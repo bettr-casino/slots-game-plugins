@@ -1,0 +1,30 @@
+require "math"
+require "Core"
+
+Game002Background = {
+}
+
+function Game002Background:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game002Background:destroy()
+	System.Print("Game002Background destroy tile id={0}", self.id)
+end
+
+function Game002Background:OnError(callStack)
+	System.Error("Game002Background Error CallStack: {0}", callStack)
+end
+
+function Game002Background:Awake()
+	System.Print("Game002Background Awake tile id={0}", self.id)
+end
+
+function Game002Background:OnBecameVisible()
+	System.Print("Game002Background OnBecameVisible tile id={0}", self.id)
+end
+
+return Game002Background:new()

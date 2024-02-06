@@ -1,0 +1,49 @@
+require "math"
+
+Main = {
+}
+
+function Main:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Main:destroy()
+	System.Print("Main destroy tile id={0}", self.id)
+end
+
+function Main:OnError(callStack)
+	System.Error("Main Error CallStack: {0}", callStack)
+end
+
+function Main:Init()
+    series
+        do
+            System.SetTargetFrameRate(30)
+            RenderSettings.fog = false
+            RenderSettings.skybox = null
+            RenderSettings.sun = null
+        end
+    end
+end
+
+function Main:Login()
+    series
+        do
+            BettrUserController.Login()
+        end
+    end
+end
+
+function Main:LoadLobbyScene()
+    series
+        do
+            System.Print("LoadLobbyScene starting...")
+            BettrAssetController.LoadScene(BettrUser.LobbyScene.BundleName, BettrUser.LobbyScene.BundleVersion, "MainLobbyScene")
+        end
+    end
+end
+
+return Main:new()

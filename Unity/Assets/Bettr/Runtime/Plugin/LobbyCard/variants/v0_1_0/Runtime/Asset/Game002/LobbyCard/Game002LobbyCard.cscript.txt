@@ -1,0 +1,52 @@
+require "math"
+
+Game002LobbyCard = {
+    Manifest = {
+        BundleName = "game002",
+        BundleVersion = "buffalo",
+        SceneName = "Game002Scene"
+    }
+}
+
+function Game002LobbyCard:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game002LobbyCard:destroy()
+	System.Print("Game002LobbyCard destroy tile id={0}", self.id)
+end
+
+function Game002LobbyCard:OnError(callStack)
+	System.Error("Game002LobbyCard Error CallStack: {0}", callStack)
+end
+
+function Game002LobbyCard:Awake()
+	System.Print("Game002LobbyCard Awake tile id={0}", self.id)
+end
+
+function Game002LobbyCard:Start()
+    System.Print("Game002LobbyCard Start tile id={0}", self.id)
+end
+
+function Game002LobbyCard:OnBecameVisible()
+	System.Print("Game002LobbyCard OnBecameVisible tile id={0}", self.id)
+end
+
+function Game002LobbyCard:OnPointerClick()
+    System.Print("Game002LobbyCard OnPointerClick tile id={0}", self.id)
+    self:LoadMachineScene()
+end
+
+function Game002LobbyCard:LoadMachineScene()
+    series
+        do
+            System.Print("Game002LobbyCard:LoadMachineScene ... Machine Load starting...")
+            BettrAssetController.LoadScene(self.Manifest.BundleName, self.Manifest.BundleVersion, self.Manifest.SceneName)
+        end
+    end
+end
+
+return Game002LobbyCard:new()

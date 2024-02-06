@@ -1,0 +1,39 @@
+require "math"
+
+Utils = {}
+
+function Utils:findModelItem(modelItems, modelItemAttributes)
+    for _, item in ipairs(modelItems) do
+        local found = true
+        for attr, value in pairs(modelItemAttributes) do
+            if item[attr] ~= value then
+                found = false
+                break
+            end
+        end
+        if found then
+            return item
+        end
+    end
+    return nil
+end
+
+function Utils:findModelItems(modelItems, modelItemAttributes)
+    local matchingModelItems = {}
+
+    for _, item in ipairs(modelItems) do
+        local matchesAll = true
+        for attr, value in pairs(modelItemAttributes) do
+            if item[attr] ~= value then
+                matchesAll = false
+                break
+            end
+        end
+        if matchesAll then
+            table.insert(matchingModelItems, item)
+        end
+    end
+    return matchingModelItems
+end
+
+return Utils

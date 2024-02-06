@@ -1,0 +1,30 @@
+require "math"
+require "Core"
+
+Game002FreeSpinsMachine = {
+}
+
+function Game002FreeSpinsMachine:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game002FreeSpinsMachine:destroy()
+	System.Print("Game002FreeSpinsMachine destroy tile id={0}", self.id)
+end
+
+function Game002FreeSpinsMachine:OnError(callStack)
+	System.Error("Game002FreeSpinsMachine Error CallStack: {0}", callStack)
+end
+
+function Game002FreeSpinsMachine:Awake()
+	System.Print("Game002FreeSpinsMachine Awake tile id={0}", self.id)
+end
+
+function Game002FreeSpinsMachine:OnBecameVisible()
+	System.Print("Game002FreeSpinsMachine OnBecameVisible tile id={0}", self.id)
+end
+
+return Game002FreeSpinsMachine:new()

@@ -1,0 +1,30 @@
+require "math"
+require "Core"
+
+Game002WheelMachine2 = {
+}
+
+function Game002WheelMachine2:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game002WheelMachine2:destroy()
+	System.Print("Game002WheelMachine2 destroy tile id={0}", self.id)
+end
+
+function Game002WheelMachine2:OnError(callStack)
+	System.Error("Game002WheelMachine2 Error CallStack: {0}", callStack)
+end
+
+function Game002WheelMachine2:Awake()
+	System.Print("Game002WheelMachine2 Awake tile id={0}", self.id)
+end
+
+function Game002WheelMachine2:OnBecameVisible()
+	System.Print("Game002WheelMachine2 OnBecameVisible tile id={0}", self.id)
+end
+
+return Game002WheelMachine2:new()

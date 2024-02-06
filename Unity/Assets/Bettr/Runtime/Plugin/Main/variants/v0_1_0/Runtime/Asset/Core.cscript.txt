@@ -1,0 +1,106 @@
+require "math"
+
+BettrAnimator = {}
+
+Core = {
+    Animator = BettrAnimator,
+    Layers = {
+        Default = 0,
+        TransparentFX = 1,
+        IgnoreRaycast = 2,
+        Water = 4,
+        UI = 5,
+        SLOT_BACKGROUND = 6,
+        SLOT_REELS = 7,
+        SLOT_FRAME = 8,
+        SLOT_OVERLAY = 9,
+        SLOT_PAYLINES = 10,
+        SLOT_REELS_OVERLAY = 11,
+        SLOT_FOREGROUND = 12,
+        SLOT_FOREGROUND_REELS = 13,
+        SLOT_FOREGROUND_FRAME = 14,
+        SLOT_TRANSITION = 15,
+        BONUS_BACKGROUND = 16,
+        HIDDEN = 17      
+    }
+}
+
+function Core:OnError(callStack)
+	System.Error("Core Error CallStack: {0}", callStack)
+end
+
+function BettrAnimator:Play2InParallel(tile, key1, key2)
+    parallel
+        do
+            self:Play(tile, key1)       
+        end
+        do
+            self:Play(tile, key2)            
+        end
+    end
+end
+
+function BettrAnimator:Play(tile, key)
+    local property = tile[key]
+    local propertyType = property:ToString()
+    if (propertyType == "CrayonScript.Code.TilePropertyAnimator") then
+        self:PlayAnimation(tile, key)
+    elseif (propertyType == "CrayonScript.Code.TilePropertyParticleSystem") then
+        self:PlayParticleSystem(tile, key)
+    end
+end
+
+function BettrAnimator:PlayAnimation(tile, key)
+    local animatorProperty = tile[key]
+    self:PlayAnimatorProperty(key, animatorProperty)      
+end
+
+function BettrAnimator:PlayAnimatorProperty(key, animatorProperty)
+    -- Play Animation
+    local animationDuration = 0.0
+    series
+        do
+            animationDuration = BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+        end
+    end
+    return animationDuration
+end
+
+function BettrAnimator:PlayParticleSystem(tile, key)
+    -- Play Animation
+    local startTime = System.CurrentTime()
+    System.Print("PlayParticleSystem key={0} startTime={1}", key, startTime)    
+    series
+        do
+            local particleSystemProperty = tile[key]        
+            local delayBeforeParticleSystemStart = particleSystemProperty.delayBeforeParticleSystemStart
+            System.Print("PlayParticleSystem delayBeforeParticleSystemStart={0}", delayBeforeParticleSystemStart)                      
+            if (delayBeforeParticleSystemStart > 0) then
+                System.WaitForSeconds(delayBeforeParticleSystemStart)
+            end
+            
+            local particleSystem = particleSystemProperty.particleSystem
+            local particleSystemDuration = particleSystemProperty.particleSystemDuration
+            if (particleSystemDuration <= 0) then
+                particleSystemDuration = 0
+            end
+            
+            System.Print("PlayParticleSystem key={0} particleSystemDuration={1}", key, particleSystemDuration)                                                    
+                         
+            particleSystem:Play()
+            System.Print("PlayParticleSystem key={0} Play() in progress waitingFor={1}", key, particleSystemDuration)
+            if particleSystemDuration > 0 then
+                System.WaitForSeconds(particleSystemDuration)                                            
+            end  
+            particleSystem:Clear()
+            particleSystem:Stop()                        
+        end
+    end
+    local endTime = System.CurrentTime()
+    System.Print("PlayParticleSystem key={0} endTime={1}", key, endTime)        
+    local particleSystemDuration = endTime - startTime
+    System.Print("PlayParticleSystem key={0} particleSystemDuration={1}", key, particleSystemDuration)            
+    tile.ParticleSystemDuration = particleSystemDuration        
+end
+
+return Core
