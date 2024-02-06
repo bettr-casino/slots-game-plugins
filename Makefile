@@ -32,35 +32,23 @@ all: package
 clean:
 	rm -rf ${RUNTIME_TARGET};
 
-build_all:
+build_assets_all:
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrCustomMenu.CleanupTestScenes
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrCustomMenu.BuildAssets -buildTarget iOS
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrCustomMenu.BuildAssets -buildTarget Android
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrCustomMenu.BuildAssets -buildTarget WebGL 
 
-build_ios:
+build_assets_ios:
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrCustomMenu.CleanupTestScenes
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrCustomMenu.BuildAssets -buildTarget iOS
 
-build_android:
+build_assets_android:
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrCustomMenu.CleanupTestScenes
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrCustomMenu.BuildAssets -buildTarget Android
 
-build_webgl:
+build_assets_webgl:
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrCustomMenu.CleanupTestScenes
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrCustomMenu.BuildAssets -buildTarget WebGL 
-
-publish_all:
-	@./Tools/publish_all.sh
-
-publish_ios: build_ios	
-	@export PUBLISH_TARGET="iOS";./Tools/publish_all.sh
-
-publish_android: build_android	
-	@export PUBLISH_TARGET="Android";./Tools/publish_all.sh
-
-publish_webgl: build_webgl
-	@export PUBLISH_TARGET="WebGL";./Tools/publish_all.sh
 
 testcore:
 	$(UNITY_APP) -batchmode -logFile $(UNIT_TESTS_LOG_FILE_PATH) -runTests -projectPath $(UNITY_PROJECT_PATH) -testResults $(UNITY_TEST_RESULTS_PATH)/testResultsCore.xml -testPlatform playmode -testFilter "casino.bettr.plugin.Core.Tests"
@@ -90,7 +78,7 @@ $(MODULE_SUBDIRECTORIES):
 	$(UNITY_APP) -batchmode -logFile $(UNITY_PACKAGES_LOG_FILE_PATH) -nographics -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrCustomMenu.ExportPackage -outputDirectory ${MODULE_OUTPUT_DIRECTORY} -moduleName $@
 	aws --profile $(AWS_DEFAULT_PROFILE) s3 cp $(MODULE_OUTPUT_DIRECTORY)/$@/ s3://$(S3_BUCKET)/$(S3_OBJECT_KEY)/$@/ --recursive --exclude "*.DS_Store"
 
-package: clean preparedll build_all publish_all packagemodule_all test printtestresults
+package: clean preparedll build_assets_all packagemodule_all test printtestresults
 	mkdir -p ${RUNTIME_TARGET};	\
 	cp -r ${RUNTIME_SOURCE} ${RUNTIME_TARGET} 2>/dev/null;
 
