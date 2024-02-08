@@ -8,8 +8,6 @@ UNITY_VERSION:= "2022.3.16f1"
 UNITY_APP:= "${UNITY_HOME}/${UNITY_VERSION}/Unity.app/Contents/MacOS/Unity"
 
 RUNTIME_VERSION:="v0_1_0"
-RUNTIME_SOURCE:="Unity/Assets/Bettr/Runtime/Plugin/Core/variants/${RUNTIME_VERSION}/Runtime/Bettr"
-RUNTIME_TARGET:="Unity/Packages/${PACKAGE_PATH}/Runtime"
 
 ASSET_BUNDLES_LOG_FILE_PATH:="${BETTR_CASINO_ASSET_BUNDLES_LOGS_HOME}/logfile.log"
 UNIT_TESTS_LOG_FILE_PATH:="${BETTR_CASINO_UNIT_TESTS_LOGS_HOME}/logfile.log"
@@ -28,9 +26,6 @@ S3_OBJECT_KEY := module-packages
 .PHONY: all
 
 all: package
-
-clean:
-	rm -rf ${RUNTIME_TARGET};
 
 build_assets_all:
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrCustomMenu.CleanupTestScenes
@@ -78,8 +73,5 @@ preparedll:
 # 	$(UNITY_APP) -batchmode -logFile $(UNITY_PACKAGES_LOG_FILE_PATH) -nographics -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrCustomMenu.ExportPackage -outputDirectory ${MODULE_OUTPUT_DIRECTORY} -moduleName $@
 # 	aws --profile $(AWS_DEFAULT_PROFILE) s3 cp $(MODULE_OUTPUT_DIRECTORY)/$@/ s3://$(S3_BUCKET)/$(S3_OBJECT_KEY)/$@/ --recursive --exclude "*.DS_Store"
 
-package: clean preparedll build_assets_all test printtestresults
-	mkdir -p ${RUNTIME_TARGET};	\
-	cp -r ${RUNTIME_SOURCE} ${RUNTIME_TARGET} 2>/dev/null;
-
+package: preparedll build_assets_all test
 

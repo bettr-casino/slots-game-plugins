@@ -60,7 +60,7 @@ namespace Bettr.Runtime.Plugin.Main.Tests
             Debug.Log("OneTimeSetup");
 
             TileController.StaticInit();
-            TileController.RegisterModule("BettrCore.dll");
+            TileController.RegisterModule("casino.bettr.plugin.Core.dll");
             
             SceneManager.LoadScene("Bettr/Runtime/Plugin/Main/Tests/TestScene", LoadSceneMode.Single);
             
