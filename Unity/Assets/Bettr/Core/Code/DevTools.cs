@@ -31,6 +31,9 @@ namespace Bettr.Core
         
         [JsonProperty("zipDataBase64")]
         public string ZipDataBase64 { get; set; }
+        
+        [JsonProperty("source")]
+        public string Source { get; set; }
     }
     
     public class DevTools : MonoBehaviour
@@ -141,6 +144,12 @@ namespace Bettr.Core
         {
             var taskId = PlayerPrefs.GetString(ConfigData.TaskCodeKey, ConfigData.DefaultTaskCode);
             Debug.Log($"UploadToLambda using stored PlayerPrefs taskId {ConfigData.TaskCodeKey}=" + taskId);
+            
+            var source = "desktop";
+            if (Application.isMobilePlatform)
+            {
+                source = "mobile";
+            }
 
             var zipData = ZipSceneState(sceneHierarchyRoot, imageData);
             var zipDataBase64 = Convert.ToBase64String(zipData);
@@ -148,6 +157,8 @@ namespace Bettr.Core
             {
                 TaskHashKey = taskId,
                 ZipDataBase64 = zipDataBase64,
+                Source = source
+                
             };
             var gameStatePayloadString = JsonConvert.SerializeObject(gameStatePayload);
             int attempts = 0;
