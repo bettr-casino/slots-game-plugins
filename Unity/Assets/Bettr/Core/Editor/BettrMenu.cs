@@ -2,21 +2,21 @@ using UnityEditor;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
 
-namespace Bettr.Runtime.Plugin.Main.Editor
+// ReSharper disable once CheckNamespace
+namespace Bettr.Runtime.Plugin.Core.Editor
 {
-    public static class BettrCustomMenu
+    public static class BettrMenu
     {
-        [MenuItem("Bettr/Plugins/Main/Run Unit Tests")] 
+        [MenuItem("Bettr/Plugins/Core/Run Tests")] 
         public static void RunUnitTests()
         {
             // Get the ITestRunnerApi instance
             var testRunnerApi = ScriptableObject.CreateInstance<TestRunnerApi>();
             
-            var playModeFilter = new Filter() { testMode = TestMode.PlayMode, groupNames = new []{ "^Bettr.Runtime.Plugin.Main.Tests$" }};
+            var playModeFilter = new Filter() { testMode = TestMode.PlayMode, groupNames = new []{ "^Bettr.Runtime.Plugin.Core.Tests$" }};
 
             // Run the tests
             testRunnerApi.Execute(new ExecutionSettings(playModeFilter));
         }
-
     }
 }

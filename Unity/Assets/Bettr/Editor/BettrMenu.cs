@@ -8,6 +8,7 @@ using UnityEngine;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using Newtonsoft.Json;
+using UnityEditor.SceneManagement;
 using DirectoryInfo = System.IO.DirectoryInfo;
 
 namespace Bettr.Editor
@@ -16,23 +17,31 @@ namespace Bettr.Editor
     public class DirectoryNode
     {
         public string Name;
-        public List<DirectoryNode> Children = new List<DirectoryNode>();
-        public List<string> Files = new List<string>();
+        // ReSharper disable once CollectionNeverQueried.Global
+        internal readonly List<DirectoryNode> Children = new List<DirectoryNode>();
+        // ReSharper disable once CollectionNeverQueried.Global
+        internal readonly List<string> Files = new List<string>();
     }
     
-    public static class BettrCustomMenu
+    public static class BettrMenu
     {
-        private const string PLUGIN_ROOT_DIRECTORY = "Assets/Bettr/Runtime/Plugin";
-        private const string ASSET_BUNDLES_DIRECTORY = "Assets/Bettr/LocalStore/AssetBundles";
-        private const string ASSET_BUNDLES_IOS_DIRECTORY = ASSET_BUNDLES_DIRECTORY + "/iOS";
-        private const string ASSET_BUNDLES_OSX_DIRECTORY = ASSET_BUNDLES_DIRECTORY + "/OSX";
-        private const string ASSET_BUNDLES_ANDROID_DIRECTORY = ASSET_BUNDLES_DIRECTORY + "/Android";
-        private const string ASSET_BUNDLES_WEBGL_DIRECTORY = ASSET_BUNDLES_DIRECTORY + "/WebGL";
-        private const string ASSET_BUNDLES_WINDOWS_DIRECTORY = ASSET_BUNDLES_DIRECTORY +  "/Windows";
-        private const string ASSET_BUNDLES_LINUX_DIRECTORY = ASSET_BUNDLES_DIRECTORY +  "/Linux";
-        private const string OUTCOMES_DIRECTORY = "Assets/Bettr/LocalStore/Outcomes";
+        private const string PluginRootDirectory = "Assets/Bettr/Runtime/Plugin";
+        private const string AssetBundlesDirectory = "Assets/Bettr/LocalStore/AssetBundles";
+        // ReSharper disable once UnusedMember.Local
+        private const string AssetBundlesIOSDirectory = AssetBundlesDirectory + "/iOS";
+        // ReSharper disable once UnusedMember.Local
+        private const string AssetBundlesOSXDirectory = AssetBundlesDirectory + "/OSX";
+        // ReSharper disable once UnusedMember.Local
+        private const string AssetBundlesAndroidDirectory = AssetBundlesDirectory + "/Android";
+        // ReSharper disable once UnusedMember.Local
+        private const string AssetBundlesWebglDirectory = AssetBundlesDirectory + "/WebGL";
+        // ReSharper disable once UnusedMember.Local
+        private const string AssetBundlesWindowsDirectory = AssetBundlesDirectory +  "/Windows";
+        // ReSharper disable once UnusedMember.Local
+        private const string AssetBundlesLinuxDirectory = AssetBundlesDirectory +  "/Linux";
+        // ReSharper disable once UnusedMember.Local
+        private const string OutcomesDirectory = "Assets/Bettr/LocalStore/Outcomes";
         
-        [MenuItem("Bettr/Tools/Export Module Unity Package")]
         public static void ExportPackage()
         {
             // Base directory to prepend
@@ -82,15 +91,38 @@ namespace Bettr.Editor
             // Optional: Log to confirm package creation
             Debug.Log("Package exported: " + outputPackagePath);
         }
+        
+        [MenuItem("Bettr/Play")] 
+        public static void Play()
+        {
+            // Ensure you are not in play mode when making these changes
+            if (EditorApplication.isPlaying)
+            {
+                Debug.LogWarning("Exiting play mode before executing this command.");
+                EditorApplication.isPlaying = false;
+            }
 
-        [MenuItem("Bettr/Bettr/Rebuild Assets")] 
+            // Switch to iOS build target
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.iOS, BuildTarget.iOS);
+
+            // Path to your specific scene. Adjust the path as necessary.
+            const string scenePath = "Assets/Bettr/Core/Scenes/MainScene.unity";
+
+            // Open the specified scene
+            EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+
+            // Enter play mode
+            EditorApplication.EnterPlaymode();
+        }
+
+        [MenuItem("Bettr/Assets/Build")] 
         public static void BuildAssets()
         {
             BuildAssetBundles();
             BuildOutcomes();
         }
         
-        [MenuItem("Bettr/Bettr/Cleanup Test Scenes")] 
+        [MenuItem("Bettr/Assets/Cleanup")]
         public static void CleanupTestScenes()
         {
             RemoveTestScenes(new DirectoryInfo("Assets/"));
@@ -100,7 +132,7 @@ namespace Bettr.Editor
         {
             Debug.Log("Building asset bundles...");
             
-            EnsurePluginAssetsHaveLabels(PLUGIN_ROOT_DIRECTORY);
+            EnsurePluginAssetsHaveLabels(PluginRootDirectory);
             
             Debug.Log("...refreshing database before building asset bundles..");
             AssetDatabase.Refresh();
@@ -109,51 +141,51 @@ namespace Bettr.Editor
                                            BuildAssetBundleOptions.ChunkBasedCompression;
 
 #if UNITY_IOS
-            EmptyDirectory(new DirectoryInfo(ASSET_BUNDLES_IOS_DIRECTORY));
+            EmptyDirectory(new DirectoryInfo(AssetBundlesIOSDirectory));
             AssetDatabase.Refresh();
-            BuildPipeline.BuildAssetBundles(ASSET_BUNDLES_IOS_DIRECTORY, 
+            BuildPipeline.BuildAssetBundles(AssetBundlesIOSDirectory, 
                 sharedAssetBundleOptions,
                 BuildTarget.iOS);
             
-            EmptyDirectory(new DirectoryInfo(ASSET_BUNDLES_OSX_DIRECTORY));
+            EmptyDirectory(new DirectoryInfo(AssetBundlesOSXDirectory));
             AssetDatabase.Refresh();
-            BuildPipeline.BuildAssetBundles(ASSET_BUNDLES_OSX_DIRECTORY, 
+            BuildPipeline.BuildAssetBundles(AssetBundlesOSXDirectory, 
                 sharedAssetBundleOptions,
                 BuildTarget.StandaloneOSX);
             
 #endif
 #if UNITY_ANDROID
-            EmptyDirectory(new DirectoryInfo(ASSET_BUNDLES_ANDROID_DIRECTORY));
+            EmptyDirectory(new DirectoryInfo(AssetBundlesAndroidDirectory));
             AssetDatabase.Refresh();
-            BuildPipeline.BuildAssetBundles(ASSET_BUNDLES_ANDROID_DIRECTORY, 
+            BuildPipeline.BuildAssetBundles(AssetBundlesAndroidDirectory, 
                 sharedAssetBundleOptions,
                 BuildTarget.Android);
 #endif
 #if UNITY_WEBGL
-            EmptyDirectory(new DirectoryInfo(ASSET_BUNDLES_WEBGL_DIRECTORY));
+            EmptyDirectory(new DirectoryInfo(AssetBundlesWebglDirectory));
             AssetDatabase.Refresh();
-            BuildPipeline.BuildAssetBundles(ASSET_BUNDLES_WEBGL_DIRECTORY, 
+            BuildPipeline.BuildAssetBundles(AssetBundlesWebglDirectory, 
                 sharedAssetBundleOptions,
                 BuildTarget.WebGL);
 #endif
 #if UNITY_OSX
-            EmptyDirectory(new DirectoryInfo(ASSET_BUNDLES_OSX_DIRECTORY));
+            EmptyDirectory(new DirectoryInfo(AssetBundlesOSXDirectory));
             AssetDatabase.Refresh();
-            BuildPipeline.BuildAssetBundles(ASSET_BUNDLES_OSX_DIRECTORY, 
+            BuildPipeline.BuildAssetBundles(AssetBundlesOSXDirectory, 
                 sharedAssetBundleOptions,
                 BuildTarget.StandaloneOSX);
 #endif
 #if UNITY_WIN
-            EmptyDirectory(new DirectoryInfo(ASSET_BUNDLES_WINDOWS_DIRECTORY));
+            EmptyDirectory(new DirectoryInfo(AssetBundlesWindowsDirectory));
             AssetDatabase.Refresh();
-            BuildPipeline.BuildAssetBundles(ASSET_BUNDLES_WINDOWS_DIRECTORY, 
+            BuildPipeline.BuildAssetBundles(AssetBundlesWindowsDirectory, 
                 sharedAssetBundleOptions,
                 BuildTarget.StandaloneWindows64);
 #endif
 #if UNITY_LINUX   
-            EmptyDirectory(new DirectoryInfo(ASSET_BUNDLES_LINUX_DIRECTORY));
+            EmptyDirectory(new DirectoryInfo(AssetBundlesLinuxDirectory));
             AssetDatabase.Refresh();
-            BuildPipeline.BuildAssetBundles(ASSET_BUNDLES_LINUX_DIRECTORY, 
+            BuildPipeline.BuildAssetBundles(AssetBundlesLinuxDirectory, 
                 sharedAssetBundleOptions,
                 BuildTarget.StandaloneLinux64);
 #endif
@@ -241,8 +273,8 @@ namespace Bettr.Editor
             {
                 if (assetType != null && assetType != typeof(MonoScript))
                 {
-                    importer.assetBundleName = GetAssetBundleName(assetLabel, assetType, directoryPath);
-                    importer.assetBundleVariant = GetAssetBundleVariant(assetSubLabel, assetType, directoryPath);
+                    importer.assetBundleName = GetAssetBundleName(assetLabel, assetType);
+                    importer.assetBundleVariant = GetAssetBundleVariant(assetSubLabel);
                 }
             }
             
@@ -258,8 +290,8 @@ namespace Bettr.Editor
                 {
                     if (assetType != null && assetType != typeof(MonoScript))
                     {
-                        importer.assetBundleName = GetAssetBundleName(assetLabel, assetType, assetPath);
-                        importer.assetBundleVariant = GetAssetBundleVariant(assetSubLabel, assetType, assetPath);
+                        importer.assetBundleName = GetAssetBundleName(assetLabel, assetType);
+                        importer.assetBundleVariant = GetAssetBundleVariant(assetSubLabel);
                     }
                 }
             }
@@ -277,7 +309,7 @@ namespace Bettr.Editor
             foreach(DirectoryInfo subDirectory in directory.GetDirectories()) subDirectory.Delete(true);
         }
 
-        private static string GetAssetBundleName(string assetLabel, Type assetType, string directoryPath)
+        private static string GetAssetBundleName(string assetLabel, Type assetType)
         {
             var isScene = assetType.Name == "SceneAsset";
             var suffix = isScene ? "_scenes" :"";
@@ -285,14 +317,14 @@ namespace Bettr.Editor
             return assetBundleName;
         }
         
-        private static string GetAssetBundleVariant(string assetSubLabel, Type assetType, string directoryPath)
+        private static string GetAssetBundleVariant(string assetSubLabel)
         {
             return assetSubLabel;
         }
         
         private static void ModifyAssetBundleManifestFiles()
         {
-            var files = Directory.GetFiles(ASSET_BUNDLES_DIRECTORY);
+            var files = Directory.GetFiles(AssetBundlesDirectory);
             foreach (var file in files)
             {
                 if (file.EndsWith(".manifest"))
@@ -370,19 +402,19 @@ namespace Bettr.Editor
         {
             Debug.Log("Building outcomes...");
             
-            EmptyDirectory(new DirectoryInfo(OUTCOMES_DIRECTORY));
+            EmptyDirectory(new DirectoryInfo(OutcomesDirectory));
             AssetDatabase.Refresh();
             
             Debug.Log("...refreshing database before building outcomes..");
             AssetDatabase.Refresh();
             
-            var outcomeDirectories = Directory.GetDirectories(PLUGIN_ROOT_DIRECTORY, "Outcomes", SearchOption.AllDirectories);
+            var outcomeDirectories = Directory.GetDirectories(PluginRootDirectory, "Outcomes", SearchOption.AllDirectories);
             foreach (var outcomeDirectory in outcomeDirectories)
             {
                 var outcomeFiles = new DirectoryInfo(outcomeDirectory).GetFiles("*.cscript.txt");
                 foreach (var outcomeFile in outcomeFiles)
                 {
-                    var outcomeFilePath = Path.Combine(OUTCOMES_DIRECTORY, outcomeFile.Name);
+                    var outcomeFilePath = Path.Combine(OutcomesDirectory, outcomeFile.Name);
                     File.Copy(outcomeFile.FullName, outcomeFilePath); }
                 
             }
@@ -414,11 +446,11 @@ namespace Bettr.Editor
             return JsonConvert.SerializeObject(tree, Formatting.Indented);
         }
         
-        private static string[] excludedFileNames = { ".DS_Store", ".meta" };
+        private static readonly string[] ExcludedFileNames = { ".DS_Store", ".meta" };
         
         private static bool IsExcluded(string fileName)
         {
-            return excludedFileNames.Any(excluded => fileName.EndsWith(excluded, StringComparison.OrdinalIgnoreCase));
+            return ExcludedFileNames.Any(excluded => fileName.EndsWith(excluded, StringComparison.OrdinalIgnoreCase));
         }
 
         private static DirectoryNode GetDirectoryTree(DirectoryInfo directoryInfo)
@@ -448,12 +480,15 @@ namespace Bettr.Editor
             if (!Directory.Exists(path))
             {
                 // Create the directory
-                Directory.CreateDirectory(path);
+                if (path != null)
+                {
+                    Directory.CreateDirectory(path);
 
-                // Refresh the AssetDatabase to show the new directory in Unity Editor
-                AssetDatabase.Refresh();
+                    // Refresh the AssetDatabase to show the new directory in Unity Editor
+                    AssetDatabase.Refresh();
 
-                Debug.Log($"Directory created at: {path}");
+                    Debug.Log($"Directory created at: {path}");
+                }
             }
             else
             {
