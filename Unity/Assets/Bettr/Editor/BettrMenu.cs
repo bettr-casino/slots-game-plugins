@@ -92,8 +92,8 @@ namespace Bettr.Editor
             Debug.Log("Package exported: " + outputPackagePath);
         }
         
-        [MenuItem("Bettr/Play")] 
-        public static void Play()
+        [MenuItem("Bettr/Start")] 
+        public static void Start()
         {
             // Ensure you are not in play mode when making these changes
             if (EditorApplication.isPlaying)
