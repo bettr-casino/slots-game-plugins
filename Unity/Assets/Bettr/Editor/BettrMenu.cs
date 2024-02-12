@@ -92,7 +92,7 @@ namespace Bettr.Editor
             Debug.Log("Package exported: " + outputPackagePath);
         }
         
-        [MenuItem("Bettr/Start")] 
+        [MenuItem("Bettr/Start Play Mode")] 
         public static void Start()
         {
             // Ensure you are not in play mode when making these changes
