@@ -1,0 +1,26 @@
+require "math"
+require "Core"
+
+SettingsPanel = {}
+
+function SettingsPanel:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function SettingsPanel:destroy()
+	System.Print("SettingsPanel destroy tile id={0}", self.id)
+end
+
+function SettingsPanel:OnError(callStack)
+	System.Error("SettingsPanel Error CallStack: {0}", callStack)
+end
+
+function SettingsPanel:OnPointerClick1Param(target)
+    System.Print("SettingsPanel:OnPointerClick1Param Starting target={0}", target)
+    self.SettingsPanelGo.SetActive(false)
+end
+
+return SettingsPanel:new()
