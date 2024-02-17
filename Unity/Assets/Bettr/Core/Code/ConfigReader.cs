@@ -20,6 +20,8 @@ namespace Bettr.Core
         
         public string OutcomesBaseURL { get; set; }
         
+        public bool UseFileSystemAssetBundles { get; set; }
+        
         public string TaskCode => PlayerPrefs.GetString(TaskCodeKey, DefaultTaskCode);
         
 #if UNITY_IOS

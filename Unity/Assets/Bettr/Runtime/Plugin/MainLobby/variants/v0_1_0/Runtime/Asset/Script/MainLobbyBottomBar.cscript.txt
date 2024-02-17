@@ -1,0 +1,25 @@
+require "math"
+require "Core"
+
+MainLobbyBottomBar = {}
+
+function MainLobbyBottomBar:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function MainLobbyBottomBar:destroy()
+	System.Print("MainLobbyBottomBar destroy tile id={0}", self.id)
+end
+
+function MainLobbyBottomBar:OnError(callStack)
+	System.Error("MainLobbyBottomBar Error CallStack: {0}", callStack)
+end
+
+function MainLobbyBottomBar:OnPointerClick1Param(target)
+    System.Print("MainLobbyBottomBar:OnSettingsPanelClicked Starting target={0}", target)
+end
+
+return MainLobbyBottomBar:new()

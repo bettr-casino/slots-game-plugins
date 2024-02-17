@@ -99,7 +99,7 @@ namespace Bettr.Core
             _bettrAssetController = new BettrAssetController
             {
                 webAssetBaseURL = _configData.WebAssetsBaseURL,
-                useFileSystemAssetBundles = false,
+                useFileSystemAssetBundles = _configData.UseFileSystemAssetBundles,
             };
             
             _bettrVisualsController = new BettrVisualsController();
