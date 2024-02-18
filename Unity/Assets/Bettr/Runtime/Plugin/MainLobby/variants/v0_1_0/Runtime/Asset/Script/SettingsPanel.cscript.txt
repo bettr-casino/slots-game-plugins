@@ -24,9 +24,9 @@ function SettingsPanel:OnPointerClick1Param(target)
 end
 
 function SettingsPanel:OnEvent1Param(target)
-    if target == "SliderVolume" then
-        local volume = self.SliderVolume.slider.value
-        System.Print("SettingsPanel:OnEvent1Param Setting Slider volume={0}", target)
+    if target == "VolumeSlider" then
+        local volume = self.VolumeSlider.slider.value
+        System.Print("SettingsPanel:OnEvent1Param Setting Slider volume={0}", volume)
         PlayerPrefs.SetFloat("Volume", volume)
     end
 end
