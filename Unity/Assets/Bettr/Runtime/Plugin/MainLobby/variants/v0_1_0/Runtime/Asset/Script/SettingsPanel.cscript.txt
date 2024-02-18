@@ -23,4 +23,9 @@ function SettingsPanel:OnPointerClick1Param(target)
     self.SettingsPanelGo.SetActive(false)
 end
 
+function SettingsPanel:OnEvent1Param(volume, target)
+    System.Print("SettingsPanel:OnEvent1Param Starting target={0} volume={1}", target, volume)
+    PlayerPrefs.SetFloat("Volume", volume)
+end
+
 return SettingsPanel:new()
