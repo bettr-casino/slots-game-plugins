@@ -1,5 +1,6 @@
 require "math"
 require "Core"
+require "Math"
 
 SettingsPanel = {}
 
@@ -28,6 +29,13 @@ function SettingsPanel:OnEvent1Param(target)
         local volume = self.VolumeSlider.slider.value
         System.Print("SettingsPanel:OnEvent1Param Setting Slider volume={0}", volume)
         PlayerPrefs.SetFloat("Volume", volume)
+        BettrAudioController.SetVolume(volume)
+    elseif target == "MusicToggle" then
+        local isMusicOff = PlayerPrefs.GetInt("IsMusicOff", 0)
+        isMusicOff = Math.toggle(isMusicOff)
+        System.Print("SettingsPanel:OnEvent1Param Setting Music isMusicOff={0}", isMusicOff)
+        PlayerPrefs.SetInt("IsMusicOff", isMusicOff)
+        BettrAudioController.ToggleMusic(isMusicOff == 1)
     end
 end
 

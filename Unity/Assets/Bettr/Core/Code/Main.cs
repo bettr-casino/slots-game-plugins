@@ -22,6 +22,8 @@ namespace Bettr.Core
         [NonSerialized] private BettrVisualsController _bettrVisualsController;
         // ReSharper disable once NotAccessedField.Local
         [NonSerialized] private BettrOutcomeController _bettrOutcomeController;
+        // ReSharper disable once NotAccessedField.Local
+        [NonSerialized] private BettrAudioController _bettrAudioController;
         
         private bool _oneTimeSetUpComplete;
 
@@ -111,6 +113,8 @@ namespace Bettr.Core
                     UseFileSystemOutcomes = false,
                     WebOutcomesBaseURL = _configData.WebOutcomesBaseURL,
                 };
+
+            _bettrAudioController = new BettrAudioController();
 
             BettrVisualsController.SwitchOrientationToLandscape();
             
