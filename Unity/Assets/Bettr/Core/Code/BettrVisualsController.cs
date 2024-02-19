@@ -13,8 +13,33 @@ using Object = UnityEngine.Object;
 namespace Bettr.Core
 {
     public delegate void RollupText(long value);
-    
-    public class BettrVisualsController
+
+    public interface IBettrVisualsController
+    {
+        void RollUpCounter(PropertyTextMeshPro counterTextProperty, long start, long end, float duration);
+        void RollUpFormatCounter(PropertyTextMeshPro counterTextProperty, long start, long end, float duration);
+        IEnumerator FollowPath(CrayonScriptContext context, GameObject gameObject, PropertyPathCreator pathCreatorProperty);
+        void TweenMultipleMoveBetween(TilePropertyGameObjectGroup objectPropertyGroupToMove, PropertyTween propertyTween);
+        void TweenMoveBetween(GameObject objectToMove, PropertyTween propertyTween);
+        IEnumerator TweenMoveBetweenAndWait(GameObject objectToMove, PropertyTween propertyTween);
+        void TweenMultipleScaleTo(TilePropertyGameObjectGroup objectPropertyGroupToScale, PropertyTween propertyTween);
+        void TweenScaleTo(GameObject objectToScale, PropertyTween propertyTween);
+        void TweenFadeMultipleTo(TilePropertyGameObjectGroup objectPropertyGroupToFade, PropertyTween propertyTween);
+        void TweenFadeTo(GameObject objectToFade, PropertyTween propertyTween);
+        void SetLayerRecursively(GameObject obj, int newLayer);
+        IEnumerator PlayAnimatorProperty(CrayonScriptContext context, PropertyAnimator animatorProperty);
+        IEnumerator PlayParticleSystemPropertyGroup(CrayonScriptContext context, TilePropertyParticleSystemGroup propertyParticleSystemGroup);
+        IEnumerator PlayParticleSystemProperty(CrayonScriptContext context, PropertyParticleSystem particleSystemProperty);
+        void StopParticleSystemProperty(PropertyParticleSystem particleSystemProperty);
+        void OverlayFirstOverSecond(GameObject firstGameObject, GameObject secondGameObject);
+        void DestroyGameObject(GameObject gameObject);
+        void SwitchOrientationToPortrait();
+        void SwitchOrientationToLandscape();
+        void UpdateEditorGameViewSize(int width, int height, string baseName);
+        string GetGameObjectFullPath(GameObject obj);
+    }
+
+    public class BettrVisualsController : IBettrVisualsController
     {
         public BettrVisualsController()
         {
@@ -391,7 +416,7 @@ namespace Bettr.Core
             Object.Destroy(gameObject);
         }
 
-        public static void SwitchOrientationToPortrait()
+        public void SwitchOrientationToPortrait()
         {
             Screen.orientation = ScreenOrientation.Portrait;
 #if UNITY_EDITOR
@@ -399,7 +424,7 @@ namespace Bettr.Core
 #endif
         }
         
-        public static void SwitchOrientationToLandscape()
+        public void SwitchOrientationToLandscape()
         {
             Screen.orientation = ScreenOrientation.LandscapeLeft;
 #if UNITY_EDITOR
@@ -407,7 +432,7 @@ namespace Bettr.Core
 #endif
         }
 
-        public static void UpdateEditorGameViewSize(int width, int height, string baseName)
+        public void UpdateEditorGameViewSize(int width, int height, string baseName)
         {
 #if UNITY_EDITOR
             var gameViewType = Type.GetType("UnityEditor.GameView,UnityEditor");
@@ -420,7 +445,7 @@ namespace Bettr.Core
 #endif
         }
 
-        public static string GetGameObjectFullPath(GameObject obj)
+        public string GetGameObjectFullPath(GameObject obj)
         {
             string path = "/" + obj.name;
             while (obj.transform.parent != null)

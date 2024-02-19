@@ -16,8 +16,16 @@ using Object = UnityEngine.Object;
 // ReSharper disable once CheckNamespace
 namespace Bettr.Core
 {
+    public interface IBettrAudioController
+    {
+        void AddAudioSource(AudioSource audioSource);
+        void RemoveAudioSource(AudioSource audioSource);
+        void SetVolume(float volume);
+        void ToggleMusic(bool isMusicOff);
+    }
+    
     [Serializable]
-    public class BettrAudioController
+    public class BettrAudioController : IBettrAudioController
     {
         private List<AudioSource> _audioSources = new List<AudioSource>();
 

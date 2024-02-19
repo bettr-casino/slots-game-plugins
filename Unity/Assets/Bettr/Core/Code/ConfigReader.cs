@@ -20,7 +20,11 @@ namespace Bettr.Core
         
         public string OutcomesBaseURL { get; set; }
         
+        public string ServerURL { get; set; }
+        
         public bool UseFileSystemAssetBundles { get; set; }
+        
+        public bool UseFileSystemOutcomes { get; set; }
         
         public string TaskCode => PlayerPrefs.GetString(TaskCodeKey, DefaultTaskCode);
         
