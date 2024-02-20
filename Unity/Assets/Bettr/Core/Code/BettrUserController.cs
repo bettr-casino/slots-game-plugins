@@ -198,6 +198,8 @@ namespace Bettr.Core
                     Format = "standard"
                 }
             }
+            
+            
         };
 
         private UserBlobResponse DefaultUserBlobResponse => new UserBlobResponse()

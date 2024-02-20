@@ -2,9 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.IO;
 using Bettr.Core;
 using CrayonScript.Code;
 using NUnit.Framework;
@@ -17,127 +15,19 @@ using UnityEngine.TestTools;
 // ReSharper disable once CheckNamespace
 namespace Bettr.Runtime.Plugin.Main.Tests
 {
-    [Serializable]
-    public class TestBettrUserController : IBettrUserController
-    {
-        public TestBettrUserController()
-        {
-            TileController.RegisterType<TestBettrUserController>("BettrUserController");
-            TileController.AddToGlobals("BettrUserController", this);
-        }
-        
-        public BettrUserConfig BettrUserConfig { get; private set; }
-        
-        private static BettrUserConfig DefaultBettrUserConfig => new BettrUserConfig()
-        {
-            Coins = 1000,
-            XP = 0,
-            Level = 1,
-            
-            LobbyScene = new BettrSceneConfig()
-            {
-                BundleName = "mainlobby",
-                BundleVersion = "v0_1_0",
-            },
-            
-            LobbyCards = new List<BettrLobbyCardConfig>()
-            {
-                new()
-                {
-                    Group = "New Releases",
-                    MachineName = "Game001",
-                    BundleName = "lobbycard",
-                    BundleVersion = "v0_1_0",
-                    PrefabName = "Game001LobbyCard",
-                    Format = "standard"
-                },
-                new()
-                {
-                    Group = "New Releases",
-                    MachineName = "Game002",
-                    BundleName = "lobbycard",
-                    BundleVersion = "v0_1_0",
-                    PrefabName = "Game002LobbyCard",
-                    Format = "standard"
-                }
-            }
-        };
-
-        public string GetUserId()
-        {
-            var deviceId = SystemInfo.deviceUniqueIdentifier;
-            var uniqueId = $"{deviceId}";
-            return uniqueId; 
-        }
-
-        public IEnumerator Login()
-        {
-            Debug.Log("Login...");
-            BettrUserConfig = DefaultBettrUserConfig;
-            TileController.AddToGlobals("BettrUser", BettrUserConfig);
-            yield break;
-        }
-
-        public IEnumerator LoadUserBlob()
-        {
-            Debug.Log("LoadUserBlob...");
-            yield break;
-        }
-
-        public IEnumerator PutUserBlob()
-        {
-            yield break;
-        }
-    }
-
-    [Serializable]
-    public class TestBettrOutcomeController : IBettrOutcomeController
-    {
-        [NonSerialized]  public string FileSystemOutcomesBaseURL = "Assets/Bettr/LocalStore/Outcomes";
-
-        private IBettrAssetScriptsController BettrAssetScriptsController;
-        
-        public TestBettrOutcomeController(IBettrAssetScriptsController bettrAssetScriptsController)
-        {
-            TileController.RegisterType<TestBettrOutcomeController>("BettrOutcomeController");
-            TileController.AddToGlobals("BettrOutcomeController", this);
-            
-            this.BettrAssetScriptsController = bettrAssetScriptsController;
-        }
-        
-        public IEnumerator LoadServerOutcome(string gameId)
-        {
-            yield return LoadFileSystemOutcome(gameId);
-        }
-        
-        IEnumerator LoadFileSystemOutcome(string gameId)
-        {
-            var outcomeNumber = OutcomeNumber;
-            var className = $"{gameId}Outcome{outcomeNumber:D9}";
-            var assetBundleManifestURL = $"{FileSystemOutcomesBaseURL}/{className}.cscript.txt";
-            var assetBundleManifestBytes = File.ReadAllBytes(assetBundleManifestURL);
-
-            var script = Encoding.ASCII.GetString(assetBundleManifestBytes);
-
-            BettrAssetScriptsController.AddScript(className, script);
-            
-            yield break;
-        }
-
-        public int OutcomeNumber { get; set; }
-    }
-
     public class Tests
     {
         private const string MAIN_BUNDLE_NAME = "main";
         private const string MAIN_BUNDLE_VARIANT = "v0_1_0";
+        private const string SERVER_BASE_URL = "https://bettr-casino-assets.s3.us-west-2.amazonaws.com";
 
         private IBettrAssetController _bettrAssetController;
         private IBettrAssetScriptsController _bettrAssetScriptsController;
         private IBettrUserController _bettrUserController;
         private IBettrVisualsController _bettrVisualsController;
         private IBettrOutcomeController _bettrOutcomeController;
-
+        private IBettrServer _bettrServer;
+        
         private Tile _tile;
 
         private bool _unitySetUpComplete = false;
@@ -145,8 +35,6 @@ namespace Bettr.Runtime.Plugin.Main.Tests
         [OneTimeSetUp]
         public void OneTimeSetup()
         {
-            Debug.Log("OneTimeSetup");
-            
             var commandLineArguments = GetCommandLineArguments();
             if (commandLineArguments.TryGetValue("-timeScale", out string timeScaleStr))
             {
@@ -168,26 +56,28 @@ namespace Bettr.Runtime.Plugin.Main.Tests
                     Debug.LogError("The 'timeScale' command line argument is not a valid integer.");
                 }
             }
+            
+            Debug.Log("OneTimeSetup");
 
             TileController.StaticInit();
             TileController.RegisterModule("casino.bettr.plugin.Core.dll");
-            TileController.RegisterModule("casino.bettr.plugin.Main.Tests.dll");
             
             SceneManager.LoadScene("Bettr/Runtime/Plugin/Main/Tests/TestScene", LoadSceneMode.Single);
+            
             BettrModel.Init();
+
+            _bettrServer = new BettrServer(SERVER_BASE_URL);
             
-            _bettrAssetController = new BettrAssetController()
-            {
-                useFileSystemAssetBundles = true,
-            };
-            
-            _bettrUserController = new TestBettrUserController();
+            _bettrAssetController = new BettrAssetController();
+            _bettrUserController = new BettrUserController(_bettrServer);
+
             _bettrVisualsController = new BettrVisualsController();
             _bettrAssetScriptsController = _bettrAssetController.BettrAssetScriptsController;
-            _bettrOutcomeController = new TestBettrOutcomeController(_bettrAssetScriptsController);
+            _bettrOutcomeController = new BettrOutcomeController(_bettrAssetScriptsController, _bettrUserController, "fake-hash-key");
+
             _bettrVisualsController.SwitchOrientationToLandscape();
         }
-
+        
         [UnitySetUp]
         public IEnumerator UnitySetUp()
         {
@@ -205,10 +95,10 @@ namespace Bettr.Runtime.Plugin.Main.Tests
             var scriptRunner = ScriptRunner.Acquire(mainTable);
             yield return scriptRunner.CallAsyncAction("Init");
             ScriptRunner.Release(scriptRunner);
-
+        
             Assert.AreEqual(30, Application.targetFrameRate);
         }
-
+        
         [UnityTest, Order(2)]
         public IEnumerator TestLogin()
         {
@@ -218,7 +108,7 @@ namespace Bettr.Runtime.Plugin.Main.Tests
             yield return scriptRunner.CallAsyncAction("Login");
             ScriptRunner.Release(scriptRunner);
         }
-
+        
         [UnityTest, Order(3)]
         public IEnumerator TestRoutineRunner()
         {
@@ -229,32 +119,32 @@ namespace Bettr.Runtime.Plugin.Main.Tests
             var timeStart = Time.time;
 
             yield return instance.RunRoutine(WaitForSecondsForRoutineRunner(1, 3));
-
+            
             var timeEnd = Time.time;
-
+            
             var timeElapsed = timeEnd - timeStart;
-
+            
             Debug.Log($"TestRoutineRunner timeElapsed={timeElapsed}");
-
+            
             Assert.IsTrue(timeElapsed >= 3.0f);
         }
-
+        
         [UnityTest, Order(4), Timeout(600000)]
         public IEnumerator TestLoadMainLobby()
         {
             Debug.Log("TestLoadMainLobby");
-
+            
             for (int i = 0; i < 1; i++)
             {
                 var mainTable = _bettrAssetScriptsController.GetScript("Main");
                 var scriptRunner = ScriptRunner.Acquire(mainTable);
-
+        
                 yield return scriptRunner.CallAsyncAction("LoadLobbyScene");
                 ScriptRunner.Release(scriptRunner);
-
+                
                 // wait 3 seconds and then verify MainLobby is configured with userdata
                 yield return new WaitForSeconds(3.0f);
-
+                
                 var activeScene = SceneManager.GetActiveScene();
                 Assert.IsTrue(activeScene.name.Equals("MainLobbyScene"));
                 var allRootGameObjects = activeScene.GetRootGameObjects();
@@ -266,19 +156,19 @@ namespace Bettr.Runtime.Plugin.Main.Tests
                 Assert.IsTrue(tmProUserXp.text == _bettrUserController.BettrUserConfig.XP.ToString());
                 var tmProUserCoins = tmPros.First((o => o.name == "UserCoinsText"));
                 Assert.IsTrue(tmProUserCoins.text == _bettrUserController.BettrUserConfig.Coins.ToString());
-
+                
                 var lobbyGameObject = allRootGameObjects.First((o => o.name == "Lobby"));
                 var pointerClickHandlers = lobbyGameObject.GetComponentsInChildren<IPointerClickHandler>();
-
+                
                 var pointerClickHandler = pointerClickHandlers[i];
-
+                
                 // Create a new PointerEventData instance and set the desired properties.
                 // For example, the button that was 'pressed'.
                 PointerEventData data = new PointerEventData(EventSystem.current)
                 {
                     button = PointerEventData.InputButton.Left
                 };
-
+                
                 pointerClickHandler.OnPointerClick(data);
                 LogAssert.Expect(LogType.Log, new Regex(".*OnPointerClick.*"));
 
@@ -287,33 +177,33 @@ namespace Bettr.Runtime.Plugin.Main.Tests
                 yield return WaitForSpinButtonToBeClicked(3.0f);
 
                 yield return ClickSpinButton(i, 1);
-
+                
                 yield return WaitAndLoadTestOutcome(3.0f);
-
-                yield return ClickSpinButton(i, 2);
-
+                
+                yield return ClickSpinButton(i,2);
+                
                 yield return WaitAndLoadTestOutcome(3.0f);
-
+                
                 yield return ClickSpinButton(i, 3);
-
+                
                 yield return WaitAndLoadTestOutcome(3.0f, false);
-
+                
                 yield return RunFreeSpins(i);
-
+                
                 yield return new WaitForSeconds(3.0f);
-
+                
                 yield return ClickSpinButton(i, 3);
-
+                
                 yield return WaitAndLoadTestOutcome(3.0f, false);
-
+                
                 yield return RunFreeSpins(i);
-
+                
                 yield return new WaitForSeconds(3.0f);
-
+                
                 yield return ClickSpinButton(i, 4);
-
+                
                 yield return WaitAndLoadTestOutcome(3.0f);
-
+                
                 yield return new WaitForSeconds(3.0f);
             }
         }
@@ -354,9 +244,9 @@ namespace Bettr.Runtime.Plugin.Main.Tests
         private IEnumerator ClickSpinButton(int gameIndex, int outcomeID)
         {
             yield return WaitForSpinState("Waiting");
-
+            
             _bettrOutcomeController.OutcomeNumber = outcomeID;
-
+            
             // click spin button
             var settingsGameObject = GameObject.Find("Settings");
             var pointerClickHandlers = settingsGameObject.GetComponentsInChildren<IPointerClickHandler>();
@@ -367,7 +257,7 @@ namespace Bettr.Runtime.Plugin.Main.Tests
             {
                 button = PointerEventData.InputButton.Left
             };
-
+            
             pointerClickHandler.OnPointerClick(data);
             LogAssert.Expect(LogType.Log, new Regex(".*OnPointerClick.*"));
 
@@ -377,18 +267,17 @@ namespace Bettr.Runtime.Plugin.Main.Tests
         private IEnumerator ClickFreeSpinsStartButton(int gameIndex)
         {
             yield return WaitForGame("FreeSpins");
-
+            
             var gameParent = GameObject.Find("Game");
-            var gameMachineTile = gameParent.GetComponentsInChildren<Tile>()
-                .First(tile => tile.tileId == "Game001FreeSpinsMachine");
-
+            var gameMachineTile = gameParent.GetComponentsInChildren<Tile>().First( tile => tile.tileId == "Game001FreeSpinsMachine" );
+            
             var currentSpinButtonState = gameMachineTile.CallFunction<string>("CurrentSpinButtonClickState");
             while (currentSpinButtonState != "IsWaiting")
             {
                 yield return new WaitForSeconds(1.0f);
                 currentSpinButtonState = gameMachineTile.CallFunction<string>("CurrentSpinButtonClickState");
             }
-
+            
             // click spin button
             var spinButtonGameObject = GameObject.Find("SpinButton");
             while (!spinButtonGameObject.activeSelf)
@@ -403,11 +292,12 @@ namespace Bettr.Runtime.Plugin.Main.Tests
             var data = new PointerEventData(EventSystem.current)
             {
                 button = PointerEventData.InputButton.Left,
+                
             };
-
+            
             pointerClickHandler.OnPointerClick(data);
             LogAssert.Expect(LogType.Log, new Regex(".*OnPointerClick.*"));
-
+            
             yield return new WaitForSeconds(6.0f);
         }
 
@@ -429,11 +319,10 @@ namespace Bettr.Runtime.Plugin.Main.Tests
                 var tileComponents = gameParent.GetComponentsInChildren<Tile>();
                 if (tileComponents != null)
                 {
-                    baseGameMachineTile =
-                        tileComponents.FirstOrDefault(tile => tile.tileId == "Game001BaseGameMachine");
+                    baseGameMachineTile = tileComponents.FirstOrDefault( tile => tile.tileId == "Game001BaseGameMachine" );
                 }
             }
-
+            
             var currentSpinState = baseGameMachineTile.CallFunction<string>("CurrentSpinState");
             while (currentSpinState != spinState)
             {
@@ -441,12 +330,12 @@ namespace Bettr.Runtime.Plugin.Main.Tests
                 currentSpinState = baseGameMachineTile.CallFunction<string>("CurrentSpinState");
             }
         }
-
+        
         private IEnumerator WaitForGame(string activeGame)
         {
             var gameParent = GameObject.Find("Game");
-            var sceneTile = gameParent.GetComponentsInChildren<Tile>().First(tile => tile.tileId == "Game001");
-
+            var sceneTile = gameParent.GetComponentsInChildren<Tile>().First( tile => tile.tileId == "Game001" );
+            
             var currentActiveGame = sceneTile.CallFunction<string>("ActiveGame");
             while (currentActiveGame != activeGame)
             {
@@ -458,19 +347,17 @@ namespace Bettr.Runtime.Plugin.Main.Tests
         private bool HasNextFreeSpin(int gameIndex)
         {
             var gameParent = GameObject.Find("Game");
-            var gameMachineTile = gameParent.GetComponentsInChildren<Tile>()
-                .First(tile => tile.tileId == "Game001FreeSpinsMachine");
-
+            var gameMachineTile = gameParent.GetComponentsInChildren<Tile>().First( tile => tile.tileId == "Game001FreeSpinsMachine" );
+            
             var hasNextFreeSpin = gameMachineTile.CallFunction<bool>("HasNextFreeSpin");
             return hasNextFreeSpin;
         }
-
+        
         private int GetCurrentFreeSpin(int gameIndex)
         {
             var gameParent = GameObject.Find("Game");
-            var gameMachineTile = gameParent.GetComponentsInChildren<Tile>()
-                .First(tile => tile.tileId == "Game001FreeSpinsMachine");
-
+            var gameMachineTile = gameParent.GetComponentsInChildren<Tile>().First( tile => tile.tileId == "Game001FreeSpinsMachine" );
+            
             var currentFreeSpin = gameMachineTile.CallFunction<int>("GetCurrentFreeSpin");
             return currentFreeSpin;
         }
@@ -480,7 +367,7 @@ namespace Bettr.Runtime.Plugin.Main.Tests
             var cameraGo = new GameObject("Main Camera");
             var camera = cameraGo.AddComponent<Camera>();
             camera.orthographic = true;
-
+            
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.backgroundColor = Color.black;
             cameraGo.transform.position = new Vector3(0, 0, -10);
@@ -493,12 +380,12 @@ namespace Bettr.Runtime.Plugin.Main.Tests
             eventSystemGo.AddComponent<EventSystem>();
             eventSystemGo.AddComponent<StandaloneInputModule>();
         }
-
+        
         public string GetEnvironmentVariable(string key)
         {
             return Environment.GetEnvironmentVariable(key);
         }
-
+        
         public static Dictionary<string, string> GetCommandLineArguments()
         {
             string[] args = Environment.GetCommandLineArgs();
