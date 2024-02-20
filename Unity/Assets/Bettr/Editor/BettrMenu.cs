@@ -41,6 +41,8 @@ namespace Bettr.Editor
         private const string AssetBundlesLinuxDirectory = AssetBundlesDirectory +  "/Linux";
         // ReSharper disable once UnusedMember.Local
         private const string OutcomesDirectory = "Assets/Bettr/LocalStore/Outcomes";
+        // ReSharper disable once UnusedMember.Local
+        private const string LocalServerDirectory = "Assets/Bettr/LocalStore/LocalServer";
         
         public static void ExportPackage()
         {
@@ -120,6 +122,7 @@ namespace Bettr.Editor
         {
             BuildAssetBundles();
             BuildOutcomes();
+            BuildLocalServer();
         }
         
         [MenuItem("Bettr/Assets/Cleanup")]
@@ -308,6 +311,14 @@ namespace Bettr.Editor
             foreach(FileInfo file in directory.GetFiles()) file.Delete();
             foreach(DirectoryInfo subDirectory in directory.GetDirectories()) subDirectory.Delete(true);
         }
+        
+        private static void BuildDirectory(this DirectoryInfo directory, bool force = false)
+        {
+            if (!directory.Exists || force)
+            {
+                directory.Create();
+            }
+        }
 
         private static string GetAssetBundleName(string assetLabel, Type assetType)
         {
@@ -423,6 +434,25 @@ namespace Bettr.Editor
             AssetDatabase.Refresh();
             
             Debug.Log("...done building outcomes.");
+        }
+        
+        private static void BuildLocalServer()
+        {
+            EmptyDirectory(new DirectoryInfo(LocalServerDirectory));
+            AssetDatabase.Refresh();
+    
+            var usersDirectory = $"{LocalServerDirectory}/users";
+            BuildDirectory(new DirectoryInfo(usersDirectory));
+            AssetDatabase.Refresh();
+
+            var userId = SystemInfo.deviceUniqueIdentifier;
+            var sourceFilePath = Path.Combine(Application.dataPath, "Bettr", "Editor", "LocalUser.json");
+            var destinationFilePath = $"{usersDirectory}/{userId}.json";
+
+            File.Copy(sourceFilePath, destinationFilePath);
+
+            Debug.Log("...refreshing database before building local server..");
+            AssetDatabase.Refresh();
         }
         
         // Method to extract a specific command line argument

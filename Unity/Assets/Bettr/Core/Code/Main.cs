@@ -15,6 +15,8 @@ namespace Bettr.Core
 
         [NonSerialized] private ConfigData _configData;
         [NonSerialized] private BettrServer _bettrServer;
+        [NonSerialized] private BettrAssetsServer _bettrAssetsServer;
+        [NonSerialized] private BettrOutcomesServer _bettrOutcomesServer;
         [NonSerialized] private BettrAssetController _bettrAssetController;
         [NonSerialized] private BettrAssetScriptsController _bettrAssetScriptsController;
         [NonSerialized] private BettrUserController _bettrUserController;
@@ -60,7 +62,11 @@ namespace Bettr.Core
             // load the config file
             _configData = ConfigReader.Parse(configFile.text);
             
-            _bettrServer = new BettrServer(_configData.AssetsBaseURL);
+            _bettrServer = new BettrServer(_configData.AssetsServerBaseURL);
+            
+            _bettrAssetsServer = new BettrAssetsServer(_configData.AssetsServerBaseURL);
+            
+            _bettrOutcomesServer = new BettrOutcomesServer(_configData.AssetsServerBaseURL);
             
             _bettrUserController = new BettrUserController(_bettrServer);
             
@@ -94,7 +100,7 @@ namespace Bettr.Core
             
             _configData.AssetsVersion = assetVersion;
             
-            Debug.Log($"userId={userId} AssetsVersion={_configData.AssetsVersion} AssetsBaseURL={_configData.AssetsBaseURL} WebAssetsBaseURL={_configData.WebAssetsBaseURL} WebOutcomesBaseURL={_configData.WebOutcomesBaseURL} MainBundleName={_configData.MainBundleName} MainBundleVariant={_configData.MainBundleVariant}");
+            Debug.Log($"userId={userId} AssetsVersion={_configData.AssetsVersion} AssetsBaseURL={_configData.AssetsServerBaseURL} WebAssetsBaseURL={_configData.WebAssetsBaseURL} WebOutcomesBaseURL={_configData.WebOutcomesBaseURL} MainBundleName={_configData.MainBundleName} MainBundleVariant={_configData.MainBundleVariant}");
             
             BettrModel.Init();
 

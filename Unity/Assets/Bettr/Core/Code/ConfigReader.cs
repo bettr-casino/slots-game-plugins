@@ -14,32 +14,38 @@ namespace Bettr.Core
         
         public string AssetsVersion { get; set; }
         
-        public string AssetsBaseURL { get; set; }
         public string MainBundleName { get; set; }
         public string MainBundleVariant { get; set; }
         
-        public string OutcomesBaseURL { get; set; }
+        public string AssetsServerBaseURL { get; set; }
+        public string OutcomesServerBaseURL { get; set; }
+        
+        public string ServerBaseURL { get; set; }
         
         public bool UseFileSystemAssetBundles { get; set; }
+        
+        public bool UseFileSystemOutcomes { get; set; }
+        
+        public bool UseLocalServer { get; set; }
         
         public string TaskCode => PlayerPrefs.GetString(TaskCodeKey, DefaultTaskCode);
         
 #if UNITY_IOS
         public string WebAssetsBaseURL => TaskCode.Equals(DefaultTaskCode) ? 
-            $"{AssetsBaseURL}/assets/{AssetsVersion}/iOS" : 
-            $"{AssetsBaseURL}/developers/{TaskCode}/assets/iOS";
+            $"{AssetsServerBaseURL}/assets/{AssetsVersion}/iOS" : 
+            $"{AssetsServerBaseURL}/developers/{TaskCode}/assets/iOS";
 #endif
 #if UNITY_ANDROID
-        public string WebAssetsBaseURL => $"{AssetsBaseURL}/assets/{AssetsVersion}/Android";
+        public string WebAssetsBaseURL => $"{AssetsServerBaseURL}/assets/{AssetsVersion}/Android";
 #endif
 #if UNITY_WEBGL
-        public string WebAssetsBaseURL => $"{AssetsBaseURL}/assets/{AssetsVersion}/WebGL";
+        public string WebAssetsBaseURL => $"{AssetsServerBaseURL}/assets/{AssetsVersion}/WebGL";
 #endif
 #if UNITY_STANDALONE_OSX
-        public string WebAssetsBaseURL => $"{AssetsBaseURL}/assets/{AssetsVersion}/OSX";
+        public string WebAssetsBaseURL => $"{AssetsServerBaseURL}/assets/{AssetsVersion}/OSX";
 #endif
         
-        public string WebOutcomesBaseURL => $"{OutcomesBaseURL}";
+        public string WebOutcomesBaseURL => $"{OutcomesServerBaseURL}";
     }
 
     public static class ConfigReader
