@@ -36,13 +36,12 @@ namespace Bettr.Core
     [Serializable]
     public class BettrUserConfig
     {
+        public string UserId { get; set; }
         public long Coins { get; set; }
         // ReSharper disable once InconsistentNaming
         public long XP { get; set; }
         public long Level { get; set; }
-        
         public BettrSceneConfig LobbyScene { get; set; }
-        
         public List<BettrLobbyCardConfig> LobbyCards { get; set; }
     }
 }

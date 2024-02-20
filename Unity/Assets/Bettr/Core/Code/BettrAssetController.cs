@@ -31,54 +31,15 @@ namespace Bettr.Core
     public delegate void AssetClearCompleteCallback(string assetBundleName, string assetBundleVersion,
         BettrAssetBundleManifest assetBundleManifest, bool success, string error);
 
-    public interface IBettrAssetPackageController
-    {
-        IEnumerator LoadPackage(string packageName, string packageVersion, bool loadScenes);
-    }
-    
-    public interface IBettrAssetPrefabsController
-    {
-        IEnumerator LoadPrefab(string bettrAssetBundleName, string bettrAssetBundleVersion, string prefabName,
-            GameObject parent = null);
-    }
-
-    public interface IBettrAssetScenesController
-    {
-        IEnumerator LoadScene(string bettrAssetBundleName, string bettrAssetBundleVersion,
-            string bettrSceneName);
-    }
-
-    public interface IBettrAssetScriptsController
-    {
-        Table GetScript(string scriptName);
-        void ClearScripts();
-        IEnumerator LoadScripts(string bundleName, string bundleVersion);
-        void AddScripts(string[] assetNames, AssetBundle assetBundle);
-        void AddScript(string className, string script);
-    }
-    
-    public interface IBettrAssetController
-    {
-        IEnumerator LoadPackage(string packageName, string packageVersion, bool loadScenes);
-
-        IEnumerator LoadAssetBundle(string bettrAssetBundleName, string bettrAssetBundleVersion,
-            AssetLoadCompleteCallback callback);
-
-        AssetBundle GetCachedAssetBundle(string bettrAssetBundleName, string bettrAssetBundleVersion);
-        
-        IBettrAssetScriptsController BettrAssetScriptsController { get; }
-    }
-        
-
     [Serializable]
-    public class BettrAssetPackageController : IBettrAssetPackageController
+    public class BettrAssetPackageController
     {
-        [NonSerialized] private IBettrAssetController _bettrAssetController;
-        [NonSerialized] private IBettrAssetScriptsController _bettrAssetScriptsController;
+        [NonSerialized] private BettrAssetController _bettrAssetController;
+        [NonSerialized] private BettrAssetScriptsController _bettrAssetScriptsController;
 
         public BettrAssetPackageController(
-            IBettrAssetController bettrAssetController,
-            IBettrAssetScriptsController bettrAssetScriptsController)
+            BettrAssetController bettrAssetController,
+            BettrAssetScriptsController bettrAssetScriptsController)
         {
             // TileController.RegisterType<BettrAssetPackageController>("BettrAssetPackageController");
             // TileController.AddToGlobals("BettrAssetPackageController", this);
@@ -128,14 +89,14 @@ namespace Bettr.Core
     }
 
     [Serializable]
-    public class BettrAssetPrefabsController : IBettrAssetPrefabsController
+    public class BettrAssetPrefabsController
     {
-        [NonSerialized] private IBettrAssetController _bettrAssetController;
-        [NonSerialized] private IBettrAssetPackageController _bettrAssetPackageController;
+        [NonSerialized] private BettrAssetController _bettrAssetController;
+        [NonSerialized] private BettrAssetPackageController _bettrAssetPackageController;
 
         public BettrAssetPrefabsController(
-            IBettrAssetController bettrAssetController,
-            IBettrAssetPackageController bettrAssetPackageController)
+            BettrAssetController bettrAssetController,
+            BettrAssetPackageController bettrAssetPackageController)
         {
             // TileController.RegisterType<BettrAssetPrefabsController>("BettrPrefabsController");
             // TileController.AddToGlobals("BettrPrefabsController", this);
@@ -164,14 +125,14 @@ namespace Bettr.Core
     }
 
     [Serializable]
-    public class BettrAssetScenesController : IBettrAssetScenesController
+    public class BettrAssetScenesController
     {
-        [NonSerialized] private IBettrAssetController _bettrAssetController;
-        [NonSerialized] private IBettrAssetPackageController _bettrAssetPackageController;
+        [NonSerialized] private BettrAssetController _bettrAssetController;
+        [NonSerialized] private BettrAssetPackageController _bettrAssetPackageController;
 
         public BettrAssetScenesController(
-            IBettrAssetController bettrAssetController,
-            IBettrAssetPackageController bettrAssetPackageController)
+            BettrAssetController bettrAssetController,
+            BettrAssetPackageController bettrAssetPackageController)
         {
             // TileController.RegisterType<BettrAssetScenesController>("BettrAssetScenesController");
             // TileController.AddToGlobals("BettrAssetScenesController", this);
@@ -199,12 +160,12 @@ namespace Bettr.Core
     }
 
     [Serializable]
-    public class BettrAssetScriptsController : IBettrAssetScriptsController
+    public class BettrAssetScriptsController
     {
-        [NonSerialized] private IBettrAssetController _bettrAssetController;
+        [NonSerialized] private BettrAssetController _bettrAssetController;
         public Dictionary<string, Table> ScriptsTables { get; private set; }
 
-        public BettrAssetScriptsController(IBettrAssetController bettrAssetController)
+        public BettrAssetScriptsController(BettrAssetController bettrAssetController)
         {
             // TileController.RegisterType<BettrAssetScriptsController>("BettrAssetScriptsController");
             // TileController.AddToGlobals("BettrAssetScriptsController", this);
@@ -329,16 +290,16 @@ namespace Bettr.Core
     }
 
     [Serializable]
-    public class BettrAssetController : IBettrAssetController
+    public class BettrAssetController
     {
         public bool useFileSystemAssetBundles = true;
         public string webAssetBaseURL;
         public string fileSystemAssetBaseURL = "Assets/Bettr/LocalStore/AssetBundles/OSX";
 
-        public IBettrAssetScriptsController BettrAssetScriptsController { get; private set; }
-        public IBettrAssetPrefabsController BettrAssetPrefabsController { get; private set; }
-        public IBettrAssetPackageController BettrAssetPackageController { get; private set; }
-        public IBettrAssetScenesController BettrAssetScenesController { get; private set; }
+        public BettrAssetScriptsController BettrAssetScriptsController { get; private set; }
+        public BettrAssetPrefabsController BettrAssetPrefabsController { get; private set; }
+        public BettrAssetPackageController BettrAssetPackageController { get; private set; }
+        public BettrAssetScenesController BettrAssetScenesController { get; private set; }
         
         private readonly HashSet<string> _loadingHashes = new HashSet<string>();
         

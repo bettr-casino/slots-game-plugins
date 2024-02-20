@@ -39,15 +39,8 @@ namespace Bettr.Core
         public string DigitalSignaturePayloadStr { get; set; }
     }
     
-    public interface IBettrOutcomeController
-    {
-        IEnumerator LoadServerOutcome(string gameId);
-        
-        int OutcomeNumber { get; set; }
-    }
-    
     [Serializable]
-    public class BettrOutcomeController : IBettrOutcomeController
+    public class BettrOutcomeController
     {
         [NonSerialized]  public bool UseFileSystemOutcomes = true;
         
@@ -60,11 +53,11 @@ namespace Bettr.Core
         
         public string HashKey { get; private set; }
         
-        public IBettrAssetScriptsController BettrAssetScriptsController { get; private set; }
+        public BettrAssetScriptsController BettrAssetScriptsController { get; private set; }
         
-        public IBettrUserController BettrUserController { get; private set; }
+        public BettrUserController BettrUserController { get; private set; }
 
-        public BettrOutcomeController(IBettrAssetScriptsController bettrAssetScriptsController, IBettrUserController bettrUserController, string hashKey)
+        public BettrOutcomeController(BettrAssetScriptsController bettrAssetScriptsController, BettrUserController bettrUserController, string hashKey)
         {
             TileController.RegisterType<BettrOutcomeController>("BettrOutcomeController");
             TileController.AddToGlobals("BettrOutcomeController", this);
@@ -92,7 +85,7 @@ namespace Bettr.Core
             var bettrOutcomeRequestPayload = new BettrOutcomeRequestPayload()
             {
                 GameId = gameId,
-                UserId = BettrUserController.GetUserId(),
+                UserId = BettrUserController.BettrUserConfig.UserId,
                 HashKey = HashKey,
             };
 

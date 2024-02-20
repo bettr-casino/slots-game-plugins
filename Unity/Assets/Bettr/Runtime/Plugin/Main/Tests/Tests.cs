@@ -21,12 +21,12 @@ namespace Bettr.Runtime.Plugin.Main.Tests
         private const string MAIN_BUNDLE_VARIANT = "v0_1_0";
         private const string SERVER_BASE_URL = "https://bettr-casino-assets.s3.us-west-2.amazonaws.com";
 
-        private IBettrAssetController _bettrAssetController;
-        private IBettrAssetScriptsController _bettrAssetScriptsController;
-        private IBettrUserController _bettrUserController;
-        private IBettrVisualsController _bettrVisualsController;
-        private IBettrOutcomeController _bettrOutcomeController;
-        private IBettrServer _bettrServer;
+        private BettrAssetController _bettrAssetController;
+        private BettrAssetScriptsController _bettrAssetScriptsController;
+        private BettrUserController _bettrUserController;
+        private BettrVisualsController _bettrVisualsController;
+        private BettrOutcomeController _bettrOutcomeController;
+        private BettrServer _bettrServer;
         
         private Tile _tile;
 
@@ -75,7 +75,7 @@ namespace Bettr.Runtime.Plugin.Main.Tests
             _bettrAssetScriptsController = _bettrAssetController.BettrAssetScriptsController;
             _bettrOutcomeController = new BettrOutcomeController(_bettrAssetScriptsController, _bettrUserController, "fake-hash-key");
 
-            _bettrVisualsController.SwitchOrientationToLandscape();
+            BettrVisualsController.SwitchOrientationToLandscape();
         }
         
         [UnitySetUp]
@@ -107,6 +107,13 @@ namespace Bettr.Runtime.Plugin.Main.Tests
             var scriptRunner = ScriptRunner.Acquire(mainTable);
             yield return scriptRunner.CallAsyncAction("Login");
             ScriptRunner.Release(scriptRunner);
+        
+            var deviceId = "EE0DE516-5053-5142-80AC-2D878E91215C"; // hard coded for testing
+            var uniqueId = $"{deviceId}";
+        
+            Debug.Log($"uniqueId={uniqueId}");
+        
+            Assert.AreEqual(uniqueId, _bettrUserController.BettrUserConfig.UserId);
         }
         
         [UnityTest, Order(3)]
@@ -134,6 +141,7 @@ namespace Bettr.Runtime.Plugin.Main.Tests
         {
             Debug.Log("TestLoadMainLobby");
             
+            var lobbyCardCount = _bettrUserController.BettrUserConfig.LobbyCards.Count;
             for (int i = 0; i < 1; i++)
             {
                 var mainTable = _bettrAssetScriptsController.GetScript("Main");
