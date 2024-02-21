@@ -15,8 +15,6 @@ namespace Bettr.Core
 
         [NonSerialized] private ConfigData _configData;
         [NonSerialized] private BettrServer _bettrServer;
-        [NonSerialized] private BettrAssetsServer _bettrAssetsServer;
-        [NonSerialized] private BettrOutcomesServer _bettrOutcomesServer;
         [NonSerialized] private BettrAssetController _bettrAssetController;
         [NonSerialized] private BettrAssetScriptsController _bettrAssetScriptsController;
         [NonSerialized] private BettrUserController _bettrUserController;
@@ -61,43 +59,23 @@ namespace Bettr.Core
             
             // load the config file
             _configData = ConfigReader.Parse(configFile.text);
-            
-            _bettrServer = new BettrServer(_configData.AssetsServerBaseURL);
-            
-            _bettrAssetsServer = new BettrAssetsServer(_configData.AssetsServerBaseURL);
-            
-            _bettrOutcomesServer = new BettrOutcomesServer(_configData.AssetsServerBaseURL);
-            
-            _bettrUserController = new BettrUserController(_bettrServer);
+
+            _bettrServer = new BettrServer()
+            {
+                useLocalServer = _configData.UseLocalServer,
+                serverBaseURL = _configData.ServerBaseURL,
+            };
+
+            _bettrUserController = new BettrUserController()
+            {
+                bettrServer = _bettrServer,
+                webAssetBaseURL = _configData.WebAssetsBaseURL,
+            };
             
             var userId = _bettrUserController.GetUserId();
             
-            var assetVersion = "";
-            
-            yield return _bettrServer.Get($"/commit_hash.txt", (url, payload, success, error) =>
-            {
-                if (!success)
-                {
-                    Debug.LogError($"User JSON retrieved Success: url={url} error={error}");
-                    return;
-                }
-                
-                if (payload.Length == 0)
-                {
-                    Debug.LogError("empty payload retrieved from url={url}");
-                    return;
-                }
-                
-                assetVersion = System.Text.Encoding.UTF8.GetString(payload);
-                
-            });
+            var assetVersion = "latest";
 
-            if (String.IsNullOrWhiteSpace(assetVersion))
-            {
-                Debug.LogError($"Unable to retrieve commit_hash for user url={userId}");
-                yield break;
-            }
-            
             _configData.AssetsVersion = assetVersion;
             
             Debug.Log($"userId={userId} AssetsVersion={_configData.AssetsVersion} AssetsBaseURL={_configData.AssetsServerBaseURL} WebAssetsBaseURL={_configData.WebAssetsBaseURL} WebOutcomesBaseURL={_configData.WebOutcomesBaseURL} MainBundleName={_configData.MainBundleName} MainBundleVariant={_configData.MainBundleVariant}");
@@ -116,8 +94,8 @@ namespace Bettr.Core
             
             _bettrOutcomeController = new BettrOutcomeController(_bettrAssetScriptsController, _bettrUserController, _configData.AssetsVersion)
                 {
-                    UseFileSystemOutcomes = false,
                     WebOutcomesBaseURL = _configData.WebOutcomesBaseURL,
+                    UseFileSystemOutcomes = _configData.UseFileSystemOutcomes,
                 };
 
             _bettrAudioController = new BettrAudioController();

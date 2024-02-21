@@ -21,12 +21,29 @@ namespace Bettr.Runtime.Plugin.Main.Tests
         private const string MAIN_BUNDLE_VARIANT = "v0_1_0";
         private const string SERVER_BASE_URL = "https://bettr-casino-assets.s3.us-west-2.amazonaws.com";
 
-        private BettrAssetController _bettrAssetController;
-        private BettrAssetScriptsController _bettrAssetScriptsController;
-        private BettrUserController _bettrUserController;
-        private BettrVisualsController _bettrVisualsController;
-        private BettrOutcomeController _bettrOutcomeController;
-        private BettrServer _bettrServer;
+        private ConfigData _configData = new ConfigData()
+        {
+            AssetsVersion = "v0_1_0",
+            MainBundleName = "main",
+            MainBundleVariant = "v0_1_0",
+            AssetsServerBaseURL = "https://bettr-casino-assets.s3.us-west-2.amazonaws.com",
+            OutcomesServerBaseURL = "https://bettr-casino-outcomes.s3.us-west-2.amazonaws.com",
+            ServerBaseURL = "https://bettr-casino-assets.s3.us-west-2.amazonaws.com",
+            UseFileSystemAssetBundles = true,
+            UseFileSystemOutcomes = true,
+            UseLocalServer = true,
+        };
+
+        [NonSerialized] private BettrServer _bettrServer;
+        [NonSerialized] private BettrAssetController _bettrAssetController;
+        [NonSerialized] private BettrAssetScriptsController _bettrAssetScriptsController;
+        [NonSerialized] private BettrUserController _bettrUserController;
+        // ReSharper disable once NotAccessedField.Local
+        [NonSerialized] private BettrVisualsController _bettrVisualsController;
+        // ReSharper disable once NotAccessedField.Local
+        [NonSerialized] private BettrOutcomeController _bettrOutcomeController;
+        // ReSharper disable once NotAccessedField.Local
+        [NonSerialized] private BettrAudioController _bettrAudioController;
         
         private Tile _tile;
 
@@ -56,35 +73,104 @@ namespace Bettr.Runtime.Plugin.Main.Tests
                     Debug.LogError("The 'timeScale' command line argument is not a valid integer.");
                 }
             }
-            
-            Debug.Log("OneTimeSetup");
-
-            TileController.StaticInit();
-            TileController.RegisterModule("casino.bettr.plugin.Core.dll");
-            
-            SceneManager.LoadScene("Bettr/Runtime/Plugin/Main/Tests/TestScene", LoadSceneMode.Single);
-            
-            BettrModel.Init();
-
-            _bettrServer = new BettrServer(SERVER_BASE_URL);
-            
-            _bettrAssetController = new BettrAssetController();
-            _bettrUserController = new BettrUserController(_bettrServer);
-
-            _bettrVisualsController = new BettrVisualsController();
-            _bettrAssetScriptsController = _bettrAssetController.BettrAssetScriptsController;
-            _bettrOutcomeController = new BettrOutcomeController(_bettrAssetScriptsController, _bettrUserController, "fake-hash-key");
-
-            BettrVisualsController.SwitchOrientationToLandscape();
         }
         
         [UnitySetUp]
-        public IEnumerator UnitySetUp()
+        private IEnumerator UnitySetup()
         {
-            Debug.Log("UnitySetUp");
             if (_unitySetUpComplete) yield break;
-            yield return _bettrAssetController.LoadPackage(MAIN_BUNDLE_NAME, MAIN_BUNDLE_VARIANT, false);
+            
+            Debug.Log("OneTimeSetup started");
+
+            TileController.StaticInit();
+            TileController.RegisterModule("Bettr.dll");
+            TileController.RegisterModule("casino.bettr.plugin.Core.dll");
+            
+            _bettrServer = new BettrServer()
+            {
+                useLocalServer = _configData.UseLocalServer,
+                serverBaseURL = _configData.ServerBaseURL,
+            };
+
+            _bettrUserController = new BettrUserController()
+            {
+                bettrServer = _bettrServer,
+                webAssetBaseURL = _configData.WebAssetsBaseURL,
+            };
+            
+            var userId = _bettrUserController.GetUserId();
+            
+            var assetVersion = "latest";
+
+            _configData.AssetsVersion = assetVersion;
+            
+            Debug.Log($"userId={userId} AssetsVersion={_configData.AssetsVersion} AssetsBaseURL={_configData.AssetsServerBaseURL} WebAssetsBaseURL={_configData.WebAssetsBaseURL} WebOutcomesBaseURL={_configData.WebOutcomesBaseURL} MainBundleName={_configData.MainBundleName} MainBundleVariant={_configData.MainBundleVariant}");
+            
+            BettrModel.Init();
+
+            _bettrAssetController = new BettrAssetController
+            {
+                webAssetBaseURL = _configData.WebAssetsBaseURL,
+                useFileSystemAssetBundles = _configData.UseFileSystemAssetBundles,
+            };
+            
+            _bettrVisualsController = new BettrVisualsController();
+            
+            _bettrAssetScriptsController = _bettrAssetController.BettrAssetScriptsController;
+            
+            _bettrOutcomeController = new BettrOutcomeController(_bettrAssetScriptsController, _bettrUserController, _configData.AssetsVersion)
+                {
+                    WebOutcomesBaseURL = _configData.WebOutcomesBaseURL,
+                    UseFileSystemOutcomes = _configData.UseFileSystemOutcomes,
+                };
+
+            _bettrAudioController = new BettrAudioController();
+
+            BettrVisualsController.SwitchOrientationToLandscape();
+            
+            yield return _bettrAssetController.LoadPackage(_configData.MainBundleName, _configData.MainBundleVariant, false);
+            
+            var mainTable = _bettrAssetScriptsController.GetScript("Main");
+            var scriptRunner = ScriptRunner.Acquire(mainTable);
+            yield return scriptRunner.CallAsyncAction("Init");
+            ScriptRunner.Release(scriptRunner);
+            
+            Debug.Log("OneTimeSetup ended");
+            
             _unitySetUpComplete = true;
+        }
+
+        private IEnumerator LoginUser()
+        {
+            var mainTable = _bettrAssetScriptsController.GetScript("Main");
+            var scriptRunner = ScriptRunner.Acquire(mainTable);
+            yield return scriptRunner.CallAsyncAction("Login");
+            ScriptRunner.Release(scriptRunner);
+        }
+
+        private IEnumerator LoadMainLobby()
+        {
+            var mainTable = _bettrAssetScriptsController.GetScript("Main");
+            var scriptRunner = ScriptRunner.Acquire(mainTable);
+            yield return scriptRunner.CallAsyncAction("LoadLobbyScene");
+            ScriptRunner.Release(scriptRunner);
+
+            yield return UpdateCommitHash();
+        }
+        
+        private IEnumerator UpdateCommitHash()
+        {
+            var activeScene = SceneManager.GetActiveScene();
+            while (activeScene.name != "MainLobbyScene")
+            {
+                yield return null;
+                activeScene = SceneManager.GetActiveScene();
+            }
+            
+            var allRootGameObjects = activeScene.GetRootGameObjects();
+            var appGameObject = allRootGameObjects.First((o => o.name == "App"));
+            var appTile = appGameObject.GetComponent<Tile>();
+            appTile.Call("SetCommitHash", _configData.AssetsVersion);
         }
 
         [UnityTest, Order(1)]
