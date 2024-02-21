@@ -8,6 +8,7 @@ This is the Challenges repository for the Bettr Casino Slots App.
 ## Description
 Bettr Casino is an Open Source Slots Casino Development Platform. 
 
+### Short Version
 Here is how it works (Short Version):
 1. We create challenge.
 2. You solve challenge.
@@ -15,8 +16,8 @@ Here is how it works (Short Version):
 4. We mangle everything up into new Bettr Casino Slots App. Now we wait. You still wait.
 5. Users see ... Ooh, new App. Fancy! They play. They pay! We share revenue with you. You happy. We happy.
 
-
-Here is how it works (Winded version):
+### Winded version
+Here is how it works (Winded Version):
 1. We create challenges for new features or improvement to the Bettr Casino Slots Game. These challenges are open to Unity Developers, Unity 3D Artists, 3D Tech Art, 3D Animators, Audio Engineers, Mathematicians, Game Designers and Testers.
 2. You pick and complete one or more challenges and submit a Pull Request (PR) to this repository.
 3. We will review your PR. Once its approved and merged, we will award you Bettr Casino Tokens ($BET). These $BET token transactions will be written to the Polygon Blockchain.
