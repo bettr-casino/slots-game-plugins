@@ -85,7 +85,7 @@ namespace Bettr.Core
                     BettrUserConfig = userBlob;
                 });
 
-                if (!userDoesNotExist)
+                if (userDoesNotExist)
                 {
                     yield return LoadUserJsonFromWebAssets((url, payload, success, error) =>
                     {

@@ -1,11 +1,14 @@
 using System;
 using System.Collections;
 using System.IO;
+using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using CrayonScript.Code;
 using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Networking;
+using Random = UnityEngine.Random;
 
 // ReSharper disable once CheckNamespace
 namespace Bettr.Core
@@ -123,7 +126,7 @@ namespace Bettr.Core
 
         IEnumerator LoadFileSystemOutcome(string gameId)
         {
-            var outcomeNumber = OutcomeNumber;
+            var outcomeNumber = (OutcomeNumber > 0) ? OutcomeNumber : GetRandomOutcomeNumber(gameId);
             var className = $"{gameId}Outcome{outcomeNumber:D9}";
             var assetBundleManifestURL = $"{FileSystemOutcomesBaseURL}/{className}.cscript.txt";
             var assetBundleManifestBytes = File.ReadAllBytes(assetBundleManifestURL);
@@ -133,6 +136,15 @@ namespace Bettr.Core
             BettrAssetScriptsController.AddScript(className, script);
             
             yield break;
+        }
+
+        private int GetRandomOutcomeNumber(string gameId)
+        {
+            var regex = new Regex($@"^{gameId}Outcome\d{{9}}\.cscript.txt$");
+            var files = Directory.GetFiles($"{FileSystemOutcomesBaseURL}");
+            var filteredFiles = files.Where(file => regex.IsMatch(Path.GetFileName(file))).ToArray();
+            var outcomeCount = filteredFiles.Length;
+            return outcomeCount > 0 ? Random.Range(1, outcomeCount + 1) : 0;
         }
     }
 }
