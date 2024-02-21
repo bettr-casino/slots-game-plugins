@@ -23,6 +23,8 @@ namespace Bettr.Core
 
         void Start()
         {
+            BettrVisualsController.SwitchOrientationToLandscape();
+            
             _app = gameObject.scene.GetRootGameObjects().First(o => o.name == "Bettr").GetComponent<Main>();
             _oneTimeSetup = gameObject.scene.GetRootGameObjects().First(o => o.name == "OneTimeSetup");
             

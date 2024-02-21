@@ -13,7 +13,6 @@ using DirectoryInfo = System.IO.DirectoryInfo;
 
 namespace Bettr.Editor
 {
-    
     public class DirectoryNode
     {
         public string Name;
@@ -43,6 +42,7 @@ namespace Bettr.Editor
         private const string OutcomesDirectory = "Assets/Bettr/LocalStore/Outcomes";
         // ReSharper disable once UnusedMember.Local
         private const string LocalServerDirectory = "Assets/Bettr/LocalStore/LocalServer";
+        private const string AssetsServerBaseURL = "https://bettr-casino-assets.s3.us-west-2.amazonaws.com";
         
         public static void ExportPackage()
         {
@@ -438,18 +438,26 @@ namespace Bettr.Editor
         
         private static void BuildLocalServer()
         {
-            EmptyDirectory(new DirectoryInfo(LocalServerDirectory));
+            BuildDirectory(new DirectoryInfo(LocalServerDirectory));
             AssetDatabase.Refresh();
-    
+
+            var bettrUserConfigJsonData = LoadUserJsonFromWebAssets();
+
             var usersDirectory = $"{LocalServerDirectory}/users";
             BuildDirectory(new DirectoryInfo(usersDirectory));
             AssetDatabase.Refresh();
 
             var userId = SystemInfo.deviceUniqueIdentifier;
-            var sourceFilePath = Path.Combine(Application.dataPath, "Bettr", "Editor", "LocalUser.json");
             var destinationFilePath = $"{usersDirectory}/{userId}.json";
 
-            File.Copy(sourceFilePath, destinationFilePath);
+            if (bettrUserConfigJsonData != null)
+            {
+                File.WriteAllText(destinationFilePath, bettrUserConfigJsonData);
+            }
+            else
+            {
+                Debug.LogError("Failed to load bettrUserConfig.");
+            }
 
             Debug.Log("...refreshing database before building local server..");
             AssetDatabase.Refresh();
@@ -523,6 +531,28 @@ namespace Bettr.Editor
             else
             {
                 Debug.Log($"Directory already exists at: {path}");
+            }
+        }
+        
+        private static string LoadUserJsonFromWebAssets()
+        {
+            string webAssetName = "users/default/user.json";
+            string assetBundleURL = $"{AssetsServerBaseURL}/{webAssetName}";
+
+            using (var webClient = new System.Net.WebClient())
+            {
+                try
+                {
+                    byte[] jsonBytes = webClient.DownloadData(assetBundleURL);
+                    string jsonString = System.Text.Encoding.UTF8.GetString(jsonBytes);
+                    return jsonString;
+                }
+                catch (Exception ex)
+                {
+                    var error = $"Error loading user JSON from server: {ex.Message}";
+                    Debug.LogError(error);
+                    return null;
+                }
             }
         }
         
