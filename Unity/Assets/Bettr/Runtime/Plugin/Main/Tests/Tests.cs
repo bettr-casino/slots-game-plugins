@@ -89,13 +89,13 @@ namespace Bettr.Runtime.Plugin.Main.Tests
             _bettrServer = new BettrServer()
             {
                 useLocalServer = _configData.UseLocalServer,
-                serverBaseURL = _configData.ServerBaseURL,
+                configData = _configData,
             };
 
             _bettrUserController = new BettrUserController()
             {
                 bettrServer = _bettrServer,
-                webAssetBaseURL = _configData.WebAssetsBaseURL,
+                configData = _configData,
             };
             
             var userId = _bettrUserController.GetUserId();

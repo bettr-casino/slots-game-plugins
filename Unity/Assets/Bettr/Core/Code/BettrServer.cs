@@ -124,8 +124,9 @@ namespace Bettr.Core
     public class BettrServer
     {
         public bool useLocalServer = true;
-        public string serverBaseURL;
         public string fileSystemLocalStorageBaseURL = "Assets/Bettr/LocalStore/LocalServer";
+
+        public ConfigData configData;
         
         public KeyValuePair<string, string> ApplicationJsonHeader => new KeyValuePair<string, string>("Content-Type", "application/json");
         
@@ -219,7 +220,7 @@ namespace Bettr.Core
         
         public IEnumerator Get(string requestUri, GetCallback callback, params KeyValuePair<string, string>[] headers)
         {
-            var requestURL = $"{serverBaseURL}{requestUri}";
+            var requestURL = $"{configData.ServerBaseURL}{requestUri}";
             var www = UnityWebRequest.Get(requestURL);
             UpdateHeaders(www, headers);
             yield return www.SendWebRequest();
@@ -234,7 +235,7 @@ namespace Bettr.Core
 
         public IEnumerator Put(string requestUri, byte[] bodyData, PutCallback callback, params KeyValuePair<string, string>[] headers)
         {
-            var requestURL = $"{serverBaseURL}{requestUri}";
+            var requestURL = $"{configData.ServerBaseURL}{requestUri}";
             if (bodyData == null || bodyData.Length == 0)
             {
                 Debug.LogError("Body data for PUT request is null or empty.");

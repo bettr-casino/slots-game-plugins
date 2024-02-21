@@ -31,8 +31,8 @@ namespace Bettr.Core
     public class BettrUserController
     {
         public BettrServer bettrServer;
-        
-        public string webAssetBaseURL;
+
+        public ConfigData configData;
         
         public BettrUserConfig BettrUserConfig { get; private set; }
         
@@ -107,7 +107,7 @@ namespace Bettr.Core
         {
             string webAssetName = "users/default/user.json";
             
-            string assetBundleURL = $"{webAssetBaseURL}/{webAssetName}";
+            string assetBundleURL = $"{configData.AssetsServerBaseURL}/{webAssetName}";
             using UnityWebRequest www = UnityWebRequest.Get(assetBundleURL);
             yield return www.SendWebRequest();
 
