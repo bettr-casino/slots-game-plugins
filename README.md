@@ -11,9 +11,9 @@ Bettr Casino is an Open Source Slots Casino Development Platform.
 Here is how it works (Short Version):
 1. We create challenge.
 2. You solve challenge.
-3. We like solution. We give you worthless tokens. You wait. You not happy.
+3. We like solution. We give you worthless tokens. You not happy. You wait.
 4. We mangle everything up into new Bettr Casino Slots App. Now we wait. You still wait.
-5. Users see ... Ooh, new App. Fancy! They play.They pay! We share revenue with you. You happy. We happy.
+5. Users see ... Ooh, new App. Fancy! They play. They pay! We share revenue with you. You happy. We happy.
 
 
 Here is how it works (Winded version):
