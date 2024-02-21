@@ -6,7 +6,7 @@ namespace Bettr.Runtime.Plugin.Main.Editor
 {
     public static class BettrMenu
     {
-        [MenuItem("Bettr/Plugins/Main/Run Tests")] 
+        //[MenuItem("Bettr/Plugins/Main/Run Tests")] 
         public static void RunUnitTests()
         {
             // Get the ITestRunnerApi instance
