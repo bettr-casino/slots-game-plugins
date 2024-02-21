@@ -143,7 +143,10 @@ namespace Bettr.Core
         {
             if (useLocalServer)
             {
-                AuthResponse = new AuthResponse() { isLocal = true};
+                AuthResponse = new AuthResponse() { isLocal = true, User = new AnonUser()
+                {
+                    Id = userId,
+                }};
                 yield break;
             }
             var requestUri = "/auth/login/anon";

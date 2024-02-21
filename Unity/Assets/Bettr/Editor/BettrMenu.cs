@@ -438,6 +438,8 @@ namespace Bettr.Editor
         
         private static void BuildLocalServer()
         {
+            Debug.Log("Refreshing database before building local server.");
+            
             BuildDirectory(new DirectoryInfo(LocalServerDirectory));
             AssetDatabase.Refresh();
 
@@ -453,13 +455,14 @@ namespace Bettr.Editor
             if (bettrUserConfigJsonData != null)
             {
                 File.WriteAllText(destinationFilePath, bettrUserConfigJsonData);
+                Debug.Log("Copied latest user data from s3.");
             }
             else
             {
                 Debug.LogError("Failed to load bettrUserConfig.");
             }
 
-            Debug.Log("...refreshing database before building local server..");
+            Debug.Log("Refreshing database after building local server.");
             AssetDatabase.Refresh();
         }
         

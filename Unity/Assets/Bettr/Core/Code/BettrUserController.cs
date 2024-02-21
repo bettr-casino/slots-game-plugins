@@ -100,6 +100,7 @@ namespace Bettr.Core
                     });
                 }
             }
+            TileController.AddToGlobals("BettrUser", BettrUserConfig);
         }
         
         public IEnumerator LoadUserJsonFromWebAssets(GetCallback callback)
