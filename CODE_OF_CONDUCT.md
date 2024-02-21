@@ -1,14 +1,16 @@
 # Code of Conduct
 
-# Our Pledge
-
-Bettr Casino pledges to:
-
 ## Openness
-All game code will be open to contributors. Contributors will be able to see the game code, game data, and game operations. Contributors will be able to see revenue and expenses. Contributors will be able to see token allocations.
+1. All game code will be open source. 
+2. All game assets will be open source.
+3. All game challenges will be open to all unless otherwise specified due to regulatory requirements.
 
 ## Transparency
-Revenue and expenses will be made transparent to all stakeholders via periodic reports. Rewards will be publicly visible and verifiable on the blockchain.
+1. All revenue transactions will be transparent and visible to all stakeholders. 
+2. All token transactions will be written to the Polygon Blockchain and the transactions will be visible to all stakeholders.
+3. We will provide a web interface to view the revenur and token transactions.
 
 ## Integrity
-We will strive to maintain the highest level of integrity in all of our interactions. Mistakes will be acknowledged and corrected. We will strive to be honest and transparent in all of our communications.
+1. Challenges will be fair and transparent and open to all.
+2. Challenge rewards will be distributed fairly and transparently.
+3. Challenge reward calculations will be transparent and visible to all stakeholders.
