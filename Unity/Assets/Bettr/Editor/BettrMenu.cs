@@ -104,6 +104,9 @@ namespace Bettr.Editor
                 EditorApplication.isPlaying = false;
             }
 
+            CleanupTestScenes();
+            BuildAssets();
+
             // Switch to iOS build target
             EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.iOS, BuildTarget.iOS);
 
@@ -117,7 +120,7 @@ namespace Bettr.Editor
             EditorApplication.EnterPlaymode();
         }
 
-        [MenuItem("Bettr/Assets/Build")] 
+        //[MenuItem("Bettr/Assets/Build")] 
         public static void BuildAssets()
         {
             BuildAssetBundles();
@@ -125,7 +128,7 @@ namespace Bettr.Editor
             BuildLocalServer();
         }
         
-        [MenuItem("Bettr/Assets/Cleanup")]
+        //[MenuItem("Bettr/Assets/Cleanup")]
         public static void CleanupTestScenes()
         {
             RemoveTestScenes(new DirectoryInfo("Assets/"));

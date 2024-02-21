@@ -20,7 +20,11 @@ end
 
 function MainLobbyBottomBar:OnPointerClick1Param(target)
     System.Print("MainLobbyBottomBar:OnPointerClick1Param Starting target={0}", target)
-    self.SettingsPanelGo.SetActive(true)
+    if target == "Settings" then
+       self.SettingsPanelGo.SetActive(true)
+    elseif target == "Gifts" then
+       self.GiftsPanelGo.SetActive(true)
+    end    
 end
 
 return MainLobbyBottomBar:new()

@@ -1,0 +1,42 @@
+require "math"
+require "Core"
+require "Math"
+
+GiftsPanel = {}
+
+function GiftsPanel:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function GiftsPanel:destroy()
+	System.Print("GiftsPanel destroy tile id={0}", self.id)
+end
+
+function GiftsPanel:OnError(callStack)
+	System.Error("GiftsPanel Error CallStack: {0}", callStack)
+end
+
+function GiftsPanel:OnPointerClick1Param(target)
+    System.Print("GiftsPanel:OnPointerClick1Param Starting target={0}", target)
+    self.GiftsPanelGo.SetActive(false)
+end
+
+function GiftsPanel:OnEvent1Param(target)
+    if target == "VolumeSlider" then
+        local volume = self.VolumeSlider.slider.value
+        System.Print("GiftsPanel:OnEvent1Param Setting Slider volume={0}", volume)
+        PlayerPrefs.SetFloat("Volume", volume)
+        BettrAudioController.SetVolume(volume)
+    elseif target == "MusicToggle" then
+        local isMusicOff = PlayerPrefs.GetInt("IsMusicOff", 0)
+        isMusicOff = Math.toggle(isMusicOff)
+        System.Print("GiftsPanel:OnEvent1Param Setting Music isMusicOff={0}", isMusicOff)
+        PlayerPrefs.SetInt("IsMusicOff", isMusicOff)
+        BettrAudioController.ToggleMusic(isMusicOff == 1)
+    end
+end
+
+return GiftsPanel:new()
