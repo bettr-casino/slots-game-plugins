@@ -8,7 +8,7 @@
 ## Transparency
 1. All revenue transactions will be transparent and visible to all stakeholders. 
 2. All token transactions will be written to the Polygon Blockchain and the transactions will be visible to all stakeholders.
-3. We will provide a web interface to view the revenur and token transactions.
+3. We will provide a web interface to view the revenue and token transactions.
 
 ## Integrity
 1. Challenges will be fair and transparent and open to all.
