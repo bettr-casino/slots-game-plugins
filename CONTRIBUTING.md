@@ -29,9 +29,4 @@ If you have any questions, please contact us at [support@bettr.casino](mailto:su
 
 
 
-Thank you for your interest in contributing! Let's build Bettr!
-
-
-
-
-
+Let's build Bettr!
