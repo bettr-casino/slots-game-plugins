@@ -44,4 +44,19 @@ namespace Bettr.Core
         public BettrSceneConfig LobbyScene { get; set; }
         public List<BettrLobbyCardConfig> LobbyCards { get; set; }
     }
+
+    [Serializable]
+    public class BettrUserEvents
+    {
+        public List<BettrUserEvent> Events { get; set; }
+    }
+
+    [Serializable]
+    public class BettrUserEvent
+    {
+        public string EventId { get; set; }
+        public bool Persistent { get; set; }
+        public bool Acked { get; set; }
+        public string Value { get; set; }
+    }
 }

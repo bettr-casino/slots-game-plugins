@@ -12,10 +12,37 @@ using UnityEngine.Networking;
 // ReSharper disable once CheckNamespace
 namespace Bettr.Core
 {
-    public delegate void GetCallback(string requestURL, byte[] payload, bool success, string error);
-    public delegate void PostCallback(string requestURL, List<IMultipartFormSection> formSections, byte[] payload, bool success, string error);
+    public delegate void GetStorageCallback(string requestURL, StorageResponse storageResponse, bool success, string error);
+
+    public delegate void PutStorageCallback(string requestURL, StorageResponse response, bool success, string error);
     
-    public delegate void PutCallback(string requestURL, byte[] response, bool success, string error);
+    public delegate void PutUserCallback(string requestURL, AuthResponse response, bool success, string error);
+    
+    [Serializable]
+    public class StorageRequest
+    {
+        [JsonProperty("value")]
+        public string value;
+        
+        [JsonProperty("ttl")]
+        public long ttl;
+        
+        [JsonProperty("create")]
+        public bool create;
+        
+        [JsonProperty("cas")]
+        public string cas;
+    }
+    
+    [Serializable]
+    public class StorageResponse
+    {
+        [JsonProperty("value")]
+        public string value;
+        
+        [JsonProperty("cas")]
+        public string cas;
+    }
     
     [Serializable]
     public class AuthRequest
@@ -134,6 +161,8 @@ namespace Bettr.Core
         
         public AuthResponse AuthResponse { get; private set; }
         
+        public Dictionary<string, string> CasValues = new Dictionary<string, string>();
+        
         public BettrServer()
         {
             TileController.RegisterType<BettrServer>("BettrServer");
@@ -156,9 +185,7 @@ namespace Bettr.Core
                 username = userId,
                 createUser = true,
             };
-            string jsonPayload = JsonConvert.SerializeObject(authRequest);
-            byte[] bodyData = Encoding.UTF8.GetBytes(jsonPayload);
-            yield return Put(requestUri, bodyData, (requestURL, payload, success, error) =>
+            yield return PutUser(requestUri, authRequest, (requestURL, authResponse, success, error) =>
             {
                 if (!success)
                 {
@@ -168,7 +195,7 @@ namespace Bettr.Core
                     };
                     Debug.LogError(errorResponse.error);
                 }
-                else if (payload.Length == 0)
+                else if (authResponse == null)
                 {
                     var errorResponse = new AuthResponse
                     {
@@ -178,12 +205,12 @@ namespace Bettr.Core
                 }
                 else
                 {
-                    AuthResponse = JsonConvert.DeserializeObject<AuthResponse>(Encoding.UTF8.GetString(payload));
+                    AuthResponse = authResponse;
                 }
             }, ApplicationJsonHeader);
         }
         
-        public IEnumerator LoadUserBlob(GetCallback callback)
+        public IEnumerator LoadUserBlob(GetStorageCallback storageCallback)
         {
             Debug.Log($"Starting LoadUserBlob");
             if (useLocalServer)
@@ -192,33 +219,61 @@ namespace Bettr.Core
                 if (File.Exists(localFilePath))
                 {
                     string json = File.ReadAllText(localFilePath);
-                    byte[] payload = Encoding.UTF8.GetBytes(json);
-                    callback(localFilePath, payload, true, null);
+                    StorageResponse storageResponse = new StorageResponse()
+                    {
+                        value = json,
+                        cas = "local",
+                    };
+                    storageCallback(localFilePath, storageResponse, true, null);
                 }
                 else
                 {
                     var error = $"Local user blob file not found at path: {localFilePath}";
                     Debug.LogError(error);
-                    callback(localFilePath, null, false, error);
+                    storageCallback(localFilePath, null, false, error);
                 }
                 yield break;
             }
-            var requestUri = $"storage/owner/{AuthResponse.User.Id}/protected/blobs/user";
-            yield return Get(requestUri, callback, SessionTokenHeader, ApplicationJsonHeader);
+            var requestUri = $"/storage/owner/{AuthResponse.User.Id}/protected/blobs/user";
+            yield return GetStorage(requestUri, storageCallback, SessionTokenHeader, ApplicationJsonHeader);
         }
         
-        public IEnumerator PutUserBlob(byte[] bodyData, PutCallback callback)
+        public IEnumerator PutUserBlob(BettrUserConfig userData, PutStorageCallback storageCallback)
         {
             Debug.Log($"Starting PutUserBlob");
             if (useLocalServer)
             {
                 yield break;
             }
-            string requestUri = $"storage/owner/{AuthResponse.User.Id}/protected/blobs/user";
-            yield return Put(requestUri, bodyData, callback, SessionTokenHeader, ApplicationJsonHeader);
+            string bodyData = JsonConvert.SerializeObject(userData);
+            string requestUri = $"/storage/owner/{AuthResponse.User.Id}/protected/blobs/user";
+            yield return PutStorage(requestUri, bodyData, 0, true, storageCallback, SessionTokenHeader, ApplicationJsonHeader);
         }
         
-        public IEnumerator Get(string requestUri, GetCallback callback, params KeyValuePair<string, string>[] headers)
+        public IEnumerator LoadEvents(GetStorageCallback storageCallback)
+        {
+            Debug.Log($"Starting PutEvent");
+            if (useLocalServer)
+            {
+                yield break;
+            }
+            string requestUri = $"/storage/owner/{AuthResponse.User.Id}/protected/blobs/events";
+            yield return GetStorage(requestUri, storageCallback, ApplicationJsonHeader);
+        }
+        
+        public IEnumerator PutEvents(BettrUserEvents userEvents, PutStorageCallback storageCallback)
+        {
+            Debug.Log($"Starting PutEvent");
+            if (useLocalServer)
+            {
+                yield break;
+            }
+            string bodyData = JsonConvert.SerializeObject(userEvents);
+            string requestUri = $"/storage/owner/{AuthResponse.User.Id}/protected/blobs/events";
+            yield return PutStorage(requestUri, bodyData, 0, true, storageCallback, SessionTokenHeader, ApplicationJsonHeader);
+        }
+        
+        public IEnumerator GetStorage(string requestUri, GetStorageCallback storageCallback, params KeyValuePair<string, string>[] headers)
         {
             var requestURL = $"{configData.ServerBaseURL}{requestUri}";
             var www = UnityWebRequest.Get(requestURL);
@@ -227,24 +282,73 @@ namespace Bettr.Core
             
             if (www.result != UnityWebRequest.Result.Success) {
                 Debug.Log(www.error);
-                callback(requestURL, null, false, www.error);
+                storageCallback(requestURL, null, false, www.error);
                 yield break;
             }
-            callback(requestURL, www.downloadHandler.data, true, null);
+            // update the cas value
+            byte[] bytesData = www.downloadHandler.data;
+            var storageResponse = JsonConvert.DeserializeObject<StorageResponse>(Encoding.UTF8.GetString(bytesData));
+            CasValues[requestUri] = storageResponse.cas;
+            storageCallback(requestURL, storageResponse, true, null);
         }
-
-        public IEnumerator Put(string requestUri, byte[] bodyData, PutCallback callback, params KeyValuePair<string, string>[] headers)
+        
+        public IEnumerator PutStorage(string requestUri, string value, long ttl, bool create, PutStorageCallback storageCallback, params KeyValuePair<string, string>[] headers)
         {
             var requestURL = $"{configData.ServerBaseURL}{requestUri}";
-            if (bodyData == null || bodyData.Length == 0)
+            if (string.IsNullOrEmpty(value))
             {
                 Debug.LogError("Body data for PUT request is null or empty.");
-                callback(requestUri, null, false, "Body data is null or empty.");
+                storageCallback(requestUri, null, false, "Body data is null or empty.");
                 yield break;
             }
+
+            CasValues.TryGetValue(requestUri, out var cas);
+
+            var storageRequest = new StorageRequest()
+            {
+                value = value,
+                ttl = ttl,
+                create = create,
+                cas = cas,
+            };
+            
+            string jsonPayload = JsonConvert.SerializeObject(storageRequest, new JsonSerializerSettings()
+            {
+                ContractResolver = new IgnoreZeroValueContractResolver(),
+                NullValueHandling = NullValueHandling.Ignore,
+            });
+            byte[] bodyBytes = Encoding.UTF8.GetBytes(jsonPayload);
+            
             var www = new UnityWebRequest(requestURL, "PUT")
             {
-                uploadHandler = new UploadHandlerRaw(bodyData),
+                uploadHandler = new UploadHandlerRaw(bodyBytes),
+                downloadHandler = new DownloadHandlerBuffer()
+            };
+            UpdateHeaders(www, headers);
+            yield return www.SendWebRequest();
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError(www.error);
+                storageCallback(requestUri, null, false, www.error);
+            }
+            else
+            {
+                byte[] bytesData = www.downloadHandler.data;
+                var storageResponse = JsonConvert.DeserializeObject<StorageResponse>(Encoding.UTF8.GetString(bytesData));
+                CasValues[requestUri] = storageResponse.cas;
+                storageCallback(requestUri, storageResponse, true, null);
+            }
+        }
+
+        public IEnumerator PutUser(string requestUri, AuthRequest authRequest, PutUserCallback userCallback, params KeyValuePair<string, string>[] headers)
+        {
+            var requestURL = $"{configData.ServerBaseURL}{requestUri}";
+            string jsonPayload = JsonConvert.SerializeObject(authRequest);
+            byte[] bodyBytes = Encoding.UTF8.GetBytes(jsonPayload);
+            
+            var www = new UnityWebRequest(requestURL, "PUT")
+            {
+                uploadHandler = new UploadHandlerRaw(bodyBytes),
                 downloadHandler = new DownloadHandlerBuffer()
             };
             UpdateHeaders(www, headers);
@@ -252,11 +356,13 @@ namespace Bettr.Core
             if (www.result != UnityWebRequest.Result.Success)
             {
                 Debug.Log(www.error);
-                callback(requestUri, null, false, www.error);
+                userCallback(requestUri, null, false, www.error);
             }
             else
             {
-                callback(requestUri, www.downloadHandler.data, true, null);
+                byte[] bytesData = www.downloadHandler.data;
+                var authResponse = JsonConvert.DeserializeObject<AuthResponse>(Encoding.UTF8.GetString(bytesData));
+                userCallback(requestUri, authResponse, true, null);
             }
         }
 
