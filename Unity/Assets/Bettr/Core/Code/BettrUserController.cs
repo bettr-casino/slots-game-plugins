@@ -111,22 +111,6 @@ namespace Bettr.Core
 
                         events = JsonConvert.DeserializeObject<BettrUserEvents>(response.value);
                     });
-                    // create a new user event and fail if already exists
-                    var newUserGiftEvent = new BettrUserEvent()
-                    {
-                        Persistent = true,
-                        Acked = false,
-                        EventId = "NewUserGift",
-                        Value = "1000",
-                    };
-                    events.Events.Add(newUserGiftEvent);
-                    yield return bettrServer.PutEvents(events, (_, _, success, error) =>
-                    {
-                        if (!success)
-                        {
-                            Debug.LogError($"Error putting new user gift event: {error}");
-                        }
-                    });
                 }
             }
             TileController.AddToGlobals("BettrUser", BettrUserConfig);
