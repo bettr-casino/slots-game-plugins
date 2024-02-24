@@ -21,6 +21,7 @@ namespace Bettr.Core
         [NonSerialized] private Vector3 _previousMousePosition;
         [NonSerialized] private bool _isScrolling = false;
         [NonSerialized] private bool _isPointerOverScrollable = false;
+        [NonSerialized] private bool? _isVerticalScroll = null;
 
         void Update()
         {
@@ -29,9 +30,7 @@ namespace Bettr.Core
                 if (IsPointerOverGameObject())
                 {
                     _isPointerOverScrollable = true;
-                    // Record the position of the mouse when the button is first pressed
                     _previousMousePosition = Input.mousePosition;
-                    // Invoke the onScrollBegin event
                     if (!_isScrolling)
                     {
                         onScrollBegin.Invoke();
@@ -43,29 +42,36 @@ namespace Bettr.Core
             {
                 if (_isPointerOverScrollable)
                 {
-                    // Calculate the distance the mouse has moved since the last frame
                     Vector3 delta = Input.mousePosition - _previousMousePosition;
+                    if (_isScrolling && !_isVerticalScroll.HasValue)
+                    {
+                        // Determine the primary direction of the scroll
+                        _isVerticalScroll = Mathf.Abs(delta.y) > Mathf.Abs(delta.x);
+                    }
+                    
+                    if (_isVerticalScroll == vertical)
+                    {
+                        // Translate the scrollable GameObject
+                        var localPosition = scrollable.transform.localPosition;
+                        if (vertical)
+                        {
+                            localPosition.y = Mathf.Clamp(localPosition.y + delta.y * scrollSpeed, minY, maxY);
+                        }
+                        else
+                        {
+                            localPosition.x = Mathf.Clamp(localPosition.x + delta.x * scrollSpeed, minX, maxX);
+                        }
+                        scrollable.transform.localPosition = localPosition;
+                    }
                     _previousMousePosition = Input.mousePosition;
-
-                    // Translate the scrollable GameObject
-                    var localPosition = scrollable.transform.localPosition;
-                    if (vertical)
-                    {
-                        localPosition.y = Mathf.Clamp(localPosition.y + delta.y * scrollSpeed, minY, maxY);
-                    }
-                    else // If not vertical, assume horizontal scrolling.
-                    {
-                        localPosition.x = Mathf.Clamp(localPosition.x + delta.x * scrollSpeed, minX, maxX);
-                    }
-                    scrollable.transform.localPosition = localPosition;
                 }
             }
             else if (_isScrolling)
             {
-                // Mouse button is not down, if we were scrolling, invoke the onScrollEnd event
                 onScrollEnd.Invoke();
                 _isScrolling = false;
                 _isPointerOverScrollable = false;
+                _isVerticalScroll = null;
             }
         }
 
