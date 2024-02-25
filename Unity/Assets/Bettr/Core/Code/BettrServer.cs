@@ -215,7 +215,7 @@ namespace Bettr.Core
             Debug.Log($"Starting LoadUserBlob");
             if (useLocalServer)
             {
-                string localFilePath = Path.Combine(fileSystemLocalStorageBaseURL, "users", $"{AuthResponse.User.Id}.json");
+                string localFilePath = Path.Combine(fileSystemLocalStorageBaseURL, "users", $"default.json");
                 if (File.Exists(localFilePath))
                 {
                     string json = File.ReadAllText(localFilePath);
