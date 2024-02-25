@@ -104,6 +104,33 @@ namespace Bettr.Core
             _bettrAssetController = bettrAssetController;
             _bettrAssetPackageController = bettrAssetPackageController;
         }
+        
+        public IEnumerator ReplacePrefab(string bettrAssetBundleName, string bettrAssetBundleVersion, string prefabName,
+            GameObject replaced)
+        {
+            yield return _bettrAssetPackageController.LoadPackage(bettrAssetBundleName, bettrAssetBundleVersion, false);
+            
+            var assetBundle = _bettrAssetController.GetCachedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);
+            
+            var prefab = assetBundle.LoadAsset<GameObject>(prefabName);
+            if (prefab == null)
+            {
+                Debug.LogError(
+                    $"Failed to load prefab={prefabName} from asset bundle={bettrAssetBundleName} version={bettrAssetBundleVersion}");
+                yield break;
+            }
+            
+            // Instantiate the new GameObject at the same position and rotation as the original
+            GameObject newGameObject = Object.Instantiate(prefab, replaced.transform.position, replaced.transform.rotation);
+
+            // If you want to maintain the same parent for the new GameObject
+            newGameObject.transform.SetParent(replaced.transform.parent);
+            
+            newGameObject.transform.localScale = replaced.transform.localScale;
+
+            // Destroy the original GameObject
+            Object.Destroy(replaced);
+        }
 
         public IEnumerator LoadPrefab(string bettrAssetBundleName, string bettrAssetBundleVersion, string prefabName,
             GameObject parent = null)
@@ -385,7 +412,13 @@ namespace Bettr.Core
         {
             yield return BettrAssetPrefabsController.LoadPrefab(bettrAssetBundleName, bettrAssetBundleVersion, prefabName, parent);
         }
-        
+
+        public IEnumerator ReplacePrefab(string bettrAssetBundleName, string bettrAssetBundleVersion, string prefabName,
+            GameObject replaced)
+        {
+            yield return BettrAssetPrefabsController.ReplacePrefab(bettrAssetBundleName, bettrAssetBundleVersion, prefabName, replaced);
+        }
+
         public IEnumerator LoadMaterial(string bettrAssetBundleName, string bettrAssetBundleVersion, string materialName,
             GameObject targetGameObject)
         {
