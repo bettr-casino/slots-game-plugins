@@ -123,6 +123,57 @@ namespace Bettr.Core
             Object.Instantiate(prefab, parent == null ? null : parent.transform);
         }
     }
+    
+    [Serializable]
+    public class BettrAssetMaterialsController
+    {
+        [NonSerialized] private BettrAssetController _bettrAssetController;
+        [NonSerialized] private BettrAssetPackageController _bettrAssetPackageController;
+
+        public BettrAssetMaterialsController(
+            BettrAssetController bettrAssetController,
+            BettrAssetPackageController bettrAssetPackageController)
+        {
+            // TileController.RegisterType<BettrAssetPrefabsController>("BettrPrefabsController");
+            // TileController.AddToGlobals("BettrPrefabsController", this);
+
+            _bettrAssetController = bettrAssetController;
+            _bettrAssetPackageController = bettrAssetPackageController;
+        }
+
+        public IEnumerator LoadMaterial(string bettrAssetBundleName, string bettrAssetBundleVersion, string materialName,
+            GameObject targetGameObject)
+        {
+            yield return _bettrAssetPackageController.LoadPackage(bettrAssetBundleName, bettrAssetBundleVersion, false);
+            
+            var assetBundle = _bettrAssetController.GetCachedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);
+            
+            var material = assetBundle.LoadAsset<Material>(materialName);
+            if (material == null)
+            {
+                Debug.LogError(
+                    $"Failed to load material={materialName} from asset bundle={bettrAssetBundleName} version={bettrAssetBundleVersion}");
+                yield break;
+            }
+
+            if (targetGameObject != null)
+            {
+                var meshRenderer = targetGameObject.GetComponent<MeshRenderer>();
+                if (meshRenderer != null)
+                {
+                    meshRenderer.material = material;
+                }
+                else
+                {
+                    Debug.LogError("Target GameObject does not have a MeshRenderer component.");
+                }
+            }
+            else
+            {
+                Debug.LogError("Target GameObject is null.");
+            }
+        }
+    }
 
     [Serializable]
     public class BettrAssetScenesController
@@ -298,6 +349,8 @@ namespace Bettr.Core
 
         public BettrAssetScriptsController BettrAssetScriptsController { get; private set; }
         public BettrAssetPrefabsController BettrAssetPrefabsController { get; private set; }
+        
+        public BettrAssetMaterialsController BettrAssetMaterialsController { get; private set; }
         public BettrAssetPackageController BettrAssetPackageController { get; private set; }
         public BettrAssetScenesController BettrAssetScenesController { get; private set; }
         
@@ -314,6 +367,7 @@ namespace Bettr.Core
             BettrAssetPackageController = new BettrAssetPackageController(this, BettrAssetScriptsController);
             BettrAssetScenesController = new BettrAssetScenesController(this, BettrAssetPackageController);
             BettrAssetPrefabsController = new BettrAssetPrefabsController(this, BettrAssetPackageController);
+            BettrAssetMaterialsController = new BettrAssetMaterialsController(this, BettrAssetPackageController);
         }
 
         public IEnumerator LoadPackage(string packageName, string packageVersion, bool loadScenes)
@@ -330,6 +384,12 @@ namespace Bettr.Core
             GameObject parent = null)
         {
             yield return BettrAssetPrefabsController.LoadPrefab(bettrAssetBundleName, bettrAssetBundleVersion, prefabName, parent);
+        }
+        
+        public IEnumerator LoadMaterial(string bettrAssetBundleName, string bettrAssetBundleVersion, string materialName,
+            GameObject targetGameObject)
+        {
+            yield return BettrAssetMaterialsController.LoadMaterial(bettrAssetBundleName, bettrAssetBundleVersion, materialName, targetGameObject);
         }
 
         public AssetBundle GetCachedAssetBundle(string bettrAssetBundleName, string bettrAssetBundleVersion)

@@ -452,8 +452,7 @@ namespace Bettr.Editor
             BuildDirectory(new DirectoryInfo(usersDirectory));
             AssetDatabase.Refresh();
 
-            var userId = SystemInfo.deviceUniqueIdentifier;
-            var destinationFilePath = $"{usersDirectory}/{userId}.json";
+            var destinationFilePath = $"{usersDirectory}/default.json";
 
             if (bettrUserConfigJsonData != null)
             {

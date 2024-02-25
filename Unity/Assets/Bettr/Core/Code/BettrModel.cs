@@ -29,7 +29,7 @@ namespace Bettr.Core
         public string MachineName { get; set; }
         public string BundleName { get; set; }
         public string BundleVersion { get; set; }
-        public string PrefabName { get; set; }
+        public string MaterialName { get; set; }
         public string Format { get; set; }
     }
     
