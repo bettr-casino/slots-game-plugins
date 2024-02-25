@@ -47,14 +47,17 @@ function MainLobbyScene:LoadLobbyCards()
     System.Print("LoadLobbyCards invoked")          
     series
         do
-            local i = 0
             local cardCount = #BettrUser.LobbyCards
-            System.Print("LoadApp lobbyCard cardCount={0}", cardCount)                              
+            System.Print("LoadApp lobbyCard cardCount={0}", cardCount)
+            local groupIndexes = {}                             
             for i = 1, cardCount parallel do
                 local lobbyCard = BettrUser.LobbyCards[i]
-                local lobbyCardProperty = self.LobbyCardList[i]
-                lobbyCardProperty:SetActive(true)
-                local lobbyCardGameObject = lobbyCardProperty["LobbyCard"]
+                local lobbyGroup = lobbyCard.Group
+                System.Print("LoadApp lobbyCard lobbyGroup={0}", lobbyGroup)
+                local lobbyGroupProperty = self[lobbyGroup]
+                groupIndexes[lobbyGroup] = (groupIndexes[lobbyGroup] or 0) + 1
+                local index = groupIndexes[lobbyGroup]
+                local lobbyCardGameObject = lobbyGroupProperty["LobbyCard" .. index].GameObject
                 BettrAssetController.LoadPrefab(lobbyCard.BundleName, lobbyCard.BundleVersion, lobbyCard.PrefabName, lobbyCardGameObject)                
             end
         end

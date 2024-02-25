@@ -89,28 +89,6 @@ namespace Bettr.Core
                             Debug.LogError($"Error putting user blob: {error}");
                         }
                     });
-                    // this is eminently hackable, but it's just a demo
-                    // TODO: move this to snapser
-                    var events = new BettrUserEvents()
-                    {
-                        Events = new List<BettrUserEvent>(),
-                    };
-                    yield return bettrServer.LoadEvents((_, response, success, error) =>
-                    {
-                        if (error == ErrorBlobDoesNotExist)
-                        {
-                            userDoesNotExist = true;
-                            return;
-                        }
-                        
-                        if (!success)
-                        {
-                            Debug.LogError($"Error putting new user gift event: {error}");
-                            return;
-                        }
-
-                        events = JsonConvert.DeserializeObject<BettrUserEvents>(response.value);
-                    });
                 }
             }
             TileController.AddToGlobals("BettrUser", BettrUserConfig);
