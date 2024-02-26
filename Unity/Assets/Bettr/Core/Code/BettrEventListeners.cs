@@ -1,27 +1,26 @@
 using System.Collections.Generic;
+using CrayonScript.Code;
 using UnityEngine;
 
 // ReSharper disable once CheckNamespace
 public class BettrEventListeners : MonoBehaviour
 {
+    public List<PropertyAnimator> onShowAnimators;
+    public List<PropertyAnimator> onHideAnimators;
 
-    // Lists of GameObjects to show or hide, configurable via the Unity Editor
-    public List<GameObject> gameObjectsToShow;
-    public List<GameObject> gameObjectsToHide;
-
-    public void ShowGameObjects()
+    public void PlayShowAnimations()
     {
-        foreach (var go in gameObjectsToShow)
+        foreach (var animator in onShowAnimators)
         {
-            go.SetActive(true);
+            animator.animator.Play(animator.animationStateName);
         }
     }
 
-    public void HideGameObjects()
+    public void PlayHideAnimations()
     {
-        foreach (var go in gameObjectsToHide)
+        foreach (var animator in onHideAnimators)
         {
-            go.SetActive(false);
+            animator.animator.Play(animator.animationStateName);
         }
     }
 }
