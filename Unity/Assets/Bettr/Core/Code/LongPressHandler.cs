@@ -1,16 +1,19 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 // ReSharper disable once CheckNamespace
 namespace Bettr.Core
 {
     public class LongPressHandler : MonoBehaviour
     {
+        public bool isLongPressEnabled = false;
         private bool _isInteracting = false;
         private float _interactionDuration = 0f;
         private readonly float _requiredHoldTime = 1f;
         
         void Update()
         {
+            if (!isLongPressEnabled) return;
             // Check for touch input
             if (Input.touchCount > 0)
             {

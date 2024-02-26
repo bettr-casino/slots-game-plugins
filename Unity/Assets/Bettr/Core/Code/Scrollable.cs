@@ -20,6 +20,7 @@ namespace Bettr.Core
         public UnityEvent onScrollEnd;
         [NonSerialized] private Vector3 _previousMousePosition;
         [NonSerialized] private bool _isScrolling = false;
+        [NonSerialized] private bool _isScrollingEnabled = false;
         [NonSerialized] private bool _isPointerOverScrollable = false;
         [NonSerialized] private bool? _isVerticalScroll = null;
 
@@ -34,7 +35,7 @@ namespace Bettr.Core
                     if (!_isScrolling)
                     {
                         onScrollBegin.Invoke();
-                        _isScrolling = true;
+                        _isScrollingEnabled = true;
                     }
                 }
             }
@@ -43,10 +44,14 @@ namespace Bettr.Core
                 if (_isPointerOverScrollable)
                 {
                     Vector3 delta = Input.mousePosition - _previousMousePosition;
-                    if (_isScrolling && !_isVerticalScroll.HasValue)
+                    if (_isScrollingEnabled && !_isVerticalScroll.HasValue)
                     {
                         // Determine the primary direction of the scroll
-                        _isVerticalScroll = Mathf.Abs(delta.y) > Mathf.Abs(delta.x);
+                        if (delta.magnitude > 0)
+                        {
+                            _isVerticalScroll = Mathf.Abs(delta.y) > Mathf.Abs(delta.x);
+                            _isScrolling = true;
+                        }
                     }
                     
                     if (_isVerticalScroll == vertical)
@@ -63,13 +68,18 @@ namespace Bettr.Core
                         }
                         scrollable.transform.localPosition = localPosition;
                     }
-                    _previousMousePosition = Input.mousePosition;
+
+                    if (_isScrolling)
+                    {
+                        _previousMousePosition = Input.mousePosition;
+                    }
                 }
             }
             else if (_isScrolling)
             {
                 onScrollEnd.Invoke();
                 _isScrolling = false;
+                _isScrollingEnabled = false;
                 _isPointerOverScrollable = false;
                 _isVerticalScroll = null;
             }
