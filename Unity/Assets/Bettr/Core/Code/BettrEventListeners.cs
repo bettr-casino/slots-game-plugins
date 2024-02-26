@@ -3,24 +3,27 @@ using CrayonScript.Code;
 using UnityEngine;
 
 // ReSharper disable once CheckNamespace
-public class BettrEventListeners : MonoBehaviour
+namespace Bettr.Core
 {
-    public List<PropertyAnimator> onShowAnimators;
-    public List<PropertyAnimator> onHideAnimators;
-
-    public void PlayShowAnimations()
+    public class BettrEventListeners : MonoBehaviour
     {
-        foreach (var animator in onShowAnimators)
-        {
-            animator.animator.Play(animator.animationStateName);
-        }
-    }
+        public List<PropertyAnimator> onShowAnimators;
+        public List<PropertyAnimator> onHideAnimators;
 
-    public void PlayHideAnimations()
-    {
-        foreach (var animator in onHideAnimators)
+        public void PlayShowAnimations()
         {
-            animator.animator.Play(animator.animationStateName);
+            foreach (var animator in onShowAnimators)
+            {
+                animator.animator.Play(animator.animationStateName);
+            }
         }
-    }
+
+        public void PlayHideAnimations()
+        {
+            foreach (var animator in onHideAnimators)
+            {
+                animator.animator.Play(animator.animationStateName);
+            }
+        }
+    }    
 }
