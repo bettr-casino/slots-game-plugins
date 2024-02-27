@@ -44,7 +44,6 @@ namespace Bettr.Core
             yield return new WaitForSeconds(3.0f);
             
             DevTools.Instance.Enable();
-            yield return DevTools.Instance.CaptureSceneState();
         }
 
         private IEnumerator OneTimeSetup()

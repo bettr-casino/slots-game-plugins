@@ -10,7 +10,7 @@ namespace Bettr.Core
     public class ConfigData
     {
         public static string TaskCodeKey { get; }  = "Bettr__TASK_CODE_KEY";
-        public static string DefaultTaskCode { get; } = "00000"; 
+        public static string DefaultTaskCode { get; } = "abc123"; 
         
         public string AssetsVersion { get; set; }
         
