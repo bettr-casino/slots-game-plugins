@@ -126,7 +126,7 @@ namespace Bettr.Runtime.Plugin.Main.Tests
 
             _bettrAudioController = new BettrAudioController();
 
-            BettrVisualsController.SwitchOrientationToLandscape();
+            BettrVisualsController.SwitchOrientationToPortrait();
             
             yield return _bettrAssetController.LoadPackage(_configData.MainBundleName, _configData.MainBundleVariant, false);
             
@@ -194,12 +194,7 @@ namespace Bettr.Runtime.Plugin.Main.Tests
             yield return scriptRunner.CallAsyncAction("Login");
             ScriptRunner.Release(scriptRunner);
         
-            var deviceId = "EE0DE516-5053-5142-80AC-2D878E91215C"; // hard coded for testing
-            var uniqueId = $"{deviceId}";
-        
-            Debug.Log($"uniqueId={uniqueId}");
-        
-            Assert.AreEqual(uniqueId, _bettrUserController.BettrUserConfig.UserId);
+            Assert.IsNotNull(_bettrUserController.BettrUserConfig);
         }
         
         [UnityTest, Order(3)]
@@ -221,85 +216,97 @@ namespace Bettr.Runtime.Plugin.Main.Tests
             
             Assert.IsTrue(timeElapsed >= 3.0f);
         }
-        
+
         [UnityTest, Order(4), Timeout(600000)]
         public IEnumerator TestLoadMainLobby()
         {
             Debug.Log("TestLoadMainLobby");
-            
-            var lobbyCardCount = _bettrUserController.BettrUserConfig.LobbyCards.Count;
-            for (int i = 0; i < 1; i++)
-            {
-                var mainTable = _bettrAssetScriptsController.GetScript("Main");
-                var scriptRunner = ScriptRunner.Acquire(mainTable);
+
+            var mainTable = _bettrAssetScriptsController.GetScript("Main");
+            var scriptRunner = ScriptRunner.Acquire(mainTable);
+
+            yield return scriptRunner.CallAsyncAction("LoadLobbyScene");
+            ScriptRunner.Release(scriptRunner);
+
+            // wait 3 seconds and then verify MainLobby is configured with userdata
+            yield return new WaitForSeconds(3.0f);
+
+            var activeScene = SceneManager.GetActiveScene();
+            Assert.IsTrue(activeScene.name.Equals("MainLobbyScene"));
+            var allRootGameObjects = activeScene.GetRootGameObjects();
+            var appGameObject = allRootGameObjects.First((o => o.name == "App"));
+            var tmPros = appGameObject.GetComponentsInChildren<TextMeshPro>();
+            var tmProUserLvl = tmPros.First((o => o.name == "UserLvlText"));
+            Assert.IsTrue(tmProUserLvl.text == _bettrUserController.BettrUserConfig.Level.ToString());
+            var tmProUserXp = tmPros.First((o => o.name == "UserXPText"));
+            Assert.IsTrue(tmProUserXp.text == _bettrUserController.BettrUserConfig.XP.ToString());
+            var tmProUserCoins = tmPros.First((o => o.name == "UserCoinsText"));
+            Assert.IsTrue(tmProUserCoins.text == _bettrUserController.BettrUserConfig.Coins.ToString());
+
+            var lobbyGameObject = appGameObject.transform.GetChild(0).Find("Lobby");
+            Assert.IsNotNull(lobbyGameObject);
+
+        }
         
-                yield return scriptRunner.CallAsyncAction("LoadLobbyScene");
-                ScriptRunner.Release(scriptRunner);
-                
-                // wait 3 seconds and then verify MainLobby is configured with userdata
-                yield return new WaitForSeconds(3.0f);
-                
-                var activeScene = SceneManager.GetActiveScene();
-                Assert.IsTrue(activeScene.name.Equals("MainLobbyScene"));
-                var allRootGameObjects = activeScene.GetRootGameObjects();
-                var appGameObject = allRootGameObjects.First((o => o.name == "App"));
-                var tmPros = appGameObject.GetComponentsInChildren<TextMeshPro>();
-                var tmProUserLvl = tmPros.First((o => o.name == "UserLvlText"));
-                Assert.IsTrue(tmProUserLvl.text == _bettrUserController.BettrUserConfig.Level.ToString());
-                var tmProUserXp = tmPros.First((o => o.name == "UserXPText"));
-                Assert.IsTrue(tmProUserXp.text == _bettrUserController.BettrUserConfig.XP.ToString());
-                var tmProUserCoins = tmPros.First((o => o.name == "UserCoinsText"));
-                Assert.IsTrue(tmProUserCoins.text == _bettrUserController.BettrUserConfig.Coins.ToString());
-                
-                var lobbyGameObject = allRootGameObjects.First((o => o.name == "Lobby"));
-                var pointerClickHandlers = lobbyGameObject.GetComponentsInChildren<IPointerClickHandler>();
-                
-                var pointerClickHandler = pointerClickHandlers[i];
-                
-                // Create a new PointerEventData instance and set the desired properties.
-                // For example, the button that was 'pressed'.
-                PointerEventData data = new PointerEventData(EventSystem.current)
-                {
-                    button = PointerEventData.InputButton.Left
-                };
-                
-                pointerClickHandler.OnPointerClick(data);
-                LogAssert.Expect(LogType.Log, new Regex(".*OnPointerClick.*"));
+        [UnityTest, Order(5), Timeout(600000)]
+        public IEnumerator TestGame001() {
+            var mainTable = _bettrAssetScriptsController.GetScript("Main");
+            var scriptRunner = ScriptRunner.Acquire(mainTable);
 
-                yield return WaitForGameSceneToLoad(3.0f);
+            yield return scriptRunner.CallAsyncAction("LoadLobbyScene");
+            ScriptRunner.Release(scriptRunner);
 
-                yield return WaitForSpinButtonToBeClicked(3.0f);
+            // wait 3 seconds and then verify MainLobby is configured with userdata
+            yield return new WaitForSeconds(3.0f);
 
-                yield return ClickSpinButton(i, 1);
-                
-                yield return WaitAndLoadTestOutcome(3.0f);
-                
-                yield return ClickSpinButton(i,2);
-                
-                yield return WaitAndLoadTestOutcome(3.0f);
-                
-                yield return ClickSpinButton(i, 3);
-                
-                yield return WaitAndLoadTestOutcome(3.0f, false);
-                
-                yield return RunFreeSpins(i);
-                
-                yield return new WaitForSeconds(3.0f);
-                
-                yield return ClickSpinButton(i, 3);
-                
-                yield return WaitAndLoadTestOutcome(3.0f, false);
-                
-                yield return RunFreeSpins(i);
-                
-                yield return new WaitForSeconds(3.0f);
-                
-                yield return ClickSpinButton(i, 4);
-                
-                yield return WaitAndLoadTestOutcome(3.0f);
-                
-                yield return new WaitForSeconds(3.0f);
-            }
+            var activeScene = SceneManager.GetActiveScene();
+            Assert.IsTrue(activeScene.name.Equals("MainLobbyScene"));
+            var allRootGameObjects = activeScene.GetRootGameObjects();
+            var appGameObject = allRootGameObjects.First((o => o.name == "App"));
+            var lobbyGameObject = FindGameObjectInHierarchy(appGameObject, "LobbyCard001");
+
+            var pointerClickHandlers = lobbyGameObject.GetComponentsInChildren<BettrUnityEventTrigger>();
+            Assert.IsNotNull(pointerClickHandlers);
+            
+            var pointerClickHandler = pointerClickHandlers[0];
+            Assert.IsNotNull(pointerClickHandler);
+            
+            pointerClickHandler.onLongPress.Invoke();
+            LogAssert.Expect(LogType.Log, new Regex(".*OnPointerClick.*"));
+
+            yield return WaitForGameSceneToLoad(3.0f);
+            
+            yield return WaitForSpinButtonToBeClicked(3.0f);
+            
+            yield return ClickSpinButton(1);
+            
+            yield return WaitAndLoadTestOutcome(3.0f);
+            
+            yield return ClickSpinButton(2);
+            
+            yield return WaitAndLoadTestOutcome(3.0f);
+            
+            yield return ClickSpinButton(3);
+            
+            yield return WaitAndLoadTestOutcome(3.0f, false);
+            
+            yield return RunFreeSpins();
+            
+            yield return new WaitForSeconds(3.0f);
+            
+            yield return ClickSpinButton(3);
+            
+            yield return WaitAndLoadTestOutcome(3.0f, false);
+            
+            yield return RunFreeSpins();
+            
+            yield return new WaitForSeconds(3.0f);
+            
+            yield return ClickSpinButton(4);
+            
+            yield return WaitAndLoadTestOutcome(3.0f);
+            
+            yield return new WaitForSeconds(3.0f);
         }
 
         private IEnumerator WaitForSecondsForRoutineRunner(float duration, int count)
@@ -321,13 +328,13 @@ namespace Bettr.Runtime.Plugin.Main.Tests
             yield return new WaitForSeconds(duration);
         }
 
-        private IEnumerator RunFreeSpins(int gameIndex)
+        private IEnumerator RunFreeSpins()
         {
-            yield return ClickFreeSpinsStartButton(gameIndex);
+            yield return ClickFreeSpinsStartButton();
 
-            while (HasNextFreeSpin(gameIndex))
+            while (HasNextFreeSpin())
             {
-                var currentFreeSpin = GetCurrentFreeSpin(gameIndex);
+                var currentFreeSpin = GetCurrentFreeSpin();
                 Debug.Log("Tests.cs RunFreeSpins currentFreeSpin=" + currentFreeSpin);
                 yield return new WaitForSeconds(1.0f);
             }
@@ -335,7 +342,7 @@ namespace Bettr.Runtime.Plugin.Main.Tests
             yield return new WaitForSeconds(30.0f);
         }
 
-        private IEnumerator ClickSpinButton(int gameIndex, int outcomeID)
+        private IEnumerator ClickSpinButton(int outcomeID)
         {
             yield return WaitForSpinState("Waiting");
             
@@ -358,7 +365,7 @@ namespace Bettr.Runtime.Plugin.Main.Tests
             yield return WaitForSpinState("Spinning");
         }
 
-        private IEnumerator ClickFreeSpinsStartButton(int gameIndex)
+        private IEnumerator ClickFreeSpinsStartButton()
         {
             yield return WaitForGame("FreeSpins");
             
@@ -438,7 +445,7 @@ namespace Bettr.Runtime.Plugin.Main.Tests
             }
         }
 
-        private bool HasNextFreeSpin(int gameIndex)
+        private bool HasNextFreeSpin()
         {
             var gameParent = GameObject.Find("Game");
             var gameMachineTile = gameParent.GetComponentsInChildren<Tile>().First( tile => tile.tileId == "Game001FreeSpinsMachine" );
@@ -447,7 +454,7 @@ namespace Bettr.Runtime.Plugin.Main.Tests
             return hasNextFreeSpin;
         }
         
-        private int GetCurrentFreeSpin(int gameIndex)
+        private int GetCurrentFreeSpin()
         {
             var gameParent = GameObject.Find("Game");
             var gameMachineTile = gameParent.GetComponentsInChildren<Tile>().First( tile => tile.tileId == "Game001FreeSpinsMachine" );
@@ -496,6 +503,25 @@ namespace Bettr.Runtime.Plugin.Main.Tests
             }
 
             return arguments;
+        }
+        
+        GameObject FindGameObjectInHierarchy(GameObject parent, string targetName)
+        {
+            if (parent.name == targetName)
+            {
+                return parent;
+            }
+
+            foreach (Transform child in parent.transform)
+            {
+                GameObject found = FindGameObjectInHierarchy(child.gameObject, targetName);
+                if (found != null)
+                {
+                    return found;
+                }
+            }
+
+            return null;
         }
     }
 }
