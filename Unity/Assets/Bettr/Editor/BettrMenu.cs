@@ -124,7 +124,6 @@ namespace Bettr.Editor
         public static void BuildAssets()
         {
             BuildAssetBundles();
-            BuildOutcomes();
             BuildLocalServer();
         }
         
@@ -410,33 +409,6 @@ namespace Bettr.Editor
             
             Debug.Log("...refreshing database after removing test scenes..");
             AssetDatabase.Refresh();
-        }
-
-        private static void BuildOutcomes()
-        {
-            Debug.Log("Building outcomes...");
-            
-            EmptyDirectory(new DirectoryInfo(OutcomesDirectory));
-            AssetDatabase.Refresh();
-            
-            Debug.Log("...refreshing database before building outcomes..");
-            AssetDatabase.Refresh();
-            
-            var outcomeDirectories = Directory.GetDirectories(PluginRootDirectory, "Outcomes", SearchOption.AllDirectories);
-            foreach (var outcomeDirectory in outcomeDirectories)
-            {
-                var outcomeFiles = new DirectoryInfo(outcomeDirectory).GetFiles("*.cscript.txt");
-                foreach (var outcomeFile in outcomeFiles)
-                {
-                    var outcomeFilePath = Path.Combine(OutcomesDirectory, outcomeFile.Name);
-                    File.Copy(outcomeFile.FullName, outcomeFilePath); }
-                
-            }
-            
-            Debug.Log("...refreshing database after building outcomes..");
-            AssetDatabase.Refresh();
-            
-            Debug.Log("...done building outcomes.");
         }
         
         private static void BuildLocalServer()
