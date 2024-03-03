@@ -30,8 +30,5 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
 ## Our Commitment
 Read our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for our commitment to transparency.
 
-## App Icon Attribution
-[Image by pikisuperstar](https://www.freepik.com/free-vector/realistic-casino-elements-background_4404843.htm#query=casino%20slot%20machine&position=8&from_view=keyword&track=ais&uuid=e76f89db-e9b1-4750-90a8-83bf0fc3a505) on Freepik
-
 
 

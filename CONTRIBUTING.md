@@ -28,5 +28,3 @@ Completing a challenge successfully will earn you Bettr Casino Tokens. The "Next
 If you have any questions, please contact us at [support@bettr.casino](mailto:support@bettr.casino).
 
 
-
-Let's build Bettr!
