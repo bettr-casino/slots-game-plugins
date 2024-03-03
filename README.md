@@ -8,7 +8,7 @@ This is the Challenges repository for the Bettr Casino Slots App.
 ## Description
 Bettr Casino is an Open Source Slots Casino Development Platform. 
 
-Our mission is to be the largest online slots machines casino in the world.
+Our mission is to create the largest online slots machines casino in the world.
 
 We will achieve this by creating a platform where anyone can contribute to the development of the Bettr Casino Slots App and share in the revenue.
 
