@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## About
-This is the Challenges repository for the Bettr Casino Slots App. 
+This is the repository for Bettr Casino Online Slots.
 
 ## Description
 Bettr Casino is an Open Source Slots Casino Development Platform. 
