@@ -3,25 +3,25 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## About
-This is the repository for Bettr Casino Online Slots.
+This is the development platform for Bettr Casino Online Slots.
 
 ## Description
-Bettr Casino is an Open Source Slots Casino Development Platform. 
+Bettr Casino is an online Slots Casino. 
 
-Our mission is to create the largest online slots machines casino in the world.
+Our mission is to create the largest online slots casino in the world.
 
-We will achieve this by creating a platform where anyone can contribute to the development of the Bettr Casino Slots App and share in the revenue.
+We will achieve this an open source model where anyone can contribute to developing the casino in return for a share of the revenue.
 
 ### How it works
-1. We create challenges for new features or improvement to the Bettr Casino Slots Game. These challenges are open to Unity Developers, Unity 3D Artists, 3D Tech Art, 3D Animators, Audio Engineers, Mathematicians, Game Designers and Testers.
-2. You pick and complete one or more challenges and submit a Pull Request (PR) to this repository.
-3. We will review your PR. Once its approved and merged, we will award you Bettr Casino Tokens ($BET). These $BET token transactions will be written to the Polygon Blockchain.
-4. Once all challenges for a new Slot Machine are complete, we will package everything up and deploy it to the Bettr Casino Slots App. The App will initially be available on iOS. We will port it to Android and Web later.
-5. We will distribute a percent of the in game revenue generated from the App to the $BET token holders. The revenue distribution will be done periodically. All the revenue transactions will be written to the Polygon Blockchain (pending regulatory approval).
+1. We periodically open challenges. These challenges are open to all.
+2. Anyone can complete and submit a challenge for review.
+3. Approved submissions will be awarded Crypto Tokens ($BET) which represent a share of the future revenue generated from the machine.
 
-Please note that all this is pending regulatory approval after we make sure we are compliant with all the laws and regulations.
+Please note that all revenue sharing requires regulatory approval and compliance with all the laws and regulations.
 
 ## Getting Started
+
+**__NOTE:__** We are in closed beta right now. However you can still review the open challenges and the repository code base. 
 
 Go to [Bettr Slots Casino Challenges](https://bettr.casino) for the list of open challenges.
 
