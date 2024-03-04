@@ -7,7 +7,7 @@
 | Buffalo Diamond                            | Buffalo Slots                    | Ways              | 4-5-6-5-4                     | Random Multiplier Wilds, Wheel Bonus Scatter                          |  4-5-6-5-4                 | Free Spin Multipliers, Free Spins Retriggers, Random Multiplier Wilds                        | 1 Spin                                        | Free Spin Multipliers, Progressive Jackpot, Grand Jackpot     |                                                               |                                                                               |
 | Lightning Link: High Stakes                | Lightning Link Slots             | Payline 3x50      | 3-3-3-3-3                     | Hold and Spin Reel Modifier, Free Spins Bonus Scatter                 |  3-3-3-3-3                 | Free Spins Retriggers, Random Multiplier Wilds, Expanding Wilds                              |                                               |                                                               |                                                               |                                                                               |
 | Lightning Link: Magic Pearl                | Lightning Link Slots             | Payline 3x50      | 3-3-3-3-3                     | Hold and Spin Reel Modifier, Free Spins Bonus Scatter                 |  3-3-3-3-3                 | Free Spins Retriggers, Random Multiplier Wilds, Expanding Wilds, Hold and Spin               |                                               |                                                               |                                                               |                                                                               |
-| Lightning Link: Sahara Gold                | Lightning Link Slots             | Payline 3x25      | 3-3-3-3-3                     | Hold and Spin Reel Modifier, Pick Game Bonus Scatter                  |  3-3-3-3-3                 |                                                                                              |                                               |                                                               | 1 Pick                                                        |  25 Free Spins                                                                |
+| Lightning Link: Sahara Gold                | Lightning Link Slots             | Payline 3x25      | 3-3-3-3-3                     | Hold and Spin Reel Modifier, Pick Game Bonus Scatter                  |  3-3-3-3-3                 | Free Spins Retriggers, Hold and Spin, Symbol Transformation                                  |                                               |                                                               | 1 Pick                                                        | Free Spin 25(M1 as wilds), 15 (M1,M2), 15(M1,M2,M3), 6 ...                    |
 | Mega Moolah Isis                           | Mega Moolah                      |                   |                               |                                                                       |                            |                                                                                              |                                               |                                                               |                                                               |                                                                               |
 | Mega Moolah Summertime                     | Mega Moolah                      |                   |                               |                                                                       |                            |                                                                                              |                                               |                                                               |                                                               |                                                                               |
 | Mega Moolah 5 Reel Drive                   | Mega Moolah                      |                   |                               |                                                                       |                            |                                                                                              |                                               |                                                               |                                                               |                                                                               |
@@ -216,6 +216,26 @@ Random Multiplier Wilds are added to the reels in Free Spins based on a probabil
 
 #### Expanding Wilds
 In Free Spins Wild symbol can expand to cover more positions on the reel, often turning the entire reel wild. This is based on a probability distribution.
+
+## Lightning Link: Sahara Gold
+
+#### Free Spins Bonus Scatter
+Free Spins triggered by 3 or more scatters. The number of free spins is based on the number of scatters.
+
+#### Hold and Spin Reel Modifier
+Hold and Spin triggered by 6 value symbols, usually 3 spins. New value symbols retrigger another 3 spins.
+Payout is the sum of all value symbols at the end of the feature.
+
+#### Free Spins Retriggers
+In Free Spins, Scatters retriggers additional free spins based on # scatters.
+
+#### Symbol Transformation
+Symbol Transformations at beginning of Free Spins based on the pick game. For example
+1. 25 Free Spins: The camel symbol acts as a wild during these free spins.
+2. 15 Free Spins: Both the camel and oasis symbols act as wilds during these free spins.
+3. 10 Free Spins: The camel, oasis, and palace symbols act as wilds during these free spins.
+4. 6 Free Spins: The camel, oasis, palace, and treasure chest symbols act as wilds during these free spins.
+
 
 # List of Slot Machines Themes
 
