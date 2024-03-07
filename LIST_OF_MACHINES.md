@@ -128,9 +128,6 @@ Payout is the sum of all value symbols at the end of the feature.
 #### Free Spins Retriggers
 In Free Spins, Scatters retriggers additional free spins based on # scatters.
 
-#### Random Multiplier Wilds
-Random Multiplier Wilds are added to the reels in Free Spins based on a probability distribution.
-
 #### Expanding Wilds
 In Free Spins Wild symbol can expand to cover more positions on the reel, often turning the entire reel wild. This is based on a probability distribution.
 
