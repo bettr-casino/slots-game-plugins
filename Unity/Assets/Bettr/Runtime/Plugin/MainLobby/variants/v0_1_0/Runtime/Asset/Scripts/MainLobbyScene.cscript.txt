@@ -45,24 +45,20 @@ end
 
 function MainLobbyScene:LoadLobbyCards()
     System.Print("LoadLobbyCards invoked")          
-    -- series
-    --     do
-    --         local cardCount = #BettrUser.LobbyCards
-    --         System.Print("LoadApp lobbyCard cardCount={0}", cardCount)
-    --         local groupIndexes = {}                             
-    --         for i = 1, cardCount parallel do
-    --             local lobbyCard = BettrUser.LobbyCards[i]
-    --             System.Print("LoadApp lobbyCard PrefabName={0}", lobbyCard.PrefabName)
-    --             local lobbyGroup = lobbyCard.Group
-    --             System.Print("LoadApp lobbyCard lobbyGroup={0}", lobbyGroup)
-    --             local lobbyGroupProperty = self[lobbyGroup]
-    --             groupIndexes[lobbyGroup] = (groupIndexes[lobbyGroup] or 0) + 1
-    --             local index = groupIndexes[lobbyGroup]
-    --             local lobbyCardGameObject = lobbyGroupProperty["LobbyCard" .. index].GameObject
-    --             BettrAssetController.ReplacePrefab(lobbyCard.BundleName, lobbyCard.BundleVersion, lobbyCard.PrefabName, lobbyCardGameObject)                
-    --         end
-    --     end
-    -- end
+    series
+        do
+           local cardCount = #BettrUser.LobbyCards
+           System.Print("LoadApp lobbyCard cardCount={0}", cardCount)
+           local groupIndexes = {}                             
+           for i = 1, cardCount parallel do
+               local lobbyCard = BettrUser.LobbyCards[i]
+               System.Print("LoadApp lobbyCard={0} lobbyCard.MachineName={1} lobbyCard.MaterialName={2}", lobbyCard, lobbyCard.MachineName, lobbyCard.MaterialName)
+               local machineGameObjectProperty = self[lobbyCard.MachineName]
+               local lobbyCardGameObject = machineGameObjectProperty.GameObject
+               BettrAssetController.LoadMaterial(lobbyCard.BundleName, lobbyCard.BundleVersion, lobbyCard.MaterialName, lobbyCardGameObject)                
+            end
+        end
+    end
 end
 
 function MainLobbyScene:SetCommitHash(commitHash)
