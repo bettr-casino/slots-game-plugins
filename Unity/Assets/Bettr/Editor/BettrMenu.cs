@@ -537,6 +537,7 @@ namespace Bettr.Editor
         {
             string machineName = GetArgument("-machineName");
             string machineVariant = GetArgument("-machineVariant");
+            string machineModel = GetArgument("-machineModel");
 
             string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset";
             EnsureDirectory(runtimeAssetPath);
@@ -546,6 +547,11 @@ namespace Bettr.Editor
             {
                 EnsureDirectory(Path.Combine(runtimeAssetPath, subDir));
             }
+            
+            // Copy the machine model file and rename its extension
+            string modelDestinationPath = Path.Combine(runtimeAssetPath, "Models", Path.GetFileNameWithoutExtension(machineModel) + ".cscript.txt");
+            Debug.Log($"Copying machine model {machineName} {machineVariant} from: {machineModel} to: {modelDestinationPath}");
+            File.Copy(machineModel, modelDestinationPath, overwrite: true);
 
             // Additional logic for syncing the machine...
         }
