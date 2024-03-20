@@ -1,5 +1,6 @@
 require "math"
 require "Core"
+require "Main"
 
 MainLobbyScene = {
     State = {
@@ -49,7 +50,8 @@ function MainLobbyScene:LoadLobbyCards()
         do
            local cardCount = #BettrUser.LobbyCards
            System.Print("LoadApp lobbyCard cardCount={0}", cardCount)
-           local groupIndexes = {}                             
+           local LobbyCardMap = {}
+           Main.State.LobbyCardMap = LobbyCardMap
            for i = 1, cardCount parallel do
                local lobbyCard = BettrUser.LobbyCards[i]
                System.Print("LoadApp lobbyCard={0} lobbyCard.MachineName={1} lobbyCard.MaterialName={2}", lobbyCard, lobbyCard.MachineName, lobbyCard.MaterialName)
@@ -57,7 +59,8 @@ function MainLobbyScene:LoadLobbyCards()
                local lobbyCardGameObject = machineGameObjectProperty.GameObject
                System.Print("LoadApp lobbyCardGameObject={0}", lobbyCardGameObject.name)
                local quadGameObject = lobbyCardGameObject.transform.GetChild(0).GetChild(0).gameObject 
-               BettrAssetController.LoadMaterial(lobbyCard.BundleName, lobbyCard.BundleVersion, lobbyCard.MaterialName, quadGameObject)                
+               BettrAssetController.LoadMaterial(lobbyCard.BundleName, lobbyCard.BundleVersion, lobbyCard.MaterialName, quadGameObject)
+               LobbyCardMap[lobbyCardGameObject] = lobbyCard                
             end
         end
     end

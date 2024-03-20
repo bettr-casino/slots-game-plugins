@@ -27,6 +27,9 @@ namespace Bettr.Core
     {
         public string Group { get; set; }
         public string MachineName { get; set; }
+        public string MachineBundleName { get; set; }
+        public string MachineBundleVariant { get; set; }
+        public string MachineSceneName { get; set; }
         public string BundleName { get; set; }
         public string BundleVersion { get; set; }
         public string MaterialName { get; set; }

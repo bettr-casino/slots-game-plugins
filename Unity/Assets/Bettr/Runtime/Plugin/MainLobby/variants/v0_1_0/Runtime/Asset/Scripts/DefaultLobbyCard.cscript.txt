@@ -1,4 +1,5 @@
 require "math"
+require "Main"
 
 DefaultLobbyCard = {
 }
@@ -34,7 +35,8 @@ end
 function DefaultLobbyCard:LoadMachineScene()
     series
         do
-            System.Print("TODO: DefaultLobbyCard:LoadMachineScene ... Scene Load starting...")
+            local lobbyCard = Main.State.LobbyCardMap[self.gameObject]
+            BettrAssetController.LoadScene(lobbyCard.MachineBundleName, lobbyCard.MachineBundleVariant, lobbyCard.MachineSceneName)
         end
     end
 end
