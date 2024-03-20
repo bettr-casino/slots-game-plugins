@@ -55,7 +55,9 @@ function MainLobbyScene:LoadLobbyCards()
                System.Print("LoadApp lobbyCard={0} lobbyCard.MachineName={1} lobbyCard.MaterialName={2}", lobbyCard, lobbyCard.MachineName, lobbyCard.MaterialName)
                local machineGameObjectProperty = self[lobbyCard.MachineName]
                local lobbyCardGameObject = machineGameObjectProperty.GameObject
-               BettrAssetController.LoadMaterial(lobbyCard.BundleName, lobbyCard.BundleVersion, lobbyCard.MaterialName, lobbyCardGameObject)                
+               System.Print("LoadApp lobbyCardGameObject={0}", lobbyCardGameObject.name)
+               local quadGameObject = lobbyCardGameObject.transform.GetChild(0).GetChild(0).gameObject 
+               BettrAssetController.LoadMaterial(lobbyCard.BundleName, lobbyCard.BundleVersion, lobbyCard.MaterialName, quadGameObject)                
             end
         end
     end
