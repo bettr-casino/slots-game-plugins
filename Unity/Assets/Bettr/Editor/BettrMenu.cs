@@ -532,6 +532,33 @@ namespace Bettr.Editor
                 }
             }
         }
+
+        public static void SyncMachine()
+        {
+            string machineName = GetArgument("-machineName");
+            string machineVariant = GetArgument("-machineVariant");
+
+            string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset";
+            EnsureDirectory(runtimeAssetPath);
+
+            string[] subDirectories = { "Animators", "Materials", "Models", "Prefabs", "Scenes", "Scripts", "Shaders", "Textures" };
+            foreach (string subDir in subDirectories)
+            {
+                EnsureDirectory(Path.Combine(runtimeAssetPath, subDir));
+            }
+
+            // Additional logic for syncing the machine...
+        }
+        
+        private static void EnsureDirectory(string path)
+        {
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+                AssetDatabase.Refresh();
+                Debug.Log("Directory created at: " + path);
+            }
+        }
         
     }
 }

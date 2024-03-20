@@ -74,3 +74,13 @@ prepare: preparedll
 
 package: preparedll build_assets_all test packagemodule_all printtestresults
 
+sync-machines:
+	${UNITY_APP} -batchmode -logFile $(SYNC_MACHINE_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.SyncMachine -machineName Game002 -machineVariant BuffaloGold \
+	&& ${UNITY_APP} -batchmode -logFile $(SYNC_MACHINE_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.SyncMachine -machineName Game003 -machineVariant LightningLinkHighStakes \
+	&& ${UNITY_APP} -batchmode -logFile $(SYNC_MACHINE_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.SyncMachine -machineName Game004 -machineVariant CleopatraRiches \
+	&& ${UNITY_APP} -batchmode -logFile $(SYNC_MACHINE_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.SyncMachine -machineName Game005 -machineVariant 88FortunesDancingDrums \
+	&& ${UNITY_APP} -batchmode -logFile $(SYNC_MACHINE_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.SyncMachine -machineName Game006 -machineVariant WheelOfFortuneTripleExtremeSpin \
+	&& ${UNITY_APP} -batchmode -logFile $(SYNC_MACHINE_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.SyncMachine -machineName Game007 -machineVariant DoubleDiamondVegas \
+	&& ${UNITY_APP} -batchmode -logFile $(SYNC_MACHINE_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.SyncMachine -machineName Game008 -machineVariant GodsOfOlympusZeus \
+	&& ${UNITY_APP} -batchmode -logFile $(SYNC_MACHINE_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.SyncMachine -machineName Game009 -machineVariant PlanetMooneyMooCash
+
