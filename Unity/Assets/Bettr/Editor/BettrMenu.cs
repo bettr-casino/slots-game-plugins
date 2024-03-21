@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using CrayonScript.Code;
+using CrayonScript.Interpreter;
 using UnityEditor;
 using UnityEngine;
 using YamlDotNet.Serialization;
@@ -538,6 +540,7 @@ namespace Bettr.Editor
             string machineName = GetArgument("-machineName");
             string machineVariant = GetArgument("-machineVariant");
             string machineModel = GetArgument("-machineModel");
+            string machineModelName = Path.GetFileNameWithoutExtension(machineModel);
 
             string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset";
             EnsureDirectory(runtimeAssetPath);
@@ -549,11 +552,21 @@ namespace Bettr.Editor
             }
             
             // Copy the machine model file and rename its extension
-            string modelDestinationPath = Path.Combine(runtimeAssetPath, "Models", Path.GetFileNameWithoutExtension(machineModel) + ".cscript.txt");
+            string modelDestinationPath = Path.Combine(runtimeAssetPath, "Models",  $"{machineModelName}.cscript.txt");
             Debug.Log($"Copying machine model {machineName} {machineVariant} from: {machineModel} to: {modelDestinationPath}");
             File.Copy(machineModel, modelDestinationPath, overwrite: true);
+            
+            AssetDatabase.Refresh();
+            
+            // Load and run the Model file
+            var modelTextAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(modelDestinationPath);
+            var machineModelScript = modelTextAsset.text;
+            TileController.StaticInit();
+            DynValue dynValue = TileController.LuaScript.LoadString(machineModelScript, codeFriendlyName: machineModelName);
+            TileController.LuaScript.Call(dynValue);
 
-            // Additional logic for syncing the machine...
+            ProcessSymbols(machineName, machineVariant, runtimeAssetPath);
+            
         }
         
         private static void EnsureDirectory(string path)
@@ -563,6 +576,27 @@ namespace Bettr.Editor
                 Directory.CreateDirectory(path);
                 AssetDatabase.Refresh();
                 Debug.Log("Directory created at: " + path);
+            }
+        }
+
+        private static void ProcessSymbols(string machineName, string machineVariant, string runtimeAssetPath)
+        {
+            var prefabsAssetPath = Path.Combine(runtimeAssetPath, "Prefabs");
+            var baseGameSymbolTableName = $"{machineName}BaseGameSymbolTable";
+            
+            // go through the globals and list them out one by one
+            var baseGameSymbolTable = TileController.LuaScript.Globals[baseGameSymbolTableName] as Table;
+            if (baseGameSymbolTable == null)
+            {
+                Debug.LogError("BaseGameSymbolTable not found in the machine model.");
+                return;
+            }
+            
+            foreach (var pair in baseGameSymbolTable.Pairs)
+            {
+                var key = pair.Key.String;
+                var first = (Table)pair.Value.Table["First"];
+                Debug.Log($"Symbol:{key} SymbolType: {first["SymbolType"]} Desc: {first["Desc"]}");
             }
         }
         

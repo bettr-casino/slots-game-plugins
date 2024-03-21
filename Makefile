@@ -12,7 +12,7 @@ RUNTIME_VERSION:="v0_1_0"
 ASSET_BUNDLES_LOG_FILE_PATH:="${BETTR_CASINO_ASSET_BUNDLES_LOGS_HOME}/logfile.log"
 UNIT_TESTS_LOG_FILE_PATH:="${BETTR_CASINO_UNIT_TESTS_LOGS_HOME}/logfile.log"
 UNITY_PACKAGES_LOG_FILE_PATH:="${BETTR_CASINO_LOGS_HOME}/UnityPackages/logfile.log"
-ASSET_DATA_LOG_FILE_PATH:="${BETTR_CASINO_LOGS_HOME}/AssetData/logfile.log"
+ASSET_DATA_LOG_FILE_PATH:="${BETTR_CASINO_LOGS_HOME}/UnityAssetData/logfile.log"
 
 MODULE_SUBDIRECTORIES := MainLobby LobbyCard
 MODULE_OUTPUT_DIRECTORY := ${BETTR_CASINO_BUILDS_HOME}/UnityPackages
@@ -78,13 +78,13 @@ prepare: preparedll
 package: preparedll build_assets_all test packagemodule_all printtestresults
 
 sync-machines:
-	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.SyncMachine -machineName Game002 -machineVariant BuffaloGold -machineModel $(MODELS_DIR)/Game002/Game002Models.lua \
-	&& ${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.SyncMachine -machineName Game003 -machineVariant LightningLinkHighStakes -machineModel $(MODELS_DIR)/Game003/Game003Models.lua \
-	&& ${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.SyncMachine -machineName Game004 -machineVariant CleopatraRiches -machineModel $(MODELS_DIR)/Game004/Game004Models.lua \
-	&& ${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.SyncMachine -machineName Game005 -machineVariant 88FortunesDancingDrums -machineModel $(MODELS_DIR)/Game005/Game005Models.lua \
-	&& ${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.SyncMachine -machineName Game006 -machineVariant WheelOfFortuneTripleExtremeSpin -machineModel $(MODELS_DIR)/Game006/Game006Models.lua  \
-	&& ${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.SyncMachine -machineName Game007 -machineVariant DoubleDiamondVegas -machineModel $(MODELS_DIR)/Game007/Game007Models.lua  \
-	&& ${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.SyncMachine -machineName Game008 -machineVariant GodsOfOlympusZeus -machineModel $(MODELS_DIR)/Game008/Game008Models.lua  \
-	&& ${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.SyncMachine -machineName Game009 -machineVariant PlanetMooneyMooCash -machineModel $(MODELS_DIR)/Game009/Game009Models.lua
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.SyncMachine -machineName Game002 -machineVariant BuffaloGold -machineModel $(MODELS_DIR)/Game002/Game002Models.lua
+	# && ${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.SyncMachine -machineName Game003 -machineVariant LightningLinkHighStakes -machineModel $(MODELS_DIR)/Game003/Game003Models.lua \
+	# && ${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.SyncMachine -machineName Game004 -machineVariant CleopatraRiches -machineModel $(MODELS_DIR)/Game004/Game004Models.lua \
+	# && ${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.SyncMachine -machineName Game005 -machineVariant 88FortunesDancingDrums -machineModel $(MODELS_DIR)/Game005/Game005Models.lua \
+	# && ${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.SyncMachine -machineName Game006 -machineVariant WheelOfFortuneTripleExtremeSpin -machineModel $(MODELS_DIR)/Game006/Game006Models.lua  \
+	# && ${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.SyncMachine -machineName Game007 -machineVariant DoubleDiamondVegas -machineModel $(MODELS_DIR)/Game007/Game007Models.lua  \
+	# && ${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.SyncMachine -machineName Game008 -machineVariant GodsOfOlympusZeus -machineModel $(MODELS_DIR)/Game008/Game008Models.lua  \
+	# && ${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.SyncMachine -machineName Game009 -machineVariant PlanetMooneyMooCash -machineModel $(MODELS_DIR)/Game009/Game009Models.lua
 
 
