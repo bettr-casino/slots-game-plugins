@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
@@ -94,6 +95,19 @@ namespace Bettr.Editor
 
             // Optional: Log to confirm package creation
             Debug.Log("Package exported: " + outputPackagePath);
+        }
+
+        [MenuItem("Bettr/Verify Install")]
+        public static void VerifyInstall()
+        {
+            var canPost = PostToService();
+            if (!canPost)
+            {
+                EditorUtility.DisplayDialog("Error", "Verify Failed: [ Gateway]", "OK");
+                return;
+            }
+            
+            EditorUtility.DisplayDialog("Success", "Verify Successful.", "OK");
         }
         
         [MenuItem("Bettr/Enter Play Mode")] 
@@ -598,6 +612,51 @@ namespace Bettr.Editor
                 var first = (Table)pair.Value.Table["First"];
                 Debug.Log($"Symbol:{key} SymbolType: {first["SymbolType"]} Desc: {first["Desc"]}");
             }
+        }
+        
+        private static bool PostToService()
+        {
+            var url = "https://3wcgnl14qb.execute-api.us-west-2.amazonaws.com/gateway";
+            var httpRequest = (HttpWebRequest)WebRequest.Create(url);
+            httpRequest.Method = "POST";
+            httpRequest.ContentType = "application/json";
+
+            var data = @"{
+                ""gameId"": ""Game002"",
+                ""hashKey"": ""latest""
+            }";
+
+            using (var streamWriter = new StreamWriter(httpRequest.GetRequestStream()))
+            {
+                streamWriter.Write(data);
+            }
+
+            try
+            {
+                var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
+                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+                {
+                    var result = streamReader.ReadToEnd();
+                    Debug.Log(result);
+                }
+            
+                if (httpResponse.StatusCode == HttpStatusCode.OK)
+                {
+                    Debug.Log("Successfully posted to service.");
+                    return true;
+                }
+                else
+                {
+                    Debug.LogError("Failed to post to service.");
+                    return false;
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e);
+            }
+
+            return false;
         }
         
     }
