@@ -46,6 +46,7 @@ namespace Bettr.Editor
         // ReSharper disable once UnusedMember.Local
         private const string LocalServerDirectory = "Assets/Bettr/LocalStore/LocalServer";
         private const string AssetsServerBaseURL = "https://bettr-casino-assets.s3.us-west-2.amazonaws.com";
+        private const string GatewayUrl = "https://3wcgnl14qb.execute-api.us-west-2.amazonaws.com/gateway";
         
         public static void ExportPackage()
         {
@@ -616,8 +617,7 @@ namespace Bettr.Editor
         
         private static bool PostToService()
         {
-            var url = "https://3wcgnl14qb.execute-api.us-west-2.amazonaws.com/gateway";
-            var httpRequest = (HttpWebRequest)WebRequest.Create(url);
+            var httpRequest = (HttpWebRequest)WebRequest.Create(GatewayUrl);
             httpRequest.Method = "POST";
             httpRequest.ContentType = "application/json";
 
