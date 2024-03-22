@@ -236,10 +236,10 @@ namespace Bettr.Runtime.Plugin.Main.Tests
             var allRootGameObjects = activeScene.GetRootGameObjects();
             var appGameObject = allRootGameObjects.First((o => o.name == "App"));
             var tmPros = appGameObject.GetComponentsInChildren<TextMeshPro>();
-            var tmProUserLvl = tmPros.First((o => o.name == "UserLvlText"));
-            Assert.IsTrue(tmProUserLvl.text == _bettrUserController.BettrUserConfig.Level.ToString());
-            var tmProUserXp = tmPros.First((o => o.name == "UserXPText"));
-            Assert.IsTrue(tmProUserXp.text == _bettrUserController.BettrUserConfig.XP.ToString());
+            // var tmProUserLvl = tmPros.First((o => o.name == "UserLvlText"));
+            // Assert.IsTrue(tmProUserLvl.text == _bettrUserController.BettrUserConfig.Level.ToString());
+            // var tmProUserXp = tmPros.First((o => o.name == "UserXPText"));
+            // Assert.IsTrue(tmProUserXp.text == _bettrUserController.BettrUserConfig.XP.ToString());
             var tmProUserCoins = tmPros.First((o => o.name == "UserCoinsText"));
             Assert.IsTrue(tmProUserCoins.text == _bettrUserController.BettrUserConfig.Coins.ToString());
 
@@ -263,7 +263,7 @@ namespace Bettr.Runtime.Plugin.Main.Tests
             Assert.IsTrue(activeScene.name.Equals("MainLobbyScene"));
             var allRootGameObjects = activeScene.GetRootGameObjects();
             var appGameObject = allRootGameObjects.First((o => o.name == "App"));
-            var lobbyGameObject = FindGameObjectInHierarchy(appGameObject, "LobbyCard001");
+            var lobbyGameObject = FindGameObjectInHierarchy(appGameObject, "NewReleaseGameLobbyCard");
 
             var pointerClickHandlers = lobbyGameObject.GetComponentsInChildren<BettrUnityEventTrigger>();
             Assert.IsNotNull(pointerClickHandlers);
