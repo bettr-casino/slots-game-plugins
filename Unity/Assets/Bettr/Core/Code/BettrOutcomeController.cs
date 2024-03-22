@@ -113,7 +113,7 @@ namespace Bettr.Core
                 
                 var outcomeNumber = responsePayload.OutcomeNumber;
                 
-                var className = $"{gameId}Outcome{outcomeNumber:09}";
+                var className = $"{gameId}Outcome{outcomeNumber:000000000}";
                 
                 BettrAssetScriptsController.AddScript(className, script);
             }
