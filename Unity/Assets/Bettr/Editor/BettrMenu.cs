@@ -11,6 +11,7 @@ using UnityEngine;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using Newtonsoft.Json;
+using UnityEditor.Animations;
 using UnityEditor.SceneManagement;
 using DirectoryInfo = System.IO.DirectoryInfo;
 
@@ -596,7 +597,6 @@ namespace Bettr.Editor
 
         private static void ProcessSymbols(string machineName, string machineVariant, string runtimeAssetPath)
         {
-            var prefabsAssetPath = Path.Combine(runtimeAssetPath, "Prefabs");
             var baseGameSymbolTableName = $"{machineName}BaseGameSymbolTable";
             
             // go through the globals and list them out one by one
@@ -611,7 +611,9 @@ namespace Bettr.Editor
             {
                 var key = pair.Key.String;
                 var first = (Table)pair.Value.Table["First"];
-                Debug.Log($"Symbol:{key} SymbolType: {first["SymbolType"]} Desc: {first["Desc"]}");
+                var symbolType = first["SymbolType"] as string;
+                var symbolName = $"{machineName}BaseGame{symbolType}Symbol{key}";   
+                ProcessSymbol(symbolName, runtimeAssetPath);
             }
         }
         
@@ -657,6 +659,70 @@ namespace Bettr.Editor
             }
 
             return false;
+        }
+        
+        private static void ProcessSymbol(string symbolName, string runtimeAssetPath)
+        {
+            Debug.Log($"Processing symbolName: {symbolName} runtimeAssetPath: {runtimeAssetPath}");
+            var animatorController = CreateOrLoadAnimatorController(symbolName, runtimeAssetPath);
+            var script = CreateOrLoadScript(symbolName, runtimeAssetPath);
+            
+            var symbolGo = new GameObject(symbolName);
+            var animator = symbolGo.AddComponent<Animator>();
+            animator.runtimeAnimatorController = animatorController;
+            var tile = symbolGo.AddComponent<Tile>();
+            tile.scriptAsset = script;
+            tile.tileId = symbolName;
+            
+            var symbolPrefab = PrefabUtility.SaveAsPrefabAsset(symbolGo, $"{runtimeAssetPath}/Prefabs/{symbolName}.prefab");
+            UnityEngine.Object.DestroyImmediate(symbolPrefab);
+        }
+
+        private static TextAsset CreateOrLoadScript(string name, string runtimeAssetPath)
+        {
+            var scriptName = $"{name}.cscript.txt";
+            var scriptPath = $"{runtimeAssetPath}/Scripts/{scriptName}";
+            var script = AssetDatabase.LoadAssetAtPath<TextAsset>(scriptPath);
+            if (script == null)
+            {
+                Debug.Log($"Creating script for {name} at {scriptPath}");
+                try
+                {
+                    var defaultScriptContentPath = "Assets/Bettr/Editor/DefaultCScript.cscript.txt"; // Adjust the path as needed
+                    var defaultScriptTemplateContent = File.ReadAllText(defaultScriptContentPath);
+                    var defaultScriptContent = string.Format(defaultScriptTemplateContent, name);
+                    script = new TextAsset();
+                    File.WriteAllText(scriptPath, defaultScriptContent);
+                    AssetDatabase.Refresh();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e);
+                }
+            }
+
+            return script;
+        }
+
+        private static AnimatorController CreateOrLoadAnimatorController(string name, string runtimeAssetPath)
+        {
+            var animatorControllerName = $"{name}_anims.controller";
+            var animatorControllerPath = $"{runtimeAssetPath}/Animators/{animatorControllerName}";
+            var animatorController = AssetDatabase.LoadAssetAtPath<AnimatorController>(animatorControllerPath);
+            if (animatorController == null)
+            {
+                Debug.Log($"Creating animator controller for {name} at {animatorControllerPath}");
+                try
+                {
+                    animatorController = AnimatorController.CreateAnimatorControllerAtPath(animatorControllerPath);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e);
+                }
+            }
+
+            return animatorController;
         }
         
     }

@@ -1,0 +1,24 @@
+function Game002BaseGameMinorSymbolF6:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game002BaseGameMinorSymbolF6:destroy()
+	System.Print("Game002BaseGameMinorSymbolF6 destroy tile id={0}", self.id)
+end
+
+function Game002BaseGameMinorSymbolF6:OnError(callStack)
+	System.Error("Game002BaseGameMinorSymbolF6 Error CallStack: {0}", callStack)
+end
+
+function Game002BaseGameMinorSymbolF6:Awake()
+	System.Print("Game002BaseGameMinorSymbolF6 Awake tile id={0}", self.id)
+end
+
+function Game002BaseGameMinorSymbolF6:Start()
+    System.Print("Game002BaseGameMinorSymbolF6 Start tile id={0}", self.id)
+end
+
+return Game002BaseGameMinorSymbolF6:new()

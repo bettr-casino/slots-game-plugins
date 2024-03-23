@@ -1,0 +1,24 @@
+function {0}:new(o)
+	o = o or {{}}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function {0}:destroy()
+	System.Print("{0} destroy tile id={{0}}", self.id)
+end
+
+function {0}:OnError(callStack)
+	System.Error("{0} Error CallStack: {{0}}", callStack)
+end
+
+function {0}:Awake()
+	System.Print("{0} Awake tile id={{0}}", self.id)
+end
+
+function {0}:Start()
+    System.Print("{0} Start tile id={{0}}", self.id)
+end
+
+return {0}:new()
