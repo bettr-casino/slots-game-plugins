@@ -582,7 +582,6 @@ namespace Bettr.Editor
             TileController.LuaScript.Call(dynValue);
 
             ProcessSymbols(machineName, machineVariant, runtimeAssetPath);
-            
         }
         
         private static void EnsureDirectory(string path)
@@ -597,6 +596,8 @@ namespace Bettr.Editor
 
         private static void ProcessSymbols(string machineName, string machineVariant, string runtimeAssetPath)
         {
+            AssetDatabase.Refresh();
+            
             var baseGameSymbolTableName = $"{machineName}BaseGameSymbolTable";
             
             // go through the globals and list them out one by one
@@ -608,14 +609,18 @@ namespace Bettr.Editor
             }
             
             var scriptName = $"{machineName}BaseGameSymbol";   
-            var script = CreateOrLoadScript(scriptName, runtimeAssetPath);
+            var scriptTextAsset = CreateOrLoadScript(scriptName, runtimeAssetPath);
             
             foreach (var pair in baseGameSymbolTable.Pairs)
             {
                 var key = pair.Key.String;
                 var symbolName = $"{machineName}BaseGameSymbol{key}";   
                 var animatorController = CreateOrLoadAnimatorController(symbolName, runtimeAssetPath);
-                ProcessSymbol(symbolName, script, animatorController, runtimeAssetPath);
+                ProcessSymbol(symbolName, new List<IComponent>()
+                {
+                    new TileComponent(symbolName, scriptTextAsset),
+                    new AnimatorComponent(animatorController),
+                }, runtimeAssetPath);
             }
         }
         
@@ -663,22 +668,36 @@ namespace Bettr.Editor
             return false;
         }
         
-        private static void ProcessSymbol(string symbolName, TextAsset script, AnimatorController animatorController, string runtimeAssetPath)
+        private static GameObject ProcessSymbol(string symbolName, List<IComponent> components, string runtimeAssetPath)
         {
-            Debug.Log($"Processing symbolName: {symbolName} runtimeAssetPath: {runtimeAssetPath}");
+            AssetDatabase.Refresh();
             
-            var symbolGo = new GameObject(symbolName);
-            var animator = symbolGo.AddComponent<Animator>();
-            animator.runtimeAnimatorController = animatorController;
-            var tile = symbolGo.AddComponent<Tile>();
-            tile.scriptAsset = script;
-            tile.globalTileId = symbolName;
+            var prefabPath = $"{runtimeAssetPath}/Prefabs/{symbolName}.prefab";
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+
+            if (prefab == null)
+            {
+                var symbolGo = new GameObject(symbolName);
+                foreach (var component in components)
+                {
+                    component.AddComponent(symbolGo);
+                }
             
-            PrefabUtility.SaveAsPrefabAsset(symbolGo, $"{runtimeAssetPath}/Prefabs/{symbolName}.prefab");
+                PrefabUtility.SaveAsPrefabAsset(symbolGo, prefabPath);
+            }
+            
+            AssetDatabase.Refresh();
+            
+            prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+
+            return prefab;
+
         }
 
         private static TextAsset CreateOrLoadScript(string name, string runtimeAssetPath)
         {
+            AssetDatabase.Refresh();
+            
             var scriptName = $"{name}.cscript.txt";
             var scriptPath = $"{runtimeAssetPath}/Scripts/{scriptName}";
             var script = AssetDatabase.LoadAssetAtPath<TextAsset>(scriptPath);
@@ -690,21 +709,25 @@ namespace Bettr.Editor
                     var defaultScriptContentPath = "Assets/Bettr/Editor/DefaultCScript.cscript.txt"; // Adjust the path as needed
                     var defaultScriptTemplateContent = File.ReadAllText(defaultScriptContentPath);
                     var defaultScriptContent = string.Format(defaultScriptTemplateContent, name);
-                    script = new TextAsset();
                     File.WriteAllText(scriptPath, defaultScriptContent);
-                    AssetDatabase.Refresh();
                 }
                 catch (Exception e)
                 {
                     Debug.LogError(e);
                 }
             }
+            
+            AssetDatabase.Refresh();
+            
+            script = AssetDatabase.LoadAssetAtPath<TextAsset>(scriptPath);
 
             return script;
         }
 
         private static AnimatorController CreateOrLoadAnimatorController(string name, string runtimeAssetPath)
         {
+            AssetDatabase.Refresh();
+            
             var animatorControllerName = $"{name}_anims.controller";
             var animatorControllerPath = $"{runtimeAssetPath}/Animators/{animatorControllerName}";
             var animatorController = AssetDatabase.LoadAssetAtPath<AnimatorController>(animatorControllerPath);
@@ -720,6 +743,10 @@ namespace Bettr.Editor
                     Debug.LogError(e);
                 }
             }
+            
+            AssetDatabase.Refresh();
+            
+            animatorController = AssetDatabase.LoadAssetAtPath<AnimatorController>(animatorControllerPath);
 
             return animatorController;
         }
