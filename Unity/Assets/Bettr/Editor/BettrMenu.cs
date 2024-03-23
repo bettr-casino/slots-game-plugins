@@ -610,18 +610,28 @@ namespace Bettr.Editor
             
             var scriptName = $"{machineName}BaseGameSymbol";   
             var scriptTextAsset = CreateOrLoadScript(scriptName, runtimeAssetPath);
+
+            var symbolPrefabs = new List<IGameObject>();
             
             foreach (var pair in baseGameSymbolTable.Pairs)
             {
-                var key = pair.Key.String;
-                var symbolName = $"{machineName}BaseGameSymbol{key}";   
+                var symbolKey = pair.Key.String;
+                var symbolName = $"{machineName}BaseGameSymbol{symbolKey}";   
                 var animatorController = CreateOrLoadAnimatorController(symbolName, runtimeAssetPath);
-                ProcessSymbol(symbolName, new List<IComponent>()
-                {
-                    new TileComponent(symbolName, scriptTextAsset),
-                    new AnimatorComponent(animatorController),
-                }, runtimeAssetPath);
+                var symbolPrefab = ProcessPrefab(symbolName, new List<IComponent>
+                    {
+                        new TileComponent(symbolName, scriptTextAsset),
+                        new AnimatorComponent(animatorController),
+                    }, 
+                    new List<IGameObject>(),
+                    runtimeAssetPath);
+                symbolPrefabs.Add(new PrefabGameObject(symbolPrefab, symbolKey));
             }
+            
+            var scriptGroupName = $"{machineName}BaseGameSymbolGroup"; 
+            ProcessPrefab(scriptGroupName, new List<IComponent>(), 
+                symbolPrefabs,
+                runtimeAssetPath);
         }
         
         private static bool PostToService()
@@ -668,30 +678,34 @@ namespace Bettr.Editor
             return false;
         }
         
-        private static GameObject ProcessSymbol(string symbolName, List<IComponent> components, string runtimeAssetPath)
+        private static GameObject ProcessPrefab(string prefabName, List<IComponent> components, List<IGameObject> gameObjects, string runtimeAssetPath)
         {
             AssetDatabase.Refresh();
             
-            var prefabPath = $"{runtimeAssetPath}/Prefabs/{symbolName}.prefab";
+            var prefabPath = $"{runtimeAssetPath}/Prefabs/{prefabName}.prefab";
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
 
             if (prefab == null)
             {
-                var symbolGo = new GameObject(symbolName);
+                prefab = new GameObject(prefabName);
                 foreach (var component in components)
                 {
-                    component.AddComponent(symbolGo);
+                    component.AddComponent(prefab);
+                }
+                
+                foreach (var go in gameObjects)
+                {
+                    go.AddChild(prefab);
                 }
             
-                PrefabUtility.SaveAsPrefabAsset(symbolGo, prefabPath);
+                PrefabUtility.SaveAsPrefabAsset(prefab, prefabPath);
             }
             
             AssetDatabase.Refresh();
             
             prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-
+            
             return prefab;
-
         }
 
         private static TextAsset CreateOrLoadScript(string name, string runtimeAssetPath)
