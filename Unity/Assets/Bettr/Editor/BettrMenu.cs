@@ -607,13 +607,15 @@ namespace Bettr.Editor
                 return;
             }
             
+            var scriptName = $"{machineName}BaseGameSymbol";   
+            var script = CreateOrLoadScript(scriptName, runtimeAssetPath);
+            
             foreach (var pair in baseGameSymbolTable.Pairs)
             {
                 var key = pair.Key.String;
-                var first = (Table)pair.Value.Table["First"];
-                var symbolType = first["SymbolType"] as string;
-                var symbolName = $"{machineName}BaseGame{symbolType}Symbol{key}";   
-                ProcessSymbol(symbolName, runtimeAssetPath);
+                var symbolName = $"{machineName}BaseGameSymbol{key}";   
+                var animatorController = CreateOrLoadAnimatorController(symbolName, runtimeAssetPath);
+                ProcessSymbol(symbolName, script, animatorController, runtimeAssetPath);
             }
         }
         
@@ -661,21 +663,18 @@ namespace Bettr.Editor
             return false;
         }
         
-        private static void ProcessSymbol(string symbolName, string runtimeAssetPath)
+        private static void ProcessSymbol(string symbolName, TextAsset script, AnimatorController animatorController, string runtimeAssetPath)
         {
             Debug.Log($"Processing symbolName: {symbolName} runtimeAssetPath: {runtimeAssetPath}");
-            var animatorController = CreateOrLoadAnimatorController(symbolName, runtimeAssetPath);
-            var script = CreateOrLoadScript(symbolName, runtimeAssetPath);
             
             var symbolGo = new GameObject(symbolName);
             var animator = symbolGo.AddComponent<Animator>();
             animator.runtimeAnimatorController = animatorController;
             var tile = symbolGo.AddComponent<Tile>();
             tile.scriptAsset = script;
-            tile.tileId = symbolName;
+            tile.globalTileId = symbolName;
             
-            var symbolPrefab = PrefabUtility.SaveAsPrefabAsset(symbolGo, $"{runtimeAssetPath}/Prefabs/{symbolName}.prefab");
-            UnityEngine.Object.DestroyImmediate(symbolPrefab);
+            PrefabUtility.SaveAsPrefabAsset(symbolGo, $"{runtimeAssetPath}/Prefabs/{symbolName}.prefab");
         }
 
         private static TextAsset CreateOrLoadScript(string name, string runtimeAssetPath)

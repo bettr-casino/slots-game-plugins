@@ -1,0 +1,31 @@
+require "math"
+require "Core"
+require "Utils"
+
+Game002BaseGameSymbol = {
+}
+
+function Game002BaseGameSymbol:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game002BaseGameSymbol:destroy()
+	System.Print("Game002BaseGameSymbol destroy tile id={0}", self.id)
+end
+
+function Game002BaseGameSymbol:OnError(callStack)
+	System.Error("Game002BaseGameSymbol Error CallStack: {0}", callStack)
+end
+
+function Game002BaseGameSymbol:Awake()
+	System.Print("Game002BaseGameSymbol Awake tile id={0}", self.id)
+end
+
+function Game002BaseGameSymbol:Start()
+    System.Print("Game002BaseGameSymbol Start tile id={0}", self.id)
+end
+
+return Game002BaseGameSymbol:new()
