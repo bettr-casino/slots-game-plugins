@@ -581,7 +581,7 @@ namespace Bettr.Editor
             DynValue dynValue = TileController.LuaScript.LoadString(machineModelScript, codeFriendlyName: machineModelName);
             TileController.LuaScript.Call(dynValue);
 
-            ProcessSymbols(machineName, machineVariant, runtimeAssetPath);
+            ProcessBaseGameSymbols(machineName, machineVariant, runtimeAssetPath);
         }
         
         private static void EnsureDirectory(string path)
@@ -594,7 +594,7 @@ namespace Bettr.Editor
             }
         }
 
-        private static void ProcessSymbols(string machineName, string machineVariant, string runtimeAssetPath)
+        private static void ProcessBaseGameSymbols(string machineName, string machineVariant, string runtimeAssetPath)
         {
             AssetDatabase.Refresh();
             
