@@ -11,6 +11,7 @@ using UnityEngine;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using Newtonsoft.Json;
+using Unity.VisualScripting;
 using UnityEditor.Animations;
 using UnityEditor.SceneManagement;
 using DirectoryInfo = System.IO.DirectoryInfo;
@@ -655,24 +656,34 @@ namespace Bettr.Editor
             
             var reelName = $"{machineName}BaseGameReel{reelIndex}";
             
-            var symbolGroupName = $"{machineName}BaseGameSymbolGroup.prefab"; 
-            var symbolGroup = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{symbolGroupName}");
+            var reelStates = GetTable($"{machineName}BaseGameReelState");
+            var symbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "SymbolCount");
+            
+            var symbolInstances = new List<IGameObject>();
+
+            for (int symbolIndex = 1; symbolIndex <= symbolCount; symbolIndex++)
+            {
+                var symbolInstance = new InstanceGameObject(new GameObject($"Symbol{symbolIndex}"));
+                var pivotInstance = new InstanceGameObject(new GameObject("Pivot"));
+                pivotInstance.AddChild(symbolInstance.Go);
+            
+                var symbolGroupPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameSymbolGroup.prefab");
+                var prefabGameObject = new PrefabGameObject(symbolGroupPrefab, "SymbolGroup");
+                prefabGameObject.AddChild(pivotInstance.Go);
+                
+                symbolInstances.Add(symbolInstance);
+            }
+            
             var reelPrefab = ProcessPrefab(reelName, new List<IComponent>()
                 {
                     new TileComponent(reelName, scriptTextAsset),
                 }, 
-                new List<IGameObject>()
-                {
-                    new PrefabGameObject(symbolGroup, "Symbol1")
-                },
+                symbolInstances,
                 runtimeAssetPath);
             
             //
-            // var reelStates = GetTable($"{machineName}BaseGameReelState");
-            // var reelState = reelStates[$"Reel{reelIndex}"] as Table;
-            //
             // var baseGameOverviewTable = GetTable($"{machineName}BaseGameOverview");
-            // var payType = GetTableValue<string>(baseGameOverviewTable, "PayType");
+            // var payType = GetTableValue<string>(baseGameOverviewTable, "PayType", "Value);
             // if (payType == "Ways")
             // {
             //     // add ways reel processing here
@@ -814,23 +825,29 @@ namespace Bettr.Editor
             return animatorController;
         }
         
-        private static T GetTableValue<T>(Table table, string pk)
+        private static T GetTableValue<T>(Table table, string pk, string key)
         {
-            var value = table[pk] as Table;
-            if (value == null)
+            var pkTable = table[pk] as Table;
+            if (pkTable == null)
             {
                 Debug.LogError($"Key {pk} not found in table.");
                 return default(T);
             }
 
-            var first = value["First"] as Table;
+            var first = pkTable["First"] as Table;
             if (first == null)
             {
                 Debug.LogError($"Key {pk} First not found in table.");
                 return default(T);
             }
-
-            return (T) first["Value"];
+            
+            var value = first[key];
+            if (value != null)
+            {
+                return (T)Convert.ChangeType(value, typeof(T));
+            }
+            
+            return default(T);
         }
 
         private static Table GetTable(string tableName)
@@ -842,6 +859,5 @@ namespace Bettr.Editor
             }
             return table;
         }
-        
     }
 }

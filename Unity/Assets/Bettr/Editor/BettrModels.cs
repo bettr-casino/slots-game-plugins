@@ -1,14 +1,31 @@
 using System;
+using System.Collections.Generic;
 using CrayonScript.Code;
 using UnityEditor;
 using UnityEditor.Animations;
 using UnityEngine;
+using Object = System.Object;
 
 namespace Bettr.Editor
 {
     public interface IGameObject
     {
-        public void AddChild(GameObject gameObject);
+        public void AddChild(GameObject parentGo);
+    }
+
+    public class InstanceGameObject : IGameObject
+    {
+        public readonly GameObject Go;
+        
+        public InstanceGameObject(GameObject go)
+        {
+            Go = go;
+        }
+        
+        public void AddChild(GameObject parentGo)
+        {
+            Go.transform.SetParent(parentGo.transform);
+        }
     }
 
     public class PrefabGameObject : IGameObject
@@ -22,10 +39,10 @@ namespace Bettr.Editor
             _name = name;
         }
         
-        public void AddChild(GameObject parentPrefab)
+        public void AddChild(GameObject parentGo)
         {
             // Instantiate the child prefab and set it as a child of the new prefab
-            var childInstance = (GameObject)PrefabUtility.InstantiatePrefab(_prefab, parentPrefab.transform);
+            var childInstance = (GameObject)PrefabUtility.InstantiatePrefab(_prefab, parentGo.transform);
             childInstance.name = _name;
         }
     }
