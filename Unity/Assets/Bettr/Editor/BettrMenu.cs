@@ -602,15 +602,12 @@ namespace Bettr.Editor
             
             var baseGameSymbolTable = GetTable($"{machineName}BaseGameSymbolTable");
             
-            var scriptName = $"{machineName}BaseGameSymbol";   
-            var scriptTextAsset = CreateOrLoadScript(scriptName, runtimeAssetPath);
-
             var symbolPrefabs = new List<IGameObject>();
             foreach (var pair in baseGameSymbolTable.Pairs)
             {
                 var symbolKey = pair.Key.String;
                 var symbolName = $"{machineName}BaseGameSymbol{symbolKey}";   
-                var symbolPrefab = ProcessBaseGameSymbol(symbolName, scriptTextAsset, runtimeAssetPath);
+                var symbolPrefab = ProcessBaseGameSymbol(symbolName, runtimeAssetPath);
                 symbolPrefabs.Add(new PrefabGameObject(symbolPrefab, symbolKey));
             }
             
@@ -622,12 +619,11 @@ namespace Bettr.Editor
             return symbolGroup;
         }
 
-        private static GameObject ProcessBaseGameSymbol(string symbolName, TextAsset scriptTextAsset, string runtimeAssetPath)
+        private static GameObject ProcessBaseGameSymbol(string symbolName, string runtimeAssetPath)
         {
             var animatorController = CreateOrLoadAnimatorController(symbolName, runtimeAssetPath);
             var symbolPrefab = ProcessPrefab(symbolName, new List<IComponent>
                 {
-                    new TileComponent(symbolName, scriptTextAsset),
                     new AnimatorComponent(animatorController),
                 }, 
                 new List<IGameObject>(),
