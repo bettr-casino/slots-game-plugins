@@ -582,6 +582,7 @@ namespace Bettr.Editor
             TileController.LuaScript.Call(dynValue);
 
             ProcessBaseGameSymbols(machineName, machineVariant, runtimeAssetPath);
+            ProcessBaseGameReels(machineName, machineVariant, runtimeAssetPath);
         }
         
         private static void EnsureDirectory(string path)
@@ -594,44 +595,82 @@ namespace Bettr.Editor
             }
         }
 
-        private static void ProcessBaseGameSymbols(string machineName, string machineVariant, string runtimeAssetPath)
+        private static GameObject ProcessBaseGameSymbols(string machineName, string machineVariant, string runtimeAssetPath)
         {
             AssetDatabase.Refresh();
             
-            var baseGameSymbolTableName = $"{machineName}BaseGameSymbolTable";
-            
-            // go through the globals and list them out one by one
-            var baseGameSymbolTable = TileController.LuaScript.Globals[baseGameSymbolTableName] as Table;
-            if (baseGameSymbolTable == null)
-            {
-                Debug.LogError("BaseGameSymbolTable not found in the machine model.");
-                return;
-            }
+            var baseGameSymbolTable = GetTable($"{machineName}BaseGameSymbolTable");
             
             var scriptName = $"{machineName}BaseGameSymbol";   
             var scriptTextAsset = CreateOrLoadScript(scriptName, runtimeAssetPath);
 
             var symbolPrefabs = new List<IGameObject>();
-            
             foreach (var pair in baseGameSymbolTable.Pairs)
             {
                 var symbolKey = pair.Key.String;
                 var symbolName = $"{machineName}BaseGameSymbol{symbolKey}";   
-                var animatorController = CreateOrLoadAnimatorController(symbolName, runtimeAssetPath);
-                var symbolPrefab = ProcessPrefab(symbolName, new List<IComponent>
-                    {
-                        new TileComponent(symbolName, scriptTextAsset),
-                        new AnimatorComponent(animatorController),
-                    }, 
-                    new List<IGameObject>(),
-                    runtimeAssetPath);
+                var symbolPrefab = ProcessBaseGameSymbol(symbolName, scriptTextAsset, runtimeAssetPath);
                 symbolPrefabs.Add(new PrefabGameObject(symbolPrefab, symbolKey));
             }
             
             var scriptGroupName = $"{machineName}BaseGameSymbolGroup"; 
-            ProcessPrefab(scriptGroupName, new List<IComponent>(), 
+            var symbolGroup = ProcessPrefab(scriptGroupName, new List<IComponent>(), 
                 symbolPrefabs,
                 runtimeAssetPath);
+            
+            return symbolGroup;
+        }
+
+        private static GameObject ProcessBaseGameSymbol(string symbolName, TextAsset scriptTextAsset, string runtimeAssetPath)
+        {
+            var animatorController = CreateOrLoadAnimatorController(symbolName, runtimeAssetPath);
+            var symbolPrefab = ProcessPrefab(symbolName, new List<IComponent>
+                {
+                    new TileComponent(symbolName, scriptTextAsset),
+                    new AnimatorComponent(animatorController),
+                }, 
+                new List<IGameObject>(),
+                runtimeAssetPath);
+            return symbolPrefab;
+        }
+        
+        private static void ProcessBaseGameReels(string machineName, string machineVariant, string runtimeAssetPath)
+        {
+            var baseGameReelState = GetTable($"{machineName}BaseGameReelState");
+            int reelCount = 0;
+            foreach (var pair in baseGameReelState.Pairs)
+            {
+                reelCount++;
+                ProcessBaseGameReel(machineName, machineVariant, reelCount, runtimeAssetPath);
+            }
+
+        }
+
+        private static void ProcessBaseGameReel(string machineName, string machineVariant, int reelIndex, string runtimeAssetPath)
+        {
+            // refresh the asset database
+            AssetDatabase.Refresh();
+            
+            var reelName = $"{machineName}BaseGameReel{reelIndex}";
+            var reelPrefab = ProcessPrefab(reelName, new List<IComponent>(), 
+                new List<IGameObject>(),
+                runtimeAssetPath);
+            
+            // var scriptGroupName = $"{machineName}BaseGameSymbolGroup"; 
+            //
+            // var reelStates = GetTable($"{machineName}BaseGameReelState");
+            // var reelState = reelStates[$"Reel{reelIndex}"] as Table;
+            //
+            // var baseGameOverviewTable = GetTable($"{machineName}BaseGameOverview");
+            // var payType = GetTableValue<string>(baseGameOverviewTable, "PayType");
+            // if (payType == "Ways")
+            // {
+            //     // add ways reel processing here
+            // } 
+            // else if (payType == "Paylines")
+            // {
+            //     // add paylines reel processing here
+            // }
         }
         
         private static bool PostToService()
@@ -763,6 +802,35 @@ namespace Bettr.Editor
             animatorController = AssetDatabase.LoadAssetAtPath<AnimatorController>(animatorControllerPath);
 
             return animatorController;
+        }
+        
+        private static T GetTableValue<T>(Table table, string pk)
+        {
+            var value = table[pk] as Table;
+            if (value == null)
+            {
+                Debug.LogError($"Key {pk} not found in table.");
+                return default(T);
+            }
+
+            var first = value["First"] as Table;
+            if (first == null)
+            {
+                Debug.LogError($"Key {pk} First not found in table.");
+                return default(T);
+            }
+
+            return (T) first["Value"];
+        }
+
+        private static Table GetTable(string tableName)
+        {
+            var table = TileController.LuaScript.Globals[tableName] as Table;
+            if (table == null)
+            {
+                Debug.LogError($"{tableName} not found in the machine model.");
+            }
+            return table;
         }
         
     }
