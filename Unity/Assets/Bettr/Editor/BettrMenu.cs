@@ -636,27 +636,37 @@ namespace Bettr.Editor
         
         private static void ProcessBaseGameReels(string machineName, string machineVariant, string runtimeAssetPath)
         {
+            var scriptName = $"{machineName}BaseGameReel";   
+            var scriptTextAsset = CreateOrLoadScript(scriptName, runtimeAssetPath);
+            
             var baseGameReelState = GetTable($"{machineName}BaseGameReelState");
             int reelCount = 0;
             foreach (var pair in baseGameReelState.Pairs)
             {
                 reelCount++;
-                ProcessBaseGameReel(machineName, machineVariant, reelCount, runtimeAssetPath);
+                ProcessBaseGameReel(machineName, machineVariant, reelCount, scriptTextAsset, runtimeAssetPath);
             }
-
         }
 
-        private static void ProcessBaseGameReel(string machineName, string machineVariant, int reelIndex, string runtimeAssetPath)
+        private static void ProcessBaseGameReel(string machineName, string machineVariant, int reelIndex, TextAsset scriptTextAsset, string runtimeAssetPath)
         {
             // refresh the asset database
             AssetDatabase.Refresh();
             
             var reelName = $"{machineName}BaseGameReel{reelIndex}";
-            var reelPrefab = ProcessPrefab(reelName, new List<IComponent>(), 
-                new List<IGameObject>(),
+            
+            var symbolGroupName = $"{machineName}BaseGameSymbolGroup.prefab"; 
+            var symbolGroup = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{symbolGroupName}");
+            var reelPrefab = ProcessPrefab(reelName, new List<IComponent>()
+                {
+                    new TileComponent(reelName, scriptTextAsset),
+                }, 
+                new List<IGameObject>()
+                {
+                    new PrefabGameObject(symbolGroup, "Symbol1")
+                },
                 runtimeAssetPath);
             
-            // var scriptGroupName = $"{machineName}BaseGameSymbolGroup"; 
             //
             // var reelStates = GetTable($"{machineName}BaseGameReelState");
             // var reelState = reelStates[$"Reel{reelIndex}"] as Table;
