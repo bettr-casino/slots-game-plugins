@@ -653,11 +653,13 @@ namespace Bettr.Editor
             var reelName = $"{machineName}BaseGameReel{reelIndex}";
             
             var reelStates = GetTable($"{machineName}BaseGameReelState");
-            var symbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "SymbolCount");
+            var topSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "TopSymbolCount");
+            var visibleSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "VisibleSymbolCount");
+            var bottomSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "BottomSymbolCount");
             
-            var symbolInstances = new List<IGameObject>();
+            var gameObjectInstances = new List<IGameObject>();
 
-            for (int symbolIndex = 1; symbolIndex <= symbolCount; symbolIndex++)
+            for (int symbolIndex = 1; symbolIndex <= topSymbolCount; symbolIndex++)
             {
                 var symbolInstance = new InstanceGameObject(new GameObject($"Symbol{symbolIndex}"));
                 var pivotInstance = new InstanceGameObject(new GameObject("Pivot"));
@@ -667,27 +669,82 @@ namespace Bettr.Editor
                 var prefabGameObject = new PrefabGameObject(symbolGroupPrefab, "SymbolGroup");
                 prefabGameObject.AddChild(pivotInstance.Go);
                 
-                symbolInstances.Add(symbolInstance);
+                gameObjectInstances.Add(symbolInstance);
             }
             
+            var baseGameOverviewTable = GetTable($"{machineName}BaseGameOverview");
+            var payType = GetTableValue<string>(baseGameOverviewTable, "PayType", "Value");
+            
+            for (int symbolIndex = topSymbolCount + 1 ; symbolIndex <= topSymbolCount + 1 + visibleSymbolCount; symbolIndex++)
+            {
+                if (payType == "Ways")
+                {
+                    // add ways reel processing here
+                    var waysInstance = new InstanceGameObject(new GameObject($"Ways{symbolIndex}"));
+                    var winInstance = new InstanceGameObject(new GameObject("Win"));
+                    winInstance.AddChild(waysInstance.Go);
+                    var waysPivotInstance = new InstanceGameObject(new GameObject("Pivot"));
+                    waysPivotInstance.AddChild(winInstance.Go);
+                    
+                    var waysWinPrefab = ProcessWaysWin("WaysWin", runtimeAssetPath);
+                    var waysWinGameObject = new PrefabGameObject(waysWinPrefab, "WaysWin");
+                    waysWinGameObject.AddChild(waysPivotInstance.Go);
+                    
+                    gameObjectInstances.Add(waysInstance);
+                    
+                } 
+                else if (payType == "Paylines")
+                {
+                    // add paylines reel processing here
+                }
+                
+                var symbolInstance = new InstanceGameObject(new GameObject($"Symbol{symbolIndex}"));
+                var pivotInstance = new InstanceGameObject(new GameObject("Pivot"));
+                pivotInstance.AddChild(symbolInstance.Go);
+            
+                var symbolGroupPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameSymbolGroup.prefab");
+                var prefabGameObject = new PrefabGameObject(symbolGroupPrefab, "SymbolGroup");
+                prefabGameObject.AddChild(pivotInstance.Go);
+                
+                gameObjectInstances.Add(symbolInstance);
+            }
+
+            for (int symbolIndex = topSymbolCount + visibleSymbolCount + 1;
+                 symbolIndex <= topSymbolCount + visibleSymbolCount + 1 + bottomSymbolCount;
+                 symbolIndex++)
+            {
+                var symbolInstance = new InstanceGameObject(new GameObject($"Symbol{symbolIndex}"));
+                var pivotInstance = new InstanceGameObject(new GameObject("Pivot"));
+                pivotInstance.AddChild(symbolInstance.Go);
+            
+                var symbolGroupPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameSymbolGroup.prefab");
+                var prefabGameObject = new PrefabGameObject(symbolGroupPrefab, "SymbolGroup");
+                prefabGameObject.AddChild(pivotInstance.Go);
+                
+                gameObjectInstances.Add(symbolInstance);
+            }
+
             var reelPrefab = ProcessPrefab(reelName, new List<IComponent>()
                 {
                     new TileComponent(reelName, scriptTextAsset),
                 }, 
-                symbolInstances,
+                gameObjectInstances,
                 runtimeAssetPath);
             
-            //
-            // var baseGameOverviewTable = GetTable($"{machineName}BaseGameOverview");
-            // var payType = GetTableValue<string>(baseGameOverviewTable, "PayType", "Value);
-            // if (payType == "Ways")
-            // {
-            //     // add ways reel processing here
-            // } 
-            // else if (payType == "Paylines")
-            // {
-            //     // add paylines reel processing here
-            // }
+        }
+        
+        private static GameObject ProcessWaysWin(string symbolName, string runtimeAssetPath)
+        {
+            var materialName = "WaysWin";
+            var shaderName = "Unlit/Texture";
+            var material = CreateOrLoadMaterial(materialName, shaderName, runtimeAssetPath);
+            var symbolPrefab = ProcessPrefab(symbolName, new List<IComponent>
+                {
+                    new MeshComponent(material),
+                }, 
+                new List<IGameObject>(),
+                runtimeAssetPath);
+            return symbolPrefab;
         }
         
         private static bool PostToService()
@@ -819,6 +876,34 @@ namespace Bettr.Editor
             animatorController = AssetDatabase.LoadAssetAtPath<AnimatorController>(animatorControllerPath);
 
             return animatorController;
+        }
+        
+        private static Material CreateOrLoadMaterial(string materialName, string shaderName, string runtimeAssetPath)
+        {
+            AssetDatabase.Refresh();
+            
+            var materialFilename = $"{materialName}.mat";
+            var materialFilepath = $"{runtimeAssetPath}/Materials/{materialFilename}";
+            var material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
+            if (material == null)
+            {
+                Debug.Log($"Creating material for {materialName} at {materialFilepath}");
+                try
+                {
+                    material = new Material(Shader.Find(shaderName));
+                    AssetDatabase.CreateAsset(material, materialFilepath);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e);
+                }
+            }
+            
+            AssetDatabase.Refresh();
+            
+            material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
+
+            return material;
         }
         
         private static T GetTableValue<T>(Table table, string pk, string key)

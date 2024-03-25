@@ -88,4 +88,21 @@ namespace Bettr.Editor
             animator.runtimeAnimatorController = _animatorController;
         }
     }
+    
+    [Serializable]
+    public class MeshComponent : IComponent
+    {
+        private readonly Material _material;
+
+        public MeshComponent(Material material)
+        {
+            _material = material;
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            var meshRenderer = gameObject.AddComponent<MeshRenderer>();
+            meshRenderer.material = _material;
+        }
+    }
 }
