@@ -681,14 +681,12 @@ namespace Bettr.Editor
                 {
                     // add ways reel processing here
                     var waysInstance = new InstanceGameObject(new GameObject($"Ways{symbolIndex}"));
-                    var winInstance = new InstanceGameObject(new GameObject("Win"));
-                    winInstance.AddChild(waysInstance.Go);
                     var waysPivotInstance = new InstanceGameObject(new GameObject("Pivot"));
-                    waysPivotInstance.AddChild(winInstance.Go);
+                    waysPivotInstance.AddChild(waysInstance.Go);
                     
                     var waysWinPrefab = ProcessWaysWin("WaysWin", runtimeAssetPath);
-                    var waysWinGameObject = new PrefabGameObject(waysWinPrefab, "WaysWin");
-                    waysWinGameObject.AddChild(waysPivotInstance.Go);
+                    var waysWinPrefabGameObject = new PrefabGameObject(waysWinPrefab, $"WaysWin");
+                    waysWinPrefabGameObject.AddChild(waysPivotInstance.Go);
                     
                     gameObjectInstances.Add(waysInstance);
                     
@@ -735,14 +733,22 @@ namespace Bettr.Editor
         
         private static GameObject ProcessWaysWin(string symbolName, string runtimeAssetPath)
         {
+            var winInstance = new InstanceGameObject(new GameObject("Win"));
+            var waysPivotInstance = new InstanceGameObject(new GameObject("Pivot"));
+            waysPivotInstance.AddChild(winInstance.Go);
+            var waysQuadInstance = new InstanceGameObject(GameObject.CreatePrimitive(PrimitiveType.Quad));
+            waysQuadInstance.AddChild(waysPivotInstance.Go);
+            
             var materialName = "WaysWin";
             var shaderName = "Unlit/Texture";
             var material = CreateOrLoadMaterial(materialName, shaderName, runtimeAssetPath);
             var symbolPrefab = ProcessPrefab(symbolName, new List<IComponent>
                 {
-                    new MeshComponent(material),
                 }, 
-                new List<IGameObject>(),
+                new List<IGameObject>()
+                {
+                    winInstance
+                },
                 runtimeAssetPath);
             return symbolPrefab;
         }

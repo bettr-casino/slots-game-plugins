@@ -47,6 +47,21 @@ namespace Bettr.Editor
         }
     }
     
+    public class PrimitiveGameObject : IGameObject
+    {
+        private PrimitiveType _primitiveType;
+        public PrimitiveGameObject(PrimitiveType primitiveType)
+        {
+            _primitiveType = primitiveType;
+        }
+        
+        public void AddChild(GameObject parentGo)
+        {
+            var go = GameObject.CreatePrimitive(_primitiveType);
+            go.transform.SetParent(parentGo.transform);   
+        }
+    }
+    
     public interface IComponent
     {
         public void AddComponent(GameObject gameObject);
@@ -89,20 +104,4 @@ namespace Bettr.Editor
         }
     }
     
-    [Serializable]
-    public class MeshComponent : IComponent
-    {
-        private readonly Material _material;
-
-        public MeshComponent(Material material)
-        {
-            _material = material;
-        }
-
-        public void AddComponent(GameObject gameObject)
-        {
-            var meshRenderer = gameObject.AddComponent<MeshRenderer>();
-            meshRenderer.material = _material;
-        }
-    }
 }
