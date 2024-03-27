@@ -646,9 +646,9 @@ namespace Bettr.Editor
             var camerasGameObject = new InstanceGameObject(new GameObject($"Cameras"));
             var camerasPivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
             camerasPivotGameObject.AddChild(camerasGameObject.Go);
-            ProcessUICamera("UICamera", runtimeAssetPath);
-            var cameraPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/UICamera.prefab");
-            var cameraPrefabGameObject = new PrefabGameObject(cameraPrefab, $"UI Camera");
+            ProcessUICamera($"{machineName}BaseGameUICamera", runtimeAssetPath);
+            var cameraPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameUICamera.prefab");
+            var cameraPrefabGameObject = new PrefabGameObject(cameraPrefab, $"{machineName}BaseGameUICamera");
             cameraPrefabGameObject.AddChild(camerasPivotGameObject.Go);
             
             gameObjectInstances.Add(camerasGameObject);
@@ -731,7 +731,7 @@ namespace Bettr.Editor
             var waysPivotInstance = new InstanceGameObject(new GameObject("Pivot"));
             waysPivotInstance.AddChild(waysInstance.Go);
                     
-            var waysWinPrefab = ProcessWaysWin("WaysWin", runtimeAssetPath);
+            var waysWinPrefab = ProcessWaysWin($"{machineName}BaseGameWaysWin", runtimeAssetPath);
             var waysWinPrefabGameObject = new PrefabGameObject(waysWinPrefab, $"WaysWin");
             waysWinPrefabGameObject.AddChild(waysPivotInstance.Go);
 
