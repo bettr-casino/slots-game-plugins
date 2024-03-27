@@ -650,12 +650,12 @@ namespace Bettr.Editor
             gameObjectInstances.Add(camerasGameObject);
             
             var machinePivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
+            gameObjectInstances.Add(machinePivotGameObject);
+            
             var reelsGameObject = new InstanceGameObject(new GameObject($"Reels"));
             reelsGameObject.AddChild(machinePivotGameObject.Go);
             var reelsPivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
             reelsPivotGameObject.AddChild(reelsGameObject.Go);
-            
-            gameObjectInstances.Add(machinePivotGameObject);
             
             int reelCount = 0;
             foreach (var pair in baseGameReelState.Pairs)
@@ -667,6 +667,15 @@ namespace Bettr.Editor
                 var prefabGameObject = new PrefabGameObject(prefab, $"Reel{reelCount}");
                 prefabGameObject.AddChild(reelsPivotGameObject.Go);
             }
+            
+            var backgroundGameObject = new InstanceGameObject(new GameObject($"Reels Background"));
+            backgroundGameObject.AddChild(machinePivotGameObject.Go);
+            var backgroundPivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
+            backgroundPivotGameObject.AddChild(backgroundGameObject.Go);
+            
+            var backgroundScriptName = $"{machineName}BaseGameBackground";   
+            var backgroundScriptTextAsset = CreateOrLoadScript(backgroundScriptName, runtimeAssetPath);
+            ProcessBaseGameBackground(machineName, machineVariant, backgroundScriptTextAsset, runtimeAssetPath);
             
             ProcessPrefab($"{machineName}BaseGameMachine", new List<IComponent>(), 
                 gameObjectInstances,
@@ -798,6 +807,27 @@ namespace Bettr.Editor
                     new UICameraComponent(),
                 }, 
                 new List<IGameObject>(),
+                runtimeAssetPath);
+        }
+        
+        private static void ProcessBaseGameBackground(string machineName, string machineVariant, TextAsset scriptTextAsset, string runtimeAssetPath)
+        {
+            var pivotInstance = new InstanceGameObject(new GameObject("Pivot"));
+            var quadInstance = new InstanceGameObject(GameObject.CreatePrimitive(PrimitiveType.Quad));
+            quadInstance.Go.SetActive(false);
+            quadInstance.AddChild(pivotInstance.Go);
+
+            var animatorController = CreateOrLoadAnimatorController($"{machineName}BaseGameBackground_anims", runtimeAssetPath);
+            
+            var backgroundPrefab = ProcessPrefab($"{machineName}BaseGameBackground", new List<IComponent>
+                {
+                    new TileComponent($"{machineName}BaseGameBackground", scriptTextAsset),
+                    new AnimatorComponent(animatorController),
+                }, 
+                new List<IGameObject>()
+                {
+                    pivotInstance,
+                },
                 runtimeAssetPath);
         }
         
