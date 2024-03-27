@@ -583,7 +583,7 @@ namespace Bettr.Editor
             TileController.LuaScript.Call(dynValue);
 
             ProcessBaseGameSymbols(machineName, machineVariant, runtimeAssetPath);
-            ProcessBaseGameReels(machineName, machineVariant, runtimeAssetPath);
+            ProcessBaseGameMachine(machineName, machineVariant, runtimeAssetPath);
         }
         
         private static void EnsureDirectory(string path)
@@ -631,19 +631,29 @@ namespace Bettr.Editor
             return symbolPrefab;
         }
         
-        private static void ProcessBaseGameReels(string machineName, string machineVariant, string runtimeAssetPath)
+        private static void ProcessBaseGameMachine(string machineName, string machineVariant, string runtimeAssetPath)
         {
             var scriptName = $"{machineName}BaseGameReel";   
             var scriptTextAsset = CreateOrLoadScript(scriptName, runtimeAssetPath);
             
             var baseGameReelState = GetTable($"{machineName}BaseGameReelState");
             
+            var gameObjectInstances = new List<IGameObject>();
+            
             int reelCount = 0;
             foreach (var pair in baseGameReelState.Pairs)
             {
                 reelCount++;
                 ProcessBaseGameReel(machineName, machineVariant, reelCount, scriptTextAsset, runtimeAssetPath);
+                // load the reel prefab
+                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameReel{reelCount}.prefab");
+                var prefabGameObject = new PrefabGameObject(prefab, $"Reel{reelCount}");
+                gameObjectInstances.Add(prefabGameObject);
             }
+            
+            ProcessPrefab($"{machineName}BaseGameMachine", new List<IComponent>(), 
+                gameObjectInstances,
+                runtimeAssetPath);
         }
 
         private static IGameObject ProcessBaseGameSymbolGroup(int symbolIndex, string runtimeAssetPath, string machineName)
