@@ -702,6 +702,10 @@ namespace Bettr.Editor
             reelsScrimQuadInstance.Go.SetActive(false);
             reelsScrimQuadInstance.AddChild(reelsScrimPivotGameObject.Go);
             
+            //
+            // Settings Prefab
+            //
+            
             ProcessPrefab($"{machineName}BaseGameMachine", new List<IComponent>(), 
                 gameObjectInstances,
                 runtimeAssetPath);
