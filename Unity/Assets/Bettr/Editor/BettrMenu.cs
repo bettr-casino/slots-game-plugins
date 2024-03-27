@@ -637,12 +637,40 @@ namespace Bettr.Editor
             var scriptTextAsset = CreateOrLoadScript(scriptName, runtimeAssetPath);
             
             var baseGameReelState = GetTable($"{machineName}BaseGameReelState");
+            
             int reelCount = 0;
             foreach (var pair in baseGameReelState.Pairs)
             {
                 reelCount++;
                 ProcessBaseGameReel(machineName, machineVariant, reelCount, scriptTextAsset, runtimeAssetPath);
             }
+        }
+
+        private static IGameObject ProcessBaseGameSymbolGroup(int symbolIndex, string runtimeAssetPath, string machineName)
+        {
+            var symbolInstance = new InstanceGameObject(new GameObject($"Symbol{symbolIndex}"));
+            var pivotInstance = new InstanceGameObject(new GameObject("Pivot"));
+            pivotInstance.AddChild(symbolInstance.Go);
+            
+            var symbolGroupPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameSymbolGroup.prefab");
+            var prefabGameObject = new PrefabGameObject(symbolGroupPrefab, "SymbolGroup");
+            prefabGameObject.AddChild(pivotInstance.Go);
+
+            return symbolInstance;
+        }
+
+        private static IGameObject ProcessBaseGameWaysWin(int symbolIndex, string runtimeAssetPath,
+            string machineName)
+        {
+            var waysInstance = new InstanceGameObject(new GameObject($"Ways{symbolIndex}"));
+            var waysPivotInstance = new InstanceGameObject(new GameObject("Pivot"));
+            waysPivotInstance.AddChild(waysInstance.Go);
+                    
+            var waysWinPrefab = ProcessWaysWin("WaysWin", runtimeAssetPath);
+            var waysWinPrefabGameObject = new PrefabGameObject(waysWinPrefab, $"WaysWin");
+            waysWinPrefabGameObject.AddChild(waysPivotInstance.Go);
+
+            return waysInstance;
         }
 
         private static void ProcessBaseGameReel(string machineName, string machineVariant, int reelIndex, TextAsset scriptTextAsset, string runtimeAssetPath)
@@ -656,69 +684,52 @@ namespace Bettr.Editor
             var topSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "TopSymbolCount");
             var visibleSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "VisibleSymbolCount");
             var bottomSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "BottomSymbolCount");
+            var symbolVerticalSpacing = GetTableValue<float>(reelStates, $"Reel{reelIndex}", "SymbolVerticalSpacing");
+            
+            int half = (topSymbolCount + visibleSymbolCount + bottomSymbolCount) / 2;
+            var startVerticalPosition = half * symbolVerticalSpacing;
             
             var gameObjectInstances = new List<IGameObject>();
 
             for (int symbolIndex = 1; symbolIndex <= topSymbolCount; symbolIndex++)
             {
-                var symbolInstance = new InstanceGameObject(new GameObject($"Symbol{symbolIndex}"));
-                var pivotInstance = new InstanceGameObject(new GameObject("Pivot"));
-                pivotInstance.AddChild(symbolInstance.Go);
-            
-                var symbolGroupPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameSymbolGroup.prefab");
-                var prefabGameObject = new PrefabGameObject(symbolGroupPrefab, "SymbolGroup");
-                prefabGameObject.AddChild(pivotInstance.Go);
-                
+                var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
+                var symbolInstance = (InstanceGameObject) ProcessBaseGameSymbolGroup(symbolIndex, runtimeAssetPath, machineName);
+                symbolInstance.Go.transform.position = new Vector3(0, yPosition, 0);
                 gameObjectInstances.Add(symbolInstance);
             }
             
             var baseGameOverviewTable = GetTable($"{machineName}BaseGameOverview");
             var payType = GetTableValue<string>(baseGameOverviewTable, "PayType", "Value");
             
-            for (int symbolIndex = topSymbolCount + 1 ; symbolIndex <= topSymbolCount + 1 + visibleSymbolCount; symbolIndex++)
+            for (int symbolIndex = topSymbolCount + 1 ; symbolIndex <= topSymbolCount + visibleSymbolCount; symbolIndex++)
             {
+                var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
                 if (payType == "Ways")
                 {
                     // add ways reel processing here
-                    var waysInstance = new InstanceGameObject(new GameObject($"Ways{symbolIndex}"));
-                    var waysPivotInstance = new InstanceGameObject(new GameObject("Pivot"));
-                    waysPivotInstance.AddChild(waysInstance.Go);
-                    
-                    var waysWinPrefab = ProcessWaysWin("WaysWin", runtimeAssetPath);
-                    var waysWinPrefabGameObject = new PrefabGameObject(waysWinPrefab, $"WaysWin");
-                    waysWinPrefabGameObject.AddChild(waysPivotInstance.Go);
-                    
+                    var waysInstance = (InstanceGameObject) ProcessBaseGameWaysWin(symbolIndex, runtimeAssetPath, machineName);
+                    waysInstance.Go.transform.position = new Vector3(0, yPosition, 0);
+                    waysInstance.Go.SetActive(false);
                     gameObjectInstances.Add(waysInstance);
-                    
                 } 
                 else if (payType == "Paylines")
                 {
                     // add paylines reel processing here
                 }
                 
-                var symbolInstance = new InstanceGameObject(new GameObject($"Symbol{symbolIndex}"));
-                var pivotInstance = new InstanceGameObject(new GameObject("Pivot"));
-                pivotInstance.AddChild(symbolInstance.Go);
-            
-                var symbolGroupPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameSymbolGroup.prefab");
-                var prefabGameObject = new PrefabGameObject(symbolGroupPrefab, "SymbolGroup");
-                prefabGameObject.AddChild(pivotInstance.Go);
-                
+                var symbolInstance = (InstanceGameObject) ProcessBaseGameSymbolGroup(symbolIndex, runtimeAssetPath, machineName);
+                symbolInstance.Go.transform.position = new Vector3(0, yPosition, 0);
                 gameObjectInstances.Add(symbolInstance);
             }
 
             for (int symbolIndex = topSymbolCount + visibleSymbolCount + 1;
-                 symbolIndex <= topSymbolCount + visibleSymbolCount + 1 + bottomSymbolCount;
+                 symbolIndex <= topSymbolCount + visibleSymbolCount + bottomSymbolCount;
                  symbolIndex++)
             {
-                var symbolInstance = new InstanceGameObject(new GameObject($"Symbol{symbolIndex}"));
-                var pivotInstance = new InstanceGameObject(new GameObject("Pivot"));
-                pivotInstance.AddChild(symbolInstance.Go);
-            
-                var symbolGroupPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameSymbolGroup.prefab");
-                var prefabGameObject = new PrefabGameObject(symbolGroupPrefab, "SymbolGroup");
-                prefabGameObject.AddChild(pivotInstance.Go);
-                
+                var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
+                var symbolInstance = (InstanceGameObject) ProcessBaseGameSymbolGroup(symbolIndex, runtimeAssetPath, machineName);
+                symbolInstance.Go.transform.position = new Vector3(0, yPosition, 0);
                 gameObjectInstances.Add(symbolInstance);
             }
 
