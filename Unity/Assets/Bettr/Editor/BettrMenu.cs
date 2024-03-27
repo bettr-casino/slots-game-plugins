@@ -639,6 +639,13 @@ namespace Bettr.Editor
             var baseGameReelState = GetTable($"{machineName}BaseGameReelState");
             
             var gameObjectInstances = new List<IGameObject>();
+            var machinePivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
+            var reelsGameObject = new InstanceGameObject(new GameObject($"Reels"));
+            reelsGameObject.AddChild(machinePivotGameObject.Go);
+            var reelsPivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
+            reelsPivotGameObject.AddChild(reelsGameObject.Go);
+            
+            gameObjectInstances.Add(machinePivotGameObject);
             
             int reelCount = 0;
             foreach (var pair in baseGameReelState.Pairs)
@@ -648,7 +655,7 @@ namespace Bettr.Editor
                 // load the reel prefab
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameReel{reelCount}.prefab");
                 var prefabGameObject = new PrefabGameObject(prefab, $"Reel{reelCount}");
-                gameObjectInstances.Add(prefabGameObject);
+                prefabGameObject.AddChild(reelsPivotGameObject.Go);
             }
             
             ProcessPrefab($"{machineName}BaseGameMachine", new List<IComponent>(), 
