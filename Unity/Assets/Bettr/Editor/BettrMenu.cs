@@ -639,6 +639,16 @@ namespace Bettr.Editor
             var baseGameReelState = GetTable($"{machineName}BaseGameReelState");
             
             var gameObjectInstances = new List<IGameObject>();
+            var camerasGameObject = new InstanceGameObject(new GameObject($"Cameras"));
+            var camerasPivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
+            camerasPivotGameObject.AddChild(camerasGameObject.Go);
+            ProcessUICamera("UICamera", runtimeAssetPath);
+            var cameraPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/UICamera.prefab");
+            var cameraPrefabGameObject = new PrefabGameObject(cameraPrefab, $"UI Camera");
+            cameraPrefabGameObject.AddChild(camerasPivotGameObject.Go);
+            
+            gameObjectInstances.Add(camerasGameObject);
+            
             var machinePivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
             var reelsGameObject = new InstanceGameObject(new GameObject($"Reels"));
             reelsGameObject.AddChild(machinePivotGameObject.Go);
@@ -779,6 +789,16 @@ namespace Bettr.Editor
                 },
                 runtimeAssetPath);
             return symbolPrefab;
+        }
+        
+        private static void ProcessUICamera(string cameraName, string runtimeAssetPath)
+        {
+            ProcessPrefab(cameraName, new List<IComponent>
+                {
+                    new UICameraComponent(),
+                }, 
+                new List<IGameObject>(),
+                runtimeAssetPath);
         }
         
         private static bool PostToService()

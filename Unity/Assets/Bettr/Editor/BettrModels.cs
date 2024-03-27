@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using CrayonScript.Code;
 using UnityEditor;
 using UnityEditor.Animations;
 using UnityEngine;
-using Object = System.Object;
 
 namespace Bettr.Editor
 {
@@ -101,6 +99,29 @@ namespace Bettr.Editor
         {
             var animator = gameObject.AddComponent<Animator>();
             animator.runtimeAnimatorController = _animatorController;
+        }
+    }
+
+    [Serializable]
+    public class UICameraComponent : IComponent
+    {
+        public void AddComponent(GameObject gameObject)
+        {
+            var uiCamera = gameObject.AddComponent<Camera>();
+            gameObject.layer = LayerMask.NameToLayer("UI");
+            uiCamera.clearFlags = CameraClearFlags.Depth;
+            uiCamera.cullingMask = LayerMask.GetMask("UI");
+            uiCamera.orthographic = true;
+            uiCamera.orthographicSize = 5;
+            uiCamera.nearClipPlane = 0.3f;
+            uiCamera.farClipPlane = 1000;
+            uiCamera.depth = 10;
+            uiCamera.useOcclusionCulling = true;
+            uiCamera.renderingPath = RenderingPath.UsePlayerSettings;
+            uiCamera.allowHDR = true;
+            uiCamera.allowMSAA = true;
+            uiCamera.allowDynamicResolution = false;
+            uiCamera.targetDisplay = 0;
         }
     }
     
