@@ -639,6 +639,10 @@ namespace Bettr.Editor
             var baseGameReelState = GetTable($"{machineName}BaseGameReelState");
             
             var gameObjectInstances = new List<IGameObject>();
+            
+            //
+            // Cameras
+            //
             var camerasGameObject = new InstanceGameObject(new GameObject($"Cameras"));
             var camerasPivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
             camerasPivotGameObject.AddChild(camerasGameObject.Go);
@@ -652,6 +656,9 @@ namespace Bettr.Editor
             var machinePivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
             gameObjectInstances.Add(machinePivotGameObject);
             
+            //
+            // Reels
+            //
             var reelsGameObject = new InstanceGameObject(new GameObject($"Reels"));
             reelsGameObject.AddChild(machinePivotGameObject.Go);
             var reelsPivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
@@ -668,6 +675,9 @@ namespace Bettr.Editor
                 prefabGameObject.AddChild(reelsPivotGameObject.Go);
             }
             
+            //
+            // Background
+            //
             var backgroundGameObject = new InstanceGameObject(new GameObject($"Reels Background"));
             backgroundGameObject.AddChild(machinePivotGameObject.Go);
             var backgroundPivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
@@ -676,6 +686,21 @@ namespace Bettr.Editor
             var backgroundScriptName = $"{machineName}BaseGameBackground";   
             var backgroundScriptTextAsset = CreateOrLoadScript(backgroundScriptName, runtimeAssetPath);
             ProcessBaseGameBackground(machineName, machineVariant, backgroundScriptTextAsset, runtimeAssetPath);
+            
+            var backgroundPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameBackground.prefab");
+            var backgroundPrefabGameObject = new PrefabGameObject(backgroundPrefab, $"Reels Background");
+            backgroundPrefabGameObject.AddChild(backgroundPivotGameObject.Go);
+            
+            //
+            // Scrim
+            //
+            var reelsScrimGameObject = new InstanceGameObject(new GameObject($"Reels Scrim"));
+            reelsScrimGameObject.AddChild(machinePivotGameObject.Go);
+            var reelsScrimPivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
+            reelsScrimPivotGameObject.AddChild(reelsScrimGameObject.Go);
+            var reelsScrimQuadInstance = new InstanceGameObject(GameObject.CreatePrimitive(PrimitiveType.Quad));
+            reelsScrimQuadInstance.Go.SetActive(false);
+            reelsScrimQuadInstance.AddChild(reelsScrimPivotGameObject.Go);
             
             ProcessPrefab($"{machineName}BaseGameMachine", new List<IComponent>(), 
                 gameObjectInstances,
