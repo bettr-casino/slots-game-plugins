@@ -874,150 +874,164 @@ namespace Bettr.Editor
         private static void ProcessSettings(string settingsName, string runtimeAssetPath)
         {
             string json = @"
-            {
-                ""Name"": ""Pivot"",
-                ""Children"": [
-                    {
-                        ""Name"": ""StatusTexts"",
-                        ""Child"": {
-                            ""Name"": ""Pivot"",
-                            ""Children"": [
-                                {
-                                    ""Name"": ""GoodLuckText""
-                                },
-                                {
-                                    ""Name"": ""PaysText""
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        ""Name"": ""SettingsPanel"",
+                {
+                    ""Name"": ""Settings"",
+                    ""Child"": {
+                        ""Name"": ""Pivot"",
                         ""Children"": [
                             {
-                                ""Name"": ""HorizontalBar"",
-                                ""Children"": [
-                                    {
-                                        ""Name"": ""GameControls"",
-                                        ""Child"": {
-                                            ""Name"": ""Pivot"",
-                                            ""Children"": [
-                                                {
-                                                    ""Name"": ""Vol"",
-                                                    ""Children"": [
-                                                        {
-                                                            ""Name"": ""Image""
-                                                        },
-                                                        {
-                                                            ""Name"": ""Text""
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    ""Name"": ""GameRules"",
-                                                    ""Children"": [
-                                                        {
-                                                            ""Name"": ""Image""
-                                                        },
-                                                        {
-                                                            ""Name"": ""Text""
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    ""Name"": ""ChangeDenom"",
-                                                    ""Children"": [
-                                                        {
-                                                            ""Name"": ""Image""
-                                                        },
-                                                        {
-                                                            ""Name"": ""Text""
-                                                        }
-                                                    ]
-                                                }
-                                            ]
+                                ""Name"": ""StatusTexts"",
+                                ""Child"": {
+                                    ""Name"": ""Pivot"",
+                                    ""Children"": [
+                                        {
+                                            ""Name"": ""GoodLuckText""
+                                        },
+                                        {
+                                            ""Name"": ""PaysText""
                                         }
-                                    },
-                                    {
-                                        ""Name"": ""WinMeter"",
-                                        ""Child"": {
-                                            ""Name"": ""Pivot"",
-                                            ""Children"": [
-                                                {
-                                                    ""Name"": ""Credit"",
-                                                    ""Children"": [
-                                                        {
-                                                            ""Name"": ""Image""
-                                                        },
-                                                        {
-                                                            ""Name"": ""CreditsText""
-                                                        },
-                                                        {
-                                                            ""Name"": ""CreditsLabel""
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    ""Name"": ""Win"",
-                                                    ""Children"": [
-                                                        {
-                                                            ""Name"": ""Image""
-                                                        },
-                                                        {
-                                                            ""Name"": ""WinText""
-                                                        },
-                                                        {
-                                                            ""Name"": ""WinLabel""
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    ""Name"": ""Bet"",
-                                                    ""Children"": [
-                                                        {
-                                                            ""Name"": ""Image""
-                                                        },
-                                                        {
-                                                            ""Name"": ""BetText""
-                                                        },
-                                                        {
-                                                            ""Name"": ""BetLabel""
-                                                        }
-                                                    ]
-                                                }
-                                            ]
-                                        }
-                                    },
-                                    {
-                                        ""Name"": ""SpinParent"",
-                                        ""Child"": {
-                                            ""Name"": ""Pivot"",
-                                            ""Child"": {
-                                                ""Name"": ""Spin""
-                                            }
-                                        }
-                                    }
-                                ]
+                                    ]
+                                }
                             },
                             {
-                                ""Name"": ""AnimationText""
+                                ""Name"": ""SettingsPanel"",
+                                ""Children"": [
+                                    {
+                                        ""Name"": ""HorizontalBar"",
+                                        ""Children"": [
+                                            {
+                                                ""Name"": ""GameControls"",
+                                                ""Child"": {
+                                                    ""Name"": ""Pivot"",
+                                                    ""Children"": [
+                                                        {
+                                                            ""Name"": ""Vol"",
+                                                            ""Children"": [
+                                                                {
+                                                                    ""Name"": ""Image""
+                                                                },
+                                                                {
+                                                                    ""Name"": ""Text""
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            ""Name"": ""GameRules"",
+                                                            ""Children"": [
+                                                                {
+                                                                    ""Name"": ""Image""
+                                                                },
+                                                                {
+                                                                    ""Name"": ""Text""
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            ""Name"": ""ChangeDenom"",
+                                                            ""Children"": [
+                                                                {
+                                                                    ""Name"": ""Image""
+                                                                },
+                                                                {
+                                                                    ""Name"": ""Text""
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                ""Name"": ""WinMeter"",
+                                                ""Child"": {
+                                                    ""Name"": ""Pivot"",
+                                                    ""Children"": [
+                                                        {
+                                                            ""Name"": ""Credit"",
+                                                            ""Children"": [
+                                                                {
+                                                                    ""Name"": ""Image""
+                                                                },
+                                                                {
+                                                                    ""Name"": ""CreditsText""
+                                                                },
+                                                                {
+                                                                    ""Name"": ""CreditsLabel""
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            ""Name"": ""Win"",
+                                                            ""Children"": [
+                                                                {
+                                                                    ""Name"": ""Image""
+                                                                },
+                                                                {
+                                                                    ""Name"": ""WinText""
+                                                                },
+                                                                {
+                                                                    ""Name"": ""WinLabel""
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            ""Name"": ""Bet"",
+                                                            ""Children"": [
+                                                                {
+                                                                    ""Name"": ""Image""
+                                                                },
+                                                                {
+                                                                    ""Name"": ""BetText""
+                                                                },
+                                                                {
+                                                                    ""Name"": ""BetLabel""
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                ""Name"": ""SpinParent"",
+                                                ""Child"": {
+                                                    ""Name"": ""Pivot"",
+                                                    ""Child"": {
+                                                        ""Name"": ""Spin""
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        ""Name"": ""AnimationText""
+                                    }
+                                ]
                             }
                         ]
                     }
-                ]
-            }";
+                }
+            ";
             
             GameObjectDefinition rootDefinition = JsonConvert.DeserializeObject<GameObjectDefinition>(json);
             Debug.Log($"rootDefinition name={rootDefinition.Name}");
-            IGameObject pivotInstance = CreateGameObjectHierarchy(rootDefinition);
+            List<IGameObject> gameObjects = new List<IGameObject>();
+            if (rootDefinition.Children != null)
+            {
+                foreach (var childDefinition in rootDefinition.Children)
+                {
+                    IGameObject childInstance = CreateGameObjectHierarchy(childDefinition);
+                    gameObjects.Add(childInstance);
+                }
+            } 
+            else if (rootDefinition.Child != null)
+            {
+                IGameObject childInstance = CreateGameObjectHierarchy(rootDefinition.Child);
+                gameObjects.Add(childInstance);
+            }
 
             var settingsPrefab = ProcessPrefab(settingsName, new List<IComponent>
                 {
                 }, 
-                new List<IGameObject>()
-                {
-                    pivotInstance,
-                },
+                gameObjects,
                 runtimeAssetPath);
         }
         
