@@ -20,14 +20,53 @@ namespace Bettr.Editor
         private GameObject _go;
         public string Name { get; set; }
         
-        public InstanceGameObject Child { get; set; }
-        public List<InstanceGameObject> Children { get; set; }
+        private List<IComponent> _components;
         
+        public List<IComponent> Components {
+            get => _components;
+            set
+            {
+                _components = value;
+                foreach (var component in _components)
+                {
+                    component.AddComponent(_go);
+                }
+            }
+        }
+
+        private InstanceGameObject _child;
+        
+        public InstanceGameObject Child {
+            get => _child;
+            set
+            {
+                _child = value;
+                if (_go == null) _go = new GameObject(Name);
+                _child.SetParent(_go);
+            }
+        }
+        
+        private List<InstanceGameObject> _children;
+
+        public List<InstanceGameObject> Children
+        {
+            get => _children;
+            set
+            {
+                _children = value;
+                foreach (var child in _children)
+                {
+                    if (_go == null) _go = new GameObject(Name);
+                    child.SetParent(_go);
+                }
+            }
+        }
+
         public GameObject GameObject => _go;
 
         public InstanceGameObject()
         {
-            
+            Components = new List<IComponent>();
         }
         
         public InstanceGameObject(GameObject go)
@@ -44,6 +83,7 @@ namespace Bettr.Editor
         
         public void SetParent(GameObject parentGo)
         {
+            if (_go == null) _go = new GameObject(Name);
             _go.transform.SetParent(parentGo.transform);
         }
 

@@ -1011,27 +1011,13 @@ namespace Bettr.Editor
                 }
             ";
             
-            InstanceGameObject rootDefinition = JsonConvert.DeserializeObject<InstanceGameObject>(json);
-            Debug.Log($"rootDefinition name={rootDefinition.Name}");
-            List<IGameObject> gameObjects = new List<IGameObject>();
-            if (rootDefinition.Children != null)
-            {
-                foreach (var childDefinition in rootDefinition.Children)
-                {
-                    IGameObject childInstance = CreateGameObjectHierarchy(childDefinition);
-                    gameObjects.Add(childInstance);
-                }
-            } 
-            else if (rootDefinition.Child != null)
-            {
-                IGameObject childInstance = CreateGameObjectHierarchy(rootDefinition.Child);
-                gameObjects.Add(childInstance);
-            }
+            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
+            List<IGameObject> runtimeObjects = hierarchyInstance.Child != null ? new List<IGameObject>() {hierarchyInstance.Child} : hierarchyInstance.Children.Cast<IGameObject>().ToList();
 
             var settingsPrefab = ProcessPrefab(settingsName, new List<IComponent>
                 {
                 }, 
-                gameObjects,
+                runtimeObjects,
                 runtimeAssetPath);
         }
         
@@ -1077,28 +1063,6 @@ namespace Bettr.Editor
             }
 
             return false;
-        }
-        
-        private static IGameObject CreateGameObjectHierarchy(InstanceGameObject definition)
-        {
-            var gameObject = new InstanceGameObject(definition.Name);
-            
-            if (definition.Child != null)
-            {
-                IGameObject childGameObject = CreateGameObjectHierarchy(definition.Child);
-                childGameObject.SetParent(gameObject);
-            }
-
-            else if (definition.Children != null)
-            {
-                foreach (var childDefinition in definition.Children)
-                {
-                    IGameObject childGameObject = CreateGameObjectHierarchy(childDefinition);
-                    childGameObject.SetParent(gameObject);
-                }
-            }
-
-            return gameObject;
         }
         
         private static GameObject ProcessPrefab(string prefabName, List<IComponent> components, List<IGameObject> gameObjects, string runtimeAssetPath)
