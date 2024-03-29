@@ -705,6 +705,17 @@ namespace Bettr.Editor
             //
             // Settings Prefab
             //
+            var settingsGameObject = new InstanceGameObject(new GameObject($"Settings"));
+            settingsGameObject.AddChild(machinePivotGameObject.Go);
+            var settingsPivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
+            settingsPivotGameObject.AddChild(settingsGameObject.Go);
+            
+            var settingsName = $"{machineName}BaseGameSettings";   
+            ProcessSettings(settingsName, runtimeAssetPath);
+            
+            var settingsPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameSettings.prefab");
+            var settingsPrefabGameObject = new PrefabGameObject(settingsPrefab, $"Settings");
+            settingsPrefabGameObject.AddChild(settingsPivotGameObject.Go);
             
             ProcessPrefab($"{machineName}BaseGameMachine", new List<IComponent>(), 
                 gameObjectInstances,
@@ -852,6 +863,68 @@ namespace Bettr.Editor
                 {
                     new TileComponent($"{machineName}BaseGameBackground", scriptTextAsset),
                     new AnimatorComponent(animatorController),
+                }, 
+                new List<IGameObject>()
+                {
+                    pivotInstance,
+                },
+                runtimeAssetPath);
+        }
+        
+        private static void ProcessSettings(string settingsName, string runtimeAssetPath)
+        {
+            var pivotInstance = new InstanceGameObject(new GameObject("Pivot"));
+            
+            var statusTextsInstance = new InstanceGameObject(new GameObject("StatusTexts"));
+            statusTextsInstance.AddChild(pivotInstance.Go);
+            var statusTextsPivotInstance = new InstanceGameObject(new GameObject("Pivot"));
+            statusTextsPivotInstance.AddChild(statusTextsInstance.Go);
+            var goodLuckTextInstance = new InstanceGameObject(new GameObject("GoodLuckText"));
+            goodLuckTextInstance.AddChild(statusTextsPivotInstance.Go);
+            var paysTextInstance = new InstanceGameObject(new GameObject("PaysText"));
+            paysTextInstance.AddChild(statusTextsPivotInstance.Go);
+            
+            var settingsPanelInstance = new InstanceGameObject(new GameObject("SettingsPanel"));
+            settingsPanelInstance.AddChild(pivotInstance.Go);
+            var horizontalBarInstance = new InstanceGameObject(new GameObject("HorizontalBar"));
+            horizontalBarInstance.AddChild(settingsPanelInstance.Go);
+            
+            var gameControlsInstance = new InstanceGameObject(new GameObject("GameControls"));
+            gameControlsInstance.AddChild(horizontalBarInstance.Go);
+            var gameControlsPivotInstance = new InstanceGameObject(new GameObject("Pivot"));
+            gameControlsPivotInstance.AddChild(gameControlsInstance.Go);
+            
+            var volInstance = new InstanceGameObject(new GameObject("Vol"));
+            volInstance.AddChild(gameControlsPivotInstance.Go);
+            var volImageInstance = new InstanceGameObject(new GameObject("Image"));
+            volImageInstance.AddChild(volInstance.Go);
+            var volTextInstance = new InstanceGameObject(new GameObject("Text"));
+            volTextInstance.AddChild(volInstance.Go);
+            
+            var gameRulesInstance = new InstanceGameObject(new GameObject("GameRules"));
+            gameRulesInstance.AddChild(gameControlsPivotInstance.Go);
+            var gameRulesImageInstance = new InstanceGameObject(new GameObject("Image"));
+            gameRulesImageInstance.AddChild(gameRulesInstance.Go);
+            var gameRulesTextInstance = new InstanceGameObject(new GameObject("Text"));
+            gameRulesTextInstance.AddChild(gameRulesInstance.Go);
+            
+            var changeDenomInstance = new InstanceGameObject(new GameObject("ChangeDenom"));
+            changeDenomInstance.AddChild(gameControlsPivotInstance.Go);
+            var changeDenomImageInstance = new InstanceGameObject(new GameObject("Image"));
+            changeDenomImageInstance.AddChild(changeDenomInstance.Go);
+            var changeDenomTextInstance = new InstanceGameObject(new GameObject("Text"));
+            changeDenomTextInstance.AddChild(changeDenomInstance.Go);
+            
+            var winMeterInstance = new InstanceGameObject(new GameObject("WinMeter"));
+            winMeterInstance.AddChild(horizontalBarInstance.Go);
+            var spinParentInstance = new InstanceGameObject(new GameObject("SpinParent"));
+            spinParentInstance.AddChild(horizontalBarInstance.Go);
+            var animationTextInstance = new InstanceGameObject(new GameObject("AnimationText"));
+            animationTextInstance.AddChild(settingsPanelInstance.Go);
+            
+            
+            var settingsPrefab = ProcessPrefab(settingsName, new List<IComponent>
+                {
                 }, 
                 new List<IGameObject>()
                 {
