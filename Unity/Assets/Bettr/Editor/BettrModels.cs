@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using CrayonScript.Code;
 using UnityEditor;
 using UnityEditor.Animations;
@@ -6,31 +7,48 @@ using UnityEngine;
 
 namespace Bettr.Editor
 {
+    [Serializable]
+    public class GameObjectDefinition
+    {
+        public string Name { get; set; }
+        public GameObjectDefinition Child { get; set; }
+        public List<GameObjectDefinition> Children { get; set; }
+    }
+    
     public interface IGameObject
     {
+        public GameObject GameObject { get; }
         public void SetParent(GameObject parentGo);
+        public void SetParent(IGameObject parentGo);
     }
 
     public class InstanceGameObject : IGameObject
     {
-        public  GameObject Go;
+        private GameObject _go;
         public string Name;
+        
+        public GameObject GameObject => _go;
         
         public InstanceGameObject(GameObject go)
         {
-            Go = go;
+            _go = go;
             Name = go.name;
         }
 
         public InstanceGameObject(string name)
         {
-            Go = new GameObject(name);
+            _go = new GameObject(name);
             Name = name;
         }
         
         public void SetParent(GameObject parentGo)
         {
-            Go.transform.SetParent(parentGo.transform);
+            _go.transform.SetParent(parentGo.transform);
+        }
+
+        public void SetParent(IGameObject parentGo)
+        {
+            SetParent(parentGo.GameObject);
         }
     }
 
@@ -38,6 +56,8 @@ namespace Bettr.Editor
     {
         private readonly GameObject _prefab;
         private string _name;
+        
+        public GameObject GameObject => _prefab;
         
         public PrefabGameObject(GameObject prefab, string name)
         {
@@ -51,20 +71,34 @@ namespace Bettr.Editor
             var childInstance = (GameObject)PrefabUtility.InstantiatePrefab(_prefab, parentGo.transform);
             childInstance.name = _name;
         }
+        
+        public void SetParent(IGameObject parentGo)
+        {
+            SetParent(parentGo.GameObject);
+        }
     }
     
     public class PrimitiveGameObject : IGameObject
     {
         private PrimitiveType _primitiveType;
+        private GameObject _go;
+        
+        public GameObject GameObject => _go;
+        
         public PrimitiveGameObject(PrimitiveType primitiveType)
         {
             _primitiveType = primitiveType;
+            _go = GameObject.CreatePrimitive(_primitiveType);
         }
         
         public void SetParent(GameObject parentGo)
         {
-            var go = GameObject.CreatePrimitive(_primitiveType);
-            go.transform.SetParent(parentGo.transform);   
+            _go.transform.SetParent(parentGo.transform);   
+        }
+        
+        public void SetParent(IGameObject parentGo)
+        {
+            SetParent(parentGo.GameObject);
         }
     }
     
