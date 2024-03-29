@@ -645,11 +645,11 @@ namespace Bettr.Editor
             //
             var camerasGameObject = new InstanceGameObject(new GameObject($"Cameras"));
             var camerasPivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
-            camerasPivotGameObject.AddChild(camerasGameObject.Go);
+            camerasPivotGameObject.SetParent(camerasGameObject.Go);
             ProcessUICamera($"{machineName}BaseGameUICamera", runtimeAssetPath);
             var cameraPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameUICamera.prefab");
             var cameraPrefabGameObject = new PrefabGameObject(cameraPrefab, $"{machineName}BaseGameUICamera");
-            cameraPrefabGameObject.AddChild(camerasPivotGameObject.Go);
+            cameraPrefabGameObject.SetParent(camerasPivotGameObject.Go);
             
             gameObjectInstances.Add(camerasGameObject);
             
@@ -660,9 +660,9 @@ namespace Bettr.Editor
             // Reels
             //
             var reelsGameObject = new InstanceGameObject(new GameObject($"Reels"));
-            reelsGameObject.AddChild(machinePivotGameObject.Go);
+            reelsGameObject.SetParent(machinePivotGameObject.Go);
             var reelsPivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
-            reelsPivotGameObject.AddChild(reelsGameObject.Go);
+            reelsPivotGameObject.SetParent(reelsGameObject.Go);
             
             int reelCount = 0;
             foreach (var pair in baseGameReelState.Pairs)
@@ -672,16 +672,16 @@ namespace Bettr.Editor
                 // load the reel prefab
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameReel{reelCount}.prefab");
                 var prefabGameObject = new PrefabGameObject(prefab, $"Reel{reelCount}");
-                prefabGameObject.AddChild(reelsPivotGameObject.Go);
+                prefabGameObject.SetParent(reelsPivotGameObject.Go);
             }
             
             //
             // Background
             //
             var backgroundGameObject = new InstanceGameObject(new GameObject($"Reels Background"));
-            backgroundGameObject.AddChild(machinePivotGameObject.Go);
+            backgroundGameObject.SetParent(machinePivotGameObject.Go);
             var backgroundPivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
-            backgroundPivotGameObject.AddChild(backgroundGameObject.Go);
+            backgroundPivotGameObject.SetParent(backgroundGameObject.Go);
             
             var backgroundScriptName = $"{machineName}BaseGameBackground";   
             var backgroundScriptTextAsset = CreateOrLoadScript(backgroundScriptName, runtimeAssetPath);
@@ -689,33 +689,33 @@ namespace Bettr.Editor
             
             var backgroundPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameBackground.prefab");
             var backgroundPrefabGameObject = new PrefabGameObject(backgroundPrefab, $"Reels Background");
-            backgroundPrefabGameObject.AddChild(backgroundPivotGameObject.Go);
+            backgroundPrefabGameObject.SetParent(backgroundPivotGameObject.Go);
             
             //
             // Scrim
             //
             var reelsScrimGameObject = new InstanceGameObject(new GameObject($"Reels Scrim"));
-            reelsScrimGameObject.AddChild(machinePivotGameObject.Go);
+            reelsScrimGameObject.SetParent(machinePivotGameObject.Go);
             var reelsScrimPivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
-            reelsScrimPivotGameObject.AddChild(reelsScrimGameObject.Go);
+            reelsScrimPivotGameObject.SetParent(reelsScrimGameObject.Go);
             var reelsScrimQuadInstance = new InstanceGameObject(GameObject.CreatePrimitive(PrimitiveType.Quad));
             reelsScrimQuadInstance.Go.SetActive(false);
-            reelsScrimQuadInstance.AddChild(reelsScrimPivotGameObject.Go);
+            reelsScrimQuadInstance.SetParent(reelsScrimPivotGameObject.Go);
             
             //
             // Settings Prefab
             //
             var settingsGameObject = new InstanceGameObject(new GameObject($"Settings"));
-            settingsGameObject.AddChild(machinePivotGameObject.Go);
+            settingsGameObject.SetParent(machinePivotGameObject.Go);
             var settingsPivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
-            settingsPivotGameObject.AddChild(settingsGameObject.Go);
+            settingsPivotGameObject.SetParent(settingsGameObject.Go);
             
             var settingsName = $"{machineName}BaseGameSettings";   
             ProcessSettings(settingsName, runtimeAssetPath);
             
             var settingsPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameSettings.prefab");
             var settingsPrefabGameObject = new PrefabGameObject(settingsPrefab, $"Settings");
-            settingsPrefabGameObject.AddChild(settingsPivotGameObject.Go);
+            settingsPrefabGameObject.SetParent(settingsPivotGameObject.Go);
             
             ProcessPrefab($"{machineName}BaseGameMachine", new List<IComponent>(), 
                 gameObjectInstances,
@@ -726,11 +726,11 @@ namespace Bettr.Editor
         {
             var symbolInstance = new InstanceGameObject(new GameObject($"Symbol{symbolIndex}"));
             var pivotInstance = new InstanceGameObject(new GameObject("Pivot"));
-            pivotInstance.AddChild(symbolInstance.Go);
+            pivotInstance.SetParent(symbolInstance.Go);
             
             var symbolGroupPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameSymbolGroup.prefab");
             var prefabGameObject = new PrefabGameObject(symbolGroupPrefab, "SymbolGroup");
-            prefabGameObject.AddChild(pivotInstance.Go);
+            prefabGameObject.SetParent(pivotInstance.Go);
 
             return symbolInstance;
         }
@@ -740,11 +740,11 @@ namespace Bettr.Editor
         {
             var waysInstance = new InstanceGameObject(new GameObject($"Ways{symbolIndex}"));
             var waysPivotInstance = new InstanceGameObject(new GameObject("Pivot"));
-            waysPivotInstance.AddChild(waysInstance.Go);
+            waysPivotInstance.SetParent(waysInstance.Go);
                     
             var waysWinPrefab = ProcessWaysWin($"{machineName}BaseGameWaysWin", runtimeAssetPath);
             var waysWinPrefabGameObject = new PrefabGameObject(waysWinPrefab, $"WaysWin");
-            waysWinPrefabGameObject.AddChild(waysPivotInstance.Go);
+            waysWinPrefabGameObject.SetParent(waysPivotInstance.Go);
 
             return waysInstance;
         }
@@ -822,9 +822,9 @@ namespace Bettr.Editor
         {
             var winInstance = new InstanceGameObject(new GameObject("Win"));
             var waysPivotInstance = new InstanceGameObject(new GameObject("Pivot"));
-            waysPivotInstance.AddChild(winInstance.Go);
+            waysPivotInstance.SetParent(winInstance.Go);
             var waysQuadInstance = new InstanceGameObject(GameObject.CreatePrimitive(PrimitiveType.Quad));
-            waysQuadInstance.AddChild(waysPivotInstance.Go);
+            waysQuadInstance.SetParent(waysPivotInstance.Go);
             
             var materialName = "WaysWin";
             var shaderName = "Unlit/Texture";
@@ -855,7 +855,7 @@ namespace Bettr.Editor
             var pivotInstance = new InstanceGameObject(new GameObject("Pivot"));
             var quadInstance = new InstanceGameObject(GameObject.CreatePrimitive(PrimitiveType.Quad));
             quadInstance.Go.SetActive(false);
-            quadInstance.AddChild(pivotInstance.Go);
+            quadInstance.SetParent(pivotInstance.Go);
 
             var animatorController = CreateOrLoadAnimatorController($"{machineName}BaseGameBackground_anims", runtimeAssetPath);
             
@@ -873,55 +873,216 @@ namespace Bettr.Editor
         
         private static void ProcessSettings(string settingsName, string runtimeAssetPath)
         {
-            var pivotInstance = new InstanceGameObject(new GameObject("Pivot"));
-            
-            var statusTextsInstance = new InstanceGameObject(new GameObject("StatusTexts"));
-            statusTextsInstance.AddChild(pivotInstance.Go);
-            var statusTextsPivotInstance = new InstanceGameObject(new GameObject("Pivot"));
-            statusTextsPivotInstance.AddChild(statusTextsInstance.Go);
-            var goodLuckTextInstance = new InstanceGameObject(new GameObject("GoodLuckText"));
-            goodLuckTextInstance.AddChild(statusTextsPivotInstance.Go);
-            var paysTextInstance = new InstanceGameObject(new GameObject("PaysText"));
-            paysTextInstance.AddChild(statusTextsPivotInstance.Go);
-            
-            var settingsPanelInstance = new InstanceGameObject(new GameObject("SettingsPanel"));
-            settingsPanelInstance.AddChild(pivotInstance.Go);
-            var horizontalBarInstance = new InstanceGameObject(new GameObject("HorizontalBar"));
-            horizontalBarInstance.AddChild(settingsPanelInstance.Go);
-            
-            var gameControlsInstance = new InstanceGameObject(new GameObject("GameControls"));
-            gameControlsInstance.AddChild(horizontalBarInstance.Go);
-            var gameControlsPivotInstance = new InstanceGameObject(new GameObject("Pivot"));
-            gameControlsPivotInstance.AddChild(gameControlsInstance.Go);
-            
-            var volInstance = new InstanceGameObject(new GameObject("Vol"));
-            volInstance.AddChild(gameControlsPivotInstance.Go);
-            var volImageInstance = new InstanceGameObject(new GameObject("Image"));
-            volImageInstance.AddChild(volInstance.Go);
-            var volTextInstance = new InstanceGameObject(new GameObject("Text"));
-            volTextInstance.AddChild(volInstance.Go);
-            
-            var gameRulesInstance = new InstanceGameObject(new GameObject("GameRules"));
-            gameRulesInstance.AddChild(gameControlsPivotInstance.Go);
-            var gameRulesImageInstance = new InstanceGameObject(new GameObject("Image"));
-            gameRulesImageInstance.AddChild(gameRulesInstance.Go);
-            var gameRulesTextInstance = new InstanceGameObject(new GameObject("Text"));
-            gameRulesTextInstance.AddChild(gameRulesInstance.Go);
-            
-            var changeDenomInstance = new InstanceGameObject(new GameObject("ChangeDenom"));
-            changeDenomInstance.AddChild(gameControlsPivotInstance.Go);
-            var changeDenomImageInstance = new InstanceGameObject(new GameObject("Image"));
-            changeDenomImageInstance.AddChild(changeDenomInstance.Go);
-            var changeDenomTextInstance = new InstanceGameObject(new GameObject("Text"));
-            changeDenomTextInstance.AddChild(changeDenomInstance.Go);
-            
-            var winMeterInstance = new InstanceGameObject(new GameObject("WinMeter"));
-            winMeterInstance.AddChild(horizontalBarInstance.Go);
-            var spinParentInstance = new InstanceGameObject(new GameObject("SpinParent"));
-            spinParentInstance.AddChild(horizontalBarInstance.Go);
-            var animationTextInstance = new InstanceGameObject(new GameObject("AnimationText"));
-            animationTextInstance.AddChild(settingsPanelInstance.Go);
-            
+            string json = @"
+            {
+                ""Name"": ""Pivot"",
+                ""Children"": [
+                    {
+                        ""Name"": ""StatusTexts"",
+                        ""Child"": {
+                            ""Name"": ""Pivot"",
+                            ""Children"": [
+                                {
+                                    ""Name"": ""GoodLuckText""
+                                },
+                                {
+                                    ""Name"": ""PaysText""
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        ""Name"": ""SettingsPanel"",
+                        ""Children"": [
+                            {
+                                ""Name"": ""HorizontalBar"",
+                                ""Children"": [
+                                    {
+                                        ""Name"": ""GameControls"",
+                                        ""Child"": {
+                                            ""Name"": ""Pivot"",
+                                            ""Children"": [
+                                                {
+                                                    ""Name"": ""Vol"",
+                                                    ""Children"": [
+                                                        {
+                                                            ""Name"": ""Image""
+                                                        },
+                                                        {
+                                                            ""Name"": ""Text""
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    ""Name"": ""GameRules"",
+                                                    ""Children"": [
+                                                        {
+                                                            ""Name"": ""Image""
+                                                        },
+                                                        {
+                                                            ""Name"": ""Text""
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    ""Name"": ""ChangeDenom"",
+                                                    ""Children"": [
+                                                        {
+                                                            ""Name"": ""Image""
+                                                        },
+                                                        {
+                                                            ""Name"": ""Text""
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        ""Name"": ""WinMeter"",
+                                        ""Child"": {
+                                            ""Name"": ""Pivot"",
+                                            ""Children"": [
+                                                {
+                                                    ""Name"": ""Credit"",
+                                                    ""Children"": [
+                                                        {
+                                                            ""Name"": ""Image""
+                                                        },
+                                                        {
+                                                            ""Name"": ""CreditsText""
+                                                        },
+                                                        {
+                                                            ""Name"": ""CreditsLabel""
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    ""Name"": ""Win"",
+                                                    ""Children"": [
+                                                        {
+                                                            ""Name"": ""Image""
+                                                        },
+                                                        {
+                                                            ""Name"": ""WinText""
+                                                        },
+                                                        {
+                                                            ""Name"": ""WinLabel""
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    ""Name"": ""Bet"",
+                                                    ""Children"": [
+                                                        {
+                                                            ""Name"": ""Image""
+                                                        },
+                                                        {
+                                                            ""Name"": ""BetText""
+                                                        },
+                                                        {
+                                                            ""Name"": ""BetLabel""
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        ""Name"": ""SpinParent"",
+                                        ""Child"": {
+                                            ""Name"": ""Pivot"",
+                                            ""Child"": {
+                                                ""Name"": ""Spin""
+                                            }
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                ""Name"": ""AnimationText""
+                            }
+                        ]
+                    }
+                ]
+            }";
+
+            var pivotInstance = new InstanceGameObject("Pivot");
+
+            var statusTextsInstance = new InstanceGameObject("StatusTexts");
+            statusTextsInstance.SetParent(pivotInstance.Go);
+            var statusTextsPivotInstance = new InstanceGameObject("Pivot");
+            statusTextsPivotInstance.SetParent(statusTextsInstance.Go);
+            var goodLuckTextInstance = new InstanceGameObject("GoodLuckText");
+            goodLuckTextInstance.SetParent(statusTextsPivotInstance.Go);
+            var paysTextInstance = new InstanceGameObject("PaysText");
+            paysTextInstance.SetParent(statusTextsPivotInstance.Go);
+
+            var settingsPanelInstance = new InstanceGameObject("SettingsPanel");
+            settingsPanelInstance.SetParent(pivotInstance.Go);
+            var horizontalBarInstance = new InstanceGameObject("HorizontalBar");
+            horizontalBarInstance.SetParent(settingsPanelInstance.Go);
+            var gameControlsInstance = new InstanceGameObject("GameControls");
+            gameControlsInstance.SetParent(horizontalBarInstance.Go);
+            var gameControlsPivotInstance = new InstanceGameObject("Pivot");
+            gameControlsPivotInstance.SetParent(gameControlsInstance.Go);
+            var volInstance = new InstanceGameObject("Vol");
+            volInstance.SetParent(gameControlsPivotInstance.Go);
+            var volImageInstance = new InstanceGameObject("Image");
+            volImageInstance.SetParent(volInstance.Go);
+            var volTextInstance = new InstanceGameObject("Text");
+            volTextInstance.SetParent(volInstance.Go);
+            var gameRulesInstance = new InstanceGameObject("GameRules");
+            gameRulesInstance.SetParent(gameControlsPivotInstance.Go);
+            var gameRulesImageInstance = new InstanceGameObject("Image");
+            gameRulesImageInstance.SetParent(gameRulesInstance.Go);
+            var gameRulesTextInstance = new InstanceGameObject("Text");
+            gameRulesTextInstance.SetParent(gameRulesInstance.Go);
+            var changeDenomInstance = new InstanceGameObject("ChangeDenom");
+            changeDenomInstance.SetParent(gameControlsPivotInstance.Go);
+            var changeDenomImageInstance = new InstanceGameObject("Image");
+            changeDenomImageInstance.SetParent(changeDenomInstance.Go);
+            var changeDenomTextInstance = new InstanceGameObject("Text");
+            changeDenomTextInstance.SetParent(changeDenomInstance.Go);
+
+            var winMeterInstance = new InstanceGameObject("WinMeter");
+            winMeterInstance.SetParent(horizontalBarInstance.Go);
+            var winMeterPivotInstance = new InstanceGameObject("Pivot");
+            winMeterPivotInstance.SetParent(winMeterInstance.Go);
+            var winMeterCreditInstance = new InstanceGameObject("Credit");
+            winMeterCreditInstance.SetParent(winMeterPivotInstance.Go);
+            var winMeterCreditImageInstance = new InstanceGameObject("Image");
+            winMeterCreditImageInstance.SetParent(winMeterCreditInstance.Go);
+            var winMeterCreditTextInstance = new InstanceGameObject("CreditsText");
+            winMeterCreditTextInstance.SetParent(winMeterCreditInstance.Go);
+            var winMeterCreditLabelInstance = new InstanceGameObject("CreditsLabel");
+            winMeterCreditLabelInstance.SetParent(winMeterCreditInstance.Go);
+            var winMeterWinInstance = new InstanceGameObject("Win");
+            winMeterWinInstance.SetParent(winMeterPivotInstance.Go);
+            var winMeterWinImageInstance = new InstanceGameObject("Image");
+            winMeterWinImageInstance.SetParent(winMeterWinInstance.Go);
+            var winMeterWinTextInstance = new InstanceGameObject("WinText");
+            winMeterWinTextInstance.SetParent(winMeterWinInstance.Go);
+            var winMeterWinLabelInstance = new InstanceGameObject("WinLabel");
+            winMeterWinLabelInstance.SetParent(winMeterWinInstance.Go);
+            var winMeterBetInstance = new InstanceGameObject("Bet");
+            winMeterBetInstance.SetParent(winMeterPivotInstance.Go);
+            var winMeterBetImageInstance = new InstanceGameObject("Image");
+            winMeterBetImageInstance.SetParent(winMeterBetInstance.Go);
+            var winMeterBetTextInstance = new InstanceGameObject("BetText");
+            winMeterBetTextInstance.SetParent(winMeterBetInstance.Go);
+            var winMeterBetLabelInstance = new InstanceGameObject("BetLabel");
+            winMeterBetLabelInstance.SetParent(winMeterBetInstance.Go);
+
+            var spinParentInstance = new InstanceGameObject("SpinParent");
+            spinParentInstance.SetParent(horizontalBarInstance.Go);
+            var spinParentPivotInstance = new InstanceGameObject("Pivot");
+            spinParentPivotInstance.SetParent(spinParentInstance.Go);
+            var spinInstance = new InstanceGameObject("Spin");
+            spinInstance.SetParent(spinParentPivotInstance.Go);
+
+            var animationTextInstance = new InstanceGameObject("AnimationText");
+            animationTextInstance.SetParent(settingsPanelInstance.Go);
             
             var settingsPrefab = ProcessPrefab(settingsName, new List<IComponent>
                 {
@@ -994,7 +1155,7 @@ namespace Bettr.Editor
                 
                 foreach (var go in gameObjects)
                 {
-                    go.AddChild(prefab);
+                    go.SetParent(prefab);
                 }
             
                 PrefabUtility.SaveAsPrefabAsset(prefab, prefabPath);

@@ -8,19 +8,27 @@ namespace Bettr.Editor
 {
     public interface IGameObject
     {
-        public void AddChild(GameObject parentGo);
+        public void SetParent(GameObject parentGo);
     }
 
     public class InstanceGameObject : IGameObject
     {
-        public readonly GameObject Go;
+        public  GameObject Go;
+        public string Name;
         
         public InstanceGameObject(GameObject go)
         {
             Go = go;
+            Name = go.name;
+        }
+
+        public InstanceGameObject(string name)
+        {
+            Go = new GameObject(name);
+            Name = name;
         }
         
-        public void AddChild(GameObject parentGo)
+        public void SetParent(GameObject parentGo)
         {
             Go.transform.SetParent(parentGo.transform);
         }
@@ -37,7 +45,7 @@ namespace Bettr.Editor
             _name = name;
         }
         
-        public void AddChild(GameObject parentGo)
+        public void SetParent(GameObject parentGo)
         {
             // Instantiate the child prefab and set it as a child of the new prefab
             var childInstance = (GameObject)PrefabUtility.InstantiatePrefab(_prefab, parentGo.transform);
@@ -53,7 +61,7 @@ namespace Bettr.Editor
             _primitiveType = primitiveType;
         }
         
-        public void AddChild(GameObject parentGo)
+        public void SetParent(GameObject parentGo)
         {
             var go = GameObject.CreatePrimitive(_primitiveType);
             go.transform.SetParent(parentGo.transform);   
