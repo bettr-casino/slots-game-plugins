@@ -1011,7 +1011,7 @@ namespace Bettr.Editor
                 }
             ";
             
-            GameObjectDefinition rootDefinition = JsonConvert.DeserializeObject<GameObjectDefinition>(json);
+            InstanceGameObject rootDefinition = JsonConvert.DeserializeObject<InstanceGameObject>(json);
             Debug.Log($"rootDefinition name={rootDefinition.Name}");
             List<IGameObject> gameObjects = new List<IGameObject>();
             if (rootDefinition.Children != null)
@@ -1079,7 +1079,7 @@ namespace Bettr.Editor
             return false;
         }
         
-        private static IGameObject CreateGameObjectHierarchy(GameObjectDefinition definition)
+        private static IGameObject CreateGameObjectHierarchy(InstanceGameObject definition)
         {
             var gameObject = new InstanceGameObject(definition.Name);
             

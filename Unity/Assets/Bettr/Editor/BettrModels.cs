@@ -7,14 +7,6 @@ using UnityEngine;
 
 namespace Bettr.Editor
 {
-    [Serializable]
-    public class GameObjectDefinition
-    {
-        public string Name { get; set; }
-        public GameObjectDefinition Child { get; set; }
-        public List<GameObjectDefinition> Children { get; set; }
-    }
-    
     public interface IGameObject
     {
         public GameObject GameObject { get; }
@@ -22,12 +14,21 @@ namespace Bettr.Editor
         public void SetParent(IGameObject parentGo);
     }
 
+    [Serializable]
     public class InstanceGameObject : IGameObject
     {
         private GameObject _go;
-        public string Name;
+        public string Name { get; set; }
+        
+        public InstanceGameObject Child { get; set; }
+        public List<InstanceGameObject> Children { get; set; }
         
         public GameObject GameObject => _go;
+
+        public InstanceGameObject()
+        {
+            
+        }
         
         public InstanceGameObject(GameObject go)
         {
