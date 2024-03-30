@@ -20,9 +20,9 @@ namespace Bettr.Editor
         private GameObject _go;
         public string Name { get; set; }
         
-        private List<IComponent> _components;
+        private List<InstanceComponent> _components;
         
-        public List<IComponent> Components {
+        public List<InstanceComponent> Components {
             get => _components;
             set
             {
@@ -66,7 +66,7 @@ namespace Bettr.Editor
 
         public InstanceGameObject()
         {
-            Components = new List<IComponent>();
+            Components = new List<InstanceComponent>();
         }
         
         public InstanceGameObject(GameObject go)
@@ -146,6 +146,31 @@ namespace Bettr.Editor
     public interface IComponent
     {
         public void AddComponent(GameObject gameObject);
+    }
+
+    [Serializable]
+    public class InstanceComponent : IComponent
+    {
+        public static string RuntimeAssetPath;
+        
+        public string ComponentType { get; set; }
+        public string Name { get; set; }
+        
+        public string Filename { get; set; }
+        
+        public void AddComponent(GameObject gameObject)
+        {
+            if (ComponentType == "AnimatorController")
+            {
+                var animatorControllerName = $"{Filename}_anims.controller";
+                var animatorControllerPath = $"{RuntimeAssetPath}/Animators/{animatorControllerName}";
+                var animator = gameObject.AddComponent<Animator>();
+                AnimatorController.CreateAnimatorControllerAtPath(animatorControllerPath);
+                AssetDatabase.Refresh();
+                var runtimeAnimatorController = AssetDatabase.LoadAssetAtPath<AnimatorController>(animatorControllerPath);
+                animator.runtimeAnimatorController = runtimeAnimatorController;
+            }
+        }
     }
     
     [Serializable]

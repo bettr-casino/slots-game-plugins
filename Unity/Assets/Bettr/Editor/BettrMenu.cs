@@ -857,7 +857,7 @@ namespace Bettr.Editor
             quadInstance.GameObject.SetActive(false);
             quadInstance.SetParent(pivotInstance.GameObject);
 
-            var animatorController = CreateOrLoadAnimatorController($"{machineName}BaseGameBackground_anims", runtimeAssetPath);
+            var animatorController = CreateOrLoadAnimatorController($"{machineName}BaseGameBackground", runtimeAssetPath);
             
             var backgroundPrefab = ProcessPrefab($"{machineName}BaseGameBackground", new List<IComponent>
                 {
@@ -873,150 +873,159 @@ namespace Bettr.Editor
         
         private static void ProcessSettings(string settingsName, string runtimeAssetPath)
         {
-            string json = @"
-                {
+            string json = $@"
+                {{
                     ""Name"": ""Settings"",
-                    ""Child"": {
+                    ""Components"": [
+                        {{
+                            ""ComponentType"": ""AnimatorController"",
+                            ""Filename"": ""{settingsName}"",
+                            ""Name"": ""start"",
+                        }}
+                    ],
+                    ""Child"": {{
                         ""Name"": ""Pivot"",
                         ""Children"": [
-                            {
+                            {{
                                 ""Name"": ""StatusTexts"",
-                                ""Child"": {
+                                ""Child"": {{
                                     ""Name"": ""Pivot"",
                                     ""Children"": [
-                                        {
+                                        {{
                                             ""Name"": ""GoodLuckText""
-                                        },
-                                        {
+                                        }},
+                                        {{
                                             ""Name"": ""PaysText""
-                                        }
+                                        }}
                                     ]
-                                }
-                            },
-                            {
+                                }}
+                            }},
+                            {{
                                 ""Name"": ""SettingsPanel"",
                                 ""Children"": [
-                                    {
+                                    {{
                                         ""Name"": ""HorizontalBar"",
                                         ""Children"": [
-                                            {
+                                            {{
                                                 ""Name"": ""GameControls"",
-                                                ""Child"": {
+                                                ""Child"": {{
                                                     ""Name"": ""Pivot"",
                                                     ""Children"": [
-                                                        {
+                                                        {{
                                                             ""Name"": ""Vol"",
                                                             ""Children"": [
-                                                                {
+                                                                {{
                                                                     ""Name"": ""Image""
-                                                                },
-                                                                {
+                                                                }},
+                                                                {{
                                                                     ""Name"": ""Text""
-                                                                }
+                                                                }}
                                                             ]
-                                                        },
-                                                        {
+                                                        }},
+                                                        {{
                                                             ""Name"": ""GameRules"",
                                                             ""Children"": [
-                                                                {
+                                                                {{
                                                                     ""Name"": ""Image""
-                                                                },
-                                                                {
+                                                                }},
+                                                                {{
                                                                     ""Name"": ""Text""
-                                                                }
+                                                                }}
                                                             ]
-                                                        },
-                                                        {
+                                                        }},
+                                                        {{
                                                             ""Name"": ""ChangeDenom"",
                                                             ""Children"": [
-                                                                {
+                                                                {{
                                                                     ""Name"": ""Image""
-                                                                },
-                                                                {
+                                                                }},
+                                                                {{
                                                                     ""Name"": ""Text""
-                                                                }
+                                                                }}
                                                             ]
-                                                        }
+                                                        }}
                                                     ]
-                                                }
-                                            },
-                                            {
+                                                }}
+                                            }},
+                                            {{
                                                 ""Name"": ""WinMeter"",
-                                                ""Child"": {
+                                                ""Child"": {{
                                                     ""Name"": ""Pivot"",
                                                     ""Children"": [
-                                                        {
+                                                        {{
                                                             ""Name"": ""Credit"",
                                                             ""Children"": [
-                                                                {
+                                                                {{
                                                                     ""Name"": ""Image""
-                                                                },
-                                                                {
+                                                                }},
+                                                                {{
                                                                     ""Name"": ""CreditsText""
-                                                                },
-                                                                {
+                                                                }},
+                                                                {{
                                                                     ""Name"": ""CreditsLabel""
-                                                                }
+                                                                }}
                                                             ]
-                                                        },
-                                                        {
+                                                        }},
+                                                        {{
                                                             ""Name"": ""Win"",
                                                             ""Children"": [
-                                                                {
+                                                                {{
                                                                     ""Name"": ""Image""
-                                                                },
-                                                                {
+                                                                }},
+                                                                {{
                                                                     ""Name"": ""WinText""
-                                                                },
-                                                                {
+                                                                }},
+                                                                {{
                                                                     ""Name"": ""WinLabel""
-                                                                }
+                                                                }}
                                                             ]
-                                                        },
-                                                        {
+                                                        }},
+                                                        {{
                                                             ""Name"": ""Bet"",
                                                             ""Children"": [
-                                                                {
+                                                                {{
                                                                     ""Name"": ""Image""
-                                                                },
-                                                                {
+                                                                }},
+                                                                {{
                                                                     ""Name"": ""BetText""
-                                                                },
-                                                                {
+                                                                }},
+                                                                {{
                                                                     ""Name"": ""BetLabel""
-                                                                }
+                                                                }}
                                                             ]
-                                                        }
+                                                        }}
                                                     ]
-                                                }
-                                            },
-                                            {
+                                                }}
+                                            }},
+                                            {{
                                                 ""Name"": ""SpinParent"",
-                                                ""Child"": {
+                                                ""Child"": {{
                                                     ""Name"": ""Pivot"",
-                                                    ""Child"": {
+                                                    ""Child"": {{
                                                         ""Name"": ""Spin""
-                                                    }
-                                                }
-                                            }
+                                                    }}
+                                                }}
+                                            }}
                                         ]
-                                    },
-                                    {
+                                    }},
+                                    {{
                                         ""Name"": ""AnimationText""
-                                    }
+                                    }}
                                 ]
-                            }
+                            }}
                         ]
-                    }
-                }
+                    }}
+                }}
             ";
+
+            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
             
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
             List<IGameObject> runtimeObjects = hierarchyInstance.Child != null ? new List<IGameObject>() {hierarchyInstance.Child} : hierarchyInstance.Children.Cast<IGameObject>().ToList();
+            List<IComponent> components = hierarchyInstance.Components.Cast<IComponent>().ToList();
 
-            var settingsPrefab = ProcessPrefab(settingsName, new List<IComponent>
-                {
-                }, 
+            var settingsPrefab = ProcessPrefab(settingsName, 
+                components, 
                 runtimeObjects,
                 runtimeAssetPath);
         }
