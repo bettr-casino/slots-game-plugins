@@ -893,17 +893,30 @@ namespace Bettr.Editor
                                     ""Children"": [
                                         {{
                                             ""Name"": ""GoodLuckText"",
+                                            ""Active"": false,
+                                            ""Position"": {{
+                                                ""X"": -1.5,
+                                                ""Y"": -2.25,
+                                                ""Z"": -29
+                                            }},
                                             ""Components"": [
                                                 {{
                                                     ""ComponentType"": ""TextMeshPro"",
                                                     ""Text"": ""Good Luck!"",
                                                     ""FontSize"": 3,
-                                                    ""Color"": ""#FF0000""
+                                                    ""Color"": ""#FF0000"",
+                                                    ""Rect"": {{
+                                                        ""X"": 0.5,
+                                                        ""Y"": 0.5,
+                                                        ""Width"": 17.6577,
+                                                        ""Height"": 1.4192
+                                                    }}
                                                 }}
                                             ]
                                         }},
                                         {{
                                             ""Name"": ""PaysText"",
+                                            ""Active"": false,
                                             ""Components"": [
                                                 {{
                                                     ""ComponentType"": ""TextMeshPro"",
@@ -975,10 +988,47 @@ namespace Bettr.Editor
                                                                     ""Name"": ""Image""
                                                                 }},
                                                                 {{
-                                                                    ""Name"": ""CreditsText""
+                                                                    ""Name"": ""CreditsText"",
+                                                                    ""Position"": {{
+                                                                        ""X"": 0,
+                                                                        ""Y"": 0,
+                                                                        ""Z"": 0
+                                                                    }},
+                                                                    ""Components"": [
+                                                                        {{
+                                                                            ""ComponentType"": ""TextMeshProUI"",
+                                                                            ""FontSize"": 16,
+                                                                            ""Color"": ""#FF0000"",
+                                                                            ""Rect"": {{
+                                                                                ""X"": 0.5,
+                                                                                ""Y"": 0.5,
+                                                                                ""Width"": 146.95,
+                                                                                ""Height"": 20.51
+                                                                            }}
+                                                                        }}
+                                                                    ]
                                                                 }},
                                                                 {{
-                                                                    ""Name"": ""CreditsLabel""
+                                                                    ""Name"": ""CreditsLabel"",
+                                                                    ""Position"": {{
+                                                                        ""X"": 0,
+                                                                        ""Y"": -19,
+                                                                        ""Z"": 0
+                                                                    }},
+                                                                    ""Components"": [
+                                                                        {{
+                                                                            ""ComponentType"": ""TextMeshProUI"",
+                                                                            ""Text"": ""CREDIT"",
+                                                                            ""FontSize"": 12,
+                                                                            ""Color"": ""#E96E06"",
+                                                                            ""Rect"": {{
+                                                                                ""X"": 0.5,
+                                                                                ""Y"": 0.5,
+                                                                                ""Width"": 146.95,
+                                                                                ""Height"": 20.51
+                                                                            }}
+                                                                        }}
+                                                                    ]
                                                                 }}
                                                             ]
                                                         }},
@@ -989,10 +1039,47 @@ namespace Bettr.Editor
                                                                     ""Name"": ""Image""
                                                                 }},
                                                                 {{
-                                                                    ""Name"": ""WinText""
+                                                                    ""Name"": ""WinText"",
+                                                                    ""Position"": {{
+                                                                        ""X"": 0,
+                                                                        ""Y"": 0.75499,
+                                                                        ""Z"": 0
+                                                                    }},
+                                                                    ""Components"": [
+                                                                        {{
+                                                                            ""ComponentType"": ""TextMeshProUI"",
+                                                                            ""FontSize"": 16,
+                                                                            ""Color"": ""#FF0000"",
+                                                                            ""Rect"": {{
+                                                                                ""X"": 0.5,
+                                                                                ""Y"": 0.5,
+                                                                                ""Width"": 226.45,
+                                                                                ""Height"": 19
+                                                                            }}
+                                                                        }}
+                                                                    ]
                                                                 }},
                                                                 {{
-                                                                    ""Name"": ""WinLabel""
+                                                                    ""Name"": ""WinLabel"",
+                                                                    ""Position"": {{
+                                                                        ""X"": 0,
+                                                                        ""Y"": -19,
+                                                                        ""Z"": 0
+                                                                    }},
+                                                                    ""Components"": [
+                                                                        {{
+                                                                            ""ComponentType"": ""TextMeshProUI"",
+                                                                            ""Text"": ""WIN"",
+                                                                            ""FontSize"": 12,
+                                                                            ""Color"": ""#E96E06"",
+                                                                            ""Rect"": {{
+                                                                                ""X"": 0.5,
+                                                                                ""Y"": 0.5,
+                                                                                ""Width"": 146.95,
+                                                                                ""Height"": 20.51
+                                                                            }}
+                                                                        }}
+                                                                    ]
                                                                 }}
                                                             ]
                                                         }},
@@ -1003,10 +1090,47 @@ namespace Bettr.Editor
                                                                     ""Name"": ""Image""
                                                                 }},
                                                                 {{
-                                                                    ""Name"": ""BetText""
+                                                                    ""Name"": ""BetText"",
+                                                                    ""Position"": {{
+                                                                        ""X"": -27.493,
+                                                                        ""Y"": 0,
+                                                                        ""Z"": 0
+                                                                    }},
+                                                                    ""Components"": [
+                                                                        {{
+                                                                            ""ComponentType"": ""TextMeshProUI"",
+                                                                            ""FontSize"": 16,
+                                                                            ""Color"": ""#FF0000"",
+                                                                            ""Rect"": {{
+                                                                                ""X"": 0.5,
+                                                                                ""Y"": 0.5,
+                                                                                ""Width"": 171.46,
+                                                                                ""Height"": 20.51
+                                                                            }}
+                                                                        }}
+                                                                    ]
                                                                 }},
                                                                 {{
-                                                                    ""Name"": ""BetLabel""
+                                                                    ""Name"": ""BetLabel"",
+                                                                    ""Position"": {{
+                                                                        ""X"": -27.494,
+                                                                        ""Y"": -19.66,
+                                                                        ""Z"": 0
+                                                                    }},
+                                                                    ""Components"": [
+                                                                        {{
+                                                                            ""ComponentType"": ""TextMeshProUI"",
+                                                                            ""Text"": ""BET"",
+                                                                            ""FontSize"": 12,
+                                                                            ""Color"": ""#E96E06"",
+                                                                            ""Rect"": {{
+                                                                                ""X"": 0.5,
+                                                                                ""Y"": 0.5,
+                                                                                ""Width"": 171.46,
+                                                                                ""Height"": 21.83
+                                                                            }}
+                                                                        }}
+                                                                    ]
                                                                 }}
                                                             ]
                                                         }}

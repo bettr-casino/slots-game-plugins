@@ -21,6 +21,14 @@ namespace Bettr.Editor
         private GameObject _go;
         public string Name { get; set; }
         
+        public bool Active { get; set; }
+        
+        public Vector3? Position { get; set; }
+        
+        public Vector3? Rotation { get; set; }
+        
+        public Vector3? Scale { get; set; }
+        
         private List<InstanceComponent> _components;
         
         public List<InstanceComponent> Components {
@@ -28,7 +36,7 @@ namespace Bettr.Editor
             set
             {
                 _components = value;
-                if (_go == null) _go = new GameObject(Name);
+                EnsureGameObject();
                 foreach (var component in _components)
                 {
                     component.AddComponent(_go);
@@ -43,7 +51,7 @@ namespace Bettr.Editor
             set
             {
                 _child = value;
-                if (_go == null) _go = new GameObject(Name);
+                EnsureGameObject();
                 _child.SetParent(_go);
             }
         }
@@ -56,7 +64,7 @@ namespace Bettr.Editor
             set
             {
                 _children = value;
-                if (_go == null) _go = new GameObject(Name);
+                EnsureGameObject();
                 foreach (var child in _children)
                 {
                     child.SetParent(_go);
@@ -68,6 +76,7 @@ namespace Bettr.Editor
 
         public InstanceGameObject()
         {
+            Active = true;
         }
         
         public InstanceGameObject(GameObject go)
@@ -78,19 +87,40 @@ namespace Bettr.Editor
 
         public InstanceGameObject(string name)
         {
-            _go = new GameObject(name);
             Name = name;
+            EnsureGameObject();
         }
         
         public void SetParent(GameObject parentGo)
         {
-            if (_go == null) _go = new GameObject(Name);
+            EnsureGameObject();
             _go.transform.SetParent(parentGo.transform);
         }
 
         public void SetParent(IGameObject parentGo)
         {
             SetParent(parentGo.GameObject);
+        }
+
+        private void EnsureGameObject()
+        {
+            if (_go == null)
+            {
+                _go = new GameObject(Name);
+                _go.SetActive(Active);
+                if (Position != null)
+                {
+                    _go.transform.position = (Vector3) Position;
+                }
+                if (Rotation != null)
+                {
+                    _go.transform.rotation = Quaternion.Euler((Vector3) Rotation);
+                }
+                if (Scale != null)
+                {
+                    _go.transform.localScale = (Vector3) Scale;
+                }
+            }
         }
     }
 
@@ -163,6 +193,8 @@ namespace Bettr.Editor
         public string Text { get; set; }
         
         public int FontSize { get; set; }
+        
+        public Rect? Rect { get; set; }
 
         public InstanceComponent()
         {
@@ -177,8 +209,12 @@ namespace Bettr.Editor
                     animatorComponent.AddComponent(gameObject);
                     break;
                 case "TextMeshPro":
-                    var textMeshProComponent = new TextMeshProComponent(Text, FontSize, Color);
+                    var textMeshProComponent = new TextMeshProComponent(Text, FontSize, Color, Rect);
                     textMeshProComponent.AddComponent(gameObject);
+                    break;
+                case "TextMeshProUI":
+                    var textMeshProUIComponent = new TextMeshProUIComponent(Text, FontSize, Color, Rect);
+                    textMeshProUIComponent.AddComponent(gameObject);
                     break;
             }
         }
@@ -291,12 +327,15 @@ namespace Bettr.Editor
         public float FontSize { get; set; }
         public Color FontColor { get; set; }
         
+        public Rect? Rect { get; set; }
+        
         public TMP_FontAsset FontAsset { get; set; }
 
-        public TextMeshProComponent(string text, float fontSize, string colorHex, string fontAssetName = "Roboto-Bold SDF")
+        public TextMeshProComponent(string text, float fontSize, string colorHex, Rect? rect = null, string fontAssetName = "Roboto-Bold SDF")
         {
             Text = text;
             FontSize = fontSize;
+            Rect = rect;
             
             FontAsset = FontAssetsMap.TryGetValue(fontAssetName, out var value) ? value : FontAssetsMap["Roboto-Bold SDF"];
             
@@ -313,6 +352,11 @@ namespace Bettr.Editor
 
         public void AddComponent(GameObject gameObject)
         {
+            AddTextMeshPro(gameObject);
+        }
+
+        private void AddTextMeshPro(GameObject gameObject)
+        {
             var textMeshPro = gameObject.AddComponent<TextMeshPro>();
             textMeshPro.text = Text;
             textMeshPro.fontSize = FontSize;
@@ -320,6 +364,44 @@ namespace Bettr.Editor
             textMeshPro.color = FontColor;
             textMeshPro.alignment = TextAlignmentOptions.Center;
             textMeshPro.enableWordWrapping = false;
+            
+            if (Rect != null && Rect.HasValue)
+            {
+                var rect = (Rect) Rect;
+                textMeshPro.rectTransform.sizeDelta = new Vector2(rect.width, rect.height);
+                textMeshPro.rectTransform.pivot = new Vector2(rect.x, rect.y);
+            }
+        }
+    }
+    
+    [Serializable]
+    public class TextMeshProUIComponent : TextMeshProComponent
+    {
+        public TextMeshProUIComponent(string text, float fontSize, string colorHex, Rect? rect = null, string fontAssetName = "Roboto-Bold SDF") : base(text, fontSize, colorHex, rect, fontAssetName)
+        {
+        }
+        
+        public new void AddComponent(GameObject gameObject)
+        {
+            AddTextMeshProUI(gameObject);
+        }
+
+        private void AddTextMeshProUI(GameObject gameObject)
+        {
+            var textMeshPro = gameObject.AddComponent<TextMeshProUGUI>();
+            textMeshPro.text = Text;
+            textMeshPro.fontSize = FontSize;
+            textMeshPro.enableAutoSizing = false; // Ensure fixed font size
+            textMeshPro.color = FontColor;
+            textMeshPro.alignment = TextAlignmentOptions.Center;
+            textMeshPro.enableWordWrapping = false;
+            
+            if (Rect != null && Rect.HasValue)
+            {
+                var rect = (Rect) Rect;
+                textMeshPro.rectTransform.sizeDelta = new Vector2(rect.width, rect.height);
+                textMeshPro.rectTransform.pivot = new Vector2(rect.x, rect.y);
+            }
         }
     }
     
