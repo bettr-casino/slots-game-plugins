@@ -876,6 +876,7 @@ namespace Bettr.Editor
             string json = $@"
                 {{
                     ""Name"": ""Settings"",
+                    ""Layer"": ""SLOT_REELS_OVERLAY"",
                     ""Components"": [
                         {{
                             ""ComponentType"": ""AnimatorController"",
@@ -887,12 +888,31 @@ namespace Bettr.Editor
                         ""Name"": ""Pivot"",
                         ""Children"": [
                             {{
-                                ""Name"": ""StatusTexts"",
+                                ""Name"": ""Cameras"",
                                 ""Child"": {{
                                     ""Name"": ""Pivot"",
                                     ""Children"": [
                                         {{
+                                            ""Name"": ""UI Camera"",
+                                            ""Layer"": ""UI"",
+                                            ""Components"": [
+                                                {{
+                                                    ""ComponentType"": ""UICamera""
+                                                }}
+                                            ]
+                                        }}
+                                    ]
+                                }},
+                            }},
+                            {{
+                                ""Name"": ""StatusTexts"",
+                                ""Child"": {{
+                                    ""Name"": ""Pivot"",
+                                    ""Layer"": ""SLOT_REELS_OVERLAY"",
+                                    ""Children"": [
+                                        {{
                                             ""Name"": ""GoodLuckText"",
+                                            ""Layer"": ""SLOT_REELS_OVERLAY"",
                                             ""Active"": false,
                                             ""Position"": {{
                                                 ""X"": -1.5,
@@ -916,6 +936,7 @@ namespace Bettr.Editor
                                         }},
                                         {{
                                             ""Name"": ""PaysText"",
+                                            ""Layer"": ""SLOT_REELS_OVERLAY"",
                                             ""Active"": false,
                                             ""Components"": [
                                                 {{
@@ -931,6 +952,9 @@ namespace Bettr.Editor
                             }},
                             {{
                                 ""Name"": ""SettingsPanel"",
+                                ""Layer"": ""UI"",
+                                ""Components"": [
+                                ],
                                 ""Children"": [
                                     {{
                                         ""Name"": ""HorizontalBar"",
@@ -985,10 +1009,27 @@ namespace Bettr.Editor
                                                             ""Name"": ""Credit"",
                                                             ""Children"": [
                                                                 {{
-                                                                    ""Name"": ""Image""
+                                                                    ""Name"": ""CreditImage"",
+                                                                    ""Position"": {{
+                                                                        ""X"": 0,
+                                                                        ""Y"": 0,
+                                                                        ""Z"": 0
+                                                                    }},
+                                                                    ""Components"": [
+                                                                        {{
+                                                                            ""ComponentType"": ""Image"",
+                                                                            ""Color"": ""#E76610"",
+                                                                            ""Rect"": {{
+                                                                                ""X"": 0.5,
+                                                                                ""Y"": 0.5,
+                                                                                ""Width"": 117.33,
+                                                                                ""Height"": 20.51
+                                                                            }}
+                                                                        }}
+                                                                    ]
                                                                 }},
                                                                 {{
-                                                                    ""Name"": ""CreditsText"",
+                                                                    ""Name"": ""CreditText"",
                                                                     ""Position"": {{
                                                                         ""X"": 0,
                                                                         ""Y"": 0,
@@ -1009,7 +1050,7 @@ namespace Bettr.Editor
                                                                     ]
                                                                 }},
                                                                 {{
-                                                                    ""Name"": ""CreditsLabel"",
+                                                                    ""Name"": ""CreditLabel"",
                                                                     ""Position"": {{
                                                                         ""X"": 0,
                                                                         ""Y"": -19,
@@ -1036,7 +1077,24 @@ namespace Bettr.Editor
                                                             ""Name"": ""Win"",
                                                             ""Children"": [
                                                                 {{
-                                                                    ""Name"": ""Image""
+                                                                    ""Name"": ""WinImage"",
+                                                                    ""Position"": {{
+                                                                        ""X"": 0,
+                                                                        ""Y"": 0,
+                                                                        ""Z"": 0
+                                                                    }},
+                                                                    ""Components"": [
+                                                                        {{
+                                                                            ""ComponentType"": ""Image"",
+                                                                            ""Color"": ""#E76610"",
+                                                                            ""Rect"": {{
+                                                                                ""X"": 0.5,
+                                                                                ""Y"": 0.5,
+                                                                                ""Width"": 226.45,
+                                                                                ""Height"": 20.51
+                                                                            }}
+                                                                        }}
+                                                                    ]
                                                                 }},
                                                                 {{
                                                                     ""Name"": ""WinText"",
@@ -1087,7 +1145,24 @@ namespace Bettr.Editor
                                                             ""Name"": ""Bet"",
                                                             ""Children"": [
                                                                 {{
-                                                                    ""Name"": ""Image""
+                                                                    ""Name"": ""BetImage"",
+                                                                    ""Position"": {{
+                                                                        ""X"": 0,
+                                                                        ""Y"": 0,
+                                                                        ""Z"": 0
+                                                                    }},
+                                                                    ""Components"": [
+                                                                        {{
+                                                                            ""ComponentType"": ""Image"",
+                                                                            ""Color"": ""#E76610"",
+                                                                            ""Rect"": {{
+                                                                                ""X"": 0.5,
+                                                                                ""Y"": 0.5,
+                                                                                ""Width"": 226.45,
+                                                                                ""Height"": 20.51
+                                                                            }}
+                                                                        }}
+                                                                    ]
                                                                 }},
                                                                 {{
                                                                     ""Name"": ""BetText"",
@@ -1142,14 +1217,55 @@ namespace Bettr.Editor
                                                 ""Child"": {{
                                                     ""Name"": ""Pivot"",
                                                     ""Child"": {{
-                                                        ""Name"": ""Spin""
+                                                        ""Name"": ""Spin"",
+                                                        ""Children"": [
+                                                            {{
+                                                                ""Name"": ""SpinImage"",
+                                                                ""Position"": {{
+                                                                    ""X"": 0,
+                                                                    ""Y"": 0,
+                                                                    ""Z"": 0
+                                                                }},
+                                                                ""Components"": [
+                                                                    {{
+                                                                        ""ComponentType"": ""Image"",
+                                                                        ""Color"": ""#E76610"",
+                                                                        ""Rect"": {{
+                                                                            ""X"": 0.5,
+                                                                            ""Y"": 0.5,
+                                                                            ""Width"": 226.45,
+                                                                            ""Height"": 20.51
+                                                                        }}
+                                                                    }}
+                                                                ]
+                                                            }}
+                                                        ]
                                                     }}
                                                 }}
                                             }}
                                         ]
                                     }},
                                     {{
-                                        ""Name"": ""AnimationText""
+                                        ""Name"": ""AnimationText"",
+                                        ""Position"": {{
+                                            ""X"": 4.69,
+                                            ""Y"": -197,
+                                            ""Z"": 0
+                                        }},
+                                        ""Components"": [
+                                            {{
+                                                ""ComponentType"": ""TextMeshProUI"",
+                                                ""Text"": ""Settings Animation ..."",
+                                                ""FontSize"": 24,
+                                                ""Color"": ""#FF0000"",
+                                                ""Rect"": {{
+                                                    ""X"": 0.5,
+                                                    ""Y"": 0.5,
+                                                    ""Width"": 529.87,
+                                                    ""Height"": 86.93
+                                                }}
+                                            }}
+                                        ]
                                     }}
                                 ]
                             }}

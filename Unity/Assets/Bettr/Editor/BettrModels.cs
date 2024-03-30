@@ -5,6 +5,7 @@ using TMPro;
 using UnityEditor;
 using UnityEditor.Animations;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Bettr.Editor
 {
@@ -22,6 +23,8 @@ namespace Bettr.Editor
         public string Name { get; set; }
         
         public bool Active { get; set; }
+        
+        public string Layer { get; set; }
         
         public Vector3? Position { get; set; }
         
@@ -77,6 +80,7 @@ namespace Bettr.Editor
         public InstanceGameObject()
         {
             Active = true;
+            Layer = "Default";
         }
         
         public InstanceGameObject(GameObject go)
@@ -120,6 +124,8 @@ namespace Bettr.Editor
                 {
                     _go.transform.localScale = (Vector3) Scale;
                 }
+                
+                _go.layer = LayerMask.NameToLayer(Layer);
             }
         }
     }
@@ -215,6 +221,14 @@ namespace Bettr.Editor
                 case "TextMeshProUI":
                     var textMeshProUIComponent = new TextMeshProUIComponent(Text, FontSize, Color, Rect);
                     textMeshProUIComponent.AddComponent(gameObject);
+                    break;
+                case "Image":
+                    var imageComponent = new ImageComponent(RuntimeAssetPath, Filename, Color, Rect);
+                    imageComponent.AddComponent(gameObject);
+                    break;
+                case "UICamera":
+                    var uiCameraComponent = new UICameraComponent();
+                    uiCameraComponent.AddComponent(gameObject);
                     break;
             }
         }
@@ -365,7 +379,7 @@ namespace Bettr.Editor
             textMeshPro.alignment = TextAlignmentOptions.Center;
             textMeshPro.enableWordWrapping = false;
             
-            if (Rect != null && Rect.HasValue)
+            if (Rect is not null)
             {
                 var rect = (Rect) Rect;
                 textMeshPro.rectTransform.sizeDelta = new Vector2(rect.width, rect.height);
@@ -396,11 +410,60 @@ namespace Bettr.Editor
             textMeshPro.alignment = TextAlignmentOptions.Center;
             textMeshPro.enableWordWrapping = false;
             
-            if (Rect != null && Rect.HasValue)
+            if (Rect is not null)
             {
                 var rect = (Rect) Rect;
                 textMeshPro.rectTransform.sizeDelta = new Vector2(rect.width, rect.height);
                 textMeshPro.rectTransform.pivot = new Vector2(rect.x, rect.y);
+            }
+        }
+    }
+    
+    [Serializable]
+    public class ImageComponent : IComponent
+    {
+        public Color Color { get; set; }
+        public Sprite ImageSprite { get; private set; }
+        public Rect? Rect { get; set; }
+
+        // Constructor that takes a path to a Texture2D
+        public ImageComponent(string runtimeAssetPath, string textureName, string colorHex, Rect? rect = null)
+        {
+            ImageSprite = null;
+            if (!string.IsNullOrEmpty(textureName))
+            {
+                var texturePath = $"{runtimeAssetPath}/Textures/{textureName}";
+                Texture2D texture = Resources.Load<Texture2D>(texturePath);
+                ImageSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+            }
+            Color = Color.white;
+            if (!string.IsNullOrEmpty(colorHex))
+            {
+                if (ColorUtility.TryParseHtmlString(colorHex, out var tempColor))
+                {
+                    Color = tempColor;
+                }
+                else
+                {
+                    Debug.LogWarning($"Failed to parse color hex: {colorHex}. Using default color.");
+                }
+            }
+            Rect = rect;
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            // Add the Image component
+            var image = gameObject.AddComponent<Image>();
+            image.sprite = ImageSprite;
+            image.color = Color;
+
+            // Configure the RectTransform
+            if (Rect is not null)
+            {
+                RectTransform rectTransform = gameObject.GetComponent<RectTransform>();
+                rectTransform.anchoredPosition = new Vector2(Rect.Value.x, Rect.Value.y);
+                rectTransform.sizeDelta = new Vector2(Rect.Value.width, Rect.Value.height);
             }
         }
     }
