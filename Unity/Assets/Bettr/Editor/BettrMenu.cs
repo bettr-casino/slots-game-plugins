@@ -713,9 +713,9 @@ namespace Bettr.Editor
             var settingsName = $"{machineName}BaseGameSettings";   
             ProcessSettings(settingsName, runtimeAssetPath);
             
-            // var settingsPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameSettings.prefab");
-            // var settingsPrefabGameObject = new PrefabGameObject(settingsPrefab, $"Settings");
-            // settingsPrefabGameObject.SetParent(settingsPivotGameObject.GameObject);
+            var settingsPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameSettings.prefab");
+            var settingsPrefabGameObject = new PrefabGameObject(settingsPrefab, $"Settings");
+            settingsPrefabGameObject.SetParent(settingsPivotGameObject.GameObject);
             
             ProcessPrefab($"{machineName}BaseGameMachine", new List<IComponent>(), 
                 gameObjectInstances,
@@ -892,10 +892,26 @@ namespace Bettr.Editor
                                     ""Name"": ""Pivot"",
                                     ""Children"": [
                                         {{
-                                            ""Name"": ""GoodLuckText""
+                                            ""Name"": ""GoodLuckText"",
+                                            ""Components"": [
+                                                {{
+                                                    ""ComponentType"": ""TextMeshPro"",
+                                                    ""Text"": ""Good Luck!"",
+                                                    ""FontSize"": 3,
+                                                    ""Color"": ""#FF0000""
+                                                }}
+                                            ]
                                         }},
                                         {{
-                                            ""Name"": ""PaysText""
+                                            ""Name"": ""PaysText"",
+                                            ""Components"": [
+                                                {{
+                                                    ""ComponentType"": ""TextMeshPro"",
+                                                    ""Text"": ""{{0}}           Pays  {{1,3}} x {{2}} ways = {{3,3}} CREDITS!!"",
+                                                    ""FontSize"": 4,
+                                                    ""Color"": ""#FF0000""
+                                                }}
+                                            ]
                                         }}
                                     ]
                                 }}

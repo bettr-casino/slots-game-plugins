@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using CrayonScript.Code;
+using TMPro;
 using UnityEditor;
 using UnityEditor.Animations;
 using UnityEngine;
@@ -27,6 +28,7 @@ namespace Bettr.Editor
             set
             {
                 _components = value;
+                if (_go == null) _go = new GameObject(Name);
                 foreach (var component in _components)
                 {
                     component.AddComponent(_go);
@@ -54,9 +56,9 @@ namespace Bettr.Editor
             set
             {
                 _children = value;
+                if (_go == null) _go = new GameObject(Name);
                 foreach (var child in _children)
                 {
-                    if (_go == null) _go = new GameObject(Name);
                     child.SetParent(_go);
                 }
             }
@@ -66,7 +68,6 @@ namespace Bettr.Editor
 
         public InstanceGameObject()
         {
-            Components = new List<InstanceComponent>();
         }
         
         public InstanceGameObject(GameObject go)
@@ -154,21 +155,31 @@ namespace Bettr.Editor
         public static string RuntimeAssetPath;
         
         public string ComponentType { get; set; }
-        public string Name { get; set; }
         
         public string Filename { get; set; }
         
+        public string Color { get; set; }
+        
+        public string Text { get; set; }
+        
+        public int FontSize { get; set; }
+
+        public InstanceComponent()
+        {
+        }
+        
         public void AddComponent(GameObject gameObject)
         {
-            if (ComponentType == "AnimatorController")
+            switch (ComponentType)
             {
-                var animatorControllerName = $"{Filename}_anims.controller";
-                var animatorControllerPath = $"{RuntimeAssetPath}/Animators/{animatorControllerName}";
-                var animator = gameObject.AddComponent<Animator>();
-                AnimatorController.CreateAnimatorControllerAtPath(animatorControllerPath);
-                AssetDatabase.Refresh();
-                var runtimeAnimatorController = AssetDatabase.LoadAssetAtPath<AnimatorController>(animatorControllerPath);
-                animator.runtimeAnimatorController = runtimeAnimatorController;
+                case "AnimatorController":
+                    var animatorComponent = new AnimatorComponent(Filename, RuntimeAssetPath);
+                    animatorComponent.AddComponent(gameObject);
+                    break;
+                case "TextMeshPro":
+                    var textMeshProComponent = new TextMeshProComponent(Text, FontSize, Color);
+                    textMeshProComponent.AddComponent(gameObject);
+                    break;
             }
         }
     }
@@ -196,7 +207,17 @@ namespace Bettr.Editor
     [Serializable]
     public class AnimatorComponent : IComponent
     {
-        private readonly AnimatorController _animatorController;
+        private AnimatorController _animatorController;
+
+        private string _runtimeAssetPath;
+        
+        private string _fileName;
+        
+        public AnimatorComponent(string fileName, string runtimeAssetPath)
+        {
+            _fileName = fileName;
+            _runtimeAssetPath = runtimeAssetPath;
+        }
 
         public AnimatorComponent(AnimatorController animatorController)
         {
@@ -205,8 +226,23 @@ namespace Bettr.Editor
 
         public void AddComponent(GameObject gameObject)
         {
+            if (_animatorController == null)
+            {
+                BuildAnimatorController(gameObject);
+            }
+            
             var animator = gameObject.AddComponent<Animator>();
             animator.runtimeAnimatorController = _animatorController;
+        }
+
+        private void BuildAnimatorController(GameObject gameObject)
+        {
+            var animatorControllerName = $"{_fileName}_anims.controller";
+            var animatorControllerPath = $"{_runtimeAssetPath}/Animators/{animatorControllerName}";
+            AnimatorController.CreateAnimatorControllerAtPath(animatorControllerPath);
+            AssetDatabase.Refresh();
+            var runtimeAnimatorController = AssetDatabase.LoadAssetAtPath<AnimatorController>(animatorControllerPath);
+            _animatorController = runtimeAnimatorController;
         }
     }
 
@@ -230,6 +266,60 @@ namespace Bettr.Editor
             uiCamera.allowMSAA = true;
             uiCamera.allowDynamicResolution = false;
             uiCamera.targetDisplay = 0;
+        }
+    }
+    
+    [Serializable]
+    public class TextMeshProComponent : IComponent
+    {
+        public static Dictionary<string, TMP_FontAsset> FontAssetsMap = new Dictionary<string, TMP_FontAsset>()
+        {
+            { "Anton SDF", LoadFontAsset("Fonts & Materials/Anton SDF") },
+            { "Bangers SDF", LoadFontAsset("Fonts & Materials/Bangers SDF") },
+            { "LiberationSans SDF", LoadFontAsset("Fonts & Materials/LiberationSans SDF") },
+            { "Oswald Bold SDF", LoadFontAsset("Fonts & Materials/Oswald Bold SDF") },
+            { "Roboto-Bold SDF", LoadFontAsset("Fonts & Materials/Roboto-Bold SDF") }
+        };
+        
+        private static TMP_FontAsset LoadFontAsset(string assetPath)
+        {
+            return Resources.Load<TMP_FontAsset>(assetPath);
+        }
+            
+        
+        public string Text { get; set; }
+        public float FontSize { get; set; }
+        public Color FontColor { get; set; }
+        
+        public TMP_FontAsset FontAsset { get; set; }
+
+        public TextMeshProComponent(string text, float fontSize, string colorHex, string fontAssetName = "Roboto-Bold SDF")
+        {
+            Text = text;
+            FontSize = fontSize;
+            
+            FontAsset = FontAssetsMap.TryGetValue(fontAssetName, out var value) ? value : FontAssetsMap["Roboto-Bold SDF"];
+            
+            FontColor = Color.white;
+            if (ColorUtility.TryParseHtmlString(colorHex, out var tempColor))
+            {
+                FontColor = tempColor;
+            }
+            else
+            {
+                Debug.LogWarning($"Failed to parse color hex: {colorHex}. Using default color.");
+            }
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            var textMeshPro = gameObject.AddComponent<TextMeshPro>();
+            textMeshPro.text = Text;
+            textMeshPro.fontSize = FontSize;
+            textMeshPro.enableAutoSizing = false; // Ensure fixed font size
+            textMeshPro.color = FontColor;
+            textMeshPro.alignment = TextAlignmentOptions.Center;
+            textMeshPro.enableWordWrapping = false;
         }
     }
     
