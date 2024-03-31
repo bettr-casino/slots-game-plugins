@@ -215,7 +215,7 @@ namespace Bettr.Editor
         public Rect? Rect { get; set; }
         
         public string ReferenceId { get; set; }
-
+        
         public InstanceComponent()
         {
         }
@@ -445,7 +445,7 @@ namespace Bettr.Editor
         public Color Color { get; set; }
         public Sprite ImageSprite { get; private set; }
         public Rect? Rect { get; set; }
-
+        
         // Constructor that takes a path to a Texture2D
         public ImageComponent(string runtimeAssetPath, string textureName, string colorHex, Rect? rect = null)
         {
@@ -477,6 +477,8 @@ namespace Bettr.Editor
             var image = gameObject.AddComponent<Image>();
             image.sprite = ImageSprite;
             image.color = Color;
+            image.raycastTarget = true;
+            image.maskable = true;
 
             // Configure the RectTransform
             if (Rect is not null)
