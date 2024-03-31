@@ -894,6 +894,7 @@ namespace Bettr.Editor
                                     ""Children"": [
                                         {{
                                             ""Name"": ""UI Camera"",
+                                            ""Id"": ""uiCamera"",
                                             ""Layer"": ""UI"",
                                             ""Components"": [
                                                 {{
@@ -1275,6 +1276,7 @@ namespace Bettr.Editor
             ";
 
             InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
+            InstanceGameObject.IdGameObjects.Clear();
             
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
             List<IGameObject> runtimeObjects = hierarchyInstance.Child != null ? new List<IGameObject>() {hierarchyInstance.Child} : hierarchyInstance.Children.Cast<IGameObject>().ToList();

@@ -19,8 +19,12 @@ namespace Bettr.Editor
     [Serializable]
     public class InstanceGameObject : IGameObject
     {
+        public static Dictionary<string, InstanceGameObject> IdGameObjects = new Dictionary<string, InstanceGameObject>();
+        
         private GameObject _go;
         public string Name { get; set; }
+        
+        public string Id { get; set; }
         
         public bool Active { get; set; }
         
