@@ -955,6 +955,10 @@ namespace Bettr.Editor
                                 ""Name"": ""SettingsPanel"",
                                 ""Layer"": ""UI"",
                                 ""Components"": [
+                                    {{
+                                        ""ComponentType"": ""Canvas"",
+                                        ""ReferenceId"": ""uiCamera""
+                                    }}
                                 ],
                                 ""Children"": [
                                     {{

@@ -24,7 +24,15 @@ namespace Bettr.Editor
         private GameObject _go;
         public string Name { get; set; }
         
-        public string Id { get; set; }
+        private string _Id;
+
+        public string Id
+        {
+            get => _Id;
+            set { _Id = value;
+                IdGameObjects[_Id] = this;
+            }
+        }
         
         public bool Active { get; set; }
         
@@ -205,6 +213,8 @@ namespace Bettr.Editor
         public int FontSize { get; set; }
         
         public Rect? Rect { get; set; }
+        
+        public string ReferenceId { get; set; }
 
         public InstanceComponent()
         {
@@ -233,6 +243,12 @@ namespace Bettr.Editor
                 case "UICamera":
                     var uiCameraComponent = new UICameraComponent();
                     uiCameraComponent.AddComponent(gameObject);
+                    break;
+                case "Canvas":
+                    InstanceGameObject.IdGameObjects.TryGetValue(ReferenceId, out var referenceGameObject);
+                    var renderCamera = referenceGameObject?.GameObject.GetComponent<Camera>();
+                    var canvasComponent = new CanvasComponent(renderCamera);
+                    canvasComponent.AddComponent(gameObject);
                     break;
             }
         }
@@ -469,6 +485,66 @@ namespace Bettr.Editor
                 rectTransform.anchoredPosition = new Vector2(Rect.Value.x, Rect.Value.y);
                 rectTransform.sizeDelta = new Vector2(Rect.Value.width, Rect.Value.height);
             }
+        }
+    }
+    
+    [Serializable]
+    public class CanvasComponent : IComponent
+    {
+        public Camera RenderCamera { get; set; }
+        
+        // Canvas settings
+        public static float DefaultMatchWidthOrHeight = 0f;
+        public static CanvasScaler.ScreenMatchMode DefaultScreenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+        public static CanvasScaler.ScaleMode DefaultScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        public static RenderMode DefaultRenderMode = RenderMode.ScreenSpaceCamera;
+        public static Vector2 DefaultReferenceResolution = new Vector2(800, 600);
+        public static int DefaultSortOrder = 0;
+        public static int DefaultPlaneDistance = 100;
+        public static bool DefaultPixelPerfect = false;
+        public static string DefaultSortingLayerName = "Default";
+
+        // Scaler settings
+        public static int DefaultReferencePixelsPerUnit = 100;
+        
+        // Raycaster settings
+        public static bool DefaultIgnoreReversedGraphics = true;
+
+        // Constructor
+        public CanvasComponent(
+            Camera renderCamera = null)
+        {
+            RenderCamera = renderCamera;
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            // Ensure the GameObject has a RectTransform component
+            if (gameObject.GetComponent<RectTransform>() == null)
+            {
+                gameObject.AddComponent<RectTransform>();
+            }
+
+            // Add the Canvas component
+            Canvas canvas = gameObject.AddComponent<Canvas>();
+            canvas.pixelPerfect = DefaultPixelPerfect;
+            canvas.worldCamera = RenderCamera;
+            canvas.planeDistance = DefaultPlaneDistance;
+            canvas.renderMode = DefaultRenderMode;
+            canvas.sortingLayerName = DefaultSortingLayerName;
+            canvas.sortingOrder = DefaultSortOrder;
+
+            // Add the Canvas Scaler component
+            CanvasScaler scaler = gameObject.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = DefaultScaleMode;
+            scaler.referenceResolution = DefaultReferenceResolution;
+            scaler.screenMatchMode = DefaultScreenMatchMode;
+            scaler.matchWidthOrHeight = DefaultMatchWidthOrHeight;
+            scaler.referencePixelsPerUnit = DefaultReferencePixelsPerUnit;
+
+            // Add the Graphic Raycaster component
+            GraphicRaycaster raycaster = gameObject.AddComponent<GraphicRaycaster>();
+            raycaster.ignoreReversedGraphics = DefaultIgnoreReversedGraphics;
         }
     }
     
