@@ -240,6 +240,10 @@ namespace Bettr.Editor
                     var imageComponent = new ImageComponent(RuntimeAssetPath, Filename, Color, Rect);
                     imageComponent.AddComponent(gameObject);
                     break;
+                case "RectTransform":
+                    var rectTransformComponent = new RectTransformComponent(RuntimeAssetPath, Filename, Color, Rect);
+                    rectTransformComponent.AddComponent(gameObject);
+                    break;
                 case "UICamera":
                     var uiCameraComponent = new UICameraComponent();
                     uiCameraComponent.AddComponent(gameObject);
@@ -480,6 +484,29 @@ namespace Bettr.Editor
             image.raycastTarget = true;
             image.maskable = true;
 
+            // Configure the RectTransform
+            if (Rect is not null)
+            {
+                RectTransform rectTransform = gameObject.GetComponent<RectTransform>();
+                rectTransform.anchoredPosition = new Vector2(Rect.Value.x, Rect.Value.y);
+                rectTransform.sizeDelta = new Vector2(Rect.Value.width, Rect.Value.height);
+            }
+        }
+    }
+    
+    [Serializable]
+    public class RectTransformComponent : IComponent
+    {
+        public Rect? Rect { get; set; }
+
+        // Constructor that takes a path to a Texture2D
+        public RectTransformComponent(string runtimeAssetPath, string textureName, string colorHex, Rect? rect = null)
+        {
+            Rect = rect;
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
             // Configure the RectTransform
             if (Rect is not null)
             {
