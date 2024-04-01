@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using CrayonScript.Code;
 using TMPro;
 using UnityEditor;
@@ -447,19 +448,17 @@ namespace Bettr.Editor
     public class ImageComponent : IComponent
     {
         public Color Color { get; set; }
-        public Sprite ImageSprite { get; private set; }
         public Rect? Rect { get; set; }
+        
+        public string TextureName { get; set; }
+        
+        public string RuntimeAssetPath { get; set; }
         
         // Constructor that takes a path to a Texture2D
         public ImageComponent(string runtimeAssetPath, string textureName, string colorHex, Rect? rect = null)
         {
-            ImageSprite = null;
-            if (!string.IsNullOrEmpty(textureName))
-            {
-                var texturePath = $"{runtimeAssetPath}/Textures/{textureName}";
-                Texture2D texture = Resources.Load<Texture2D>(texturePath);
-                ImageSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
-            }
+            RuntimeAssetPath = runtimeAssetPath;
+            TextureName = textureName;
             Color = Color.white;
             if (!string.IsNullOrEmpty(colorHex))
             {
@@ -479,18 +478,49 @@ namespace Bettr.Editor
         {
             // Add the Image component
             var image = gameObject.AddComponent<Image>();
-            image.sprite = ImageSprite;
-            image.color = Color;
             image.raycastTarget = true;
             image.maskable = true;
-
-            // Configure the RectTransform
-            if (Rect is not null)
+            
+            if (!string.IsNullOrEmpty(TextureName))
             {
-                RectTransform rectTransform = gameObject.GetComponent<RectTransform>();
-                rectTransform.anchoredPosition = new Vector2(Rect.Value.x, Rect.Value.y);
-                rectTransform.sizeDelta = new Vector2(Rect.Value.width, Rect.Value.height);
+                ImportTexture2D(RuntimeAssetPath, TextureName);
+                AssetDatabase.Refresh();
+                var destPath = $"{RuntimeAssetPath}/Textures/{TextureName}";
+                var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(destPath);
+                image.sprite = sprite;
+                image.type = Image.Type.Simple;
             }
+            else
+            {
+                image.color = Color;
+            }
+            
+            // Configure the RectTransform
+            // if (Rect is not null)
+            // {
+            //     RectTransform rectTransform = gameObject.GetComponent<RectTransform>();
+            //     rectTransform.anchoredPosition = new Vector2(Rect.Value.x, Rect.Value.y);
+            //     rectTransform.sizeDelta = new Vector2(Rect.Value.width, Rect.Value.height);
+            // }
+        }
+        
+        private static void ImportTexture2D(string runtimeAssetPath, string textureName)
+        {
+            string sourcePath = Path.Combine("Assets", "Bettr", "Editor", "textures", textureName);
+            var destPath = $"{runtimeAssetPath}/Textures/{textureName}";
+            File.Copy(sourcePath, destPath, overwrite: true);
+            // Import the copied image file as a Texture2D asset
+            AssetDatabase.ImportAsset(destPath, ImportAssetOptions.ForceUpdate);
+            TextureImporter textureImporter = AssetImporter.GetAtPath(destPath) as TextureImporter;
+            if (textureImporter != null)
+            {
+                textureImporter.textureType = TextureImporterType.Sprite;
+                textureImporter.mipmapEnabled = false;
+                textureImporter.isReadable = true;
+                textureImporter.SaveAndReimport();
+            }
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
         }
     }
     
@@ -510,7 +540,7 @@ namespace Bettr.Editor
             // Configure the RectTransform
             if (Rect is not null)
             {
-                RectTransform rectTransform = gameObject.GetComponent<RectTransform>();
+                RectTransform rectTransform = gameObject.AddComponent<RectTransform>();
                 rectTransform.anchoredPosition = new Vector2(Rect.Value.x, Rect.Value.y);
                 rectTransform.sizeDelta = new Vector2(Rect.Value.width, Rect.Value.height);
             }
