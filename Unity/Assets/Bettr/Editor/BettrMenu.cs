@@ -706,6 +706,7 @@ namespace Bettr.Editor
             // Settings Prefab
             //
             var settingsGameObject = new InstanceGameObject(new GameObject($"Settings"));
+            settingsGameObject.GameObject.SetActive(false);
             settingsGameObject.SetParent(machinePivotGameObject.GameObject);
             var settingsPivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
             settingsPivotGameObject.SetParent(settingsGameObject.GameObject);
@@ -715,7 +716,6 @@ namespace Bettr.Editor
             
             var settingsPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameSettings.prefab");
             var settingsPrefabGameObject = new PrefabGameObject(settingsPrefab, $"Settings");
-            settingsPrefabGameObject.GameObject.SetActive(false);
             settingsPrefabGameObject.SetParent(settingsPivotGameObject.GameObject);
             
             ProcessPrefab($"{machineName}BaseGameMachine", new List<IComponent>(), 
