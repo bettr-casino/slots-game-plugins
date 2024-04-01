@@ -874,7 +874,7 @@ namespace Bettr.Editor
         
         private static string ReadJson(string fileName)
         {
-            string path = Path.Combine(Application.dataPath, "Bettr", "Editor", "json", $"{fileName}.json.txt");
+            string path = Path.Combine(Application.dataPath, "Bettr", "Editor", "json", $"{fileName}.json");
             if (!File.Exists(path))
             {
                 Debug.LogError($"JSON file not found at path: {path}");
@@ -886,8 +886,11 @@ namespace Bettr.Editor
         
         private static void ProcessSettings(string settingsName, string runtimeAssetPath)
         {
+            SimpleStringInterpolator interpolator = new SimpleStringInterpolator();
+            interpolator.SetVariable("settingsName", settingsName);
+            
             string jsonTemplate = ReadJson("BaseGameSettings");
-            string json = string.Format(jsonTemplate, settingsName);
+            string json = interpolator.Interpolate(jsonTemplate);
 
             InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
             InstanceGameObject.IdGameObjects.Clear();
@@ -1094,6 +1097,30 @@ namespace Bettr.Editor
                 Debug.LogError($"{tableName} not found in the machine model.");
             }
             return table;
+        }
+    }
+    
+    public class SimpleStringInterpolator
+    {
+        private readonly Dictionary<string, string> _variables;
+
+        public SimpleStringInterpolator()
+        {
+            _variables = new Dictionary<string, string>();
+        }
+
+        public void SetVariable(string key, string value)
+        {
+            _variables[key] = value;
+        }
+
+        public string Interpolate(string template)
+        {
+            return Regex.Replace(template, @"\{(\w+)\}", match =>
+            {
+                string key = match.Groups[1].Value;
+                return _variables.TryGetValue(key, out string value) ? value : match.Value;
+            });
         }
     }
 }
