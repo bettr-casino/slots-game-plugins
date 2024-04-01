@@ -496,12 +496,12 @@ namespace Bettr.Editor
             }
             
             // Configure the RectTransform
-            // if (Rect is not null)
-            // {
-            //     RectTransform rectTransform = gameObject.GetComponent<RectTransform>();
-            //     rectTransform.anchoredPosition = new Vector2(Rect.Value.x, Rect.Value.y);
-            //     rectTransform.sizeDelta = new Vector2(Rect.Value.width, Rect.Value.height);
-            // }
+            if (Rect is not null)
+            {
+                RectTransform rectTransform = gameObject.GetComponent<RectTransform>();
+                rectTransform.anchoredPosition = new Vector2(Rect.Value.x, Rect.Value.y);
+                rectTransform.sizeDelta = new Vector2(Rect.Value.width, Rect.Value.height);
+            }
         }
         
         private static void ImportTexture2D(string runtimeAssetPath, string textureName)
