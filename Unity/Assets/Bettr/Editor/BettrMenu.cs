@@ -705,11 +705,12 @@ namespace Bettr.Editor
             //
             // Win Symbols
             //
-            
-            var winSymbolsGameObject = new InstanceGameObject(new GameObject($"Win Symbols"));
+
+            var winSymbolsGameObject = ProcessWinSymbols(runtimeAssetPath);
             winSymbolsGameObject.SetParent(machinePivotGameObject.GameObject);
-            var winSymbolsPivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
-            winSymbolsPivotGameObject.SetParent(winSymbolsGameObject.GameObject);
+
+            // ReSharper disable once PossibleNullReferenceException
+            var winSymbolsPivotGameObject = (winSymbolsGameObject as InstanceGameObject).Child;
             
             var baseGameSymbolTable = GetTable($"{machineName}BaseGameSymbolTable");
             foreach (var pair in baseGameSymbolTable.Pairs)
@@ -717,6 +718,7 @@ namespace Bettr.Editor
                 var symbolKey = pair.Key.String;
                 var symbolPrefabName = $"{machineName}BaseGameSymbol{symbolKey}";   
                 var winSymbolGameObject = ProcessWinSymbol( symbolKey, symbolPrefabName, runtimeAssetPath);
+                winSymbolGameObject.GameObject.SetActive(false);
                 winSymbolGameObject.SetParent(winSymbolsPivotGameObject.GameObject);
             }
             
@@ -888,6 +890,21 @@ namespace Bettr.Editor
                     pivotInstance,
                 },
                 runtimeAssetPath);
+        }
+        
+        private static IGameObject ProcessWinSymbols(string runtimeAssetPath)
+        {
+            SimpleStringInterpolator interpolator = new SimpleStringInterpolator();
+            
+            string jsonTemplate = ReadJson("BaseGameWinSymbols");
+            string json = interpolator.Interpolate(jsonTemplate);
+
+            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
+            InstanceGameObject.IdGameObjects.Clear();
+            
+            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
+
+            return hierarchyInstance;
         }
         
         private static IGameObject ProcessWinSymbol(string symbolName, string symbolPrefabName, string runtimeAssetPath)

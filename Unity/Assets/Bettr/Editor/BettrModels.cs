@@ -116,6 +116,21 @@ namespace Bettr.Editor
         {
             EnsureGameObject();
             _go.transform.SetParent(parentGo.transform);
+            _go.transform.position = new Vector3(0, 0, 0);
+            if (Position != null)
+            {
+                _go.transform.position = (Vector3) Position;
+            }
+            _go.transform.rotation = Quaternion.Euler(0, 0, 0);
+            if (Rotation != null)
+            {
+                _go.transform.rotation = Quaternion.Euler((Vector3) Rotation);
+            }
+            _go.transform.localScale = new Vector3(0, 0, 0);
+            if (Scale != null)
+            {
+                _go.transform.localScale = (Vector3) Scale;
+            }
         }
 
         public void SetParent(IGameObject parentGo)
@@ -140,19 +155,6 @@ namespace Bettr.Editor
                 }
                 
                 _go.SetActive(Active);
-                if (Position != null)
-                {
-                    _go.transform.position = (Vector3) Position;
-                }
-                if (Rotation != null)
-                {
-                    _go.transform.rotation = Quaternion.Euler((Vector3) Rotation);
-                }
-                if (Scale != null)
-                {
-                    _go.transform.localScale = (Vector3) Scale;
-                }
-                
                 _go.layer = LayerMask.NameToLayer(Layer);
             }
         }
