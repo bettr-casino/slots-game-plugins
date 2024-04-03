@@ -605,10 +605,10 @@ namespace Bettr.Editor
             var symbolPrefabs = new List<IGameObject>();
             foreach (var pair in baseGameSymbolTable.Pairs)
             {
-                var symbolKey = pair.Key.String;
-                var symbolName = $"{machineName}BaseGameSymbol{symbolKey}";   
-                var symbolPrefab = ProcessBaseGameSymbol(symbolName, runtimeAssetPath);
-                symbolPrefabs.Add(new PrefabGameObject(symbolPrefab, symbolKey));
+                var symbolName = pair.Key.String;
+                var symbolPrefabName = $"{machineName}BaseGameSymbol{symbolName}";   
+                var symbolPrefab = ProcessBaseGameSymbol(symbolName, symbolPrefabName, runtimeAssetPath);
+                symbolPrefabs.Add(new PrefabGameObject(symbolPrefab, symbolName));
             }
             
             var scriptGroupName = $"{machineName}BaseGameSymbolGroup"; 
@@ -619,16 +619,28 @@ namespace Bettr.Editor
             return symbolGroup;
         }
 
-        private static GameObject ProcessBaseGameSymbol(string symbolName, string runtimeAssetPath)
+        private static GameObject ProcessBaseGameSymbol(string symbolName, string symbolPrefabName, string runtimeAssetPath)
         {
-            var animatorController = CreateOrLoadAnimatorController(symbolName, runtimeAssetPath);
-            var symbolPrefab = ProcessPrefab(symbolName, new List<IComponent>
-                {
-                    new AnimatorComponent(animatorController),
-                }, 
-                new List<IGameObject>(),
+            SimpleStringInterpolator interpolator = new SimpleStringInterpolator();
+            interpolator.SetVariable("symbolName", symbolName);
+            interpolator.SetVariable("symbolPrefabName", symbolPrefabName);
+            
+            string jsonTemplate = ReadJson("BaseGameSymbol");
+            string json = interpolator.Interpolate(jsonTemplate);
+
+            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
+            InstanceGameObject.IdGameObjects.Clear();
+            
+            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
+            List<IGameObject> runtimeObjects = hierarchyInstance.Child != null ? new List<IGameObject>() {hierarchyInstance.Child} : hierarchyInstance.Children != null ? hierarchyInstance.Children.Cast<IGameObject>().ToList() : new List<IGameObject>();
+            List<IComponent> components = hierarchyInstance.Components.Cast<IComponent>().ToList();
+
+            var settingsPrefab = ProcessPrefab(symbolPrefabName, 
+                components, 
+                runtimeObjects,
                 runtimeAssetPath);
-            return symbolPrefab;
+
+            return settingsPrefab;
         }
         
         private static void ProcessBaseGameMachine(string machineName, string machineVariant, string runtimeAssetPath)
