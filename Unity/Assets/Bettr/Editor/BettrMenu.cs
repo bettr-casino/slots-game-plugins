@@ -703,12 +703,22 @@ namespace Bettr.Editor
             reelsScrimQuadInstance.SetParent(reelsScrimPivotGameObject.GameObject);
             
             //
-            // Win Symbol
+            // Win Symbols
             //
             
-            var winSymbolGameObject = ProcessWinSymbol("M1", $"{machineName}BaseGameSymbolM1", runtimeAssetPath);
-            Debug.Log($"Win Symbol GameObject: {winSymbolGameObject.GameObject.transform.GetChild(0).transform.GetChild(0).name}");
-            winSymbolGameObject.SetParent(machinePivotGameObject.GameObject);
+            var winSymbolsGameObject = new InstanceGameObject(new GameObject($"Win Symbols"));
+            winSymbolsGameObject.SetParent(machinePivotGameObject.GameObject);
+            var winSymbolsPivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
+            winSymbolsPivotGameObject.SetParent(winSymbolsGameObject.GameObject);
+            
+            var baseGameSymbolTable = GetTable($"{machineName}BaseGameSymbolTable");
+            foreach (var pair in baseGameSymbolTable.Pairs)
+            {
+                var symbolKey = pair.Key.String;
+                var symbolPrefabName = $"{machineName}BaseGameSymbol{symbolKey}";   
+                var winSymbolGameObject = ProcessWinSymbol( symbolKey, symbolPrefabName, runtimeAssetPath);
+                winSymbolGameObject.SetParent(winSymbolsPivotGameObject.GameObject);
+            }
             
             //
             // Settings Prefab
