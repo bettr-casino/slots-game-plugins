@@ -35,6 +35,10 @@ namespace Bettr.Editor
             }
         }
         
+        public string PrefabName { get; set; }
+        
+        public bool IsPrefab { get; set; }
+        
         public bool Active { get; set; }
         
         public string Layer { get; set; }
@@ -123,7 +127,18 @@ namespace Bettr.Editor
         {
             if (_go == null)
             {
-                _go = new GameObject(Name);
+                if (IsPrefab)
+                {
+                    Debug.Log($"loading prefab from path: {InstanceComponent.RuntimeAssetPath}/Prefabs/{PrefabName}.prefab");
+                    var prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{InstanceComponent.RuntimeAssetPath}/Prefabs/{PrefabName}.prefab");
+                    var prefabGameObject = new PrefabGameObject(prefab, Name);
+                    _go = prefabGameObject.GameObject;
+                }
+                else
+                {
+                    _go = new GameObject(Name);
+                }
+                
                 _go.SetActive(Active);
                 if (Position != null)
                 {
@@ -146,21 +161,23 @@ namespace Bettr.Editor
     public class PrefabGameObject : IGameObject
     {
         private readonly GameObject _prefab;
+        private readonly GameObject _go;
         private string _name;
         
-        public GameObject GameObject => _prefab;
+        public GameObject GameObject => _go;
         
         public PrefabGameObject(GameObject prefab, string name)
         {
             _prefab = prefab;
             _name = name;
+            _go = (GameObject)PrefabUtility.InstantiatePrefab(_prefab);
+            _go.name = _name;
         }
         
         public void SetParent(GameObject parentGo)
         {
             // Instantiate the child prefab and set it as a child of the new prefab
-            var childInstance = (GameObject)PrefabUtility.InstantiatePrefab(_prefab, parentGo.transform);
-            childInstance.name = _name;
+            _go.transform.SetParent(parentGo.transform);
         }
         
         public void SetParent(IGameObject parentGo)

@@ -703,6 +703,14 @@ namespace Bettr.Editor
             reelsScrimQuadInstance.SetParent(reelsScrimPivotGameObject.GameObject);
             
             //
+            // Win Symbol
+            //
+            
+            var winSymbolGameObject = ProcessWinSymbol("M1", $"{machineName}BaseGameSymbolM1", runtimeAssetPath);
+            Debug.Log($"Win Symbol GameObject: {winSymbolGameObject.GameObject.transform.GetChild(0).transform.GetChild(0).name}");
+            winSymbolGameObject.SetParent(machinePivotGameObject.GameObject);
+            
+            //
             // Settings Prefab
             //
             var settingsGameObject = new InstanceGameObject(new GameObject($"Settings"));
@@ -870,6 +878,23 @@ namespace Bettr.Editor
                     pivotInstance,
                 },
                 runtimeAssetPath);
+        }
+        
+        private static IGameObject ProcessWinSymbol(string symbolName, string symbolPrefabName, string runtimeAssetPath)
+        {
+            SimpleStringInterpolator interpolator = new SimpleStringInterpolator();
+            interpolator.SetVariable("symbolName", symbolName);
+            interpolator.SetVariable("symbolPrefabName", symbolPrefabName);
+            
+            string jsonTemplate = ReadJson("BaseGameWinSymbol");
+            string json = interpolator.Interpolate(jsonTemplate);
+
+            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
+            InstanceGameObject.IdGameObjects.Clear();
+            
+            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
+
+            return hierarchyInstance;
         }
         
         private static string ReadJson(string fileName)
