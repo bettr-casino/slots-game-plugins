@@ -368,16 +368,20 @@ namespace Bettr.Editor
     {
         public static Dictionary<string, TMP_FontAsset> FontAssetsMap = new Dictionary<string, TMP_FontAsset>()
         {
-            { "Anton SDF", LoadFontAsset("Fonts & Materials/Anton SDF") },
-            { "Bangers SDF", LoadFontAsset("Fonts & Materials/Bangers SDF") },
-            { "LiberationSans SDF", LoadFontAsset("Fonts & Materials/LiberationSans SDF") },
-            { "Oswald Bold SDF", LoadFontAsset("Fonts & Materials/Oswald Bold SDF") },
-            { "Roboto-Bold SDF", LoadFontAsset("Fonts & Materials/Roboto-Bold SDF") }
+            { "Anton SDF", LoadFontAsset("Anton SDF") },
+            { "Bangers SDF", LoadFontAsset("Bangers SDF") },
+            { "Oswald Bold SDF", LoadFontAsset("Oswald Bold SDF") },
+            { "Roboto-Bold SDF", LoadFontAsset("Roboto-Bold SDF") },
+            { "LiberationSans SDF", LoadFontAsset("LiberationSans SDF") },
         };
         
-        private static TMP_FontAsset LoadFontAsset(string assetPath)
+        private static TMP_FontAsset LoadFontAsset(string fontAssetName)
         {
-            return Resources.Load<TMP_FontAsset>(assetPath);
+            Debug.Log($"Loading fontAssetName:{fontAssetName}");
+            var fontPath = $"Assets/Bettr/Editor/fonts/{fontAssetName}.asset";
+            var fontAsset =AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(fontPath);;
+            Debug.Log($"Loaded font asset:{fontAsset.name}");
+            return fontAsset;
         }
             
         
@@ -395,7 +399,10 @@ namespace Bettr.Editor
             FontSize = fontSize;
             Rect = rect;
             
-            FontAsset = FontAssetsMap.TryGetValue(fontAssetName, out var value) ? value : FontAssetsMap["Roboto-Bold SDF"];
+            // ReSharper disable once InlineOutVariableDeclaration
+            TMP_FontAsset tmpFontAsset;
+            FontAsset = FontAssetsMap.TryGetValue(fontAssetName, out tmpFontAsset) ? tmpFontAsset : FontAssetsMap["Roboto-Bold SDF"];
+            Debug.Log($"TextMeshProComponent Retrieved FontAsset:{FontAsset.name}");
             
             FontColor = Color.white;
             if (ColorUtility.TryParseHtmlString(colorHex, out var tempColor))
@@ -429,6 +436,9 @@ namespace Bettr.Editor
                 textMeshPro.rectTransform.sizeDelta = new Vector2(rect.width, rect.height);
                 textMeshPro.rectTransform.pivot = new Vector2(rect.x, rect.y);
             }
+            
+            Debug.Log($"TextMeshProComponent Setting FontAsset:{FontAsset.name}");
+            textMeshPro.fontMaterial = FontAsset.material;
         }
     }
     
