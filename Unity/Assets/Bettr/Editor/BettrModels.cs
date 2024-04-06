@@ -12,7 +12,9 @@ namespace Bettr.Editor
 {
     public static class Utils
     {
-        public static Material CreateOrLoadMaterial(string materialName, string shaderName, string runtimeAssetPath)
+        private static readonly int MainTex = Shader.PropertyToID("_MainTex");
+        
+        public static Material CreateOrLoadMaterial(string materialName, string shaderName, string textureName, string runtimeAssetPath)
         {
             AssetDatabase.Refresh();
             
@@ -36,16 +38,32 @@ namespace Bettr.Editor
             AssetDatabase.Refresh();
             
             material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
+            string sourcePath = Path.Combine("Assets", "Bettr", "Editor", "textures", textureName);
+            var destPath = $"{runtimeAssetPath}/Textures/{textureName}";
+            string extension = Path.GetExtension(sourcePath);
+            if (string.IsNullOrEmpty(extension))
+            {
+                extension = File.Exists($"{sourcePath}.jpg") ? ".jpg" : ".png";
+                sourcePath += extension;
+                destPath += extension;
+            }
+            ImportTexture2D( sourcePath, destPath);
+            AssetDatabase.Refresh();
+            Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>($"{InstanceComponent.RuntimeAssetPath}/Textures/{textureName}.jpg");
+            if (texture == null)
+            {
+                throw new Exception($"{textureName} texture not found.");
+            }
+            material.SetTexture(MainTex, texture);
+
+            AssetDatabase.Refresh();
 
             return material;
         }
         
-        public static void ImportTexture2D(string runtimeAssetPath, string textureName, TextureImporterType textureImporterType = TextureImporterType.Sprite)
+        public static void ImportTexture2D(string sourcePath, string destPath, TextureImporterType textureImporterType = TextureImporterType.Sprite)
         {
-            string sourcePath = Path.Combine("Assets", "Bettr", "Editor", "textures", textureName);
-            string extension = File.Exists($"{sourcePath}.jpg") ? ".jpg" : ".png";
-            var destPath = $"{runtimeAssetPath}/Textures/{textureName}";
-            File.Copy($"{sourcePath}{extension}", $"{destPath}{extension}", overwrite: true);
+            File.Copy(sourcePath, destPath, overwrite: true);
             // Import the copied image file as a Texture2D asset
             AssetDatabase.ImportAsset(destPath, ImportAssetOptions.ForceUpdate);
             TextureImporter textureImporter = AssetImporter.GetAtPath(destPath) as TextureImporter;
@@ -138,7 +156,6 @@ namespace Bettr.Editor
         }
         
         private List<InstanceGameObject> _children;
-        private static readonly int MainTex = Shader.PropertyToID("_MainTex");
 
         public List<InstanceGameObject> Children
         {
@@ -214,11 +231,7 @@ namespace Bettr.Editor
                 else if (IsPrimitive)
                 {
                     var primitiveGameObject = GameObject.CreatePrimitive(Enum.GetValues(typeof(PrimitiveType)).GetValue(Primitive) as PrimitiveType? ?? PrimitiveType.Quad);
-                    var primitiveMaterial = Utils.CreateOrLoadMaterial(PrimitiveMaterial, PrimitiveShader, InstanceComponent.RuntimeAssetPath);
-                    Utils.ImportTexture2D(InstanceComponent.RuntimeAssetPath, PrimitiveTexture);
-                    AssetDatabase.Refresh();
-                    Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>($"{InstanceComponent.RuntimeAssetPath}/Textures/{PrimitiveTexture}");
-                    primitiveMaterial.SetTexture(MainTex, texture);
+                    var primitiveMaterial = Utils.CreateOrLoadMaterial(PrimitiveMaterial, PrimitiveShader, PrimitiveTexture, InstanceComponent.RuntimeAssetPath);
                     
                     var primitiveMeshRenderer = primitiveGameObject.GetComponent<MeshRenderer>();
                     primitiveMeshRenderer.material = primitiveMaterial;
@@ -588,9 +601,17 @@ namespace Bettr.Editor
 
             if (!string.IsNullOrEmpty(TextureName))
             {
-                Utils.ImportTexture2D(RuntimeAssetPath, TextureName);
-                AssetDatabase.Refresh();
+                string sourcePath = Path.Combine("Assets", "Bettr", "Editor", "textures", TextureName);
                 var destPath = $"{RuntimeAssetPath}/Textures/{TextureName}";
+                string extension = Path.GetExtension(sourcePath);
+                if (string.IsNullOrEmpty(extension))
+                {
+                    extension = File.Exists($"{sourcePath}.jpg") ? ".jpg" : ".png";
+                    sourcePath += extension;
+                    destPath += extension;
+                }
+                Utils.ImportTexture2D(sourcePath, destPath);
+                AssetDatabase.Refresh();
                 var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(destPath);
                 image.sprite = sprite;
                 image.type = Image.Type.Simple;
