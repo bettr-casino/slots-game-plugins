@@ -10,6 +10,57 @@ using UnityEngine.UI;
 
 namespace Bettr.Editor
 {
+    public static class Utils
+    {
+        public static Material CreateOrLoadMaterial(string materialName, string shaderName, string runtimeAssetPath)
+        {
+            AssetDatabase.Refresh();
+            
+            var materialFilename = $"{materialName}.mat";
+            var materialFilepath = $"{runtimeAssetPath}/Materials/{materialFilename}";
+            var material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
+            if (material == null)
+            {
+                Debug.Log($"Creating material for {materialName} at {materialFilepath}");
+                try
+                {
+                    material = new Material(Shader.Find(shaderName));
+                    AssetDatabase.CreateAsset(material, materialFilepath);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e);
+                }
+            }
+            
+            AssetDatabase.Refresh();
+            
+            material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
+
+            return material;
+        }
+        
+        public static void ImportTexture2D(string runtimeAssetPath, string textureName, TextureImporterType textureImporterType = TextureImporterType.Sprite)
+        {
+            string sourcePath = Path.Combine("Assets", "Bettr", "Editor", "textures", textureName);
+            string extension = File.Exists($"{sourcePath}.jpg") ? ".jpg" : ".png";
+            var destPath = $"{runtimeAssetPath}/Textures/{textureName}";
+            File.Copy($"{sourcePath}{extension}", $"{destPath}{extension}", overwrite: true);
+            // Import the copied image file as a Texture2D asset
+            AssetDatabase.ImportAsset(destPath, ImportAssetOptions.ForceUpdate);
+            TextureImporter textureImporter = AssetImporter.GetAtPath(destPath) as TextureImporter;
+            if (textureImporter != null)
+            {
+                textureImporter.textureType = textureImporterType;
+                textureImporter.mipmapEnabled = false;
+                textureImporter.isReadable = true;
+                textureImporter.SaveAndReimport();
+            }
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
+    }
+    
     public interface IGameObject
     {
         public GameObject GameObject { get; }
@@ -42,6 +93,8 @@ namespace Bettr.Editor
         public string PrimitiveMaterial { get; set; }
         
         public string PrimitiveShader { get; set; }
+        
+        public string PrimitiveTexture { get; set; }
         
         public int Primitive { get; set; }
         
@@ -85,6 +138,7 @@ namespace Bettr.Editor
         }
         
         private List<InstanceGameObject> _children;
+        private static readonly int MainTex = Shader.PropertyToID("_MainTex");
 
         public List<InstanceGameObject> Children
         {
@@ -160,8 +214,14 @@ namespace Bettr.Editor
                 else if (IsPrimitive)
                 {
                     var primitiveGameObject = GameObject.CreatePrimitive(Enum.GetValues(typeof(PrimitiveType)).GetValue(Primitive) as PrimitiveType? ?? PrimitiveType.Quad);
-                    var primitiveMaterial = CreateOrLoadMaterial(PrimitiveMaterial, PrimitiveShader, InstanceComponent.RuntimeAssetPath);
-                    primitiveGameObject.GetComponent<MeshRenderer>().material = primitiveMaterial;
+                    var primitiveMaterial = Utils.CreateOrLoadMaterial(PrimitiveMaterial, PrimitiveShader, InstanceComponent.RuntimeAssetPath);
+                    Utils.ImportTexture2D(InstanceComponent.RuntimeAssetPath, PrimitiveTexture);
+                    AssetDatabase.Refresh();
+                    Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>($"{InstanceComponent.RuntimeAssetPath}/Textures/{PrimitiveTexture}");
+                    primitiveMaterial.SetTexture(MainTex, texture);
+                    
+                    var primitiveMeshRenderer = primitiveGameObject.GetComponent<MeshRenderer>();
+                    primitiveMeshRenderer.material = primitiveMaterial;
                     
                     _go = primitiveGameObject;
                 }
@@ -173,34 +233,6 @@ namespace Bettr.Editor
                 _go.SetActive(Active);
                 _go.layer = LayerMask.NameToLayer(Layer);
             }
-        }
-        
-        private static Material CreateOrLoadMaterial(string materialName, string shaderName, string runtimeAssetPath)
-        {
-            AssetDatabase.Refresh();
-            
-            var materialFilename = $"{materialName}.mat";
-            var materialFilepath = $"{runtimeAssetPath}/Materials/{materialFilename}";
-            var material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
-            if (material == null)
-            {
-                Debug.Log($"Creating material for {materialName} at {materialFilepath}");
-                try
-                {
-                    material = new Material(Shader.Find(shaderName));
-                    AssetDatabase.CreateAsset(material, materialFilepath);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError(e);
-                }
-            }
-            
-            AssetDatabase.Refresh();
-            
-            material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
-
-            return material;
         }
     }
 
@@ -553,10 +585,10 @@ namespace Bettr.Editor
             var image = gameObject.AddComponent<Image>();
             image.raycastTarget = true;
             image.maskable = true;
-            
+
             if (!string.IsNullOrEmpty(TextureName))
             {
-                ImportTexture2D(RuntimeAssetPath, TextureName);
+                Utils.ImportTexture2D(RuntimeAssetPath, TextureName);
                 AssetDatabase.Refresh();
                 var destPath = $"{RuntimeAssetPath}/Textures/{TextureName}";
                 var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(destPath);
@@ -575,25 +607,6 @@ namespace Bettr.Editor
                 rectTransform.anchoredPosition = new Vector2(Rect.Value.x, Rect.Value.y);
                 rectTransform.sizeDelta = new Vector2(Rect.Value.width, Rect.Value.height);
             }
-        }
-        
-        private static void ImportTexture2D(string runtimeAssetPath, string textureName)
-        {
-            string sourcePath = Path.Combine("Assets", "Bettr", "Editor", "textures", textureName);
-            var destPath = $"{runtimeAssetPath}/Textures/{textureName}";
-            File.Copy(sourcePath, destPath, overwrite: true);
-            // Import the copied image file as a Texture2D asset
-            AssetDatabase.ImportAsset(destPath, ImportAssetOptions.ForceUpdate);
-            TextureImporter textureImporter = AssetImporter.GetAtPath(destPath) as TextureImporter;
-            if (textureImporter != null)
-            {
-                textureImporter.textureType = TextureImporterType.Sprite;
-                textureImporter.mipmapEnabled = false;
-                textureImporter.isReadable = true;
-                textureImporter.SaveAndReimport();
-            }
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
         }
     }
     
