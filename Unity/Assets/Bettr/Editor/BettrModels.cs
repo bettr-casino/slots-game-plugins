@@ -39,6 +39,14 @@ namespace Bettr.Editor
         
         public bool IsPrefab { get; set; }
         
+        public string PrimitiveMaterial { get; set; }
+        
+        public string PrimitiveShader { get; set; }
+        
+        public int Primitive { get; set; }
+        
+        public bool IsPrimitive { get; set; }
+        
         public bool Active { get; set; }
         
         public string Layer { get; set; }
@@ -149,6 +157,14 @@ namespace Bettr.Editor
                     var prefabGameObject = new PrefabGameObject(prefab, Name);
                     _go = prefabGameObject.GameObject;
                 }
+                else if (IsPrimitive)
+                {
+                    var primitiveGameObject = GameObject.CreatePrimitive(Enum.GetValues(typeof(PrimitiveType)).GetValue(Primitive) as PrimitiveType? ?? PrimitiveType.Quad);
+                    var primitiveMaterial = CreateOrLoadMaterial(PrimitiveMaterial, PrimitiveShader, InstanceComponent.RuntimeAssetPath);
+                    primitiveGameObject.GetComponent<MeshRenderer>().material = primitiveMaterial;
+                    
+                    _go = primitiveGameObject;
+                }
                 else
                 {
                     _go = new GameObject(Name);
@@ -157,6 +173,34 @@ namespace Bettr.Editor
                 _go.SetActive(Active);
                 _go.layer = LayerMask.NameToLayer(Layer);
             }
+        }
+        
+        private static Material CreateOrLoadMaterial(string materialName, string shaderName, string runtimeAssetPath)
+        {
+            AssetDatabase.Refresh();
+            
+            var materialFilename = $"{materialName}.mat";
+            var materialFilepath = $"{runtimeAssetPath}/Materials/{materialFilename}";
+            var material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
+            if (material == null)
+            {
+                Debug.Log($"Creating material for {materialName} at {materialFilepath}");
+                try
+                {
+                    material = new Material(Shader.Find(shaderName));
+                    AssetDatabase.CreateAsset(material, materialFilepath);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e);
+                }
+            }
+            
+            AssetDatabase.Refresh();
+            
+            material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
+
+            return material;
         }
     }
 
@@ -635,5 +679,4 @@ namespace Bettr.Editor
             raycaster.ignoreReversedGraphics = DefaultIgnoreReversedGraphics;
         }
     }
-    
 }
