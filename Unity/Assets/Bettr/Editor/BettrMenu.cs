@@ -885,22 +885,24 @@ namespace Bettr.Editor
         
         private static void ProcessBaseGameBackground(string machineName, string machineVariant, TextAsset scriptTextAsset, string runtimeAssetPath)
         {
-            var pivotInstance = new InstanceGameObject(new GameObject("Pivot"));
-            var quadInstance = new InstanceGameObject(GameObject.CreatePrimitive(PrimitiveType.Quad));
-            quadInstance.GameObject.SetActive(false);
-            quadInstance.SetParent(pivotInstance.GameObject);
-
-            var animatorController = CreateOrLoadAnimatorController($"{machineName}BaseGameBackground", runtimeAssetPath);
+            SimpleStringInterpolator interpolator = new SimpleStringInterpolator();
             
-            var backgroundPrefab = ProcessPrefab($"{machineName}BaseGameBackground", new List<IComponent>
-                {
-                    new TileComponent($"{machineName}BaseGameBackground", scriptTextAsset),
-                    new AnimatorComponent(animatorController),
-                }, 
-                new List<IGameObject>()
-                {
-                    pivotInstance,
-                },
+            string backgroundName = $"{machineName}BaseGameBackground";
+            interpolator.SetVariable("backgroundName", backgroundName);
+            
+            string jsonTemplate = ReadJson("BaseGameBackground");
+            string json = interpolator.Interpolate(jsonTemplate);
+
+            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
+            InstanceGameObject.IdGameObjects.Clear();
+            
+            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
+            List<IGameObject> runtimeObjects = hierarchyInstance.Child != null ? new List<IGameObject>() {hierarchyInstance.Child} : hierarchyInstance.Children != null ? hierarchyInstance.Children.Cast<IGameObject>().ToList() : new List<IGameObject>();
+            List<IComponent> components = hierarchyInstance.Components.Cast<IComponent>().ToList();
+
+            var settingsPrefab = ProcessPrefab(backgroundName, 
+                components, 
+                runtimeObjects,
                 runtimeAssetPath);
         }
         

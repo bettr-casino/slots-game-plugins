@@ -12,7 +12,7 @@ namespace Bettr.Editor
 {
     public static class Utils
     {
-        private static readonly int MainTex = Shader.PropertyToID("_MainTex");
+        public static readonly int MainTex = Shader.PropertyToID("_MainTex");
         
         public static Material CreateOrLoadMaterial(string materialName, string shaderName, string textureName, string runtimeAssetPath)
         {
