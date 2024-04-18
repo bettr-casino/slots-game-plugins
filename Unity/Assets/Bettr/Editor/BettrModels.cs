@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Bettr.Editor.generators;
 using CrayonScript.Code;
 using TMPro;
 using UnityEditor;
@@ -10,75 +11,6 @@ using UnityEngine.UI;
 
 namespace Bettr.Editor
 {
-    public static class Utils
-    {
-        public static readonly int MainTex = Shader.PropertyToID("_MainTex");
-        
-        public static Material CreateOrLoadMaterial(string materialName, string shaderName, string textureName, string runtimeAssetPath)
-        {
-            AssetDatabase.Refresh();
-            
-            var materialFilename = $"{materialName}.mat";
-            var materialFilepath = $"{runtimeAssetPath}/Materials/{materialFilename}";
-            var material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
-            if (material == null)
-            {
-                Debug.Log($"Creating material for {materialName} at {materialFilepath}");
-                try
-                {
-                    material = new Material(Shader.Find(shaderName));
-                    AssetDatabase.CreateAsset(material, materialFilepath);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError(e);
-                }
-            }
-            
-            AssetDatabase.Refresh();
-            
-            material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
-            string sourcePath = Path.Combine("Assets", "Bettr", "Editor", "textures", textureName);
-            var destPath = $"{runtimeAssetPath}/Textures/{textureName}";
-            string extension = Path.GetExtension(sourcePath);
-            if (string.IsNullOrEmpty(extension))
-            {
-                extension = File.Exists($"{sourcePath}.jpg") ? ".jpg" : ".png";
-                sourcePath += extension;
-                destPath += extension;
-            }
-            ImportTexture2D( sourcePath, destPath);
-            AssetDatabase.Refresh();
-            Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>($"{InstanceComponent.RuntimeAssetPath}/Textures/{textureName}.jpg");
-            if (texture == null)
-            {
-                throw new Exception($"{textureName} texture not found.");
-            }
-            material.SetTexture(MainTex, texture);
-
-            AssetDatabase.Refresh();
-
-            return material;
-        }
-        
-        public static void ImportTexture2D(string sourcePath, string destPath, TextureImporterType textureImporterType = TextureImporterType.Sprite)
-        {
-            File.Copy(sourcePath, destPath, overwrite: true);
-            // Import the copied image file as a Texture2D asset
-            AssetDatabase.ImportAsset(destPath, ImportAssetOptions.ForceUpdate);
-            TextureImporter textureImporter = AssetImporter.GetAtPath(destPath) as TextureImporter;
-            if (textureImporter != null)
-            {
-                textureImporter.textureType = textureImporterType;
-                textureImporter.mipmapEnabled = false;
-                textureImporter.isReadable = true;
-                textureImporter.SaveAndReimport();
-            }
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-        }
-    }
-    
     public interface IGameObject
     {
         public GameObject GameObject { get; }
@@ -231,7 +163,7 @@ namespace Bettr.Editor
                 else if (IsPrimitive)
                 {
                     var primitiveGameObject = GameObject.CreatePrimitive(Enum.GetValues(typeof(PrimitiveType)).GetValue(Primitive) as PrimitiveType? ?? PrimitiveType.Quad);
-                    var primitiveMaterial = Utils.CreateOrLoadMaterial(PrimitiveMaterial, PrimitiveShader, PrimitiveTexture, InstanceComponent.RuntimeAssetPath);
+                    var primitiveMaterial = BettrMaterialGenerator.CreateOrLoadMaterial(PrimitiveMaterial, PrimitiveShader, PrimitiveTexture, InstanceComponent.RuntimeAssetPath);
                     
                     var primitiveMeshRenderer = primitiveGameObject.GetComponent<MeshRenderer>();
                     primitiveMeshRenderer.material = primitiveMaterial;
