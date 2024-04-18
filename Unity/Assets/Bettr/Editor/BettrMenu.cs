@@ -16,6 +16,7 @@ using UnityEditor.Animations;
 using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
 using DirectoryInfo = System.IO.DirectoryInfo;
+using Object = System.Object;
 
 namespace Bettr.Editor
 {
@@ -944,40 +945,47 @@ namespace Bettr.Editor
         {
             AssetDatabase.Refresh();
             
-            var sceneName = $"{machineName}BaseGameScene";
+            SceneAsset sceneAsset = null;
+            Scene scene = default;
             
+            var sceneName = $"{machineName}BaseGameScene";
             string scenePath = $"{runtimeAssetPath}/Scenes/{sceneName}.unity";
-            var sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePath);
+            
+            sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePath);
             if (sceneAsset != null)
             {
                 EditorSceneManager.OpenScene(scenePath);
             }
             else
             {
-                Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+                scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
                 scene.name = sceneName;
                 EditorSceneManager.SaveScene(scene, scenePath);
             }
             
             AssetDatabase.Refresh();
             
+            EditorSceneManager.OpenScene(scenePath);
+            
+            SimpleStringInterpolator interpolator = new SimpleStringInterpolator();
+            interpolator.SetVariable("machineName", machineName);
+            interpolator.SetVariable("machineVariant", machineVariant);
+            interpolator.SetVariable("sceneName", sceneName);
+            
+            string jsonTemplate = ReadJson("Scene");
+            string json = interpolator.Interpolate(jsonTemplate);
+            
+            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
+            InstanceGameObject.IdGameObjects.Clear();
+            
+            JsonConvert.DeserializeObject<InstanceGameObject>(json);
+            
+            EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+            EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
+            
+            AssetDatabase.Refresh();
+            
             sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePath);
-            
-            // modify the scene
-            
-            // SimpleStringInterpolator interpolator = new SimpleStringInterpolator();
-            // interpolator.SetVariable("machineName", machineName);
-            // interpolator.SetVariable("machineVariant", machineVariant);
-            //
-            // string jsonTemplate = ReadJson("BaseGameScene");
-            // string json = interpolator.Interpolate(jsonTemplate);
-            //
-            // InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-            // InstanceGameObject.IdGameObjects.Clear();
-            //
-            // InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
-            // List<IGameObject> runtimeObjects = hierarchyInstance.Child != null ? new List<IGameObject>() {hierarchyInstance.Child} : hierarchyInstance.Children.Cast<IGameObject>().ToList();
-            // List<IComponent> components = hierarchyInstance.Components.Cast<IComponent>().ToList();
 
             return sceneAsset;
         }
