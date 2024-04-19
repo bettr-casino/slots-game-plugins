@@ -948,7 +948,7 @@ namespace Bettr.Editor
             SceneAsset sceneAsset = null;
             Scene scene = default;
             
-            var sceneName = $"{machineName}BaseGameScene";
+            var sceneName = $"{machineName}Scene";
             string scenePath = $"{runtimeAssetPath}/Scenes/{sceneName}.unity";
             
             sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePath);
