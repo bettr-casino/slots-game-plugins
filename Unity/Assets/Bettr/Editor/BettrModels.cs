@@ -7,6 +7,7 @@ using TMPro;
 using UnityEditor;
 using UnityEditor.Animations;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Bettr.Editor
@@ -319,6 +320,10 @@ namespace Bettr.Editor
                     var canvasComponent = new CanvasComponent(renderCamera);
                     canvasComponent.AddComponent(gameObject);
                     break;
+                case "EventSystem":
+                    var eventSystemComponent = new EventSystemComponent();
+                    eventSystemComponent.AddComponent(gameObject);
+                    break;
             }
         }
     }
@@ -388,6 +393,14 @@ namespace Bettr.Editor
     [Serializable]
     public class UICameraComponent : IComponent
     {
+
+        private bool _includeAudioListener;
+        
+        public UICameraComponent(bool includeAudioListener = true)
+        {
+            _includeAudioListener = includeAudioListener;
+        }
+        
         public void AddComponent(GameObject gameObject)
         {
             var uiCamera = gameObject.AddComponent<Camera>();
@@ -405,6 +418,11 @@ namespace Bettr.Editor
             uiCamera.allowMSAA = true;
             uiCamera.allowDynamicResolution = false;
             uiCamera.targetDisplay = 0;
+            
+            if (_includeAudioListener)
+            {
+                gameObject.AddComponent<AudioListener>();
+            }
         }
     }
     
@@ -418,10 +436,10 @@ namespace Bettr.Editor
             uiCamera.clearFlags = CameraClearFlags.Depth;
             uiCamera.cullingMask = LayerMask.GetMask("SLOT_BACKGROUND");
             uiCamera.orthographic = true;
-            uiCamera.orthographicSize = 5;
+            uiCamera.orthographicSize = 4.1f;
             uiCamera.nearClipPlane = 0.3f;
             uiCamera.farClipPlane = 1000;
-            uiCamera.depth = 10;
+            uiCamera.depth = -13;
             uiCamera.useOcclusionCulling = true;
             uiCamera.renderingPath = RenderingPath.UsePlayerSettings;
             uiCamera.allowHDR = true;
@@ -441,62 +459,20 @@ namespace Bettr.Editor
             uiCamera.clearFlags = CameraClearFlags.Depth;
             uiCamera.cullingMask = LayerMask.GetMask("SLOT_REELS");
             uiCamera.orthographic = true;
-            uiCamera.orthographicSize = 5;
+            uiCamera.orthographicSize = 4.1f;
             uiCamera.nearClipPlane = 0.3f;
             uiCamera.farClipPlane = 1000;
-            uiCamera.depth = 10;
+            uiCamera.depth = -10;
             uiCamera.useOcclusionCulling = true;
             uiCamera.renderingPath = RenderingPath.UsePlayerSettings;
             uiCamera.allowHDR = true;
             uiCamera.allowMSAA = true;
             uiCamera.allowDynamicResolution = false;
             uiCamera.targetDisplay = 0;
-        }
-    }
-    
-    [Serializable]
-    public class OverlayCameraComponent : IComponent
-    {
-        public void AddComponent(GameObject gameObject)
-        {
-            var uiCamera = gameObject.AddComponent<Camera>();
-            gameObject.layer = LayerMask.NameToLayer("SLOT_OVERLAY");
-            uiCamera.clearFlags = CameraClearFlags.Depth;
-            uiCamera.cullingMask = LayerMask.GetMask("SLOT_OVERLAY");
-            uiCamera.orthographic = true;
-            uiCamera.orthographicSize = 5;
-            uiCamera.nearClipPlane = 0.3f;
-            uiCamera.farClipPlane = 1000;
-            uiCamera.depth = 10;
-            uiCamera.useOcclusionCulling = true;
-            uiCamera.renderingPath = RenderingPath.UsePlayerSettings;
-            uiCamera.allowHDR = true;
-            uiCamera.allowMSAA = true;
-            uiCamera.allowDynamicResolution = false;
-            uiCamera.targetDisplay = 0;
-        }
-    }
-    
-    [Serializable]
-    public class ReelsOverlayCameraComponent : IComponent
-    {
-        public void AddComponent(GameObject gameObject)
-        {
-            var uiCamera = gameObject.AddComponent<Camera>();
-            gameObject.layer = LayerMask.NameToLayer("SLOT_REELS_OVERLAY");
-            uiCamera.clearFlags = CameraClearFlags.Depth;
-            uiCamera.cullingMask = LayerMask.GetMask("SLOT_REELS_OVERLAY");
-            uiCamera.orthographic = true;
-            uiCamera.orthographicSize = 5;
-            uiCamera.nearClipPlane = 0.3f;
-            uiCamera.farClipPlane = 1000;
-            uiCamera.depth = 10;
-            uiCamera.useOcclusionCulling = true;
-            uiCamera.renderingPath = RenderingPath.UsePlayerSettings;
-            uiCamera.allowHDR = true;
-            uiCamera.allowMSAA = true;
-            uiCamera.allowDynamicResolution = false;
-            uiCamera.targetDisplay = 0;
+            
+            var physicsRaycaster = gameObject.AddComponent<PhysicsRaycaster>();
+            physicsRaycaster.eventMask = LayerMask.GetMask("SLOT_REELS");
+            physicsRaycaster.maxRayIntersections = 0;
         }
     }
     
@@ -513,13 +489,71 @@ namespace Bettr.Editor
             uiCamera.orthographicSize = 5;
             uiCamera.nearClipPlane = 0.3f;
             uiCamera.farClipPlane = 1000;
-            uiCamera.depth = 10;
+            uiCamera.depth = -5;
             uiCamera.useOcclusionCulling = true;
             uiCamera.renderingPath = RenderingPath.UsePlayerSettings;
             uiCamera.allowHDR = true;
             uiCamera.allowMSAA = true;
             uiCamera.allowDynamicResolution = false;
             uiCamera.targetDisplay = 0;
+            
+            var physicsRaycaster = gameObject.AddComponent<PhysicsRaycaster>();
+            physicsRaycaster.eventMask = LayerMask.GetMask("SLOT_FRAME");
+            physicsRaycaster.maxRayIntersections = 0;
+        }
+    }
+    
+    [Serializable]
+    public class OverlayCameraComponent : IComponent
+    {
+        public void AddComponent(GameObject gameObject)
+        {
+            var uiCamera = gameObject.AddComponent<Camera>();
+            gameObject.layer = LayerMask.NameToLayer("SLOT_OVERLAY");
+            uiCamera.clearFlags = CameraClearFlags.Depth;
+            uiCamera.cullingMask = LayerMask.GetMask("SLOT_OVERLAY");
+            uiCamera.orthographic = true;
+            uiCamera.orthographicSize = 5;
+            uiCamera.nearClipPlane = 0.3f;
+            uiCamera.farClipPlane = 1000;
+            uiCamera.depth = -1;
+            uiCamera.useOcclusionCulling = true;
+            uiCamera.renderingPath = RenderingPath.UsePlayerSettings;
+            uiCamera.allowHDR = true;
+            uiCamera.allowMSAA = true;
+            uiCamera.allowDynamicResolution = false;
+            uiCamera.targetDisplay = 0;
+            
+            var physicsRaycaster = gameObject.AddComponent<PhysicsRaycaster>();
+            physicsRaycaster.eventMask = LayerMask.GetMask("SLOT_OVERLAY");
+            physicsRaycaster.maxRayIntersections = 0;
+        }
+    }
+    
+    [Serializable]
+    public class ReelsOverlayCameraComponent : IComponent
+    {
+        public void AddComponent(GameObject gameObject)
+        {
+            var uiCamera = gameObject.AddComponent<Camera>();
+            gameObject.layer = LayerMask.NameToLayer("SLOT_REELS_OVERLAY");
+            uiCamera.clearFlags = CameraClearFlags.Depth;
+            uiCamera.cullingMask = LayerMask.GetMask("SLOT_REELS_OVERLAY");
+            uiCamera.orthographic = true;
+            uiCamera.orthographicSize = 5;
+            uiCamera.nearClipPlane = 0.3f;
+            uiCamera.farClipPlane = 1000;
+            uiCamera.depth = 1;
+            uiCamera.useOcclusionCulling = true;
+            uiCamera.renderingPath = RenderingPath.UsePlayerSettings;
+            uiCamera.allowHDR = true;
+            uiCamera.allowMSAA = true;
+            uiCamera.allowDynamicResolution = false;
+            uiCamera.targetDisplay = 0;
+            
+            var physicsRaycaster = gameObject.AddComponent<PhysicsRaycaster>();
+            physicsRaycaster.eventMask = LayerMask.GetMask("SLOT_REELS_OVERLAY");
+            physicsRaycaster.maxRayIntersections = 0;
         }
     }
     
@@ -536,13 +570,17 @@ namespace Bettr.Editor
             uiCamera.orthographicSize = 5;
             uiCamera.nearClipPlane = 0.3f;
             uiCamera.farClipPlane = 1000;
-            uiCamera.depth = 10;
+            uiCamera.depth = 2;
             uiCamera.useOcclusionCulling = true;
             uiCamera.renderingPath = RenderingPath.UsePlayerSettings;
             uiCamera.allowHDR = true;
             uiCamera.allowMSAA = true;
             uiCamera.allowDynamicResolution = false;
             uiCamera.targetDisplay = 0;
+            
+            var physicsRaycaster = gameObject.AddComponent<PhysicsRaycaster>();
+            physicsRaycaster.eventMask = LayerMask.GetMask("SLOT_TRANSITION");
+            physicsRaycaster.maxRayIntersections = 0;
         }
     }
     
@@ -805,6 +843,23 @@ namespace Bettr.Editor
             // Add the Graphic Raycaster component
             GraphicRaycaster raycaster = gameObject.AddComponent<GraphicRaycaster>();
             raycaster.ignoreReversedGraphics = DefaultIgnoreReversedGraphics;
+        }
+    }
+    
+    public class EventSystemComponent : IComponent
+    {
+        public void AddComponent(GameObject gameObject)
+        {
+            var eventSystem = gameObject.AddComponent<UnityEngine.EventSystems.EventSystem>();
+            eventSystem.sendNavigationEvents = true;
+            eventSystem.pixelDragThreshold = 10;
+            var standaloneInputModule = gameObject.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+            standaloneInputModule.horizontalAxis = "Horizontal";
+            standaloneInputModule.verticalAxis = "Vertical";
+            standaloneInputModule.submitButton = "Submit";
+            standaloneInputModule.cancelButton = "Cancel";
+            standaloneInputModule.inputActionsPerSecond = 10;
+            standaloneInputModule.repeatDelay = 0.5f;
         }
     }
 }
