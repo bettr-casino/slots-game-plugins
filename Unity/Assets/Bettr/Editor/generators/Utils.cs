@@ -24,5 +24,21 @@ namespace Bettr.Editor.generators
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
         }
+        
+        public static Shader LoadShader(string shaderName, string runtimeAssetPath)
+        {
+            Shader shader = null;
+            if (shaderName.StartsWith("Bettr/"))
+            {
+                shaderName = shaderName.Substring(6);
+                var shaderFilepath = $"{runtimeAssetPath}/Shaders/{shaderName}.shader";
+                shader = AssetDatabase.LoadAssetAtPath<Shader>(shaderFilepath);
+            }
+            else
+            {
+                shader = Shader.Find(shaderName);
+            }
+            return shader;
+        }
     }
 }

@@ -19,13 +19,7 @@ namespace Bettr.Editor.generators
                 Debug.Log($"Creating material for {materialName} at {materialFilepath}");
                 try
                 {
-                    var shader = Shader.Find(shaderName);
-                    if (shader == null)
-                    {
-                        var shaderFilepath = $"{runtimeAssetPath}/Shaders/{shaderName}.shader";
-                        shader = AssetDatabase.LoadAssetAtPath<Shader>(shaderFilepath);
-                        
-                    }
+                    var shader = Utils.LoadShader(shaderName, runtimeAssetPath);
                     material = new Material(shader);
                     AssetDatabase.CreateAsset(material, materialFilepath);
                 }
