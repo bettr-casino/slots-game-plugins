@@ -143,7 +143,7 @@ namespace Bettr.Editor
             EditorApplication.EnterPlaymode();
         }
 
-        //[MenuItem("Bettr/Assets/Build")] 
+        [MenuItem("Bettr/Assets/Build")] 
         public static void BuildAssets()
         {
             BuildAssetBundles();
@@ -174,12 +174,14 @@ namespace Bettr.Editor
             BuildPipeline.BuildAssetBundles(AssetBundlesIOSDirectory, 
                 sharedAssetBundleOptions,
                 BuildTarget.iOS);
+            AssetDatabase.Refresh();
             
             EmptyDirectory(new DirectoryInfo(AssetBundlesOSXDirectory));
             AssetDatabase.Refresh();
             BuildPipeline.BuildAssetBundles(AssetBundlesOSXDirectory, 
                 sharedAssetBundleOptions,
                 BuildTarget.StandaloneOSX);
+            AssetDatabase.Refresh();
             
 #endif
 #if UNITY_ANDROID
@@ -590,7 +592,7 @@ namespace Bettr.Editor
             {
                 string fileName = Path.GetFileName(file);
                 string destFile = Path.Combine(shaderDestinationPath, fileName);
-                File.Copy(file, destFile, overwrite: true);
+                AssetDatabase.CopyAsset(file, destFile);
             }
 
             Debug.Log("Shader files copied successfully.");
