@@ -572,6 +572,29 @@ namespace Bettr.Editor
                 EnsureDirectory(Path.Combine(runtimeAssetPath, subDir));
             }
             
+            // Copy the shader files
+            string shaderSourcePath = Path.Combine("Assets", "Bettr", "Editor", "Shaders");
+            string shaderDestinationPath = Path.Combine(runtimeAssetPath, "Shaders");
+            Debug.Log($"Copying shaders from: {machineModel} to: {shaderDestinationPath}");
+            // Ensure the destination directory exists
+            if (!Directory.Exists(shaderDestinationPath))
+            {
+                Directory.CreateDirectory(shaderDestinationPath);
+            }
+
+            // Get all shader files in the source directory
+            string[] shaderFiles = Directory.GetFiles(shaderSourcePath, "*.shader");
+
+            // Copy each shader file to the destination directory
+            foreach (string file in shaderFiles)
+            {
+                string fileName = Path.GetFileName(file);
+                string destFile = Path.Combine(shaderDestinationPath, fileName);
+                File.Copy(file, destFile, overwrite: true);
+            }
+
+            Debug.Log("Shader files copied successfully.");
+            
             // Copy the machine model file and rename its extension
             string modelDestinationPath = Path.Combine(runtimeAssetPath, "Models",  $"{machineModelName}.cscript.txt");
             Debug.Log($"Copying machine model {machineName} {machineVariant} from: {machineModel} to: {modelDestinationPath}");
