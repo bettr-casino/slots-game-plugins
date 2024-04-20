@@ -18,6 +18,8 @@ using UnityEngine.SceneManagement;
 using DirectoryInfo = System.IO.DirectoryInfo;
 using Object = System.Object;
 
+using Scriban;
+
 namespace Bettr.Editor
 {
     public class DirectoryNode
@@ -944,6 +946,8 @@ namespace Bettr.Editor
         private static SceneAsset ProcessScene(string machineName, string machineVariant, string runtimeAssetPath)
         {
             AssetDatabase.Refresh();
+
+            var template = Template.Parse(null);
             
             SceneAsset sceneAsset = null;
             Scene scene = default;
