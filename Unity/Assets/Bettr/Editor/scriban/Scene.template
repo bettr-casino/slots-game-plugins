@@ -10,6 +10,11 @@
             "Name": "Camera_Background",
             "Id": "backgroundCamera",
             "Layer": "SLOT_BACKGROUND",
+            "Position": {
+                "X": 0,
+                "Y": 0,
+                "Z": -100
+            },
             "Components": [
               {
                 "ComponentType": "BackgroundCamera"
@@ -20,6 +25,11 @@
             "Name": "Camera_Reels",
             "Id": "reelsCamera",
             "Layer": "SLOT_REELS",
+            "Position": {
+                "X": 0,
+                "Y": 0,
+                "Z": -70
+            },
             "Components": [
               {
                 "ComponentType": "ReelsCamera"
@@ -30,6 +40,11 @@
             "Name": "Camera_Frame",
             "Id": "frameCamera",
             "Layer": "SLOT_FRAME",
+            "Position": {
+                "X": 0,
+                "Y": 0,
+                "Z": -60
+            },
             "Components": [
               {
                 "ComponentType": "FrameCamera"
@@ -40,6 +55,11 @@
             "Name": "Camera_Overlay",
             "Id": "overlayCamera",
             "Layer": "SLOT_OVERLAY",
+            "Position": {
+                "X": 0,
+                "Y": 0,
+                "Z": -50
+            },
             "Components": [
               {
                 "ComponentType": "OverlayCamera"
@@ -50,6 +70,11 @@
             "Name": "Camera_Reels_Overlay",
             "Id": "reelsOverlayCamera",
             "Layer": "SLOT_REELS_OVERLAY",
+            "Position": {
+                "X": 0,
+                "Y": 0,
+                "Z": -40
+            },
             "Components": [
               {
                 "ComponentType": "ReelsOverlayCamera"
@@ -59,7 +84,12 @@
           {
             "Name": "Camera_Transition",
             "Id": "transitionCamera",
-            "Layer": "SLOT_TRANSITION_OVERLAY",
+            "Layer": "SLOT_TRANSITION",
+            "Position": {
+                "X": 0,
+                "Y": 0,
+                "Z": -30
+            },
             "Components": [
               {
                 "ComponentType": "TransitionCamera"
@@ -95,14 +125,34 @@
           "Child": {
             "Name": "Pivot",
             "Children": [
+            {{ for machine in machines }}
+              {
+                "Name": "{{ machine }}Parent",
+                "Active": false,
+                "Child": {
+                    "Name": "Pivot",
+                    "Active": false
+                }
+              }{{ if !for.last }},{{ end }}
+            {{ end }}
             ]
           }
         },
         {
-          "Name": "Backgrounds"
-        },
-        {
-          "Name": "ReelOverlays"
+          "Name": "Backgrounds",
+          "Child": {
+            "Name": "Pivot",
+            "Children": [
+            {{ for machine in machines }}
+              {
+                "Name": "{{ machine }}BackgroundParent",
+                "Child": {
+                    "Name": "Pivot"
+                }
+              }{{ if !for.last }},{{ end }}
+            {{ end }}
+            ]
+          }
         }
       ]
     },

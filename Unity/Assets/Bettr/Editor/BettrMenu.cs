@@ -971,16 +971,29 @@ namespace Bettr.Editor
             
             EditorSceneManager.OpenScene(scenePath);
             
-            SimpleStringInterpolator interpolator = new SimpleStringInterpolator();
-            interpolator.SetVariable("machineName", machineName);
-            interpolator.SetVariable("machineVariant", machineVariant);
-            interpolator.SetVariable("sceneName", sceneName);
+            // run it through Scriban
+            var scribanModel = new
+            {
+                machineName = machineName,
+                machineVariant = machineVariant,
+                sceneName = sceneName,
+                machines = new string[]
+                {
+                    "BaseGame",
+                    "FreeSpins"
+                }
+            };
             
-            string jsonTemplate = ReadJson("Scene");
-            string json = interpolator.Interpolate(jsonTemplate);
-            
-            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-            InstanceGameObject.IdGameObjects.Clear();
+            string scribanTemplateText = ReadScribanTemplate("Scene");
+
+            var scribanTemplate = Template.Parse(scribanTemplateText);
+            if (scribanTemplate.HasErrors)
+            {
+                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages}");
+                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages}");
+            }
+
+            var json = scribanTemplate.Render(scribanModel);
             
             JsonConvert.DeserializeObject<InstanceGameObject>(json);
             
@@ -1005,6 +1018,19 @@ namespace Bettr.Editor
 
             return File.ReadAllText(path);
         }
+        
+        private static string ReadScribanTemplate(string fileName)
+        {
+            string path = Path.Combine(Application.dataPath, "Bettr", "Editor", "scriban", $"{fileName}.template");
+            if (!File.Exists(path))
+            {
+                Debug.LogError($"Scriban template file not found at path: {path}");
+                return null;
+            }
+
+            return File.ReadAllText(path);
+        }
+
         
         private static void ProcessSettings(string settingsName, string runtimeAssetPath)
         {
