@@ -578,13 +578,13 @@ namespace Bettr.Editor
             uiCamera.clearFlags = CameraClearFlags.Depth;
             uiCamera.cullingMask = LayerMask.GetMask("SLOT_TRANSITION");
             uiCamera.orthographic = true;
-            uiCamera.orthographicSize = 5;
-            uiCamera.nearClipPlane = 0.3f;
+            uiCamera.orthographicSize = 4.1f;
+            uiCamera.nearClipPlane = 1f;
             uiCamera.farClipPlane = 1000;
             uiCamera.depth = 2;
             uiCamera.useOcclusionCulling = true;
             uiCamera.renderingPath = RenderingPath.UsePlayerSettings;
-            uiCamera.allowHDR = true;
+            uiCamera.allowHDR = false;
             uiCamera.allowMSAA = true;
             uiCamera.allowDynamicResolution = false;
             uiCamera.targetDisplay = 0;
