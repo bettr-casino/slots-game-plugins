@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Threading;
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
 using UnityEditor;
@@ -11,7 +12,6 @@ using UnityEngine;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using Newtonsoft.Json;
-using Unity.VisualScripting;
 using UnityEditor.Animations;
 using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
@@ -1022,13 +1022,15 @@ namespace Bettr.Editor
             
             JsonConvert.DeserializeObject<InstanceGameObject>(json);
             
+            // add a delay to allow the scene to be saved
+            
             EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
             EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
             
             AssetDatabase.Refresh();
             
             sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePath);
-
+            
             return sceneAsset;
         }
         

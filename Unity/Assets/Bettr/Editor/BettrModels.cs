@@ -6,8 +6,10 @@ using CrayonScript.Code;
 using TMPro;
 using UnityEditor;
 using UnityEditor.Animations;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Bettr.Editor
@@ -622,7 +624,7 @@ namespace Bettr.Editor
         public Rect? Rect { get; set; }
         
         public TMP_FontAsset FontAsset { get; set; }
-
+        
         public TextMeshProComponent(string text, float fontSize, string colorHex, Rect? rect = null, string fontAssetName = "Roboto-Bold SDF")
         {
             Text = text;
@@ -656,13 +658,12 @@ namespace Bettr.Editor
             textMeshPro.text = Text;
             textMeshPro.fontSize = FontSize;
             textMeshPro.fontMaterial = FontAsset.material;
-            Debug.Log($"TextMeshProComponent textMeshPro.fontMaterial:{textMeshPro.fontMaterial.name}");
-            textMeshPro.color = FontColor;
-            textMeshPro.alignment = TextAlignmentOptions.Center;
-            textMeshPro.enableWordWrapping = false;
             textMeshPro.enableAutoSizing = true;
             textMeshPro.fontSizeMin = FontSize;
             textMeshPro.fontSizeMax = FontSize;
+            textMeshPro.color = FontColor;
+            textMeshPro.alignment = TextAlignmentOptions.Center;
+            textMeshPro.enableWordWrapping = false;
             
             if (Rect is not null)
             {
