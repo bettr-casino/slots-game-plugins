@@ -655,6 +655,7 @@ namespace Bettr.Editor
         private void AddTextMeshPro(GameObject gameObject)
         {
             var textMeshPro = gameObject.AddComponent<TextMeshPro>();
+            gameObject.AddComponent<MeshRenderer>();
             textMeshPro.text = Text;
             textMeshPro.fontSize = FontSize;
             textMeshPro.fontMaterial = FontAsset.material;
@@ -664,6 +665,7 @@ namespace Bettr.Editor
             textMeshPro.color = FontColor;
             textMeshPro.alignment = TextAlignmentOptions.Center;
             textMeshPro.enableWordWrapping = false;
+            textMeshPro.font = FontAsset;
             
             if (Rect is not null)
             {
