@@ -268,9 +268,12 @@ namespace Bettr.Editor
         
         public string ReferenceId { get; set; }
         
+        public string[] Params { get; set; }
+        
         public InstanceComponent()
         {
             FontAsset = "Roboto-Bold SDF";
+            Params = Array.Empty<string>();
         }
         
         public void AddComponent(GameObject gameObject)
@@ -324,16 +327,26 @@ namespace Bettr.Editor
                 case "TransitionCamera":
                     var transitionComponent = new TransitionCameraComponent();
                     transitionComponent.AddComponent(gameObject);
-                    break;                
+                    break;
                 case "Canvas":
-                    InstanceGameObject.IdGameObjects.TryGetValue(ReferenceId, out var referenceGameObject);
-                    var renderCamera = referenceGameObject?.GameObject.GetComponent<Camera>();
-                    var canvasComponent = new CanvasComponent(renderCamera);
-                    canvasComponent.AddComponent(gameObject);
+                    {
+                        InstanceGameObject.IdGameObjects.TryGetValue(ReferenceId, out var referenceGameObject);
+                        var renderCamera = referenceGameObject?.GameObject.GetComponent<Camera>();
+                        var canvasComponent = new CanvasComponent(renderCamera);
+                        canvasComponent.AddComponent(gameObject);
+                    }
                     break;
                 case "EventSystem":
                     var eventSystemComponent = new EventSystemComponent();
                     eventSystemComponent.AddComponent(gameObject);
+                    break;
+                case "EventTrigger":
+                    {
+                        InstanceGameObject.IdGameObjects.TryGetValue(ReferenceId, out var referenceGameObject);
+                        var tile = referenceGameObject?.GameObject.GetComponent<Tile>();
+                        var eventTriggerComponent = new EventTriggerComponent(tile, Params);
+                        eventTriggerComponent.AddComponent(gameObject);
+                    }
                     break;
             }
         }
@@ -873,6 +886,40 @@ namespace Bettr.Editor
             standaloneInputModule.cancelButton = "Cancel";
             standaloneInputModule.inputActionsPerSecond = 10;
             standaloneInputModule.repeatDelay = 0.5f;
+        }
+    }
+    
+    public class EventTriggerComponent : IComponent
+    {
+        private readonly Tile _tile;
+        private readonly int _paramCount;
+        private readonly string _param;
+        
+        public EventTriggerComponent(Tile tile, params string[] param)
+        {
+            _tile = tile;
+            _param = param.Length > 0 ? param[0] : null;
+            _paramCount = param.Length;
+        }
+        
+        public void AddComponent(GameObject gameObject)
+        {
+            var eventTrigger = gameObject.AddComponent<EventTrigger>();
+            var eventTriggerEntry = new EventTrigger.Entry
+            {
+                eventID = EventTriggerType.PointerClick,
+                callback = new EventTrigger.TriggerEvent()
+            };
+            if (_paramCount > 0)
+            {
+                eventTriggerEntry.callback.AddListener((data) => { _tile.OnPointerClick(_param); });
+            }
+            else
+            {
+                eventTriggerEntry.callback.AddListener((data) => { _tile.OnPointerClick(); });
+            }
+            
+            eventTrigger.triggers.Add(eventTriggerEntry);
         }
     }
 }
