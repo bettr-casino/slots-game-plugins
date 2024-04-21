@@ -142,7 +142,7 @@ namespace Bettr.Editor
             {
                 _go.transform.rotation = Quaternion.Euler((Vector3) Rotation);
             }
-            _go.transform.localScale = new Vector3(0, 0, 0);
+            _go.transform.localScale = new Vector3(1, 1, 1);
             if (Scale != null)
             {
                 _go.transform.localScale = (Vector3) Scale;
