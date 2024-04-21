@@ -8,6 +8,8 @@ namespace Bettr.Editor.generators
     {
         public static readonly int MainTex = Shader.PropertyToID("_MainTex");
         
+        public static readonly int Color = Shader.PropertyToID("_Color");
+        
         public static void ImportTexture2D(string sourcePath, string destPath, TextureImporterType textureImporterType = TextureImporterType.Sprite)
         {
             File.Copy(sourcePath, destPath, overwrite: true);

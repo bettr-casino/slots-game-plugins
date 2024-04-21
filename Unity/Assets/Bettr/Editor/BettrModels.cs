@@ -47,6 +47,8 @@ namespace Bettr.Editor
         
         public string PrimitiveTexture { get; set; }
         
+        public string PrimitiveColor { get; set; }
+        
         public int Primitive { get; set; }
         
         public bool IsPrimitive { get; set; }
@@ -164,10 +166,14 @@ namespace Bettr.Editor
                 else if (IsPrimitive)
                 {
                     var primitiveGameObject = GameObject.CreatePrimitive(Enum.GetValues(typeof(PrimitiveType)).GetValue(Primitive) as PrimitiveType? ?? PrimitiveType.Quad);
-                    var primitiveMaterial = BettrMaterialGenerator.CreateOrLoadMaterial(PrimitiveMaterial, PrimitiveShader, PrimitiveTexture, InstanceComponent.RuntimeAssetPath);
+                    var primitiveMaterial = BettrMaterialGenerator.CreateOrLoadMaterial(PrimitiveMaterial, PrimitiveShader, PrimitiveTexture, PrimitiveColor, InstanceComponent.RuntimeAssetPath);
                     
                     var primitiveMeshRenderer = primitiveGameObject.GetComponent<MeshRenderer>();
                     primitiveMeshRenderer.material = primitiveMaterial;
+                    primitiveGameObject.name = Name;
+                    
+                    var primitiveMeshCollider = primitiveGameObject.GetComponent<MeshCollider>();
+                    primitiveMeshCollider.includeLayers = LayerMask.GetMask(Layer);
                     
                     _go = primitiveGameObject;
                 }
@@ -254,12 +260,15 @@ namespace Bettr.Editor
         
         public int FontSize { get; set; }
         
+        public string FontAsset { get; set; }
+        
         public Rect? Rect { get; set; }
         
         public string ReferenceId { get; set; }
         
         public InstanceComponent()
         {
+            FontAsset = "Roboto-Bold SDF";
         }
         
         public void AddComponent(GameObject gameObject)
@@ -271,11 +280,11 @@ namespace Bettr.Editor
                     animatorComponent.AddComponent(gameObject);
                     break;
                 case "TextMeshPro":
-                    var textMeshProComponent = new TextMeshProComponent(Text, FontSize, Color, Rect);
+                    var textMeshProComponent = new TextMeshProComponent(Text, FontSize, Color, Rect, FontAsset);
                     textMeshProComponent.AddComponent(gameObject);
                     break;
                 case "TextMeshProUI":
-                    var textMeshProUIComponent = new TextMeshProUIComponent(Text, FontSize, Color, Rect);
+                    var textMeshProUIComponent = new TextMeshProUIComponent(Text, FontSize, Color, Rect, FontAsset);
                     textMeshProUIComponent.AddComponent(gameObject);
                     break;
                 case "Image":
@@ -646,10 +655,14 @@ namespace Bettr.Editor
             var textMeshPro = gameObject.AddComponent<TextMeshPro>();
             textMeshPro.text = Text;
             textMeshPro.fontSize = FontSize;
-            textMeshPro.enableAutoSizing = false; // Ensure fixed font size
+            textMeshPro.fontMaterial = FontAsset.material;
+            Debug.Log($"TextMeshProComponent textMeshPro.fontMaterial:{textMeshPro.fontMaterial.name}");
             textMeshPro.color = FontColor;
             textMeshPro.alignment = TextAlignmentOptions.Center;
             textMeshPro.enableWordWrapping = false;
+            textMeshPro.enableAutoSizing = true;
+            textMeshPro.fontSizeMin = FontSize;
+            textMeshPro.fontSizeMax = FontSize;
             
             if (Rect is not null)
             {
@@ -657,9 +670,6 @@ namespace Bettr.Editor
                 textMeshPro.rectTransform.sizeDelta = new Vector2(rect.width, rect.height);
                 textMeshPro.rectTransform.pivot = new Vector2(rect.x, rect.y);
             }
-            
-            Debug.Log($"TextMeshProComponent Setting FontAsset:{FontAsset.name}");
-            textMeshPro.fontMaterial = FontAsset.material;
         }
     }
     

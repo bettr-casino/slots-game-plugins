@@ -7,7 +7,7 @@ namespace Bettr.Editor.generators
 {
     public static class BettrMaterialGenerator
     {
-        public static Material CreateOrLoadMaterial(string materialName, string shaderName, string textureName, string runtimeAssetPath)
+        public static Material CreateOrLoadMaterial(string materialName, string shaderName, string textureName, string hexColor, string runtimeAssetPath)
         {
             AssetDatabase.Refresh();
             
@@ -33,23 +33,39 @@ namespace Bettr.Editor.generators
             AssetDatabase.Refresh();
             
             material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
-            string sourcePath = Path.Combine("Assets", "Bettr", "Editor", "textures", textureName);
-            var destPath = $"{runtimeAssetPath}/Textures/{textureName}";
-            string extension = Path.GetExtension(sourcePath);
-            if (string.IsNullOrEmpty(extension))
+
+            if (string.IsNullOrEmpty(hexColor))
             {
-                extension = File.Exists($"{sourcePath}.jpg") ? ".jpg" : ".png";
-                sourcePath += extension;
-                destPath += extension;
+                string sourcePath = Path.Combine("Assets", "Bettr", "Editor", "textures", textureName);
+                var destPath = $"{runtimeAssetPath}/Textures/{textureName}";
+                string extension = Path.GetExtension(sourcePath);
+                if (string.IsNullOrEmpty(extension))
+                {
+                    extension = File.Exists($"{sourcePath}.jpg") ? ".jpg" : ".png";
+                    sourcePath += extension;
+                    destPath += extension;
+                }
+                Utils.ImportTexture2D( sourcePath, destPath);
+                AssetDatabase.Refresh();
+                Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>($"{InstanceComponent.RuntimeAssetPath}/Textures/{textureName}.jpg");
+                if (texture == null)
+                {
+                    throw new Exception($"{textureName} texture not found.");
+                }
+                material.SetTexture(Utils.MainTex, texture);
             }
-            Utils.ImportTexture2D( sourcePath, destPath);
-            AssetDatabase.Refresh();
-            Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>($"{InstanceComponent.RuntimeAssetPath}/Textures/{textureName}.jpg");
-            if (texture == null)
+            else
             {
-                throw new Exception($"{textureName} texture not found.");
+                Color color;
+                if (ColorUtility.TryParseHtmlString(hexColor, out color))
+                {
+                    material.SetColor(Utils.Color, color);
+                }
+                else
+                {
+                    throw new Exception($"Invalid color {hexColor}.");
+                }
             }
-            material.SetTexture(Utils.MainTex, texture);
 
             AssetDatabase.Refresh();
 
