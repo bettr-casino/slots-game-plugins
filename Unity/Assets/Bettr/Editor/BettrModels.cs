@@ -348,6 +348,10 @@ namespace Bettr.Editor
                         eventTriggerComponent.AddComponent(gameObject);
                     }
                     break;
+                case "Tile":
+                    var tileComponent = new TileComponent(ReferenceId, RuntimeAssetPath, Filename);
+                    tileComponent.AddComponent(gameObject);
+                    break;
             }
         }
     }
@@ -357,6 +361,13 @@ namespace Bettr.Editor
     {
         private readonly TextAsset _scriptAsset;
         private readonly string _globalTileId;
+        
+        public TileComponent(string globalTileId, string runtimeAssetPath, string scriptName)
+        {
+            _globalTileId = globalTileId;
+            var scriptPath = $"{runtimeAssetPath}/Scripts/{scriptName}.cscript.txt";
+            _scriptAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(scriptPath);
+        }
 
         public TileComponent(string globalTileId, TextAsset scriptAsset)
         {
