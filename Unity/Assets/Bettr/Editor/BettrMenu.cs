@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
-using System.Threading;
+using Bettr.Editor.generators;
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
 using UnityEditor;
@@ -676,7 +676,7 @@ namespace Bettr.Editor
         private static void ProcessBaseGameMachine(string machineName, string machineVariant, string runtimeAssetPath)
         {
             var scriptName = $"{machineName}BaseGameReel";   
-            var scriptTextAsset = CreateOrLoadScript(scriptName, runtimeAssetPath);
+            var scriptTextAsset = BettrScriptGenerator.CreateOrLoadScript(scriptName, runtimeAssetPath);
             
             var baseGameReelState = GetTable($"{machineName}BaseGameReelState");
             
@@ -726,7 +726,7 @@ namespace Bettr.Editor
             backgroundPivotGameObject.SetParent(backgroundGameObject.GameObject);
             
             var backgroundScriptName = $"{machineName}BaseGameBackground";   
-            var backgroundScriptTextAsset = CreateOrLoadScript(backgroundScriptName, runtimeAssetPath);
+            var backgroundScriptTextAsset = BettrScriptGenerator.CreateOrLoadScript(backgroundScriptName, runtimeAssetPath);
             ProcessBaseGameBackground(machineName, machineVariant, backgroundScriptTextAsset, runtimeAssetPath);
             
             var backgroundPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameBackground.prefab");
@@ -996,19 +996,6 @@ namespace Bettr.Editor
             
             EditorSceneManager.OpenScene(scenePath);
             
-            // run it through Scriban
-            var scribanModel = new
-            {
-                machineName = machineName,
-                machineVariant = machineVariant,
-                sceneName = sceneName,
-                machines = new string[]
-                {
-                    "BaseGame",
-                    "FreeSpins"
-                }
-            };
-            
             string scribanTemplateText = ReadScribanTemplate("Scene");
 
             var scribanTemplate = Template.Parse(scribanTemplateText);
@@ -1017,12 +1004,24 @@ namespace Bettr.Editor
                 Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages}");
                 throw new Exception($"Scriban template has errors: {scribanTemplate.Messages}");
             }
-
-            var json = scribanTemplate.Render(scribanModel);
+            
+            // Create a model object with the machineName variable
+            var model = new Dictionary<string, object>
+            {
+                { "machineName", machineName },
+                { "machineVariant", machineVariant },
+                { "sceneName", sceneName },
+                { "machines", new string[]
+                {
+                    "BaseGame",
+                    "FreeSpins"
+                } }
+            };
+            
+            // run it through Scriban
+            var json = scribanTemplate.Render(model);
             
             JsonConvert.DeserializeObject<InstanceGameObject>(json);
-            
-            // add a delay to allow the scene to be saved
             
             EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
             EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
@@ -1030,7 +1029,7 @@ namespace Bettr.Editor
             AssetDatabase.Refresh();
             
             sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePath);
-            
+
             return sceneAsset;
         }
         
@@ -1152,36 +1151,6 @@ namespace Bettr.Editor
             prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
             
             return prefab;
-        }
-
-        private static TextAsset CreateOrLoadScript(string name, string runtimeAssetPath)
-        {
-            AssetDatabase.Refresh();
-            
-            var scriptName = $"{name}.cscript.txt";
-            var scriptPath = $"{runtimeAssetPath}/Scripts/{scriptName}";
-            var script = AssetDatabase.LoadAssetAtPath<TextAsset>(scriptPath);
-            if (script == null)
-            {
-                Debug.Log($"Creating script for {name} at {scriptPath}");
-                try
-                {
-                    var defaultScriptContentPath = "Assets/Bettr/Editor/DefaultCScript.cscript.txt"; // Adjust the path as needed
-                    var defaultScriptTemplateContent = File.ReadAllText(defaultScriptContentPath);
-                    var defaultScriptContent = string.Format(defaultScriptTemplateContent, name);
-                    File.WriteAllText(scriptPath, defaultScriptContent);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError(e);
-                }
-            }
-            
-            AssetDatabase.Refresh();
-            
-            script = AssetDatabase.LoadAssetAtPath<TextAsset>(scriptPath);
-
-            return script;
         }
 
         private static AnimatorController CreateOrLoadAnimatorController(string name, string runtimeAssetPath)
