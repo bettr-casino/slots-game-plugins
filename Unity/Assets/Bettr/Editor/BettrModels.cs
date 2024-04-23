@@ -1,15 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using Bettr.Editor.generators;
 using CrayonScript.Code;
 using TMPro;
 using UnityEditor;
 using UnityEditor.Animations;
-using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Bettr.Editor
@@ -914,22 +914,11 @@ namespace Bettr.Editor
         
         public void AddComponent(GameObject gameObject)
         {
-            var eventTrigger = gameObject.AddComponent<EventTrigger>();
-            var eventTriggerEntry = new EventTrigger.Entry
-            {
-                eventID = EventTriggerType.PointerClick,
-                callback = new EventTrigger.TriggerEvent()
-            };
-            if (_paramCount > 0)
-            {
-                eventTriggerEntry.callback.AddListener((data) => { _tile.OnPointerClick(_param); });
-            }
-            else
-            {
-                eventTriggerEntry.callback.AddListener((data) => { _tile.OnPointerClick(); });
-            }
-            
-            eventTrigger.triggers.Add(eventTriggerEntry);
+            EventTrigger eventTrigger =gameObject.AddComponent<EventTrigger>();
+            EventTrigger.Entry entry = new EventTrigger.Entry { eventID = EventTriggerType.PointerClick };
+            var triggerEvent = entry.callback;
+            UnityEditor.Events.UnityEventTools.AddVoidPersistentListener(triggerEvent, _tile.OnPointerClick);
+            eventTrigger.triggers.Add(entry);
         }
     }
 }
