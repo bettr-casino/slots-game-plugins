@@ -1,0 +1,31 @@
+require "math"
+require "Core"
+require "Utils"
+
+Game002 = {
+}
+
+function Game002:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game002:destroy()
+	System.Print("Game002 destroy tile id={0}", self.id)
+end
+
+function Game002:OnError(callStack)
+	System.Error("Game002 Error CallStack: {0}", callStack)
+end
+
+function Game002:Awake()
+	System.Print("Game002 Awake tile id={0}", self.id)
+end
+
+function Game002:Start()
+    System.Print("Game002 Start tile id={0}", self.id)
+end
+
+return Game002:new()
