@@ -164,19 +164,25 @@
         },
         {
             "ComponentType": "TilePropertyGameObjects",
-            "GameObjectsMap": {
+            GameObjectsProperty: [
             {{ for machine in machines }}
-            "{{ machine }}BackgroundParent" : "{{ machine }}BackgroundParent"{{ if !for.last }},{{ end }}
+            {
+            "Key": "{{ machine }}BackgroundParent",
+            "Id": "{{ machine }}BackgroundParent"
+            }{{ if !for.last }},{{ end }}
             {{ end }}
-            }
+            ]
         },
         {
             "ComponentType": "TilePropertyGameObjects",
-            "GameObjectsMap": {
+            GameObjectsProperty: [
             {{ for machine in machines }}
-            "{{ machine }}MachineParent" : "{{ machine }}MachineParent"{{ if !for.last }},{{ end }}
+            {
+            "Key": "{{ machine }}MachineParent",
+            "Id": "{{ machine }}MachineParent"
+            }{{ if !for.last }},{{ end }}
             {{ end }}
-            }
+            ]
         }
       ]
     },
