@@ -611,6 +611,7 @@ namespace Bettr.Editor
             DynValue dynValue = TileController.LuaScript.LoadString(machineModelScript, codeFriendlyName: machineModelName);
             TileController.LuaScript.Call(dynValue);
 
+            ProcessScripts(machineName, machineVariant, runtimeAssetPath);
             ProcessBaseGameSymbols(machineName, machineVariant, runtimeAssetPath);
             ProcessBaseGameMachine(machineName, machineVariant, runtimeAssetPath);
             ProcessScene(machineName, machineVariant, runtimeAssetPath);
@@ -623,6 +624,40 @@ namespace Bettr.Editor
                 Directory.CreateDirectory(path);
                 AssetDatabase.Refresh();
                 Debug.Log("Directory created at: " + path);
+            }
+        }
+
+        private static void ProcessScripts(string machineName, string machineVariant, string runtimeAssetPath)
+        {
+            AssetDatabase.Refresh();
+            
+            string dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "scripts");
+            string[] filePaths = Directory.GetFiles(dirPath, "*.cscript.txt.template");
+            foreach (string filePath in filePaths)
+            {
+                string scribanTemplateText = File.ReadAllText(filePath);
+                var scribanTemplate = Template.Parse(scribanTemplateText);
+                if (scribanTemplate.HasErrors)
+                {
+                    Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages}");
+                    throw new Exception($"Scriban template has errors: {scribanTemplate.Messages}");
+                }
+                var model = new Dictionary<string, object>
+                {
+                    { "machineName", machineName },
+                    { "machineVariant", machineVariant },
+                    { "machines", new string[]
+                    {
+                        "BaseGame",
+                        "FreeSpins"
+                    } }
+                };
+                var scriptText = scribanTemplate.Render(model);
+                var scriptName = Path.GetFileNameWithoutExtension(filePath); // remove the .template
+                scriptName = Regex.Replace(scriptName, @"^Game", machineName);
+                
+                var destinationPath = Path.Combine(runtimeAssetPath, "Scripts", $"{scriptName}");
+                File.WriteAllText(destinationPath, scriptText);
             }
         }
 
@@ -1056,7 +1091,6 @@ namespace Bettr.Editor
 
             return File.ReadAllText(path);
         }
-
         
         private static void ProcessSettings(string settingsName, string runtimeAssetPath)
         {

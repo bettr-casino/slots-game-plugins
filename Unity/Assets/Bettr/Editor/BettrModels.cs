@@ -349,7 +349,9 @@ namespace Bettr.Editor
                     }
                     break;
                 case "Tile":
-                    var tileComponent = new TileComponent(RuntimeAssetPath, Filename);
+                    var globalTileId = Filename;
+                    var scriptAsset = BettrScriptGenerator.CreateOrLoadScript(Filename, RuntimeAssetPath);
+                    var tileComponent = new TileComponent(globalTileId, scriptAsset);
                     tileComponent.AddComponent(gameObject);
                     break;
             }
@@ -362,12 +364,6 @@ namespace Bettr.Editor
         private readonly TextAsset _scriptAsset;
         private readonly string _globalTileId;
         
-        public TileComponent(string runtimeAssetPath, string scriptName)
-        {
-            _globalTileId = scriptName;
-            _scriptAsset = BettrScriptGenerator.CreateOrLoadScript(scriptName, runtimeAssetPath);
-        }
-
         public TileComponent(string globalTileId, TextAsset scriptAsset)
         {
             _globalTileId = globalTileId;
