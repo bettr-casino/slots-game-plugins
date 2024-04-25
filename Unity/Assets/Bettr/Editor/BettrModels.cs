@@ -268,12 +268,18 @@ namespace Bettr.Editor
         
         public string ReferenceId { get; set; }
         
+        public Dictionary<string, string> GameObjectsMap { get; set; }
+        
+        public Dictionary<string, List<string>> GameObjectsGroupMap { get; set; }
+        
         public string[] Params { get; set; }
         
         public InstanceComponent()
         {
             FontAsset = "Roboto-Bold SDF";
             Params = Array.Empty<string>();
+            GameObjectsMap = new Dictionary<string, string>();
+            GameObjectsGroupMap = new Dictionary<string, List<string>>();
         }
         
         public void AddComponent(GameObject gameObject)
@@ -354,6 +360,41 @@ namespace Bettr.Editor
                     var tileComponent = new TileComponent(globalTileId, scriptAsset);
                     tileComponent.AddComponent(gameObject);
                     break;
+                case "TilePropertyGameObjects":
+                    var tileGameObjectProperties = new List<TilePropertyGameObject>();
+                    var tileGameObjectGroupProperties = new List<TilePropertyGameObjectGroup>();
+                    foreach (var kvPair in GameObjectsMap)
+                    {
+                        InstanceGameObject.IdGameObjects.TryGetValue(kvPair.Value, out var referenceGameObject);
+                        var tilePropertyGameObject = new TilePropertyGameObject()
+                        {
+                            key = kvPair.Key,
+                            value = new PropertyGameObject() {gameObject = referenceGameObject?.GameObject },
+                        };
+                        tileGameObjectProperties.Add(tilePropertyGameObject);
+                    }
+                    foreach (var kvPair in GameObjectsGroupMap)
+                    {
+                        List<TilePropertyGameObject> gameObjectProperties = new List<TilePropertyGameObject>();
+                        foreach (var referenceId in kvPair.Value)
+                        {
+                            InstanceGameObject.IdGameObjects.TryGetValue(referenceId, out var referenceGameObject);
+                            var gameObjectProperty = new TilePropertyGameObject()
+                            {
+                                key = kvPair.Key,
+                                value = new PropertyGameObject() {gameObject = referenceGameObject?.GameObject },
+                            };
+                            gameObjectProperties.Add(gameObjectProperty);
+                        }
+                        tileGameObjectGroupProperties.Add(new TilePropertyGameObjectGroup()
+                        {
+                            groupKey = kvPair.Key,
+                            gameObjectProperties = gameObjectProperties,
+                        });
+                    }
+                    var tilePropertyGameObjectsComponent = new TilePropertyGameObjectsComponent(tileGameObjectProperties, tileGameObjectGroupProperties);
+                    tilePropertyGameObjectsComponent.AddComponent(gameObject);
+                    break;
             }
         }
     }
@@ -375,6 +416,26 @@ namespace Bettr.Editor
             var tile = gameObject.AddComponent<Tile>();
             tile.scriptAsset = _scriptAsset;
             tile.globalTileId = _globalTileId;
+        }
+    }
+    
+    [Serializable]
+    public class TilePropertyGameObjectsComponent : IComponent
+    {
+        private readonly List<TilePropertyGameObject> _tileGameObjectProperties;
+        private readonly List<TilePropertyGameObjectGroup> _tileGameObjectGroupProperties;
+        
+        public TilePropertyGameObjectsComponent(List<TilePropertyGameObject> tileGameObjectProperties, List<TilePropertyGameObjectGroup> tileGameObjectGroupProperties)
+        {
+            this._tileGameObjectProperties = tileGameObjectProperties;
+            this._tileGameObjectGroupProperties = tileGameObjectGroupProperties;
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            var component = gameObject.AddComponent<TilePropertyGameObjects>();
+            component.tileGameObjectProperties = _tileGameObjectProperties;
+            component.tileGameObjectGroupProperties = _tileGameObjectGroupProperties;
         }
     }
     
