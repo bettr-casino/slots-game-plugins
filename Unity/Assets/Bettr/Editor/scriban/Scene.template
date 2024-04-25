@@ -127,7 +127,8 @@
             "Children": [
             {{ for machine in machines }}
               {
-                "Name": "{{ machine }}Parent",
+                "Name": "{{ machine }}MachineParent",
+                "Id": "{{ machine }}MachineParent",
                 "Active": false,
                 "Child": {
                     "Name": "Pivot",
@@ -146,6 +147,7 @@
             {{ for machine in machines }}
               {
                 "Name": "{{ machine }}BackgroundParent",
+                "Id": "{{ machine }}BackgroundParent",
                 "Child": {
                     "Name": "Pivot"
                 }
@@ -162,7 +164,19 @@
         },
         {
             "ComponentType": "TilePropertyGameObjects",
-            "FileName": "{{machineName}}"
+            "GameObjectsMap": {
+            {{ for machine in machines }}
+            "{{ machine }}BackgroundParent" : "{{ machine }}BackgroundParent"{{ if !for.last }},{{ end }}
+            {{ end }}
+            }
+        },
+        {
+            "ComponentType": "TilePropertyGameObjects",
+            "GameObjectsMap": {
+            {{ for machine in machines }}
+            "{{ machine }}MachineParent" : "{{ machine }}MachineParent"{{ if !for.last }},{{ end }}
+            {{ end }}
+            }
         }
       ]
     },

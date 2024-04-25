@@ -1056,6 +1056,8 @@ namespace Bettr.Editor
             // run it through Scriban
             var json = scribanTemplate.Render(model);
             
+            Console.WriteLine(json);
+            
             JsonConvert.DeserializeObject<InstanceGameObject>(json);
             
             EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
