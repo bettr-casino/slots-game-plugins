@@ -3,12 +3,12 @@ require "Core"
 
 {{machineName}} = {
     Manifest = {        
-        BundleName = "{{bundleName}}",
-        BundleVersion = "{{bundleVersion}}",
-        {{ for machine in machines }}
-        {{machine}}BackgroundPrefabName = "{{machineName}}{{}}Background",
-        {{machine}}PrefabName = "{{machineName}}{{machine}}Machine",
-        {{ end }}
+        BundleName = "{{machineName | string.downcase}}",
+        BundleVersion = "{{machineVariant | string.downcase}}",
+        {{- for machine in machines }}
+        {{ machine}}BackgroundPrefabName = "{{machineName}}{{machine}}Background",
+        {{ machine}}PrefabName = "{{machineName}}{{machine}}Machine",
+        {{- end }}
     }
 }
 
@@ -35,12 +35,14 @@ function {{machineName}}:Start()
     series
         do
             System.Print("{{machineName}}:Start tile id={0}", self.id)
-            self:LoadBaseGameBackgroundPrefab()
-            self:LoadFreeSpinsBackgroundPrefab()
-            self:LoadBaseGamePrefab()
-            self:LoadFreeSpinsPrefab()
+            {{ for machine in machines }}
+            self:Load{{machine}}BackgroundPrefab()
+            {{ end }}
+            {{ for machine in machines }}
+            self:Load{{machine}}Prefab()
+            {{ end }}
             BettrVisualsController.SwitchOrientationToLandscape()
-            Game001BaseGameBackground:StartBackground()
+            {{machineName}}BaseGameBackground:StartBackground()
             self:SetBaseGameActive(true)
         end
     end
