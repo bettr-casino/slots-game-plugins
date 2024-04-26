@@ -16,7 +16,6 @@ using UnityEditor.Animations;
 using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
 using DirectoryInfo = System.IO.DirectoryInfo;
-using Object = System.Object;
 
 using Scriban;
 
@@ -104,7 +103,7 @@ namespace Bettr.Editor
             Debug.Log("Package exported: " + outputPackagePath);
         }
 
-        [MenuItem("Bettr/Verify Install")]
+        [MenuItem("Bettr/Install/Verify")]
         public static void VerifyInstall()
         {
             var canPost = PostToService();
@@ -117,7 +116,7 @@ namespace Bettr.Editor
             EditorUtility.DisplayDialog("Success", "Verify Successful.", "OK");
         }
         
-        [MenuItem("Bettr/Enter Play Mode")] 
+        [MenuItem("Bettr/PlayMode/Start")] 
         public static void Start()
         {
             // Ensure you are not in play mode when making these changes
@@ -143,11 +142,25 @@ namespace Bettr.Editor
             EditorApplication.EnterPlaymode();
         }
 
-        [MenuItem("Bettr/Assets/Build")] 
+        [MenuItem("Bettr/Build/Assets")] 
         public static void BuildAssets()
         {
             BuildAssetBundles();
             BuildLocalServer();
+        }
+
+        [MenuItem("Bettr/Build/Machines")] 
+        public static void BuildMachines()
+        {
+            var currentDir = Environment.CurrentDirectory;
+            var modelsDir = $"{currentDir}/../../../bettr-infrastructure/bettr-infrastructure/tools/publish-data/published_models";
+            
+            var machineName = "Game002";
+            Environment.SetEnvironmentVariable("machineName", machineName);
+            Environment.SetEnvironmentVariable("machineVariant", "BuffaloGold");
+            Environment.SetEnvironmentVariable("machineModel", $"{modelsDir}/{machineName}/Game002Models.lua");
+            
+            SyncMachine();
         }
         
         //[MenuItem("Bettr/Assets/Cleanup")]
@@ -476,7 +489,13 @@ namespace Bettr.Editor
                     return args[i + 1];
                 }
             }
-            return null;
+
+            if (name.StartsWith("-"))
+            {
+                name = name.Substring(1);
+            }
+            // fallback to environment variables
+            return Environment.GetEnvironmentVariable(name);
         }
 
         private static string GenerateDirectoryTreeJson(string path)
