@@ -420,6 +420,10 @@ namespace Bettr.Editor
                             key = kvPair.Key,
                             value = new PropertyAnimator() {animator = referenceGameObject?.Animator, animationStateName = kvPair.State},
                         };
+                        if (tileProperty.value.animator == null)
+                        {
+                            throw new Exception($"Failed to find animator with id: {kvPair.Id}");
+                        }
                         properties.Add(tileProperty);
                     }
                     foreach (var kvPair in AnimatorsGroupProperty)
