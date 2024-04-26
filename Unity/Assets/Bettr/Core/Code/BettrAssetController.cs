@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
+using CrayonScript.Interpreter.Execution.VM;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
@@ -132,12 +133,13 @@ namespace Bettr.Core
             Object.Destroy(replaced);
         }
 
-        public IEnumerator LoadPrefab(string bettrAssetBundleName, string bettrAssetBundleVersion, string prefabName,
+        public IEnumerator LoadPrefab(CrayonScriptContext context, string bettrAssetBundleName, string bettrAssetBundleVersion, string prefabName,
             GameObject parent = null)
         {
             if (string.IsNullOrWhiteSpace(prefabName))
             {
                 Debug.LogError($"Prefab name is null or empty for asset bundle={bettrAssetBundleName} version={bettrAssetBundleVersion}");
+                context.SetError(new ScriptRuntimeException($"Prefab name is null or empty for asset bundle={bettrAssetBundleName} version={bettrAssetBundleVersion}"));
                 yield break;
             }
             
@@ -413,10 +415,10 @@ namespace Bettr.Core
             yield return BettrAssetScenesController.LoadScene(bettrAssetBundleName, bettrAssetBundleVersion, bettrSceneName);
         }
         
-        public IEnumerator LoadPrefab(string bettrAssetBundleName, string bettrAssetBundleVersion, string prefabName,
+        public IEnumerator LoadPrefab(CrayonScriptContext context, string bettrAssetBundleName, string bettrAssetBundleVersion, string prefabName,
             GameObject parent = null)
         {
-            yield return BettrAssetPrefabsController.LoadPrefab(bettrAssetBundleName, bettrAssetBundleVersion, prefabName, parent);
+            yield return BettrAssetPrefabsController.LoadPrefab(context, bettrAssetBundleName, bettrAssetBundleVersion, prefabName, parent);
         }
 
         public IEnumerator ReplacePrefab(string bettrAssetBundleName, string bettrAssetBundleVersion, string prefabName,
