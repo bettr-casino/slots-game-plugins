@@ -33,12 +33,8 @@ function Game002:Start()
     series
         do
             System.Print("Game002:Start tile id={0}", self.id)
-            
-                        self:LoadBaseGameBackgroundPrefab()
-                        
-            
-                        self:LoadBaseGamePrefab()
-                        
+            self:LoadBaseGameBackgroundPrefab()
+            self:LoadBaseGamePrefab()
             BettrVisualsController.SwitchOrientationToLandscape()
             Game002BaseGameBackground:StartBackground()
             self:SetBaseGameActive(true)
@@ -52,8 +48,7 @@ function Game002:LoadBaseGameBackgroundPrefab()
             System.Print("Game002:LoadBaseGameBackgroundPrefab tile id={0}", self.id)
             local manifest = self.Manifest
             local backgroundParentProperty = self.BaseGameBackgroundParent
-            local backgroundParent = backgroundParentProperty["Pivot"]       
-            System.Print("Game002:LoadBaseGameBackgroundPrefab manifest.BaseGameBackgroundPrefabName={0}", manifest.BaseGameBackgroundPrefabName)                 
+            local backgroundParent = backgroundParentProperty["Pivot"]                        
             BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, manifest.BaseGameBackgroundPrefabName, backgroundParent)
         end
     end
