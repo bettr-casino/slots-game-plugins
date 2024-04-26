@@ -135,6 +135,12 @@ namespace Bettr.Core
         public IEnumerator LoadPrefab(string bettrAssetBundleName, string bettrAssetBundleVersion, string prefabName,
             GameObject parent = null)
         {
+            if (string.IsNullOrWhiteSpace(prefabName))
+            {
+                Debug.LogError($"Prefab name is null or empty for asset bundle={bettrAssetBundleName} version={bettrAssetBundleVersion}");
+                yield break;
+            }
+            
             yield return _bettrAssetPackageController.LoadPackage(bettrAssetBundleName, bettrAssetBundleVersion, false);
             
             var assetBundle = _bettrAssetController.GetCachedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);

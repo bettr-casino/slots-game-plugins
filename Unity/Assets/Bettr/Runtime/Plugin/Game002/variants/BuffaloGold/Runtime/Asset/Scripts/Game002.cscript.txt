@@ -7,8 +7,6 @@ Game002 = {
         BundleVersion = "buffalogold",
         BaseGameBackgroundPrefabName = "Game002BaseGameBackground",
         BaseGamePrefabName = "Game002BaseGameMachine",
-        FreeSpinsBackgroundPrefabName = "Game002FreeSpinsBackground",
-        FreeSpinsPrefabName = "Game002FreeSpinsMachine",
     }
 }
 
@@ -38,12 +36,8 @@ function Game002:Start()
             
                         self:LoadBaseGameBackgroundPrefab()
                         
-                        self:LoadFreeSpinsBackgroundPrefab()
-                        
             
                         self:LoadBaseGamePrefab()
-                        
-                        self:LoadFreeSpinsPrefab()
                         
             BettrVisualsController.SwitchOrientationToLandscape()
             Game002BaseGameBackground:StartBackground()
@@ -58,7 +52,8 @@ function Game002:LoadBaseGameBackgroundPrefab()
             System.Print("Game002:LoadBaseGameBackgroundPrefab tile id={0}", self.id)
             local manifest = self.Manifest
             local backgroundParentProperty = self.BaseGameBackgroundParent
-            local backgroundParent = backgroundParentProperty["Pivot"]                        
+            local backgroundParent = backgroundParentProperty["Pivot"]       
+            System.Print("Game002:LoadBaseGameBackgroundPrefab manifest.BaseGameBackgroundPrefabName={0}", manifest.BaseGameBackgroundPrefabName)                 
             BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, manifest.BaseGameBackgroundPrefabName, backgroundParent)
         end
     end

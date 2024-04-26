@@ -649,7 +649,6 @@ namespace Bettr.Editor
                     { "machines", new string[]
                     {
                         "BaseGame",
-                        "FreeSpins"
                     } }
                 };
                 var scriptText = scribanTemplate.Render(model);
@@ -1049,7 +1048,6 @@ namespace Bettr.Editor
                 { "machines", new string[]
                 {
                     "BaseGame",
-                    "FreeSpins"
                 } }
             };
             
