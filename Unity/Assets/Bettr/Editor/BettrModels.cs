@@ -428,21 +428,25 @@ namespace Bettr.Editor
                     }
                     foreach (var kvPair in AnimatorsGroupProperty)
                     {
-                        List<TilePropertyAnimator> gameObjectProperties = new List<TilePropertyAnimator>();
+                        List<TilePropertyAnimator> animatorProperties = new List<TilePropertyAnimator>();
                         foreach (var property in kvPair.Group)
                         {
                             InstanceGameObject.IdGameObjects.TryGetValue(property.Id, out var referenceGameObject);
-                            var gameObjectProperty = new TilePropertyAnimator()
+                            var tileProperty = new TilePropertyAnimator()
                             {
                                 key = property.Key,
                                 value = new PropertyAnimator() {animator = referenceGameObject?.Animator, animationStateName = property.State},
                             };
-                            gameObjectProperties.Add(gameObjectProperty);
+                            if (tileProperty.value.animator == null)
+                            {
+                                throw new Exception($"Failed to find animator with id: {property.Id}");
+                            }
+                            animatorProperties.Add(tileProperty);
                         }
                         groupProperties.Add(new TilePropertyAnimatorGroup()
                         {
                             groupKey = kvPair.GroupKey,
-                            tileAnimatorProperties = gameObjectProperties,
+                            tileAnimatorProperties = animatorProperties,
                         });
                     }
                     var tilePropertyAnimatorsComponent = new TilePropertyAnimatorsComponent(properties, groupProperties);
