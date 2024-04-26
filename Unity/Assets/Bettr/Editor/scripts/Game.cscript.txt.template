@@ -35,12 +35,12 @@ function {{machineName}}:Start()
     series
         do
             System.Print("{{machineName}}:Start tile id={0}", self.id)
-            {{ for machine in machines }}
+            {{- for machine in machines }}
             self:Load{{machine}}BackgroundPrefab()
-            {{ end }}
-            {{ for machine in machines }}
+            {{- end }}
+            {{- for machine in machines }}
             self:Load{{machine}}Prefab()
-            {{ end }}
+            {{- end }}
             BettrVisualsController.SwitchOrientationToLandscape()
             {{machineName}}BaseGameBackground:StartBackground()
             self:SetBaseGameActive(true)
