@@ -270,10 +270,6 @@ namespace Bettr.Editor
         
         public string ReferenceId { get; set; }
         
-        public Dictionary<string, string> GameObjectsMap { get; set; }
-        
-        public Dictionary<string, List<string>> GameObjectsGroupMap { get; set; }
-        
         public List<GameObjectProperty> GameObjectsProperty { get; set; }
         
         public List<GameObjectGroupProperty> GameObjectGroupsProperty { get; set; }
@@ -288,8 +284,6 @@ namespace Bettr.Editor
         {
             FontAsset = "Roboto-Bold SDF";
             Params = Array.Empty<string>();
-            GameObjectsMap = new Dictionary<string, string>();
-            GameObjectsGroupMap = new Dictionary<string, List<string>>();
             GameObjectsProperty = new List<GameObjectProperty>();
             GameObjectGroupsProperty = new List<GameObjectGroupProperty>();
             AnimatorsProperty = new List<AnimatorProperty>();
@@ -847,7 +841,6 @@ namespace Bettr.Editor
         private void AddTextMeshPro(GameObject gameObject)
         {
             var textMeshPro = gameObject.AddComponent<TextMeshPro>();
-            gameObject.AddComponent<MeshRenderer>();
             textMeshPro.text = Text;
             textMeshPro.fontSize = FontSize;
             textMeshPro.fontMaterial = FontAsset.material;
