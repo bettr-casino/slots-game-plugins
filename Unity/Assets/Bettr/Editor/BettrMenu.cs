@@ -949,14 +949,27 @@ namespace Bettr.Editor
         
         private static void ProcessBaseGameBackground(string machineName, string machineVariant, TextAsset scriptTextAsset, string runtimeAssetPath)
         {
-            SimpleStringInterpolator interpolator = new SimpleStringInterpolator();
-            
             string backgroundName = $"{machineName}BaseGameBackground";
-            interpolator.SetVariable("backgroundName", backgroundName);
             
-            string jsonTemplate = ReadJson("BaseGameBackground");
-            string json = interpolator.Interpolate(jsonTemplate);
+            string scribanTemplateText = ReadScribanTemplate("BaseGameBackground");
 
+            var scribanTemplate = Template.Parse(scribanTemplateText);
+            if (scribanTemplate.HasErrors)
+            {
+                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages}");
+                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages}");
+            }
+            
+            var model = new Dictionary<string, object>
+            {
+                { "machineName", machineName },
+                { "machineVariant", machineVariant },
+                { "backgroundName", backgroundName },
+            };
+            
+            var json = scribanTemplate.Render(model);
+            Console.WriteLine(json);
+            
             InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
             InstanceGameObject.IdGameObjects.Clear();
             
