@@ -1,0 +1,508 @@
+require "math"
+require "Core"
+require "Game002BaseGameReel"
+
+Game002BaseGameMachine = {
+}
+
+function Game002BaseGameMachine:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game002BaseGameMachine:destroy()
+	System.Print("Game002BaseGameMachine destroy tile id={0}", self.id)
+end
+
+function Game002BaseGameMachine:OnError(callStack)
+	System.Error("Game002BaseGameMachine Error CallStack: {0}", callStack)
+end
+
+function Game002BaseGameMachine:Awake()
+	System.Print("Game002BaseGameMachine Awake tile id={0}", self.id)
+end
+
+function Game002BaseGameMachine:Start()
+    series
+        do
+	        self:ConfigureSettings()
+	        self:ShowSettings()
+	        self:PlayStartAnimations()
+	        self:StartEngines()
+        end
+    end
+end
+
+function Game002BaseGameMachine:ConfigureSettings()
+    self.CreditsText.SetText(BettrUser.Coins)
+    self.WinText.SetText("0")       
+    self.BetText.SetText(Game002BetMultiplierState.Current.First.BetMultiplier) 
+end
+
+function Game002BaseGameMachine:ShowSettings()
+    series
+        do
+            local settings = self["Settings"]
+            settings.SetActive(true)
+        end
+    end
+end
+
+function Game002BaseGameMachine:HideSettings()
+    series
+        do
+            local settings = self["Settings"]
+            settings.SetActive(false)
+        end
+    end
+end
+
+function Game002BaseGameMachine:ResetSettings()
+    self.WinText.SetText("0")
+end
+
+function Game002BaseGameMachine:Update()
+    local spinState = Game002BaseGameState.SpinState.First.State
+    self.BaseGameStateDispatchTable[spinState](self)    
+end
+
+function Game002BaseGameMachine:BaseGameSpinning()    
+end
+
+function Game002BaseGameMachine:WaitingForFreeSpinsToComplete()    
+end
+
+function Game002BaseGameMachine:BaseGameFreeSpinsTriggering()
+    Game002BaseGameState.SpinState.First.State = "WaitingForFreeSpinsToComplete"
+    System.StartCoroutine(self, "FreeSpinsTrigger")
+end
+
+function Game002BaseGameMachine:WaitingForPayToComplete()    
+end
+
+function Game002BaseGameMachine:BaseGameWaysPaying()
+    Game002BaseGameState.SpinState.First.State = "WaitingForPayToComplete"
+    System.StartCoroutine(self, "BaseGamePayout")
+end
+
+function Game002BaseGameMachine:BaseGameWaiting()    
+end
+
+function Game002BaseGameMachine:BaseGameCompleted()
+   self:ShowSettings()
+   Game002BaseGameState.SpinState.First.State = "Waiting"
+end
+
+function Game002BaseGameMachine:FreeSpinsTrigger()
+    series
+        do
+            local freeSpinsSummary = Game002BaseGameFreeSpinsTriggerSummary.FreeSpins
+            if freeSpinsSummary == nil then
+                self:OnBaseGameSpinCompleted()
+            else
+                local bn1Count = freeSpinsSummary.First.BN1Count
+                local bn2Count = freeSpinsSummary.First.BN2Count
+                local bn1bn2Count = freeSpinsSummary.First.BN1BN2Count
+                -- clone all trigger symbols
+                local animatorProperty = Game002BaseGameBackground["freespinstrigger"]                
+                BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+                -- clone the free spin trigger symbols
+                Game002MachineState.Current.First.FreeSpinsTriggerSymbols = {}
+                local clonedSymbols = Game002MachineState.Current.First.FreeSpinsTriggerSymbols                                
+                for i=1,#Game002BaseGameFreeSpinsTriggerMatrix parallel do
+                    local triggerMatrix = Game002BaseGameFreeSpinsTriggerMatrix[i]
+                    local triggerSymbol = triggerMatrix.Symbol
+                    if triggerSymbol == "BN2" then
+                        local reel = _G["Game002BaseGame" .. triggerMatrix.ReelID]
+                        local clonedSymbol = reel:CloneAndOverlayCurrentSymbol(triggerMatrix.RowIndex)
+                        table.insert(clonedSymbols, clonedSymbol)
+                    end
+                end
+                local clonedSymbolsCount = #clonedSymbols
+                local clonedSymbol = nil
+                local tweenGroupProperty = self["FreeSpinsTriggerTweenEndPointsGroup"]
+                parallel
+                    do
+                        if clonedSymbolsCount ~= 1 then
+                            return
+                        end 
+                        clonedSymbol = clonedSymbols[1]                       
+                        local middleProperty = tweenGroupProperty["Middle"]                                
+                        BettrVisualsController.TweenMoveBetween(clonedSymbol, middleProperty)
+                        System.WaitForSeconds(middleProperty.tweenDuration)
+                    end
+                    do
+                        if clonedSymbolsCount ~= 2 then
+                            return
+                        end                        
+                        local leftProperty = tweenGroupProperty["Left"]
+                        local rightProperty = tweenGroupProperty["Right"]  
+                        clonedSymbol = clonedSymbols[1]                              
+                        BettrVisualsController.TweenMoveBetween(clonedSymbol, leftProperty)
+                        clonedSymbol = clonedSymbols[2]
+                        BettrVisualsController.TweenMoveBetween(clonedSymbol, rightProperty)
+                        System.WaitForSeconds(leftProperty.tweenDuration)
+                    end
+                    do
+                        if clonedSymbolsCount ~= 3 then
+                            return
+                        end                        
+                        local middleProperty = tweenGroupProperty["Middle"]                                
+                        local leftProperty = tweenGroupProperty["Left"]
+                        local rightProperty = tweenGroupProperty["Right"]
+                        clonedSymbol = clonedSymbols[1]
+                        BettrVisualsController.TweenMoveBetween(clonedSymbol, middleProperty)
+                        clonedSymbol = clonedSymbols[2]
+                        BettrVisualsController.TweenMoveBetween(clonedSymbol, leftProperty)
+                        clonedSymbol = clonedSymbols[3]
+                        BettrVisualsController.TweenMoveBetween(clonedSymbol, rightProperty)
+                        System.WaitForSeconds(leftProperty.tweenDuration)
+                    end
+                    do
+                        if clonedSymbolsCount ~= 4 then
+                            return
+                        end                        
+                        local topProperty = tweenGroupProperty["Top"]
+                        local bottomProperty = tweenGroupProperty["Bottom"]                                
+                        local leftProperty = tweenGroupProperty["Left"]
+                        local rightProperty = tweenGroupProperty["Right"]
+                        clonedSymbol = clonedSymbols[1]
+                        BettrVisualsController.TweenMoveBetween(clonedSymbol, topProperty)
+                        clonedSymbol = clonedSymbols[2]
+                        BettrVisualsController.TweenMoveBetween(clonedSymbol, bottomProperty)
+                        clonedSymbol = clonedSymbols[3]
+                        BettrVisualsController.TweenMoveBetween(clonedSymbol, leftProperty)
+                        clonedSymbol = clonedSymbols[4]
+                        BettrVisualsController.TweenMoveBetween(clonedSymbol, rightProperty)
+                        System.WaitForSeconds(leftProperty.tweenDuration)
+                    end
+                    do
+                        if clonedSymbolsCount ~= 5 then
+                            return
+                        end
+                        local middleProperty = tweenGroupProperty["Middle"]                        
+                        local topProperty = tweenGroupProperty["Top"]
+                        local bottomProperty = tweenGroupProperty["Bottom"]                                
+                        local leftProperty = tweenGroupProperty["Left"]
+                        local rightProperty = tweenGroupProperty["Right"]
+                        clonedSymbol = clonedSymbols[1]
+                        BettrVisualsController.TweenMoveBetween(clonedSymbol, middleProperty)
+                        clonedSymbol = clonedSymbols[2]
+                        BettrVisualsController.TweenMoveBetween(clonedSymbol, topProperty)
+                        clonedSymbol = clonedSymbols[3]
+                        BettrVisualsController.TweenMoveBetween(clonedSymbol, bottomProperty)
+                        clonedSymbol = clonedSymbols[4]
+                        BettrVisualsController.TweenMoveBetween(clonedSymbol, leftProperty)
+                        clonedSymbol = clonedSymbols[5]
+                        BettrVisualsController.TweenMoveBetween(clonedSymbol, rightProperty)
+                        System.WaitForSeconds(leftProperty.tweenDuration)
+                    end
+                    do
+                        local animatorProperty = self["free_spins_trigger_fade_in"]
+                        BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+                    end
+                    do
+                        self:HideSettings()
+                    end
+                end
+                Game002:OnFreeSpinsTriggeringStarted()
+            end
+        end
+    end
+end
+
+function Game002BaseGameMachine:OnFreeSpinsTriggeringCompleted()
+    series
+        do
+            local animatorProperty = self["free_spins_trigger_fade_out"]
+            BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+            self:OnBaseGameSpinCompleted()
+        end
+    end
+end
+
+function Game002BaseGameMachine:OnBaseGameSpinCompleted()
+    series
+        do
+            Game002BaseGameState.SpinState.First.State = "Completed"
+        end
+    end
+end
+
+function Game002BaseGameMachine:BaseGamePayout()
+    series
+        do
+            local waysSummary = Game002BaseGameWaysSummary.Ways.First
+            local waysIndex = waysSummary.WaysIndex
+            local waysCount = waysSummary.WaysCount
+            if waysCount > 0 then
+                local ways = Game002BaseGameWays.Ways.Array
+                local waysMatrix = Game002BaseGameWaysMatrix
+                parallel
+                    do
+                        self:DisplayWays(waysSummary, waysMatrix, ways)            
+                    end
+                    do
+                        if waysIndex == 0 then
+                            self:RollUpWaysWin(waysSummary)
+                        end
+                    end
+                end
+                if waysIndex >= 2 then
+                    self:OnWaysPayingCompleted()
+                elseif Game002BaseGameState.DisplayState.First.State == "CancelRequested" then
+                    self:OnWaysPayingCompleted()
+                else
+                    System.StartCoroutine(self, "BaseGamePayout")
+                end
+            else
+                self:OnWaysPayingCompleted()
+            end
+        end
+    end      
+end
+
+function Game002BaseGameMachine:DisplayWays(waysSummary, waysMatrix, ways)
+    series
+        do
+            local waysIndex = waysSummary.WaysIndex   
+            local waysCount = waysSummary.WaysCount 
+            local startDelay = waysSummary.DisplayLoopStartDelay
+            local duration = waysSummary.DisplayLoopDuration
+            local endDelay = waysSummary.DisplayLoopEndDelay            
+            if waysIndex == 0 then
+                System.WaitForSeconds(startDelay)
+            end
+            for waysCounterIndex = 1, waysCount do
+                series
+                    do
+                        local way = ways[waysCounterIndex]
+                        local waySymbol = way.Symbol
+                        local wayReelCount = way.ReelCount
+                        local waySymbolCount = way.SymbolCount
+                        local wayMultiplier = way.Multiplier
+                        local wayPay = way.Pay
+                        local wayTotalPay = way.Pays
+                        local wayMatrix = waysMatrix[waySymbol].Array
+                        -- update status text 
+                        local statusTexts = self.StatusTexts
+                        -- {0}        Pays  {1} x {2} ways = {3} CREDITS!!
+                        statusTexts.FormatAndSetCurrentActive("PaysText", wayReelCount, wayPay, wayMultiplier, wayTotalPay)
+                        local winSymbols = self.WinSymbols
+                        winSymbols.SetCurrentActive(waySymbol)
+                        -- display ways
+                        for i=1,5 parallel do
+                            local reel = _G["Game002BaseGameReel" .. i]
+                            if reel != nil then
+                                reel:DisplayWays(waySymbol, wayMatrix, waySymbolCount, duration)
+                                System.WaitForSeconds(duration)
+                                reel:HideWays(waySymbol, wayMatrix, waySymbolCount)
+                            end
+                        end
+                    end
+                end                            
+            end
+            waysSummary.WaysIndex = waysIndex + 1
+            System.WaitForSeconds(endDelay) 
+        end
+    end
+end
+
+function Game002BaseGameMachine:UpdateStatusText(text)
+end
+
+function Game002BaseGameMachine:RollUpWaysWin(waysSummary)
+    series
+        do
+            -- rollup ways win once
+            local startDelay = waysSummary.DisplayLoopStartDelay
+            local duration = waysSummary.DisplayLoopDuration
+            local pays = waysSummary.Pays 
+            System.WaitForSeconds(startDelay)
+            local winTextProperty = self.WinText
+            
+            BettrVisualsController.RollUpCounter(winTextProperty, 0, pays, 1)
+            
+            local creditsTextProperty = self.CreditsText   
+            local oldCoins = BettrUser.Coins
+            local newCoins = oldCoins + pays            
+            BettrUser.Coins = newCoins  
+                      
+            BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 1)
+        end
+    end    
+end
+
+function Game002BaseGameMachine:PlayStartAnimations()
+    series
+        do
+            local animatorProperty = self["start"]
+            BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+        end        
+    end
+end
+
+function Game002BaseGameMachine:StartEngines()
+    parallel
+        do
+            Game002BaseGameReel1:StartEngines()
+        end
+        do
+            Game002BaseGameReel2:StartEngines()
+        end
+        do
+            Game002BaseGameReel3:StartEngines()
+        end
+        do
+            Game002BaseGameReel4:StartEngines()
+        end
+        do
+            Game002BaseGameReel5:StartEngines()
+        end
+    end
+end
+
+function Game002BaseGameMachine:LoadServerOutcome()
+    series
+        do
+            BettrOutcomeController.LoadServerOutcome("Game002")
+        end
+    end
+end
+
+function Game002BaseGameMachine:WaitForApplyOutcomeDelay()
+    series
+        do
+            local outcomeDelayInMs = Game002BaseGameSpinProperties.ApplyOutcomeDelay.First.Value
+            if outcomeDelayInMs > 0 then
+                System.WaitForSeconds(outcomeDelayInMs / 1000)
+            end
+        end
+    end
+end
+
+function Game002BaseGameMachine:SpinEngines()
+    Game002BaseGameState.SpinState.First.State = "Spinning"
+    local statusTexts = self.StatusTexts
+    statusTexts.SetCurrentActive("GoodLuckText")
+    local winSymbols = self.WinSymbols
+    winSymbols.SetAllInactive()
+    self:ResetSettings()
+    parallel
+        do
+            Game002BaseGameReel1:SpinEngines()
+        end
+        do
+            Game002BaseGameReel2:SpinEngines()
+        end
+        do
+            Game002BaseGameReel3:SpinEngines()
+        end
+        do
+            Game002BaseGameReel4:SpinEngines()
+        end
+        do
+            Game002BaseGameReel5:SpinEngines()
+        end
+    end
+end
+
+function Game002BaseGameMachine:WaitForPayToComplete()
+    series
+        do
+            if Game002BaseGameState.SpinState.First.State == "WaitingForPayToComplete" then
+                local waysSummary = Game002BaseGameWaysSummary.Ways.First
+                local delay = waysSummary.DisplayLoopEndDelay
+                while Game002BaseGameState.SpinState.First.State == "WaitingForPayToComplete" do
+                    Game002BaseGameState.DisplayState.First.State = "CancelRequested"
+                    System.WaitForSeconds(delay)
+                end
+            end
+            Game002BaseGameState.DisplayState.First.State = "Idle"            
+        end
+    end
+end
+
+function Game002BaseGameMachine:UpdateBaseGameReelsSpinState(state)    
+    Game002BaseGameReelSpinState.Reel1.First.ReelSpinState = state
+    Game002BaseGameReelSpinState.Reel2.First.ReelSpinState = state
+    Game002BaseGameReelSpinState.Reel3.First.ReelSpinState = state
+    Game002BaseGameReelSpinState.Reel4.First.ReelSpinState = state
+    Game002BaseGameReelSpinState.Reel5.First.ReelSpinState = state
+end
+
+function Game002BaseGameMachine:TryWaysPaying()
+    Game002BaseGameState.SpinState.First.State = "WaysPaying"
+end
+
+function Game002BaseGameMachine:TryFreeSpinsTriggering()
+    Game002BaseGameState.SpinState.First.State = "FreeSpinsTriggering"
+end
+
+function Game002BaseGameMachine:CurrentSpinState()
+    return Game002BaseGameState.SpinState.First.State
+end
+
+function Game002BaseGameMachine:OnWaysPayingCompleted()
+    self:TryFreeSpinsTriggering()
+end
+
+function Game002BaseGameMachine:OnSpinReelsStopped()
+    self:UpdateBaseGameReelsSpinState("Waiting")
+    self:TryWaysPaying()
+end
+
+function Game002BaseGameMachine:OnSpinButtonClicked()
+    series
+        do
+            self:WaitForPayToComplete()                        
+            self:SpinEngines()
+            self:WaitForApplyOutcomeDelay()
+            self:LoadServerOutcome()
+            self:OnOutcomeReceived()
+        end
+    end
+end
+
+function Game002BaseGameMachine:OnOutcomeReceived()
+    parallel
+        do
+            Game002BaseGameReel1:OnOutcomeReceived()
+        end
+        do
+            Game002BaseGameReel2:OnOutcomeReceived()
+        end
+        do
+            Game002BaseGameReel3:OnOutcomeReceived()
+        end
+        do
+            Game002BaseGameReel4:OnOutcomeReceived()
+        end
+        do
+            Game002BaseGameReel5:OnOutcomeReceived()
+        end
+    end
+end
+
+function Game002BaseGameMachine:OnPointerClick()
+    System.Print("Game002BaseGameMachine OnPointerClick tile id={0}", self.id)
+    System.StartCoroutine(self, "OnSpinButtonClicked")
+end
+
+function Game002BaseGameMachine:OnBecameVisible()
+	System.Print("Game002BaseGameMachine OnBecameVisible tile id={0}", self.id)
+end
+
+Game002BaseGameMachine.BaseGameStateDispatchTable = {
+    Waiting = Game002BaseGameMachine.BaseGameWaiting,
+    Spinning = Game002BaseGameMachine.BaseGameSpinning,
+    WaysPaying = Game002BaseGameMachine.BaseGameWaysPaying,
+    WaitingForPayToComplete = Game002BaseGameMachine.WaitingForPayToComplete,
+    FreeSpinsTriggering = Game002BaseGameMachine.BaseGameFreeSpinsTriggering,
+    WaitingForFreeSpinsToComplete = Game002BaseGameMachine.WaitingForFreeSpinsToComplete,
+    Completed = Game002BaseGameMachine.BaseGameCompleted,
+}
+
+return Game002BaseGameMachine:new()
