@@ -371,6 +371,8 @@ namespace Bettr.Editor
                 case "TilePropertyGameObjects":
                     var tileGameObjectProperties = new List<TilePropertyGameObject>();
                     var tileGameObjectGroupProperties = new List<TilePropertyGameObjectGroup>();
+                    var tilePropertyGameObjectsComponent = new TilePropertyGameObjectsComponent(tileGameObjectProperties, tileGameObjectGroupProperties);
+                    tilePropertyGameObjectsComponent.AddComponent(gameObject);
                     foreach (var kvPair in GameObjectsProperty)
                     {
                         InstanceGameObject.IdGameObjects.TryGetValue(kvPair.Id, out var referenceGameObject);
@@ -400,12 +402,12 @@ namespace Bettr.Editor
                             gameObjectProperties = gameObjectProperties,
                         });
                     }
-                    var tilePropertyGameObjectsComponent = new TilePropertyGameObjectsComponent(tileGameObjectProperties, tileGameObjectGroupProperties);
-                    tilePropertyGameObjectsComponent.AddComponent(gameObject);
                     break;
                 case "TilePropertyAnimators":
                     var properties = new List<TilePropertyAnimator>();
                     var groupProperties = new List<TilePropertyAnimatorGroup>();
+                    var tilePropertyAnimatorsComponent = new TilePropertyAnimatorsComponent(properties, groupProperties);
+                    tilePropertyAnimatorsComponent.AddComponent(gameObject);
                     foreach (var kvPair in AnimatorsProperty)
                     {
                         InstanceGameObject.IdGameObjects.TryGetValue(kvPair.Id, out var referenceGameObject);
@@ -443,8 +445,6 @@ namespace Bettr.Editor
                             tileAnimatorProperties = animatorProperties,
                         });
                     }
-                    var tilePropertyAnimatorsComponent = new TilePropertyAnimatorsComponent(properties, groupProperties);
-                    tilePropertyAnimatorsComponent.AddComponent(gameObject);
                     break;
             }
         }
