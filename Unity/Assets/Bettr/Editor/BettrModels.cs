@@ -24,7 +24,7 @@ namespace Bettr.Editor
     [Serializable]
     public class InstanceGameObject : IGameObject
     {
-        public static Dictionary<string, GameObject> IdGameObjects = new Dictionary<string, GameObject>();
+        public static Dictionary<string, InstanceGameObject> IdGameObjects = new Dictionary<string, InstanceGameObject>();
         
         private GameObject _go;
         public string Name { get; set; }
@@ -34,7 +34,9 @@ namespace Bettr.Editor
         public string Id
         {
             get => _Id;
-            set => _Id = value;
+            set { _Id = value;
+                IdGameObjects[_Id] = this;
+            }
         }
         
         public string PrefabName { get; set; }
@@ -186,11 +188,6 @@ namespace Bettr.Editor
                 
                 _go.SetActive(Active);
                 _go.layer = LayerMask.NameToLayer(Layer);
-                
-                if (!string.IsNullOrWhiteSpace(_Id))
-                {
-                    IdGameObjects.Add(_Id, _go);
-                }
             }
         }
     }
@@ -348,8 +345,7 @@ namespace Bettr.Editor
                 case "Canvas":
                     {
                         InstanceGameObject.IdGameObjects.TryGetValue(ReferenceId, out var referenceGameObject);
-                        // ReSharper disable once PossibleNullReferenceException
-                        var renderCamera = referenceGameObject.GetComponent<Camera>();
+                        var renderCamera = referenceGameObject?.GameObject.GetComponent<Camera>();
                         var canvasComponent = new CanvasComponent(renderCamera);
                         canvasComponent.AddComponent(gameObject);
                     }
@@ -361,8 +357,7 @@ namespace Bettr.Editor
                 case "EventTrigger":
                     {
                         InstanceGameObject.IdGameObjects.TryGetValue(ReferenceId, out var referenceGameObject);
-                        // ReSharper disable once PossibleNullReferenceException
-                        var tile = referenceGameObject.GetComponent<Tile>();
+                        var tile = referenceGameObject?.GameObject.GetComponent<Tile>();
                         var eventTriggerComponent = new EventTriggerComponent(tile, Params);
                         eventTriggerComponent.AddComponent(gameObject);
                     }
@@ -384,7 +379,7 @@ namespace Bettr.Editor
                         var tilePropertyGameObject = new TilePropertyGameObject()
                         {
                             key = kvPair.Key,
-                            value = new PropertyGameObject() {gameObject = referenceGameObject },
+                            value = new PropertyGameObject() {gameObject = referenceGameObject?.GameObject },
                         };
                         tileGameObjectProperties.Add(tilePropertyGameObject);
                     }
@@ -397,7 +392,7 @@ namespace Bettr.Editor
                             var gameObjectProperty = new TilePropertyGameObject()
                             {
                                 key = property.Key,
-                                value = new PropertyGameObject() {gameObject = referenceGameObject },
+                                value = new PropertyGameObject() {gameObject = referenceGameObject?.GameObject },
                             };
                             gameObjectProperties.Add(gameObjectProperty);
                         }
@@ -419,8 +414,7 @@ namespace Bettr.Editor
                         var tileProperty = new TilePropertyAnimator()
                         {
                             key = kvPair.Key,
-                            // ReSharper disable once PossibleNullReferenceException
-                            value = new PropertyAnimator() {animator = referenceGameObject.GetComponent<Animator>(), animationStateName = kvPair.State},
+                            value = new PropertyAnimator() {animator = referenceGameObject?.Animator, animationStateName = kvPair.State},
                         };
                         if (tileProperty.value.animator == null)
                         {
@@ -437,8 +431,7 @@ namespace Bettr.Editor
                             var tileProperty = new TilePropertyAnimator()
                             {
                                 key = property.Key,
-                                // ReSharper disable once PossibleNullReferenceException
-                                value = new PropertyAnimator() {animator = referenceGameObject.GetComponent<Animator>(), animationStateName = property.State},
+                                value = new PropertyAnimator() {animator = referenceGameObject?.Animator, animationStateName = property.State},
                             };
                             if (tileProperty.value.animator == null)
                             {
