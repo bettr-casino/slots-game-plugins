@@ -1,14 +1,26 @@
 {
   "Name": "{{backgroundName}}",
+  "Id": "{{backgroundName}}",
   "Layer": "SLOT_BACKGROUND",
   "Components": [
     {
-      "ComponentType": "AnimatorController",
-      "Filename": "{{backgroundName}}"
+        "ComponentType": "Tile",
+        "FileName": "{{backgroundName}}"
+    },
+    {
+        "ComponentType": "TilePropertyAnimators",
+        "AnimatorsProperty": [
+          {
+            "Key": "start",
+            "Id": "Pivot",
+            "State": "start"
+          }
+        ]
     }
   ],
   "Child": {
     "Name": "Pivot",
+    "Id": "Pivot",
     "Layer": "SLOT_BACKGROUND",
     "Children": [
       {
@@ -81,6 +93,12 @@
           }
         ]
       }
+    ],
+    "Components": [
+      {
+          "ComponentType": "AnimatorController",
+          "Filename": "{{backgroundName}}"
+      }          
     ]
   }
 }

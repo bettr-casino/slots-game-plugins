@@ -416,7 +416,7 @@ namespace Bettr.Editor
                         };
                         if (tileProperty.value.animator == null)
                         {
-                            throw new Exception($"Failed to find animator with id: {kvPair.Id}");
+                            Debug.LogError($"Failed to find animator with id: {kvPair.Id}");
                         }
                         properties.Add(tileProperty);
                     }
@@ -433,7 +433,7 @@ namespace Bettr.Editor
                             };
                             if (tileProperty.value.animator == null)
                             {
-                                throw new Exception($"Failed to find animator with id: {property.Id}");
+                                Debug.LogError($"Failed to find animator with id: {property.Id}");
                             }
                             animatorProperties.Add(tileProperty);
                         }
