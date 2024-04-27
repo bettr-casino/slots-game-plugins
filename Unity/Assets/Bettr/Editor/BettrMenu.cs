@@ -1088,6 +1088,9 @@ namespace Bettr.Editor
             
             Console.WriteLine(json);
             
+            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
+            InstanceGameObject.IdGameObjects.Clear();
+            
             JsonConvert.DeserializeObject<InstanceGameObject>(json);
             
             EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
