@@ -18,6 +18,7 @@ using UnityEngine.SceneManagement;
 using DirectoryInfo = System.IO.DirectoryInfo;
 
 using Scriban;
+using Object = System.Object;
 
 namespace Bettr.Editor
 {
@@ -993,12 +994,9 @@ namespace Bettr.Editor
             InstanceGameObject.IdGameObjects.Clear();
             
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
-            List<IGameObject> runtimeObjects = hierarchyInstance.Child != null ? new List<IGameObject>() {hierarchyInstance.Child} : hierarchyInstance.Children != null ? hierarchyInstance.Children.Cast<IGameObject>().ToList() : new List<IGameObject>();
-            List<IComponent> components = hierarchyInstance.Components.Cast<IComponent>().ToList();
 
             var settingsPrefab = ProcessPrefab(backgroundName, 
-                components, 
-                runtimeObjects,
+                hierarchyInstance, 
                 runtimeAssetPath);
         }
         
@@ -1190,6 +1188,26 @@ namespace Bettr.Editor
             }
 
             return false;
+        }
+        
+        private static GameObject ProcessPrefab(string prefabName, IGameObject rootGameObject, string runtimeAssetPath)
+        {
+            AssetDatabase.Refresh();
+            
+            var prefabPath = $"{runtimeAssetPath}/Prefabs/{prefabName}.prefab";
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+
+            if (prefab == null)
+            {
+                prefab = rootGameObject.GameObject;
+                PrefabUtility.SaveAsPrefabAsset(prefab, prefabPath);
+            }
+            
+            AssetDatabase.Refresh();
+            
+            prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            
+            return prefab;
         }
         
         private static GameObject ProcessPrefab(string prefabName, List<IComponent> components, List<IGameObject> gameObjects, string runtimeAssetPath)
