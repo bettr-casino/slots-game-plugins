@@ -7,6 +7,7 @@ using CrayonScript.Interpreter.Execution.VM;
 using PathCreation;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
 // ReSharper disable once CheckNamespace
@@ -308,6 +309,12 @@ namespace Bettr.Core
             {
                 Debug.LogWarning($"!activeSelf animator animationStateName={animatorProperty.animationStateName} gameObject={animatorProperty.GameObject.name} path={GetGameObjectFullPath(animatorProperty.GameObject)}");
             }
+            // verify animator state exists
+            if (!animator.HasState(0, Animator.StringToHash(animationStateName)))
+            {
+                context.SetError(new ScriptRuntimeException($"animator state \"{animationStateName}\" not found, gameObject={animatorProperty.GameObject.name} path={GetGameObjectFullPath(animatorProperty.GameObject)}"));
+                yield break;
+            }
             animator.Play(animationStateName, -1, normalizedTime);
             yield return null;
             yield return null;
@@ -422,11 +429,13 @@ namespace Bettr.Core
 
         public static string GetGameObjectFullPath(GameObject obj)
         {
-            string path = "/" + obj.name;
+            var scene = SceneManager.GetActiveScene();
+            var sceneName = scene.name;
+            string path = $"{sceneName}/{obj.name}";
             while (obj.transform.parent != null)
             {
                 obj = obj.transform.parent.gameObject;
-                path = "/" + obj.name + path;
+                path = $"{path}/{obj.name}";
             }
             return path;
         }
