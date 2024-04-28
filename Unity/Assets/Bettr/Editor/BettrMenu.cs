@@ -1240,33 +1240,6 @@ namespace Bettr.Editor
             return prefab;
         }
 
-        private static AnimatorController CreateOrLoadAnimatorController(string name, string runtimeAssetPath)
-        {
-            AssetDatabase.Refresh();
-            
-            var animatorControllerName = $"{name}_anims.controller";
-            var animatorControllerPath = $"{runtimeAssetPath}/Animators/{animatorControllerName}";
-            var animatorController = AssetDatabase.LoadAssetAtPath<AnimatorController>(animatorControllerPath);
-            if (animatorController == null)
-            {
-                Debug.Log($"Creating animator controller for {name} at {animatorControllerPath}");
-                try
-                {
-                    animatorController = AnimatorController.CreateAnimatorControllerAtPath(animatorControllerPath);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError(e);
-                }
-            }
-            
-            AssetDatabase.Refresh();
-            
-            animatorController = AssetDatabase.LoadAssetAtPath<AnimatorController>(animatorControllerPath);
-
-            return animatorController;
-        }
-        
         private static Material CreateOrLoadMaterial(string materialName, string shaderName, string runtimeAssetPath)
         {
             AssetDatabase.Refresh();

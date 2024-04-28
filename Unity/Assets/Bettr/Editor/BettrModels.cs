@@ -940,7 +940,7 @@ namespace Bettr.Editor
                     sourcePath += extension;
                     destPath += extension;
                 }
-                Utils.ImportTexture2D(sourcePath, destPath);
+                BettrMaterialGenerator.ImportTexture2D(sourcePath, destPath);
                 AssetDatabase.Refresh();
                 var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(destPath);
                 image.sprite = sprite;
