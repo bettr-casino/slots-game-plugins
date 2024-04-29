@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using Bettr.Editor.generators;
 using CrayonScript.Code;
 using TMPro;
 using UnityEditor;
 using UnityEditor.Animations;
+using UnityEditor.Events;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -270,6 +269,8 @@ namespace Bettr.Editor
         
         public string ReferenceId { get; set; }
         
+        public List<AnimationClip> AnimationClips { get; set; }
+        
         public List<GameObjectProperty> GameObjectsProperty { get; set; }
         
         public List<GameObjectGroupProperty> GameObjectGroupsProperty { get; set; }
@@ -288,6 +289,7 @@ namespace Bettr.Editor
             GameObjectGroupsProperty = new List<GameObjectGroupProperty>();
             AnimatorsProperty = new List<AnimatorProperty>();
             AnimatorsGroupProperty = new List<AnimatorGroupProperty>();
+            AnimationClips = new List<AnimationClip>();
         }
         
         public void AddComponent(GameObject gameObject)
@@ -553,11 +555,14 @@ namespace Bettr.Editor
         private string _runtimeAssetPath;
         
         private string _fileName;
+
+        private List<AnimationClip> _animationClips;
         
-        public AnimatorComponent(string fileName, string runtimeAssetPath)
+        public AnimatorComponent(string fileName, List<AnimationClip> animationClips, string runtimeAssetPath)
         {
             _fileName = fileName;
             _runtimeAssetPath = runtimeAssetPath;
+            _animationClips = animationClips;
         }
 
         public AnimatorComponent(AnimatorController animatorController)
@@ -569,6 +574,7 @@ namespace Bettr.Editor
         {
             if (_animatorController == null)
             {
+                BuildAnimationClips();
                 BuildAnimatorController(gameObject);
             }
             
@@ -580,10 +586,30 @@ namespace Bettr.Editor
         {
             var animatorControllerName = $"{_fileName}_anims.controller";
             var animatorControllerPath = $"{_runtimeAssetPath}/Animators/{animatorControllerName}";
-            AnimatorController.CreateAnimatorControllerAtPath(animatorControllerPath);
+            var animatorController = AnimatorController.CreateAnimatorControllerAtPath(animatorControllerPath);
+            var stateMachine = animatorController.layers[0].stateMachine;
+            foreach (var animationClip in _animationClips)
+            {
+                var state = stateMachine.AddState(animationClip.name);
+                state.motion = animationClip;
+            }
+            AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             var runtimeAnimatorController = AssetDatabase.LoadAssetAtPath<AnimatorController>(animatorControllerPath);
             _animatorController = runtimeAnimatorController;
+        }
+
+        private void BuildAnimationClips()
+        {
+            for (int i = 0; i < _animationClips.Count; i++)
+            {
+                var animationClip = _animationClips[i];
+                var animationClipName = $"{_fileName}_anim_{animationClip.name}.anim";
+                var animationClipPath = $"{_runtimeAssetPath}/Animators/{animationClipName}";
+                AssetDatabase.CreateAsset(animationClip, animationClipPath);
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+            }
         }
     }
 
@@ -1048,10 +1074,10 @@ namespace Bettr.Editor
     {
         public void AddComponent(GameObject gameObject)
         {
-            var eventSystem = gameObject.AddComponent<UnityEngine.EventSystems.EventSystem>();
+            var eventSystem = gameObject.AddComponent<EventSystem>();
             eventSystem.sendNavigationEvents = true;
             eventSystem.pixelDragThreshold = 10;
-            var standaloneInputModule = gameObject.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+            var standaloneInputModule = gameObject.AddComponent<StandaloneInputModule>();
             standaloneInputModule.horizontalAxis = "Horizontal";
             standaloneInputModule.verticalAxis = "Vertical";
             standaloneInputModule.submitButton = "Submit";
@@ -1079,7 +1105,7 @@ namespace Bettr.Editor
             EventTrigger eventTrigger =gameObject.AddComponent<EventTrigger>();
             EventTrigger.Entry entry = new EventTrigger.Entry { eventID = EventTriggerType.PointerClick };
             var triggerEvent = entry.callback;
-            UnityEditor.Events.UnityEventTools.AddVoidPersistentListener(triggerEvent, _tile.OnPointerClick);
+            UnityEventTools.AddVoidPersistentListener(triggerEvent, _tile.OnPointerClick);
             eventTrigger.triggers.Add(entry);
         }
     }
