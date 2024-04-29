@@ -574,7 +574,6 @@ namespace Bettr.Editor
         {
             if (_animatorController == null)
             {
-                BuildAnimationClips();
                 BuildAnimatorController(gameObject);
             }
             
@@ -588,28 +587,27 @@ namespace Bettr.Editor
             var animatorControllerPath = $"{_runtimeAssetPath}/Animators/{animatorControllerName}";
             var animatorController = AnimatorController.CreateAnimatorControllerAtPath(animatorControllerPath);
             var stateMachine = animatorController.layers[0].stateMachine;
-            foreach (var animationClip in _animationClips)
-            {
-                var state = stateMachine.AddState(animationClip.name);
-                state.motion = animationClip;
-            }
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            var runtimeAnimatorController = AssetDatabase.LoadAssetAtPath<AnimatorController>(animatorControllerPath);
-            _animatorController = runtimeAnimatorController;
-        }
-
-        private void BuildAnimationClips()
-        {
+            
             for (int i = 0; i < _animationClips.Count; i++)
             {
                 var animationClip = _animationClips[i];
+                var animationStateName = animationClip.name;
                 var animationClipName = $"{_fileName}_anim_{animationClip.name}.anim";
                 var animationClipPath = $"{_runtimeAssetPath}/Animators/{animationClipName}";
                 AssetDatabase.CreateAsset(animationClip, animationClipPath);
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
+                var state = stateMachine.AddState(animationStateName);
+                state.motion = animationClip;
             }
+            
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            
+            var runtimeAnimatorController = AssetDatabase.LoadAssetAtPath<AnimatorController>(animatorControllerPath);
+            _animatorController = runtimeAnimatorController;
         }
     }
 
