@@ -297,7 +297,7 @@ namespace Bettr.Editor
             switch (ComponentType)
             {
                 case "AnimatorController":
-                    var animatorComponent = new AnimatorComponent(Filename, RuntimeAssetPath);
+                    var animatorComponent = new AnimatorComponent(Filename, AnimationClips, RuntimeAssetPath);
                     animatorComponent.AddComponent(gameObject);
                     break;
                 case "TextMeshPro":
