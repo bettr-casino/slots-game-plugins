@@ -742,7 +742,7 @@ namespace Bettr.Editor
             var camerasGameObject = new InstanceGameObject(new GameObject($"Cameras"));
             var camerasPivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
             camerasPivotGameObject.SetParent(camerasGameObject.GameObject);
-            ProcessUICamera($"{machineName}BaseGameUICamera", runtimeAssetPath);
+            ProcessUICamera($"{machineName}BaseGameUICamera", false, runtimeAssetPath);
             var cameraPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameUICamera.prefab");
             var cameraPrefabGameObject = new PrefabGameObject(cameraPrefab, $"{machineName}BaseGameUICamera");
             cameraPrefabGameObject.SetParent(camerasPivotGameObject.GameObject);
@@ -957,11 +957,11 @@ namespace Bettr.Editor
             return symbolPrefab;
         }
         
-        private static void ProcessUICamera(string cameraName, string runtimeAssetPath)
+        private static void ProcessUICamera(string cameraName, bool includeAudioListener, string runtimeAssetPath)
         {
             ProcessPrefab(cameraName, new List<IComponent>
                 {
-                    new UICameraComponent(),
+                    new UICameraComponent(includeAudioListener),
                 }, 
                 new List<IGameObject>(),
                 runtimeAssetPath);

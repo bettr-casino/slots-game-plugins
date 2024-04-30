@@ -271,6 +271,8 @@ namespace Bettr.Editor
         
         public string ReferenceId { get; set; }
         
+        public bool IncludeAudioListener { get; set; }
+        
         public List<AnimationState> AnimationStates { get; set; }
         
         public List<AnimationTransition> AnimatorTransitions { get; set; }
@@ -288,6 +290,7 @@ namespace Bettr.Editor
         public InstanceComponent()
         {
             FontAsset = "Roboto-Bold SDF";
+            IncludeAudioListener = true;
             Params = Array.Empty<string>();
             GameObjectsProperty = new List<GameObjectProperty>();
             GameObjectGroupsProperty = new List<GameObjectGroupProperty>();
@@ -322,7 +325,7 @@ namespace Bettr.Editor
                     rectTransformComponent.AddComponent(gameObject);
                     break;
                 case "UICamera":
-                    var uiCameraComponent = new UICameraComponent();
+                    var uiCameraComponent = new UICameraComponent(IncludeAudioListener);
                     uiCameraComponent.AddComponent(gameObject);
                     break;
                 case "BackgroundCamera":
