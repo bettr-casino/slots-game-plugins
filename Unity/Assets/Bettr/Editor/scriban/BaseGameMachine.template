@@ -1,0 +1,103 @@
+{
+  "Name": "{{baseGameMachine}}",
+  "Id": "{{baseGameMachine}}",
+  "Children": [
+    {
+        "Name": "Cameras"
+        "Child": {
+            "Name": "Pivot",
+            "Child": {
+                "Name": "UI Camera",
+                "Id": "uiCamera",
+                "Layer": "UI",
+                "Components": [
+                    {
+                     "ComponentType": "UICamera",
+                     "IncludeAudioListener": false
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "Name": "Pivot",
+        "Children": [
+            {
+                "Name": "Reels",
+                "Child": {
+                    "Name": "Pivot",
+                    "Children": [
+                        {
+                            "Name": "Reel1",
+                            "IsPrefab": true,
+                            "PrefabName": "{{machineName}}BaseGameReel1",
+                            "Position": {
+                                "X": -5,
+                                "Y": 0,
+                                "Z": 0
+                            }
+                        },
+                        {
+                            "Name": "Reel2"
+                            "IsPrefab": true,
+                            "PrefabName": "{{machineName}}BaseGameReel2",
+                            "Position": {
+                                "X": -2.5,
+                                "Y": 0,
+                                "Z": 0
+                            }
+                        },
+                        {
+                             "Name": "Reel3"
+                             "IsPrefab": true,
+                             "PrefabName": "{{machineName}}BaseGameReel3",
+                             "Position": {
+                                 "X": 2.5,
+                                 "Y": 0,
+                                 "Z": 0
+                             }
+                        },
+                        {
+                            "Name": "Reel4"
+                            "IsPrefab": true,
+                            "PrefabName": "{{machineName}}BaseGameReel4",
+                            "Position": {
+                                "X": 2.5,
+                                "Y": 0,
+                                "Z": 0
+                            }
+                        },
+                        {
+                            "Name": "Reel5"
+                            "IsPrefab": true,
+                            "PrefabName": "{{machineName}}BaseGameReel5",
+                            "Position": {
+                                "X": 5,
+                                "Y": 0,
+                                "Z": 0
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "Name": "Reels Background"
+            },
+            {
+                "Name": "Reels Scrim"
+            },
+            {
+                "Name": "WinSymbols",
+                "Position": {
+                    "X": 1.95,
+                    "Y": -2.25,
+                    "Z": 0
+                }
+            },
+            {
+                "Name": "Settings"
+            }
+        ]
+    }
+  ]
+}
