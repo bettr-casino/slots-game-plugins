@@ -841,7 +841,7 @@ namespace Bettr.Editor
             {
                 var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
                 var symbolInstance = (InstanceGameObject) ProcessBaseGameSymbolGroup(symbolIndex, runtimeAssetPath, machineName);
-                symbolInstance.GameObject.transform.position = new Vector3(0, yPosition, 0);
+                symbolInstance.Position = new Vector3(0, yPosition, 0);
                 gameObjectInstances.Add(symbolInstance);
             }
             
@@ -855,7 +855,7 @@ namespace Bettr.Editor
                 {
                     // add ways reel processing here
                     var waysInstance = (InstanceGameObject) ProcessBaseGameWaysWin(symbolIndex, runtimeAssetPath, machineName);
-                    waysInstance.GameObject.transform.position = new Vector3(0, yPosition, 0);
+                    waysInstance.Position = new Vector3(0, yPosition, 0);
                     waysInstance.GameObject.SetActive(false);
                     gameObjectInstances.Add(waysInstance);
                 } 
@@ -865,7 +865,7 @@ namespace Bettr.Editor
                 }
                 
                 var symbolInstance = (InstanceGameObject) ProcessBaseGameSymbolGroup(symbolIndex, runtimeAssetPath, machineName);
-                symbolInstance.GameObject.transform.position = new Vector3(0, yPosition, 0);
+                symbolInstance.Position = new Vector3(0, yPosition, 0);
                 gameObjectInstances.Add(symbolInstance);
             }
 
@@ -875,7 +875,7 @@ namespace Bettr.Editor
             {
                 var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
                 var symbolInstance = (InstanceGameObject) ProcessBaseGameSymbolGroup(symbolIndex, runtimeAssetPath, machineName);
-                symbolInstance.GameObject.transform.position = new Vector3(0, yPosition, 0);
+                symbolInstance.Position = new Vector3(0, yPosition, 0);
                 gameObjectInstances.Add(symbolInstance);
             }
 
