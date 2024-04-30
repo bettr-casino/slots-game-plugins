@@ -729,6 +729,28 @@ namespace Bettr.Editor
         
         private static void ProcessBaseGameMachine(string machineName, string machineVariant, string runtimeAssetPath)
         {
+            string baseGameMachine = $"{machineName}BaseGameMachine";
+            
+            string scribanTemplateText = ReadScribanTemplate("BaseGameMachine");
+
+            var scribanTemplate = Template.Parse(scribanTemplateText);
+            if (scribanTemplate.HasErrors)
+            {
+                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages}");
+                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages}");
+            }
+            
+            var model = new Dictionary<string, object>
+            {
+                { "machineName", machineName },
+                { "machineVariant", machineVariant },
+                { "baseGameMachine", baseGameMachine },
+            };
+            
+            var json = scribanTemplate.Render(model);
+            Debug.Log($"BaseGameMachine: {json}");
+            
+            
             var scriptName = $"{machineName}BaseGameReel";   
             var scriptTextAsset = BettrScriptGenerator.CreateOrLoadScript(scriptName, runtimeAssetPath);
             

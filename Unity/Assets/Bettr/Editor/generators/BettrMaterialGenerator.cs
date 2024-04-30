@@ -34,7 +34,7 @@ namespace Bettr.Editor.generators
             
             material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
 
-            if (string.IsNullOrEmpty(hexColor))
+            if (!string.IsNullOrEmpty(textureName))
             {
                 string sourcePath = Path.Combine("Assets", "Bettr", "Editor", "textures", textureName);
                 var destPath = $"{runtimeAssetPath}/Textures/{textureName}";
@@ -54,7 +54,7 @@ namespace Bettr.Editor.generators
                 }
                 material.SetTexture((int) MainTex, texture);
             }
-            else
+            else if (!string.IsNullOrEmpty(hexColor))
             {
                 Color color;
                 if (ColorUtility.TryParseHtmlString(hexColor, out color))
