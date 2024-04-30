@@ -731,25 +731,7 @@ namespace Bettr.Editor
         {
             string baseGameMachine = $"{machineName}BaseGameMachine";
             
-            string scribanTemplateText = ReadScribanTemplate("BaseGameMachine");
-
-            var scribanTemplate = Template.Parse(scribanTemplateText);
-            if (scribanTemplate.HasErrors)
-            {
-                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages}");
-                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages}");
-            }
-            
-            var model = new Dictionary<string, object>
-            {
-                { "machineName", machineName },
-                { "machineVariant", machineVariant },
-                { "baseGameMachine", baseGameMachine },
-            };
-            
-            var json = scribanTemplate.Render(model);
-            Debug.Log($"BaseGameMachine: {json}");
-            
+            var baseGameSymbolTable = GetTable($"{machineName}BaseGameSymbolTable");
             
             var scriptName = $"{machineName}BaseGameReel";   
             var scriptTextAsset = BettrScriptGenerator.CreateOrLoadScript(scriptName, runtimeAssetPath);
@@ -830,7 +812,6 @@ namespace Bettr.Editor
             // ReSharper disable once PossibleNullReferenceException
             var winSymbolsPivotGameObject = (winSymbolsGameObject as InstanceGameObject).Child;
             
-            var baseGameSymbolTable = GetTable($"{machineName}BaseGameSymbolTable");
             foreach (var pair in baseGameSymbolTable.Pairs)
             {
                 var symbolKey = pair.Key.String;
@@ -856,8 +837,49 @@ namespace Bettr.Editor
             var settingsPrefabGameObject = new PrefabGameObject(settingsPrefab, $"Settings");
             settingsPrefabGameObject.SetParent(settingsPivotGameObject.GameObject);
             
+            // OLD:
+            
             ProcessPrefab($"{machineName}BaseGameMachine", new List<IComponent>(), 
                 gameObjectInstances,
+                runtimeAssetPath);
+            
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            
+            // NEW:
+            
+            string scribanTemplateText = ReadScribanTemplate("BaseGameMachine");
+            
+            var scribanTemplate = Template.Parse(scribanTemplateText);
+            if (scribanTemplate.HasErrors)
+            {
+                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages}");
+                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages}");
+            }
+            
+            var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
+            
+            var model = new Dictionary<string, object>
+            {
+                { "machineName", machineName },
+                { "machineVariant", machineVariant },
+                { "baseGameMachine", baseGameMachine },
+                { "symbolKeys", symbolKeys}
+            };
+            
+            var json = scribanTemplate.Render(model);
+            Debug.Log($"BaseGameMachine: {json}");
+            
+            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
+            InstanceGameObject.IdGameObjects.Clear();
+            
+            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
+            List<IGameObject> runtimeObjects = hierarchyInstance.Child != null ? new List<IGameObject>() {hierarchyInstance.Child} : hierarchyInstance.Children != null ? hierarchyInstance.Children.Cast<IGameObject>().ToList() : new List<IGameObject>();
+            List<IComponent> components = hierarchyInstance.Components != null ? hierarchyInstance.Components.Cast<IComponent>().ToList() : new List<IComponent>();
+            
+            var baseGameMachinePrefab2 = ProcessPrefab($"{baseGameMachine}2", 
+                components, 
+                runtimeObjects,
                 runtimeAssetPath);
         }
 
