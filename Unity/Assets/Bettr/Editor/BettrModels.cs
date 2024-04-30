@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Bettr.Editor.generators;
 using CrayonScript.Code;
 using TMPro;
@@ -9,6 +10,7 @@ using UnityEditor.Animations;
 using UnityEditor.Events;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace Bettr.Editor
@@ -247,7 +249,7 @@ namespace Bettr.Editor
     {
         public void AddComponent(GameObject gameObject);
     }
-
+    
     [Serializable]
     public class InstanceComponent : IComponent
     {
@@ -269,7 +271,9 @@ namespace Bettr.Editor
         
         public string ReferenceId { get; set; }
         
-        public List<AnimationClip> AnimationClips { get; set; }
+        public List<AnimationState> AnimationStates { get; set; }
+        
+        public List<AnimationTransition> AnimatorTransitions { get; set; }
         
         public List<GameObjectProperty> GameObjectsProperty { get; set; }
         
@@ -289,7 +293,8 @@ namespace Bettr.Editor
             GameObjectGroupsProperty = new List<GameObjectGroupProperty>();
             AnimatorsProperty = new List<AnimatorProperty>();
             AnimatorsGroupProperty = new List<AnimatorGroupProperty>();
-            AnimationClips = new List<AnimationClip>();
+            AnimationStates = new List<AnimationState>();
+            AnimatorTransitions = new List<AnimationTransition>();
         }
         
         public void AddComponent(GameObject gameObject)
@@ -297,7 +302,7 @@ namespace Bettr.Editor
             switch (ComponentType)
             {
                 case "AnimatorController":
-                    var animatorComponent = new AnimatorComponent(Filename, AnimationClips, RuntimeAssetPath);
+                    var animatorComponent = new AnimatorComponent(Filename, AnimationStates, AnimatorTransitions, RuntimeAssetPath);
                     animatorComponent.AddComponent(gameObject);
                     break;
                 case "TextMeshPro":
@@ -548,6 +553,41 @@ namespace Bettr.Editor
     }
     
     [Serializable]
+    public class AnimationState
+    {
+        // ReSharper disable once InconsistentNaming
+        public string Name;
+        
+        // ReSharper disable once InconsistentNaming
+        public bool IsLoop;
+        
+        // ReSharper disable once InconsistentNaming
+        public bool IsDefault;
+        
+        // ReSharper disable once InconsistentNaming
+        public int LoopTime;
+        
+        // ReSharper disable once InconsistentNaming
+        public int Speed;
+    }
+
+    [Serializable]
+    public class AnimationTransition
+    {
+        // ReSharper disable once InconsistentNaming
+        public string TransitionFrom;
+        
+        // ReSharper disable once InconsistentNaming
+        public string TransitionTo;
+        
+        // ReSharper disable once InconsistentNaming
+        public int TransitionDuration;
+        
+        // ReSharper disable once InconsistentNaming
+        public int TransitionType;
+    }
+    
+    [Serializable]
     public class AnimatorComponent : IComponent
     {
         private AnimatorController _animatorController;
@@ -556,13 +596,16 @@ namespace Bettr.Editor
         
         private string _fileName;
 
-        private List<AnimationClip> _animationClips;
+        private List<AnimationState> _animationStates;
         
-        public AnimatorComponent(string fileName, List<AnimationClip> animationClips, string runtimeAssetPath)
+        private List<AnimationTransition> _animationTransitions;
+        
+        public AnimatorComponent(string fileName, List<AnimationState> animationStates, List<AnimationTransition> animationTransitions, string runtimeAssetPath)
         {
             _fileName = fileName;
             _runtimeAssetPath = runtimeAssetPath;
-            _animationClips = animationClips;
+            _animationStates = animationStates;
+            _animationTransitions = animationTransitions;
         }
 
         public AnimatorComponent(AnimatorController animatorController)
@@ -590,22 +633,59 @@ namespace Bettr.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             
-            for (int i = 0; i < _animationClips.Count; i++)
+            foreach (var animationState in _animationStates)
             {
-                var animationClip = _animationClips[i];
+                var animationClip = new AnimationClip
+                {
+                    name = animationState.Name,
+                    wrapMode = animationState.IsLoop ? WrapMode.Loop : WrapMode.Once,
+                    frameRate = animationState.Speed
+                };
                 var animationStateName = animationClip.name;
-                var animationClipName = $"{_fileName}_anim_{animationClip.name}.anim";
+                var state = stateMachine.AddState(animationStateName);
+                state.motion = animationClip;
+                if (animationClip.wrapMode == WrapMode.Loop)
+                {
+                    SerializedObject serializedClip = new SerializedObject(animationClip);
+                    var properties = serializedClip.GetIterator();
+                    while (properties.NextVisible(true))
+                    {
+                        if (properties.name == "m_AnimationClipSettings")
+                        {
+                            properties.FindPropertyRelative("m_LoopTime").boolValue = true;
+                            serializedClip.ApplyModifiedProperties();
+                        }
+                    }
+                }
+                if (stateMachine.defaultState == null && animationState.IsDefault)
+                {
+                    stateMachine.defaultState = state;
+                }
+                var animationClipName = $"{_fileName}_anim_{animationStateName}.anim";
                 var animationClipPath = $"{_runtimeAssetPath}/Animators/{animationClipName}";
                 AssetDatabase.CreateAsset(animationClip, animationClipPath);
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
-                var state = stateMachine.AddState(animationStateName);
-                state.motion = animationClip;
             }
             
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+
+            foreach (var animationStateTransition in _animationTransitions)
+            {
+                var stateTransition = animationStateTransition;
+                var transitionFrom = stateMachine.states.FirstOrDefault(s => s.state.name == stateTransition.TransitionFrom);
+                var transitionTo = stateMachine.states.FirstOrDefault(s => s.state.name == animationStateTransition.TransitionTo);
+                var transition = transitionFrom.state.AddTransition(transitionTo.state);
+                if (animationStateTransition.TransitionDuration > 0)
+                {
+                    transition.duration = animationStateTransition.TransitionDuration;
+                }
+            }
             
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
             var runtimeAnimatorController = AssetDatabase.LoadAssetAtPath<AnimatorController>(animatorControllerPath);
             _animatorController = runtimeAnimatorController;
         }
