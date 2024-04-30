@@ -630,9 +630,13 @@ namespace Bettr.Editor
             TileController.StaticInit();
             DynValue dynValue = TileController.LuaScript.LoadString(machineModelScript, codeFriendlyName: machineModelName);
             TileController.LuaScript.Call(dynValue);
-
+            
             ProcessScripts(machineName, machineVariant, runtimeAssetPath);
+            ProcessBaseGameSettings(machineName, runtimeAssetPath);
+            ProcessBaseGameBackground(machineName, machineVariant, runtimeAssetPath);
             ProcessBaseGameSymbols(machineName, machineVariant, runtimeAssetPath);
+            ProcessBaseGameReels(machineName, runtimeAssetPath);
+            
             ProcessBaseGameMachine(machineName, machineVariant, runtimeAssetPath);
             ProcessScene(machineName, machineVariant, runtimeAssetPath);
         }
@@ -734,119 +738,10 @@ namespace Bettr.Editor
             var baseGameSymbolTable = GetTable($"{machineName}BaseGameSymbolTable");
             
             var scriptName = $"{machineName}BaseGameReel";   
-            var scriptTextAsset = BettrScriptGenerator.CreateOrLoadScript(scriptName, runtimeAssetPath);
-            
-            var baseGameReelState = GetTable($"{machineName}BaseGameReelState");
-            
-            var gameObjectInstances = new List<IGameObject>();
-            
-            //
-            // Cameras
-            //
-            var camerasGameObject = new InstanceGameObject(new GameObject($"Cameras"));
-            var camerasPivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
-            camerasPivotGameObject.SetParent(camerasGameObject.GameObject);
-            ProcessUICamera($"{machineName}BaseGameUICamera", false, runtimeAssetPath);
-            var cameraPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameUICamera.prefab");
-            var cameraPrefabGameObject = new PrefabGameObject(cameraPrefab, $"{machineName}BaseGameUICamera");
-            cameraPrefabGameObject.SetParent(camerasPivotGameObject.GameObject);
-            
-            gameObjectInstances.Add(camerasGameObject);
-            
-            var machinePivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
-            gameObjectInstances.Add(machinePivotGameObject);
-            
-            //
-            // Reels
-            //
-            var reelsGameObject = new InstanceGameObject(new GameObject($"Reels"));
-            reelsGameObject.SetParent(machinePivotGameObject.GameObject);
-            var reelsPivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
-            reelsPivotGameObject.SetParent(reelsGameObject.GameObject);
-            
-            int reelCount = 0;
-            foreach (var pair in baseGameReelState.Pairs)
-            {
-                reelCount++;
-                ProcessBaseGameReel(machineName, machineVariant, reelCount, scriptTextAsset, runtimeAssetPath);
-                // load the reel prefab
-                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameReel{reelCount}.prefab");
-                var prefabGameObject = new PrefabGameObject(prefab, $"Reel{reelCount}");
-                prefabGameObject.SetParent(reelsPivotGameObject.GameObject);
-            }
-            
-            //
-            // Background
-            //
-            var backgroundGameObject = new InstanceGameObject(new GameObject($"Reels Background"));
-            backgroundGameObject.SetParent(machinePivotGameObject.GameObject);
-            var backgroundPivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
-            backgroundPivotGameObject.SetParent(backgroundGameObject.GameObject);
-            
-            var backgroundScriptName = $"{machineName}BaseGameBackground";   
-            var backgroundScriptTextAsset = BettrScriptGenerator.CreateOrLoadScript(backgroundScriptName, runtimeAssetPath);
-            ProcessBaseGameBackground(machineName, machineVariant, backgroundScriptTextAsset, runtimeAssetPath);
-            
-            var backgroundPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameBackground.prefab");
-            var backgroundPrefabGameObject = new PrefabGameObject(backgroundPrefab, $"Reels Background");
-            backgroundPrefabGameObject.SetParent(backgroundPivotGameObject.GameObject);
-            
-            //
-            // Scrim
-            //
-            var reelsScrimGameObject = new InstanceGameObject(new GameObject($"Reels Scrim"));
-            reelsScrimGameObject.SetParent(machinePivotGameObject.GameObject);
-            var reelsScrimPivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
-            reelsScrimPivotGameObject.SetParent(reelsScrimGameObject.GameObject);
-            var reelsScrimQuadInstance = new InstanceGameObject(GameObject.CreatePrimitive(PrimitiveType.Quad));
-            reelsScrimQuadInstance.GameObject.SetActive(false);
-            reelsScrimQuadInstance.SetParent(reelsScrimPivotGameObject.GameObject);
-            
-            //
-            // Win Symbols
-            //
-
-            var winSymbolsGameObject = ProcessWinSymbols(runtimeAssetPath);
-            winSymbolsGameObject.SetParent(machinePivotGameObject.GameObject);
-
-            // ReSharper disable once PossibleNullReferenceException
-            var winSymbolsPivotGameObject = (winSymbolsGameObject as InstanceGameObject).Child;
-            
-            foreach (var pair in baseGameSymbolTable.Pairs)
-            {
-                var symbolKey = pair.Key.String;
-                var symbolPrefabName = $"{machineName}BaseGameSymbol{symbolKey}";   
-                var winSymbolGameObject = ProcessWinSymbol( symbolKey, symbolPrefabName, runtimeAssetPath);
-                winSymbolGameObject.GameObject.SetActive(false);
-                winSymbolGameObject.SetParent(winSymbolsPivotGameObject.GameObject);
-            }
-            
-            //
-            // Settings Prefab
-            //
-            var settingsGameObject = new InstanceGameObject(new GameObject($"Settings"));
-            settingsGameObject.GameObject.SetActive(false);
-            settingsGameObject.SetParent(machinePivotGameObject.GameObject);
-            var settingsPivotGameObject = new InstanceGameObject(new GameObject($"Pivot"));
-            settingsPivotGameObject.SetParent(settingsGameObject.GameObject);
-            
-            var settingsName = $"{machineName}BaseGameSettings";   
-            ProcessSettings(settingsName, runtimeAssetPath);
-            
-            var settingsPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameSettings.prefab");
-            var settingsPrefabGameObject = new PrefabGameObject(settingsPrefab, $"Settings");
-            settingsPrefabGameObject.SetParent(settingsPivotGameObject.GameObject);
-            
-            // OLD:
-            
-            ProcessPrefab($"{machineName}BaseGameMachine", new List<IComponent>(), 
-                gameObjectInstances,
-                runtimeAssetPath);
+            BettrScriptGenerator.CreateOrLoadScript(scriptName, runtimeAssetPath);
             
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            
-            // NEW:
             
             string scribanTemplateText = ReadScribanTemplate("BaseGameMachine");
             
@@ -877,7 +772,7 @@ namespace Bettr.Editor
             List<IGameObject> runtimeObjects = hierarchyInstance.Child != null ? new List<IGameObject>() {hierarchyInstance.Child} : hierarchyInstance.Children != null ? hierarchyInstance.Children.Cast<IGameObject>().ToList() : new List<IGameObject>();
             List<IComponent> components = hierarchyInstance.Components != null ? hierarchyInstance.Components.Cast<IComponent>().ToList() : new List<IComponent>();
             
-            var baseGameMachinePrefab2 = ProcessPrefab($"{baseGameMachine}2", 
+            var baseGameMachinePrefab = ProcessPrefab($"{baseGameMachine}", 
                 components, 
                 runtimeObjects,
                 runtimeAssetPath);
@@ -910,12 +805,26 @@ namespace Bettr.Editor
             return waysInstance;
         }
 
-        private static void ProcessBaseGameReel(string machineName, string machineVariant, int reelIndex, TextAsset scriptTextAsset, string runtimeAssetPath)
+        private static void ProcessBaseGameReels(string machineName, string runtimeAssetPath)
+        {
+            var baseGameReelState = GetTable($"{machineName}BaseGameReelState");
+            var reelCount = 0;
+            foreach (var pair in baseGameReelState.Pairs)
+            {
+                reelCount++;
+                ProcessBaseGameReel(machineName, reelCount, runtimeAssetPath);
+            }
+        }
+
+        private static void ProcessBaseGameReel(string machineName, int reelIndex, string runtimeAssetPath)
         {
             // refresh the asset database
             AssetDatabase.Refresh();
             
+            var scriptName = $"{machineName}BaseGameReel";
             var reelName = $"{machineName}BaseGameReel{reelIndex}";
+            
+            TextAsset scriptTextAsset = BettrScriptGenerator.CreateOrLoadScript(scriptName, runtimeAssetPath);
             
             var reelStates = GetTable($"{machineName}BaseGameReelState");
             var topSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "TopSymbolCount");
@@ -1011,9 +920,12 @@ namespace Bettr.Editor
                 runtimeAssetPath);
         }
         
-        private static void ProcessBaseGameBackground(string machineName, string machineVariant, TextAsset scriptTextAsset, string runtimeAssetPath)
+        private static void ProcessBaseGameBackground(string machineName, string machineVariant, string runtimeAssetPath)
         {
             string backgroundName = $"{machineName}BaseGameBackground";
+            
+            var backgroundScriptName = $"{machineName}BaseGameBackground";   
+            BettrScriptGenerator.CreateOrLoadScript(backgroundScriptName, runtimeAssetPath);
             
             string scribanTemplateText = ReadScribanTemplate("BaseGameBackground");
 
@@ -1169,8 +1081,10 @@ namespace Bettr.Editor
             return File.ReadAllText(path);
         }
         
-        private static void ProcessSettings(string settingsName, string runtimeAssetPath)
+        private static void ProcessBaseGameSettings(string machineName, string runtimeAssetPath)
         {
+            var settingsName = $"{machineName}BaseGameSettings";   
+            
             SimpleStringInterpolator interpolator = new SimpleStringInterpolator();
             interpolator.SetVariable("settingsName", settingsName);
             
