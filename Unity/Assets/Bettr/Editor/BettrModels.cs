@@ -39,6 +39,8 @@ namespace Bettr.Editor
             }
         }
         
+        public List<PrefabId> PrefabIds { get; set; }
+        
         public string PrefabName { get; set; }
         
         public bool IsPrefab { get; set; }
@@ -166,6 +168,14 @@ namespace Bettr.Editor
                     var prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{InstanceComponent.RuntimeAssetPath}/Prefabs/{PrefabName}.prefab");
                     var prefabGameObject = new PrefabGameObject(prefab, Name);
                     _go = prefabGameObject.GameObject;
+                    if (PrefabIds != null)
+                    {
+                        foreach (var prefabId in PrefabIds)
+                        {
+                            var referencedGameObject = prefabGameObject.FindReferencedId(prefabId.Id, prefabId.Index);
+                            InstanceGameObject.IdGameObjects[prefabId.Id] = new InstanceGameObject(referencedGameObject);
+                        }
+                    }
                 }
                 else if (IsPrimitive)
                 {
@@ -190,6 +200,15 @@ namespace Bettr.Editor
                 _go.layer = LayerMask.NameToLayer(Layer);
             }
         }
+    }
+
+    [Serializable]    
+    public struct PrefabId
+    {
+        // ReSharper disable once InconsistentNaming
+        public string Id;
+        // ReSharper disable once InconsistentNaming
+        public int Index;
     }
 
     public class PrefabGameObject : IGameObject
@@ -218,6 +237,37 @@ namespace Bettr.Editor
         {
             SetParent(parentGo.GameObject);
         }
+
+        public GameObject FindReferencedId(string id, int index)
+        {
+            var currentIndex = 0;
+            return FindByIdDepthFirst(_go.transform, id, ref index, ref currentIndex);
+        }
+        
+        private static GameObject FindByIdDepthFirst(Transform current, string id, ref int targetIndex, ref int currentIndex)
+        {
+            var identifier = current.gameObject;
+            if (identifier != null && identifier.name == id)
+            {
+                if (currentIndex == targetIndex)
+                {
+                    return current.gameObject;
+                }
+                currentIndex++;  // Only increment if the ID matches
+            }
+
+            foreach (Transform child in current)
+            {
+                var found = FindByIdDepthFirst(child, id, ref targetIndex, ref currentIndex);
+                if (found != null)
+                {
+                    return found;
+                }
+            }
+
+            return null;
+        }
+        
     }
     
     public class PrimitiveGameObject : IGameObject
@@ -631,8 +681,8 @@ namespace Bettr.Editor
         public void AddComponent(GameObject gameObject)
         {
             var component = gameObject.AddComponent<TilePropertyTextMeshPros>();
-            component.tileTextMeshProProperties = new List<TilePropertyTextMeshPro>();
-            component.tileTextMeshProGroupProperties = new List<TilePropertyTextMeshProGroup>();
+            component.tileTextMeshProProperties = _tileTextMeshProProperties;
+            component.tileTextMeshProGroupProperties = _tileTextMeshProGroupProperties;
         }
     }
     
