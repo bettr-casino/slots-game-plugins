@@ -21,6 +21,7 @@
     },
     {
         "Name": "Pivot",
+        "Id": "Pivot",
         "Children": [
             {
                 "Name": "Reels",
@@ -260,7 +261,56 @@
                 "IsPrefab": true,
                 "PrefabName": "{{machineName}}BaseGameSettings"
             }
+        ],
+        "Components": [        
+           {
+                  "ComponentType": "AnimatorController",
+                  "Filename": "{{baseGameMachine}}",
+                  "AnimationStates": [
+                    {
+                        "Name": "noop",
+                        "Speed": 1,
+                        "IsLoop": false,
+                        "IsDefault": true
+                    },
+                    {
+                        "Name": "start",
+                        "Speed": 1,
+                        "IsLoop": false,
+                        "IsDefault": false,
+                        "Dopesheet": [
+                            {
+                                "Path": "Animation Text",
+                                "Type": "GameObject",
+                                "Property": "m_IsActive",
+                                "Keyframes": {
+                                    "Times":  [0, 10, 20, 30, 40, 50, 60],
+                                    "Values": [1, 0,  1,  0,  1,  1,  0]
+                                }
+                            }
+                        ] 
+                    }
+                  ],
+                  "AnimatorStateTransitions": [
+                  ]
+           }        
         ]
+    }
+  ],
+  "Components": [
+    {
+      "ComponentType": "Tile",
+      "FileName": "{{baseGameMachine}}"
+    },
+    {
+      "ComponentType": "TilePropertyAnimators",
+      "AnimatorsProperty": [
+        {
+           "Key": "start",
+           "Id": "Pivot",
+           "State": "start"             
+        }
+      ]
     }
   ]
 }
