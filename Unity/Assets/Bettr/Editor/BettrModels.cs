@@ -10,7 +10,6 @@ using UnityEditor.Animations;
 using UnityEditor.Events;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace Bettr.Editor
@@ -483,10 +482,13 @@ namespace Bettr.Editor
     [Serializable]
     public class AnimatorProperty
     {
+        // ReSharper disable once InconsistentNaming
         public string Key;
 
+        // ReSharper disable once InconsistentNaming
         public string Id;
         
+        // ReSharper disable once InconsistentNaming
         public string State;
     }
     
@@ -556,6 +558,28 @@ namespace Bettr.Editor
     }
     
     [Serializable]
+    public struct AnimationKeyframes
+    {
+        // ReSharper disable once InconsistentNaming
+        public float[] Times;
+        // ReSharper disable once InconsistentNaming
+        public float[] Values;
+    }
+
+    [Serializable]
+    public struct AnimationDopesheet
+    {
+        // ReSharper disable once InconsistentNaming
+        public string Path;
+        // ReSharper disable once InconsistentNaming
+        public string Type;
+        // ReSharper disable once InconsistentNaming
+        public string Property;
+        // ReSharper disable once InconsistentNaming
+        public AnimationKeyframes Keyframes;
+    }
+    
+    [Serializable]
     public class AnimationState
     {
         // ReSharper disable once InconsistentNaming
@@ -572,6 +596,9 @@ namespace Bettr.Editor
         
         // ReSharper disable once InconsistentNaming
         public int Speed;
+                
+        // ReSharper disable once InconsistentNaming
+        public List<AnimationDopesheet> Dopesheet;
     }
 
     [Serializable]
@@ -644,6 +671,25 @@ namespace Bettr.Editor
                     wrapMode = animationState.IsLoop ? WrapMode.Loop : WrapMode.Once,
                     frameRate = animationState.Speed
                 };
+
+                var dopesheets = animationState.Dopesheet;
+                if (dopesheets != null)
+                {
+                    foreach (var dopesheet in dopesheets)
+                    {
+                        AnimationCurve curve = new AnimationCurve
+                        {
+                            keys = dopesheet.Keyframes.Times.Select((t, i) => new Keyframe(t, dopesheet.Keyframes.Values[i])).ToArray()
+                        };
+                        switch (dopesheet.Property)
+                        {
+                            case "m_IsActive":
+                                AnimationUtility.SetEditorCurve(animationClip, EditorCurveBinding.FloatCurve(dopesheet.Path, typeof(GameObject), "m_IsActive"), curve);
+                                break;
+                        }
+                    }
+                }
+                
                 var animationStateName = animationClip.name;
                 var state = stateMachine.AddState(animationStateName);
                 state.motion = animationClip;
