@@ -284,6 +284,10 @@ namespace Bettr.Editor
         
         public List<AnimatorGroupProperty> AnimatorsGroupProperty { get; set; }
         
+        public List<TextMeshProProperty> TextMeshProsProperty { get; set; }
+        
+        public List<TextMeshProGroupProperty> TextMeshProGroupsProperty { get; set; }
+        
         public string[] Params { get; set; }
         
         public InstanceComponent()
@@ -297,6 +301,8 @@ namespace Bettr.Editor
             AnimatorsGroupProperty = new List<AnimatorGroupProperty>();
             AnimationStates = new List<AnimationState>();
             AnimatorTransitions = new List<AnimationTransition>();
+            TextMeshProsProperty = new List<TextMeshProProperty>();
+            TextMeshProGroupsProperty = new List<TextMeshProGroupProperty>();
         }
         
         public void AddComponent(GameObject gameObject)
@@ -376,6 +382,43 @@ namespace Bettr.Editor
                     var scriptAsset = BettrScriptGenerator.CreateOrLoadScript(Filename, RuntimeAssetPath);
                     var tileComponent = new TileComponent(globalTileId, scriptAsset);
                     tileComponent.AddComponent(gameObject);
+                    break;
+                case "TilePropertyTextMeshPros":
+                    var tileTextMeshProProperties = new List<TilePropertyTextMeshPro>();
+                    var tileTextMeshProGroupProperties = new List<TilePropertyTextMeshProGroup>();
+                    var tilePropertyTextMeshProsComponent = new TilePropertyTextMeshProsComponent(tileTextMeshProProperties, tileTextMeshProGroupProperties);
+                    tilePropertyTextMeshProsComponent.AddComponent(gameObject);
+                    foreach (var kvPair in TextMeshProsProperty)
+                    {
+                        InstanceGameObject.IdGameObjects.TryGetValue(kvPair.Id, out var referenceGameObject);
+                        var textMeshPro = referenceGameObject?.GameObject.GetComponent<TMP_Text>();
+                        var tilePropertyTextMeshPro = new TilePropertyTextMeshPro()
+                        {
+                            key = kvPair.Key,
+                            value = new PropertyTextMeshPro() {textMeshPro = textMeshPro },
+                        };
+                        tileTextMeshProProperties.Add(tilePropertyTextMeshPro);
+                    }
+                    foreach (var kvPair in TextMeshProGroupsProperty)
+                    {
+                        List<TilePropertyTextMeshPro> textMeshProsProperties = new List<TilePropertyTextMeshPro>();
+                        foreach (var property in kvPair.Group)
+                        {
+                            InstanceGameObject.IdGameObjects.TryGetValue(property.Id, out var referenceGameObject);
+                            var textMeshPro = referenceGameObject?.GameObject.GetComponent<TMP_Text>();
+                            var gameObjectProperty = new TilePropertyTextMeshPro()
+                            {
+                                key = property.Key,
+                                value = new PropertyTextMeshPro() { textMeshPro = textMeshPro },
+                            };
+                            textMeshProsProperties.Add(gameObjectProperty);
+                        }
+                        tileTextMeshProGroupProperties.Add(new TilePropertyTextMeshProGroup()
+                        {
+                            groupKey = kvPair.GroupKey,
+                            textMeshProProperties = textMeshProsProperties,
+                        });
+                    }
                     break;
                 case "TilePropertyGameObjects":
                     var tileGameObjectProperties = new List<TilePropertyGameObject>();
@@ -554,6 +597,42 @@ namespace Bettr.Editor
             var component = gameObject.AddComponent<TilePropertyGameObjects>();
             component.tileGameObjectProperties = _tileGameObjectProperties;
             component.tileGameObjectGroupProperties = _tileGameObjectGroupProperties;
+        }
+    }
+    
+    [Serializable]
+    public class TextMeshProProperty
+    {
+        public string Key;
+
+        public string Id;
+    }
+    
+    [Serializable]
+    public class TextMeshProGroupProperty
+    {
+        public string GroupKey;
+
+        public List<TextMeshProProperty> Group;
+    }
+    
+    [Serializable]
+    public class TilePropertyTextMeshProsComponent : IComponent
+    {
+        private readonly List<TilePropertyTextMeshPro> _tileTextMeshProProperties;
+        private readonly List<TilePropertyTextMeshProGroup> _tileTextMeshProGroupProperties;
+        
+        public TilePropertyTextMeshProsComponent(List<TilePropertyTextMeshPro> properties, List<TilePropertyTextMeshProGroup> groupProperties)
+        {
+            this._tileTextMeshProProperties = properties;
+            this._tileTextMeshProGroupProperties = groupProperties;
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            var component = gameObject.AddComponent<TilePropertyTextMeshPros>();
+            component.tileTextMeshProProperties = new List<TilePropertyTextMeshPro>();
+            component.tileTextMeshProGroupProperties = new List<TilePropertyTextMeshProGroup>();
         }
     }
     
