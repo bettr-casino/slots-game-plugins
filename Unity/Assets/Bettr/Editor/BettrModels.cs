@@ -200,6 +200,36 @@ namespace Bettr.Editor
                 _go.layer = LayerMask.NameToLayer(Layer);
             }
         }
+        
+        public static GameObject FindReferencedId(GameObject parentGameObject, string id, int index)
+        {
+            var currentIndex = 0;
+            return FindByIdDepthFirst(parentGameObject.transform, id, ref index, ref currentIndex);
+        }
+        
+        private static GameObject FindByIdDepthFirst(Transform current, string id, ref int targetIndex, ref int currentIndex)
+        {
+            var identifier = current.gameObject;
+            if (identifier != null && identifier.name == id)
+            {
+                if (currentIndex == targetIndex)
+                {
+                    return current.gameObject;
+                }
+                currentIndex++;  // Only increment if the ID matches
+            }
+
+            foreach (Transform child in current)
+            {
+                var found = FindByIdDepthFirst(child, id, ref targetIndex, ref currentIndex);
+                if (found != null)
+                {
+                    return found;
+                }
+            }
+
+            return null;
+        }
     }
 
     [Serializable]    
@@ -240,32 +270,7 @@ namespace Bettr.Editor
 
         public GameObject FindReferencedId(string id, int index)
         {
-            var currentIndex = 0;
-            return FindByIdDepthFirst(_go.transform, id, ref index, ref currentIndex);
-        }
-        
-        private static GameObject FindByIdDepthFirst(Transform current, string id, ref int targetIndex, ref int currentIndex)
-        {
-            var identifier = current.gameObject;
-            if (identifier != null && identifier.name == id)
-            {
-                if (currentIndex == targetIndex)
-                {
-                    return current.gameObject;
-                }
-                currentIndex++;  // Only increment if the ID matches
-            }
-
-            foreach (Transform child in current)
-            {
-                var found = FindByIdDepthFirst(child, id, ref targetIndex, ref currentIndex);
-                if (found != null)
-                {
-                    return found;
-                }
-            }
-
-            return null;
+            return InstanceGameObject.FindReferencedId(_go, id, index);
         }
         
     }
