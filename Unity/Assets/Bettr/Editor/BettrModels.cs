@@ -338,6 +338,10 @@ namespace Bettr.Editor
         
         public List<TextMeshProGroupProperty> TextMeshProGroupsProperty { get; set; }
         
+        public List<StringProperty> StringsProperty { get; set; }
+        
+        public List<StringGroupProperty> StringGroupsProperty { get; set; }
+        
         public string[] Params { get; set; }
         
         public InstanceComponent()
@@ -558,6 +562,39 @@ namespace Bettr.Editor
                         });
                     }
                     break;
+                case "TilePropertyStrings":
+                    var tileStringProperties = new List<TilePropertyString>();
+                    var tileStringGroupProperties = new List<TilePropertyStringGroup>();
+                    var tilePropertyStringsComponent = new TilePropertyStringsComponent(tileStringProperties, tileStringGroupProperties);
+                    tilePropertyStringsComponent.AddComponent(gameObject);
+                    foreach (var kvPair in StringsProperty)
+                    {
+                        var tilePropertyString = new TilePropertyString()
+                        {
+                            key = kvPair.Key,
+                            value = kvPair.Value,
+                        };
+                        tileStringProperties.Add(tilePropertyString);
+                    }
+                    foreach (var kvPair in StringGroupsProperty)
+                    {
+                        List<TilePropertyString> tilePropertyStrings = new List<TilePropertyString>();
+                        foreach (var property in kvPair.Group)
+                        {
+                            var tilePropertyString = new TilePropertyString()
+                            {
+                                key = property.Key,
+                                value = property.Value,
+                            };
+                            tilePropertyStrings.Add(tilePropertyString);
+                        }
+                        tileStringGroupProperties.Add(new TilePropertyStringGroup()
+                        {
+                            groupKey = kvPair.GroupKey,
+                            values = tilePropertyStrings,
+                        });
+                    }
+                    break;
             }
         }
     }
@@ -713,6 +750,44 @@ namespace Bettr.Editor
             var component = gameObject.AddComponent<TilePropertyTextMeshPros>();
             component.tileTextMeshProProperties = _tileTextMeshProProperties;
             component.tileTextMeshProGroupProperties = _tileTextMeshProGroupProperties;
+        }
+    }
+    
+    [Serializable]
+    public class StringProperty
+    {
+        // ReSharper disable once InconsistentNaming
+        public string Key;
+
+        // ReSharper disable once InconsistentNaming
+        public string Value;
+    }
+    
+    [Serializable]
+    public class StringGroupProperty
+    {
+        public string GroupKey;
+
+        public List<StringProperty> Group;
+    }
+    
+    [Serializable]
+    public class TilePropertyStringsComponent : IComponent
+    {
+        private readonly List<TilePropertyString> _tileStringProperties;
+        private readonly List<TilePropertyStringGroup> _tileStringGroupProperties;
+        
+        public TilePropertyStringsComponent(List<TilePropertyString> properties, List<TilePropertyStringGroup> groupProperties)
+        {
+            this._tileStringProperties = properties;
+            this._tileStringGroupProperties = groupProperties;
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            var component = gameObject.AddComponent<TilePropertyStrings>();
+            component.tileGameStringProperties = _tileStringProperties;
+            component.tileGameStringGroupProperties = _tileStringGroupProperties;
         }
     }
     
