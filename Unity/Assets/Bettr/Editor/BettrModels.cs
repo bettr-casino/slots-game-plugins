@@ -342,6 +342,10 @@ namespace Bettr.Editor
         
         public List<StringGroupProperty> StringGroupsProperty { get; set; }
         
+        public List<IntProperty> IntsProperty { get; set; }
+        
+        public List<IntGroupProperty> IntGroupsProperty { get; set; }
+        
         public string[] Params { get; set; }
         
         public InstanceComponent()
@@ -562,6 +566,39 @@ namespace Bettr.Editor
                         });
                     }
                     break;
+                case "TilePropertyInts":
+                    var tileIntProperties = new List<TilePropertyInt>();
+                    var tileIntGroupProperties = new List<TilePropertyIntGroup>();
+                    var tilePropertyIntsComponent = new TilePropertyIntsComponent(tileIntProperties, tileIntGroupProperties);
+                    tilePropertyIntsComponent.AddComponent(gameObject);
+                    foreach (var kvPair in IntsProperty)
+                    {
+                        var tilePropertyInt = new TilePropertyInt()
+                        {
+                            key = kvPair.Key,
+                            value = kvPair.Value,
+                        };
+                        tileIntProperties.Add(tilePropertyInt);
+                    }
+                    foreach (var kvPair in IntGroupsProperty)
+                    {
+                        List<TilePropertyInt> tilePropertyInts = new List<TilePropertyInt>();
+                        foreach (var property in kvPair.Group)
+                        {
+                            var tilePropertyString = new TilePropertyInt()
+                            {
+                                key = property.Key,
+                                value = property.Value,
+                            };
+                            tilePropertyInts.Add(tilePropertyString);
+                        }
+                        tileIntGroupProperties.Add(new TilePropertyIntGroup()
+                        {
+                            groupKey = kvPair.GroupKey,
+                            values = tilePropertyInts,
+                        });
+                    }
+                    break;                
                 case "TilePropertyStrings":
                     var tileStringProperties = new List<TilePropertyString>();
                     var tileStringGroupProperties = new List<TilePropertyStringGroup>();
@@ -750,6 +787,44 @@ namespace Bettr.Editor
             var component = gameObject.AddComponent<TilePropertyTextMeshPros>();
             component.tileTextMeshProProperties = _tileTextMeshProProperties;
             component.tileTextMeshProGroupProperties = _tileTextMeshProGroupProperties;
+        }
+    }
+    
+    [Serializable]
+    public class IntProperty
+    {
+        // ReSharper disable once InconsistentNaming
+        public string Key;
+
+        // ReSharper disable once InconsistentNaming
+        public long Value;
+    }
+    
+    [Serializable]
+    public class IntGroupProperty
+    {
+        public string GroupKey;
+
+        public List<IntProperty> Group;
+    }
+    
+    [Serializable]
+    public class TilePropertyIntsComponent : IComponent
+    {
+        private readonly List<TilePropertyInt> _tileIntProperties;
+        private readonly List<TilePropertyIntGroup> _tileIntGroupProperties;
+        
+        public TilePropertyIntsComponent(List<TilePropertyInt> properties, List<TilePropertyIntGroup> groupProperties)
+        {
+            this._tileIntProperties = properties;
+            this._tileIntGroupProperties = groupProperties;
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            var component = gameObject.AddComponent<TilePropertyInts>();
+            component.tileGameIntProperties = _tileIntProperties;
+            component.tileGameIntGroupProperties = _tileIntGroupProperties;
         }
     }
     

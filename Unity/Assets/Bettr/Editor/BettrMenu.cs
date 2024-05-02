@@ -882,6 +882,14 @@ namespace Bettr.Editor
             var reelPrefab = ProcessPrefab(reelName, new List<IComponent>()
                 {
                     new TileComponent(reelName, scriptTextAsset),
+                    new TilePropertyStringsComponent(new List<TilePropertyString>() 
+                    {
+                        new TilePropertyString() { key = "ReelID", value = $"Reel{reelIndex}"},
+                    }, new List<TilePropertyStringGroup>()),
+                    new TilePropertyIntsComponent(new List<TilePropertyInt>() 
+                    {
+                        new TilePropertyInt() { key = "ReelIndex", value = reelIndex - 1},
+                    }, new List<TilePropertyIntGroup>())
                 }, 
                 gameObjectInstances,
                 runtimeAssetPath);
