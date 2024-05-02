@@ -836,6 +836,8 @@ namespace Bettr.Editor
             var startVerticalPosition = half * symbolVerticalSpacing;
             
             var gameObjectInstances = new List<IGameObject>();
+            
+            var tilePropertySymbols = new List<TilePropertyGameObject>();
 
             for (int symbolIndex = 1; symbolIndex <= topSymbolCount; symbolIndex++)
             {
@@ -843,6 +845,12 @@ namespace Bettr.Editor
                 var symbolInstance = (InstanceGameObject) ProcessBaseGameSymbolGroup(symbolIndex, runtimeAssetPath, machineName);
                 symbolInstance.Position = new Vector3(0, yPosition, 0);
                 gameObjectInstances.Add(symbolInstance);
+                
+                tilePropertySymbols.Add(new TilePropertyGameObject()
+                {
+                    key = $"Symbol{symbolIndex}",
+                    value = new PropertyGameObject() {gameObject = symbolInstance.GameObject}
+                });
             }
             
             var baseGameOverviewTable = GetTable($"{machineName}BaseGameOverview");
@@ -867,6 +875,12 @@ namespace Bettr.Editor
                 var symbolInstance = (InstanceGameObject) ProcessBaseGameSymbolGroup(symbolIndex, runtimeAssetPath, machineName);
                 symbolInstance.Position = new Vector3(0, yPosition, 0);
                 gameObjectInstances.Add(symbolInstance);
+                
+                tilePropertySymbols.Add(new TilePropertyGameObject()
+                {
+                    key = $"Symbol{symbolIndex}",
+                    value = new PropertyGameObject() {gameObject = symbolInstance.GameObject}
+                });
             }
 
             for (int symbolIndex = topSymbolCount + visibleSymbolCount + 1;
@@ -877,6 +891,12 @@ namespace Bettr.Editor
                 var symbolInstance = (InstanceGameObject) ProcessBaseGameSymbolGroup(symbolIndex, runtimeAssetPath, machineName);
                 symbolInstance.Position = new Vector3(0, yPosition, 0);
                 gameObjectInstances.Add(symbolInstance);
+                
+                tilePropertySymbols.Add(new TilePropertyGameObject()
+                {
+                    key = $"Symbol{symbolIndex}",
+                    value = new PropertyGameObject() {gameObject = symbolInstance.GameObject}
+                });
             }
 
             var reelPrefab = ProcessPrefab(reelName, new List<IComponent>()
@@ -889,7 +909,9 @@ namespace Bettr.Editor
                     new TilePropertyIntsComponent(new List<TilePropertyInt>() 
                     {
                         new TilePropertyInt() { key = "ReelIndex", value = reelIndex - 1},
-                    }, new List<TilePropertyIntGroup>())
+                    }, new List<TilePropertyIntGroup>()),
+                    new TilePropertyGameObjectsComponent(tilePropertySymbols, 
+                        new List<TilePropertyGameObjectGroup>()),
                 }, 
                 gameObjectInstances,
                 runtimeAssetPath);
