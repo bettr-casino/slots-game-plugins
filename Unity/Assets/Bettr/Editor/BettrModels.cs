@@ -1003,6 +1003,8 @@ namespace Bettr.Editor
             var stateMachine = animatorController.layers[0].stateMachine;
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+
+            var frameRate = 60;
             
             foreach (var animationState in _animationStates)
             {
@@ -1010,9 +1012,9 @@ namespace Bettr.Editor
                 {
                     name = animationState.Name,
                     wrapMode = animationState.IsLoop ? WrapMode.Loop : WrapMode.Once,
-                    frameRate = animationState.Speed
+                    frameRate = frameRate,
                 };
-
+                
                 var dopesheets = animationState.Dopesheet;
                 if (dopesheets != null)
                 {
@@ -1020,8 +1022,22 @@ namespace Bettr.Editor
                     {
                         AnimationCurve curve = new AnimationCurve
                         {
-                            keys = dopesheet.Keyframes.Times.Select((t, i) => new Keyframe(t, dopesheet.Keyframes.Values[i])).ToArray()
+                            keys = dopesheet.Keyframes.Times.Select((t, i) => new Keyframe(t/frameRate, dopesheet.Keyframes.Values[i])).ToArray()
                         };
+                        for (int i = 0; i < curve.length; i++)
+                        {
+                            Keyframe key = curve[i];
+                            key.inTangent = 0;  // Set to desired inTangent
+                            key.outTangent = 0; // Set to desired outTangent
+                            curve.MoveKey(i, key);
+                        }
+
+                        // Automatically smooth the curve's tangents
+                        for (int i = 0; i < curve.length; i++)
+                        {
+                            AnimationUtility.SetKeyLeftTangentMode(curve, i, AnimationUtility.TangentMode.Auto);
+                            AnimationUtility.SetKeyRightTangentMode(curve, i, AnimationUtility.TangentMode.Auto);
+                        }
                         switch (dopesheet.Property)
                         {
                             case "m_IsActive":
@@ -1033,6 +1049,7 @@ namespace Bettr.Editor
                 
                 var animationStateName = animationClip.name;
                 var state = stateMachine.AddState(animationStateName);
+                state.speed = animationState.Speed;
                 state.motion = animationClip;
                 if (animationClip.wrapMode == WrapMode.Loop)
                 {
