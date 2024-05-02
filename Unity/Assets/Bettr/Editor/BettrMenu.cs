@@ -18,6 +18,7 @@ using UnityEngine.SceneManagement;
 using DirectoryInfo = System.IO.DirectoryInfo;
 
 using Scriban;
+using Exception = System.Exception;
 using Object = System.Object;
 
 namespace Bettr.Editor
@@ -1078,8 +1079,6 @@ namespace Bettr.Editor
         {
             AssetDatabase.Refresh();
 
-            var template = Template.Parse(null);
-            
             SceneAsset sceneAsset = null;
             Scene scene = default;
             
@@ -1095,7 +1094,10 @@ namespace Bettr.Editor
             {
                 scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
                 scene.name = sceneName;
-                EditorSceneManager.SaveScene(scene, scenePath);
+                if (!EditorSceneManager.SaveScene(scene, scenePath))
+                {
+                    throw new Exception($"Failed to save scene at path: {scenePath}");
+                }
             }
             
             AssetDatabase.Refresh();
