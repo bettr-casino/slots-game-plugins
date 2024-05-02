@@ -1051,9 +1051,13 @@ namespace Bettr.Editor
                 {
                     stateMachine.defaultState = state;
                 }
-                var animationClipName = $"{_fileName}_anim_{animationStateName}.anim";
-                var animationClipPath = $"{_runtimeAssetPath}/Animators/{animationClipName}";
-                AssetDatabase.CreateAsset(animationClip, animationClipPath);
+
+                if (animationStateName != "noop")
+                {
+                    var animationClipName = $"{_fileName}_anim_{animationStateName}.anim";
+                    var animationClipPath = $"{_runtimeAssetPath}/Animators/{animationClipName}";
+                    AssetDatabase.CreateAsset(animationClip, animationClipPath);
+                }
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
             }
