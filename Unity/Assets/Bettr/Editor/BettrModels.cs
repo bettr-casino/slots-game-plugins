@@ -539,7 +539,15 @@ namespace Bettr.Editor
                         var tileProperty = new TilePropertyAnimator()
                         {
                             key = kvPair.Key,
-                            value = new PropertyAnimator() {animator = referenceGameObject?.Animator, animationStateName = kvPair.State},
+                            value = new PropertyAnimator()
+                            {
+                                animator = referenceGameObject?.Animator, 
+                                animationStateName = kvPair.State,
+                                delayBeforeAnimationStart = kvPair.DelayBeforeStart,
+                                waitForAnimationComplete = kvPair.WaitForComplete,
+                                overrideAnimationDuration = kvPair.OverrideDuration,
+                                animationDuration = kvPair.AnimationDuration,
+                            },
                         };
                         if (tileProperty.value.animator == null)
                         {
@@ -556,7 +564,14 @@ namespace Bettr.Editor
                             var tileProperty = new TilePropertyAnimator()
                             {
                                 key = property.Key,
-                                value = new PropertyAnimator() {animator = referenceGameObject?.Animator, animationStateName = property.State},
+                                value = new PropertyAnimator() {
+                                    animator = referenceGameObject?.Animator, 
+                                    animationStateName = property.State,
+                                    delayBeforeAnimationStart = property.DelayBeforeStart,
+                                    waitForAnimationComplete = property.WaitForComplete,
+                                    overrideAnimationDuration = property.OverrideDuration,
+                                    animationDuration = property.AnimationDuration,
+                                },
                             };
                             if (tileProperty.value.animator == null)
                             {
@@ -692,6 +707,18 @@ namespace Bettr.Editor
         
         // ReSharper disable once InconsistentNaming
         public string State;
+        
+        // ReSharper disable once InconsistentNaming
+        public float AnimationDuration;
+
+        // ReSharper disable once InconsistentNaming
+        public float DelayBeforeStart;
+
+        // ReSharper disable once InconsistentNaming
+        public bool WaitForComplete;
+
+        // ReSharper disable once InconsistentNaming
+        public bool OverrideDuration;
     }
     
     [Serializable]
