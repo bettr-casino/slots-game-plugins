@@ -180,6 +180,7 @@
                     "Name": "Pivot",
                     "Child": {
                         "Name": "ReelsScrim",
+                        "Id": "ReelsScrim",
                         "Active": false,
                         "Layer": "SLOT_REELS_OVERLAY",
                         "IsPrimitive": true,
@@ -257,6 +258,7 @@
             },
             {
                 "Name": "Settings",
+                "Id": "Settings",
                 "Active": false,
                 "IsPrefab": true,
                 "PrefabName": "{{machineName}}BaseGameSettings",
@@ -313,8 +315,21 @@
   ],
   "Components": [
     {
-      "ComponentType": "Tile",
+      "ComponentType": "TileWithUpdate",
       "FileName": "{{baseGameMachine}}"
+    },
+    {
+        "ComponentType": "TilePropertyGameObjects",
+        "GameObjectsProperty": [
+           {
+             "Key": "Scrim",
+             "Id": "ReelsScrim"           
+           },
+           {
+             "Key": "Settings",
+             "Id": "Settings"           
+           }
+        ]
     },
     {
       "ComponentType": "TilePropertyAnimators",
@@ -330,7 +345,7 @@
       "ComponentType": "TilePropertyTextMeshPros",
       "TextMeshProsProperty": [
         {
-            "Key": "CreditText",
+            "Key": "CreditsText",
             "Id": "CreditText"
         },
         {

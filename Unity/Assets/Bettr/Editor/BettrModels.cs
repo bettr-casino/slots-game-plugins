@@ -428,10 +428,20 @@ namespace Bettr.Editor
                     }
                     break;
                 case "Tile":
+                {
                     var globalTileId = Filename;
                     var scriptAsset = BettrScriptGenerator.CreateOrLoadScript(Filename, RuntimeAssetPath);
                     var tileComponent = new TileComponent(globalTileId, scriptAsset);
                     tileComponent.AddComponent(gameObject);
+                }
+                    break;
+                case "TileWithUpdate":
+                {
+                    var globalTileId = Filename;
+                    var scriptAsset = BettrScriptGenerator.CreateOrLoadScript(Filename, RuntimeAssetPath);
+                    var tileComponent = new TileWithUpdateComponent(globalTileId, scriptAsset);
+                    tileComponent.AddComponent(gameObject);
+                }
                     break;
                 case "TilePropertyTextMeshPros":
                     var tileTextMeshProProperties = new List<TilePropertyTextMeshPro>();
@@ -567,6 +577,26 @@ namespace Bettr.Editor
         public void AddComponent(GameObject gameObject)
         {
             var tile = gameObject.AddComponent<Tile>();
+            tile.scriptAsset = _scriptAsset;
+            tile.globalTileId = _globalTileId;
+        }
+    }
+    
+    [Serializable]
+    public class TileWithUpdateComponent : IComponent
+    {
+        private readonly TextAsset _scriptAsset;
+        private readonly string _globalTileId;
+        
+        public TileWithUpdateComponent(string globalTileId, TextAsset scriptAsset)
+        {
+            _globalTileId = globalTileId;
+            _scriptAsset = scriptAsset;
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            var tile = gameObject.AddComponent<TileWithUpdate>();
             tile.scriptAsset = _scriptAsset;
             tile.globalTileId = _globalTileId;
         }
