@@ -135,7 +135,7 @@ namespace Bettr.Editor
         public void SetParent(GameObject parentGo)
         {
             EnsureGameObject();
-            _go.transform.SetParent(parentGo.transform);
+            _go.transform.SetParent(parentGo == null ? null : parentGo.transform);
             _go.transform.position = new Vector3(0, 0, 0);
             if (Position != null)
             {
