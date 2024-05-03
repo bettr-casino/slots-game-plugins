@@ -1357,11 +1357,11 @@ namespace Bettr.Editor
         {
             var textMeshPro = gameObject.AddComponent<TextMeshPro>();
             textMeshPro.text = Text;
-            textMeshPro.fontSize = FontSize;
             textMeshPro.fontMaterial = FontAsset.material;
-            textMeshPro.enableAutoSizing = true;
+            textMeshPro.fontSize = FontSize;
             textMeshPro.fontSizeMin = FontSize;
             textMeshPro.fontSizeMax = FontSize;
+            textMeshPro.enableAutoSizing = false;
             textMeshPro.color = FontColor;
             textMeshPro.alignment = TextAlignmentOptions.Center;
             textMeshPro.enableWordWrapping = false;
