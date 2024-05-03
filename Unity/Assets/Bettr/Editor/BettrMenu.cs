@@ -1037,6 +1037,7 @@ namespace Bettr.Editor
             InstanceGameObject.IdGameObjects.Clear();
             
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
+            hierarchyInstance.SetParent((GameObject) null);
 
             var settingsPrefab = ProcessPrefab(backgroundName, 
                 hierarchyInstance, 
