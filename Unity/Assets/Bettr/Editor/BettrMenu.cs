@@ -744,6 +744,30 @@ namespace Bettr.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             
+            var reelStates = GetTable($"{machineName}BaseGameReelState");
+            var reelCount = 0;
+            foreach (var pair in reelStates.Pairs)
+            {
+                reelCount++;
+            }
+            
+            var reelHPositions = new List<float>();
+            var reelMaskYs = new List<float>();
+            
+            for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
+            {
+                var topSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "TopSymbolCount");
+                var visibleSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "VisibleSymbolCount");
+                var bottomSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "BottomSymbolCount");
+                var symbolVerticalSpacing = GetTableValue<float>(reelStates, $"Reel{reelIndex}", "SymbolVerticalSpacing");
+                var horizontalSpacing = GetTableValue<float>(reelStates, $"Reel{reelIndex}", "HorizontalSpacing");
+                var zeroVisibleSymbolIndex = visibleSymbolCount % 2 == 0 ? visibleSymbolCount / 2 : (visibleSymbolCount - 1) / 2;
+                var reelMaskY = (topSymbolCount + zeroVisibleSymbolIndex + 1) * symbolVerticalSpacing + symbolVerticalSpacing/2;
+                reelMaskYs.Add(reelMaskY);
+            
+                //
+            }
+            
             string scribanTemplateText = ReadScribanTemplate("BaseGameMachine");
             
             var scribanTemplate = Template.Parse(scribanTemplateText);
