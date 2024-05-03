@@ -760,7 +760,8 @@ namespace Bettr.Editor
                 { "machineName", machineName },
                 { "machineVariant", machineVariant },
                 { "baseGameMachine", baseGameMachine },
-                { "symbolKeys", symbolKeys}
+                { "symbolKeys", symbolKeys},
+                { "reelMaskY", 3.6f}
             };
             
             var json = scribanTemplate.Render(model);
