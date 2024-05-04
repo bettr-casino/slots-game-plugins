@@ -758,6 +758,8 @@ namespace Bettr.Editor
             var reelBackgroundYs = new List<float>();
             var reelBackgroundScaleYs = new List<float>();
             
+            float maxOffsetY = 0.0f;
+            
             for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
             {
                 var topSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "TopSymbolCount");
@@ -776,7 +778,11 @@ namespace Bettr.Editor
                 reelMaskScaleYs.Add(reelMaskScaleY);
                 reelBackgroundYs.Add(reelBackgroundY);
                 reelBackgroundScaleYs.Add(reelBackgroundScaleY);
+
+                var offsetY = (visibleSymbolCount % 3) * symbolVerticalSpacing; 
+                maxOffsetY = Mathf.Max(maxOffsetY, offsetY);
             }
+            
             
             string scribanTemplateText = ReadScribanTemplate("BaseGameMachine");
             
@@ -799,7 +805,8 @@ namespace Bettr.Editor
                 { "reelMaskLowerY", reelMaskLowerYs[0]},
                 { "reelMaskScaleY", reelMaskScaleYs[0]},
                 { "reelBackgroundY", reelBackgroundYs[0]},
-                { "reelBackgroundScaleY", reelBackgroundScaleYs[0]}
+                { "reelBackgroundScaleY", reelBackgroundScaleYs[0]},
+                { "offsetY", maxOffsetY },
             };
             
             var json = scribanTemplate.Render(model);
