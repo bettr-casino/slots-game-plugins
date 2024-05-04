@@ -752,7 +752,11 @@ namespace Bettr.Editor
             }
             
             var reelHPositions = new List<float>();
-            var reelMaskYs = new List<float>();
+            var reelMaskUpperYs = new List<float>();
+            var reelMaskLowerYs = new List<float>();
+            var reelMaskScaleYs = new List<float>();
+            var reelBackgroundYs = new List<float>();
+            var reelBackgroundScaleYs = new List<float>();
             
             for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
             {
@@ -762,10 +766,16 @@ namespace Bettr.Editor
                 var symbolVerticalSpacing = GetTableValue<float>(reelStates, $"Reel{reelIndex}", "SymbolVerticalSpacing");
                 var horizontalSpacing = GetTableValue<float>(reelStates, $"Reel{reelIndex}", "HorizontalSpacing");
                 var zeroVisibleSymbolIndex = visibleSymbolCount % 2 == 0 ? visibleSymbolCount / 2 : (visibleSymbolCount - 1) / 2;
-                var reelMaskY = (topSymbolCount + zeroVisibleSymbolIndex + 1) * symbolVerticalSpacing + symbolVerticalSpacing/2;
-                reelMaskYs.Add(reelMaskY);
-            
-                //
+                var reelMaskUpperY = visibleSymbolCount % 2 == 0? (zeroVisibleSymbolIndex + 1) * symbolVerticalSpacing : (zeroVisibleSymbolIndex) * symbolVerticalSpacing;
+                var reelMaskLowerY = visibleSymbolCount % 2 == 0? -(zeroVisibleSymbolIndex + 2) * symbolVerticalSpacing : -(zeroVisibleSymbolIndex) * symbolVerticalSpacing;
+                var reelMaskScaleY = (topSymbolCount + 1) * symbolVerticalSpacing;
+                var reelBackgroundY = visibleSymbolCount % 2 == 0 ? -symbolVerticalSpacing/2 : 0;
+                var reelBackgroundScaleY = (visibleSymbolCount) * symbolVerticalSpacing;
+                reelMaskUpperYs.Add(reelMaskUpperY);
+                reelMaskLowerYs.Add(reelMaskLowerY);
+                reelMaskScaleYs.Add(reelMaskScaleY);
+                reelBackgroundYs.Add(reelBackgroundY);
+                reelBackgroundScaleYs.Add(reelBackgroundScaleY);
             }
             
             string scribanTemplateText = ReadScribanTemplate("BaseGameMachine");
@@ -785,7 +795,11 @@ namespace Bettr.Editor
                 { "machineVariant", machineVariant },
                 { "baseGameMachine", baseGameMachine },
                 { "symbolKeys", symbolKeys},
-                { "reelMaskY", 3.6f}
+                { "reelMaskUpperY", reelMaskUpperYs[0]},
+                { "reelMaskLowerY", reelMaskLowerYs[0]},
+                { "reelMaskScaleY", reelMaskScaleYs[0]},
+                { "reelBackgroundY", reelBackgroundYs[0]},
+                { "reelBackgroundScaleY", reelBackgroundScaleYs[0]}
             };
             
             var json = scribanTemplate.Render(model);
