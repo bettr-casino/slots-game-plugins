@@ -765,9 +765,9 @@ namespace Bettr.Editor
                 var bottomSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "BottomSymbolCount");
                 var symbolVerticalSpacing = GetTableValue<float>(reelStates, $"Reel{reelIndex}", "SymbolVerticalSpacing");
                 var horizontalSpacing = GetTableValue<float>(reelStates, $"Reel{reelIndex}", "HorizontalSpacing");
-                var zeroVisibleSymbolIndex = visibleSymbolCount % 2 == 0 ? visibleSymbolCount / 2 : (visibleSymbolCount - 1) / 2;
-                var reelMaskUpperY = visibleSymbolCount % 2 == 0? (zeroVisibleSymbolIndex + 1) * symbolVerticalSpacing : (zeroVisibleSymbolIndex) * symbolVerticalSpacing;
-                var reelMaskLowerY = visibleSymbolCount % 2 == 0? -(zeroVisibleSymbolIndex + 2) * symbolVerticalSpacing : -(zeroVisibleSymbolIndex) * symbolVerticalSpacing;
+                var zeroVisibleSymbolIndex = visibleSymbolCount % 2 == 0 ? visibleSymbolCount / 2 + 1 : (visibleSymbolCount - 1) / 2 + 1;
+                var reelMaskUpperY = visibleSymbolCount % 2 == 0? (zeroVisibleSymbolIndex) * symbolVerticalSpacing : (zeroVisibleSymbolIndex + 1) * symbolVerticalSpacing;
+                var reelMaskLowerY = -(zeroVisibleSymbolIndex + 1) * symbolVerticalSpacing;
                 var reelMaskScaleY = (topSymbolCount + 1) * symbolVerticalSpacing;
                 var reelBackgroundY = visibleSymbolCount % 2 == 0 ? -symbolVerticalSpacing/2 : 0;
                 var reelBackgroundScaleY = (visibleSymbolCount) * symbolVerticalSpacing;
