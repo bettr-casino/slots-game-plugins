@@ -697,7 +697,11 @@ namespace Bettr.Editor
                 var symbolName = pair.Key.String;
                 var symbolPrefabName = $"{machineName}BaseGameSymbol{symbolName}";   
                 var symbolPrefab = ProcessBaseGameSymbol(symbolName, symbolPrefabName, runtimeAssetPath);
-                symbolPrefabs.Add(new PrefabGameObject(symbolPrefab, symbolName));
+                var symbolPrefabGameObject = new PrefabGameObject(symbolPrefab, symbolName)
+                {
+                    Active = false
+                };
+                symbolPrefabs.Add(symbolPrefabGameObject);
             }
             
             var scriptGroupName = $"{machineName}BaseGameSymbolGroup"; 

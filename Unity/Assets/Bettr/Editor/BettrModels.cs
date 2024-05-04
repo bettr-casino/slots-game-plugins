@@ -248,6 +248,7 @@ namespace Bettr.Editor
         private string _name;
         
         public GameObject GameObject => _go;
+        public bool Active { get; set; } = true;
         
         public PrefabGameObject(GameObject prefab, string name)
         {
@@ -261,6 +262,7 @@ namespace Bettr.Editor
         {
             // Instantiate the child prefab and set it as a child of the new prefab
             _go.transform.SetParent(parentGo.transform);
+            _go.SetActive(Active);
         }
         
         public void SetParent(IGameObject parentGo)
