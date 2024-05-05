@@ -19,6 +19,8 @@ namespace Bettr.Editor
     {
         public GameObject GameObject { get; }
         public void SetParent(GameObject parentGo);
+        
+        public void SetParent(IGameObject parentGo);
     }
 
     [Serializable]
@@ -29,15 +31,7 @@ namespace Bettr.Editor
         private GameObject _go;
         public string Name { get; set; }
         
-        private string _Id;
-
-        public string Id
-        {
-            get => _Id;
-            set { _Id = value;
-                IdGameObjects[_Id] = this;
-            }
-        }
+        public string Id { get; set; }
         
         public List<PrefabId> PrefabIds { get; set; }
         
@@ -67,48 +61,11 @@ namespace Bettr.Editor
         
         public Vector3? Scale { get; set; }
         
-        private List<InstanceComponent> _components;
-        
-        public List<InstanceComponent> Components {
-            get => _components;
-            set
-            {
-                _components = value;
-                EnsureGameObject();
-                foreach (var component in _components)
-                {
-                    component.AddComponent(_go);
-                }
-            }
-        }
+        public List<InstanceComponent> Components { get; set; }
 
-        private InstanceGameObject _child;
+        public InstanceGameObject Child { get; set; }
         
-        public InstanceGameObject Child {
-            get => _child;
-            set
-            {
-                _child = value;
-                EnsureGameObject();
-                _child.SetParent(_go);
-            }
-        }
-        
-        private List<InstanceGameObject> _children;
-
-        public List<InstanceGameObject> Children
-        {
-            get => _children;
-            set
-            {
-                _children = value;
-                EnsureGameObject();
-                foreach (var child in _children)
-                {
-                    child.SetParent(_go);
-                }
-            }
-        }
+        public List<InstanceGameObject> Children { get; set; }
 
         public GameObject GameObject => _go;
 
@@ -124,6 +81,7 @@ namespace Bettr.Editor
         {
             _go = go;
             Name = go.name;
+            EnsureGameObject();
         }
 
         public InstanceGameObject(string name)
@@ -135,13 +93,35 @@ namespace Bettr.Editor
         [OnDeserialized]
         private void OnDeserialized(StreamingContext context)
         {
-            Console.WriteLine($"Deserialization complete name=${Name}");
-        }
-        
-        public void SetParent(GameObject parentGo)
-        {
+            Debug.Log($"Deserialization complete name={Name}");
+            
             EnsureGameObject();
-            _go.transform.SetParent(parentGo == null ? null : parentGo.transform);
+            
+            if (Id != null && Id.Length > 0)
+            {
+                IdGameObjects[Id] = this;
+            }
+            
+            if (Child != null)
+            {
+                Child.SetParent(_go);
+            } 
+            else if (Children != null && Children.Count > 0)
+            {
+                foreach (var child in Children)
+                {
+                    child.SetParent(_go);
+                }
+            }
+
+            if (Components != null)
+            {
+                foreach (var component in Components)
+                {
+                    component.AddComponent(_go);
+                }
+            }
+            
             _go.transform.position = new Vector3(0, 0, 0);
             if (Position != null)
             {
@@ -157,6 +137,11 @@ namespace Bettr.Editor
             {
                 _go.transform.localScale = (Vector3) Scale;
             }
+        }
+        
+        public void SetParent(GameObject parentGo)
+        {
+            _go.transform.SetParent(parentGo == null ? null : parentGo.transform);
         }
 
         public void SetParent(IGameObject parentGo)
@@ -179,7 +164,7 @@ namespace Bettr.Editor
                         foreach (var prefabId in PrefabIds)
                         {
                             var referencedGameObject = prefabGameObject.FindReferencedId(prefabId.Id, prefabId.Index);
-                            InstanceGameObject.IdGameObjects[prefabId.Id] = new InstanceGameObject(referencedGameObject);
+                            InstanceGameObject.IdGameObjects[$"{prefabId.Prefix}{prefabId.Id}"] = new InstanceGameObject(referencedGameObject);
                         }
                     }
                 }
@@ -241,6 +226,8 @@ namespace Bettr.Editor
     [Serializable]    
     public struct PrefabId
     {
+        // ReSharper disable once InconsistentNaming
+        public string Prefix;
         // ReSharper disable once InconsistentNaming
         public string Id;
         // ReSharper disable once InconsistentNaming
@@ -506,34 +493,40 @@ namespace Bettr.Editor
                     var tileGameObjectGroupProperties = new List<TilePropertyGameObjectGroup>();
                     var tilePropertyGameObjectsComponent = new TilePropertyGameObjectsComponent(tileGameObjectProperties, tileGameObjectGroupProperties);
                     tilePropertyGameObjectsComponent.AddComponent(gameObject);
-                    foreach (var kvPair in GameObjectsProperty)
+                    if (GameObjectsProperty != null)
                     {
-                        InstanceGameObject.IdGameObjects.TryGetValue(kvPair.Id, out var referenceGameObject);
-                        var tilePropertyGameObject = new TilePropertyGameObject()
+                        foreach (var kvPair in GameObjectsProperty)
                         {
-                            key = kvPair.Key,
-                            value = new PropertyGameObject() {gameObject = referenceGameObject?.GameObject },
-                        };
-                        tileGameObjectProperties.Add(tilePropertyGameObject);
-                    }
-                    foreach (var kvPair in GameObjectGroupsProperty)
-                    {
-                        List<TilePropertyGameObject> gameObjectProperties = new List<TilePropertyGameObject>();
-                        foreach (var property in kvPair.Group)
-                        {
-                            InstanceGameObject.IdGameObjects.TryGetValue(property.Id, out var referenceGameObject);
-                            var gameObjectProperty = new TilePropertyGameObject()
+                            InstanceGameObject.IdGameObjects.TryGetValue(kvPair.Id, out var referenceGameObject);
+                            var tilePropertyGameObject = new TilePropertyGameObject()
                             {
-                                key = property.Key,
+                                key = kvPair.Key,
                                 value = new PropertyGameObject() {gameObject = referenceGameObject?.GameObject },
                             };
-                            gameObjectProperties.Add(gameObjectProperty);
+                            tileGameObjectProperties.Add(tilePropertyGameObject);
                         }
-                        tileGameObjectGroupProperties.Add(new TilePropertyGameObjectGroup()
+                    }
+                    if (GameObjectGroupsProperty != null)
+                    {
+                        foreach (var kvPair in GameObjectGroupsProperty)
                         {
-                            groupKey = kvPair.GroupKey,
-                            gameObjectProperties = gameObjectProperties,
-                        });
+                            List<TilePropertyGameObject> gameObjectProperties = new List<TilePropertyGameObject>();
+                            foreach (var property in kvPair.Group)
+                            {
+                                InstanceGameObject.IdGameObjects.TryGetValue(property.Id, out var referenceGameObject);
+                                var gameObjectProperty = new TilePropertyGameObject()
+                                {
+                                    key = property.Key,
+                                    value = new PropertyGameObject() {gameObject = referenceGameObject?.GameObject },
+                                };
+                                gameObjectProperties.Add(gameObjectProperty);
+                            }
+                            tileGameObjectGroupProperties.Add(new TilePropertyGameObjectGroup()
+                            {
+                                groupKey = kvPair.GroupKey,
+                                gameObjectProperties = gameObjectProperties,
+                            });
+                        }
                     }
                     break;
                 case "TilePropertyAnimators":
@@ -599,32 +592,38 @@ namespace Bettr.Editor
                     var tileIntGroupProperties = new List<TilePropertyIntGroup>();
                     var tilePropertyIntsComponent = new TilePropertyIntsComponent(tileIntProperties, tileIntGroupProperties);
                     tilePropertyIntsComponent.AddComponent(gameObject);
-                    foreach (var kvPair in IntsProperty)
+                    if (IntsProperty != null)
                     {
-                        var tilePropertyInt = new TilePropertyInt()
+                        foreach (var kvPair in IntsProperty)
                         {
-                            key = kvPair.Key,
-                            value = kvPair.Value,
-                        };
-                        tileIntProperties.Add(tilePropertyInt);
-                    }
-                    foreach (var kvPair in IntGroupsProperty)
-                    {
-                        List<TilePropertyInt> tilePropertyInts = new List<TilePropertyInt>();
-                        foreach (var property in kvPair.Group)
-                        {
-                            var tilePropertyString = new TilePropertyInt()
+                            var tilePropertyInt = new TilePropertyInt()
                             {
-                                key = property.Key,
-                                value = property.Value,
+                                key = kvPair.Key,
+                                value = kvPair.Value,
                             };
-                            tilePropertyInts.Add(tilePropertyString);
+                            tileIntProperties.Add(tilePropertyInt);
                         }
-                        tileIntGroupProperties.Add(new TilePropertyIntGroup()
+                    }
+                    if (IntGroupsProperty != null)
+                    {
+                        foreach (var kvPair in IntGroupsProperty)
                         {
-                            groupKey = kvPair.GroupKey,
-                            values = tilePropertyInts,
-                        });
+                            List<TilePropertyInt> tilePropertyInts = new List<TilePropertyInt>();
+                            foreach (var property in kvPair.Group)
+                            {
+                                var tilePropertyString = new TilePropertyInt()
+                                {
+                                    key = property.Key,
+                                    value = property.Value,
+                                };
+                                tilePropertyInts.Add(tilePropertyString);
+                            }
+                            tileIntGroupProperties.Add(new TilePropertyIntGroup()
+                            {
+                                groupKey = kvPair.GroupKey,
+                                values = tilePropertyInts,
+                            });
+                        }
                     }
                     break;                
                 case "TilePropertyStrings":
@@ -632,32 +631,38 @@ namespace Bettr.Editor
                     var tileStringGroupProperties = new List<TilePropertyStringGroup>();
                     var tilePropertyStringsComponent = new TilePropertyStringsComponent(tileStringProperties, tileStringGroupProperties);
                     tilePropertyStringsComponent.AddComponent(gameObject);
-                    foreach (var kvPair in StringsProperty)
+                    if (StringsProperty != null)
                     {
-                        var tilePropertyString = new TilePropertyString()
-                        {
-                            key = kvPair.Key,
-                            value = kvPair.Value,
-                        };
-                        tileStringProperties.Add(tilePropertyString);
-                    }
-                    foreach (var kvPair in StringGroupsProperty)
-                    {
-                        List<TilePropertyString> tilePropertyStrings = new List<TilePropertyString>();
-                        foreach (var property in kvPair.Group)
+                        foreach (var kvPair in StringsProperty)
                         {
                             var tilePropertyString = new TilePropertyString()
                             {
-                                key = property.Key,
-                                value = property.Value,
+                                key = kvPair.Key,
+                                value = kvPair.Value,
                             };
-                            tilePropertyStrings.Add(tilePropertyString);
+                            tileStringProperties.Add(tilePropertyString);
                         }
-                        tileStringGroupProperties.Add(new TilePropertyStringGroup()
+                    }
+                    if (StringGroupsProperty != null)
+                    {
+                        foreach (var kvPair in StringGroupsProperty)
                         {
-                            groupKey = kvPair.GroupKey,
-                            values = tilePropertyStrings,
-                        });
+                            List<TilePropertyString> tilePropertyStrings = new List<TilePropertyString>();
+                            foreach (var property in kvPair.Group)
+                            {
+                                var tilePropertyString = new TilePropertyString()
+                                {
+                                    key = property.Key,
+                                    value = property.Value,
+                                };
+                                tilePropertyStrings.Add(tilePropertyString);
+                            }
+                            tileStringGroupProperties.Add(new TilePropertyStringGroup()
+                            {
+                                groupKey = kvPair.GroupKey,
+                                values = tilePropertyStrings,
+                            });
+                        }
                     }
                     break;
             }
