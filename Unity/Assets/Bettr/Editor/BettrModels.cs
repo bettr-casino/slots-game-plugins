@@ -304,6 +304,10 @@ namespace Bettr.Editor
     {
         public static string RuntimeAssetPath;
         
+        public string Name { get; set; }
+        
+        public string[] Params { get; set; }
+        
         public string ComponentType { get; set; }
         
         public string Filename { get; set; }
@@ -345,8 +349,6 @@ namespace Bettr.Editor
         public List<IntProperty> IntsProperty { get; set; }
         
         public List<IntGroupProperty> IntGroupsProperty { get; set; }
-        
-        public string[] Params { get; set; }
         
         public InstanceComponent()
         {
@@ -437,15 +439,15 @@ namespace Bettr.Editor
                     break;
                 case "Tile":
                 {
-                    var globalTileId = Filename;
-                    var scriptAsset = BettrScriptGenerator.CreateOrLoadScript(Filename, RuntimeAssetPath);
+                    var globalTileId = string.IsNullOrEmpty(Name) ? Filename : Name;
+                    var scriptAsset = BettrScriptGenerator.CreateOrLoadScript( Filename, RuntimeAssetPath);
                     var tileComponent = new TileComponent(globalTileId, scriptAsset);
                     tileComponent.AddComponent(gameObject);
                 }
                     break;
                 case "TileWithUpdate":
                 {
-                    var globalTileId = Filename;
+                    var globalTileId = string.IsNullOrEmpty(Name) ? Filename : Name;
                     var scriptAsset = BettrScriptGenerator.CreateOrLoadScript(Filename, RuntimeAssetPath);
                     var tileComponent = new TileWithUpdateComponent(globalTileId, scriptAsset);
                     tileComponent.AddComponent(gameObject);
