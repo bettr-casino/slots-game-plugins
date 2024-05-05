@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using Bettr.Editor.generators;
 using CrayonScript.Code;
 using TMPro;
@@ -18,7 +19,6 @@ namespace Bettr.Editor
     {
         public GameObject GameObject { get; }
         public void SetParent(GameObject parentGo);
-        public void SetParent(IGameObject parentGo);
     }
 
     [Serializable]
@@ -130,6 +130,14 @@ namespace Bettr.Editor
         {
             Name = name;
             EnsureGameObject();
+        }
+        
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext context)
+        {
+            // This code will run after all the properties have been deserialized
+            Console.WriteLine("Deserialization complete!");
+            // Perform any additional setup or checks here
         }
         
         public void SetParent(GameObject parentGo)
