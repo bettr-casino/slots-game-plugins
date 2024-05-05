@@ -633,7 +633,6 @@ namespace Bettr.Editor
             TileController.LuaScript.Call(dynValue);
             
             ProcessScripts(machineName, machineVariant, runtimeAssetPath);
-            ProcessBaseGameSettings(machineName, runtimeAssetPath);
             ProcessBaseGameBackground(machineName, machineVariant, runtimeAssetPath);
             ProcessBaseGameSymbols(machineName, machineVariant, runtimeAssetPath);
             ProcessBaseGameReels(machineName, runtimeAssetPath);
@@ -1218,29 +1217,6 @@ namespace Bettr.Editor
             }
 
             return File.ReadAllText(path);
-        }
-        
-        private static void ProcessBaseGameSettings(string machineName, string runtimeAssetPath)
-        {
-            var settingsName = $"{machineName}BaseGameSettings";   
-            
-            SimpleStringInterpolator interpolator = new SimpleStringInterpolator();
-            interpolator.SetVariable("settingsName", settingsName);
-            
-            string jsonTemplate = ReadJson("BaseGameSettings");
-            string json = interpolator.Interpolate(jsonTemplate);
-
-            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-            InstanceGameObject.IdGameObjects.Clear();
-            
-            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
-            List<IGameObject> runtimeObjects = hierarchyInstance.Child != null ? new List<IGameObject>() {hierarchyInstance.Child} : hierarchyInstance.Children.Cast<IGameObject>().ToList();
-            List<IComponent> components = hierarchyInstance.Components.Cast<IComponent>().ToList();
-
-            var settingsPrefab = ProcessPrefab(settingsName, 
-                components, 
-                runtimeObjects,
-                runtimeAssetPath);
         }
         
         private static bool PostToService()
