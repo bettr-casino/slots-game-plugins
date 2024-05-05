@@ -135,9 +135,7 @@ namespace Bettr.Editor
         [OnDeserialized]
         private void OnDeserialized(StreamingContext context)
         {
-            // This code will run after all the properties have been deserialized
-            Console.WriteLine("Deserialization complete!");
-            // Perform any additional setup or checks here
+            Console.WriteLine($"Deserialization complete name=${Name}");
         }
         
         public void SetParent(GameObject parentGo)
