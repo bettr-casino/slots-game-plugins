@@ -12,14 +12,12 @@ using UnityEngine;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using Newtonsoft.Json;
-using UnityEditor.Animations;
 using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
 using DirectoryInfo = System.IO.DirectoryInfo;
 
 using Scriban;
 using Exception = System.Exception;
-using Object = System.Object;
 
 namespace Bettr.Editor
 {
@@ -635,6 +633,8 @@ namespace Bettr.Editor
             ProcessScripts(machineName, machineVariant, runtimeAssetPath);
             ProcessBaseGameBackground(machineName, machineVariant, runtimeAssetPath);
             ProcessBaseGameSymbols(machineName, machineVariant, runtimeAssetPath);
+            ProcessWaysWin(machineName, runtimeAssetPath);
+            
             ProcessBaseGameReels(machineName, runtimeAssetPath);
             
             ProcessBaseGameMachine(machineName, machineVariant, runtimeAssetPath);
@@ -686,26 +686,47 @@ namespace Bettr.Editor
 
         private static GameObject ProcessBaseGameSymbols(string machineName, string machineVariant, string runtimeAssetPath)
         {
-            AssetDatabase.Refresh();
+            var templateName = "BaseGameSymbolGroup";
+            string scribanTemplateText = ReadScribanTemplate(templateName);
             
-            var baseGameSymbolTable = GetTable($"{machineName}BaseGameSymbolTable");
-            
-            var symbolPrefabs = new List<IGameObject>();
-            foreach (var pair in baseGameSymbolTable.Pairs)
+            var scribanTemplate = Template.Parse(scribanTemplateText);
+            if (scribanTemplate.HasErrors)
             {
-                var symbolName = pair.Key.String;
-                var symbolPrefabName = $"{machineName}BaseGameSymbol{symbolName}";   
-                var symbolPrefab = ProcessBaseGameSymbol(symbolName, symbolPrefabName, runtimeAssetPath);
-                var symbolPrefabGameObject = new PrefabGameObject(symbolPrefab, symbolName)
-                {
-                    Active = false
-                };
-                symbolPrefabs.Add(symbolPrefabGameObject);
+                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} templateName: {templateName}");
+                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} templateName: {templateName}");
             }
             
+            var baseGameSymbolTable = GetTable($"{machineName}BaseGameSymbolTable");
+            var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
+
+            AssetDatabase.Refresh();
+            
+            foreach (var symbolKey in symbolKeys)
+            {
+                ProcessBaseGameSymbol(symbolKey, $"{machineName}BaseGameSymbol{symbolKey}", runtimeAssetPath);
+            }
+            
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            
+            var model = new Dictionary<string, object>
+            {
+                { "machineName", machineName },
+                { "machineVariant", machineVariant },
+                { "symbolKeys", symbolKeys},
+            };
+            
+            var json = scribanTemplate.Render(model);
+            Debug.Log($"ProcessBaseGameSymbols: {json}");
+            
+            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
+            InstanceGameObject.IdGameObjects.Clear();
+            
+            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
+
             var scriptGroupName = $"{machineName}BaseGameSymbolGroup"; 
-            var symbolGroup = ProcessPrefab(scriptGroupName, new List<IComponent>(), 
-                symbolPrefabs,
+            var symbolGroup = ProcessPrefab(scriptGroupName, 
+                hierarchyInstance, 
                 runtimeAssetPath);
             
             return symbolGroup;
@@ -724,12 +745,9 @@ namespace Bettr.Editor
             InstanceGameObject.IdGameObjects.Clear();
             
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
-            List<IGameObject> runtimeObjects = hierarchyInstance.Child != null ? new List<IGameObject>() {hierarchyInstance.Child} : hierarchyInstance.Children != null ? hierarchyInstance.Children.Cast<IGameObject>().ToList() : new List<IGameObject>();
-            List<IComponent> components = hierarchyInstance.Components.Cast<IComponent>().ToList();
 
             var settingsPrefab = ProcessPrefab(symbolPrefabName, 
-                components, 
-                runtimeObjects,
+                hierarchyInstance, 
                 runtimeAssetPath);
 
             return settingsPrefab;
@@ -786,14 +804,14 @@ namespace Bettr.Editor
                 maxOffsetY = Mathf.Max(maxOffsetY, offsetY);
             }
             
-            
-            string scribanTemplateText = ReadScribanTemplate("BaseGameMachine");
+            var templateName = "BaseGameMachine";
+            string scribanTemplateText = ReadScribanTemplate(templateName);
             
             var scribanTemplate = Template.Parse(scribanTemplateText);
             if (scribanTemplate.HasErrors)
             {
-                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages}");
-                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages}");
+                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} templateName: {templateName}");
+                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} templateName: {templateName}");
             }
             
             var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
@@ -819,12 +837,9 @@ namespace Bettr.Editor
             InstanceGameObject.IdGameObjects.Clear();
             
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
-            List<IGameObject> runtimeObjects = hierarchyInstance.Child != null ? new List<IGameObject>() {hierarchyInstance.Child} : hierarchyInstance.Children != null ? hierarchyInstance.Children.Cast<IGameObject>().ToList() : new List<IGameObject>();
-            List<IComponent> components = hierarchyInstance.Components != null ? hierarchyInstance.Components.Cast<IComponent>().ToList() : new List<IComponent>();
             
             var baseGameMachinePrefab = ProcessPrefab($"{baseGameMachine}", 
-                components, 
-                runtimeObjects,
+                hierarchyInstance, 
                 runtimeAssetPath);
         }
 
@@ -871,13 +886,10 @@ namespace Bettr.Editor
             // refresh the asset database
             AssetDatabase.Refresh();
             
-            var scriptName = $"{machineName}BaseGameReel";
             var reelName = $"{machineName}BaseGameReel{reelIndex}";
             var baseGameSymbolTable = GetTable($"{machineName}BaseGameSymbolTable");
             var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
-            
-            TextAsset scriptTextAsset = BettrScriptGenerator.CreateOrLoadScript(scriptName, runtimeAssetPath);
-            
+
             var reelStates = GetTable($"{machineName}BaseGameReelState");
             var topSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "TopSymbolCount");
             var visibleSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "VisibleSymbolCount");
@@ -887,162 +899,105 @@ namespace Bettr.Editor
             int half = (topSymbolCount + visibleSymbolCount + bottomSymbolCount) / 2;
             var startVerticalPosition = half * symbolVerticalSpacing;
             
-            var gameObjectInstances = new List<IGameObject>();
-            
-            var tilePropertySymbols = new List<TilePropertyGameObject>();
-            var tilePropertySymbolGroups = new List<TilePropertyGameObjectGroup>();
+            var yPositions = new List<float>();
+            var waysSymbolIndexes = new List<int>();
+            var symbolIndexes = new List<int>();
 
+            yPositions.Add(0);
+            
             for (int symbolIndex = 1; symbolIndex <= topSymbolCount; symbolIndex++)
             {
+                symbolIndexes.Add(symbolIndex);
+                
                 var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
-                var symbolInstance = (InstanceGameObject) ProcessBaseGameSymbolGroup(symbolIndex, runtimeAssetPath, machineName);
-                symbolInstance.Position = new Vector3(0, yPosition, 0);
-                gameObjectInstances.Add(symbolInstance);
-                
-                tilePropertySymbols.Add(new TilePropertyGameObject()
-                {
-                    key = $"Symbol{symbolIndex}",
-                    value = new PropertyGameObject() {gameObject = symbolInstance.GameObject}
-                });
-
-                var tilePropertySymbolGroup = new TilePropertyGameObjectGroup
-                {
-                    groupKey = $"SymbolGroup{symbolIndex}",
-                    gameObjectProperties = new List<TilePropertyGameObject>()
-                };
-                
-                tilePropertySymbolGroups.Add(tilePropertySymbolGroup);
-
-                foreach (var symbolKey in symbolKeys)
-                {
-                    var symbolGameObject = InstanceGameObject.FindReferencedId(symbolInstance.GameObject, symbolKey, 0);
-                    tilePropertySymbolGroup.gameObjectProperties.Add(new TilePropertyGameObject()
-                    {
-                        key = symbolKey,
-                        value = new PropertyGameObject() {gameObject = symbolGameObject}
-                    });
-                }
+                yPositions.Add(yPosition);
             }
-            
-            var baseGameOverviewTable = GetTable($"{machineName}BaseGameOverview");
-            var payType = GetTableValue<string>(baseGameOverviewTable, "PayType", "Value");
-            
-            for (int symbolIndex = topSymbolCount + 1 ; symbolIndex <= topSymbolCount + visibleSymbolCount; symbolIndex++)
-            {
-                var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
-                if (payType == "Ways")
-                {
-                    // add ways reel processing here
-                    var waysInstance = (InstanceGameObject) ProcessBaseGameWaysWin(symbolIndex, runtimeAssetPath, machineName);
-                    waysInstance.Position = new Vector3(0, yPosition, 0);
-                    waysInstance.GameObject.SetActive(false);
-                    gameObjectInstances.Add(waysInstance);
-                } 
-                else if (payType == "Paylines")
-                {
-                    // add paylines reel processing here
-                }
-                
-                var symbolInstance = (InstanceGameObject) ProcessBaseGameSymbolGroup(symbolIndex, runtimeAssetPath, machineName);
-                symbolInstance.Position = new Vector3(0, yPosition, 0);
-                gameObjectInstances.Add(symbolInstance);
-                
-                tilePropertySymbols.Add(new TilePropertyGameObject()
-                {
-                    key = $"Symbol{symbolIndex}",
-                    value = new PropertyGameObject() {gameObject = symbolInstance.GameObject}
-                });
-                
-                var tilePropertySymbolGroup = new TilePropertyGameObjectGroup
-                {
-                    groupKey = $"SymbolGroup{symbolIndex}",
-                    gameObjectProperties = new List<TilePropertyGameObject>()
-                };
-                
-                tilePropertySymbolGroups.Add(tilePropertySymbolGroup);
 
-                foreach (var symbolKey in symbolKeys)
-                {
-                    var symbolGameObject = InstanceGameObject.FindReferencedId(symbolInstance.GameObject, symbolKey, 0);
-                    tilePropertySymbolGroup.gameObjectProperties.Add(new TilePropertyGameObject()
-                    {
-                        key = symbolKey,
-                        value = new PropertyGameObject() {gameObject = symbolGameObject}
-                    });
-                }
+            for (int symbolIndex = topSymbolCount + 1;
+                 symbolIndex <= topSymbolCount + visibleSymbolCount;
+                 symbolIndex++)
+            {
+                symbolIndexes.Add(symbolIndex);
+                waysSymbolIndexes.Add(symbolIndex);
+                
+                var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
+                yPositions.Add(yPosition);
             }
 
             for (int symbolIndex = topSymbolCount + visibleSymbolCount + 1;
                  symbolIndex <= topSymbolCount + visibleSymbolCount + bottomSymbolCount;
                  symbolIndex++)
             {
+                symbolIndexes.Add(symbolIndex);
+                
                 var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
-                var symbolInstance = (InstanceGameObject) ProcessBaseGameSymbolGroup(symbolIndex, runtimeAssetPath, machineName);
-                symbolInstance.Position = new Vector3(0, yPosition, 0);
-                gameObjectInstances.Add(symbolInstance);
-                
-                tilePropertySymbols.Add(new TilePropertyGameObject()
-                {
-                    key = $"Symbol{symbolIndex}",
-                    value = new PropertyGameObject() {gameObject = symbolInstance.GameObject}
-                });
-                
-                var tilePropertySymbolGroup = new TilePropertyGameObjectGroup
-                {
-                    groupKey = $"SymbolGroup{symbolIndex}",
-                    gameObjectProperties = new List<TilePropertyGameObject>()
-                };
-                
-                tilePropertySymbolGroups.Add(tilePropertySymbolGroup);
-
-                foreach (var symbolKey in symbolKeys)
-                {
-                    var symbolGameObject = InstanceGameObject.FindReferencedId(symbolInstance.GameObject, symbolKey, 0);
-                    tilePropertySymbolGroup.gameObjectProperties.Add(new TilePropertyGameObject()
-                    {
-                        key = symbolKey,
-                        value = new PropertyGameObject() {gameObject = symbolGameObject}
-                    });
-                }
+                yPositions.Add(yPosition);
             }
 
-            var reelPrefab = ProcessPrefab(reelName, new List<IComponent>()
-                {
-                    new TileComponent(reelName, scriptTextAsset),
-                    new TilePropertyStringsComponent(new List<TilePropertyString>() 
-                    {
-                        new TilePropertyString() { key = "ReelID", value = $"Reel{reelIndex}"},
-                    }, new List<TilePropertyStringGroup>()),
-                    new TilePropertyIntsComponent(new List<TilePropertyInt>() 
-                    {
-                        new TilePropertyInt() { key = "ReelIndex", value = reelIndex - 1},
-                    }, new List<TilePropertyIntGroup>()),
-                    new TilePropertyGameObjectsComponent(tilePropertySymbols, tilePropertySymbolGroups),
-                }, 
-                gameObjectInstances,
-                runtimeAssetPath);
+            var templateName = "BaseGameReel";
+            string scribanTemplateText = ReadScribanTemplate(templateName);
+
+            var scribanTemplate = Template.Parse(scribanTemplateText);
+            if (scribanTemplate.HasErrors)
+            {
+                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} templateName: {templateName}");
+                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} templateName: {templateName}");
+            }
             
+            var model = new Dictionary<string, object>
+            {
+                { "machineName", machineName },
+                { "reelIndex", reelIndex },
+                { "symbolKeys", symbolKeys },
+                { "yPositions", yPositions },
+                { "waysSymbolIndexes", waysSymbolIndexes },
+                { "symbolIndexes", symbolIndexes },
+            };
+            
+            var json = scribanTemplate.Render(model);
+            Debug.Log($"template: {templateName} json: {json}");
+            
+            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
+            InstanceGameObject.IdGameObjects.Clear();
+            
+            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
+            hierarchyInstance.SetParent((GameObject) null);
+
+            var reelPrefab = ProcessPrefab(reelName, 
+                hierarchyInstance, 
+                runtimeAssetPath);
         }
         
-        private static GameObject ProcessWaysWin(string symbolName, string runtimeAssetPath)
+        private static GameObject ProcessWaysWin(string machineName, string runtimeAssetPath)
         {
-            var winInstance = new InstanceGameObject(new GameObject("Win"));
-            var waysPivotInstance = new InstanceGameObject(new GameObject("Pivot"));
-            waysPivotInstance.SetParent(winInstance.GameObject);
-            var waysQuadInstance = new InstanceGameObject(GameObject.CreatePrimitive(PrimitiveType.Quad));
-            waysQuadInstance.SetParent(waysPivotInstance.GameObject);
+            string symbolName = $"{machineName}BaseGameWaysWin";
+            var templateName = "BaseGameWaysWin";
+            string scribanTemplateText = ReadScribanTemplate(templateName);
+
+            var scribanTemplate = Template.Parse(scribanTemplateText);
+            if (scribanTemplate.HasErrors)
+            {
+                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} templateName: {templateName}");
+                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} templateName: {templateName}");
+            }
             
-            var materialName = "WaysWin";
-            var shaderName = "Unlit/Texture";
-            var material = CreateOrLoadMaterial(materialName, shaderName, runtimeAssetPath);
-            var symbolPrefab = ProcessPrefab(symbolName, new List<IComponent>
-                {
-                }, 
-                new List<IGameObject>()
-                {
-                    winInstance
-                },
+            var model = new Dictionary<string, object>
+            {
+            };
+            
+            var json = scribanTemplate.Render(model);
+            Console.WriteLine(json);
+            
+            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
+            InstanceGameObject.IdGameObjects.Clear();
+            
+            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
+            hierarchyInstance.SetParent((GameObject) null);
+
+            var symbolPrefab = ProcessPrefab(symbolName, 
+                hierarchyInstance, 
                 runtimeAssetPath);
+            
             return symbolPrefab;
         }
         
@@ -1063,13 +1018,14 @@ namespace Bettr.Editor
             var backgroundScriptName = $"{machineName}BaseGameBackground";   
             BettrScriptGenerator.CreateOrLoadScript(backgroundScriptName, runtimeAssetPath);
             
-            string scribanTemplateText = ReadScribanTemplate("BaseGameBackground");
+            string templateName = "BaseGameBackground";
+            string scribanTemplateText = ReadScribanTemplate(templateName);
 
             var scribanTemplate = Template.Parse(scribanTemplateText);
             if (scribanTemplate.HasErrors)
             {
-                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages}");
-                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages}");
+                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} template: {templateName}");
+                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} template: {{templateName}}");
             }
             
             var model = new Dictionary<string, object>
@@ -1154,13 +1110,14 @@ namespace Bettr.Editor
             
             EditorSceneManager.OpenScene(scenePath);
             
-            string scribanTemplateText = ReadScribanTemplate("Scene");
+            var templateName = "Scene";
+            string scribanTemplateText = ReadScribanTemplate(templateName);
 
             var scribanTemplate = Template.Parse(scribanTemplateText);
             if (scribanTemplate.HasErrors)
             {
-                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages}");
-                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages}");
+                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} template: {templateName}");
+                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} template: {templateName}");
             }
             
             // Create a model object with the machineName variable
@@ -1306,6 +1263,7 @@ namespace Bettr.Editor
                 PrefabUtility.SaveAsPrefabAsset(prefab, prefabPath);
             }
             
+            AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             
             prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
