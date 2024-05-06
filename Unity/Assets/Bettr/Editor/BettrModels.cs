@@ -1404,7 +1404,7 @@ namespace Bettr.Editor
             textMeshPro.fontSize = FontSize;
             textMeshPro.fontSizeMin = FontSize;
             textMeshPro.fontSizeMax = FontSize;
-            textMeshPro.enableAutoSizing = false;
+            textMeshPro.enableAutoSizing = true;
             textMeshPro.color = FontColor;
             textMeshPro.alignment = TextAlignmentOptions.Center;
             textMeshPro.enableWordWrapping = false;
