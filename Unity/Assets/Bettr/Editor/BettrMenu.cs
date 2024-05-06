@@ -723,13 +723,10 @@ namespace Bettr.Editor
             InstanceGameObject.IdGameObjects.Clear();
             
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
-            List<IGameObject> runtimeObjects = hierarchyInstance.Child != null ? new List<IGameObject>() {hierarchyInstance.Child} : hierarchyInstance.Children != null ? hierarchyInstance.Children.Cast<IGameObject>().ToList() : new List<IGameObject>();
-            List<IComponent> components = hierarchyInstance.Components != null ? hierarchyInstance.Components.Cast<IComponent>().ToList() : new List<IComponent>();
 
             var scriptGroupName = $"{machineName}BaseGameSymbolGroup"; 
             var symbolGroup = ProcessPrefab(scriptGroupName, 
-                components, 
-                runtimeObjects,
+                hierarchyInstance, 
                 runtimeAssetPath);
             
             return symbolGroup;
@@ -748,12 +745,9 @@ namespace Bettr.Editor
             InstanceGameObject.IdGameObjects.Clear();
             
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
-            List<IGameObject> runtimeObjects = hierarchyInstance.Child != null ? new List<IGameObject>() {hierarchyInstance.Child} : hierarchyInstance.Children != null ? hierarchyInstance.Children.Cast<IGameObject>().ToList() : new List<IGameObject>();
-            List<IComponent> components = hierarchyInstance.Components.Cast<IComponent>().ToList();
 
             var settingsPrefab = ProcessPrefab(symbolPrefabName, 
-                components, 
-                runtimeObjects,
+                hierarchyInstance, 
                 runtimeAssetPath);
 
             return settingsPrefab;
@@ -843,12 +837,9 @@ namespace Bettr.Editor
             InstanceGameObject.IdGameObjects.Clear();
             
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
-            List<IGameObject> runtimeObjects = hierarchyInstance.Child != null ? new List<IGameObject>() {hierarchyInstance.Child} : hierarchyInstance.Children != null ? hierarchyInstance.Children.Cast<IGameObject>().ToList() : new List<IGameObject>();
-            List<IComponent> components = hierarchyInstance.Components != null ? hierarchyInstance.Components.Cast<IComponent>().ToList() : new List<IComponent>();
             
             var baseGameMachinePrefab = ProcessPrefab($"{baseGameMachine}", 
-                components, 
-                runtimeObjects,
+                hierarchyInstance, 
                 runtimeAssetPath);
         }
 

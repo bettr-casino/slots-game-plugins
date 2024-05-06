@@ -326,6 +326,8 @@ namespace Bettr.Editor
         
         public bool IncludeAudioListener { get; set; }
         
+        public List<EventTriggerData> EventTriggers { get; set; }
+        
         public List<AnimationState> AnimationStates { get; set; }
         
         public List<AnimationTransition> AnimatorTransitions { get; set; }
@@ -363,6 +365,7 @@ namespace Bettr.Editor
             AnimatorTransitions = new List<AnimationTransition>();
             TextMeshProsProperty = new List<TextMeshProProperty>();
             TextMeshProGroupsProperty = new List<TextMeshProGroupProperty>();
+            EventTriggers = new List<EventTriggerData>();
         }
         
         public void AddComponent(GameObject gameObject)
@@ -429,20 +432,22 @@ namespace Bettr.Editor
                     var eventSystemComponent = new EventSystemComponent();
                     eventSystemComponent.AddComponent(gameObject);
                     break;
-                case "EventTrigger":
-                    {
-                        InstanceGameObject.IdGameObjects.TryGetValue(ReferenceId, out var referenceGameObject);
-                        var tile = referenceGameObject?.GameObject.GetComponent<Tile>();
-                        var eventTriggerComponent = new EventTriggerComponent(tile, Params);
-                        eventTriggerComponent.AddComponent(gameObject);
-                    }
-                    break;
                 case "Tile":
                 {
                     var globalTileId = string.IsNullOrEmpty(Name) ? Filename : Name;
                     var scriptAsset = BettrScriptGenerator.CreateOrLoadScript( Filename, RuntimeAssetPath);
                     var tileComponent = new TileComponent(globalTileId, scriptAsset);
                     tileComponent.AddComponent(gameObject);
+                    
+                    // add in the event triggers
+                    var tile = gameObject.GetComponent<Tile>();
+                    foreach (var eventTrigger in EventTriggers)
+                    {
+                        InstanceGameObject.IdGameObjects.TryGetValue(eventTrigger.ReferenceId, out var referenceGameObject);
+                        var eventTriggerComponent = new EventTriggerComponent(tile, Params);
+                        eventTriggerComponent.AddComponent(referenceGameObject?.GameObject);
+                        
+                    }
                 }
                     break;
                 case "TileWithUpdate":
@@ -451,6 +456,15 @@ namespace Bettr.Editor
                     var scriptAsset = BettrScriptGenerator.CreateOrLoadScript(Filename, RuntimeAssetPath);
                     var tileComponent = new TileWithUpdateComponent(globalTileId, scriptAsset);
                     tileComponent.AddComponent(gameObject);
+                    
+                    // add in the event triggers
+                    var tile = gameObject.GetComponent<TileWithUpdate>();
+                    foreach (var eventTrigger in EventTriggers)
+                    {
+                        InstanceGameObject.IdGameObjects.TryGetValue(eventTrigger.ReferenceId, out var referenceGameObject);
+                        var eventTriggerComponent = new EventTriggerComponent(tile, Params);
+                        eventTriggerComponent.AddComponent(referenceGameObject?.GameObject);
+                    }
                 }
                     break;
                 case "TilePropertyTextMeshPros":
@@ -669,6 +683,13 @@ namespace Bettr.Editor
                     break;
             }
         }
+    }
+
+    [Serializable]
+    public class EventTriggerData
+    {
+        // ReSharper disable once InconsistentNaming
+        public string ReferenceId;
     }
     
     [Serializable]
