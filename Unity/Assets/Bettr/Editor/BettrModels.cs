@@ -320,6 +320,10 @@ namespace Bettr.Editor
         
         public string FontAsset { get; set; }
         
+        public string HorizontalAlignment { get; set; }
+        
+        public string VerticalAlignment { get; set; }
+        
         public Rect? Rect { get; set; }
         
         public string ReferenceId { get; set; }
@@ -355,6 +359,8 @@ namespace Bettr.Editor
         public InstanceComponent()
         {
             FontAsset = "Roboto-Bold SDF";
+            HorizontalAlignment = "Center";
+            VerticalAlignment = "Middle";
             IncludeAudioListener = true;
             Params = Array.Empty<string>();
             GameObjectsProperty = new List<GameObjectProperty>();
@@ -377,11 +383,11 @@ namespace Bettr.Editor
                     animatorComponent.AddComponent(gameObject);
                     break;
                 case "TextMeshPro":
-                    var textMeshProComponent = new TextMeshProComponent(Text, FontSize, Color, Rect, FontAsset);
+                    var textMeshProComponent = new TextMeshProComponent(Text, FontSize, Color, HorizontalAlignment, VerticalAlignment, Rect, FontAsset);
                     textMeshProComponent.AddComponent(gameObject);
                     break;
                 case "TextMeshProUI":
-                    var textMeshProUIComponent = new TextMeshProUIComponent(Text, FontSize, Color, Rect, FontAsset);
+                    var textMeshProUIComponent = new TextMeshProUIComponent(Text, FontSize, Color, HorizontalAlignment, VerticalAlignment, Rect, FontAsset);
                     textMeshProUIComponent.AddComponent(gameObject);
                     break;
                 case "Image":
@@ -1360,6 +1366,9 @@ namespace Bettr.Editor
             return fontAsset;
         }
             
+        public string HorizontalAlignment { get; set; }
+        
+        public string VerticalAlignment { get; set; }
         
         public string Text { get; set; }
         public float FontSize { get; set; }
@@ -1369,11 +1378,13 @@ namespace Bettr.Editor
         
         public TMP_FontAsset FontAsset { get; set; }
         
-        public TextMeshProComponent(string text, float fontSize, string colorHex, Rect? rect = null, string fontAssetName = "Roboto-Bold SDF")
+        public TextMeshProComponent(string text, float fontSize, string colorHex, string horizontalAlignment = "Left", string verticalAlignment = "Middle", Rect? rect = null, string fontAssetName = "Roboto-Bold SDF")
         {
             Text = text;
             FontSize = fontSize;
             Rect = rect;
+            HorizontalAlignment = horizontalAlignment;
+            VerticalAlignment = verticalAlignment;
             
             // ReSharper disable once InlineOutVariableDeclaration
             TMP_FontAsset tmpFontAsset;
@@ -1408,6 +1419,8 @@ namespace Bettr.Editor
             textMeshPro.color = FontColor;
             textMeshPro.alignment = TextAlignmentOptions.Center;
             textMeshPro.enableWordWrapping = false;
+            textMeshPro.horizontalAlignment = (HorizontalAlignmentOptions) Enum.Parse(typeof(HorizontalAlignmentOptions), HorizontalAlignment);
+            textMeshPro.verticalAlignment = (VerticalAlignmentOptions) Enum.Parse(typeof(VerticalAlignmentOptions), VerticalAlignment);
             textMeshPro.font = FontAsset;
             
             if (Rect is not null)
@@ -1422,7 +1435,7 @@ namespace Bettr.Editor
     [Serializable]
     public class TextMeshProUIComponent : TextMeshProComponent
     {
-        public TextMeshProUIComponent(string text, float fontSize, string colorHex, Rect? rect = null, string fontAssetName = "Roboto-Bold SDF") : base(text, fontSize, colorHex, rect, fontAssetName)
+        public TextMeshProUIComponent(string text, float fontSize, string colorHex, string horizontalAlignment = "Left", string verticalAlignment = "Middle", Rect? rect = null, string fontAssetName = "Roboto-Bold SDF") : base(text, fontSize, colorHex, horizontalAlignment, verticalAlignment, rect, fontAssetName)
         {
         }
         
@@ -1439,6 +1452,8 @@ namespace Bettr.Editor
             textMeshPro.enableAutoSizing = false; // Ensure fixed font size
             textMeshPro.color = FontColor;
             textMeshPro.alignment = TextAlignmentOptions.Center;
+            textMeshPro.horizontalAlignment = (HorizontalAlignmentOptions) Enum.Parse(typeof(HorizontalAlignmentOptions), HorizontalAlignment);
+            textMeshPro.verticalAlignment = (VerticalAlignmentOptions) Enum.Parse(typeof(VerticalAlignmentOptions), VerticalAlignment);
             textMeshPro.enableWordWrapping = false;
             
             if (Rect is not null)
