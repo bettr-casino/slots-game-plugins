@@ -479,7 +479,7 @@ namespace Bettr.Editor
                         var tilePropertyTextMeshPro = new TilePropertyTextMeshPro()
                         {
                             key = kvPair.Key,
-                            value = new PropertyTextMeshPro() {textMeshPro = textMeshPro },
+                            value = new PropertyTextMeshPro() {textMeshPro = textMeshPro, isFormatText = kvPair.IsFormatText},
                         };
                         tileTextMeshProProperties.Add(tilePropertyTextMeshPro);
                     }
@@ -493,7 +493,7 @@ namespace Bettr.Editor
                             var gameObjectProperty = new TilePropertyTextMeshPro()
                             {
                                 key = property.Key,
-                                value = new PropertyTextMeshPro() { textMeshPro = textMeshPro },
+                                value = new PropertyTextMeshPro() { textMeshPro = textMeshPro, isFormatText = property.IsFormatText },
                             };
                             textMeshProsProperties.Add(gameObjectProperty);
                         }
@@ -825,16 +825,23 @@ namespace Bettr.Editor
     [Serializable]
     public class TextMeshProProperty
     {
+        // ReSharper disable once InconsistentNaming
         public string Key;
 
+        // ReSharper disable once InconsistentNaming
         public string Id;
+        
+        // ReSharper disable once InconsistentNaming
+        public bool IsFormatText;
     }
     
     [Serializable]
     public class TextMeshProGroupProperty
     {
+        // ReSharper disable once InconsistentNaming
         public string GroupKey;
 
+        // ReSharper disable once InconsistentNaming
         public List<TextMeshProProperty> Group;
     }
     
