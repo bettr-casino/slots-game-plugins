@@ -1295,7 +1295,7 @@ namespace Bettr.Editor
             uiCamera.clearFlags = CameraClearFlags.Depth;
             uiCamera.cullingMask = LayerMask.GetMask("SLOT_REELS_OVERLAY");
             uiCamera.orthographic = true;
-            uiCamera.orthographicSize = 5;
+            uiCamera.orthographicSize = 4.1f;
             uiCamera.nearClipPlane = 0.3f;
             uiCamera.farClipPlane = 1000;
             uiCamera.depth = 1;
