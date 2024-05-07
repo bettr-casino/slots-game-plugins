@@ -438,7 +438,8 @@ function Game002BaseGameMachine:TryWaysPaying()
 end
 
 function Game002BaseGameMachine:TryFreeSpinsTriggering()
-    Game002BaseGameState.SpinState.First.State = "FreeSpinsTriggering"
+    -- Game002BaseGameState.SpinState.First.State = "FreeSpinsTriggering"
+    Game002BaseGameMachine:OnBaseGameSpinCompleted()
 end
 
 function Game002BaseGameMachine:CurrentSpinState()

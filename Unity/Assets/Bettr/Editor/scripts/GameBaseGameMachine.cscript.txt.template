@@ -438,7 +438,8 @@ function {{machineName}}BaseGameMachine:TryWaysPaying()
 end
 
 function {{machineName}}BaseGameMachine:TryFreeSpinsTriggering()
-    {{machineName}}BaseGameState.SpinState.First.State = "FreeSpinsTriggering"
+    -- {{machineName}}BaseGameState.SpinState.First.State = "FreeSpinsTriggering"
+    {{machineName}}BaseGameMachine:OnBaseGameSpinCompleted()
 end
 
 function {{machineName}}BaseGameMachine:CurrentSpinState()
