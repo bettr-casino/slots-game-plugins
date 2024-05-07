@@ -757,6 +757,8 @@ namespace Bettr.Editor
         {
             string baseGameMachine = $"{machineName}BaseGameMachine";
             
+            string baseGameSettings = $"{machineName}BaseGameSettings";
+            
             var baseGameSymbolTable = GetTable($"{machineName}BaseGameSymbolTable");
             
             var scriptName = $"{machineName}BaseGameReel";   
@@ -821,6 +823,7 @@ namespace Bettr.Editor
                 { "machineName", machineName },
                 { "machineVariant", machineVariant },
                 { "baseGameMachine", baseGameMachine },
+                { "baseGameSettings", baseGameSettings },
                 { "symbolKeys", symbolKeys},
                 { "reelMaskUpperY", reelMaskUpperYs[0]},
                 { "reelMaskLowerY", reelMaskLowerYs[0]},
