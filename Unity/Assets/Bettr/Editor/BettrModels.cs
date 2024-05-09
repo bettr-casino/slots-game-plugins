@@ -1087,10 +1087,13 @@ namespace Bettr.Editor
                             AnimationUtility.SetKeyLeftTangentMode(curve, i, AnimationUtility.TangentMode.Auto);
                             AnimationUtility.SetKeyRightTangentMode(curve, i, AnimationUtility.TangentMode.Auto);
                         }
-                        switch (dopesheet.Property)
+                        switch (dopesheet.Type)
                         {
-                            case "m_IsActive":
-                                AnimationUtility.SetEditorCurve(animationClip, EditorCurveBinding.FloatCurve(dopesheet.Path, typeof(GameObject), "m_IsActive"), curve);
+                            case "GameObject":
+                                AnimationUtility.SetEditorCurve(animationClip, EditorCurveBinding.FloatCurve(dopesheet.Path, typeof(GameObject), dopesheet.Property), curve);
+                                break;
+                            case "Transform":
+                                AnimationUtility.SetEditorCurve(animationClip, EditorCurveBinding.FloatCurve(dopesheet.Path, typeof(Transform), dopesheet.Property), curve);
                                 break;
                         }
                     }
