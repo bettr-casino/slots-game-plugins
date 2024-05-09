@@ -49,6 +49,24 @@
                 }
             {{ if !for.last }},{{ end }}{{ end }}    
             ]
+        },
+        {
+             "ComponentType": "TilePropertyAnimators",
+             "AnimatorsGroupProperty": [
+             {{ for symbolIndex in waysSymbolIndexes }}
+                 {
+                     "GroupKey": "SymbolWaysWinAnimatorGroup{{symbolIndex}}",
+                     "Group": [
+                         {{ for symbolKey in symbolKeys }}
+                         {
+                             "Key": "{{symbolKey}}",
+                             "Id": "Symbol{{symbolIndex}}{{symbolKey}}"
+                         }
+                         {{ if !for.last }},{{ end }}{{ end }}
+                     ]
+                 }
+             {{ if !for.last }},{{ end }}{{ end }}    
+             ]
         }
     ],
     "Children": [
