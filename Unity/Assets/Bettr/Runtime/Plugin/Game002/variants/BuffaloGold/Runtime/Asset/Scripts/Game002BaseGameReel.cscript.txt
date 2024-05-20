@@ -30,9 +30,8 @@ function Game002BaseGameReel:DisplayWays(waySymbol, wayMatrix, waySymbolCount, d
        if wayReelID == self.ReelID then
            local waysGroupProperty = self.WaysGroup
            local rowIndex = wayMatrix[i].RowIndex
-           waysGroupProperty["RowIndex" .. rowIndex].SetActive(true)
-           local rowIndex = wayMatrix[i].RowIndex
            local luaRowIndex = rowIndex + 1
+           waysGroupProperty["RowIndex" .. luaRowIndex].SetActive(true)
            local animatorGroupProperty = self["SymbolWaysWinAnimatorGroup" .. luaRowIndex]
            local symbolGroupProperty = self["SymbolGroup" .. luaRowIndex]
            local currentKey = symbolGroupProperty.CurrentKey
