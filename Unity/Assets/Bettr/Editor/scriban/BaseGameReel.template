@@ -51,6 +51,22 @@
             ]
         },
         {
+            "ComponentType": "TilePropertyGameObjects",
+            "GameObjectGroupsProperty": [
+                {
+                    "GroupKey": "WaysGroup",
+                    "Group": [
+                         {{ for waysIndex in waysSymbolIndexes }}
+                         {
+                             "Key": "RowIndex{{waysIndex}}",
+                             "Id": "Ways{{waysIndex}}"
+                         }
+                         {{ if !for.last }},{{ end }}{{ end }}
+                    ]
+                }    
+            ]
+        },
+        {
              "ComponentType": "TilePropertyAnimators",
              "AnimatorsGroupProperty": [
              {{ for symbolIndex in waysSymbolIndexes }}
@@ -100,6 +116,7 @@
         {{ for symbolIndex in waysSymbolIndexes }}
         {
             "Name": "Ways{{symbolIndex}}",
+            "Id": "Ways{{symbolIndex}}",
             "Layer": "SLOT_REELS",
             "Active": false,
             "IsPrefab": true,
