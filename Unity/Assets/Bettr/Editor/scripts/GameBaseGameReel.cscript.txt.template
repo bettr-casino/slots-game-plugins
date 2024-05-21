@@ -50,7 +50,8 @@ function {{machineName}}BaseGameReel:HideWays(waySymbol, wayMatrix, wayMatrixCou
         if wayReelID == self.ReelID then
             local waysGroupProperty = self.WaysGroup
             local rowIndex = wayMatrix[i].RowIndex
-            waysGroupProperty["RowIndex" .. rowIndex].SetActive(false)
+            local luaRowIndex = rowIndex + 1
+            waysGroupProperty["RowIndex" .. luaRowIndex].SetActive(false)
         end
     end
 end
