@@ -300,7 +300,7 @@ namespace Bettr.Core
             var normalizedTime = 0.0f;
             var isAnimationDurationOverridden = animatorProperty.overrideAnimationDuration;
             var animationStateName = animatorProperty.animationStateName;            
-            Debug.Log($"animator animationStateName={animatorProperty.animationStateName} gameObject={animatorProperty.GameObject.name} path={GetGameObjectFullPath(animatorProperty.GameObject)}");
+            //Debug.Log($"animator animationStateName={animatorProperty.animationStateName} gameObject={animatorProperty.GameObject.name} path={GetGameObjectFullPath(animatorProperty.GameObject)}");
             if (!animatorProperty.GameObject.activeSelf)
             {
                 Debug.LogWarning($"!activeSelf animator animationStateName={animatorProperty.animationStateName} gameObject={animatorProperty.GameObject.name} path={GetGameObjectFullPath(animatorProperty.GameObject)}");
