@@ -639,6 +639,9 @@ namespace Bettr.Editor
             
             ProcessBaseGameMachine(machineName, machineVariant, runtimeAssetPath);
             ProcessScene(machineName, machineVariant, runtimeAssetPath);
+            
+            // Apply mechanics
+            ProcessMechanics(machineName, machineVariant, runtimeAssetPath);
         }
         
         private static void EnsureDirectory(string path)
@@ -1052,38 +1055,6 @@ namespace Bettr.Editor
                 runtimeAssetPath);
         }
         
-        private static IGameObject ProcessWinSymbols(string runtimeAssetPath)
-        {
-            SimpleStringInterpolator interpolator = new SimpleStringInterpolator();
-            
-            string jsonTemplate = ReadJson("BaseGameWinSymbols");
-            string json = interpolator.Interpolate(jsonTemplate);
-
-            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-            InstanceGameObject.IdGameObjects.Clear();
-            
-            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
-
-            return hierarchyInstance;
-        }
-        
-        private static IGameObject ProcessWinSymbol(string symbolName, string symbolPrefabName, string runtimeAssetPath)
-        {
-            SimpleStringInterpolator interpolator = new SimpleStringInterpolator();
-            interpolator.SetVariable("symbolName", symbolName);
-            interpolator.SetVariable("symbolPrefabName", symbolPrefabName);
-            
-            string jsonTemplate = ReadJson("BaseGameWinSymbol");
-            string json = interpolator.Interpolate(jsonTemplate);
-
-            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-            InstanceGameObject.IdGameObjects.Clear();
-            
-            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
-
-            return hierarchyInstance;
-        }
-        
         private static SceneAsset ProcessScene(string machineName, string machineVariant, string runtimeAssetPath)
         {
             AssetDatabase.Refresh();
@@ -1153,6 +1124,24 @@ namespace Bettr.Editor
             sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePath);
 
             return sceneAsset;
+        }
+        
+        private static void ProcessMechanics(string machineName, string machineVariant, string runtimeAssetPath)
+        {
+            AssetDatabase.Refresh();
+            
+            // read all the mechanics from the machine model
+            if (HasTable($"{machineName}BaseGameScatterBonusPaysMechanic"))
+            {
+                ProcessBaseGameScatterBonusPaysMechanic(machineName, machineVariant, runtimeAssetPath);
+            }
+            
+        }
+
+        private static void ProcessBaseGameScatterBonusPaysMechanic(string machineName, string machineVariant, string runtimeAssetPath)
+        {
+            // base game scatter bonus pays
+            // add new animations on all symbols animator controllers
         }
         
         private static string ReadJson(string fileName)
@@ -1335,6 +1324,12 @@ namespace Bettr.Editor
                 Debug.LogError($"{tableName} not found in the machine model.");
             }
             return table;
+        }
+        
+        private static bool HasTable(string tableName)
+        {
+            var table = TileController.LuaScript.Globals[tableName] as Table;
+            return table != null;
         }
     }
     
