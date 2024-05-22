@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Bettr.Editor.generators
 {
-    public class BettrAnimatorController
+    public static class BettrAnimatorController
     {
         public static AnimatorController CreateOrLoadAnimatorController(string fileName, List<AnimationState> animationStates, List<AnimationTransition> animationTransitions, string runtimeAssetPath)
         {
