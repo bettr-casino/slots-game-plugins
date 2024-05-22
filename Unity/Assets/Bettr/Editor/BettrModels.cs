@@ -334,7 +334,7 @@ namespace Bettr.Editor
         
         public List<AnimationState> AnimationStates { get; set; }
         
-        public List<AnimationTransition> AnimatorTransitions { get; set; }
+        public List<AnimatorTransition> AnimatorTransitions { get; set; }
         
         public List<GameObjectProperty> GameObjectsProperty { get; set; }
         
@@ -368,7 +368,7 @@ namespace Bettr.Editor
             AnimatorsProperty = new List<AnimatorProperty>();
             AnimatorsGroupProperty = new List<AnimatorGroupProperty>();
             AnimationStates = new List<AnimationState>();
-            AnimatorTransitions = new List<AnimationTransition>();
+            AnimatorTransitions = new List<AnimatorTransition>();
             TextMeshProsProperty = new List<TextMeshProProperty>();
             TextMeshProGroupsProperty = new List<TextMeshProGroupProperty>();
             EventTriggers = new List<EventTriggerData>();
@@ -992,7 +992,7 @@ namespace Bettr.Editor
     }
 
     [Serializable]
-    public class AnimationTransition
+    public class AnimatorTransition
     {
         // ReSharper disable once InconsistentNaming
         public string TransitionFrom;
@@ -1018,9 +1018,9 @@ namespace Bettr.Editor
 
         private List<AnimationState> _animationStates;
         
-        private List<AnimationTransition> _animationTransitions;
+        private List<AnimatorTransition> _animationTransitions;
         
-        public AnimatorComponent(string fileName, List<AnimationState> animationStates, List<AnimationTransition> animationTransitions, string runtimeAssetPath)
+        public AnimatorComponent(string fileName, List<AnimationState> animationStates, List<AnimatorTransition> animationTransitions, string runtimeAssetPath)
         {
             _fileName = fileName;
             _runtimeAssetPath = runtimeAssetPath;
@@ -1557,5 +1557,25 @@ namespace Bettr.Editor
             UnityEventTools.AddVoidPersistentListener(triggerEvent, _tile.OnPointerClick);
             eventTrigger.triggers.Add(entry);
         }
+    }
+
+    [Serializable]
+    public class MechanicAnimation
+    {
+        // ReSharper disable once InconsistentNaming
+        public string Filename { get; set; }
+        
+        // ReSharper disable once InconsistentNaming
+        public List<AnimationState> AnimationStates { get; set; }
+        
+        // ReSharper disable once InconsistentNaming
+        public List<AnimatorTransition> AnimatorTransitions { get; set; }
+    }
+
+    [Serializable]
+    public class Mechanic
+    {
+        // ReSharper disable once InconsistentNaming
+        public List<MechanicAnimation> Animations { get; set; }
     }
 }

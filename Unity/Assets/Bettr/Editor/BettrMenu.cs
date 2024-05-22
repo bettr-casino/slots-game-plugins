@@ -1140,8 +1140,35 @@ namespace Bettr.Editor
 
         private static void ProcessBaseGameScatterBonusPaysMechanic(string machineName, string machineVariant, string runtimeAssetPath)
         {
-            // base game scatter bonus pays
-            // add new animations on all symbols animator controllers
+            string templateName = "BaseGameScatterBonusPaysMechanic";
+            string scribanTemplateText = ReadScribanTemplate(templateName);
+
+            var scribanTemplate = Template.Parse(scribanTemplateText);
+            if (scribanTemplate.HasErrors)
+            {
+                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} template: {templateName}");
+                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} template: {{templateName}}");
+            }
+            
+            var model = new Dictionary<string, object>
+            {
+                { "machineName", machineName },
+                { "machineVariant", machineVariant },
+            };
+            
+            var json = scribanTemplate.Render(model);
+            Debug.Log(json);
+            
+            Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
+            if (mechanic == null)
+            {
+                throw new Exception($"Failed to deserialize mechanic from json: {json}");
+            }
+            
+            foreach (var mechanicAnimation in mechanic.Animations)
+            {
+                BettrAnimatorController.AddAnimationState(mechanicAnimation.Filename, mechanicAnimation.AnimationStates, mechanicAnimation.AnimatorTransitions, runtimeAssetPath);
+            }
         }
         
         private static string ReadJson(string fileName)

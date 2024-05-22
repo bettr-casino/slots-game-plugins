@@ -9,7 +9,7 @@ namespace Bettr.Editor.generators
 {
     public static class BettrAnimatorController
     {
-        public static AnimatorController CreateOrLoadAnimatorController(string fileName, List<AnimationState> animationStates, List<AnimationTransition> animationTransitions, string runtimeAssetPath)
+        public static AnimatorController CreateOrLoadAnimatorController(string fileName, List<AnimationState> animationStates, List<AnimatorTransition> animationTransitions, string runtimeAssetPath)
         {
             AssetDatabase.Refresh();
             
@@ -129,7 +129,7 @@ namespace Bettr.Editor.generators
             return runtimeAnimatorController;
         }
         
-        public static AnimatorController AddAnimationState(string fileName, List<AnimationState> animationStates, List<AnimationTransition> animationTransitions, string runtimeAssetPath)
+        public static AnimatorController AddAnimationState(string fileName, List<AnimationState> animationStates, List<AnimatorTransition> animationTransitions, string runtimeAssetPath)
         {
             AssetDatabase.Refresh();
             
