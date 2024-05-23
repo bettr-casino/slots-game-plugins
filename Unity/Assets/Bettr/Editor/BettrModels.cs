@@ -1573,9 +1573,25 @@ namespace Bettr.Editor
     }
 
     [Serializable]
+    public class MechanicTilePropertyAnimators
+    {
+        // ReSharper disable once InconsistentNaming
+        public List<PrefabId> PrefabIds { get; set; }
+        
+        // ReSharper disable once InconsistentNaming
+        public string PrefabName { get; set; }
+        
+        // ReSharper disable once InconsistentNaming
+        public List<AnimatorProperty> AnimatorsProperty { get; set; }
+    }
+
+    [Serializable]
     public class Mechanic
     {
         // ReSharper disable once InconsistentNaming
         public List<MechanicAnimation> Animations { get; set; }
+        
+        // ReSharper disable once InconsistentNaming
+        public List<MechanicTilePropertyAnimators> TilePropertyAnimators { get; set; }
     }
 }

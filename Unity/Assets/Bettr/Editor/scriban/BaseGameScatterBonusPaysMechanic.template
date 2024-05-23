@@ -42,5 +42,31 @@
             "AnimatorTransitions": [
             ]
         }
+    ],
+    "TilePropertyAnimators": [
+        {{- for tuple in scatterSymbolIndexesByReel }}
+        {
+            "PrefabName": "{{machineName}}BaseGameReel{{tuple.key}}",
+            "PrefabIds": [
+                {{- for symbolIndex in tuple.value }}
+                {
+                    "Prefix": "Symbol{{ symbolIndex }}",
+                    "Index": {{ symbolIndex - 1 }},
+                    "Id": "SC"
+                }{{- if !for.last }},{{ end -}}
+                {{- end -}}
+            ],
+            "AnimatorsProperty": [
+                {{- for symbolIndex in tuple.value }}
+                {
+                    "Key": "SymbolScatterAnimator{{symbolIndex}}",
+                    "State": "scatter",
+                    "Id": "Symbol{{symbolIndex}}SC"
+                }
+                {{- if !for.last }},{{ end -}}
+                {{- end -}}
+            ]
+        }{{- if !for.last }},{{ end -}}
+        {{- end -}}
     ]
 }
