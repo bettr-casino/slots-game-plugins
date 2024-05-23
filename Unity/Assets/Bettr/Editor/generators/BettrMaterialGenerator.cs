@@ -47,7 +47,7 @@ namespace Bettr.Editor.generators
                 }
                 ImportTexture2D( sourcePath, destPath);
                 AssetDatabase.Refresh();
-                Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>($"{InstanceComponent.RuntimeAssetPath}/Textures/{textureName}.jpg");
+                Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(destPath);
                 if (texture == null)
                 {
                     throw new Exception($"{textureName} texture not found.");
