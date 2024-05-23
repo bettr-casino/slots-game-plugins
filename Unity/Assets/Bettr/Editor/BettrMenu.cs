@@ -1312,7 +1312,57 @@ namespace Bettr.Editor
             {
                 throw new Exception($"Failed to deserialize mechanic from json: {json}");
             }
-            
+
+            if (mechanic.ParticleSystems != null)
+                foreach (var mechanicParticleSystem in mechanic.ParticleSystems)
+                {
+                    // Create the particle system
+                    var particleSystem =
+                        BettrParticleSystem.AddOrGetParticleSystem(mechanicParticleSystem.Id, mechanicParticleSystem.Filename, runtimeAssetPath);
+                    var mainModule = particleSystem.main;
+                    var emissionModule = particleSystem.emission;
+                    var renderer = particleSystem.GetComponent<ParticleSystemRenderer>();
+
+                    mainModule.playOnAwake = mechanicParticleSystem.PlayOnAwake;
+
+                    // Example: Set properties from the rendered content
+                    mainModule.startLifetime = mechanicParticleSystem.StartLifetime;
+                    mainModule.startSpeed = mechanicParticleSystem.StartSpeed;
+                    mainModule.startSize = mechanicParticleSystem.StartSize;
+                    mainModule.startColor = new ParticleSystem.MinMaxGradient(mechanicParticleSystem.GetStartColor());
+                    mainModule.gravityModifier = mechanicParticleSystem.GravityModifier;
+                    emissionModule.rateOverTime = mechanicParticleSystem.EmissionRateOverTime;
+                    mainModule.simulationSpace = ParticleSystemSimulationSpace.World;
+                    mainModule.loop = mechanicParticleSystem.Looping;
+                    mainModule.duration = mechanicParticleSystem.Duration;
+                    
+                    // Check if material properties are provided before generating the material
+                    Material material = null;
+                    if (!string.IsNullOrEmpty(mechanicParticleSystem.RendererSettings.Material) &&
+                        !string.IsNullOrEmpty(mechanicParticleSystem.RendererSettings.Shader))
+                    {
+                        material = BettrMaterialGenerator.CreateOrLoadMaterial(
+                            mechanicParticleSystem.RendererSettings.Material,
+                            mechanicParticleSystem.RendererSettings.Shader,
+                            mechanicParticleSystem.RendererSettings.Texture,
+                            mechanicParticleSystem.RendererSettings.Color,
+                            runtimeAssetPath
+                        );
+                    }
+    
+                    // Set the material to the renderer
+                    if (material != null)
+                    {
+                        renderer.material = material;
+                    }
+
+                    renderer.sortingOrder = mechanicParticleSystem.RendererSettings.SortingOrder;
+
+                    // Save changes to the prefab
+                    BettrParticleSystem.SaveParticleSystem(particleSystem, mechanicParticleSystem.Filename,
+                        runtimeAssetPath);
+                }
+
             // save the changes
             AssetDatabase.SaveAssets();
         }

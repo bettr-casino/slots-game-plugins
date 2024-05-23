@@ -1590,6 +1590,61 @@ namespace Bettr.Editor
     {
         // ReSharper disable once InconsistentNaming
         public string Filename { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public int Id { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public float StartLifetime { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public float StartSpeed { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public float StartSize { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public string StartColor { get; set; } // Stored as a string in RGBA format
+        // ReSharper disable once InconsistentNaming
+        public float GravityModifier { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public float EmissionRateOverTime { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public string Shape { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public string SimulationSpace { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public bool Looping { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public float Duration { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public bool PlayOnAwake { get; set; }
+
+        // ReSharper disable once InconsistentNaming
+        public ParticleSystemRendererSettings RendererSettings { get; set; }
+        [Serializable]
+        public class ParticleSystemRendererSettings
+        {
+            // ReSharper disable once InconsistentNaming
+            public string Material { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public string Texture { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public string Color { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public string Shader { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public int SortingOrder { get; set; }
+        }
+        
+        public Color32 GetStartColor()
+        {
+            string[] rgba = StartColor.Split(',');
+            if (rgba.Length == 4 &&
+                byte.TryParse(rgba[0], out byte r) &&
+                byte.TryParse(rgba[1], out byte g) &&
+                byte.TryParse(rgba[2], out byte b) &&
+                byte.TryParse(rgba[3], out byte a))
+            {
+                return new Color32(r, g, b, a);
+            }
+            return new Color32(255, 255, 255, 255); // Default to white if parsing fails
+        }
     }
     
     [Serializable]

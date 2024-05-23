@@ -1,8 +1,26 @@
 {
-    "ParticleEffects": [
-        {
-            "Filename": "{{machineName}}BaseGameScatterAnticipation"            
-        }
+    "ParticleSystems": [
+    {{- for reelIndex in 1..reelCount -}}
+    {
+        "Filename": "{{machineName}}BaseGameReel{{reelIndex}}",
+        "Id": 1,
+        "StartLifetime": 5.0,
+        "StartSpeed": 10.0,
+        "StartSize": 1.0,
+        "StartColor": "255, 0, 0, 255",
+        "GravityModifier": 0.5,
+        "EmissionRate": 50.0,
+        "Shape": "Cone",
+        "SimulationSpace": "World",
+        "Looping": true,
+        "Duration": 10.0,
+        "RendererSettings": {
+            "Material": "ParticleMaterial",
+            "SortingOrder": 1
+        }           
+    }
+    {{- if !for.last }},{{ end -}}
+    {{- end -}}
     ],
     "TilePropertyParticleSystems": [        
     ]
