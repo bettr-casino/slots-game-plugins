@@ -1138,6 +1138,10 @@ namespace Bettr.Editor
                 ProcessBaseGameScatterBonusPaysMechanic(machineName, machineVariant, runtimeAssetPath);
             }
             
+            if (HasTable($"{machineName}BaseGameScatterBonusFreeSpinsMechanic"))
+            {
+                ProcessBaseGameScatterBonusFreeSpinsMechanic(machineName, machineVariant, runtimeAssetPath);
+            }
         }
 
         private static void ProcessBaseGameScatterBonusPaysMechanic(string machineName, string machineVariant, string runtimeAssetPath)
@@ -1247,6 +1251,66 @@ namespace Bettr.Editor
                 }
                 
                 PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
+            }
+            
+            // save the changes
+            AssetDatabase.SaveAssets();
+        }
+        
+        private static void ProcessBaseGameScatterBonusFreeSpinsMechanic(string machineName, string machineVariant, string runtimeAssetPath)
+        {
+            AssetDatabase.Refresh();
+            
+            var baseGameReelState = GetTable($"{machineName}BaseGameReelState");
+            var reelCount = 0;
+            foreach (var pair in baseGameReelState.Pairs)
+            {
+                reelCount++;
+            }
+            
+            var scatterSymbolIndexesByReel = new Dictionary<string, List<int>>();
+            for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
+            {
+                var reelStates = GetTable($"{machineName}BaseGameReelState");
+                var topSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "TopSymbolCount");
+                var visibleSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "VisibleSymbolCount");
+                
+                var scatterSymbolIndexes = new List<int>();
+                for (int symbolIndex = topSymbolCount + 1;
+                     symbolIndex <= topSymbolCount + visibleSymbolCount;
+                     symbolIndex++)
+                {
+                    scatterSymbolIndexes.Add(symbolIndex);
+                }
+                
+                scatterSymbolIndexesByReel.Add($"{reelIndex}", scatterSymbolIndexes);
+            }
+
+            string templateName = "BaseGameScatterBonusFreeSpinsMechanic";
+            string scribanTemplateText = ReadScribanTemplate(templateName);
+
+            var scribanTemplate = Template.Parse(scribanTemplateText);
+            if (scribanTemplate.HasErrors)
+            {
+                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} template: {templateName}");
+                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} template: {{templateName}}");
+            }
+            
+            var model = new Dictionary<string, object>
+            {
+                { "machineName", machineName },
+                { "machineVariant", machineVariant },
+                { "reelCount", reelCount },
+                { "scatterSymbolIndexesByReel", scatterSymbolIndexesByReel },
+            };
+            
+            var json = scribanTemplate.Render(model);
+            Debug.Log(json);
+            
+            Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
+            if (mechanic == null)
+            {
+                throw new Exception($"Failed to deserialize mechanic from json: {json}");
             }
             
             // save the changes
