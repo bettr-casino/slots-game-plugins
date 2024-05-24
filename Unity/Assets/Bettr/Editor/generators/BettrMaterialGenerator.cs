@@ -66,7 +66,8 @@ namespace Bettr.Editor.generators
                     throw new Exception($"Invalid color {hexColor}.");
                 }
             }
-
+            
+            AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
             return material;
