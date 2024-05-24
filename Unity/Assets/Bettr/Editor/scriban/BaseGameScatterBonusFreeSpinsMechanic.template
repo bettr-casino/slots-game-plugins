@@ -1,4 +1,19 @@
 {
+    "Modifiers": [
+        {{- for reelIndex in 1..reelCount -}}
+        {
+            "PrefabName": "{{machineName}}BaseGameReel{{reelIndex}}",
+            "PrefabIds": [
+                {
+                    "Index": 0,
+                    "Id": "{{machineName}}BaseGameReel{{reelIndex}}"
+                }
+            ],
+            "Name": "AnticipationParticleEffect",
+            "Parent": "{{machineName}}BaseGameReel{{reelIndex}}"
+        }{{- if !for.last }},{{ end -}}
+        {{- end -}}                    
+    ],
     "ParticleSystems": [
     {{- for reelIndex in 1..reelCount -}}
     {
@@ -23,13 +38,13 @@
         "ShapeAngle": 0,
         "ShapeRadius": 0,
         "ShapeRadiusThickness": 1,
-        "ShapeArc": 0,
+        "ShapeArc": 360,
         "ShapeArcMode": "Loop",
         "ShapeSpread": 0,
         "ShapeEmitFrom": "Edge",
-        "ShapePosition": { "x": 0, "y": 0, "z": 0 },
+        "ShapePosition": { "x": 0, "y": -0.67, "z": 0 },
         "ShapeRotation": { "x": 0, "y": 0, "z": 0 },
-        "ShapeScale": { "x": 1, "y": 6, "z": 1 },
+        "ShapeScale": { "x": 1, "y": 3.5, "z": 1 },
         "ShapeArcSpeed": 0.0,
         "SimulationSpace": "Local",
         "Looping": true,
@@ -45,11 +60,12 @@
             "Texture": "GlowTexture.png",
             "Color": "#0000FF10", // Fully opaque blue
             "SortingOrder": -1,
+            "SortingLayer": "SLOT_OVERLAY",
             "RenderMode": "Billboard",
             "NormalDirection": 1,
             "SortMode": "None",
             "MinParticleSize": 0.1,
-            "MaxParticleSize": 0.2,
+            "MaxParticleSize": 0.1,
             "RenderAlignment": "View",
             "FlipX": false,
             "FlipY": false,

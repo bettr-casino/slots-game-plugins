@@ -1299,7 +1299,7 @@ namespace Bettr.Editor
             foreach (var mechanicParticleSystem in mechanic.ParticleSystems)
             {
                 // Create the particle system
-                var particleSystem = BettrParticleSystem.AddOrGetParticleSystem(mechanicParticleSystem.Id, mechanicParticleSystem.Filename, runtimeAssetPath);
+                var particleSystem = BettrParticleSystem.AddOrGetParticleSystem(mechanicParticleSystem.Filename, runtimeAssetPath);
                 var mainModule = particleSystem.main;
                 var emissionModule = particleSystem.emission;
                 var shapeModule = particleSystem.shape;

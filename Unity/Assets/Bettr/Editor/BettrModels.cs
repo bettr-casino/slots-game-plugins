@@ -1609,6 +1609,22 @@ namespace Bettr.Editor
             eventTrigger.triggers.Add(entry);
         }
     }
+    
+    [Serializable]
+    public class MechanicModifier
+    {
+        // ReSharper disable once InconsistentNaming
+        public List<PrefabId> PrefabIds { get; set; }
+        
+        // ReSharper disable once InconsistentNaming
+        public string PrefabName { get; set; }
+        
+        // ReSharper disable once InconsistentNaming
+        public string Name { get; set; }
+        
+        // ReSharper disable once InconsistentNaming
+        public string Parent { get; set; }
+    }
 
     [Serializable]
     public class MechanicAnimation
@@ -1795,6 +1811,9 @@ namespace Bettr.Editor
     [Serializable]
     public class Mechanic
     {
+        // ReSharper disable once InconsistentNaming
+        public List<MechanicModifier> Modifiers { get; set; }
+        
         // ReSharper disable once InconsistentNaming
         public List<MechanicAnimation> Animations { get; set; }
         

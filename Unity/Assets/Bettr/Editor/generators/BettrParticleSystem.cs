@@ -9,7 +9,7 @@ namespace Bettr.Editor.generators
 {
     public static class BettrParticleSystem
     {
-        public static ParticleSystem AddOrGetParticleSystem(int particleSystemId, string prefabName, string runtimeAssetPath)
+        public static ParticleSystem AddOrGetParticleSystem(string prefabName, string runtimeAssetPath)
         {
             AssetDatabase.Refresh();
             
@@ -25,9 +25,6 @@ namespace Bettr.Editor.generators
             var customData = particleSystem.customData;
             customData.enabled = true;
             customData.SetMode(ParticleSystemCustomData.Custom1, ParticleSystemCustomDataMode.Vector);
-            
-            // Set custom data to store the particle system ID
-            customData.SetVector(ParticleSystemCustomData.Custom1, 0, new ParticleSystem.MinMaxCurve(particleSystemId));
             
             return particleSystem;
         }
