@@ -1722,6 +1722,9 @@ namespace Bettr.Editor
             // ReSharper disable once InconsistentNaming
             public int SortingOrder { get; set; }
             // ReSharper disable once InconsistentNaming
+            
+            // ReSharper disable once InconsistentNaming
+            public string SortingLayer { get; set; }
             public string RenderMode { get; set; }
             // ReSharper disable once InconsistentNaming
             public float NormalDirection { get; set; }

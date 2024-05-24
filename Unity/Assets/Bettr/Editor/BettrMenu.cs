@@ -1376,6 +1376,10 @@ namespace Bettr.Editor
                 {
                     renderer.lightProbeUsage = lightProbeUsage;
                 }
+
+                renderer.sortingOrder = mechanicParticleSystem.RendererSettings.SortingOrder;
+                renderer.sortingLayerName = mechanicParticleSystem.RendererSettings.SortingLayer;
+                
                 // Check if material properties are provided before generating the material
                 Material material = null;
                 if (!string.IsNullOrEmpty(mechanicParticleSystem.RendererSettings.Material) &&
