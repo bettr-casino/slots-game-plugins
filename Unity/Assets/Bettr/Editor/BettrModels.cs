@@ -1765,14 +1765,9 @@ namespace Bettr.Editor
         
         public Color32 GetStartColor()
         {
-            string[] rgba = StartColor.Split(',');
-            if (rgba.Length == 4 &&
-                byte.TryParse(rgba[0], out byte r) &&
-                byte.TryParse(rgba[1], out byte g) &&
-                byte.TryParse(rgba[2], out byte b) &&
-                byte.TryParse(rgba[3], out byte a))
+            if (ColorUtility.TryParseHtmlString(StartColor, out var color))
             {
-                return new Color32(r, g, b, a);
+                return color;
             }
             return new Color32(255, 255, 255, 255); // Default to white if parsing fails
         }

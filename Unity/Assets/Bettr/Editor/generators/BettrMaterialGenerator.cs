@@ -54,7 +54,7 @@ namespace Bettr.Editor.generators
                 }
                 material.SetTexture((int) MainTex, texture);
             }
-            else if (!string.IsNullOrEmpty(hexColor))
+            if (!string.IsNullOrEmpty(hexColor))
             {
                 Color color;
                 if (ColorUtility.TryParseHtmlString(hexColor, out color))

@@ -7,7 +7,7 @@
         "StartLifetime": 5.0,
         "StartSpeed": 10.0,
         "StartSize": 1.0,
-        "StartColor": "255, 0, 0, 255",
+        "StartColor": "#0000FF", // Bluish color in hex
         "GravityModifier": 0.5,
         "EmissionRateOverTime": 50.0,
         "EmissionRateOverDistance": 0.0,
@@ -25,6 +25,7 @@
         "ShapePosition": { "x": 0, "y": 0, "z": 0 },
         "ShapeRotation": { "x": 0, "y": 0, "z": 0 },
         "ShapeScale": { "x": 1, "y": 1, "z": 1 },
+        "ShapeArcSpeed": 1.0,
         "SimulationSpace": "World",
         "Looping": true,
         "Duration": 60.0,
@@ -37,7 +38,7 @@
             "Material": "ParticleMaterial",
             "Shader": "Bettr/BluishGlow",
             "Texture": "GlowTexture.png",
-            "Color": "0, 0, 255, 255",
+            "Color": "#0000FF", // Bluish color in hex
             "SortingOrder": 1,
             "RenderMode": "Billboard",
             "NormalDirection": 1,
@@ -52,7 +53,7 @@
             "CastShadows": false,
             "ReceiveShadows": false,
             "LightProbes": "Off"
-        }                
+        }           
     }
     {{- if !for.last }},{{ end -}}
     {{- end -}}
@@ -63,7 +64,6 @@
             "PrefabName": "{{machineName}}BaseGameReel{{reelIndex}}",
             "PrefabIds": [
                 {
-                    "Prefix": "Reel{{reelIndex}}",
                     "Index": 0,
                     "Id": "{{machineName}}BaseGameReel{{reelIndex}}"
                 }

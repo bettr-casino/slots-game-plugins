@@ -1421,7 +1421,7 @@ namespace Bettr.Editor
                         };
                         if (tileProperty.value.particleSystem == null)
                         {
-                            Debug.LogError($"Failed to find animator with id: {particleSystemProperty.Id}");
+                            Debug.LogError($"Failed to find particleSystem with id: {particleSystemProperty.Id}");
                         }
                         properties.Add(tileProperty);                        
                     }
