@@ -1672,7 +1672,7 @@ namespace Bettr.Editor
         // ReSharper disable once InconsistentNaming
         public float ShapeArc { get; set; }
         // ReSharper disable once InconsistentNaming
-        public string ShapeMode { get; set; }
+        public string ShapeArcMode { get; set; }
         // ReSharper disable once InconsistentNaming
         public float ShapeSpread { get; set; }
         // ReSharper disable once InconsistentNaming

@@ -17,6 +17,7 @@ using UnityEngine.SceneManagement;
 using DirectoryInfo = System.IO.DirectoryInfo;
 
 using Scriban;
+using UnityEngine.Rendering;
 using Exception = System.Exception;
 
 namespace Bettr.Editor
@@ -1310,13 +1311,16 @@ namespace Bettr.Editor
                 mainModule.startSize = mechanicParticleSystem.StartSize;
                 mainModule.startColor = new ParticleSystem.MinMaxGradient(mechanicParticleSystem.GetStartColor());
                 mainModule.gravityModifier = mechanicParticleSystem.GravityModifier;
-                mainModule.simulationSpace = ParticleSystemSimulationSpace.World;
+                if (Enum.TryParse(mechanicParticleSystem.SimulationSpace, out ParticleSystemSimulationSpace simulationSpace))
+                {
+                    mainModule.simulationSpace = simulationSpace;
+                }
                 mainModule.loop = mechanicParticleSystem.Looping;
                 mainModule.duration = mechanicParticleSystem.Duration;
                 mainModule.startRotation = mechanicParticleSystem.StartRotation;
                 mainModule.startDelay = mechanicParticleSystem.StartDelay;
                 mainModule.prewarm = mechanicParticleSystem.Prewarm;
-                particleSystem.maxParticles = mechanicParticleSystem.MaxParticles;
+                mainModule.maxParticles = mechanicParticleSystem.MaxParticles;
 
                 // Emission module settings
                 emissionModule.rateOverTime = mechanicParticleSystem.EmissionRateOverTime;
@@ -1329,12 +1333,18 @@ namespace Bettr.Editor
                 }
 
                 // Shape module settings
-                shapeModule.shapeType = ParticleSystemShapeType.BoxEdge;
+                shapeModule.shapeType = (ParticleSystemShapeType)Enum.Parse(typeof(ParticleSystemShapeType), mechanicParticleSystem.Shape);
                 shapeModule.angle = mechanicParticleSystem.ShapeAngle;
                 shapeModule.radius = mechanicParticleSystem.ShapeRadius;
                 shapeModule.radiusThickness = mechanicParticleSystem.ShapeRadiusThickness;
                 shapeModule.arc = mechanicParticleSystem.ShapeArc;
-                shapeModule.arcMode = ParticleSystemShapeMultiModeValue.Loop;
+                
+                // Set shape mode if applicable
+                if (Enum.TryParse(mechanicParticleSystem.ShapeArcMode, out ParticleSystemShapeMultiModeValue shapeMode))
+                {
+                    shapeModule.arcMode = shapeMode;
+                }
+                
                 shapeModule.arcSpread = mechanicParticleSystem.ShapeSpread;
                 shapeModule.arcSpeed = mechanicParticleSystem.ShapeArcSpeed; // Set arc speed
                 shapeModule.position = mechanicParticleSystem.ShapePosition;
@@ -1342,19 +1352,30 @@ namespace Bettr.Editor
                 shapeModule.scale = mechanicParticleSystem.ShapeScale;
 
                 // Renderer module settings
-                renderer.renderMode = ParticleSystemRenderMode.Billboard;
+                if (Enum.TryParse(mechanicParticleSystem.RendererSettings.RenderMode, out ParticleSystemRenderMode renderMode))
+                {
+                    renderer.renderMode = renderMode;
+                }
                 renderer.normalDirection = mechanicParticleSystem.RendererSettings.NormalDirection;
-                renderer.sortMode = ParticleSystemSortMode.None;
+                if (Enum.TryParse(mechanicParticleSystem.RendererSettings.SortMode, out ParticleSystemSortMode sortMode))
+                {
+                    renderer.sortMode = sortMode;
+                }
                 renderer.minParticleSize = mechanicParticleSystem.RendererSettings.MinParticleSize;
                 renderer.maxParticleSize = mechanicParticleSystem.RendererSettings.MaxParticleSize;
-                renderer.alignment = ParticleSystemRenderSpace.View;
+                if (Enum.TryParse(mechanicParticleSystem.RendererSettings.RenderAlignment, out ParticleSystemRenderSpace renderAlignment))
+                {
+                    renderer.alignment = renderAlignment;
+                }
                 renderer.flip = new Vector3(mechanicParticleSystem.RendererSettings.FlipX ? 1 : 0, mechanicParticleSystem.RendererSettings.FlipY ? 1 : 0, 0);
                 renderer.pivot = mechanicParticleSystem.RendererSettings.Pivot;
                 renderer.allowRoll = mechanicParticleSystem.RendererSettings.AllowRoll;
                 renderer.receiveShadows = mechanicParticleSystem.RendererSettings.ReceiveShadows;
                 renderer.shadowCastingMode = mechanicParticleSystem.RendererSettings.CastShadows ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off;
-                renderer.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
-
+                if (Enum.TryParse(mechanicParticleSystem.RendererSettings.LightProbes, out LightProbeUsage lightProbeUsage))
+                {
+                    renderer.lightProbeUsage = lightProbeUsage;
+                }
                 // Check if material properties are provided before generating the material
                 Material material = null;
                 if (!string.IsNullOrEmpty(mechanicParticleSystem.RendererSettings.Material) &&
