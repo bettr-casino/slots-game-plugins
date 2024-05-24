@@ -70,6 +70,8 @@ namespace Bettr.Editor
         public GameObject GameObject => _go;
 
         public Animator Animator => _go.GetComponent<Animator>();
+        
+        public ParticleSystem ParticleSystem => _go.GetComponent<ParticleSystem>();
 
         public InstanceGameObject()
         {
@@ -872,6 +874,55 @@ namespace Bettr.Editor
     }
     
     [Serializable]
+    public class ParticleSystemProperty
+    {
+        // ReSharper disable once InconsistentNaming
+        public string Key;
+
+        // ReSharper disable once InconsistentNaming
+        public string Id;
+        
+        // ReSharper disable once InconsistentNaming
+        public float DelayBeforeStart;
+        
+        // ReSharper disable once InconsistentNaming
+        public float Duration;
+        
+        // ReSharper disable once InconsistentNaming
+        public bool WaitForComplete;
+    }
+    
+    [Serializable]
+    public class ParticleSystemGroupProperty
+    {
+        // ReSharper disable once InconsistentNaming
+        public string GroupKey;
+
+        // ReSharper disable once InconsistentNaming
+        public List<ParticleSystemProperty> Group;
+    }
+    
+    [Serializable]
+    public class TilePropertyParticleSystemsComponent : IComponent
+    {
+        private readonly List<TilePropertyParticleSystem> _tileTextMeshProProperties;
+        private readonly List<TilePropertyParticleSystemGroup> _tileTextMeshProGroupProperties;
+        
+        public TilePropertyParticleSystemsComponent(List<TilePropertyParticleSystem> properties, List<TilePropertyParticleSystemGroup> groupProperties)
+        {
+            this._tileTextMeshProProperties = properties;
+            this._tileTextMeshProGroupProperties = groupProperties;
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            var component = gameObject.AddComponent<TilePropertyParticleSystems>();
+            component.tileParticleSystemProperties = _tileTextMeshProProperties;
+            component.tileParticleSystemGroupProperties = _tileTextMeshProGroupProperties;
+        }
+    }
+    
+    [Serializable]
     public class IntProperty
     {
         // ReSharper disable once InconsistentNaming
@@ -1650,7 +1701,14 @@ namespace Bettr.Editor
     [Serializable]
     public class MechanicTilePropertyParticleSystems
     {
+        // ReSharper disable once InconsistentNaming
+        public List<PrefabId> PrefabIds { get; set; }
         
+        // ReSharper disable once InconsistentNaming
+        public string PrefabName { get; set; }
+        
+        // ReSharper disable once InconsistentNaming
+        public List<ParticleSystemProperty> ParticleSystemsProperty { get; set; }
     }
 
     [Serializable]

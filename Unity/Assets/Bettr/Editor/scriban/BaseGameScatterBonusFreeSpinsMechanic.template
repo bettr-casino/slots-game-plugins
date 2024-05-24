@@ -26,6 +26,26 @@
     {{- if !for.last }},{{ end -}}
     {{- end -}}
     ],
-    "TilePropertyParticleSystems": [        
+    "TilePropertyParticleSystems": [
+        {{- for reelIndex in 1..reelCount -}}
+        {
+            "PrefabName": "{{machineName}}BaseGameReel{{reelIndex}}",
+            "PrefabIds": [
+                {
+                    "Prefix": "Reel{{reelIndex}}",
+                    "Index": 0,
+                    "Id": "{{machineName}}BaseGameReel{{reelIndex}}"
+                }
+            ],
+            "ParticleSystemsProperty": [
+                {
+                    "Key": "AnticipationParticleEffect",
+                    "State": "scatter",
+                    "Id": "{{machineName}}BaseGameReel{{reelIndex}}",
+                    "Duration": 60.0
+                }
+            ]
+        }{{- if !for.last }},{{ end -}}
+        {{- end -}}        
     ]
 }

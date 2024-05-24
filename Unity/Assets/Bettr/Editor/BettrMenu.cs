@@ -1313,55 +1313,110 @@ namespace Bettr.Editor
                 throw new Exception($"Failed to deserialize mechanic from json: {json}");
             }
 
-            if (mechanic.ParticleSystems != null)
-                foreach (var mechanicParticleSystem in mechanic.ParticleSystems)
+            foreach (var mechanicParticleSystem in mechanic.ParticleSystems)
+            {
+                // Create the particle system
+                var particleSystem =
+                    BettrParticleSystem.AddOrGetParticleSystem(mechanicParticleSystem.Id, mechanicParticleSystem.Filename, runtimeAssetPath);
+                var mainModule = particleSystem.main;
+                var emissionModule = particleSystem.emission;
+                var renderer = particleSystem.GetComponent<ParticleSystemRenderer>();
+
+                mainModule.playOnAwake = mechanicParticleSystem.PlayOnAwake;
+
+                // Example: Set properties from the rendered content
+                mainModule.startLifetime = mechanicParticleSystem.StartLifetime;
+                mainModule.startSpeed = mechanicParticleSystem.StartSpeed;
+                mainModule.startSize = mechanicParticleSystem.StartSize;
+                mainModule.startColor = new ParticleSystem.MinMaxGradient(mechanicParticleSystem.GetStartColor());
+                mainModule.gravityModifier = mechanicParticleSystem.GravityModifier;
+                emissionModule.rateOverTime = mechanicParticleSystem.EmissionRateOverTime;
+                mainModule.simulationSpace = ParticleSystemSimulationSpace.World;
+                mainModule.loop = mechanicParticleSystem.Looping;
+                mainModule.duration = mechanicParticleSystem.Duration;
+                
+                // Check if material properties are provided before generating the material
+                Material material = null;
+                if (!string.IsNullOrEmpty(mechanicParticleSystem.RendererSettings.Material) &&
+                    !string.IsNullOrEmpty(mechanicParticleSystem.RendererSettings.Shader))
                 {
-                    // Create the particle system
-                    var particleSystem =
-                        BettrParticleSystem.AddOrGetParticleSystem(mechanicParticleSystem.Id, mechanicParticleSystem.Filename, runtimeAssetPath);
-                    var mainModule = particleSystem.main;
-                    var emissionModule = particleSystem.emission;
-                    var renderer = particleSystem.GetComponent<ParticleSystemRenderer>();
-
-                    mainModule.playOnAwake = mechanicParticleSystem.PlayOnAwake;
-
-                    // Example: Set properties from the rendered content
-                    mainModule.startLifetime = mechanicParticleSystem.StartLifetime;
-                    mainModule.startSpeed = mechanicParticleSystem.StartSpeed;
-                    mainModule.startSize = mechanicParticleSystem.StartSize;
-                    mainModule.startColor = new ParticleSystem.MinMaxGradient(mechanicParticleSystem.GetStartColor());
-                    mainModule.gravityModifier = mechanicParticleSystem.GravityModifier;
-                    emissionModule.rateOverTime = mechanicParticleSystem.EmissionRateOverTime;
-                    mainModule.simulationSpace = ParticleSystemSimulationSpace.World;
-                    mainModule.loop = mechanicParticleSystem.Looping;
-                    mainModule.duration = mechanicParticleSystem.Duration;
-                    
-                    // Check if material properties are provided before generating the material
-                    Material material = null;
-                    if (!string.IsNullOrEmpty(mechanicParticleSystem.RendererSettings.Material) &&
-                        !string.IsNullOrEmpty(mechanicParticleSystem.RendererSettings.Shader))
-                    {
-                        material = BettrMaterialGenerator.CreateOrLoadMaterial(
-                            mechanicParticleSystem.RendererSettings.Material,
-                            mechanicParticleSystem.RendererSettings.Shader,
-                            mechanicParticleSystem.RendererSettings.Texture,
-                            mechanicParticleSystem.RendererSettings.Color,
-                            runtimeAssetPath
-                        );
-                    }
-    
-                    // Set the material to the renderer
-                    if (material != null)
-                    {
-                        renderer.material = material;
-                    }
-
-                    renderer.sortingOrder = mechanicParticleSystem.RendererSettings.SortingOrder;
-
-                    // Save changes to the prefab
-                    BettrParticleSystem.SaveParticleSystem(particleSystem, mechanicParticleSystem.Filename,
-                        runtimeAssetPath);
+                    material = BettrMaterialGenerator.CreateOrLoadMaterial(
+                        mechanicParticleSystem.RendererSettings.Material,
+                        mechanicParticleSystem.RendererSettings.Shader,
+                        mechanicParticleSystem.RendererSettings.Texture,
+                        mechanicParticleSystem.RendererSettings.Color,
+                        runtimeAssetPath
+                    );
                 }
+
+                // Set the material to the renderer
+                if (material != null)
+                {
+                    renderer.material = material;
+                }
+
+                renderer.sortingOrder = mechanicParticleSystem.RendererSettings.SortingOrder;
+
+                // Save changes to the prefab
+                BettrParticleSystem.SaveParticleSystem(particleSystem, mechanicParticleSystem.Filename,
+                    runtimeAssetPath);
+            }
+            
+            //
+            
+            foreach (var tilePropertyParticleSystem in mechanic.TilePropertyParticleSystems)
+            {
+                var prefabPath =
+                    $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{tilePropertyParticleSystem.PrefabName}.prefab";
+                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                var prefabGameObject = new PrefabGameObject(prefab, tilePropertyParticleSystem.PrefabName);
+                if (tilePropertyParticleSystem.PrefabIds != null)
+                {
+                    foreach (var prefabId in tilePropertyParticleSystem.PrefabIds)
+                    {
+                        var referencedGameObject = prefabGameObject.FindReferencedId(prefabId.Id, prefabId.Index);
+                        InstanceGameObject.IdGameObjects[$"{prefabId.Prefix}{prefabId.Id}"] = new InstanceGameObject(referencedGameObject);
+                    }
+                }
+                if (tilePropertyParticleSystem.ParticleSystemsProperty != null)
+                {
+                    var properties = new List<TilePropertyParticleSystem>();
+                    var groupProperties = new List<TilePropertyParticleSystemGroup>();
+                    foreach (var particleSystemProperty in tilePropertyParticleSystem.ParticleSystemsProperty)
+                    {
+                        InstanceGameObject.IdGameObjects.TryGetValue(particleSystemProperty.Id, out var referenceGameObject);
+                        var tileProperty = new TilePropertyParticleSystem()
+                        {
+                            key = particleSystemProperty.Key,
+                            value = new PropertyParticleSystem()
+                            {
+                                particleSystem = referenceGameObject?.ParticleSystem, 
+                                particleSystemDuration = particleSystemProperty.Duration,
+                                delayBeforeParticleSystemStart = particleSystemProperty.DelayBeforeStart,
+                                waitForParticleSystemComplete = particleSystemProperty.WaitForComplete,
+                            },
+                        };
+                        if (tileProperty.value.particleSystem == null)
+                        {
+                            Debug.LogError($"Failed to find animator with id: {particleSystemProperty.Id}");
+                        }
+                        properties.Add(tileProperty);                        
+                    }
+                    var component = prefabGameObject.GameObject.GetComponent<TilePropertyParticleSystems>();
+                    if (component == null)
+                    {
+                        component = prefabGameObject.GameObject.AddComponent<TilePropertyParticleSystems>();
+                        component.tileParticleSystemProperties = new List<TilePropertyParticleSystem>();
+                        component.tileParticleSystemGroupProperties = new List<TilePropertyParticleSystemGroup>();
+                    }
+                    component.tileParticleSystemProperties.AddRange(properties);
+                    component.tileParticleSystemGroupProperties.AddRange(groupProperties);
+                }
+                
+                PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
+            }
+            
+            //
 
             // save the changes
             AssetDatabase.SaveAssets();
