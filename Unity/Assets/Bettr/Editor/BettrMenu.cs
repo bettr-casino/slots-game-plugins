@@ -1301,7 +1301,6 @@ namespace Bettr.Editor
                 { "machineName", machineName },
                 { "machineVariant", machineVariant },
                 { "reelCount", reelCount },
-                { "scatterSymbolIndexesByReel", scatterSymbolIndexesByReel },
             };
             
             var json = scribanTemplate.Render(model);
@@ -1313,6 +1312,7 @@ namespace Bettr.Editor
                 throw new Exception($"Failed to deserialize mechanic from json: {json}");
             }
 
+            // anticipation animation
             foreach (var mechanicParticleSystem in mechanic.ParticleSystems)
             {
                 // Create the particle system
