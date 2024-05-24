@@ -1659,7 +1659,7 @@ namespace Bettr.Editor
         // ReSharper disable once InconsistentNaming
         public float EmissionRateOverDistance { get; set; }
         // ReSharper disable once InconsistentNaming
-        public List<EmissionBurst> Bursts { get; set; }
+        public List<EmissionBurst> Bursts { get; set; } = new List<EmissionBurst>();
         
         // ReSharper disable once InconsistentNaming
         public string Shape { get; set; }
@@ -1684,6 +1684,8 @@ namespace Bettr.Editor
         // ReSharper disable once InconsistentNaming
         public Vector3 ShapeScale { get; set; }
         
+        public float ShapeArcSpeed { get; set; }
+        
         // ReSharper disable once InconsistentNaming
         public string SimulationSpace { get; set; }
         // ReSharper disable once InconsistentNaming
@@ -1704,7 +1706,8 @@ namespace Bettr.Editor
         public int MaxParticles { get; set; }
 
         // ReSharper disable once InconsistentNaming
-        public ParticleSystemRendererSettings RendererSettings { get; set; }
+        public ParticleSystemRendererSettings RendererSettings { get; set; } = new ParticleSystemRendererSettings();
+        
         [Serializable]
         public class ParticleSystemRendererSettings
         {
