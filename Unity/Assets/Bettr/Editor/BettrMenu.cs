@@ -1268,24 +1268,6 @@ namespace Bettr.Editor
                 reelCount++;
             }
             
-            var scatterSymbolIndexesByReel = new Dictionary<string, List<int>>();
-            for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
-            {
-                var reelStates = GetTable($"{machineName}BaseGameReelState");
-                var topSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "TopSymbolCount");
-                var visibleSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "VisibleSymbolCount");
-                
-                var scatterSymbolIndexes = new List<int>();
-                for (int symbolIndex = topSymbolCount + 1;
-                     symbolIndex <= topSymbolCount + visibleSymbolCount;
-                     symbolIndex++)
-                {
-                    scatterSymbolIndexes.Add(symbolIndex);
-                }
-                
-                scatterSymbolIndexesByReel.Add($"{reelIndex}", scatterSymbolIndexes);
-            }
-
             string templateName = "BaseGameScatterBonusFreeSpinsMechanic";
             string scribanTemplateText = ReadScribanTemplate(templateName);
 
@@ -1312,19 +1294,17 @@ namespace Bettr.Editor
                 throw new Exception($"Failed to deserialize mechanic from json: {json}");
             }
 
-            // anticipation animation
+            // Anticipation animation
             foreach (var mechanicParticleSystem in mechanic.ParticleSystems)
             {
                 // Create the particle system
-                var particleSystem =
-                    BettrParticleSystem.AddOrGetParticleSystem(mechanicParticleSystem.Id, mechanicParticleSystem.Filename, runtimeAssetPath);
+                var particleSystem = BettrParticleSystem.AddOrGetParticleSystem(mechanicParticleSystem.Id, mechanicParticleSystem.Filename, runtimeAssetPath);
                 var mainModule = particleSystem.main;
                 var emissionModule = particleSystem.emission;
+                var shapeModule = particleSystem.shape;
                 var renderer = particleSystem.GetComponent<ParticleSystemRenderer>();
 
                 mainModule.playOnAwake = mechanicParticleSystem.PlayOnAwake;
-
-                // Example: Set properties from the rendered content
                 mainModule.startLifetime = mechanicParticleSystem.StartLifetime;
                 mainModule.startSpeed = mechanicParticleSystem.StartSpeed;
                 mainModule.startSize = mechanicParticleSystem.StartSize;
@@ -1334,7 +1314,51 @@ namespace Bettr.Editor
                 mainModule.simulationSpace = ParticleSystemSimulationSpace.World;
                 mainModule.loop = mechanicParticleSystem.Looping;
                 mainModule.duration = mechanicParticleSystem.Duration;
+
+                // Set additional properties
+                mainModule.startRotation = mechanicParticleSystem.StartRotation;
+                mainModule.startDelay = mechanicParticleSystem.StartDelay;
+                mainModule.prewarm = mechanicParticleSystem.Prewarm;
+                mainModule.maxParticles = mechanicParticleSystem.MaxParticles;
                 
+                // Emission module settings
+                emissionModule.rateOverTime = mechanicParticleSystem.EmissionRateOverTime;
+                emissionModule.rateOverDistance = mechanicParticleSystem.EmissionRateOverDistance;
+                emissionModule.burstCount = mechanicParticleSystem.Bursts.Count;
+                for (int i = 0; i < mechanicParticleSystem.Bursts.Count; i++)
+                {
+                    var burst = mechanicParticleSystem.Bursts[i];
+                    emissionModule.SetBurst(i, new ParticleSystem.Burst(burst.Time, burst.MinCount, burst.MaxCount, burst.Cycles, burst.Interval) { probability = burst.Probability });
+                }
+                
+                // Shape module settings
+                shapeModule.shapeType = (ParticleSystemShapeType)Enum.Parse(typeof(ParticleSystemShapeType), mechanicParticleSystem.Shape, true);
+                shapeModule.angle = mechanicParticleSystem.ShapeAngle;
+                shapeModule.radius = mechanicParticleSystem.ShapeRadius;
+                shapeModule.radiusThickness = mechanicParticleSystem.ShapeRadiusThickness;
+                shapeModule.arc = mechanicParticleSystem.ShapeArc;
+                shapeModule.arcMode = (ParticleSystemShapeMultiModeValue)Enum.Parse(typeof(ParticleSystemShapeMultiModeValue), mechanicParticleSystem.ShapeMode, true);
+                shapeModule.arcSpread = mechanicParticleSystem.ShapeSpread;
+                shapeModule.position = mechanicParticleSystem.ShapePosition;
+                shapeModule.rotation = mechanicParticleSystem.ShapeRotation;
+                shapeModule.scale = mechanicParticleSystem.ShapeScale;
+                shapeModule.arcSpeed = 1.0f; // Set default arc speed if needed
+                
+                // Renderer settings
+                // Renderer module settings
+                renderer.renderMode = (ParticleSystemRenderMode)Enum.Parse(typeof(ParticleSystemRenderMode), mechanicParticleSystem.RendererSettings.RenderMode, true);
+                renderer.normalDirection = mechanicParticleSystem.RendererSettings.NormalDirection;
+                renderer.sortMode = (ParticleSystemSortMode)Enum.Parse(typeof(ParticleSystemSortMode), mechanicParticleSystem.RendererSettings.SortMode, true);
+                renderer.minParticleSize = mechanicParticleSystem.RendererSettings.MinParticleSize;
+                renderer.maxParticleSize = mechanicParticleSystem.RendererSettings.MaxParticleSize;
+                renderer.alignment = (ParticleSystemRenderSpace)Enum.Parse(typeof(ParticleSystemRenderSpace), mechanicParticleSystem.RendererSettings.RenderAlignment, true);
+                renderer.flip = new Vector3(mechanicParticleSystem.RendererSettings.FlipX ? 1 : 0, mechanicParticleSystem.RendererSettings.FlipY ? 1 : 0, 0);
+                renderer.pivot = mechanicParticleSystem.RendererSettings.Pivot;
+                renderer.allowRoll = mechanicParticleSystem.RendererSettings.AllowRoll;
+                renderer.receiveShadows = mechanicParticleSystem.RendererSettings.ReceiveShadows;
+                renderer.shadowCastingMode = mechanicParticleSystem.RendererSettings.CastShadows ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off;
+                renderer.lightProbeUsage = (UnityEngine.Rendering.LightProbeUsage)Enum.Parse(typeof(UnityEngine.Rendering.LightProbeUsage), mechanicParticleSystem.RendererSettings.LightProbes, true);
+
                 // Check if material properties are provided before generating the material
                 Material material = null;
                 if (!string.IsNullOrEmpty(mechanicParticleSystem.RendererSettings.Material) &&
@@ -1358,8 +1382,7 @@ namespace Bettr.Editor
                 renderer.sortingOrder = mechanicParticleSystem.RendererSettings.SortingOrder;
 
                 // Save changes to the prefab
-                BettrParticleSystem.SaveParticleSystem(particleSystem, mechanicParticleSystem.Filename,
-                    runtimeAssetPath);
+                BettrParticleSystem.SaveParticleSystem(particleSystem, mechanicParticleSystem.Filename, runtimeAssetPath);
             }
             
             //

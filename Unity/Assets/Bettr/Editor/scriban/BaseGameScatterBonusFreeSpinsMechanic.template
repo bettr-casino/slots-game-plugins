@@ -3,25 +3,56 @@
     {{- for reelIndex in 1..reelCount -}}
     {
         "Filename": "{{machineName}}BaseGameReel{{reelIndex}}",
-        "Id": 1,
+        "Id": {{ reelIndex }},
         "StartLifetime": 5.0,
         "StartSpeed": 10.0,
         "StartSize": 1.0,
         "StartColor": "255, 0, 0, 255",
         "GravityModifier": 0.5,
         "EmissionRateOverTime": 50.0,
+        "EmissionRateOverDistance": 0.0,
+        "Bursts": [
+            { "Time": 0.0, "MinCount": 10, "MaxCount": 20, "Cycles": 1, "Interval": 0.5, "Probability": 1.0 }
+        ],
         "Shape": "Cone",
+        "ShapeAngle": 25,
+        "ShapeRadius": 1,
+        "ShapeRadiusThickness": 1,
+        "ShapeArc": 360,
+        "ShapeMode": "Random",
+        "ShapeSpread": 0,
+        "ShapeEmitFrom": "Base",
+        "ShapePosition": { "x": 0, "y": 0, "z": 0 },
+        "ShapeRotation": { "x": 0, "y": 0, "z": 0 },
+        "ShapeScale": { "x": 1, "y": 1, "z": 1 },
         "SimulationSpace": "World",
         "Looping": true,
-        "Duration": 10.0,
+        "Duration": 60.0,
         "PlayOnAwake": false,
+        "StartRotation": 0.0,
+        "StartDelay": 0.0,
+        "Prewarm": true,
+        "MaxParticles": 1000,
         "RendererSettings": {
             "Material": "ParticleMaterial",
             "Shader": "Bettr/BluishGlow",
             "Texture": "GlowTexture.png",
             "Color": "0, 0, 255, 255",
-            "SortingOrder": 1
-        }           
+            "SortingOrder": 1,
+            "RenderMode": "Billboard",
+            "NormalDirection": 1,
+            "SortMode": "None",
+            "MinParticleSize": 0,
+            "MaxParticleSize": 0.5,
+            "RenderAlignment": "View",
+            "FlipX": false,
+            "FlipY": false,
+            "Pivot": { "x": 0, "y": 0, "z": 0 },
+            "AllowRoll": true,
+            "CastShadows": false,
+            "ReceiveShadows": false,
+            "LightProbes": "Off"
+        }                
     }
     {{- if !for.last }},{{ end -}}
     {{- end -}}

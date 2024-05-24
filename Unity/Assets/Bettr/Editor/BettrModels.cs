@@ -1654,9 +1654,36 @@ namespace Bettr.Editor
         // ReSharper disable once InconsistentNaming
         public float GravityModifier { get; set; }
         // ReSharper disable once InconsistentNaming
+        
         public float EmissionRateOverTime { get; set; }
         // ReSharper disable once InconsistentNaming
+        public float EmissionRateOverDistance { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public List<EmissionBurst> Bursts { get; set; }
+        
+        // ReSharper disable once InconsistentNaming
         public string Shape { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public float ShapeAngle { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public float ShapeRadius { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public float ShapeRadiusThickness { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public float ShapeArc { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public string ShapeMode { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public float ShapeSpread { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public string ShapeEmitFrom { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public Vector3 ShapePosition { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public Vector3 ShapeRotation { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public Vector3 ShapeScale { get; set; }
+        
         // ReSharper disable once InconsistentNaming
         public string SimulationSpace { get; set; }
         // ReSharper disable once InconsistentNaming
@@ -1665,6 +1692,16 @@ namespace Bettr.Editor
         public float Duration { get; set; }
         // ReSharper disable once InconsistentNaming
         public bool PlayOnAwake { get; set; }
+
+        // Additional properties
+        // ReSharper disable once InconsistentNaming
+        public float StartRotation { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public float StartDelay { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public bool Prewarm { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public int MaxParticles { get; set; }
 
         // ReSharper disable once InconsistentNaming
         public ParticleSystemRendererSettings RendererSettings { get; set; }
@@ -1681,6 +1718,49 @@ namespace Bettr.Editor
             public string Shader { get; set; }
             // ReSharper disable once InconsistentNaming
             public int SortingOrder { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public string RenderMode { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public float NormalDirection { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public string SortMode { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public float MinParticleSize { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public float MaxParticleSize { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public string RenderAlignment { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public bool FlipX { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public bool FlipY { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public Vector3 Pivot { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public bool AllowRoll { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public bool CastShadows { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public bool ReceiveShadows { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public string LightProbes { get; set; }
+        }
+        
+        [Serializable]
+        public class EmissionBurst
+        {
+            // ReSharper disable once InconsistentNaming
+            public float Time { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public short MinCount { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public short MaxCount { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public int Cycles { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public float Interval { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public float Probability { get; set; }
         }
         
         public Color32 GetStartColor()
