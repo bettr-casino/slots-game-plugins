@@ -9,17 +9,14 @@ namespace Bettr.Editor.generators
 {
     public static class BettrParticleSystem
     {
-        public static ParticleSystem AddOrGetParticleSystem(string prefabName, string runtimeAssetPath)
+        public static ParticleSystem AddOrGetParticleSystem(GameObject go, string runtimeAssetPath)
         {
             AssetDatabase.Refresh();
-            
-            var prefabPath = $"{runtimeAssetPath}/Prefabs/{prefabName}.prefab";
-            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-            
-            var particleSystem = prefab.GetComponent<ParticleSystem>();
+
+            var particleSystem = go.GetComponent<ParticleSystem>();
             if (particleSystem == null)
             {
-                particleSystem = prefab.AddComponent<ParticleSystem>();
+                particleSystem = go.AddComponent<ParticleSystem>();
             }
             
             var customData = particleSystem.customData;
@@ -29,19 +26,6 @@ namespace Bettr.Editor.generators
             return particleSystem;
         }
 
-        public static void SaveParticleSystem(ParticleSystem particleSystem, string prefabName, string runtimeAssetPath)
-        {
-            AssetDatabase.Refresh();
-            
-            var prefab = particleSystem.gameObject;
-            
-            var prefabPath = $"{runtimeAssetPath}/Prefabs/{prefabName}.prefab";
-            // Save changes to the prefab
-            PrefabUtility.SaveAsPrefabAsset(prefab, prefabPath);
-            
-            AssetDatabase.SaveAssets();
-        }
-        
         public static int GetParticleSystemId(ParticleSystem particleSystem)
         {
             var customData = particleSystem.customData;

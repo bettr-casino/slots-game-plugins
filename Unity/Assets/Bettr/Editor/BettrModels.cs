@@ -1647,9 +1647,11 @@ namespace Bettr.Editor
     public class MechanicParticleSystem
     {
         // ReSharper disable once InconsistentNaming
-        public string Filename { get; set; }
+        public string PrefabName { get; set; }
         // ReSharper disable once InconsistentNaming
-        public int Id { get; set; }
+        public List<PrefabId> PrefabIds { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public string ReferenceId { get; set; }
         // ReSharper disable once InconsistentNaming
         public float StartLifetime { get; set; }
         // ReSharper disable once InconsistentNaming

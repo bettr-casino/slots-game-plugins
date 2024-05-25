@@ -1328,8 +1328,23 @@ namespace Bettr.Editor
             // Anticipation animation
             foreach (var mechanicParticleSystem in mechanic.ParticleSystems)
             {
+                var prefabPath =
+                    $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{mechanicParticleSystem.PrefabName}.prefab";
+                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                var prefabGameObject = new PrefabGameObject(prefab, mechanicParticleSystem.PrefabName);
+                if (mechanicParticleSystem.PrefabIds != null)
+                {
+                    foreach (var prefabId in mechanicParticleSystem.PrefabIds)
+                    {
+                        var referencedGameObject = prefabGameObject.FindReferencedId(prefabId.Id, prefabId.Index);
+                        InstanceGameObject.IdGameObjects[$"{prefabId.Prefix}{prefabId.Id}"] = new InstanceGameObject(referencedGameObject);
+                    }
+                }
+                
+                var referenceGameObject = InstanceGameObject.IdGameObjects[mechanicParticleSystem.ReferenceId];
+                
                 // Create the particle system
-                var particleSystem = BettrParticleSystem.AddOrGetParticleSystem(mechanicParticleSystem.Filename, runtimeAssetPath);
+                var particleSystem = BettrParticleSystem.AddOrGetParticleSystem(referenceGameObject.GameObject, runtimeAssetPath);
                 var mainModule = particleSystem.main;
                 var emissionModule = particleSystem.emission;
                 var shapeModule = particleSystem.shape;
@@ -1433,10 +1448,13 @@ namespace Bettr.Editor
                 renderer.sortingOrder = mechanicParticleSystem.RendererSettings.SortingOrder;
 
                 // Save changes to the prefab
-                BettrParticleSystem.SaveParticleSystem(particleSystem, mechanicParticleSystem.Filename, runtimeAssetPath);
+                PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
             }
             
-            //
+            // save the changes
+            AssetDatabase.SaveAssets();
+            
+            AssetDatabase.Refresh();
             
             foreach (var tilePropertyParticleSystem in mechanic.TilePropertyParticleSystems)
             {
@@ -1490,8 +1508,6 @@ namespace Bettr.Editor
                 PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
             }
             
-            //
-
             // save the changes
             AssetDatabase.SaveAssets();
             

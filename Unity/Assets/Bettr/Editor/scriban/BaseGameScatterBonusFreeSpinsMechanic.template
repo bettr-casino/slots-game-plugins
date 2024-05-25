@@ -18,8 +18,14 @@
     "ParticleSystems": [
     {{- for reelIndex in 1..reelCount -}}
     {
-        "Filename": "{{machineName}}BaseGameReel{{reelIndex}}",
-        "Id": {{ reelIndex }},
+        "PrefabName": "{{machineName}}BaseGameReel{{reelIndex}}",
+        "PrefabIds": [
+            {
+                "Index": 0,
+                "Id": "AnticipationParticleEffect"
+            }
+        ],
+        "ReferenceId": "AnticipationParticleEffect",
         "StartLifetime": 1.0,
         "StartSpeed": 0.1,
         "StartSize": 0.2,
@@ -87,14 +93,14 @@
             "PrefabIds": [
                 {
                     "Index": 0,
-                    "Id": "{{machineName}}BaseGameReel{{reelIndex}}"
+                    "Id": "AnticipationParticleEffect"
                 }
             ],
             "ParticleSystemsProperty": [
                 {
                     "Key": "AnticipationParticleEffect",
                     "State": "scatter",
-                    "Id": "{{machineName}}BaseGameReel{{reelIndex}}",
+                    "Id": "AnticipationParticleEffect",
                     "Duration": 60.0
                 }
             ]
