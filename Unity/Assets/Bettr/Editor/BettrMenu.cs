@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using Bettr.Editor.generators;
 using CrayonScript.Code;
@@ -1294,6 +1295,35 @@ namespace Bettr.Editor
             {
                 throw new Exception($"Failed to deserialize mechanic from json: {json}");
             }
+            
+            // Modifiers
+            foreach (var instanceGameObject in mechanic.GameObjects)
+            {
+                AssetDatabase.Refresh();
+                
+                var prefabPath =
+                    $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{instanceGameObject.PrefabName}.prefab";
+                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                var prefabGameObject = new PrefabGameObject(prefab, instanceGameObject.PrefabName);
+                if (instanceGameObject.PrefabIds != null)
+                {
+                    foreach (var prefabId in instanceGameObject.PrefabIds)
+                    {
+                        var referencedGameObject = prefabGameObject.FindReferencedId(prefabId.Id, prefabId.Index);
+                        InstanceGameObject.IdGameObjects[$"{prefabId.Prefix}{prefabId.Id}"] = new InstanceGameObject(referencedGameObject);
+                    }
+                }
+
+                var parentGameObject = InstanceGameObject.IdGameObjects[instanceGameObject.ParentId];
+                
+                instanceGameObject.SetParent(parentGameObject.GameObject);
+                
+                instanceGameObject.OnDeserialized(new StreamingContext());
+                
+                PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
+            }
+            
+            AssetDatabase.Refresh();
 
             // Anticipation animation
             foreach (var mechanicParticleSystem in mechanic.ParticleSystems)

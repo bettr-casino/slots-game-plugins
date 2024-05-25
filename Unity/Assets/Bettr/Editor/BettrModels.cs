@@ -93,7 +93,7 @@ namespace Bettr.Editor
         }
         
         [OnDeserialized]
-        private void OnDeserialized(StreamingContext context)
+        public void OnDeserialized(StreamingContext context)
         {
             Debug.Log($"Deserialization complete name={Name}");
             
@@ -1611,19 +1611,10 @@ namespace Bettr.Editor
     }
     
     [Serializable]
-    public class MechanicModifier
+    public class MechanicInstanceGameObject : InstanceGameObject
     {
         // ReSharper disable once InconsistentNaming
-        public List<PrefabId> PrefabIds { get; set; }
-        
-        // ReSharper disable once InconsistentNaming
-        public string PrefabName { get; set; }
-        
-        // ReSharper disable once InconsistentNaming
-        public string Name { get; set; }
-        
-        // ReSharper disable once InconsistentNaming
-        public string Parent { get; set; }
+        public string ParentId { get; set; }
     }
 
     [Serializable]
@@ -1812,7 +1803,7 @@ namespace Bettr.Editor
     public class Mechanic
     {
         // ReSharper disable once InconsistentNaming
-        public List<MechanicModifier> Modifiers { get; set; }
+        public List<MechanicInstanceGameObject> GameObjects { get; set; }
         
         // ReSharper disable once InconsistentNaming
         public List<MechanicAnimation> Animations { get; set; }

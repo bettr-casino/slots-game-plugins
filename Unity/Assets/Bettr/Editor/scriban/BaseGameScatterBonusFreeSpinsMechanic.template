@@ -1,5 +1,5 @@
 {
-    "Modifiers": [
+    "GameObjects": [
         {{- for reelIndex in 1..reelCount -}}
         {
             "PrefabName": "{{machineName}}BaseGameReel{{reelIndex}}",
@@ -9,8 +9,8 @@
                     "Id": "{{machineName}}BaseGameReel{{reelIndex}}"
                 }
             ],
-            "Name": "AnticipationParticleEffect",
-            "Parent": "{{machineName}}BaseGameReel{{reelIndex}}"
+            "ParentId": "{{machineName}}BaseGameReel{{reelIndex}}",
+            "Name": "AnticipationParticleEffect"
         }{{- if !for.last }},{{ end -}}
         {{- end -}}                    
     ],
