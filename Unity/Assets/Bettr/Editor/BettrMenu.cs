@@ -1144,6 +1144,11 @@ namespace Bettr.Editor
             {
                 ProcessBaseGameScatterBonusFreeSpinsMechanic(machineName, machineVariant, runtimeAssetPath);
             }
+            
+            if (HasTable($"{machineName}BaseGameRandomMultiplierWildsMechanic"))
+            {
+                ProcessBaseGameRandomMultiplierWildsMechanic(machineName, machineVariant, runtimeAssetPath);
+            }
         }
 
         private static void ProcessBaseGameScatterBonusPaysMechanic(string machineName, string machineVariant, string runtimeAssetPath)
@@ -1512,6 +1517,119 @@ namespace Bettr.Editor
             AssetDatabase.SaveAssets();
             
             AssetDatabase.Refresh();
+        }
+        
+        private static void ProcessBaseGameRandomMultiplierWildsMechanic(string machineName, string machineVariant, string runtimeAssetPath)
+        {
+            AssetDatabase.Refresh();
+            
+            var baseGameReelState = GetTable($"{machineName}BaseGameReelState");
+            var reelCount = 0;
+            foreach (var pair in baseGameReelState.Pairs)
+            {
+                reelCount++;
+            }
+            
+            var symbolIndexesByReel = new Dictionary<string, List<int>>();
+            for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
+            {
+                var reelStates = GetTable($"{machineName}BaseGameReelState");
+                var topSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "TopSymbolCount");
+                var visibleSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "VisibleSymbolCount");
+                
+                var scatterSymbolIndexes = new List<int>();
+                for (int symbolIndex = topSymbolCount + 1;
+                     symbolIndex <= topSymbolCount + visibleSymbolCount;
+                     symbolIndex++)
+                {
+                    scatterSymbolIndexes.Add(symbolIndex);
+                }
+                
+                symbolIndexesByReel.Add($"{reelIndex}", scatterSymbolIndexes);
+            }
+
+            string templateName = "BaseGameRandomMultiplierWildsMechanic";
+            string scribanTemplateText = ReadScribanTemplate(templateName);
+
+            var scribanTemplate = Template.Parse(scribanTemplateText);
+            if (scribanTemplate.HasErrors)
+            {
+                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} template: {templateName}");
+                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} template: {{templateName}}");
+            }
+            
+            var model = new Dictionary<string, object>
+            {
+                { "machineName", machineName },
+                { "machineVariant", machineVariant },
+                { "reelCount", reelCount },
+                { "randomMultiplierWildsSymbolIndexesByReel", symbolIndexesByReel },
+            };
+            
+            var json = scribanTemplate.Render(model);
+            Debug.Log(json);
+            
+            Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
+            if (mechanic == null)
+            {
+                throw new Exception($"Failed to deserialize mechanic from json: {json}");
+            }
+            
+            foreach (var mechanicAnimation in mechanic.Animations)
+            {
+                BettrAnimatorController.AddAnimationState(mechanicAnimation.Filename, mechanicAnimation.AnimationStates, mechanicAnimation.AnimatorTransitions, runtimeAssetPath);
+            }
+            
+            foreach (var tilePropertyAnimator in mechanic.TilePropertyAnimators)
+            {
+                var prefabPath =
+                    $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{tilePropertyAnimator.PrefabName}.prefab";
+                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                var prefabGameObject = new PrefabGameObject(prefab, tilePropertyAnimator.PrefabName);
+                if (tilePropertyAnimator.PrefabIds != null)
+                {
+                    foreach (var prefabId in tilePropertyAnimator.PrefabIds)
+                    {
+                        var referencedGameObject = prefabGameObject.FindReferencedId(prefabId.Id, prefabId.Index);
+                        InstanceGameObject.IdGameObjects[$"{prefabId.Prefix}{prefabId.Id}"] = new InstanceGameObject(referencedGameObject);
+                    }
+                }
+                if (tilePropertyAnimator.AnimatorsProperty != null)
+                {
+                    var properties = new List<TilePropertyAnimator>();
+                    var groupProperties = new List<TilePropertyAnimatorGroup>();
+                    foreach (var animatorProperty in tilePropertyAnimator.AnimatorsProperty)
+                    {
+                        InstanceGameObject.IdGameObjects.TryGetValue(animatorProperty.Id, out var referenceGameObject);
+                        var tileProperty = new TilePropertyAnimator()
+                        {
+                            key = animatorProperty.Key,
+                            value = new PropertyAnimator()
+                            {
+                                animator = referenceGameObject?.Animator, 
+                                animationStateName = animatorProperty.State,
+                                delayBeforeAnimationStart = animatorProperty.DelayBeforeStart,
+                                waitForAnimationComplete = animatorProperty.WaitForComplete,
+                                overrideAnimationDuration = animatorProperty.OverrideDuration,
+                                animationDuration = animatorProperty.AnimationDuration,
+                            },
+                        };
+                        if (tileProperty.value.animator == null)
+                        {
+                            Debug.LogError($"Failed to find animator with id: {animatorProperty.Id}");
+                        }
+                        properties.Add(tileProperty);                        
+                    }
+                    var component = prefabGameObject.GameObject.GetComponent<TilePropertyAnimators>();
+                    component.tileAnimatorProperties.AddRange(properties);
+                    component.tileAnimatorGroupProperties.AddRange(groupProperties);
+                }
+                
+                PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
+            }
+            
+            // save the changes
+            AssetDatabase.SaveAssets();
         }
         
         private static string ReadJson(string fileName)
