@@ -632,7 +632,9 @@ namespace Bettr.Editor
             DynValue dynValue = TileController.LuaScript.LoadString(machineModelScript, codeFriendlyName: machineModelName);
             TileController.LuaScript.Call(dynValue);
             
+            // Common to all machines
             ProcessScripts(machineName, machineVariant, runtimeAssetPath);
+            
             ProcessBaseGameBackground(machineName, machineVariant, runtimeAssetPath);
             ProcessBaseGameSymbols(machineName, machineVariant, runtimeAssetPath);
             ProcessWaysWin(machineName, runtimeAssetPath);
@@ -641,9 +643,9 @@ namespace Bettr.Editor
             
             ProcessBaseGameMachine(machineName, machineVariant, runtimeAssetPath);
             
+            // Common to all machines
             // Apply mechanics
             ProcessMechanics(machineName, machineVariant, runtimeAssetPath);
-            
             ProcessScene(machineName, machineVariant, runtimeAssetPath);
             
         }
