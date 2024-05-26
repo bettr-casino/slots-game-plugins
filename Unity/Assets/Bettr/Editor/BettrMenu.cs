@@ -635,13 +635,37 @@ namespace Bettr.Editor
             // Common to all machines
             ProcessScripts(machineName, machineVariant, runtimeAssetPath);
             
-            ProcessBaseGameBackground(machineName, machineVariant, runtimeAssetPath);
-            ProcessBaseGameSymbols(machineName, machineVariant, runtimeAssetPath);
-            ProcessWaysWin(machineName, runtimeAssetPath);
+            var machines = GetTable($"{machineName}Machines");
+            for (var index = 1; index <= machines.Length; index++)
+            {
+                var machineData = (Table) machines[index];
+                var isBase = (bool) machineData["IsBase"];
+                var isBonus = (bool) machineData["IsBonus"];
+                if (isBase)
+                {
+                    ProcessBaseGameBackground(machineName, machineVariant, runtimeAssetPath);
+                    ProcessBaseGameSymbols(machineName, machineVariant, runtimeAssetPath);
+                    ProcessWaysWin(machineName, runtimeAssetPath);
+                    ProcessBaseGameReels(machineName, runtimeAssetPath);
+                    ProcessBaseGameMachine(machineName, machineVariant, runtimeAssetPath);
+                }
+                else if (isBonus)
+                {
+                    var isFreeSpins = (bool) machineData["IsFreeSpins"];
+                    var isWheel = (bool) machineData["IsWheel"];
+                    if (isFreeSpins)
+                    {
+                        ProcessFreeSpinsBackground(machineName, machineVariant, runtimeAssetPath);
+                        ProcessFreeSpinsMachine(machineName, machineVariant, runtimeAssetPath);
+                    } 
+                    else if (isWheel)
+                    {
+                        ProcessWheelGameBackground(machineName, machineVariant, runtimeAssetPath);
+                        ProcessWheelGameMachine(machineName, machineVariant, runtimeAssetPath);
+                    }
+                }
+            }
             
-            ProcessBaseGameReels(machineName, runtimeAssetPath);
-            
-            ProcessBaseGameMachine(machineName, machineVariant, runtimeAssetPath);
             
             // Common to all machines
             // Apply mechanics
@@ -1031,6 +1055,215 @@ namespace Bettr.Editor
             BettrScriptGenerator.CreateOrLoadScript(backgroundScriptName, runtimeAssetPath);
             
             string templateName = "BaseGameBackground";
+            string scribanTemplateText = ReadScribanTemplate(templateName);
+
+            var scribanTemplate = Template.Parse(scribanTemplateText);
+            if (scribanTemplate.HasErrors)
+            {
+                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} template: {templateName}");
+                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} template: {{templateName}}");
+            }
+            
+            var model = new Dictionary<string, object>
+            {
+                { "machineName", machineName },
+                { "machineVariant", machineVariant },
+                { "backgroundName", backgroundName },
+            };
+            
+            var json = scribanTemplate.Render(model);
+            Console.WriteLine(json);
+            
+            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
+            InstanceGameObject.IdGameObjects.Clear();
+            
+            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
+            hierarchyInstance.SetParent((GameObject) null);
+
+            var settingsPrefab = ProcessPrefab(backgroundName, 
+                hierarchyInstance, 
+                runtimeAssetPath);
+        }
+        
+        private static void ProcessFreeSpinsMachine(string machineName, string machineVariant, string runtimeAssetPath)
+        {
+            string baseGameMachine = $"{machineName}FreeSpinsMachine";
+            
+            string baseGameSettings = $"{machineName}FreeSpinsSettings";
+            
+            var baseGameSymbolTable = GetTable($"{machineName}FreeSpinsSymbolTable");
+            
+            var scriptName = $"{machineName}FreeSpinsReel";   
+            BettrScriptGenerator.CreateOrLoadScript(scriptName, runtimeAssetPath);
+            
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            
+            var reelStates = GetTable($"{machineName}BaseGameReelState");
+            var reelCount = 0;
+            foreach (var pair in reelStates.Pairs)
+            {
+                reelCount++;
+            }
+            
+            var reelHPositions = new List<float>();
+            var reelMaskUpperYs = new List<float>();
+            var reelMaskLowerYs = new List<float>();
+            var reelMaskScaleYs = new List<float>();
+            var reelBackgroundYs = new List<float>();
+            var reelBackgroundScaleYs = new List<float>();
+            
+            float maxOffsetY = 0.0f;
+            
+            for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
+            {
+                var topSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "TopSymbolCount");
+                var visibleSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "VisibleSymbolCount");
+                var bottomSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "BottomSymbolCount");
+                var symbolVerticalSpacing = GetTableValue<float>(reelStates, $"Reel{reelIndex}", "SymbolVerticalSpacing");
+                var horizontalSpacing = GetTableValue<float>(reelStates, $"Reel{reelIndex}", "HorizontalSpacing");
+                var zeroVisibleSymbolIndex = visibleSymbolCount % 2 == 0 ? visibleSymbolCount / 2 + 1 : (visibleSymbolCount - 1) / 2 + 1;
+                var reelMaskUpperY = visibleSymbolCount % 2 == 0? (zeroVisibleSymbolIndex) * symbolVerticalSpacing : (zeroVisibleSymbolIndex + 1) * symbolVerticalSpacing;
+                var reelMaskLowerY = -(zeroVisibleSymbolIndex + 1) * symbolVerticalSpacing;
+                var reelMaskScaleY = (topSymbolCount + 1) * symbolVerticalSpacing;
+                var reelBackgroundY = visibleSymbolCount % 2 == 0 ? -symbolVerticalSpacing/2 : 0;
+                var reelBackgroundScaleY = (visibleSymbolCount) * symbolVerticalSpacing;
+                reelMaskUpperYs.Add(reelMaskUpperY);
+                reelMaskLowerYs.Add(reelMaskLowerY);
+                reelMaskScaleYs.Add(reelMaskScaleY);
+                reelBackgroundYs.Add(reelBackgroundY);
+                reelBackgroundScaleYs.Add(reelBackgroundScaleY);
+
+                var offsetY = (visibleSymbolCount % 3) * symbolVerticalSpacing; 
+                maxOffsetY = Mathf.Max(maxOffsetY, offsetY);
+            }
+            
+            var templateName = "BaseGameMachine";
+            string scribanTemplateText = ReadScribanTemplate(templateName);
+            
+            var scribanTemplate = Template.Parse(scribanTemplateText);
+            if (scribanTemplate.HasErrors)
+            {
+                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} templateName: {templateName}");
+                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} templateName: {templateName}");
+            }
+            
+            var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
+            
+            var model = new Dictionary<string, object>
+            {
+                { "machineName", machineName },
+                { "machineVariant", machineVariant },
+                { "baseGameMachine", baseGameMachine },
+                { "baseGameSettings", baseGameSettings },
+                { "symbolKeys", symbolKeys},
+                { "reelMaskUpperY", reelMaskUpperYs[0]},
+                { "reelMaskLowerY", reelMaskLowerYs[0]},
+                { "reelMaskScaleY", reelMaskScaleYs[0]},
+                { "reelBackgroundY", reelBackgroundYs[0]},
+                { "reelBackgroundScaleY", reelBackgroundScaleYs[0]},
+                { "offsetY", maxOffsetY },
+            };
+            
+            var json = scribanTemplate.Render(model);
+            Debug.Log($"BaseGameMachine: {json}");
+            
+            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
+            InstanceGameObject.IdGameObjects.Clear();
+            
+            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
+            
+            var baseGameMachinePrefab = ProcessPrefab($"{baseGameMachine}", 
+                hierarchyInstance, 
+                runtimeAssetPath);
+        }
+        
+        private static void ProcessFreeSpinsBackground(string machineName, string machineVariant, string runtimeAssetPath)
+        {
+            string backgroundName = $"{machineName}FreeSpinsBackground";
+            
+            var backgroundScriptName = $"{machineName}FreeSpinsBackground";   
+            BettrScriptGenerator.CreateOrLoadScript(backgroundScriptName, runtimeAssetPath);
+            
+            string templateName = "FreeSpinsBackground";
+            string scribanTemplateText = ReadScribanTemplate(templateName);
+
+            var scribanTemplate = Template.Parse(scribanTemplateText);
+            if (scribanTemplate.HasErrors)
+            {
+                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} template: {templateName}");
+                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} template: {{templateName}}");
+            }
+            
+            var model = new Dictionary<string, object>
+            {
+                { "machineName", machineName },
+                { "machineVariant", machineVariant },
+                { "backgroundName", backgroundName },
+            };
+            
+            var json = scribanTemplate.Render(model);
+            Console.WriteLine(json);
+            
+            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
+            InstanceGameObject.IdGameObjects.Clear();
+            
+            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
+            hierarchyInstance.SetParent((GameObject) null);
+
+            var settingsPrefab = ProcessPrefab(backgroundName, 
+                hierarchyInstance, 
+                runtimeAssetPath);
+        }
+        
+        private static void ProcessWheelGameMachine(string machineName, string machineVariant, string runtimeAssetPath)
+        {
+            string wheelGameMachine = $"{machineName}WheelGameMachine";
+            
+            var scriptName = $"{machineName}WheelGameReel";   
+            BettrScriptGenerator.CreateOrLoadScript(scriptName, runtimeAssetPath);
+            
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            
+            var templateName = "WheelGameMachine";
+            string scribanTemplateText = ReadScribanTemplate(templateName);
+            
+            var scribanTemplate = Template.Parse(scribanTemplateText);
+            if (scribanTemplate.HasErrors)
+            {
+                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} templateName: {templateName}");
+                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} templateName: {templateName}");
+            }
+            
+            var model = new Dictionary<string, object>
+            {
+                { "machineName", machineName },
+                { "machineVariant", machineVariant },
+                { "wheelGameMachine", wheelGameMachine },
+            };
+            
+            var json = scribanTemplate.Render(model);
+            Debug.Log($"WheelGameMachine: {json}");
+            
+            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
+            InstanceGameObject.IdGameObjects.Clear();
+            
+            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
+            
+            var baseGameMachinePrefab = ProcessPrefab($"{wheelGameMachine}", 
+                hierarchyInstance, 
+                runtimeAssetPath);
+        }
+        
+        private static void ProcessWheelGameBackground(string machineName, string machineVariant, string runtimeAssetPath)
+        {
+            string backgroundName = $"{machineName}WheelGameBackground";
+            
+            var backgroundScriptName = $"{machineName}WheelGameBackground";   
+            BettrScriptGenerator.CreateOrLoadScript(backgroundScriptName, runtimeAssetPath);
+            
+            string templateName = "WheelGameBackground";
             string scribanTemplateText = ReadScribanTemplate(templateName);
 
             var scribanTemplate = Template.Parse(scribanTemplateText);
