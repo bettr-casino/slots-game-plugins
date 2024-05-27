@@ -12,6 +12,7 @@ using UnityEditor.Events;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 namespace Bettr.Editor
 {
@@ -38,6 +39,10 @@ namespace Bettr.Editor
         public string PrefabName { get; set; }
         
         public bool IsPrefab { get; set; }
+        
+        public string ModelName { get; set; }
+        
+        public bool IsModel { get; set; }
         
         public string PrimitiveMaterial { get; set; }
         
@@ -155,6 +160,13 @@ namespace Bettr.Editor
         {
             if (_go == null)
             {
+                if (IsModel)
+                {
+                    Debug.Log($"loading model from path: {InstanceComponent.RuntimeAssetPath}/Models/{ModelName}.fbx");
+                    var modelAsPrefab = BettrModelController.ImportAndLoadModelAsPrefab(ModelName, InstanceComponent.RuntimeAssetPath);
+                    var modelGameObject = new PrefabGameObject(modelAsPrefab, Name);
+                    _go = modelGameObject.GameObject;
+                }
                 if (IsPrefab)
                 {
                     Debug.Log($"loading prefab from path: {InstanceComponent.RuntimeAssetPath}/Prefabs/{PrefabName}.prefab");
