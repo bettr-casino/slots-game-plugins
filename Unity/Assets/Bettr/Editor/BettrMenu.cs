@@ -640,7 +640,6 @@ namespace Bettr.Editor
             {
                 var machineData = (Table) machines[index];
                 ProcessGame(machineData, machineName, machineVariant, runtimeAssetPath);
-                ProcessGameTransition(machineData, machineName, machineVariant, runtimeAssetPath);
             }
             
             // Common to all machines
@@ -1297,18 +1296,6 @@ namespace Bettr.Editor
                     ProcessWheelGameMachine(machineName, machineVariant, runtimeAssetPath);
                 }
             }
-        }
-
-        private static void ProcessGameTransition(Table machineData, string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            var isBase = (bool) machineData["IsBase"];
-            var isBonus = (bool) machineData["IsBonus"];
-            var isFreeSpins = (bool) machineData["IsFreeSpins"];
-            var isWheel = (bool) machineData["IsWheel"];
-
-            
-            var transitionFrom = (string) machineData["TransitionFrom"];
-            var transitionTo = (string) machineData["TransitionTo"];
         }
         
         private static SceneAsset ProcessScene(string machineName, string machineVariant, string runtimeAssetPath)
