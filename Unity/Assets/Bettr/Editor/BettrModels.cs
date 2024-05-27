@@ -163,7 +163,7 @@ namespace Bettr.Editor
                 if (IsModel)
                 {
                     Debug.Log($"loading model from path: {InstanceComponent.RuntimeAssetPath}/Models/{ModelName}.fbx");
-                    var modelAsPrefab = BettrModelController.ImportAndLoadModelAsPrefab(ModelName, InstanceComponent.RuntimeAssetPath);
+                    var modelAsPrefab = BettrModelController.ImportAndLoadModelAsPrefab(ModelName, Name, InstanceComponent.RuntimeAssetPath);
                     var modelGameObject = new PrefabGameObject(modelAsPrefab, Name);
                     _go = modelGameObject.GameObject;
                 }
