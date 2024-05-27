@@ -639,33 +639,9 @@ namespace Bettr.Editor
             for (var index = 1; index <= machines.Length; index++)
             {
                 var machineData = (Table) machines[index];
-                var isBase = (bool) machineData["IsBase"];
-                var isBonus = (bool) machineData["IsBonus"];
-                if (isBase)
-                {
-                    ProcessBaseGameBackground(machineName, machineVariant, runtimeAssetPath);
-                    ProcessBaseGameSymbols(machineName, machineVariant, runtimeAssetPath);
-                    ProcessWaysWin(machineName, runtimeAssetPath);
-                    ProcessBaseGameReels(machineName, runtimeAssetPath);
-                    ProcessBaseGameMachine(machineName, machineVariant, runtimeAssetPath);
-                }
-                else if (isBonus)
-                {
-                    var isFreeSpins = (bool) machineData["IsFreeSpins"];
-                    var isWheel = (bool) machineData["IsWheel"];
-                    if (isFreeSpins)
-                    {
-                        ProcessFreeSpinsBackground(machineName, machineVariant, runtimeAssetPath);
-                        ProcessFreeSpinsMachine(machineName, machineVariant, runtimeAssetPath);
-                    } 
-                    else if (isWheel)
-                    {
-                        ProcessWheelGameBackground(machineName, machineVariant, runtimeAssetPath);
-                        ProcessWheelGameMachine(machineName, machineVariant, runtimeAssetPath);
-                    }
-                }
+                ProcessGame(machineData, machineName, machineVariant, runtimeAssetPath);
+                ProcessGameTransition(machineData, machineName, machineVariant, runtimeAssetPath);
             }
-            
             
             // Common to all machines
             // Apply mechanics
@@ -1292,6 +1268,47 @@ namespace Bettr.Editor
             var settingsPrefab = ProcessPrefab(backgroundName, 
                 hierarchyInstance, 
                 runtimeAssetPath);
+        }
+
+        private static void ProcessGame(Table machineData, string machineName, string machineVariant, string runtimeAssetPath)
+        {
+            var isBase = (bool) machineData["IsBase"];
+            var isBonus = (bool) machineData["IsBonus"];
+            var isFreeSpins = (bool) machineData["IsFreeSpins"];
+            var isWheel = (bool) machineData["IsWheel"];
+            if (isBase)
+            {
+                ProcessBaseGameBackground(machineName, machineVariant, runtimeAssetPath);
+                ProcessBaseGameSymbols(machineName, machineVariant, runtimeAssetPath);
+                ProcessWaysWin(machineName, runtimeAssetPath);
+                ProcessBaseGameReels(machineName, runtimeAssetPath);
+                ProcessBaseGameMachine(machineName, machineVariant, runtimeAssetPath);
+            }
+            else if (isBonus)
+            {
+                if (isFreeSpins)
+                {
+                    ProcessFreeSpinsBackground(machineName, machineVariant, runtimeAssetPath);
+                    ProcessFreeSpinsMachine(machineName, machineVariant, runtimeAssetPath);
+                } 
+                else if (isWheel)
+                {
+                    ProcessWheelGameBackground(machineName, machineVariant, runtimeAssetPath);
+                    ProcessWheelGameMachine(machineName, machineVariant, runtimeAssetPath);
+                }
+            }
+        }
+
+        private static void ProcessGameTransition(Table machineData, string machineName, string machineVariant, string runtimeAssetPath)
+        {
+            var isBase = (bool) machineData["IsBase"];
+            var isBonus = (bool) machineData["IsBonus"];
+            var isFreeSpins = (bool) machineData["IsFreeSpins"];
+            var isWheel = (bool) machineData["IsWheel"];
+
+            
+            var transitionFrom = (string) machineData["TransitionFrom"];
+            var transitionTo = (string) machineData["TransitionTo"];
         }
         
         private static SceneAsset ProcessScene(string machineName, string machineVariant, string runtimeAssetPath)
