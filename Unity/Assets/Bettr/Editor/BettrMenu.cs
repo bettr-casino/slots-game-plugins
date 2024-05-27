@@ -1373,12 +1373,6 @@ namespace Bettr.Editor
         {
             AssetDatabase.Refresh();
             
-            // read all the mechanics from the machine model
-            if (HasTable($"{machineName}BaseGameScatterBonusPaysMechanic"))
-            {
-                ProcessBaseGameScatterBonusPaysMechanic(machineName, machineVariant, runtimeAssetPath);
-            }
-            
             if (HasTable($"{machineName}BaseGameScatterBonusFreeSpinsMechanic"))
             {
                 ProcessBaseGameScatterBonusFreeSpinsMechanic(machineName, machineVariant, runtimeAssetPath);
@@ -1389,8 +1383,8 @@ namespace Bettr.Editor
                 ProcessBaseGameRandomMultiplierWildsMechanic(machineName, machineVariant, runtimeAssetPath);
             }
         }
-
-        private static void ProcessBaseGameScatterBonusPaysMechanic(string machineName, string machineVariant, string runtimeAssetPath)
+        
+        private static void ProcessBaseGameScatterBonusFreeSpinsMechanic(string machineName, string machineVariant, string runtimeAssetPath)
         {
             AssetDatabase.Refresh();
             
@@ -1418,8 +1412,8 @@ namespace Bettr.Editor
                 
                 scatterSymbolIndexesByReel.Add($"{reelIndex}", scatterSymbolIndexes);
             }
-
-            string templateName = "BaseGameScatterBonusPaysMechanic";
+            
+            string templateName = "BaseGameScatterBonusFreeSpinsMechanic";
             string scribanTemplateText = ReadScribanTemplate(templateName);
 
             var scribanTemplate = Template.Parse(scribanTemplateText);
@@ -1500,45 +1494,7 @@ namespace Bettr.Editor
             }
             
             // save the changes
-            AssetDatabase.SaveAssets();
-        }
-        
-        private static void ProcessBaseGameScatterBonusFreeSpinsMechanic(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            AssetDatabase.Refresh();
-            
-            var baseGameReelState = GetTable($"{machineName}BaseGameReelState");
-            var reelCount = 0;
-            foreach (var pair in baseGameReelState.Pairs)
-            {
-                reelCount++;
-            }
-            
-            string templateName = "BaseGameScatterBonusFreeSpinsMechanic";
-            string scribanTemplateText = ReadScribanTemplate(templateName);
-
-            var scribanTemplate = Template.Parse(scribanTemplateText);
-            if (scribanTemplate.HasErrors)
-            {
-                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} template: {templateName}");
-                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} template: {{templateName}}");
-            }
-            
-            var model = new Dictionary<string, object>
-            {
-                { "machineName", machineName },
-                { "machineVariant", machineVariant },
-                { "reelCount", reelCount },
-            };
-            
-            var json = scribanTemplate.Render(model);
-            Debug.Log(json);
-            
-            Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
-            if (mechanic == null)
-            {
-                throw new Exception($"Failed to deserialize mechanic from json: {json}");
-            }
+            AssetDatabase.SaveAssets();            
             
             // Modifiers
             foreach (var instanceGameObject in mechanic.GameObjects)
