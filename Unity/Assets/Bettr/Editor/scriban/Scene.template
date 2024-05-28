@@ -299,7 +299,10 @@
             {{ for machineActivationList in machineActivations[machineTransition] }}
             {{ if machineActivationList["ButtonText"] != "none" }}
                 {
-                    "ReferenceId": "{{machineActivationList["ButtonText"]}}"
+                    "ReferenceId": "{{machineActivationList["ButtonText"]}}",
+                    "Params": [
+                        "{{machineTransition}}"
+                    ]
                 }{{ end }}{{ if !for.last }},{{ end }}
             {{- end -}}
             {{- end -}}

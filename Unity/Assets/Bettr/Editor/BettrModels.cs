@@ -467,7 +467,7 @@ namespace Bettr.Editor
                     foreach (var eventTrigger in EventTriggers)
                     {
                         InstanceGameObject.IdGameObjects.TryGetValue(eventTrigger.ReferenceId, out var referenceGameObject);
-                        var eventTriggerComponent = new EventTriggerComponent(tile, Params);
+                        var eventTriggerComponent = new EventTriggerComponent(tile, eventTrigger.Params);
                         eventTriggerComponent.AddComponent(referenceGameObject?.GameObject);
                         
                     }
@@ -485,7 +485,7 @@ namespace Bettr.Editor
                     foreach (var eventTrigger in EventTriggers)
                     {
                         InstanceGameObject.IdGameObjects.TryGetValue(eventTrigger.ReferenceId, out var referenceGameObject);
-                        var eventTriggerComponent = new EventTriggerComponent(tile, Params);
+                        var eventTriggerComponent = new EventTriggerComponent(tile, eventTrigger.Params);
                         eventTriggerComponent.AddComponent(referenceGameObject?.GameObject);
                     }
                 }
@@ -713,6 +713,14 @@ namespace Bettr.Editor
     {
         // ReSharper disable once InconsistentNaming
         public string ReferenceId;
+
+        // ReSharper disable once InconsistentNaming
+        public string[] Params;
+
+        public EventTriggerData()
+        {
+            Params = Array.Empty<string>();
+        }
     }
     
     [Serializable]
@@ -1613,14 +1621,39 @@ namespace Bettr.Editor
             _tile = tile;
             _param = param.Length > 0 ? param[0] : null;
             _paramCount = param.Length;
+            if (_paramCount > 1)
+            {
+                throw new ArgumentOutOfRangeException("param", "EventTriggerComponent only supports 0 or 1 parameters");
+            }
         }
         
         public void AddComponent(GameObject gameObject)
+        {
+            if (_paramCount == 0)
+            {
+                AddPointerClick(gameObject);
+            }
+            else
+            {
+                AddPointerClick1Param(gameObject);
+            }
+        }
+
+        private void AddPointerClick(GameObject gameObject)
         {
             EventTrigger eventTrigger =gameObject.AddComponent<EventTrigger>();
             EventTrigger.Entry entry = new EventTrigger.Entry { eventID = EventTriggerType.PointerClick };
             var triggerEvent = entry.callback;
             UnityEventTools.AddVoidPersistentListener(triggerEvent, _tile.OnPointerClick);
+            eventTrigger.triggers.Add(entry);
+        }
+        
+        private void AddPointerClick1Param(GameObject gameObject)
+        {
+            EventTrigger eventTrigger =gameObject.AddComponent<EventTrigger>();
+            EventTrigger.Entry entry = new EventTrigger.Entry { eventID = EventTriggerType.PointerClick };
+            var triggerEvent = entry.callback;
+            UnityEventTools.AddStringPersistentListener(triggerEvent, _tile.OnPointerClick, _param);
             eventTrigger.triggers.Add(entry);
         }
     }
