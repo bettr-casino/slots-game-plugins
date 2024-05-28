@@ -1342,16 +1342,17 @@ namespace Bettr.Editor
             var machines = GetTable($"{machineName}Machines");
             var machineTransitions = GetTable($"{machineName}MachineTransitions");
 
+            var machineNames = machines.Pairs.Select(pair => pair.Value.Table["Name"]).ToList();
+            var machineTransitionNames = machineTransitions.Pairs.Select(pair => pair.Value.Table["Name"]).ToList();
+
             // Create a model object with the machineName variable
             var model = new Dictionary<string, object>
             {
                 { "machineName", machineName },
                 { "machineVariant", machineVariant },
                 { "sceneName", sceneName },
-                { "machines", new string[]
-                {
-                    "BaseGame",
-                }}
+                { "machines", machineNames},
+                { "machineTransitions", machineTransitionNames},
             };
             
             var context = new TemplateContext();
@@ -2023,52 +2024,6 @@ namespace Bettr.Editor
             var table = TileController.LuaScript.Globals[tableName] as Table;
             return table != null;
         }
-    }
-
-    public class DictionaryWrapper : IScriptObject
-    {
-        public IEnumerable<string> GetMembers()
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Contains(string member)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool TryGetValue(TemplateContext context, SourceSpan span, string member, out object value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool CanWrite(string member)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool TrySetValue(TemplateContext context, SourceSpan span, string member, object value, bool readOnly)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Remove(string member)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetReadOnly(string member, bool readOnly)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IScriptObject Clone(bool deep)
-        {
-            throw new NotImplementedException();
-        }
-
-        public int Count { get; }
-        public bool IsReadOnly { get; set; }
     }
     
     public class SimpleStringInterpolator
