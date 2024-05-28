@@ -163,11 +163,14 @@ namespace Bettr.Editor
                 if (IsModel)
                 {
                     Debug.Log($"loading model from path: {InstanceComponent.RuntimeAssetPath}/Models/{ModelName}.fbx");
-                    var modelAsPrefab = BettrModelController.ImportAndLoadModelAsPrefab(ModelName, Name, InstanceComponent.RuntimeAssetPath);
+                    BettrModelController.ImportModelAsPrefab(ModelName, Name, InstanceComponent.RuntimeAssetPath);
+                    AssetDatabase.Refresh();
+                    string prefabPath = Path.Combine(InstanceComponent.RuntimeAssetPath, "Prefabs",  $"{Name}.prefab");
+                    GameObject modelAsPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
                     var modelGameObject = new PrefabGameObject(modelAsPrefab, Name);
                     _go = modelGameObject.GameObject;
                 }
-                if (IsPrefab)
+                else if (IsPrefab)
                 {
                     Debug.Log($"loading prefab from path: {InstanceComponent.RuntimeAssetPath}/Prefabs/{PrefabName}.prefab");
                     var prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{InstanceComponent.RuntimeAssetPath}/Prefabs/{PrefabName}.prefab");

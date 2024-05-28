@@ -7,7 +7,7 @@ namespace Bettr.Editor.generators
 {
     public static class BettrModelController
     {
-        public static GameObject ImportAndLoadModelAsPrefab(string modelFileName, string prefabName, string runtimeAssetPath)
+        public static void ImportModelAsPrefab(string modelFileName, string prefabName, string runtimeAssetPath)
         {
             string extension = Path.GetExtension(modelFileName);
             if (string.IsNullOrEmpty(extension))
@@ -15,24 +15,9 @@ namespace Bettr.Editor.generators
                 modelFileName = $"{modelFileName}.fbx";
             }
             
-            ImportModelAsPrefab(modelFileName, prefabName, runtimeAssetPath);
-            
-            AssetDatabase.Refresh();
-            
-            string prefabPath = Path.Combine(runtimeAssetPath, "Prefabs", Path.GetFileNameWithoutExtension(prefabName) + ".prefab");
-            GameObject modelPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-            
-            return modelPrefab;
-        }
-        
-        public static void ImportModelAsPrefab(string modelFileName, string prefabName, string runtimeAssetPath)
-        {
             string sourcePath = Path.Combine("Assets", "Bettr", "Editor", "fbx", modelFileName);
             string destPath = Path.Combine(runtimeAssetPath, "FBX", modelFileName);
             
-            string sourceMaterialsBasePath = Path.Combine("Assets", "Bettr", "Editor", "materials");
-            string destMaterialsBasePath = Path.Combine(runtimeAssetPath, "Materials");
-
             // Copy the FBX file to the destination path
             File.Copy(sourcePath, destPath, overwrite: true);
 
