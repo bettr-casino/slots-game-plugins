@@ -247,22 +247,21 @@
                                             }
                                             {{- end -}}{{ if machineActivationList["ButtonText"] != "none" }},
                                             {
-                                              "Name": "PlayButton",
-                                              "Layer": "UI",
-                                              "Components": [
-                                                {
-                                                  "ComponentType": "Button",
-                                                  "Text": "{{machineActivationList["ButtonText"]}}",
-                                                  "FontSize": 24,
-                                                  "Color": "#FFFFFF",
-                                                  "Rect": {
-                                                    "X": 0.5,
-                                                    "Y": 0.1,
-                                                    "Width": 200,
-                                                    "Height": 50
-                                                  }
-                                                }
-                                              ]
+                                                "Name": "{{machineActivationList["ButtonText"]}}",
+                                                "Layer": "UI",
+                                                "Components": [
+                                                    {
+                                                        "ComponentType": "Image",
+                                                        "Filename": "{{machineActivationList["ButtonText"]}}Image",
+                                                        "Color": "#FFFFFF",
+                                                        "Rect": {
+                                                            "X": 0.5,
+                                                            "Y": 0.5,
+                                                            "Width": 84.21,
+                                                            "Height": 42.06
+                                                        }
+                                                    }
+                                                ]
                                             }
                                             {{- end -}}
                                         ]
