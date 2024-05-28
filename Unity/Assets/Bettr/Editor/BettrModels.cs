@@ -1619,8 +1619,9 @@ namespace Bettr.Editor
         public EventTriggerComponent(Tile tile, params string[] param)
         {
             _tile = tile;
+            param ??= Array.Empty<string>();
             _param = param.Length > 0 ? param[0] : null;
-            _paramCount = param.Length;
+            _paramCount = (int)param?.Length;
             if (_paramCount > 1)
             {
                 throw new ArgumentOutOfRangeException("param", "EventTriggerComponent only supports 0 or 1 parameters");
