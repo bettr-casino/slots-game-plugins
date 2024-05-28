@@ -18,6 +18,8 @@ using UnityEngine.SceneManagement;
 using DirectoryInfo = System.IO.DirectoryInfo;
 
 using Scriban;
+using Scriban.Parsing;
+using Scriban.Runtime;
 using UnityEngine.Rendering;
 using Exception = System.Exception;
 
@@ -1337,6 +1339,9 @@ namespace Bettr.Editor
                 throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} template: {templateName}");
             }
             
+            var machines = GetTable($"{machineName}Machines");
+            var machineTransitions = GetTable($"{machineName}MachineTransitions");
+
             // Create a model object with the machineName variable
             var model = new Dictionary<string, object>
             {
@@ -1346,8 +1351,13 @@ namespace Bettr.Editor
                 { "machines", new string[]
                 {
                     "BaseGame",
-                } }
+                }}
             };
+            
+            var context = new TemplateContext();
+            var scriptObject = new ScriptObject();
+            
+            context.PushGlobal(scriptObject);
             
             // run it through Scriban
             var json = scribanTemplate.Render(model);
@@ -1976,14 +1986,13 @@ namespace Bettr.Editor
         
         private static T GetTableValue<T>(Table table, string pk, string key)
         {
-            var pkTable = table[pk] as Table;
-            if (pkTable == null)
+            var valueTable = table;
+            if (table[pk] is Table pkTable)
             {
-                Debug.LogError($"Key {pk} not found in table.");
-                return default(T);
+                valueTable = pkTable;
             }
-
-            var first = pkTable["First"] as Table;
+            
+            var first = valueTable["First"] as Table;
             if (first == null)
             {
                 Debug.LogError($"Key {pk} First not found in table.");
@@ -2014,6 +2023,52 @@ namespace Bettr.Editor
             var table = TileController.LuaScript.Globals[tableName] as Table;
             return table != null;
         }
+    }
+
+    public class DictionaryWrapper : IScriptObject
+    {
+        public IEnumerable<string> GetMembers()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Contains(string member)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool TryGetValue(TemplateContext context, SourceSpan span, string member, out object value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool CanWrite(string member)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool TrySetValue(TemplateContext context, SourceSpan span, string member, object value, bool readOnly)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Remove(string member)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetReadOnly(string member, bool readOnly)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IScriptObject Clone(bool deep)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int Count { get; }
+        public bool IsReadOnly { get; set; }
     }
     
     public class SimpleStringInterpolator
