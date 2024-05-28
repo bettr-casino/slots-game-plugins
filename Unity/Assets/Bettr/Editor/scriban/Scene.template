@@ -163,11 +163,9 @@
             {{ for machineTransition in machineTransitions }}
               {
                 "Name": "{{ machineTransition }}Dialog",
-                "Id": "{{ machineTransition }}Dialog",
                 "Layer": "UI",
                 "Child": {
                     "Name": "Pivot",
-                    "Id": "Pivot",
                     "Layer": "UI",
                     "Children": [
                         {
@@ -185,63 +183,92 @@
                                   }
                                 }
                             ],
-                            "Children": [
-                            {
-                              "Name": "TitleText",
-                              "Layer": "UI",
-                              "Components": [
-                                {
-                                  "ComponentType": "TextMeshProUI",
-                                  "Text": "YOU HAVE WON THE WHEEL FEATURE!",
-                                  "FontSize": 48,
-                                  "Color": "#FFFFFF",
-                                  "Rect": {
-                                    "X": 0.5,
-                                    "Y": 0.8,
-                                    "Width": 480,
-                                    "Height": 100
-                                  }
-                                }
-                              ]
-                            },
-                            {
-                              "Name": "SubtitleText",
-                              "Layer": "UI",
-                              "Components": [
-                                {
-                                  "ComponentType": "TextMeshProUI",
-                                  "Text": "PRESS PLAY TO SPIN THE WHEEL",
-                                  "FontSize": 24,
-                                  "Color": "#FFFFFF",
-                                  "Rect": {
-                                    "X": 0.5,
-                                    "Y": 0.3,
-                                    "Width": 480,
-                                    "Height": 50
-                                  }
-                                }
-                              ]
-                            },
-                            {
-                              "Name": "PlayButton",
-                              "Layer": "UI",
-                              "Components": [
-                                {
-                                  "ComponentType": "Button",
-                                  "Text": "Play",
-                                  "FontSize": 24,
-                                  "Color": "#FFFFFF",
-                                  "Rect": {
-                                    "X": 0.5,
-                                    "Y": 0.1,
-                                    "Width": 200,
-                                    "Height": 50
-                                  }
-                                }
-                              ]
+                            "Child": {
+                                "Name": "Pivot",
+                                "Layer": "UI",
+                                "Children": [
+                                    {{ for machineActivationList in machineActivations[machineTransition] }}
+                                    {
+                                        "Name": "{{machineActivationList["ActivationKey"]}}",
+                                        "Children": [
+                                            {
+                                              "Name": "TitleText",
+                                              "Layer": "UI",
+                                              "Components": [
+                                                {
+                                                  "ComponentType": "TextMeshProUI",
+                                                  "Text": "{{machineActivationList["TitleText"]}}",
+                                                  "FontSize": 48,
+                                                  "Color": "#FFFFFF",
+                                                  "Rect": {
+                                                    "X": 0.5,
+                                                    "Y": 0.8,
+                                                    "Width": 480,
+                                                    "Height": 100
+                                                  }
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "Name": "MainText",
+                                              "Layer": "UI",
+                                              "Components": [
+                                                {
+                                                  "ComponentType": "TextMeshProUI",
+                                                  "Text": "{{machineActivationList["MainText"]}}",
+                                                  "FontSize": 48,
+                                                  "Color": "#FFFFFF",
+                                                  "Rect": {
+                                                    "X": 0.5,
+                                                    "Y": 0.8,
+                                                    "Width": 480,
+                                                    "Height": 100
+                                                  }
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "Name": "SubtitleText",
+                                              "Layer": "UI",
+                                              "Components": [
+                                                {
+                                                  "ComponentType": "TextMeshProUI",
+                                                  "Text": "{{machineActivationList["SubtitleText"]}}",
+                                                  "FontSize": 24,
+                                                  "Color": "#FFFFFF",
+                                                  "Rect": {
+                                                    "X": 0.5,
+                                                    "Y": 0.3,
+                                                    "Width": 480,
+                                                    "Height": 50
+                                                  }
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "Name": "PlayButton",
+                                              "Layer": "UI",
+                                              "Components": [
+                                                {
+                                                  "ComponentType": "Button",
+                                                  "Text": "{{machineActivationList["ButtonText"]}}",
+                                                  "FontSize": 24,
+                                                  "Color": "#FFFFFF",
+                                                  "Rect": {
+                                                    "X": 0.5,
+                                                    "Y": 0.1,
+                                                    "Width": 200,
+                                                    "Height": 50
+                                                  }
+                                                }
+                                              ]
+                                            }
+                                        ]
+                                    }{{ if !for.last }},{{ end }}
+                                    {{ end }}
+                                ]
                             }
-                            ]
-                            }
+                        }
                     ]
                 }
               }{{ if !for.last }},{{ end }}

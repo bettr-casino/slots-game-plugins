@@ -1341,9 +1341,11 @@ namespace Bettr.Editor
             
             var machines = GetTable($"{machineName}Machines");
             var machineTransitions = GetTable($"{machineName}MachineTransitions");
+            var machineTransitionDialogs = GetTable($"{machineName}MachineTransitionDialogs");
 
-            var machineNames = machines.Pairs.Select(pair => pair.Value.Table["Name"]).ToList();
-            var machineTransitionNames = machineTransitions.Pairs.Select(pair => pair.Value.Table["Name"]).ToList();
+            var machineNames = GetTableArray<string>(machines, null, "Name");
+            var machineTransitionNames = GetTableArray<string>(machineTransitions, null, "Name");
+            var machineActivations = GetTablePkArray<string>(machineTransitionDialogs); 
 
             // Create a model object with the machineName variable
             var model = new Dictionary<string, object>
@@ -1353,6 +1355,7 @@ namespace Bettr.Editor
                 { "sceneName", sceneName },
                 { "machines", machineNames},
                 { "machineTransitions", machineTransitionNames},
+                { "machineActivations", machineActivations},
             };
             
             var context = new TemplateContext();
@@ -1985,10 +1988,46 @@ namespace Bettr.Editor
             return material;
         }
         
+        private static Dictionary<string, List<Dictionary<string, T>>> GetTablePkArray<T>(Table table)
+        {
+            var dict = new Dictionary<string, List<Dictionary<string, T>>>();
+            foreach (var pair in table.Pairs)
+            {
+                dict[pair.Key.String] = GetTableArray<T>((Table) pair.Value.Table["Array"]);
+            }
+            return dict;
+        }
+        
+        private static List<Dictionary<string, T>> GetTableArray<T>(Table table)
+        {
+            var list = new List<Dictionary<string, T>>();
+            foreach (var pair in table.Pairs)
+            {
+                var dict = new Dictionary<string, T>();
+                foreach (var valuePair in pair.Value.Table.Pairs)
+                {
+                    dict[valuePair.Key.String] = TileController.ProcessResult<T>(valuePair.Value);
+                }
+                list.Add(dict);
+            }
+            return list;
+        }
+        
+        private static List<T> GetTableArray<T>(Table table, string pk, string key)
+        {
+            Table valueTable = table;
+            if (!string.IsNullOrEmpty(pk) && table[pk] is Table pkTable)
+            {
+                valueTable = pkTable;
+            }
+            
+            return valueTable.Pairs.Select(pair => pair.Value.Table[key]).ToList().Cast<T>().ToList();
+        }
+        
         private static T GetTableValue<T>(Table table, string pk, string key)
         {
             var valueTable = table;
-            if (table[pk] is Table pkTable)
+            if (!string.IsNullOrEmpty(pk) && table[pk] is Table pkTable)
             {
                 valueTable = pkTable;
             }
