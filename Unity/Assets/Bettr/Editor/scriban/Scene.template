@@ -248,11 +248,12 @@
                                             {{- end -}}{{ if machineActivationList["ButtonText"] != "none" }},
                                             {
                                                 "Name": "{{machineActivationList["ButtonText"]}}",
+                                                "Id": "{{machineActivationList["ButtonText"]}}",
                                                 "Layer": "UI",
                                                 "Components": [
                                                     {
                                                         "ComponentType": "Image",
-                                                        "Filename": "{{machineActivationList["ButtonText"]}}Image",
+                                                        "Filename": "{{machineActivationList["ButtonText"]}}",
                                                         "Color": "#FFFFFF",
                                                         "Rect": {
                                                             "X": 0.5,
@@ -292,7 +293,17 @@
       "Components": [
         {
             "ComponentType": "Tile",
-            "FileName": "{{machineName}}"
+            "FileName": "{{machineName}}",
+            "EventTriggers": [
+            {{ for machineTransition in machineTransitions }}
+            {{ for machineActivationList in machineActivations[machineTransition] }}
+            {{ if machineActivationList["ButtonText"] != "none" }}
+                {
+                    "ReferenceId": "{{machineActivationList["ButtonText"]}}"
+                }{{ end }}{{ if !for.last }},{{ end }}
+            {{- end -}}
+            {{- end -}}
+            ]
         },
         {
             "ComponentType": "TilePropertyGameObjects",

@@ -669,13 +669,7 @@ namespace Bettr.Editor
             string[] filePaths = Directory.GetFiles(dirPath, "*.cscript.txt.template");
             foreach (string filePath in filePaths)
             {
-                string scribanTemplateText = File.ReadAllText(filePath);
-                var scribanTemplate = Template.Parse(scribanTemplateText);
-                if (scribanTemplate.HasErrors)
-                {
-                    Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages}");
-                    throw new Exception($"Scriban template has errors: {scribanTemplate.Messages}");
-                }
+                var scribanTemplate = ParseScribanTemplate(filePath);
                 var model = new Dictionary<string, object>
                 {
                     { "machineName", machineName },
@@ -697,14 +691,7 @@ namespace Bettr.Editor
         private static GameObject ProcessBaseGameSymbols(string machineName, string machineVariant, string runtimeAssetPath)
         {
             var templateName = "BaseGameSymbolGroup";
-            string scribanTemplateText = ReadScribanTemplate(templateName);
-            
-            var scribanTemplate = Template.Parse(scribanTemplateText);
-            if (scribanTemplate.HasErrors)
-            {
-                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} templateName: {templateName}");
-                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} templateName: {templateName}");
-            }
+            var scribanTemplate = ParseScribanTemplate(templateName);
             
             var baseGameSymbolTable = GetTable($"{machineName}BaseGameSymbolTable");
             var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
@@ -817,14 +804,7 @@ namespace Bettr.Editor
             }
             
             var templateName = "BaseGameMachine";
-            string scribanTemplateText = ReadScribanTemplate(templateName);
-            
-            var scribanTemplate = Template.Parse(scribanTemplateText);
-            if (scribanTemplate.HasErrors)
-            {
-                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} templateName: {templateName}");
-                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} templateName: {templateName}");
-            }
+            var scribanTemplate = ParseScribanTemplate(templateName);
             
             var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
             
@@ -948,15 +928,8 @@ namespace Bettr.Editor
             }
 
             var templateName = "BaseGameReel";
-            string scribanTemplateText = ReadScribanTemplate(templateName);
+            var scribanTemplate = ParseScribanTemplate(templateName);
 
-            var scribanTemplate = Template.Parse(scribanTemplateText);
-            if (scribanTemplate.HasErrors)
-            {
-                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} templateName: {templateName}");
-                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} templateName: {templateName}");
-            }
-            
             var model = new Dictionary<string, object>
             {
                 { "machineName", machineName },
@@ -985,15 +958,8 @@ namespace Bettr.Editor
         {
             string symbolName = $"{machineName}BaseGameWaysWin";
             var templateName = "BaseGameWaysWin";
-            string scribanTemplateText = ReadScribanTemplate(templateName);
+            var scribanTemplate = ParseScribanTemplate(templateName);
 
-            var scribanTemplate = Template.Parse(scribanTemplateText);
-            if (scribanTemplate.HasErrors)
-            {
-                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} templateName: {templateName}");
-                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} templateName: {templateName}");
-            }
-            
             var model = new Dictionary<string, object>
             {
             };
@@ -1032,15 +998,8 @@ namespace Bettr.Editor
             BettrScriptGenerator.CreateOrLoadScript(backgroundScriptName, runtimeAssetPath);
             
             string templateName = "BaseGameBackground";
-            string scribanTemplateText = ReadScribanTemplate(templateName);
+            var scribanTemplate = ParseScribanTemplate(templateName);
 
-            var scribanTemplate = Template.Parse(scribanTemplateText);
-            if (scribanTemplate.HasErrors)
-            {
-                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} template: {templateName}");
-                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} template: {{templateName}}");
-            }
-            
             var model = new Dictionary<string, object>
             {
                 { "machineName", machineName },
@@ -1116,14 +1075,7 @@ namespace Bettr.Editor
             }
             
             var templateName = "BaseGameMachine";
-            string scribanTemplateText = ReadScribanTemplate(templateName);
-            
-            var scribanTemplate = Template.Parse(scribanTemplateText);
-            if (scribanTemplate.HasErrors)
-            {
-                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} templateName: {templateName}");
-                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} templateName: {templateName}");
-            }
+            var scribanTemplate = ParseScribanTemplate(templateName);
             
             var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
             
@@ -1163,9 +1115,8 @@ namespace Bettr.Editor
             BettrScriptGenerator.CreateOrLoadScript(backgroundScriptName, runtimeAssetPath);
             
             string templateName = "FreeSpinsBackground";
-            string scribanTemplateText = ReadScribanTemplate(templateName);
+            var scribanTemplate = ParseScribanTemplate(templateName);
 
-            var scribanTemplate = Template.Parse(scribanTemplateText);
             if (scribanTemplate.HasErrors)
             {
                 Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} template: {templateName}");
@@ -1204,14 +1155,7 @@ namespace Bettr.Editor
             AssetDatabase.Refresh();
             
             var templateName = "WheelGameMachine";
-            string scribanTemplateText = ReadScribanTemplate(templateName);
-            
-            var scribanTemplate = Template.Parse(scribanTemplateText);
-            if (scribanTemplate.HasErrors)
-            {
-                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} templateName: {templateName}");
-                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} templateName: {templateName}");
-            }
+            var scribanTemplate = ParseScribanTemplate(templateName);
             
             var model = new Dictionary<string, object>
             {
@@ -1241,15 +1185,8 @@ namespace Bettr.Editor
             BettrScriptGenerator.CreateOrLoadScript(backgroundScriptName, runtimeAssetPath);
             
             string templateName = "WheelGameBackground";
-            string scribanTemplateText = ReadScribanTemplate(templateName);
+            var scribanTemplate = ParseScribanTemplate(templateName);
 
-            var scribanTemplate = Template.Parse(scribanTemplateText);
-            if (scribanTemplate.HasErrors)
-            {
-                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} template: {templateName}");
-                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} template: {{templateName}}");
-            }
-            
             var model = new Dictionary<string, object>
             {
                 { "machineName", machineName },
@@ -1330,15 +1267,8 @@ namespace Bettr.Editor
             EditorSceneManager.OpenScene(scenePath);
             
             var templateName = "Scene";
-            string scribanTemplateText = ReadScribanTemplate(templateName);
+            var scribanTemplate = ParseScribanTemplate(templateName);
 
-            var scribanTemplate = Template.Parse(scribanTemplateText);
-            if (scribanTemplate.HasErrors)
-            {
-                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} template: {templateName}");
-                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} template: {templateName}");
-            }
-            
             var machines = GetTable($"{machineName}Machines");
             var machineTransitions = GetTable($"{machineName}MachineTransitions");
             var machineTransitionDialogs = GetTable($"{machineName}MachineTransitionDialogs");
@@ -1428,15 +1358,8 @@ namespace Bettr.Editor
             }
             
             string templateName = "BaseGameScatterBonusFreeSpinsMechanic";
-            string scribanTemplateText = ReadScribanTemplate(templateName);
+            var scribanTemplate = ParseScribanTemplate(templateName);
 
-            var scribanTemplate = Template.Parse(scribanTemplateText);
-            if (scribanTemplate.HasErrors)
-            {
-                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} template: {templateName}");
-                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} template: {{templateName}}");
-            }
-            
             var model = new Dictionary<string, object>
             {
                 { "machineName", machineName },
@@ -1758,15 +1681,8 @@ namespace Bettr.Editor
             }
 
             string templateName = "BaseGameRandomMultiplierWildsMechanic";
-            string scribanTemplateText = ReadScribanTemplate(templateName);
+            var scribanTemplate = ParseScribanTemplate(templateName);
 
-            var scribanTemplate = Template.Parse(scribanTemplateText);
-            if (scribanTemplate.HasErrors)
-            {
-                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} template: {templateName}");
-                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} template: {{templateName}}");
-            }
-            
             var model = new Dictionary<string, object>
             {
                 { "machineName", machineName },
@@ -1852,10 +1768,23 @@ namespace Bettr.Editor
 
             return File.ReadAllText(path);
         }
+
+        private static Template ParseScribanTemplate(string templateName)
+        {
+            var templateText = ReadScribanTemplate(templateName);
+            var scribanTemplate = Template.Parse(templateText);
+            if (scribanTemplate.HasErrors)
+            {
+                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} filePath: {templateName}");
+                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} filePath: {templateName}");
+            }
+
+            return scribanTemplate;
+        }
         
         private static string ReadScribanTemplate(string fileName)
         {
-            string path = Path.Combine(Application.dataPath, "Bettr", "Editor", "scriban", $"{fileName}.template");
+            string path = Path.Combine(Application.dataPath, "Bettr", "Editor", fileName.Contains(".cscript.txt") ? "scripts" : "scriban", $"{Path.GetFileNameWithoutExtension(fileName)}.template");
             if (!File.Exists(path))
             {
                 Debug.LogError($"Scriban template file not found at path: {path}");
