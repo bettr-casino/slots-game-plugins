@@ -1,7 +1,7 @@
 require "math"
 require "Core"
 require "Utils"
-require "{{machineName}}BaseGameReelCore"
+require "{{machineName}}BaseGameReelMechanics"
 
 function {{machineName}}BaseGameReel:new(o)
 	o = o or {}
@@ -20,38 +20,6 @@ end
 
 function {{machineName}}BaseGameReel:Awake()
 	System.Print("{{machineName}}BaseGameReel Awake tile id={0}", self.id)
-end
-
-function {{machineName}}BaseGameReel:DisplayWays(waySymbol, wayMatrix, waySymbolCount, duration)
-    for i=1,waySymbolCount parallel do
-        local wayReelID = wayMatrix[i].ReelID
-       if wayReelID == self.ReelID then
-           local waysGroupProperty = self.WaysGroup
-           local rowIndex = wayMatrix[i].RowIndex
-           local luaRowIndex = rowIndex + 1
-           waysGroupProperty["RowIndex" .. luaRowIndex].SetActive(true)
-           local animatorGroupProperty = self["SymbolWaysWinAnimatorGroup" .. luaRowIndex]
-           local symbolGroupProperty = self["SymbolGroup" .. luaRowIndex]
-           local currentKey = symbolGroupProperty.CurrentKey
-           local animatorProperty = animatorGroupProperty[currentKey]
-           animatorProperty.overrideAnimationDuration = true
-           animatorProperty.animationDuration = duration
-           BettrVisualsController.PlayAnimatorProperty(animatorProperty)
-           -- Core.Animator:PlayAnimatorProperty(currentKey, animatorProperty)
-       end
-    end
-end
-
-function {{machineName}}BaseGameReel:HideWays(waySymbol, wayMatrix, wayMatrixCount)
-    for i=1,wayMatrixCount parallel do
-        local wayReelID = wayMatrix[i].ReelID
-        if wayReelID == self.ReelID then
-            local waysGroupProperty = self.WaysGroup
-            local rowIndex = wayMatrix[i].RowIndex
-            local luaRowIndex = rowIndex + 1
-            waysGroupProperty["RowIndex" .. luaRowIndex].SetActive(false)
-        end
-    end
 end
 
 function {{machineName}}BaseGameReel:Start()
