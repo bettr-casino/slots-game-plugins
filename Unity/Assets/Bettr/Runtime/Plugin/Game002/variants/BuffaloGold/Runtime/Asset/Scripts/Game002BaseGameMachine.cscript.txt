@@ -1,7 +1,9 @@
 require "math"
 require "Core"
-require "Game002BaseGameMachineMechanics"
 require "Game002BaseGameReel"
+
+Game002BaseGameMachine = {
+}
 
 function Game002BaseGameMachine:new(o)
 	o = o or {}
@@ -31,6 +33,72 @@ function Game002BaseGameMachine:Start()
 	        self:StartEngines()
         end
     end
+end
+
+function Game002BaseGameMachine:OnSpinButtonClicked()
+    series
+        do
+            self:WaitForPayToComplete()                       
+            self:SpinEngines()
+            self:WaitForApplyOutcomeDelay()
+            self:LoadServerOutcome()
+            self:OnOutcomeReceived()
+        end
+    end
+end
+
+function Game002BaseGameMachine:RollUpWaysWin(waysSummary)
+    series
+        do
+            -- rollup ways win once
+            local startDelay = waysSummary.DisplayLoopStartDelay
+            local duration = waysSummary.DisplayLoopDuration
+            local pays = waysSummary.Pays 
+            System.WaitForSeconds(startDelay)
+            local winTextProperty = self.WinText
+            
+            BettrVisualsController.RollUpCounter(winTextProperty, 0, pays, 1)
+            
+            local creditsTextProperty = self.CreditsText   
+            local oldCoins = BettrUser.Coins
+            local newCoins = oldCoins + pays            
+            BettrUser.Coins = newCoins  
+                      
+            BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 1)
+        end
+    end    
+end
+
+function Game002BaseGameMachine:WaitForPayToComplete()
+    series
+        do
+            if Game002BaseGameState.SpinState.First.State == "WaitingForPayToComplete" then
+                local waysSummary = Game002BaseGameWaysSummary.Ways.First
+                local delay = waysSummary.DisplayLoopEndDelay
+                while Game002BaseGameState.SpinState.First.State == "WaitingForPayToComplete" do
+                    Game002BaseGameState.DisplayState.First.State = "CancelRequested"
+                    System.WaitForSeconds(delay)
+                end
+            end
+            Game002BaseGameState.DisplayState.First.State = "Idle"            
+        end
+    end
+end
+
+function Game002BaseGameMachine:WaitingForFreeSpinsToComplete()    
+end
+
+function Game002BaseGameMachine:BaseGameFreeSpinsTriggering()
+    Game002BaseGameState.SpinState.First.State = "WaitingForFreeSpinsToComplete"
+    System.StartCoroutine(self, "FreeSpinsTrigger")
+end
+
+function Game002BaseGameMachine:WaitingForPayToComplete()    
+end
+
+function Game002BaseGameMachine:BaseGameWaysPaying()
+    Game002BaseGameState.SpinState.First.State = "WaitingForPayToComplete"
+    System.StartCoroutine(self, "BaseGamePayout")
 end
 
 function Game002BaseGameMachine:ConfigureSettings()
@@ -295,28 +363,6 @@ end
 function Game002BaseGameMachine:UpdateStatusText(text)
 end
 
-function Game002BaseGameMachine:RollUpWaysWin(waysSummary)
-    series
-        do
-            -- rollup ways win once
-            local startDelay = waysSummary.DisplayLoopStartDelay
-            local duration = waysSummary.DisplayLoopDuration
-            local pays = waysSummary.Pays 
-            System.WaitForSeconds(startDelay)
-            local winTextProperty = self.WinText
-            
-            BettrVisualsController.RollUpCounter(winTextProperty, 0, pays, 1)
-            
-            local creditsTextProperty = self.CreditsText   
-            local oldCoins = BettrUser.Coins
-            local newCoins = oldCoins + pays            
-            BettrUser.Coins = newCoins  
-                      
-            BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 1)
-        end
-    end    
-end
-
 function Game002BaseGameMachine:PlayStartAnimations()
     series
         do
@@ -391,22 +437,6 @@ function Game002BaseGameMachine:SpinEngines()
     end
 end
 
-function Game002BaseGameMachine:WaitForPayToComplete()
-    series
-        do
-            if Game002BaseGameState.SpinState.First.State == "WaitingForPayToComplete" then
-                local waysSummary = Game002BaseGameWaysSummary.Ways.First
-                local delay = waysSummary.DisplayLoopEndDelay
-                while Game002BaseGameState.SpinState.First.State == "WaitingForPayToComplete" do
-                    Game002BaseGameState.DisplayState.First.State = "CancelRequested"
-                    System.WaitForSeconds(delay)
-                end
-            end
-            Game002BaseGameState.DisplayState.First.State = "Idle"            
-        end
-    end
-end
-
 function Game002BaseGameMachine:UpdateBaseGameReelsSpinState(state)    
     Game002BaseGameReelSpinState.Reel1.First.ReelSpinState = state
     Game002BaseGameReelSpinState.Reel2.First.ReelSpinState = state
@@ -435,18 +465,6 @@ end
 function Game002BaseGameMachine:OnSpinReelsStopped()
     self:UpdateBaseGameReelsSpinState("Waiting")
     self:TryWaysPaying()
-end
-
-function Game002BaseGameMachine:OnSpinButtonClicked()
-    series
-        do
-            self:WaitForPayToComplete()                        
-            self:SpinEngines()
-            self:WaitForApplyOutcomeDelay()
-            self:LoadServerOutcome()
-            self:OnOutcomeReceived()
-        end
-    end
 end
 
 function Game002BaseGameMachine:OnOutcomeReceived()
@@ -478,9 +496,14 @@ function Game002BaseGameMachine:OnBecameVisible()
 	System.Print("Game002BaseGameMachine OnBecameVisible tile id={0}", self.id)
 end
 
--- update dispatch table
-Game002BaseGameMachine.BaseGameStateDispatchTable.Waiting = Game002BaseGameMachine.BaseGameWaiting
-Game002BaseGameMachine.BaseGameStateDispatchTable.Spinning = Game002BaseGameMachine.BaseGameSpinning
-Game002BaseGameMachine.BaseGameStateDispatchTable.Completed = Game002BaseGameMachine.BaseGameCompleted 
+Game002BaseGameMachine.BaseGameStateDispatchTable = {
+    Waiting = Game002BaseGameMachine.BaseGameWaiting,
+    Spinning = Game002BaseGameMachine.BaseGameSpinning,
+    Completed = Game002BaseGameMachine.BaseGameCompleted,
+    WaysPaying = Game002BaseGameMachine.BaseGameWaysPaying,
+    WaitingForPayToComplete = Game002BaseGameMachine.WaitingForPayToComplete,
+    FreeSpinsTriggering = Game002BaseGameMachine.BaseGameFreeSpinsTriggering,
+    WaitingForFreeSpinsToComplete = Game002BaseGameMachine.WaitingForFreeSpinsToComplete
+}
 
 return Game002BaseGameMachine:new()

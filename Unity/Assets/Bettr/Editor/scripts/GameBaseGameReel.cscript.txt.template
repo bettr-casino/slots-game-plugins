@@ -1,7 +1,9 @@
 require "math"
 require "Core"
 require "Utils"
-require "{{machineName}}BaseGameReelMechanics"
+
+{{machineName}}BaseGameReel = {
+}
 
 function {{machineName}}BaseGameReel:new(o)
 	o = o or {}
@@ -487,16 +489,47 @@ function {{machineName}}BaseGameReel:CloneCurrentSymbol(rowIndex)
     return clonedSymbol
 end
 
-{{machineName}}BaseGameReel.ReelSpinStateDispatchTable = {
-}
+function {{machineName}}BaseGameReel:DisplayWays(waySymbol, wayMatrix, waySymbolCount, duration)
+    for i=1,waySymbolCount parallel do
+        local wayReelID = wayMatrix[i].ReelID
+       if wayReelID == self.ReelID then
+           local waysGroupProperty = self.WaysGroup
+           local rowIndex = wayMatrix[i].RowIndex
+           local luaRowIndex = rowIndex + 1
+           waysGroupProperty["RowIndex" .. luaRowIndex].SetActive(true)
+           local animatorGroupProperty = self["SymbolWaysWinAnimatorGroup" .. luaRowIndex]
+           local symbolGroupProperty = self["SymbolGroup" .. luaRowIndex]
+           local currentKey = symbolGroupProperty.CurrentKey
+           local animatorProperty = animatorGroupProperty[currentKey]
+           animatorProperty.overrideAnimationDuration = true
+           animatorProperty.animationDuration = duration
+           BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+           -- Core.Animator:PlayAnimatorProperty(currentKey, animatorProperty)
+       end
+    end
+end
 
-{{machineName}}BaseGameReel.ReelSpinStateDispatchTable.Waiting = {{machineName}}BaseGameReel.SpinReelWaiting
-{{machineName}}BaseGameReel.ReelSpinStateDispatchTable.Spinning = {{machineName}}BaseGameReel.SpinReelSpinning
-{{machineName}}BaseGameReel.ReelSpinStateDispatchTable.Stopped = {{machineName}}BaseGameReel.SpinReelStopped
-{{machineName}}BaseGameReel.ReelSpinStateDispatchTable.ReachedOutcomeStopIndex = {{machineName}}BaseGameReel.SpinReelReachedOutcomeStopIndex
-{{machineName}}BaseGameReel.ReelSpinStateDispatchTable.SpinStartedRollBack = {{machineName}}BaseGameReel.SpinReelSpinStartedRollBack
-{{machineName}}BaseGameReel.ReelSpinStateDispatchTable.SpinStartedRollForward = {{machineName}}BaseGameReel.SpinReelSpinStartedRollForward
-{{machineName}}BaseGameReel.ReelSpinStateDispatchTable.SpinEndingRollForward = {{machineName}}BaseGameReel.SpinReelSpinEndingRollForward
-{{machineName}}BaseGameReel.ReelSpinStateDispatchTable.SpinEndingRollBack = {{machineName}}BaseGameReel.SpinReelSpinEndingRollBack
+function {{machineName}}BaseGameReel:HideWays(waySymbol, wayMatrix, wayMatrixCount)
+    for i=1,wayMatrixCount parallel do
+        local wayReelID = wayMatrix[i].ReelID
+        if wayReelID == self.ReelID then
+            local waysGroupProperty = self.WaysGroup
+            local rowIndex = wayMatrix[i].RowIndex
+            local luaRowIndex = rowIndex + 1
+            waysGroupProperty["RowIndex" .. luaRowIndex].SetActive(false)
+        end
+    end
+end
+
+{{machineName}}BaseGameReel.ReelSpinStateDispatchTable = {
+    Waiting = {{machineName}}BaseGameReel.SpinReelWaiting,
+    Spinning = {{machineName}}BaseGameReel.SpinReelSpinning,
+    Stopped = {{machineName}}BaseGameReel.SpinReelStopped,
+    ReachedOutcomeStopIndex = {{machineName}}BaseGameReel.SpinReelReachedOutcomeStopIndex,
+    SpinStartedRollBack = {{machineName}}BaseGameReel.SpinReelSpinStartedRollBack,
+    SpinStartedRollForward = {{machineName}}BaseGameReel.SpinReelSpinStartedRollForward,
+    SpinEndingRollForward = {{machineName}}BaseGameReel.SpinReelSpinEndingRollForward,
+    SpinEndingRollBack = {{machineName}}BaseGameReel.SpinReelSpinEndingRollBack
+}
 
 return {{machineName}}BaseGameReel:new()
