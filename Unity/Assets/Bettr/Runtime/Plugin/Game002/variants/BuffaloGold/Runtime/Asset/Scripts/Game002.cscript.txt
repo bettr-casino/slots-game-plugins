@@ -54,18 +54,6 @@ function Game002:LoadBaseGameBackgroundPrefab()
     end
 end
 
-function Game002:LoadFreeSpinsBackgroundPrefab()
-    series
-        do
-            System.Print("Game002:LoadFreeSpinsBackgroundPrefab tile id={0}", self.id)
-            local manifest = self.Manifest
-            local backgroundParentProperty = self.FreeSpinsBackgroundParent
-            local backgroundParent = backgroundParentProperty["Pivot"]                        
-            BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, manifest.FreeSpinsBackgroundPrefabName, backgroundParent)
-        end
-    end
-end
-
 function Game002:LoadBaseGamePrefab()
     series
         do            
@@ -77,66 +65,12 @@ function Game002:LoadBaseGamePrefab()
     end
 end
 
-function Game002:LoadFreeSpinsPrefab()
-    series
-        do            
-            local manifest = self.Manifest
-            local freeSpinsMachineParentProperty = self.FreeSpinsMachineParent
-            local freeSpinsMachineParent = freeSpinsMachineParentProperty["Pivot"]
-            BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, manifest.FreeSpinsMachinePrefabName, freeSpinsMachineParent)
-        end
-    end
-end
-
 function Game002:SetBaseGameActive(active)
     if active then
         self.BaseGameMachineParent.SetActive(true)
         Game002MachineState.Current.First.ActiveGame = "BaseGame"
     else
         self.BaseGameMachineParent.SetActive(false)
-    end
-end
-
-function Game002:SetFreeSpinsActive(active)
-    if active then
-        self.FreeSpinsMachineParent.SetActive(true)
-        Game002MachineState.Current.First.ActiveGame = "FreeSpins"
-    else
-        self.FreeSpinsMachineParent.SetActive(false)
-    end
-end
-
-function Game002:OnFreeSpinsTriggeringStarted()
-    series
-        do
-            local animatorProperty = self["free_spins_trigger_slide_in"]
-            BettrVisualsController.PlayAnimatorProperty(animatorProperty)
-            self:SetBaseGameActive(false)
-            Game002BaseGameBackground:HideBackground()
-            BettrVisualsController.SwitchOrientationToPortrait()
-            local animatorProperty = self["free_spins_trigger_slide_out"]            
-            BettrVisualsController.PlayAnimatorProperty(animatorProperty)
-            Game001FreeSpinsBackground:StartBackground()                        
-            self:SetFreeSpinsActive(true)
-            Game002FreeSpinsMachine:StartFreeSpins()
-        end
-    end
-end
-
-function Game002:OnFreeSpinsTriggeringCompleted()
-    series
-        do
-            local animatorProperty = self["free_spins_trigger_slide_in"]            
-            BettrVisualsController.PlayAnimatorProperty(animatorProperty)
-            self:SetFreeSpinsActive(false)
-            Game002FreeSpinsBackground:HideBackground()
-            BettrVisualsController.SwitchOrientationToLandscape()
-            Game002BaseGameBackground:ShowBackground()
-            self:SetBaseGameActive(true)
-            local animatorProperty = self["free_spins_trigger_slide_out"]            
-            BettrVisualsController.PlayAnimatorProperty(animatorProperty)
-            Game002BaseGameMachine:OnFreeSpinsTriggeringCompleted()
-        end
     end
 end
 

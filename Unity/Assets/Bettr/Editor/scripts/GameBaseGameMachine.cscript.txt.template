@@ -85,18 +85,10 @@ function {{machineName}}BaseGameMachine:WaitForPayToComplete()
     end
 end
 
-function {{machineName}}BaseGameMachine:WaitingForFreeSpinsToComplete()    
-end
-
-function {{machineName}}BaseGameMachine:BaseGameFreeSpinsTriggering()
-    {{machineName}}BaseGameState.SpinState.First.State = "WaitingForFreeSpinsToComplete"
-    System.StartCoroutine(self, "FreeSpinsTrigger")
-end
-
 function {{machineName}}BaseGameMachine:WaitingForPayToComplete()    
 end
 
-function {{machineName}}BaseGameMachine:BaseGameWaysPaying()
+function {{machineName}}BaseGameMachine:BaseGamePaying()
     {{machineName}}BaseGameState.SpinState.First.State = "WaitingForPayToComplete"
     System.StartCoroutine(self, "BaseGamePayout")
 end
@@ -143,134 +135,6 @@ end
 function {{machineName}}BaseGameMachine:BaseGameCompleted()
    self:ShowSettings()
    {{machineName}}BaseGameState.SpinState.First.State = "Waiting"
-end
-
-function {{machineName}}BaseGameMachine:FreeSpinsTrigger()
-    series
-        do
-            local freeSpinsSummary = {{machineName}}BaseGameFreeSpinsTriggerSummary.FreeSpins
-            if freeSpinsSummary == nil then
-                self:OnBaseGameSpinCompleted()
-            else
-                local bn1Count = freeSpinsSummary.First.BN1Count
-                local bn2Count = freeSpinsSummary.First.BN2Count
-                local bn1bn2Count = freeSpinsSummary.First.BN1BN2Count
-                -- clone all trigger symbols
-                local animatorProperty = {{machineName}}BaseGameBackground["freespinstrigger"]                
-                BettrVisualsController.PlayAnimatorProperty(animatorProperty)
-                -- clone the free spin trigger symbols
-                {{machineName}}MachineState.Current.First.FreeSpinsTriggerSymbols = {}
-                local clonedSymbols = {{machineName}}MachineState.Current.First.FreeSpinsTriggerSymbols                                
-                for i=1,#{{machineName}}BaseGameFreeSpinsTriggerMatrix parallel do
-                    local triggerMatrix = {{machineName}}BaseGameFreeSpinsTriggerMatrix[i]
-                    local triggerSymbol = triggerMatrix.Symbol
-                    if triggerSymbol == "BN2" then
-                        local reel = _G["{{machineName}}BaseGame" .. triggerMatrix.ReelID]
-                        local clonedSymbol = reel:CloneAndOverlayCurrentSymbol(triggerMatrix.RowIndex)
-                        table.insert(clonedSymbols, clonedSymbol)
-                    end
-                end
-                local clonedSymbolsCount = #clonedSymbols
-                local clonedSymbol = nil
-                local tweenGroupProperty = self["FreeSpinsTriggerTweenEndPointsGroup"]
-                parallel
-                    do
-                        if clonedSymbolsCount ~= 1 then
-                            return
-                        end 
-                        clonedSymbol = clonedSymbols[1]                       
-                        local middleProperty = tweenGroupProperty["Middle"]                                
-                        BettrVisualsController.TweenMoveBetween(clonedSymbol, middleProperty)
-                        System.WaitForSeconds(middleProperty.tweenDuration)
-                    end
-                    do
-                        if clonedSymbolsCount ~= 2 then
-                            return
-                        end                        
-                        local leftProperty = tweenGroupProperty["Left"]
-                        local rightProperty = tweenGroupProperty["Right"]  
-                        clonedSymbol = clonedSymbols[1]                              
-                        BettrVisualsController.TweenMoveBetween(clonedSymbol, leftProperty)
-                        clonedSymbol = clonedSymbols[2]
-                        BettrVisualsController.TweenMoveBetween(clonedSymbol, rightProperty)
-                        System.WaitForSeconds(leftProperty.tweenDuration)
-                    end
-                    do
-                        if clonedSymbolsCount ~= 3 then
-                            return
-                        end                        
-                        local middleProperty = tweenGroupProperty["Middle"]                                
-                        local leftProperty = tweenGroupProperty["Left"]
-                        local rightProperty = tweenGroupProperty["Right"]
-                        clonedSymbol = clonedSymbols[1]
-                        BettrVisualsController.TweenMoveBetween(clonedSymbol, middleProperty)
-                        clonedSymbol = clonedSymbols[2]
-                        BettrVisualsController.TweenMoveBetween(clonedSymbol, leftProperty)
-                        clonedSymbol = clonedSymbols[3]
-                        BettrVisualsController.TweenMoveBetween(clonedSymbol, rightProperty)
-                        System.WaitForSeconds(leftProperty.tweenDuration)
-                    end
-                    do
-                        if clonedSymbolsCount ~= 4 then
-                            return
-                        end                        
-                        local topProperty = tweenGroupProperty["Top"]
-                        local bottomProperty = tweenGroupProperty["Bottom"]                                
-                        local leftProperty = tweenGroupProperty["Left"]
-                        local rightProperty = tweenGroupProperty["Right"]
-                        clonedSymbol = clonedSymbols[1]
-                        BettrVisualsController.TweenMoveBetween(clonedSymbol, topProperty)
-                        clonedSymbol = clonedSymbols[2]
-                        BettrVisualsController.TweenMoveBetween(clonedSymbol, bottomProperty)
-                        clonedSymbol = clonedSymbols[3]
-                        BettrVisualsController.TweenMoveBetween(clonedSymbol, leftProperty)
-                        clonedSymbol = clonedSymbols[4]
-                        BettrVisualsController.TweenMoveBetween(clonedSymbol, rightProperty)
-                        System.WaitForSeconds(leftProperty.tweenDuration)
-                    end
-                    do
-                        if clonedSymbolsCount ~= 5 then
-                            return
-                        end
-                        local middleProperty = tweenGroupProperty["Middle"]                        
-                        local topProperty = tweenGroupProperty["Top"]
-                        local bottomProperty = tweenGroupProperty["Bottom"]                                
-                        local leftProperty = tweenGroupProperty["Left"]
-                        local rightProperty = tweenGroupProperty["Right"]
-                        clonedSymbol = clonedSymbols[1]
-                        BettrVisualsController.TweenMoveBetween(clonedSymbol, middleProperty)
-                        clonedSymbol = clonedSymbols[2]
-                        BettrVisualsController.TweenMoveBetween(clonedSymbol, topProperty)
-                        clonedSymbol = clonedSymbols[3]
-                        BettrVisualsController.TweenMoveBetween(clonedSymbol, bottomProperty)
-                        clonedSymbol = clonedSymbols[4]
-                        BettrVisualsController.TweenMoveBetween(clonedSymbol, leftProperty)
-                        clonedSymbol = clonedSymbols[5]
-                        BettrVisualsController.TweenMoveBetween(clonedSymbol, rightProperty)
-                        System.WaitForSeconds(leftProperty.tweenDuration)
-                    end
-                    do
-                        local animatorProperty = self["free_spins_trigger_fade_in"]
-                        BettrVisualsController.PlayAnimatorProperty(animatorProperty)
-                    end
-                    do
-                        self:HideSettings()
-                    end
-                end
-                {{machineName}}:OnFreeSpinsTriggeringStarted()
-            end
-        end
-    end
-end
-
-function {{machineName}}BaseGameMachine:OnFreeSpinsTriggeringCompleted()
-    series
-        do
-            local animatorProperty = self["free_spins_trigger_fade_out"]
-            BettrVisualsController.PlayAnimatorProperty(animatorProperty)
-            self:OnBaseGameSpinCompleted()
-        end
-    end
 end
 
 function {{machineName}}BaseGameMachine:OnBaseGameSpinCompleted()
@@ -445,13 +309,8 @@ function {{machineName}}BaseGameMachine:UpdateBaseGameReelsSpinState(state)
     {{machineName}}BaseGameReelSpinState.Reel5.First.ReelSpinState = state
 end
 
-function {{machineName}}BaseGameMachine:TryWaysPaying()
-    {{machineName}}BaseGameState.SpinState.First.State = "WaysPaying"
-end
-
-function {{machineName}}BaseGameMachine:TryFreeSpinsTriggering()
-    -- {{machineName}}BaseGameState.SpinState.First.State = "FreeSpinsTriggering"
-    {{machineName}}BaseGameMachine:OnBaseGameSpinCompleted()
+function {{machineName}}BaseGameMachine:TryPaying()
+    {{machineName}}BaseGameState.SpinState.First.State = "Paying"
 end
 
 function {{machineName}}BaseGameMachine:CurrentSpinState()
@@ -459,12 +318,12 @@ function {{machineName}}BaseGameMachine:CurrentSpinState()
 end
 
 function {{machineName}}BaseGameMachine:OnWaysPayingCompleted()
-    self:TryFreeSpinsTriggering()
+    self:OnBaseGameSpinCompleted()
 end
 
 function {{machineName}}BaseGameMachine:OnSpinReelsStopped()
     self:UpdateBaseGameReelsSpinState("Waiting")
-    self:TryWaysPaying()
+    self:TryPaying()
 end
 
 function {{machineName}}BaseGameMachine:OnOutcomeReceived()
@@ -500,10 +359,8 @@ end
     Waiting = {{machineName}}BaseGameMachine.BaseGameWaiting,
     Spinning = {{machineName}}BaseGameMachine.BaseGameSpinning,
     Completed = {{machineName}}BaseGameMachine.BaseGameCompleted,
-    WaysPaying = {{machineName}}BaseGameMachine.BaseGameWaysPaying,
+    Paying = {{machineName}}BaseGameMachine.BaseGamePaying,
     WaitingForPayToComplete = {{machineName}}BaseGameMachine.WaitingForPayToComplete,
-    FreeSpinsTriggering = {{machineName}}BaseGameMachine.BaseGameFreeSpinsTriggering,
-    WaitingForFreeSpinsToComplete = {{machineName}}BaseGameMachine.WaitingForFreeSpinsToComplete
 }
 
 return {{machineName}}BaseGameMachine:new()
