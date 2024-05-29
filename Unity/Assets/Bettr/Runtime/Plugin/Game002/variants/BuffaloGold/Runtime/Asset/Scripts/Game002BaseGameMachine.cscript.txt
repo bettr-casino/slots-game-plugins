@@ -36,6 +36,7 @@ function Game002BaseGameMachine:Start()
 end
 
 function Game002BaseGameMachine:OnSpinButtonClicked()
+    self:CancelWaysAnimation()
     series
         do
             self:WaitForPayToComplete()                       
@@ -45,6 +46,10 @@ function Game002BaseGameMachine:OnSpinButtonClicked()
             self:OnOutcomeReceived()
         end
     end
+end
+
+function Game002BaseGameMachine:CancelWaysAnimation()
+    Game002BaseGameState.DisplayState.First.State = "CancelRequested"
 end
 
 function Game002BaseGameMachine:RollUpWaysWin(waysSummary)
@@ -192,6 +197,9 @@ function Game002BaseGameMachine:DisplayWays(waysSummary, waysMatrix, ways)
             for waysCounterIndex = 1, waysCount do
                 series
                     do
+                        if Game002BaseGameState.DisplayState.First.State == "CancelRequested" then
+                            break
+                        end
                         local way = ways[waysCounterIndex]
                         local waySymbol = way.Symbol
                         local wayReelCount = way.ReelCount
@@ -207,7 +215,7 @@ function Game002BaseGameMachine:DisplayWays(waysSummary, waysMatrix, ways)
                         local winSymbols = self.WinSymbols
                         winSymbols.SetCurrentActive(waySymbol)
                         -- display ways
-                        for i=1,5 parallel do
+                        for i=1,wayReelCount parallel do
                             local reel = _G["Game002BaseGameReel" .. i]
                             if reel != nil then
                                 reel:DisplayWays(waySymbol, wayMatrix, waySymbolCount, duration)

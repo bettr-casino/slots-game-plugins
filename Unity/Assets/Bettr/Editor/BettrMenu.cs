@@ -665,6 +665,13 @@ namespace Bettr.Editor
         {
             AssetDatabase.Refresh();
             
+            var reelStates = GetTable($"{machineName}BaseGameReelState");
+            var reelCount = 0;
+            foreach (var pair in reelStates.Pairs)
+            {
+                reelCount++;
+            }
+            
             string dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "scripts");
             string[] filePaths = Directory.GetFiles(dirPath, "*.cscript.txt.template");
             foreach (string filePath in filePaths)
@@ -675,9 +682,11 @@ namespace Bettr.Editor
                     { "machineName", machineName },
                     { "machineVariant", machineVariant },
                     { "machines", new string[]
-                    {
-                        "BaseGame",
-                    } }
+                        {
+                            "BaseGame",
+                        } 
+                    },
+                    { "reelCount", reelCount },
                 };
                 var scriptText = scribanTemplate.Render(model);
                 var scriptName = Path.GetFileNameWithoutExtension(filePath); // remove the .template
