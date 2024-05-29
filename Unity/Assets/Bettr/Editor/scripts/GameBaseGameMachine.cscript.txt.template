@@ -246,21 +246,11 @@ end
 
 function {{machineName}}BaseGameMachine:StartEngines()
     parallel
+    {{ for reelIndex in 1..reelCount }}
         do
-            {{machineName}}BaseGameReel1:StartEngines()
+            {{machineName}}BaseGameReel{{ reelIndex }}:StartEngines()
         end
-        do
-            {{machineName}}BaseGameReel2:StartEngines()
-        end
-        do
-            {{machineName}}BaseGameReel3:StartEngines()
-        end
-        do
-            {{machineName}}BaseGameReel4:StartEngines()
-        end
-        do
-            {{machineName}}BaseGameReel5:StartEngines()
-        end
+    {{ end }}
     end
 end
 
@@ -291,30 +281,18 @@ function {{machineName}}BaseGameMachine:SpinEngines()
     winSymbols.SetAllInactive()
     self:ResetSettings()
     parallel
-        do
-            {{machineName}}BaseGameReel1:SpinEngines()
-        end
-        do
-            {{machineName}}BaseGameReel2:SpinEngines()
-        end
-        do
-            {{machineName}}BaseGameReel3:SpinEngines()
-        end
-        do
-            {{machineName}}BaseGameReel4:SpinEngines()
-        end
-        do
-            {{machineName}}BaseGameReel5:SpinEngines()
-        end
+        {{ for reelIndex in 1..reelCount }}
+            do
+                {{machineName}}BaseGameReel{{ reelIndex }}:SpinEngines()
+            end
+        {{ end }}
     end
 end
 
-function {{machineName}}BaseGameMachine:UpdateBaseGameReelsSpinState(state)    
-    {{machineName}}BaseGameReelSpinState.Reel1.First.ReelSpinState = state
-    {{machineName}}BaseGameReelSpinState.Reel2.First.ReelSpinState = state
-    {{machineName}}BaseGameReelSpinState.Reel3.First.ReelSpinState = state
-    {{machineName}}BaseGameReelSpinState.Reel4.First.ReelSpinState = state
-    {{machineName}}BaseGameReelSpinState.Reel5.First.ReelSpinState = state
+function {{machineName}}BaseGameMachine:UpdateBaseGameReelsSpinState(state)
+{{ for reelIndex in 1..reelCount }}
+    {{machineName}}BaseGameReelSpinState.Reel{{ reelIndex }}.First.ReelSpinState = state
+{{ end }}
 end
 
 function {{machineName}}BaseGameMachine:TryPaying()
@@ -336,21 +314,11 @@ end
 
 function {{machineName}}BaseGameMachine:OnOutcomeReceived()
     parallel
-        do
-            {{machineName}}BaseGameReel1:OnOutcomeReceived()
-        end
-        do
-            {{machineName}}BaseGameReel2:OnOutcomeReceived()
-        end
-        do
-            {{machineName}}BaseGameReel3:OnOutcomeReceived()
-        end
-        do
-            {{machineName}}BaseGameReel4:OnOutcomeReceived()
-        end
-        do
-            {{machineName}}BaseGameReel5:OnOutcomeReceived()
-        end
+        {{ for reelIndex in 1..reelCount }}
+            do
+                {{machineName}}BaseGameReel{{ reelIndex }}:OnOutcomeReceived()
+            end
+        {{ end }}
     end
 end
 

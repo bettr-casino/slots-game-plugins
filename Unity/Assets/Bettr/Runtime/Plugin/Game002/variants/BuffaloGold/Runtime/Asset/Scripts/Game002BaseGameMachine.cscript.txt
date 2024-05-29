@@ -246,21 +246,27 @@ end
 
 function Game002BaseGameMachine:StartEngines()
     parallel
-        do
-            Game002BaseGameReel1:StartEngines()
-        end
-        do
-            Game002BaseGameReel2:StartEngines()
-        end
-        do
-            Game002BaseGameReel3:StartEngines()
-        end
-        do
-            Game002BaseGameReel4:StartEngines()
-        end
-        do
-            Game002BaseGameReel5:StartEngines()
-        end
+    
+            do
+                Game002BaseGameReel1:StartEngines()
+            end
+        
+            do
+                Game002BaseGameReel2:StartEngines()
+            end
+        
+            do
+                Game002BaseGameReel3:StartEngines()
+            end
+        
+            do
+                Game002BaseGameReel4:StartEngines()
+            end
+        
+            do
+                Game002BaseGameReel5:StartEngines()
+            end
+        
     end
 end
 
@@ -291,30 +297,42 @@ function Game002BaseGameMachine:SpinEngines()
     winSymbols.SetAllInactive()
     self:ResetSettings()
     parallel
-        do
-            Game002BaseGameReel1:SpinEngines()
-        end
-        do
-            Game002BaseGameReel2:SpinEngines()
-        end
-        do
-            Game002BaseGameReel3:SpinEngines()
-        end
-        do
-            Game002BaseGameReel4:SpinEngines()
-        end
-        do
-            Game002BaseGameReel5:SpinEngines()
-        end
+        
+                    do
+                        Game002BaseGameReel1:SpinEngines()
+                    end
+                
+                    do
+                        Game002BaseGameReel2:SpinEngines()
+                    end
+                
+                    do
+                        Game002BaseGameReel3:SpinEngines()
+                    end
+                
+                    do
+                        Game002BaseGameReel4:SpinEngines()
+                    end
+                
+                    do
+                        Game002BaseGameReel5:SpinEngines()
+                    end
+                
     end
 end
 
-function Game002BaseGameMachine:UpdateBaseGameReelsSpinState(state)    
+function Game002BaseGameMachine:UpdateBaseGameReelsSpinState(state)
+
     Game002BaseGameReelSpinState.Reel1.First.ReelSpinState = state
+
     Game002BaseGameReelSpinState.Reel2.First.ReelSpinState = state
+
     Game002BaseGameReelSpinState.Reel3.First.ReelSpinState = state
+
     Game002BaseGameReelSpinState.Reel4.First.ReelSpinState = state
+
     Game002BaseGameReelSpinState.Reel5.First.ReelSpinState = state
+
 end
 
 function Game002BaseGameMachine:TryPaying()
@@ -336,21 +354,27 @@ end
 
 function Game002BaseGameMachine:OnOutcomeReceived()
     parallel
-        do
-            Game002BaseGameReel1:OnOutcomeReceived()
-        end
-        do
-            Game002BaseGameReel2:OnOutcomeReceived()
-        end
-        do
-            Game002BaseGameReel3:OnOutcomeReceived()
-        end
-        do
-            Game002BaseGameReel4:OnOutcomeReceived()
-        end
-        do
-            Game002BaseGameReel5:OnOutcomeReceived()
-        end
+        
+                    do
+                        Game002BaseGameReel1:OnOutcomeReceived()
+                    end
+                
+                    do
+                        Game002BaseGameReel2:OnOutcomeReceived()
+                    end
+                
+                    do
+                        Game002BaseGameReel3:OnOutcomeReceived()
+                    end
+                
+                    do
+                        Game002BaseGameReel4:OnOutcomeReceived()
+                    end
+                
+                    do
+                        Game002BaseGameReel5:OnOutcomeReceived()
+                    end
+                
     end
 end
 
