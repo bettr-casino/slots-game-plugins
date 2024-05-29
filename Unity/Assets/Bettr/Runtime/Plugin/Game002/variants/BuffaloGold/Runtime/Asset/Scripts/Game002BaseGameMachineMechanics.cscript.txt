@@ -1,0 +1,32 @@
+require "math"
+require "Core"
+require "Game002BaseGameReel"
+
+Game002BaseGameMachine = {
+}
+
+function Game002BaseGameMachine:WaitingForFreeSpinsToComplete()    
+end
+
+function Game002BaseGameMachine:BaseGameFreeSpinsTriggering()
+    Game002BaseGameState.SpinState.First.State = "WaitingForFreeSpinsToComplete"
+    System.StartCoroutine(self, "FreeSpinsTrigger")
+end
+
+function Game002BaseGameMachine:WaitingForPayToComplete()    
+end
+
+function Game002BaseGameMachine:BaseGameWaysPaying()
+    Game002BaseGameState.SpinState.First.State = "WaitingForPayToComplete"
+    System.StartCoroutine(self, "BaseGamePayout")
+end
+
+Game002BaseGameMachine.BaseGameStateDispatchTable = {
+}
+
+-- update dispatch table
+Game002BaseGameMachine.BaseGameStateDispatchTable.WaysPaying = Game002BaseGameMachine.BaseGameWaysPaying
+Game002BaseGameMachine.BaseGameStateDispatchTable.WaitingForPayToComplete = Game002BaseGameMachine.WaitingForPayToComplete
+Game002BaseGameMachine.BaseGameStateDispatchTable.FreeSpinsTriggering = Game002BaseGameMachine.BaseGameFreeSpinsTriggering
+Game002BaseGameMachine.BaseGameStateDispatchTable.WaitingForFreeSpinsToComplete = Game002BaseGameMachine.WaitingForFreeSpinsToComplete
+

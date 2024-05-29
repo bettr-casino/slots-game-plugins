@@ -1,9 +1,7 @@
 require "math"
 require "Core"
+require "Game002BaseGameMachineMechanics"
 require "Game002BaseGameReel"
-
-Game002BaseGameMachine = {
-}
 
 function Game002BaseGameMachine:new(o)
 	o = o or {}
@@ -69,22 +67,6 @@ function Game002BaseGameMachine:Update()
 end
 
 function Game002BaseGameMachine:BaseGameSpinning()    
-end
-
-function Game002BaseGameMachine:WaitingForFreeSpinsToComplete()    
-end
-
-function Game002BaseGameMachine:BaseGameFreeSpinsTriggering()
-    Game002BaseGameState.SpinState.First.State = "WaitingForFreeSpinsToComplete"
-    System.StartCoroutine(self, "FreeSpinsTrigger")
-end
-
-function Game002BaseGameMachine:WaitingForPayToComplete()    
-end
-
-function Game002BaseGameMachine:BaseGameWaysPaying()
-    Game002BaseGameState.SpinState.First.State = "WaitingForPayToComplete"
-    System.StartCoroutine(self, "BaseGamePayout")
 end
 
 function Game002BaseGameMachine:BaseGameWaiting()    
@@ -496,14 +478,9 @@ function Game002BaseGameMachine:OnBecameVisible()
 	System.Print("Game002BaseGameMachine OnBecameVisible tile id={0}", self.id)
 end
 
-Game002BaseGameMachine.BaseGameStateDispatchTable = {
-    Waiting = Game002BaseGameMachine.BaseGameWaiting,
-    Spinning = Game002BaseGameMachine.BaseGameSpinning,
-    WaysPaying = Game002BaseGameMachine.BaseGameWaysPaying,
-    WaitingForPayToComplete = Game002BaseGameMachine.WaitingForPayToComplete,
-    FreeSpinsTriggering = Game002BaseGameMachine.BaseGameFreeSpinsTriggering,
-    WaitingForFreeSpinsToComplete = Game002BaseGameMachine.WaitingForFreeSpinsToComplete,
-    Completed = Game002BaseGameMachine.BaseGameCompleted,
-}
+-- update dispatch table
+Game002BaseGameMachine.BaseGameStateDispatchTable.Waiting = Game002BaseGameMachine.BaseGameWaiting
+Game002BaseGameMachine.BaseGameStateDispatchTable.Spinning = Game002BaseGameMachine.BaseGameSpinning
+Game002BaseGameMachine.BaseGameStateDispatchTable.Completed = Game002BaseGameMachine.BaseGameCompleted 
 
 return Game002BaseGameMachine:new()

@@ -1,9 +1,7 @@
 require "math"
 require "Core"
+require "{{machineName}}BaseGameMachineMechanics"
 require "{{machineName}}BaseGameReel"
-
-{{machineName}}BaseGameMachine = {
-}
 
 function {{machineName}}BaseGameMachine:new(o)
 	o = o or {}
@@ -69,22 +67,6 @@ function {{machineName}}BaseGameMachine:Update()
 end
 
 function {{machineName}}BaseGameMachine:BaseGameSpinning()    
-end
-
-function {{machineName}}BaseGameMachine:WaitingForFreeSpinsToComplete()    
-end
-
-function {{machineName}}BaseGameMachine:BaseGameFreeSpinsTriggering()
-    {{machineName}}BaseGameState.SpinState.First.State = "WaitingForFreeSpinsToComplete"
-    System.StartCoroutine(self, "FreeSpinsTrigger")
-end
-
-function {{machineName}}BaseGameMachine:WaitingForPayToComplete()    
-end
-
-function {{machineName}}BaseGameMachine:BaseGameWaysPaying()
-    {{machineName}}BaseGameState.SpinState.First.State = "WaitingForPayToComplete"
-    System.StartCoroutine(self, "BaseGamePayout")
 end
 
 function {{machineName}}BaseGameMachine:BaseGameWaiting()    
@@ -496,14 +478,9 @@ function {{machineName}}BaseGameMachine:OnBecameVisible()
 	System.Print("{{machineName}}BaseGameMachine OnBecameVisible tile id={0}", self.id)
 end
 
-{{machineName}}BaseGameMachine.BaseGameStateDispatchTable = {
-    Waiting = {{machineName}}BaseGameMachine.BaseGameWaiting,
-    Spinning = {{machineName}}BaseGameMachine.BaseGameSpinning,
-    WaysPaying = {{machineName}}BaseGameMachine.BaseGameWaysPaying,
-    WaitingForPayToComplete = {{machineName}}BaseGameMachine.WaitingForPayToComplete,
-    FreeSpinsTriggering = {{machineName}}BaseGameMachine.BaseGameFreeSpinsTriggering,
-    WaitingForFreeSpinsToComplete = {{machineName}}BaseGameMachine.WaitingForFreeSpinsToComplete,
-    Completed = {{machineName}}BaseGameMachine.BaseGameCompleted,
-}
+-- update dispatch table
+{{machineName}}BaseGameMachine.BaseGameStateDispatchTable.Waiting = {{machineName}}BaseGameMachine.BaseGameWaiting
+{{machineName}}BaseGameMachine.BaseGameStateDispatchTable.Spinning = {{machineName}}BaseGameMachine.BaseGameSpinning
+{{machineName}}BaseGameMachine.BaseGameStateDispatchTable.Completed = {{machineName}}BaseGameMachine.BaseGameCompleted 
 
 return {{machineName}}BaseGameMachine:new()
