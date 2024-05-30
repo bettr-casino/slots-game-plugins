@@ -42,11 +42,11 @@ function Game003BaseGameReel:StartEngines()
             local reelSpinState = Game003BaseGameReelSpinState[self.ReelID].First
             local reelSymbolsState = Game003BaseGameReelSymbolsState[self.ReelID].Array
             local reelStopIndex = reelSpinState.ReelStopIndex
-            local reelCount = reelState.ReelCount                        
+            local reelSymbolCount = reelState.ReelSymbolCount                        
             for i = 1, #reelSymbolsState do
                 local symbolState = reelSymbolsState[i]
                 local reelPosition = symbolState.ReelPosition
-                local symbolStopIndex = 1 + (reelCount + reelStopIndex + reelPosition) % reelCount 
+                local symbolStopIndex = 1 + (reelSymbolCount + reelStopIndex + reelPosition) % reelSymbolCount 
                 local reelSymbol = reelSymbols[symbolStopIndex].ReelSymbol
                 local symbolGroupProperty = self["SymbolGroup" .. i]
                 if symbolGroupProperty.Current ~= nil then
@@ -151,7 +151,6 @@ function Game003BaseGameReel:SpinReelSpinEndingRollBack()
     local reelSymbolsState = Game003BaseGameReelSymbolsState[self.ReelID].Array
     
     local reelStopIndex = reelSpinState.ReelStopIndex
-    local reelCount = reelState.ReelCount                
     
     reelSpinState.SpeedInSymbolUnitsPerSecond = reelState.SpinEndingRollBackSpeedInSymbolUnitsPerSecond
     local reelSpinDirection = reelSpinState.ReelSpinDirection
@@ -277,9 +276,9 @@ function Game003BaseGameReel:UpdateReelSymbolForSpin(symbolIndex)
     local reelSymbols = Game003BaseGameReelSet[self.ReelID].Array
     local rowVisible = symbolState.RowVisible 
     local reelStopIndex = reelSpinState.ReelStopIndex
-    local reelCount = reelState.ReelCount
+    local reelSymbolCount = reelState.ReelSymbolCount
     local reelPosition = symbolState.ReelPosition
-    local symbolStopIndex = 1 + (reelCount + reelStopIndex + reelPosition) % reelCount
+    local symbolStopIndex = 1 + (reelSymbolCount + reelStopIndex + reelPosition) % reelSymbolCount
     local reelSymbol = reelSymbols[symbolStopIndex].ReelSymbol
     local symbolGroupProperty = self["SymbolGroup" .. symbolIndex]
     if symbolGroupProperty.Current ~= nil then
@@ -295,11 +294,11 @@ end
 function Game003BaseGameReel:UpdateReelStopIndexes()
     local reelState = Game003BaseGameReelState[self.ReelID].First
     local reelSpinState = Game003BaseGameReelSpinState[self.ReelID].First
-    local reelCount = reelState.ReelCount
+    local reelSymbolCount = reelState.ReelSymbolCount
     local reelStopIndex = reelSpinState.ReelStopIndex
     local reelStopIndexAdvanceOffset = reelState.ReelStopIndexAdvanceOffset
     reelStopIndex = reelStopIndex + reelStopIndexAdvanceOffset
-    reelStopIndex = (reelCount + reelStopIndex) % reelCount
+    reelStopIndex = (reelSymbolCount + reelStopIndex) % reelSymbolCount
     reelSpinState.ReelStopIndex = reelStopIndex
 end
 
@@ -310,11 +309,11 @@ function Game003BaseGameReel:ApplySpinReelStop()
     end
     local reelSpinState = Game003BaseGameReelSpinState[self.ReelID].First    
     local spinOutcome = Game003BaseGameReelSpinOutcome[self.ReelID].First   
-    local reelCount = reelState.ReelCount     
+    local reelSymbolCount = reelState.ReelSymbolCount     
     local reelStopIndex = reelSpinState.ReelStopIndex
     local reelStopIndexAdvanceOffset = reelState.ReelStopIndexAdvanceOffset
     reelStopIndex = reelStopIndex - reelStopIndexAdvanceOffset
-    reelStopIndex = (reelCount + reelStopIndex) % reelCount
+    reelStopIndex = (reelSymbolCount + reelStopIndex) % reelSymbolCount
     local outcomeReelStopIndex = spinOutcome.OutcomeReelStopIndex
     if outcomeReelStopIndex == reelStopIndex then
         reelSpinState.ReelSpinState = "ReachedOutcomeStopIndex"
@@ -358,18 +357,18 @@ function Game003BaseGameReel:SpliceReel()
     local spinOutcome = Game003BaseGameReelSpinOutcome[self.ReelID].First
     local d1 = spinOutcome.OutcomeReelStopIndex
     local d2 = reelState.SpliceDistance
-    local reelCount = reelState.ReelCount
+    local reelSymbolCount = reelState.ReelSymbolCount
     local spinDirectionIsDown = reelSpinState.ReelSpinDirection == "Down"    
     
     local skipSplice = self:SkipSpliceReel()          
     if spinDirectionIsDown then
         if not skipSplice then
-            local reelStopIndex = (d1 + d2 + reelCount) % reelCount
+            local reelStopIndex = (d1 + d2 + reelSymbolCount) % reelSymbolCount
             reelSpinState.ReelStopIndex = reelStopIndex - 1
         end
     elseif not spinDirectionIsDown then
         if not skipSplice then
-            local reelStopIndex = (d1 - d2 + reelCount) % reelCount
+            local reelStopIndex = (d1 - d2 + reelSymbolCount) % reelSymbolCount
             reelSpinState.ReelStopIndex = reelStopIndex + 1
         end
     end
