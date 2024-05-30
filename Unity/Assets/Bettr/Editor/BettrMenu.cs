@@ -207,6 +207,7 @@ namespace Bettr.Editor
             var modelsDir = $"{currentDir}/../../../bettr-infrastructure/bettr-infrastructure/tools/publish-data/published_models";
             
             Environment.SetEnvironmentVariable("machineName", machineName);
+            Environment.SetEnvironmentVariable("machineVariant", machineVariant);
             Environment.SetEnvironmentVariable("machineModel", $"{modelsDir}/{machineName}/{machineName}Models.lua");
             
             ClearRuntimeAssetPath();
