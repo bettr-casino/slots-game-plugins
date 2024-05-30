@@ -152,23 +152,69 @@ namespace Bettr.Editor
             BuildAssetBundles();
             BuildLocalServer();
         }
+        
+        [MenuItem("Bettr/Build/Game002 - BuffaloGold")]
+        public static void BuildGame002()
+        {
+            BuildMachines("Game002", "BuffaloGold");
+        }
 
-        [MenuItem("Bettr/Build/Machines")] 
-        public static void BuildMachines()
+        [MenuItem("Bettr/Build/Game003 - LightningLinkHighStakes")]
+        public static void BuildGame003()
+        {
+            BuildMachines("Game003", "LightningLinkHighStakes");
+        }
+
+        [MenuItem("Bettr/Build/Game004 - CleopatraRiches")]
+        public static void BuildGame004()
+        {
+            BuildMachines("Game004", "CleopatraRiches");
+        }
+
+        [MenuItem("Bettr/Build/Game005 - 88FortunesDancingDrums")]
+        public static void BuildGame005()
+        {
+            BuildMachines("Game005", "88FortunesDancingDrums");
+        }
+
+        [MenuItem("Bettr/Build/Game006 - WheelOfFortuneTripleExtremeSpin")]
+        public static void BuildGame006()
+        {
+            BuildMachines("Game006", "WheelOfFortuneTripleExtremeSpin");
+        }
+
+        [MenuItem("Bettr/Build/Game007 - DoubleDiamondVegas")]
+        public static void BuildGame007()
+        {
+            BuildMachines("Game007", "DoubleDiamondVegas");
+        }
+
+        [MenuItem("Bettr/Build/Game008 - GodsOfOlympusZeus")]
+        public static void BuildGame008()
+        {
+            BuildMachines("Game008", "GodsOfOlympusZeus");
+        }
+
+        [MenuItem("Bettr/Build/Game009 - PlanetMooneyMooCash")]
+        public static void BuildGame009()
+        {
+            BuildMachines("Game009", "PlanetMooneyMooCash");
+        }
+
+        private static void BuildMachines(string machineName, string machineVariant)
         {
             var currentDir = Environment.CurrentDirectory;
             var modelsDir = $"{currentDir}/../../../bettr-infrastructure/bettr-infrastructure/tools/publish-data/published_models";
             
-            var machineName = "Game002";
             Environment.SetEnvironmentVariable("machineName", machineName);
-            Environment.SetEnvironmentVariable("machineVariant", "BuffaloGold");
-            Environment.SetEnvironmentVariable("machineModel", $"{modelsDir}/{machineName}/Game002Models.lua");
+            Environment.SetEnvironmentVariable("machineModel", $"{modelsDir}/{machineName}/{machineName}Models.lua");
             
+            ClearRuntimeAssetPath();
             SyncMachine();
         }
         
         //[MenuItem("Bettr/Assets/Cleanup")]
-        public static void CleanupTestScenes()
+        private static void CleanupTestScenes()
         {
             RemoveTestScenes(new DirectoryInfo("Assets/"));
         }
@@ -581,7 +627,39 @@ namespace Bettr.Editor
             }
         }
 
-        public static void SyncMachine()
+        private static void ClearRuntimeAssetPath()
+        {
+            string machineName = GetArgument("-machineName");
+            string machineVariant = GetArgument("-machineVariant");
+            string machineModel = GetArgument("-machineModel");
+            
+            string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset";
+            
+            if (Directory.Exists(runtimeAssetPath))
+            {
+                // Delete all files in the directory
+                foreach (string file in Directory.GetFiles(runtimeAssetPath))
+                {
+                    File.Delete(file);
+                }
+
+                // Delete all subdirectories in the directory
+                foreach (string subDir in Directory.GetDirectories(runtimeAssetPath))
+                {
+                    Directory.Delete(subDir, true);
+                }
+
+                Debug.Log($"Cleared runtime asset path: {runtimeAssetPath}");
+            }
+            else
+            {
+                Debug.LogWarning($"Directory does not exist: {runtimeAssetPath}");
+            }
+            
+            AssetDatabase.Refresh();
+        }
+
+        private static void SyncMachine()
         {
             string machineName = GetArgument("-machineName");
             string machineVariant = GetArgument("-machineVariant");
