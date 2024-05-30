@@ -1310,19 +1310,19 @@ namespace Bettr.Editor
                 ProcessBaseGameReels(machineName, runtimeAssetPath);
                 ProcessBaseGameMachine(machineName, machineVariant, runtimeAssetPath);
             }
-            else if (isBonus)
-            {
-                if (isFreeSpins)
-                {
-                    ProcessFreeSpinsBackground(machineName, machineVariant, runtimeAssetPath);
-                    ProcessFreeSpinsMachine(machineName, machineVariant, runtimeAssetPath);
-                } 
-                else if (isWheel)
-                {
-                    ProcessWheelGameBackground(machineName, machineVariant, runtimeAssetPath);
-                    ProcessWheelGameMachine(machineName, machineVariant, runtimeAssetPath);
-                }
-            }
+            // else if (isBonus)
+            // {
+            //     if (isFreeSpins)
+            //     {
+            //         ProcessFreeSpinsBackground(machineName, machineVariant, runtimeAssetPath);
+            //         ProcessFreeSpinsMachine(machineName, machineVariant, runtimeAssetPath);
+            //     } 
+            //     else if (isWheel)
+            //     {
+            //         ProcessWheelGameBackground(machineName, machineVariant, runtimeAssetPath);
+            //         ProcessWheelGameMachine(machineName, machineVariant, runtimeAssetPath);
+            //     }
+            // }
         }
         
         private static SceneAsset ProcessScene(string machineName, string machineVariant, string runtimeAssetPath)
@@ -1357,13 +1357,9 @@ namespace Bettr.Editor
             var templateName = "Scene";
             var scribanTemplate = ParseScribanTemplate(templateName);
 
-            var machines = GetTable($"{machineName}Machines");
-            var machineTransitions = GetTable($"{machineName}MachineTransitions");
-            var machineTransitionDialogs = GetTable($"{machineName}MachineTransitionDialogs");
-
-            var machineNames = GetTableArray<string>(machines, null, "Name");
-            var machineTransitionNames = GetTableArray<string>(machineTransitions, null, "Name");
-            var machineActivations = GetTablePkArray<string>(machineTransitionDialogs); 
+            var machineNames = HasTable($"{machineName}Machines") ? GetTableArray<string>(GetTable($"{machineName}Machines"), null, "Name") : new List<string>();
+            var machineTransitionNames = HasTable($"{machineName}MachineTransitions") ? GetTableArray<string>(GetTable($"{machineName}MachineTransitions"), null, "Name") : new List<string>();
+            var machineActivations = HasTable($"{machineName}MachineTransitionDialogs") ? GetTablePkArray<string>(GetTable($"{machineName}MachineTransitionDialogs")) : new Dictionary<string, List<Dictionary<string, string>>>(); 
 
             // Create a model object with the machineName variable
             var model = new Dictionary<string, object>
