@@ -937,20 +937,6 @@ namespace Bettr.Editor
             return symbolInstance;
         }
 
-        private static IGameObject ProcessBaseGameWaysWin(int symbolIndex, string runtimeAssetPath,
-            string machineName)
-        {
-            var waysInstance = new InstanceGameObject(new GameObject($"Ways{symbolIndex}"));
-            var waysPivotInstance = new InstanceGameObject(new GameObject("Pivot"));
-            waysPivotInstance.SetParent(waysInstance.GameObject);
-                    
-            var waysWinPrefab = ProcessWaysWin($"{machineName}BaseGameWaysWin", runtimeAssetPath);
-            var waysWinPrefabGameObject = new PrefabGameObject(waysWinPrefab, $"WaysWin");
-            waysWinPrefabGameObject.SetParent(waysPivotInstance.GameObject);
-
-            return waysInstance;
-        }
-
         private static void ProcessBaseGameReels(string machineName, string runtimeAssetPath)
         {
             var baseGameReelState = GetTable($"{machineName}BaseGameReelState");
@@ -981,7 +967,6 @@ namespace Bettr.Editor
             var startVerticalPosition = half * symbolVerticalSpacing;
             
             var yPositions = new List<float>();
-            var waysSymbolIndexes = new List<int>();
             var symbolIndexes = new List<int>();
 
             yPositions.Add(0);
@@ -999,7 +984,6 @@ namespace Bettr.Editor
                  symbolIndex++)
             {
                 symbolIndexes.Add(symbolIndex);
-                waysSymbolIndexes.Add(symbolIndex);
                 
                 var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
                 yPositions.Add(yPosition);
@@ -1024,7 +1008,6 @@ namespace Bettr.Editor
                 { "reelIndex", reelIndex },
                 { "symbolKeys", symbolKeys },
                 { "yPositions", yPositions },
-                { "waysSymbolIndexes", waysSymbolIndexes },
                 { "symbolIndexes", symbolIndexes },
             };
             
@@ -1044,12 +1027,37 @@ namespace Bettr.Editor
         
         private static GameObject ProcessWaysWin(string machineName, string runtimeAssetPath)
         {
+            var waysSymbolIndexes = new List<int>();
+            
+            var reelStates = GetTable($"{machineName}BaseGameReelState");
+            
+            var reelCount = 0;
+            foreach (var pair in reelStates.Pairs)
+            {
+                reelCount++;
+            }
+
+            for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
+            {
+                var topSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "TopSymbolCount");
+                var visibleSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "VisibleSymbolCount");
+                var symbolVerticalSpacing = GetTableValue<float>(reelStates, $"Reel{reelIndex}", "SymbolVerticalSpacing");
+                
+                for (int symbolIndex = topSymbolCount + 1;
+                     symbolIndex <= topSymbolCount + visibleSymbolCount;
+                     symbolIndex++)
+                {
+                    waysSymbolIndexes.Add(symbolIndex);
+                }
+            }
+            
             string symbolName = $"{machineName}BaseGameWaysWin";
             var templateName = "BaseGameWaysWin";
             var scribanTemplate = ParseScribanTemplate(templateName);
 
             var model = new Dictionary<string, object>
             {
+                { "waysSymbolIndexes", waysSymbolIndexes },
             };
             
             var json = scribanTemplate.Render(model);
@@ -1306,7 +1314,6 @@ namespace Bettr.Editor
             {
                 ProcessBaseGameBackground(machineName, machineVariant, runtimeAssetPath);
                 ProcessBaseGameSymbols(machineName, machineVariant, runtimeAssetPath);
-                ProcessWaysWin(machineName, runtimeAssetPath);
                 ProcessBaseGameReels(machineName, runtimeAssetPath);
                 ProcessBaseGameMachine(machineName, machineVariant, runtimeAssetPath);
             }
@@ -1401,15 +1408,20 @@ namespace Bettr.Editor
         {
             AssetDatabase.Refresh();
             
-            if (HasTable($"{machineName}BaseGameScatterBonusFreeSpinsMechanic"))
+            if (HasTable($"{machineName}BaseGameWays"))
             {
-                ProcessBaseGameScatterBonusFreeSpinsMechanic(machineName, machineVariant, runtimeAssetPath);
+                ProcessWaysWin(machineName, runtimeAssetPath);
             }
             
-            if (HasTable($"{machineName}BaseGameRandomMultiplierWildsMechanic"))
-            {
-                ProcessBaseGameRandomMultiplierWildsMechanic(machineName, machineVariant, runtimeAssetPath);
-            }
+            // if (HasTable($"{machineName}BaseGameScatterBonusFreeSpinsMechanic"))
+            // {
+            //     ProcessBaseGameScatterBonusFreeSpinsMechanic(machineName, machineVariant, runtimeAssetPath);
+            // }
+            //
+            // if (HasTable($"{machineName}BaseGameRandomMultiplierWildsMechanic"))
+            // {
+            //     ProcessBaseGameRandomMultiplierWildsMechanic(machineName, machineVariant, runtimeAssetPath);
+            // }
         }
         
         private static void ProcessBaseGameScatterBonusFreeSpinsMechanic(string machineName, string machineVariant, string runtimeAssetPath)
