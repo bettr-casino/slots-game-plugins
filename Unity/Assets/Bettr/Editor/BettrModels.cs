@@ -1669,6 +1669,12 @@ namespace Bettr.Editor
     {
         // ReSharper disable once InconsistentNaming
         public string ParentId { get; set; }
+        
+        // ReSharper disable once InconsistentNaming
+        public string ThisId { get; set; }
+        
+        // ReSharper disable once InconsistentNaming
+        public string Action { get; set; }
     }
 
     [Serializable]

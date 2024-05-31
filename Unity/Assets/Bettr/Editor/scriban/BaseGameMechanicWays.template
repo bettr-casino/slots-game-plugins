@@ -1,5 +1,29 @@
 {
-    "GameObjects": [
+    "NewPrefabs": [
+        {
+            "Name": "{{machineName}}BaseGameWaysWin",
+            "Layer": "SLOT_REELS",
+            "Child": {
+                "Name": "Pivot",
+                "Layer": "SLOT_REELS",
+                "Child": {
+                    "Name": "Quad",
+                    "Layer": "SLOT_REELS",
+                    "IsPrimitive": true,
+                    "Primitive": 5,
+                    "PrimitiveMaterial": "WaysWin",
+                    "PrimitiveShader": "Unlit/Texture",
+                    "PrimitiveTexture": "PaysWin",
+                    "Scale": {
+                      "X": 1.5,
+                      "Y": 1,
+                      "Z": 1
+                    }
+                }
+            }    
+        }
+    ],
+    "ModifiedPrefabs": [
         {
             "PrefabName": "{{machineName}}BaseGameReel{{reelIndex}}",
             "PrefabIds": [
@@ -8,143 +32,62 @@
                     "Id": "{{machineName}}BaseGameReel{{reelIndex}}"
                 }
             ],
-            "ParentId": "{{machineName}}BaseGameReel{{reelIndex}}",
-            "Name": "AnticipationParticleEffect",
-            "Layer": "SLOT_BACKGROUND"
-        }
-    ]
-}
-
-{
-    "Name": "{{machineName}}BaseGameReel{{reelIndex}}",
-    "Components": [
-        {
-          "ComponentType": "TileWithUpdate",
-          "FileName": "{{machineName}}BaseGameReel",
-          "Name": "{{machineName}}BaseGameReel{{reelIndex}}"
-        },
-        {
-            "ComponentType": "TilePropertyStrings",
-            "StringsProperty": [
-               {
-                 "Key": "ReelID",
-                 "Value": "Reel{{reelIndex}}"           
-               }
-            ]
-        },
-        {
-             "ComponentType": "TilePropertyInts",
-             "IntsProperty": [
+            "Action": "Modify",
+            "ThisId": "{{machineName}}BaseGameReel{{reelIndex}}",
+            "Components": [
                 {
-                  "Key": "ReelIndex",
-                  "Value": {{reelIndex - 1}}           
-                }
-             ]
-        },
-        {
-            "ComponentType": "TilePropertyGameObjects",
-            "GameObjectsProperty": [
-            {{ for symbolIndex in symbolIndexes }}
-                {
-                    "Key": "Symbol{{symbolIndex}}",
-                    "Id": "Symbol{{symbolIndex}}"
-                }
-            {{ if !for.last }},{{ end }}{{ end }}             
-            ],
-            "GameObjectGroupsProperty": [
-            {{ for symbolIndex in symbolIndexes }}
-                {
-                    "GroupKey": "SymbolGroup{{symbolIndex}}",
-                    "Group": [
-                        {{ for symbolKey in symbolKeys }}
+                    "ComponentType": "TilePropertyGameObjects",
+                    "GameObjectGroupsProperty": [
                         {
-                            "Key": "{{symbolKey}}",
-                            "Id": "Symbol{{symbolIndex}}{{symbolKey}}"
-                        }
-                        {{ if !for.last }},{{ end }}{{ end }}
+                            "GroupKey": "WaysGroup",
+                            "Group": [
+                                 {{ for waysIndex in waysSymbolIndexes }}
+                                 {
+                                     "Key": "RowIndex{{waysIndex}}",
+                                     "Id": "Ways{{waysIndex}}"
+                                 }
+                                 {{ if !for.last }},{{ end }}{{ end }}
+                            ]
+                        }    
                     ]
-                }
-            {{ if !for.last }},{{ end }}{{ end }}    
-            ]
-        },
-        {
-            "ComponentType": "TilePropertyGameObjects",
-            "GameObjectGroupsProperty": [
+                },
                 {
-                    "GroupKey": "WaysGroup",
-                    "Group": [
-                         {{ for waysIndex in waysSymbolIndexes }}
+                     "ComponentType": "TilePropertyAnimators",
+                     "AnimatorsGroupProperty": [
+                     {{ for symbolIndex in waysSymbolIndexes }}
                          {
-                             "Key": "RowIndex{{waysIndex}}",
-                             "Id": "Ways{{waysIndex}}"
+                             "GroupKey": "SymbolWaysWinAnimatorGroup{{symbolIndex}}",
+                             "Group": [
+                                 {{ for symbolKey in symbolKeys }}
+                                 {
+                                     "Key": "{{symbolKey}}",
+                                     "Id": "Symbol{{symbolIndex}}{{symbolKey}}",
+                                     "State": "win"
+                                 }
+                                 {{ if !for.last }},{{ end }}{{ end }}
+                             ]
                          }
-                         {{ if !for.last }},{{ end }}{{ end }}
-                    ]
-                }    
-            ]
-        },
-        {
-             "ComponentType": "TilePropertyAnimators",
-             "AnimatorsGroupProperty": [
-             {{ for symbolIndex in waysSymbolIndexes }}
-                 {
-                     "GroupKey": "SymbolWaysWinAnimatorGroup{{symbolIndex}}",
-                     "Group": [
-                         {{ for symbolKey in symbolKeys }}
-                         {
-                             "Key": "{{symbolKey}}",
-                             "Id": "Symbol{{symbolIndex}}{{symbolKey}}",
-                             "State": "win"
-                         }
-                         {{ if !for.last }},{{ end }}{{ end }}
+                     {{ if !for.last }},{{ end }}{{ end }}    
                      ]
-                 }
-             {{ if !for.last }},{{ end }}{{ end }}    
-             ]
-        }
-    ],
-    "Children": [
-        {{ for symbolIndex in symbolIndexes }}
-        {
-            "Name": "Symbol{{symbolIndex}}",
-            "Id": "Symbol{{symbolIndex}}",
-            "Position": {
-                "X": 0,
-                "Y": {{yPositions[symbolIndex]}},
-                "Z": 0
-            },
-            "Child": {
-                "Name": "Pivot",
-                "Child": {
-                    "Name": "SymbolGroup",
+                }            
+            ],
+            "Children": [
+                {{ for symbolIndex in waysSymbolIndexes }}
+                {
+                    "Name": "Ways{{symbolIndex}}",
+                    "Id": "Ways{{symbolIndex}}",
+                    "Layer": "SLOT_REELS",
+                    "Active": false,
                     "IsPrefab": true,
-                    "PrefabName": "{{machineName}}BaseGameSymbolGroup",
-                    "PrefabIds": [
-                    {{ for symbolKey in symbolKeys }}
-                    {
-                        "Prefix": "Symbol{{symbolIndex}}",
-                        "Id": "{{symbolKey}}"
-                    }
-                    {{ if !for.last }},{{ end }}{{ end }}
-                    ]
+                    "PrefabName": "{{machineName}}BaseGameWaysWin",
+                    "Position": {
+                        "X": 0,
+                        "Y": {{yPositions[symbolIndex]}},
+                        "Z": 0
+                    }            
                 }
-            }
+                {{ if !for.last }},{{ end }}{{ end }}            
+            ]
         }
-        {{ if !for.last || waysSymbolIndexes.size > 0 }},{{ end }}{{ end }}
-        {{ for symbolIndex in waysSymbolIndexes }}
-        {
-            "Name": "Ways{{symbolIndex}}",
-            "Id": "Ways{{symbolIndex}}",
-            "Layer": "SLOT_REELS",
-            "Active": false,
-            "IsPrefab": true,
-            "PrefabName": "{{machineName}}BaseGameWaysWin",
-            "Position": {
-                "X": 0,
-                "Y": {{yPositions[symbolIndex]}},
-                "Z": 0
-            }            
-        }
-        {{ if !for.last }},{{ end }}{{ end }}
     ]
 }
