@@ -1025,57 +1025,6 @@ namespace Bettr.Editor
                 runtimeAssetPath);
         }
         
-        private static GameObject ProcessWaysWin(string machineName, string runtimeAssetPath)
-        {
-            var waysSymbolIndexes = new List<int>();
-            
-            var reelStates = GetTable($"{machineName}BaseGameReelState");
-            
-            var reelCount = 0;
-            foreach (var pair in reelStates.Pairs)
-            {
-                reelCount++;
-            }
-
-            for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
-            {
-                var topSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "TopSymbolCount");
-                var visibleSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "VisibleSymbolCount");
-                var symbolVerticalSpacing = GetTableValue<float>(reelStates, $"Reel{reelIndex}", "SymbolVerticalSpacing");
-                
-                for (int symbolIndex = topSymbolCount + 1;
-                     symbolIndex <= topSymbolCount + visibleSymbolCount;
-                     symbolIndex++)
-                {
-                    waysSymbolIndexes.Add(symbolIndex);
-                }
-            }
-            
-            string symbolName = $"{machineName}BaseGameWaysWin";
-            var templateName = "BaseGameWaysWin";
-            var scribanTemplate = ParseScribanTemplate(templateName);
-
-            var model = new Dictionary<string, object>
-            {
-                { "waysSymbolIndexes", waysSymbolIndexes },
-            };
-            
-            var json = scribanTemplate.Render(model);
-            Console.WriteLine(json);
-            
-            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-            InstanceGameObject.IdGameObjects.Clear();
-            
-            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
-            hierarchyInstance.SetParent((GameObject) null);
-
-            var symbolPrefab = ProcessPrefab(symbolName, 
-                hierarchyInstance, 
-                runtimeAssetPath);
-            
-            return symbolPrefab;
-        }
-        
         private static void ProcessUICamera(string cameraName, bool includeAudioListener, string runtimeAssetPath)
         {
             ProcessPrefab(cameraName, new List<IComponent>
@@ -1408,12 +1357,11 @@ namespace Bettr.Editor
         {
             AssetDatabase.Refresh();
             
-            if (HasTable($"{machineName}BaseGameWays"))
-            {
-                ProcessWaysWin(machineName, runtimeAssetPath);
-            }
-            
-            // if (HasTable($"{machineName}BaseGameScatterBonusFreeSpinsMechanic"))
+            // if (HasTable($"{machineName}BaseGameWays"))
+            // {
+            //     ProcessBaseGameMechanicWays(machineName, runtimeAssetPath);
+            // }
+            // if (HasTable($"{machineName}BaseGameMechanicScatterBonusFreeSpins"))
             // {
             //     ProcessBaseGameScatterBonusFreeSpinsMechanic(machineName, machineVariant, runtimeAssetPath);
             // }
@@ -1424,7 +1372,57 @@ namespace Bettr.Editor
             // }
         }
         
-        private static void ProcessBaseGameScatterBonusFreeSpinsMechanic(string machineName, string machineVariant, string runtimeAssetPath)
+        private static GameObject ProcessBaseGameMechanicWays(string machineName, string runtimeAssetPath)
+        {
+            var waysSymbolIndexes = new List<int>();
+            
+            var reelStates = GetTable($"{machineName}BaseGameReelState");
+            
+            var reelCount = 0;
+            foreach (var pair in reelStates.Pairs)
+            {
+                reelCount++;
+            }
+
+            for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
+            {
+                var topSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "TopSymbolCount");
+                var visibleSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "VisibleSymbolCount");
+                
+                for (int symbolIndex = topSymbolCount + 1;
+                     symbolIndex <= topSymbolCount + visibleSymbolCount;
+                     symbolIndex++)
+                {
+                    waysSymbolIndexes.Add(symbolIndex);
+                }
+            }
+            
+            string symbolName = $"{machineName}BaseGameWaysWin";
+            var templateName = "BaseGameMechanicWays";
+            var scribanTemplate = ParseScribanTemplate(templateName);
+
+            var model = new Dictionary<string, object>
+            {
+                { "waysSymbolIndexes", waysSymbolIndexes },
+            };
+            
+            var json = scribanTemplate.Render(model);
+            Console.WriteLine(json);
+            
+            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
+            InstanceGameObject.IdGameObjects.Clear();
+            
+            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
+            hierarchyInstance.SetParent((GameObject) null);
+
+            var symbolPrefab = ProcessPrefab(symbolName, 
+                hierarchyInstance, 
+                runtimeAssetPath);
+            
+            return symbolPrefab;
+        }
+        
+        private static void ProcessBaseGameMechanicScatterBonusFreeSpins(string machineName, string machineVariant, string runtimeAssetPath)
         {
             AssetDatabase.Refresh();
             
@@ -1453,7 +1451,7 @@ namespace Bettr.Editor
                 scatterSymbolIndexesByReel.Add($"{reelIndex}", scatterSymbolIndexes);
             }
             
-            string templateName = "BaseGameScatterBonusFreeSpinsMechanic";
+            string templateName = "BaseGameMechanicScatterBonusFreeSpins";
             var scribanTemplate = ParseScribanTemplate(templateName);
 
             var model = new Dictionary<string, object>
@@ -1747,7 +1745,7 @@ namespace Bettr.Editor
             AssetDatabase.Refresh();
         }
         
-        private static void ProcessBaseGameRandomMultiplierWildsMechanic(string machineName, string machineVariant, string runtimeAssetPath)
+        private static void ProcessBaseGameMechanicRandomMultiplierWilds(string machineName, string machineVariant, string runtimeAssetPath)
         {
             AssetDatabase.Refresh();
             
@@ -1776,7 +1774,7 @@ namespace Bettr.Editor
                 symbolIndexesByReel.Add($"{reelIndex}", scatterSymbolIndexes);
             }
 
-            string templateName = "BaseGameRandomMultiplierWildsMechanic";
+            string templateName = "BaseGameMechanicRandomMultiplierWilds";
             var scribanTemplate = ParseScribanTemplate(templateName);
 
             var model = new Dictionary<string, object>

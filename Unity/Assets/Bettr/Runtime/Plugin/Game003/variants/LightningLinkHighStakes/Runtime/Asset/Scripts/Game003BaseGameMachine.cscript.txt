@@ -170,14 +170,14 @@ function Game003BaseGameMachine:BaseGamePayout()
                     end
                 end
                 if waysIndex >= 2 then
-                    self:OnWaysPayingCompleted()
+                    self:OnPayingCompleted()
                 elseif Game003BaseGameState.DisplayState.First.State == "CancelRequested" then
-                    self:OnWaysPayingCompleted()
+                    self:OnPayingCompleted()
                 else
                     System.StartCoroutine(self, "BaseGamePayout")
                 end
             else
-                self:OnWaysPayingCompleted()
+                self:OnPayingCompleted()
             end
         end
     end      
@@ -343,7 +343,7 @@ function Game003BaseGameMachine:CurrentSpinState()
     return Game003BaseGameState.SpinState.First.State
 end
 
-function Game003BaseGameMachine:OnWaysPayingCompleted()
+function Game003BaseGameMachine:OnPayingCompleted()
     self:OnBaseGameSpinCompleted()
 end
 
