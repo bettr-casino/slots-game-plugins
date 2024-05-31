@@ -1660,7 +1660,12 @@ namespace Bettr.Editor
     }
     
     [Serializable]
-    public class MechanicInstanceGameObject : InstanceGameObject
+    public class MechanicNewPrefab : InstanceGameObject
+    {
+    }
+    
+    [Serializable]
+    public class MechanicModifiedPrefab : InstanceGameObject
     {
         // ReSharper disable once InconsistentNaming
         public string ParentId { get; set; }
@@ -1854,7 +1859,10 @@ namespace Bettr.Editor
     public class Mechanic
     {
         // ReSharper disable once InconsistentNaming
-        public List<MechanicInstanceGameObject> GameObjects { get; set; }
+        public List<MechanicModifiedPrefab> ModifiedPrefabs { get; set; }
+        
+        // ReSharper disable once InconsistentNaming
+        public List<MechanicNewPrefab> NewPrefabs { get; set; }
         
         // ReSharper disable once InconsistentNaming
         public List<MechanicAnimation> Animations { get; set; }

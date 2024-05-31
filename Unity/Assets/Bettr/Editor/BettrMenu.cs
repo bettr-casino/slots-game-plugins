@@ -1527,8 +1527,8 @@ namespace Bettr.Editor
             // save the changes
             AssetDatabase.SaveAssets();            
             
-            // Modifiers
-            foreach (var instanceGameObject in mechanic.GameObjects)
+            // Modified Prefabs
+            foreach (var instanceGameObject in mechanic.ModifiedPrefabs)
             {
                 AssetDatabase.Refresh();
                 
