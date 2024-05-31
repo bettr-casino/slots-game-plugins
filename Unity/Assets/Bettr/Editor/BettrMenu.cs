@@ -1358,11 +1358,11 @@ namespace Bettr.Editor
             
             if (HasTable($"{machineName}BaseGameWays"))
             {
-                ProcessBaseGameMechanicWays(machineName, machineVariant, runtimeAssetPath);
+                ProcessBaseGameWaysMechanic(machineName, machineVariant, runtimeAssetPath);
             }
-            // if (HasTable($"{machineName}BaseGameMechanicScatterBonusFreeSpins"))
+            // if (HasTable($"{machineName}BaseGameScatterBonusFreeSpinsMechanic"))
             // {
-            //     ProcessBaseGameMechanicScatterBonusFreeSpins(machineName, machineVariant, runtimeAssetPath);
+            //     ProcessBaseGameScatterBonusFreeSpinsMechanic(machineName, machineVariant, runtimeAssetPath);
             // }
             //
             // if (HasTable($"{machineName}BaseGameRandomMultiplierWildsMechanic"))
@@ -1371,9 +1371,9 @@ namespace Bettr.Editor
             // }
         }
         
-        private static void ProcessBaseGameMechanicWays(string machineName, string machineVariant, string runtimeAssetPath)
+        private static void ProcessBaseGameWaysMechanic(string machineName, string machineVariant, string runtimeAssetPath)
         {
-            string templateName = "BaseGameMechanicWays";
+            string templateName = "BaseGameWaysMechanic";
             var scribanTemplate = ParseScribanTemplate(templateName);
             
             var baseGameSymbolTable = GetTable($"{machineName}BaseGameSymbolTable");
@@ -1425,6 +1425,9 @@ namespace Bettr.Editor
                     yPositions.Add(yPosition);
                 }
                 
+                InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
+                InstanceGameObject.IdGameObjects.Clear();
+                
                 var model = new Dictionary<string, object>
                 {
                     { "machineName", machineName },
@@ -1451,6 +1454,8 @@ namespace Bettr.Editor
                     {
                         // Create the prefab
                         newPrefab.SetParent((GameObject)null);
+                        
+                        newPrefab.OnDeserialized(new StreamingContext());
 
                         ProcessPrefab(newPrefab.Name,
                             newPrefab,
@@ -1515,7 +1520,7 @@ namespace Bettr.Editor
             AssetDatabase.Refresh();
         }
         
-        private static void ProcessBaseGameMechanicScatterBonusFreeSpins(string machineName, string machineVariant, string runtimeAssetPath)
+        private static void ProcessBaseGameScatterBonusFreeSpinsMechanic(string machineName, string machineVariant, string runtimeAssetPath)
         {
             AssetDatabase.Refresh();
             
@@ -1544,7 +1549,7 @@ namespace Bettr.Editor
                 scatterSymbolIndexesByReel.Add($"{reelIndex}", scatterSymbolIndexes);
             }
             
-            string templateName = "BaseGameMechanicScatterBonusFreeSpins";
+            string templateName = "BaseGameScatterBonusFreeSpinsMechanic";
             var scribanTemplate = ParseScribanTemplate(templateName);
 
             var model = new Dictionary<string, object>
@@ -1838,7 +1843,7 @@ namespace Bettr.Editor
             AssetDatabase.Refresh();
         }
         
-        private static void ProcessBaseGameMechanicRandomMultiplierWilds(string machineName, string machineVariant, string runtimeAssetPath)
+        private static void ProcessBaseGameRandomMultiplierWildsMechanic(string machineName, string machineVariant, string runtimeAssetPath)
         {
             AssetDatabase.Refresh();
             
@@ -1867,7 +1872,7 @@ namespace Bettr.Editor
                 symbolIndexesByReel.Add($"{reelIndex}", scatterSymbolIndexes);
             }
 
-            string templateName = "BaseGameMechanicRandomMultiplierWilds";
+            string templateName = "BaseGameRandomMultiplierWildsMechanic";
             var scribanTemplate = ParseScribanTemplate(templateName);
 
             var model = new Dictionary<string, object>
