@@ -1660,7 +1660,7 @@ namespace Bettr.Editor
     }
     
     [Serializable]
-    public class MechanicModifiedPrefab : InstanceGameObject
+    public class MechanicPrefab : InstanceGameObject
     {
         // ReSharper disable once InconsistentNaming
         public string ParentId { get; set; }
@@ -1860,7 +1860,7 @@ namespace Bettr.Editor
     public class Mechanic
     {
         // ReSharper disable once InconsistentNaming
-        public List<MechanicModifiedPrefab> ModifiedPrefabs { get; set; }
+        public List<MechanicPrefab> Prefabs { get; set; }
         
         // ReSharper disable once InconsistentNaming
         public List<MechanicAnimation> Animations { get; set; }

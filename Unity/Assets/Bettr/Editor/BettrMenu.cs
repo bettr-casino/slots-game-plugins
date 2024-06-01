@@ -1478,7 +1478,7 @@ namespace Bettr.Editor
             AssetDatabase.SaveAssets();            
             
             // Modified Prefabs
-            foreach (var modifiedPrefab in mechanic.ModifiedPrefabs)
+            foreach (var modifiedPrefab in mechanic.Prefabs)
             {
                 AssetDatabase.Refresh();
                 
@@ -2171,9 +2171,9 @@ namespace Bettr.Editor
                 }
                 
                 // Modified Prefabs
-                if (mechanic.ModifiedPrefabs != null)
+                if (mechanic.Prefabs != null)
                 {
-                    foreach (var instanceGameObject in mechanic.ModifiedPrefabs)
+                    foreach (var instanceGameObject in mechanic.Prefabs)
                     {
                         AssetDatabase.Refresh();
 
