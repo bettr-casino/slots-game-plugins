@@ -2067,7 +2067,7 @@ namespace Bettr.Editor
         public static void Process(string machineName, string machineVariant, string runtimeAssetPath)
         {
             ProcessWaysWinPrefab(machineName, runtimeAssetPath);
-            // ProcessBaseGameWaysReelModifications(machineName, machineVariant, runtimeAssetPath);
+            ProcessBaseGameWaysReelModifications(machineName, machineVariant, runtimeAssetPath);
         }
 
         private static void ProcessWaysWinPrefab(string machineName, string runtimeAssetPath)
@@ -2096,7 +2096,7 @@ namespace Bettr.Editor
         
         private static void ProcessBaseGameWaysReelModifications(string machineName, string machineVariant, string runtimeAssetPath)
         {
-            string templateName = "BaseGameWaysMechanic";
+            string templateName = "BaseGameWaysReelModifications";
             var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/ways", templateName);
             
             var baseGameSymbolTable = BettrMenu.GetTable($"{machineName}BaseGameSymbolTable");
@@ -2170,24 +2170,6 @@ namespace Bettr.Editor
                     throw new Exception($"Failed to deserialize mechanic from json: {json}");
                 }
                 
-                // New Prefabs
-                if (mechanic.NewPrefabs != null)
-                {
-                    foreach (var newPrefab in mechanic?.NewPrefabs)
-                    {
-                        // Create the prefab
-                        newPrefab.SetParent((GameObject)null);
-                        
-                        newPrefab.OnDeserialized(new StreamingContext());
-
-                        BettrMenu.ProcessPrefab(newPrefab.Name,
-                            newPrefab,
-                            runtimeAssetPath);
-
-                        AssetDatabase.Refresh();
-                    }
-                }
-
                 // Modified Prefabs
                 if (mechanic.ModifiedPrefabs != null)
                 {
@@ -2208,7 +2190,7 @@ namespace Bettr.Editor
                             }
                         }
 
-                        if (instanceGameObject.Action == "modify")
+                        if (instanceGameObject.Action == "add")
                         {
                             var parentGameObject = InstanceGameObject.IdGameObjects[instanceGameObject.ParentId];
                             instanceGameObject.SetParent(parentGameObject.GameObject);
@@ -2217,7 +2199,7 @@ namespace Bettr.Editor
                         
                             PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
                         }
-                        else if (instanceGameObject.Action == "add")
+                        else if (instanceGameObject.Action == "modify")
                         {
                             var gameObjectInPrefab = InstanceGameObject.IdGameObjects[instanceGameObject.ThisId];
                             
