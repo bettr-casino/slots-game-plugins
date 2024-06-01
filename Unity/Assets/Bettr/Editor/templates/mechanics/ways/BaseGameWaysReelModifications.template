@@ -6,7 +6,16 @@
                 {
                     "Index": 0,
                     "Id": "{{machineName}}BaseGameReel{{reelIndex}}"
-                }
+                },
+                {{ for symbolIndex in waysSymbolIndexes }}
+                     {{ for symbolKey in symbolKeys }}
+                     {
+                         "Index": {{symbolIndex}},
+                         "Prefix": "Symbol{{symbolIndex}}",
+                         "Id": "{{symbolKey}}"
+                     }
+                     {{ if !for.last }},{{ end }}{{ end }}
+                 {{ if !for.last }},{{ end }}{{ end }}                
             ],
             "Action": "modify",
             "ThisId": "{{machineName}}BaseGameReel{{reelIndex}}",
