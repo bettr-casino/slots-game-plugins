@@ -1855,6 +1855,12 @@ namespace Bettr.Editor
         // ReSharper disable once InconsistentNaming
         public List<ParticleSystemProperty> ParticleSystemsProperty { get; set; }
     }
+    
+    [Serializable]
+    public class MechanicAnimatorController : InstanceComponent
+    {
+        public string Action { get; set; }
+    }
 
     [Serializable]
     public class Mechanic
@@ -1867,6 +1873,9 @@ namespace Bettr.Editor
         
         // ReSharper disable once InconsistentNaming
         public List<MechanicTilePropertyAnimators> TilePropertyAnimators { get; set; }
+        
+        // ReSharper disable once InconsistentNaming
+        public List<MechanicAnimatorController> AnimatorControllers { get; set; }
         
         // ReSharper disable once InconsistentNaming
         public List<MechanicParticleSystem> ParticleSystems { get; set; }
