@@ -820,12 +820,17 @@ namespace Bettr.Editor
 
         private static GameObject ProcessBaseGameSymbol(string symbolName, string symbolPrefabName, string runtimeAssetPath)
         {
-            SimpleStringInterpolator interpolator = new SimpleStringInterpolator();
-            interpolator.SetVariable("symbolName", symbolName);
-            interpolator.SetVariable("symbolPrefabName", symbolPrefabName);
+            var templateName = "BaseGameSymbol";
+            var scribanTemplate = ParseScribanTemplate("", templateName);
             
-            string jsonTemplate = ReadJson("BaseGameSymbol");
-            string json = interpolator.Interpolate(jsonTemplate);
+            var model = new Dictionary<string, object>
+            {
+                { "symbolName", symbolName },
+                { "symbolPrefabName", symbolPrefabName },
+            };
+            
+            var json = scribanTemplate.Render(model);
+            Debug.Log($"ProcessBaseGameSymbol: {json}");
 
             InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
             InstanceGameObject.IdGameObjects.Clear();
