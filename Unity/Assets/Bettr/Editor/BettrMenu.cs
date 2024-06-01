@@ -751,11 +751,12 @@ namespace Bettr.Editor
                 reelCount++;
             }
             
-            string dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "scripts");
+            string dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "templates", "scripts");
             string[] filePaths = Directory.GetFiles(dirPath, "*.cscript.txt.template");
+            string scriptsPath = "scripts";
             foreach (string filePath in filePaths)
             {
-                var scribanTemplate = ParseScribanTemplate(filePath);
+                var scribanTemplate = ParseScribanTemplate(scriptsPath, filePath);
                 var model = new Dictionary<string, object>
                 {
                     { "machineName", machineName },
@@ -779,7 +780,7 @@ namespace Bettr.Editor
         private static GameObject ProcessBaseGameSymbols(string machineName, string machineVariant, string runtimeAssetPath)
         {
             var templateName = "BaseGameSymbolGroup";
-            var scribanTemplate = ParseScribanTemplate(templateName);
+            var scribanTemplate = ParseScribanTemplate("", templateName);
             
             var baseGameSymbolTable = GetTable($"{machineName}BaseGameSymbolTable");
             var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
@@ -890,7 +891,7 @@ namespace Bettr.Editor
             }
             
             var templateName = "BaseGameMachine";
-            var scribanTemplate = ParseScribanTemplate(templateName);
+            var scribanTemplate = ParseScribanTemplate("", templateName);
             
             var baseGameSymbolTable = GetTable($"{machineName}BaseGameSymbolTable");
             var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
@@ -999,7 +1000,7 @@ namespace Bettr.Editor
             }
 
             var templateName = "BaseGameReel";
-            var scribanTemplate = ParseScribanTemplate(templateName);
+            var scribanTemplate = ParseScribanTemplate("", templateName);
 
             var model = new Dictionary<string, object>
             {
@@ -1042,7 +1043,7 @@ namespace Bettr.Editor
             BettrScriptGenerator.CreateOrLoadScript(backgroundScriptName, runtimeAssetPath);
             
             string templateName = "BaseGameBackground";
-            var scribanTemplate = ParseScribanTemplate(templateName);
+            var scribanTemplate = ParseScribanTemplate("", templateName);
 
             var model = new Dictionary<string, object>
             {
@@ -1119,7 +1120,7 @@ namespace Bettr.Editor
             }
             
             var templateName = "BaseGameMachine";
-            var scribanTemplate = ParseScribanTemplate(templateName);
+            var scribanTemplate = ParseScribanTemplate("", templateName);
             
             var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
             
@@ -1159,7 +1160,7 @@ namespace Bettr.Editor
             BettrScriptGenerator.CreateOrLoadScript(backgroundScriptName, runtimeAssetPath);
             
             string templateName = "FreeSpinsBackground";
-            var scribanTemplate = ParseScribanTemplate(templateName);
+            var scribanTemplate = ParseScribanTemplate("", templateName);
 
             if (scribanTemplate.HasErrors)
             {
@@ -1199,7 +1200,7 @@ namespace Bettr.Editor
             AssetDatabase.Refresh();
             
             var templateName = "WheelGameMachine";
-            var scribanTemplate = ParseScribanTemplate(templateName);
+            var scribanTemplate = ParseScribanTemplate("", templateName);
             
             var model = new Dictionary<string, object>
             {
@@ -1229,7 +1230,7 @@ namespace Bettr.Editor
             BettrScriptGenerator.CreateOrLoadScript(backgroundScriptName, runtimeAssetPath);
             
             string templateName = "WheelGameBackground";
-            var scribanTemplate = ParseScribanTemplate(templateName);
+            var scribanTemplate = ParseScribanTemplate("", templateName);
 
             var model = new Dictionary<string, object>
             {
@@ -1310,7 +1311,7 @@ namespace Bettr.Editor
             EditorSceneManager.OpenScene(scenePath);
             
             var templateName = "Scene";
-            var scribanTemplate = ParseScribanTemplate(templateName);
+            var scribanTemplate = ParseScribanTemplate("", templateName);
 
             var machineNames = HasTable($"{machineName}Machines") ? GetTableArray<string>(GetTable($"{machineName}Machines"), null, "Name") : new List<string>();
             var machineTransitionNames = HasTable($"{machineName}MachineTransitions") ? GetTableArray<string>(GetTable($"{machineName}MachineTransitions"), null, "Name") : new List<string>();
@@ -1358,7 +1359,7 @@ namespace Bettr.Editor
             
             if (HasTable($"{machineName}BaseGameWays"))
             {
-                ProcessBaseGameWaysMechanic(machineName, machineVariant, runtimeAssetPath);
+                BaseGameWaysMechanic.Process(machineName, machineVariant, runtimeAssetPath);
             }
             // if (HasTable($"{machineName}BaseGameScatterBonusFreeSpinsMechanic"))
             // {
@@ -1369,155 +1370,6 @@ namespace Bettr.Editor
             // {
             //     ProcessBaseGameRandomMultiplierWildsMechanic(machineName, machineVariant, runtimeAssetPath);
             // }
-        }
-        
-        private static void ProcessBaseGameWaysMechanic(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            string templateName = "BaseGameWaysMechanic";
-            var scribanTemplate = ParseScribanTemplate(templateName);
-            
-            var baseGameSymbolTable = GetTable($"{machineName}BaseGameSymbolTable");
-            var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
-            
-            var reelStates = GetTable($"{machineName}BaseGameReelState");
-            var reelCount = 0;
-            foreach (var pair in reelStates.Pairs)
-            {
-                reelCount++;
-            }
-            
-            for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
-            {
-                var waysSymbolIndexes = new List<int>();
-                var yPositions = new List<float>();
-                
-                yPositions.Add(0);
-            
-                var topSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "TopSymbolCount");
-                var visibleSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "VisibleSymbolCount");
-                var bottomSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "BottomSymbolCount");
-                var symbolVerticalSpacing = GetTableValue<float>(reelStates, $"Reel{reelIndex}", "SymbolVerticalSpacing");
-            
-                int half = (topSymbolCount + visibleSymbolCount + bottomSymbolCount) / 2;
-                var startVerticalPosition = half * symbolVerticalSpacing;
-
-                for (int symbolIndex = 1; symbolIndex <= topSymbolCount; symbolIndex++)
-                {
-                    var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
-                    yPositions.Add(yPosition);
-                }
-
-                for (int symbolIndex = topSymbolCount + 1;
-                     symbolIndex <= topSymbolCount + visibleSymbolCount;
-                     symbolIndex++)
-                {
-                    waysSymbolIndexes.Add(symbolIndex);
-                
-                    var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
-                    yPositions.Add(yPosition);
-                }
-
-                for (int symbolIndex = topSymbolCount + visibleSymbolCount + 1;
-                     symbolIndex <= topSymbolCount + visibleSymbolCount + bottomSymbolCount;
-                     symbolIndex++)
-                {
-                    var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
-                    yPositions.Add(yPosition);
-                }
-                
-                InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-                InstanceGameObject.IdGameObjects.Clear();
-                
-                var model = new Dictionary<string, object>
-                {
-                    { "machineName", machineName },
-                    { "machineVariant", machineVariant },
-                    { "reelIndex", reelIndex },
-                    { "yPositions", yPositions },
-                    { "waysSymbolIndexes", waysSymbolIndexes },
-                    { "symbolKeys", symbolKeys},
-                };
-                
-                var json = scribanTemplate.Render(model);
-                Debug.Log(json);
-                
-                Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
-                if (mechanic == null)
-                {
-                    throw new Exception($"Failed to deserialize mechanic from json: {json}");
-                }
-                
-                // New Prefabs
-                if (mechanic.NewPrefabs != null)
-                {
-                    foreach (var newPrefab in mechanic?.NewPrefabs)
-                    {
-                        // Create the prefab
-                        newPrefab.SetParent((GameObject)null);
-                        
-                        newPrefab.OnDeserialized(new StreamingContext());
-
-                        ProcessPrefab(newPrefab.Name,
-                            newPrefab,
-                            runtimeAssetPath);
-
-                        AssetDatabase.Refresh();
-                    }
-                }
-
-                // Modified Prefabs
-                if (mechanic.ModifiedPrefabs != null)
-                {
-                    foreach (var instanceGameObject in mechanic.ModifiedPrefabs)
-                    {
-                        AssetDatabase.Refresh();
-
-                        var prefabPath =
-                            $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{instanceGameObject.PrefabName}.prefab";
-                        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                        var prefabGameObject = new PrefabGameObject(prefab, instanceGameObject.PrefabName);
-                        if (instanceGameObject.PrefabIds != null)
-                        {
-                            foreach (var prefabId in instanceGameObject.PrefabIds)
-                            {
-                                var referencedGameObject = prefabGameObject.FindReferencedId(prefabId.Id, prefabId.Index);
-                                InstanceGameObject.IdGameObjects[$"{prefabId.Prefix}{prefabId.Id}"] = new InstanceGameObject(referencedGameObject);
-                            }
-                        }
-
-                        if (instanceGameObject.Action == "modify")
-                        {
-                            var parentGameObject = InstanceGameObject.IdGameObjects[instanceGameObject.ParentId];
-                            instanceGameObject.SetParent(parentGameObject.GameObject);
-                        
-                            instanceGameObject.OnDeserialized(new StreamingContext());
-                        
-                            PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
-                        }
-                        else if (instanceGameObject.Action == "add")
-                        {
-                            var gameObjectInPrefab = InstanceGameObject.IdGameObjects[instanceGameObject.ThisId];
-                            
-                            instanceGameObject.OnDeserialized(new StreamingContext());
-
-                            foreach (var component in instanceGameObject.Components)
-                            {
-                                component.AddComponent(gameObjectInPrefab.GameObject);
-                            }
-                            
-                            foreach (var child in instanceGameObject.Children)
-                            {
-                                child.SetParent(gameObjectInPrefab.GameObject);
-                            }
-                        
-                            PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
-                        }
-                    }
-                }
-                
-            }
-            
-            AssetDatabase.Refresh();
         }
         
         private static void ProcessBaseGameScatterBonusFreeSpinsMechanic(string machineName, string machineVariant, string runtimeAssetPath)
@@ -1550,7 +1402,7 @@ namespace Bettr.Editor
             }
             
             string templateName = "BaseGameScatterBonusFreeSpinsMechanic";
-            var scribanTemplate = ParseScribanTemplate(templateName);
+            var scribanTemplate = ParseScribanTemplate("mechanics/scatterbonusfreespins", templateName);
 
             var model = new Dictionary<string, object>
             {
@@ -1873,7 +1725,7 @@ namespace Bettr.Editor
             }
 
             string templateName = "BaseGameRandomMultiplierWildsMechanic";
-            var scribanTemplate = ParseScribanTemplate(templateName);
+            var scribanTemplate = ParseScribanTemplate("", templateName);
 
             var model = new Dictionary<string, object>
             {
@@ -1960,10 +1812,10 @@ namespace Bettr.Editor
 
             return File.ReadAllText(path);
         }
-
-        private static Template ParseScribanTemplate(string templateName)
+        
+        public static Template ParseScribanTemplate(string prefixPath, string templateName)
         {
-            var templateText = ReadScribanTemplate(templateName);
+            var templateText = ReadScribanTemplate(prefixPath, templateName);
             var scribanTemplate = Template.Parse(templateText);
             if (scribanTemplate.HasErrors)
             {
@@ -1974,9 +1826,9 @@ namespace Bettr.Editor
             return scribanTemplate;
         }
         
-        private static string ReadScribanTemplate(string fileName)
+        private static string ReadScribanTemplate(string prefixPath, string fileName)
         {
-            string path = Path.Combine(Application.dataPath, "Bettr", "Editor", fileName.Contains(".cscript.txt") ? "scripts" : "scriban", $"{Path.GetFileNameWithoutExtension(fileName)}.template");
+            string path = Path.Combine(Application.dataPath, "Bettr", "Editor", "templates", prefixPath, $"{Path.GetFileNameWithoutExtension(fileName)}.template");
             if (!File.Exists(path))
             {
                 Debug.LogError($"Scriban template file not found at path: {path}");
@@ -2030,7 +1882,7 @@ namespace Bettr.Editor
             return false;
         }
         
-        private static GameObject ProcessPrefab(string prefabName, IGameObject rootGameObject, string runtimeAssetPath)
+        public static GameObject ProcessPrefab(string prefabName, IGameObject rootGameObject, string runtimeAssetPath)
         {
             AssetDatabase.Refresh();
             
@@ -2145,7 +1997,7 @@ namespace Bettr.Editor
             return valueTable.Pairs.Select(pair => pair.Value.Table[key]).ToList().Cast<T>().ToList();
         }
         
-        private static T GetTableValue<T>(Table table, string pk, string key)
+        public static T GetTableValue<T>(Table table, string pk, string key)
         {
             var valueTable = table;
             if (!string.IsNullOrEmpty(pk) && table[pk] is Table pkTable)
@@ -2169,7 +2021,7 @@ namespace Bettr.Editor
             return default(T);
         }
 
-        private static Table GetTable(string tableName)
+        public static Table GetTable(string tableName)
         {
             var table = TileController.LuaScript.Globals[tableName] as Table;
             if (table == null)
@@ -2207,6 +2059,188 @@ namespace Bettr.Editor
                 string key = match.Groups[1].Value;
                 return _variables.TryGetValue(key, out string value) ? value : match.Value;
             });
+        }
+    }
+
+    public static class BaseGameWaysMechanic
+    {
+        public static void Process(string machineName, string machineVariant, string runtimeAssetPath)
+        {
+            ProcessWaysWinPrefab(machineName, runtimeAssetPath);
+            // ProcessBaseGameWaysReelModifications(machineName, machineVariant, runtimeAssetPath);
+        }
+
+        private static void ProcessWaysWinPrefab(string machineName, string runtimeAssetPath)
+        {
+            string symbolName = $"{machineName}BaseGameWaysWin";
+            var templateName = "BaseGameWaysWinPrefab";
+            var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/ways/", templateName);
+
+            var model = new Dictionary<string, object>
+            {
+            };
+            
+            var json = scribanTemplate.Render(model);
+            Console.WriteLine(json);
+            
+            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
+            InstanceGameObject.IdGameObjects.Clear();
+            
+            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
+            hierarchyInstance.SetParent((GameObject) null);
+
+            BettrMenu.ProcessPrefab(symbolName, 
+                hierarchyInstance, 
+                runtimeAssetPath);
+        }
+        
+        private static void ProcessBaseGameWaysReelModifications(string machineName, string machineVariant, string runtimeAssetPath)
+        {
+            string templateName = "BaseGameWaysMechanic";
+            var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/ways", templateName);
+            
+            var baseGameSymbolTable = BettrMenu.GetTable($"{machineName}BaseGameSymbolTable");
+            var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
+            
+            var reelStates = BettrMenu.GetTable($"{machineName}BaseGameReelState");
+            var reelCount = 0;
+            foreach (var pair in reelStates.Pairs)
+            {
+                reelCount++;
+            }
+            
+            for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
+            {
+                var waysSymbolIndexes = new List<int>();
+                var yPositions = new List<float>();
+                
+                yPositions.Add(0);
+            
+                var topSymbolCount = BettrMenu.GetTableValue<int>(reelStates, $"Reel{reelIndex}", "TopSymbolCount");
+                var visibleSymbolCount = BettrMenu.GetTableValue<int>(reelStates, $"Reel{reelIndex}", "VisibleSymbolCount");
+                var bottomSymbolCount = BettrMenu.GetTableValue<int>(reelStates, $"Reel{reelIndex}", "BottomSymbolCount");
+                var symbolVerticalSpacing = BettrMenu.GetTableValue<float>(reelStates, $"Reel{reelIndex}", "SymbolVerticalSpacing");
+            
+                int half = (topSymbolCount + visibleSymbolCount + bottomSymbolCount) / 2;
+                var startVerticalPosition = half * symbolVerticalSpacing;
+
+                for (int symbolIndex = 1; symbolIndex <= topSymbolCount; symbolIndex++)
+                {
+                    var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
+                    yPositions.Add(yPosition);
+                }
+
+                for (int symbolIndex = topSymbolCount + 1;
+                     symbolIndex <= topSymbolCount + visibleSymbolCount;
+                     symbolIndex++)
+                {
+                    waysSymbolIndexes.Add(symbolIndex);
+                
+                    var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
+                    yPositions.Add(yPosition);
+                }
+
+                for (int symbolIndex = topSymbolCount + visibleSymbolCount + 1;
+                     symbolIndex <= topSymbolCount + visibleSymbolCount + bottomSymbolCount;
+                     symbolIndex++)
+                {
+                    var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
+                    yPositions.Add(yPosition);
+                }
+                
+                InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
+                InstanceGameObject.IdGameObjects.Clear();
+                
+                var model = new Dictionary<string, object>
+                {
+                    { "machineName", machineName },
+                    { "machineVariant", machineVariant },
+                    { "reelIndex", reelIndex },
+                    { "yPositions", yPositions },
+                    { "waysSymbolIndexes", waysSymbolIndexes },
+                    { "symbolKeys", symbolKeys},
+                };
+                
+                var json = scribanTemplate.Render(model);
+                Debug.Log(json);
+                
+                Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
+                if (mechanic == null)
+                {
+                    throw new Exception($"Failed to deserialize mechanic from json: {json}");
+                }
+                
+                // New Prefabs
+                if (mechanic.NewPrefabs != null)
+                {
+                    foreach (var newPrefab in mechanic?.NewPrefabs)
+                    {
+                        // Create the prefab
+                        newPrefab.SetParent((GameObject)null);
+                        
+                        newPrefab.OnDeserialized(new StreamingContext());
+
+                        BettrMenu.ProcessPrefab(newPrefab.Name,
+                            newPrefab,
+                            runtimeAssetPath);
+
+                        AssetDatabase.Refresh();
+                    }
+                }
+
+                // Modified Prefabs
+                if (mechanic.ModifiedPrefabs != null)
+                {
+                    foreach (var instanceGameObject in mechanic.ModifiedPrefabs)
+                    {
+                        AssetDatabase.Refresh();
+
+                        var prefabPath =
+                            $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{instanceGameObject.PrefabName}.prefab";
+                        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                        var prefabGameObject = new PrefabGameObject(prefab, instanceGameObject.PrefabName);
+                        if (instanceGameObject.PrefabIds != null)
+                        {
+                            foreach (var prefabId in instanceGameObject.PrefabIds)
+                            {
+                                var referencedGameObject = prefabGameObject.FindReferencedId(prefabId.Id, prefabId.Index);
+                                InstanceGameObject.IdGameObjects[$"{prefabId.Prefix}{prefabId.Id}"] = new InstanceGameObject(referencedGameObject);
+                            }
+                        }
+
+                        if (instanceGameObject.Action == "modify")
+                        {
+                            var parentGameObject = InstanceGameObject.IdGameObjects[instanceGameObject.ParentId];
+                            instanceGameObject.SetParent(parentGameObject.GameObject);
+                        
+                            instanceGameObject.OnDeserialized(new StreamingContext());
+                        
+                            PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
+                        }
+                        else if (instanceGameObject.Action == "add")
+                        {
+                            var gameObjectInPrefab = InstanceGameObject.IdGameObjects[instanceGameObject.ThisId];
+                            
+                            instanceGameObject.OnDeserialized(new StreamingContext());
+
+                            foreach (var component in instanceGameObject.Components)
+                            {
+                                component.AddComponent(gameObjectInPrefab.GameObject);
+                            }
+                            
+                            foreach (var child in instanceGameObject.Children)
+                            {
+                                child.SetParent(gameObjectInPrefab.GameObject);
+                            }
+                        
+                            PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
+                        }
+                    }
+                }
+                
+            }
+            
+            AssetDatabase.Refresh();
         }
     }
 }
