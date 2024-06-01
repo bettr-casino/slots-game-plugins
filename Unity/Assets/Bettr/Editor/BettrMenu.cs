@@ -2073,6 +2073,7 @@ namespace Bettr.Editor
         {
             ProcessWinPrefab(machineName, runtimeAssetPath);
             ProcessBaseGameSymbolModifications(machineName, machineVariant, runtimeAssetPath);
+            ProcessBaseGameMachineModifications(machineName, machineVariant, runtimeAssetPath);
             ProcessBaseGameReelModifications(machineName, machineVariant, runtimeAssetPath);
         }
 
@@ -2141,6 +2142,31 @@ namespace Bettr.Editor
                 }
             }
             
+            
+            AssetDatabase.Refresh();
+        }
+        
+        private static void ProcessBaseGameMachineModifications(string machineName, string machineVariant, string runtimeAssetPath)
+        {
+            string templateName = "BaseGameWaysMachineModifications";
+            var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/ways", templateName);
+            
+            var model = new Dictionary<string, object>
+            {
+                { "machineName", machineName },
+                { "machineVariant", machineVariant },
+            };
+                
+            var json = scribanTemplate.Render(model);
+            Debug.Log(json);
+                
+            Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
+            if (mechanic == null)
+            {
+                throw new Exception($"Failed to deserialize mechanic from json: {json}");
+            }
+
+            mechanic.Process();
             
             AssetDatabase.Refresh();
         }
@@ -2220,57 +2246,9 @@ namespace Bettr.Editor
                 {
                     throw new Exception($"Failed to deserialize mechanic from json: {json}");
                 }
-                
-                // Modified Prefabs
-                if (mechanic.Prefabs != null)
-                {
-                    foreach (var instanceGameObject in mechanic.Prefabs)
-                    {
-                        AssetDatabase.Refresh();
 
-                        var prefabPath =
-                            $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{instanceGameObject.PrefabName}.prefab";
-                        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                        var prefabGameObject = new PrefabGameObject(prefab, instanceGameObject.PrefabName);
-                        if (instanceGameObject.PrefabIds != null)
-                        {
-                            foreach (var prefabId in instanceGameObject.PrefabIds)
-                            {
-                                var referencedGameObject = prefabGameObject.FindReferencedId(prefabId.Id, prefabId.Index);
-                                InstanceGameObject.IdGameObjects[$"{prefabId.Prefix}{prefabId.Id}"] = new InstanceGameObject(referencedGameObject);
-                            }
-                        }
+                mechanic.Process();
 
-                        if (instanceGameObject.Action == "add")
-                        {
-                            var parentGameObject = InstanceGameObject.IdGameObjects[instanceGameObject.ParentId];
-                            instanceGameObject.SetParent(parentGameObject.GameObject);
-                        
-                            instanceGameObject.OnDeserialized(new StreamingContext());
-                        
-                            PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
-                        }
-                        else if (instanceGameObject.Action == "modify")
-                        {
-                            var gameObjectInPrefab = InstanceGameObject.IdGameObjects[instanceGameObject.ThisId];
-                            
-                            instanceGameObject.OnDeserialized(new StreamingContext());
-
-                            foreach (var component in instanceGameObject.Components)
-                            {
-                                component.AddComponent(gameObjectInPrefab.GameObject);
-                            }
-                            
-                            foreach (var child in instanceGameObject.Children)
-                            {
-                                child.SetParent(gameObjectInPrefab.GameObject);
-                            }
-                        
-                            PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
-                        }
-                    }
-                }
-                
             }
             
             AssetDatabase.Refresh();

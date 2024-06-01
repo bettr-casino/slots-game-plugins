@@ -1882,5 +1882,58 @@ namespace Bettr.Editor
         
         // ReSharper disable once InconsistentNaming
         public List<MechanicTilePropertyParticleSystems> TilePropertyParticleSystems { get; set; }
+
+        public void Process()
+        {
+            // Modified Prefabs
+            if (this.Prefabs != null)
+            {
+                foreach (var instanceGameObject in this.Prefabs)
+                {
+                    AssetDatabase.Refresh();
+
+                    var prefabPath =
+                        $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{instanceGameObject.PrefabName}.prefab";
+                    var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                    var prefabGameObject = new PrefabGameObject(prefab, instanceGameObject.PrefabName);
+                    if (instanceGameObject.PrefabIds != null)
+                    {
+                        foreach (var prefabId in instanceGameObject.PrefabIds)
+                        {
+                            var referencedGameObject = prefabGameObject.FindReferencedId(prefabId.Id, prefabId.Index);
+                            InstanceGameObject.IdGameObjects[$"{prefabId.Prefix}{prefabId.Id}"] = new InstanceGameObject(referencedGameObject);
+                        }
+                    }
+
+                    if (instanceGameObject.Action == "add")
+                    {
+                        var parentGameObject = InstanceGameObject.IdGameObjects[instanceGameObject.ParentId];
+                        instanceGameObject.SetParent(parentGameObject.GameObject);
+                    
+                        instanceGameObject.OnDeserialized(new StreamingContext());
+                    
+                        PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
+                    }
+                    else if (instanceGameObject.Action == "modify")
+                    {
+                        var gameObjectInPrefab = InstanceGameObject.IdGameObjects[instanceGameObject.ThisId];
+                        
+                        instanceGameObject.OnDeserialized(new StreamingContext());
+
+                        foreach (var component in instanceGameObject.Components)
+                        {
+                            component.AddComponent(gameObjectInPrefab.GameObject);
+                        }
+                        
+                        foreach (var child in instanceGameObject.Children)
+                        {
+                            child.SetParent(gameObjectInPrefab.GameObject);
+                        }
+                    
+                        PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
+                    }
+                }
+            }
+        }
     }
 }
