@@ -20,6 +20,7 @@ using DirectoryInfo = System.IO.DirectoryInfo;
 using Scriban;
 using Scriban.Parsing;
 using Scriban.Runtime;
+using TMPro;
 using UnityEngine.Rendering;
 using Exception = System.Exception;
 
@@ -1448,7 +1449,6 @@ namespace Bettr.Editor
                 if (tilePropertyAnimator.AnimatorsProperty != null)
                 {
                     var properties = new List<TilePropertyAnimator>();
-                    var groupProperties = new List<TilePropertyAnimatorGroup>();
                     foreach (var animatorProperty in tilePropertyAnimator.AnimatorsProperty)
                     {
                         InstanceGameObject.IdGameObjects.TryGetValue(animatorProperty.Id, out var referenceGameObject);
@@ -1470,6 +1470,37 @@ namespace Bettr.Editor
                             Debug.LogError($"Failed to find animator with id: {animatorProperty.Id}");
                         }
                         properties.Add(tileProperty);                        
+                    }
+                    var groupProperties = new List<TilePropertyAnimatorGroup>();
+                    foreach (var animatorGroupProperty in tilePropertyAnimator.AnimatorsGroupProperty)
+                    {
+                        List<TilePropertyAnimator> animatorProperties = new List<TilePropertyAnimator>();
+                        foreach (var property in animatorGroupProperty.Group)
+                        {
+                            InstanceGameObject.IdGameObjects.TryGetValue(property.Id, out var referenceGameObject);
+                            var tileProperty = new TilePropertyAnimator()
+                            {
+                                key = property.Key,
+                                value = new PropertyAnimator() {
+                                    animator = referenceGameObject?.Animator, 
+                                    animationStateName = property.State,
+                                    delayBeforeAnimationStart = property.DelayBeforeStart,
+                                    waitForAnimationComplete = property.WaitForComplete,
+                                    overrideAnimationDuration = property.OverrideDuration,
+                                    animationDuration = property.AnimationDuration,
+                                },
+                            };
+                            if (tileProperty.value.animator == null)
+                            {
+                                Debug.LogError($"Failed to find animator with id: {property.Id}");
+                            }
+                            animatorProperties.Add(tileProperty);
+                        }
+                        groupProperties.Add(new TilePropertyAnimatorGroup()
+                        {
+                            groupKey = animatorGroupProperty.GroupKey,
+                            tileAnimatorProperties = animatorProperties,
+                        });
                     }
                     var component = prefabGameObject.GameObject.GetComponent<TilePropertyAnimators>();
                     component.tileAnimatorProperties.AddRange(properties);
