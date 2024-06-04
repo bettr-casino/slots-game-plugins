@@ -76,6 +76,8 @@ namespace Bettr.Editor
 
         public Animator Animator => _go.GetComponent<Animator>();
         
+        public TMP_Text TextMeshPro => _go.GetComponent<TMP_Text>();
+        
         public ParticleSystem ParticleSystem => _go.GetComponent<ParticleSystem>();
 
         public InstanceGameObject()
@@ -1660,10 +1662,16 @@ namespace Bettr.Editor
     }
     
     [Serializable]
-    public class MechanicInstanceGameObject : InstanceGameObject
+    public class MechanicPrefab : InstanceGameObject
     {
         // ReSharper disable once InconsistentNaming
         public string ParentId { get; set; }
+        
+        // ReSharper disable once InconsistentNaming
+        public string ThisId { get; set; }
+        
+        // ReSharper disable once InconsistentNaming
+        public string Action { get; set; }
     }
 
     [Serializable]
@@ -1690,6 +1698,28 @@ namespace Bettr.Editor
         
         // ReSharper disable once InconsistentNaming
         public List<AnimatorProperty> AnimatorsProperty { get; set; }
+        
+        // ReSharper disable once InconsistentNaming
+        public List<AnimatorGroupProperty> AnimatorsGroupProperty { get; set; }
+    }
+    
+    [Serializable]
+    public class MechanicTilePropertyTextMeshPros
+    {
+        // ReSharper disable once InconsistentNaming
+        public List<PrefabId> PrefabIds { get; set; }
+        
+        // ReSharper disable once InconsistentNaming
+        public string PrefabName { get; set; }
+        
+        // ReSharper disable once InconsistentNaming
+        public string ThisId { get; set; }
+        
+        // ReSharper disable once InconsistentNaming
+        public List<TextMeshProProperty> TextMeshProsProperty { get; set; }
+        
+        // ReSharper disable once InconsistentNaming
+        public List<TextMeshProGroupProperty> TextMeshProsGroupProperty { get; set; }
     }
     
     [Serializable]
@@ -1849,12 +1879,18 @@ namespace Bettr.Editor
         // ReSharper disable once InconsistentNaming
         public List<ParticleSystemProperty> ParticleSystemsProperty { get; set; }
     }
+    
+    [Serializable]
+    public class MechanicAnimatorController : InstanceComponent
+    {
+        public string Action { get; set; }
+    }
 
     [Serializable]
     public class Mechanic
     {
         // ReSharper disable once InconsistentNaming
-        public List<MechanicInstanceGameObject> GameObjects { get; set; }
+        public List<MechanicPrefab> Prefabs { get; set; }
         
         // ReSharper disable once InconsistentNaming
         public List<MechanicAnimation> Animations { get; set; }
@@ -1863,9 +1899,160 @@ namespace Bettr.Editor
         public List<MechanicTilePropertyAnimators> TilePropertyAnimators { get; set; }
         
         // ReSharper disable once InconsistentNaming
+        public List<MechanicAnimatorController> AnimatorControllers { get; set; }
+        
+        // ReSharper disable once InconsistentNaming
         public List<MechanicParticleSystem> ParticleSystems { get; set; }
         
         // ReSharper disable once InconsistentNaming
         public List<MechanicTilePropertyParticleSystems> TilePropertyParticleSystems { get; set; }
+
+        // ReSharper disable once InconsistentNaming
+        public List<MechanicTilePropertyTextMeshPros> TilePropertyTextMeshPros { get; set; }
+        
+        public void Process()
+        {
+            ProcessModifiedPrefabs();
+            ProcessTextMeshPros();
+        }
+
+        private void ProcessModifiedPrefabs()
+        {
+            AssetDatabase.Refresh();
+            
+            // Modified Prefabs
+            if (this.Prefabs != null)
+            {
+                foreach (var instanceGameObject in this.Prefabs)
+                {
+                    AssetDatabase.Refresh();
+
+                    var prefabPath =
+                        $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{instanceGameObject.PrefabName}.prefab";
+                    var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                    var prefabGameObject = new PrefabGameObject(prefab, instanceGameObject.PrefabName);
+                    if (instanceGameObject.PrefabIds != null)
+                    {
+                        foreach (var prefabId in instanceGameObject.PrefabIds)
+                        {
+                            var referencedGameObject = prefabGameObject.FindReferencedId(prefabId.Id, prefabId.Index);
+                            InstanceGameObject.IdGameObjects[$"{prefabId.Prefix}{prefabId.Id}"] = new InstanceGameObject(referencedGameObject);
+                        }
+                    }
+
+                    if (instanceGameObject.Action == "add")
+                    {
+                        var parentGameObject = InstanceGameObject.IdGameObjects[instanceGameObject.ParentId];
+                        instanceGameObject.SetParent(parentGameObject.GameObject);
+                    
+                        instanceGameObject.OnDeserialized(new StreamingContext());
+                    
+                        PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
+                    }
+                    else if (instanceGameObject.Action == "modify")
+                    {
+                        var gameObjectInPrefab = InstanceGameObject.IdGameObjects[instanceGameObject.ThisId];
+                        
+                        instanceGameObject.OnDeserialized(new StreamingContext());
+
+                        foreach (var component in instanceGameObject.Components)
+                        {
+                            component.AddComponent(gameObjectInPrefab.GameObject);
+                        }
+                        
+                        foreach (var child in instanceGameObject.Children)
+                        {
+                            child.SetParent(gameObjectInPrefab.GameObject);
+                        }
+                    
+                        PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
+                    }
+                }
+            }
+            
+            AssetDatabase.Refresh();
+        }
+
+        private void ProcessTextMeshPros()
+        {
+            AssetDatabase.Refresh();
+            
+            if (TilePropertyTextMeshPros != null)
+            {
+                foreach (var tilePropertyTextMeshPro in this.TilePropertyTextMeshPros)
+                {
+                    var prefabPath =
+                        $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{tilePropertyTextMeshPro.PrefabName}.prefab";
+                    var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                    var prefabGameObject = new PrefabGameObject(prefab, tilePropertyTextMeshPro.PrefabName);
+                    if (tilePropertyTextMeshPro.PrefabIds != null)
+                    {
+                        foreach (var prefabId in tilePropertyTextMeshPro.PrefabIds)
+                        {
+                            var referencedGameObject = prefabGameObject.FindReferencedId(prefabId.Id, prefabId.Index);
+                            InstanceGameObject.IdGameObjects[$"{prefabId.Prefix}{prefabId.Id}"] = new InstanceGameObject(referencedGameObject);
+                        }
+                    }
+                    InstanceGameObject.IdGameObjects.TryGetValue(tilePropertyTextMeshPro.ThisId, out var thisGameObject);
+                    var component = thisGameObject.GameObject.GetComponent<TilePropertyTextMeshPros>();
+                    var properties = new List<TilePropertyTextMeshPro>();
+                    if (tilePropertyTextMeshPro.TextMeshProsProperty != null)
+                    {
+                        foreach (var textMeshProProperty in tilePropertyTextMeshPro.TextMeshProsProperty)
+                        {
+                            InstanceGameObject.IdGameObjects.TryGetValue(textMeshProProperty.Id, out var referenceGameObject);
+                            var tileProperty = new TilePropertyTextMeshPro()
+                            {
+                                key = textMeshProProperty.Key,
+                                value = new PropertyTextMeshPro() {textMeshPro = referenceGameObject?.TextMeshPro, isFormatText = textMeshProProperty.IsFormatText}
+                            };
+                            if (tileProperty.value.textMeshPro == null)
+                            {
+                                Debug.LogError($"Failed to find textMeshPro with id: {textMeshProProperty.Id}");
+                            }
+                            properties.Add(tileProperty);                        
+                        }
+                    }
+                    component.tileTextMeshProProperties.AddRange(properties);
+                    var groupProperties = new List<TilePropertyTextMeshProGroup>();
+                    if (tilePropertyTextMeshPro.TextMeshProsGroupProperty != null)
+                    {
+                        foreach (var textMeshProGroupProperty in tilePropertyTextMeshPro.TextMeshProsGroupProperty)
+                        {
+                            List<TilePropertyTextMeshPro> textMeshProsProperties = new List<TilePropertyTextMeshPro>();
+                            foreach (var property in textMeshProGroupProperty.Group)
+                            {
+                                InstanceGameObject.IdGameObjects.TryGetValue(property.Id, out var referenceGameObject);
+                                var textMeshPro = referenceGameObject?.GameObject.GetComponent<TMP_Text>();
+                                var gameObjectProperty = new TilePropertyTextMeshPro()
+                                {
+                                    key = property.Key,
+                                    value = new PropertyTextMeshPro() { textMeshPro = textMeshPro, isFormatText = property.IsFormatText },
+                                };
+                                textMeshProsProperties.Add(gameObjectProperty);
+                            }
+                            var group = component.tileTextMeshProGroupProperties.Find(x =>
+                                x.groupKey == textMeshProGroupProperty.GroupKey);
+                            if (group != null)
+                            {
+                                group.textMeshProProperties.AddRange(textMeshProsProperties);
+                            }
+                            else
+                            {
+                                groupProperties.Add(new TilePropertyTextMeshProGroup()
+                                {
+                                    groupKey = textMeshProGroupProperty.GroupKey,
+                                    textMeshProProperties = textMeshProsProperties,
+                                });
+                            }
+                        }
+                    }
+                    component.tileTextMeshProGroupProperties.AddRange(groupProperties);
+                    PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
+                }
+            }
+            
+            AssetDatabase.Refresh();
+        }
     }
 }
