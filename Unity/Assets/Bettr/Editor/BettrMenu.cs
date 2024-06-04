@@ -714,7 +714,6 @@ namespace Bettr.Editor
             DynValue dynValue = TileController.LuaScript.LoadString(machineModelScript, codeFriendlyName: machineModelName);
             TileController.LuaScript.Call(dynValue);
             
-            // Common to all machines
             ProcessScripts(machineName, machineVariant, runtimeAssetPath);
             
             var machines = GetTable($"{machineName}Machines");
@@ -752,9 +751,9 @@ namespace Bettr.Editor
                 reelCount++;
             }
             
-            string dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "templates", "scripts");
+            string dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "templates", "scripts", machineName);
             string[] filePaths = Directory.GetFiles(dirPath, "*.cscript.txt.template");
-            string scriptsPath = "scripts";
+            string scriptsPath = $"scripts/{machineName}";
             foreach (string filePath in filePaths)
             {
                 var scribanTemplate = ParseScribanTemplate(scriptsPath, filePath);
