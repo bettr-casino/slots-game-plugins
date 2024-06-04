@@ -1963,22 +1963,6 @@ namespace Bettr.Editor
                         foreach (var child in instanceGameObject.Children)
                         {
                             child.SetParent(gameObjectInPrefab.GameObject);
-                            
-                            child.GameObject.transform.position = new Vector3(0, 0, 0);
-                            if (child.Position != null)
-                            {
-                                child.GameObject.transform.position = (Vector3) child.Position;
-                            }
-                            child.GameObject.transform.rotation = Quaternion.Euler(0, 0, 0);
-                            if (child.Rotation != null)
-                            {
-                                child.GameObject.transform.rotation = Quaternion.Euler((Vector3) child.Rotation);
-                            }
-                            child.GameObject.transform.localScale = new Vector3(1, 1, 1);
-                            if (child.Scale != null)
-                            {
-                                child.GameObject.transform.localScale = (Vector3) child.Scale;
-                            }
                         }
                     
                         PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
