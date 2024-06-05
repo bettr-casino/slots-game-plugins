@@ -11,6 +11,7 @@ using UnityEditor.Animations;
 using UnityEditor.Events;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
@@ -349,6 +350,8 @@ namespace Bettr.Editor
         
         public bool IncludeAudioListener { get; set; }
         
+        public ParticleSystemModuleData ParticleSystemModuleData { get; set; }
+        
         public List<EventTriggerData> EventTriggers { get; set; }
         
         public List<AnimationState> AnimationStates { get; set; }
@@ -400,6 +403,10 @@ namespace Bettr.Editor
                 case "AnimatorController":
                     var animatorComponent = new AnimatorComponent(Filename, AnimationStates, AnimatorTransitions, RuntimeAssetPath);
                     animatorComponent.AddComponent(gameObject);
+                    break;
+                case "ParticleSystem":
+                    var particleSystemComponent = new ParticleSystemComponent(ParticleSystemModuleData, RuntimeAssetPath);
+                    particleSystemComponent.AddComponent(gameObject);
                     break;
                 case "TextMeshPro":
                     var textMeshProComponent = new TextMeshProComponent(Text, FontSize, Color, HorizontalAlignment, VerticalAlignment, Rect, FontAsset);
@@ -1020,6 +1027,276 @@ namespace Bettr.Editor
             var component = gameObject.AddComponent<TilePropertyStrings>();
             component.tileGameStringProperties = _tileStringProperties;
             component.tileGameStringGroupProperties = _tileStringGroupProperties;
+        }
+    }
+
+    public class ParticleSystemModuleData
+    {
+        public float StartLifetime { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public float StartSpeed { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public float StartSize { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public string StartColor { get; set; } // Stored as a string in RGBA format
+        // ReSharper disable once InconsistentNaming
+        public float GravityModifier { get; set; }
+        // ReSharper disable once InconsistentNaming
+        
+        public float EmissionRateOverTime { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public float EmissionRateOverDistance { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public List<EmissionBurst> Bursts { get; set; } = new List<EmissionBurst>();
+        
+        // ReSharper disable once InconsistentNaming
+        public string Shape { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public float ShapeAngle { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public float ShapeRadius { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public float ShapeRadiusThickness { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public float ShapeArc { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public string ShapeArcMode { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public float ShapeSpread { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public string ShapeEmitFrom { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public Vector3 ShapePosition { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public Vector3 ShapeRotation { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public Vector3 ShapeScale { get; set; }
+        
+        public float ShapeArcSpeed { get; set; }
+        
+        // ReSharper disable once InconsistentNaming
+        public string SimulationSpace { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public bool Looping { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public float Duration { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public bool PlayOnAwake { get; set; }
+
+        // Additional properties
+        // ReSharper disable once InconsistentNaming
+        public float StartRotation { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public float StartDelay { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public bool Prewarm { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public int MaxParticles { get; set; }
+
+        // ReSharper disable once InconsistentNaming
+        public ParticleSystemRendererSettings RendererSettings { get; set; } = new ParticleSystemRendererSettings();
+        
+        [Serializable]
+        public class ParticleSystemRendererSettings
+        {
+            // ReSharper disable once InconsistentNaming
+            public string Material { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public string Texture { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public string Color { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public string Shader { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public int SortingOrder { get; set; }
+            // ReSharper disable once InconsistentNaming
+            
+            // ReSharper disable once InconsistentNaming
+            public string SortingLayer { get; set; }
+            public string RenderMode { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public float NormalDirection { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public string SortMode { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public float MinParticleSize { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public float MaxParticleSize { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public string RenderAlignment { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public bool FlipX { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public bool FlipY { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public Vector3 Pivot { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public bool AllowRoll { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public bool CastShadows { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public bool ReceiveShadows { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public string LightProbes { get; set; }
+        }
+        
+        [Serializable]
+        public class EmissionBurst
+        {
+            // ReSharper disable once InconsistentNaming
+            public float Time { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public short MinCount { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public short MaxCount { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public int Cycles { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public float Interval { get; set; }
+            // ReSharper disable once InconsistentNaming
+            public float Probability { get; set; }
+        }
+        
+        public Color32 GetStartColor()
+        {
+            if (ColorUtility.TryParseHtmlString(StartColor, out var color))
+            {
+                return color;
+            }
+            return new Color32(255, 255, 255, 255); // Default to white if parsing fails
+        }
+    }
+    
+    [Serializable]
+    public class ParticleSystemComponent : IComponent
+    {
+        private ParticleSystem _particleSystem;
+
+        private string _runtimeAssetPath;
+
+        private ParticleSystemModuleData _moduleData;
+
+        public ParticleSystemComponent(ParticleSystemModuleData moduleData, string runtimeAssetPath)
+        {
+            _runtimeAssetPath = runtimeAssetPath;
+            _moduleData = moduleData;
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            BuildParticleSystem(gameObject);
+
+            var particleSystem = _particleSystem;
+            
+            var mainModule = particleSystem.main;
+            var emissionModule = particleSystem.emission;
+            var shapeModule = particleSystem.shape;
+            var renderer = particleSystem.GetComponent<ParticleSystemRenderer>();
+
+            mainModule.playOnAwake = _moduleData.PlayOnAwake;
+            mainModule.startLifetime = _moduleData.StartLifetime;
+            mainModule.startSpeed = _moduleData.StartSpeed;
+            mainModule.startSize = _moduleData.StartSize;
+            mainModule.startColor = new ParticleSystem.MinMaxGradient(_moduleData.GetStartColor());
+            mainModule.gravityModifier = _moduleData.GravityModifier;
+            if (Enum.TryParse(_moduleData.SimulationSpace, out ParticleSystemSimulationSpace simulationSpace))
+            {
+                mainModule.simulationSpace = simulationSpace;
+            }
+            mainModule.loop = _moduleData.Looping;
+            mainModule.duration = _moduleData.Duration;
+            mainModule.startRotation = _moduleData.StartRotation;
+            mainModule.startDelay = _moduleData.StartDelay;
+            mainModule.prewarm = _moduleData.Prewarm;
+            mainModule.maxParticles = _moduleData.MaxParticles;
+
+            // Emission module settings
+            emissionModule.rateOverTime = _moduleData.EmissionRateOverTime;
+            emissionModule.rateOverDistance = _moduleData.EmissionRateOverDistance;
+            emissionModule.burstCount = _moduleData.Bursts.Count;
+            for (int i = 0; i < _moduleData.Bursts.Count; i++)
+            {
+                var burst = _moduleData.Bursts[i];
+                emissionModule.SetBurst(i, new ParticleSystem.Burst(burst.Time, burst.MinCount, burst.MaxCount, burst.Cycles, burst.Interval) { probability = burst.Probability });
+            }
+
+            // Shape module settings
+            shapeModule.shapeType = (ParticleSystemShapeType)Enum.Parse(typeof(ParticleSystemShapeType), _moduleData.Shape);
+            shapeModule.angle = _moduleData.ShapeAngle;
+            shapeModule.radius = _moduleData.ShapeRadius;
+            shapeModule.radiusThickness = _moduleData.ShapeRadiusThickness;
+            shapeModule.arc = _moduleData.ShapeArc;
+            
+            // Set shape mode if applicable
+            if (Enum.TryParse(_moduleData.ShapeArcMode, out ParticleSystemShapeMultiModeValue shapeMode))
+            {
+                shapeModule.arcMode = shapeMode;
+            }
+            
+            shapeModule.arcSpread = _moduleData.ShapeSpread;
+            shapeModule.arcSpeed = _moduleData.ShapeArcSpeed; // Set arc speed
+            shapeModule.position = _moduleData.ShapePosition;
+            shapeModule.rotation = _moduleData.ShapeRotation;
+            shapeModule.scale = _moduleData.ShapeScale;
+
+            // Renderer module settings
+            if (Enum.TryParse(_moduleData.RendererSettings.RenderMode, out ParticleSystemRenderMode renderMode))
+            {
+                renderer.renderMode = renderMode;
+            }
+            renderer.normalDirection = _moduleData.RendererSettings.NormalDirection;
+            if (Enum.TryParse(_moduleData.RendererSettings.SortMode, out ParticleSystemSortMode sortMode))
+            {
+                renderer.sortMode = sortMode;
+            }
+            renderer.minParticleSize = _moduleData.RendererSettings.MinParticleSize;
+            renderer.maxParticleSize = _moduleData.RendererSettings.MaxParticleSize;
+            if (Enum.TryParse(_moduleData.RendererSettings.RenderAlignment, out ParticleSystemRenderSpace renderAlignment))
+            {
+                renderer.alignment = renderAlignment;
+            }
+            renderer.flip = new Vector3(_moduleData.RendererSettings.FlipX ? 1 : 0, _moduleData.RendererSettings.FlipY ? 1 : 0, 0);
+            renderer.pivot = _moduleData.RendererSettings.Pivot;
+            renderer.allowRoll = _moduleData.RendererSettings.AllowRoll;
+            renderer.receiveShadows = _moduleData.RendererSettings.ReceiveShadows;
+            renderer.shadowCastingMode = _moduleData.RendererSettings.CastShadows ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off;
+            if (Enum.TryParse(_moduleData.RendererSettings.LightProbes, out LightProbeUsage lightProbeUsage))
+            {
+                renderer.lightProbeUsage = lightProbeUsage;
+            }
+
+            renderer.sortingOrder = _moduleData.RendererSettings.SortingOrder;
+            renderer.sortingLayerName = _moduleData.RendererSettings.SortingLayer;
+            
+            // Check if material properties are provided before generating the material
+            Material material = null;
+            if (!string.IsNullOrEmpty(_moduleData.RendererSettings.Material) &&
+                !string.IsNullOrEmpty(_moduleData.RendererSettings.Shader))
+            {
+                material = BettrMaterialGenerator.CreateOrLoadMaterial(
+                    _moduleData.RendererSettings.Material,
+                    _moduleData.RendererSettings.Shader,
+                    _moduleData.RendererSettings.Texture,
+                    _moduleData.RendererSettings.Color,
+                    _runtimeAssetPath
+                );
+            }
+
+            // Set the material to the renderer
+            if (material != null)
+            {
+                renderer.material = material;
+            }
+
+            renderer.sortingOrder = _moduleData.RendererSettings.SortingOrder;
+        }
+
+        private void BuildParticleSystem(GameObject gameObject)
+        {
+            AssetDatabase.Refresh();
+
+            var particleSystem = BettrParticleSystem.AddOrGetParticleSystem(gameObject);
+            _particleSystem = particleSystem;
         }
     }
     
@@ -1732,139 +2009,7 @@ namespace Bettr.Editor
         // ReSharper disable once InconsistentNaming
         public string ReferenceId { get; set; }
         // ReSharper disable once InconsistentNaming
-        public float StartLifetime { get; set; }
-        // ReSharper disable once InconsistentNaming
-        public float StartSpeed { get; set; }
-        // ReSharper disable once InconsistentNaming
-        public float StartSize { get; set; }
-        // ReSharper disable once InconsistentNaming
-        public string StartColor { get; set; } // Stored as a string in RGBA format
-        // ReSharper disable once InconsistentNaming
-        public float GravityModifier { get; set; }
-        // ReSharper disable once InconsistentNaming
-        
-        public float EmissionRateOverTime { get; set; }
-        // ReSharper disable once InconsistentNaming
-        public float EmissionRateOverDistance { get; set; }
-        // ReSharper disable once InconsistentNaming
-        public List<EmissionBurst> Bursts { get; set; } = new List<EmissionBurst>();
-        
-        // ReSharper disable once InconsistentNaming
-        public string Shape { get; set; }
-        // ReSharper disable once InconsistentNaming
-        public float ShapeAngle { get; set; }
-        // ReSharper disable once InconsistentNaming
-        public float ShapeRadius { get; set; }
-        // ReSharper disable once InconsistentNaming
-        public float ShapeRadiusThickness { get; set; }
-        // ReSharper disable once InconsistentNaming
-        public float ShapeArc { get; set; }
-        // ReSharper disable once InconsistentNaming
-        public string ShapeArcMode { get; set; }
-        // ReSharper disable once InconsistentNaming
-        public float ShapeSpread { get; set; }
-        // ReSharper disable once InconsistentNaming
-        public string ShapeEmitFrom { get; set; }
-        // ReSharper disable once InconsistentNaming
-        public Vector3 ShapePosition { get; set; }
-        // ReSharper disable once InconsistentNaming
-        public Vector3 ShapeRotation { get; set; }
-        // ReSharper disable once InconsistentNaming
-        public Vector3 ShapeScale { get; set; }
-        
-        public float ShapeArcSpeed { get; set; }
-        
-        // ReSharper disable once InconsistentNaming
-        public string SimulationSpace { get; set; }
-        // ReSharper disable once InconsistentNaming
-        public bool Looping { get; set; }
-        // ReSharper disable once InconsistentNaming
-        public float Duration { get; set; }
-        // ReSharper disable once InconsistentNaming
-        public bool PlayOnAwake { get; set; }
-
-        // Additional properties
-        // ReSharper disable once InconsistentNaming
-        public float StartRotation { get; set; }
-        // ReSharper disable once InconsistentNaming
-        public float StartDelay { get; set; }
-        // ReSharper disable once InconsistentNaming
-        public bool Prewarm { get; set; }
-        // ReSharper disable once InconsistentNaming
-        public int MaxParticles { get; set; }
-
-        // ReSharper disable once InconsistentNaming
-        public ParticleSystemRendererSettings RendererSettings { get; set; } = new ParticleSystemRendererSettings();
-        
-        [Serializable]
-        public class ParticleSystemRendererSettings
-        {
-            // ReSharper disable once InconsistentNaming
-            public string Material { get; set; }
-            // ReSharper disable once InconsistentNaming
-            public string Texture { get; set; }
-            // ReSharper disable once InconsistentNaming
-            public string Color { get; set; }
-            // ReSharper disable once InconsistentNaming
-            public string Shader { get; set; }
-            // ReSharper disable once InconsistentNaming
-            public int SortingOrder { get; set; }
-            // ReSharper disable once InconsistentNaming
-            
-            // ReSharper disable once InconsistentNaming
-            public string SortingLayer { get; set; }
-            public string RenderMode { get; set; }
-            // ReSharper disable once InconsistentNaming
-            public float NormalDirection { get; set; }
-            // ReSharper disable once InconsistentNaming
-            public string SortMode { get; set; }
-            // ReSharper disable once InconsistentNaming
-            public float MinParticleSize { get; set; }
-            // ReSharper disable once InconsistentNaming
-            public float MaxParticleSize { get; set; }
-            // ReSharper disable once InconsistentNaming
-            public string RenderAlignment { get; set; }
-            // ReSharper disable once InconsistentNaming
-            public bool FlipX { get; set; }
-            // ReSharper disable once InconsistentNaming
-            public bool FlipY { get; set; }
-            // ReSharper disable once InconsistentNaming
-            public Vector3 Pivot { get; set; }
-            // ReSharper disable once InconsistentNaming
-            public bool AllowRoll { get; set; }
-            // ReSharper disable once InconsistentNaming
-            public bool CastShadows { get; set; }
-            // ReSharper disable once InconsistentNaming
-            public bool ReceiveShadows { get; set; }
-            // ReSharper disable once InconsistentNaming
-            public string LightProbes { get; set; }
-        }
-        
-        [Serializable]
-        public class EmissionBurst
-        {
-            // ReSharper disable once InconsistentNaming
-            public float Time { get; set; }
-            // ReSharper disable once InconsistentNaming
-            public short MinCount { get; set; }
-            // ReSharper disable once InconsistentNaming
-            public short MaxCount { get; set; }
-            // ReSharper disable once InconsistentNaming
-            public int Cycles { get; set; }
-            // ReSharper disable once InconsistentNaming
-            public float Interval { get; set; }
-            // ReSharper disable once InconsistentNaming
-            public float Probability { get; set; }
-        }
-        
-        public Color32 GetStartColor()
-        {
-            if (ColorUtility.TryParseHtmlString(StartColor, out var color))
-            {
-                return color;
-            }
-            return new Color32(255, 255, 255, 255); // Default to white if parsing fails
-        }
+        public ParticleSystemModuleData ModuleData { get; set; }
     }
     
     [Serializable]

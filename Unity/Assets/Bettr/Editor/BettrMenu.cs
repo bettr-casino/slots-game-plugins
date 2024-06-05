@@ -1544,97 +1544,97 @@ namespace Bettr.Editor
                 var referenceGameObject = InstanceGameObject.IdGameObjects[mechanicParticleSystem.ReferenceId];
                 
                 // Create the particle system
-                var particleSystem = BettrParticleSystem.AddOrGetParticleSystem(referenceGameObject.GameObject, runtimeAssetPath);
+                var particleSystem = BettrParticleSystem.AddOrGetParticleSystem(referenceGameObject.GameObject);
                 var mainModule = particleSystem.main;
                 var emissionModule = particleSystem.emission;
                 var shapeModule = particleSystem.shape;
                 var renderer = particleSystem.GetComponent<ParticleSystemRenderer>();
 
-                mainModule.playOnAwake = mechanicParticleSystem.PlayOnAwake;
-                mainModule.startLifetime = mechanicParticleSystem.StartLifetime;
-                mainModule.startSpeed = mechanicParticleSystem.StartSpeed;
-                mainModule.startSize = mechanicParticleSystem.StartSize;
-                mainModule.startColor = new ParticleSystem.MinMaxGradient(mechanicParticleSystem.GetStartColor());
-                mainModule.gravityModifier = mechanicParticleSystem.GravityModifier;
-                if (Enum.TryParse(mechanicParticleSystem.SimulationSpace, out ParticleSystemSimulationSpace simulationSpace))
+                mainModule.playOnAwake = mechanicParticleSystem.ModuleData.PlayOnAwake;
+                mainModule.startLifetime = mechanicParticleSystem.ModuleData.StartLifetime;
+                mainModule.startSpeed = mechanicParticleSystem.ModuleData.StartSpeed;
+                mainModule.startSize = mechanicParticleSystem.ModuleData.StartSize;
+                mainModule.startColor = new ParticleSystem.MinMaxGradient(mechanicParticleSystem.ModuleData.GetStartColor());
+                mainModule.gravityModifier = mechanicParticleSystem.ModuleData.GravityModifier;
+                if (Enum.TryParse(mechanicParticleSystem.ModuleData.SimulationSpace, out ParticleSystemSimulationSpace simulationSpace))
                 {
                     mainModule.simulationSpace = simulationSpace;
                 }
-                mainModule.loop = mechanicParticleSystem.Looping;
-                mainModule.duration = mechanicParticleSystem.Duration;
-                mainModule.startRotation = mechanicParticleSystem.StartRotation;
-                mainModule.startDelay = mechanicParticleSystem.StartDelay;
-                mainModule.prewarm = mechanicParticleSystem.Prewarm;
-                mainModule.maxParticles = mechanicParticleSystem.MaxParticles;
+                mainModule.loop = mechanicParticleSystem.ModuleData.Looping;
+                mainModule.duration = mechanicParticleSystem.ModuleData.Duration;
+                mainModule.startRotation = mechanicParticleSystem.ModuleData.StartRotation;
+                mainModule.startDelay = mechanicParticleSystem.ModuleData.StartDelay;
+                mainModule.prewarm = mechanicParticleSystem.ModuleData.Prewarm;
+                mainModule.maxParticles = mechanicParticleSystem.ModuleData.MaxParticles;
 
                 // Emission module settings
-                emissionModule.rateOverTime = mechanicParticleSystem.EmissionRateOverTime;
-                emissionModule.rateOverDistance = mechanicParticleSystem.EmissionRateOverDistance;
-                emissionModule.burstCount = mechanicParticleSystem.Bursts.Count;
-                for (int i = 0; i < mechanicParticleSystem.Bursts.Count; i++)
+                emissionModule.rateOverTime = mechanicParticleSystem.ModuleData.EmissionRateOverTime;
+                emissionModule.rateOverDistance = mechanicParticleSystem.ModuleData.EmissionRateOverDistance;
+                emissionModule.burstCount = mechanicParticleSystem.ModuleData.Bursts.Count;
+                for (int i = 0; i < mechanicParticleSystem.ModuleData.Bursts.Count; i++)
                 {
-                    var burst = mechanicParticleSystem.Bursts[i];
+                    var burst = mechanicParticleSystem.ModuleData.Bursts[i];
                     emissionModule.SetBurst(i, new ParticleSystem.Burst(burst.Time, burst.MinCount, burst.MaxCount, burst.Cycles, burst.Interval) { probability = burst.Probability });
                 }
 
                 // Shape module settings
-                shapeModule.shapeType = (ParticleSystemShapeType)Enum.Parse(typeof(ParticleSystemShapeType), mechanicParticleSystem.Shape);
-                shapeModule.angle = mechanicParticleSystem.ShapeAngle;
-                shapeModule.radius = mechanicParticleSystem.ShapeRadius;
-                shapeModule.radiusThickness = mechanicParticleSystem.ShapeRadiusThickness;
-                shapeModule.arc = mechanicParticleSystem.ShapeArc;
+                shapeModule.shapeType = (ParticleSystemShapeType)Enum.Parse(typeof(ParticleSystemShapeType), mechanicParticleSystem.ModuleData.Shape);
+                shapeModule.angle = mechanicParticleSystem.ModuleData.ShapeAngle;
+                shapeModule.radius = mechanicParticleSystem.ModuleData.ShapeRadius;
+                shapeModule.radiusThickness = mechanicParticleSystem.ModuleData.ShapeRadiusThickness;
+                shapeModule.arc = mechanicParticleSystem.ModuleData.ShapeArc;
                 
                 // Set shape mode if applicable
-                if (Enum.TryParse(mechanicParticleSystem.ShapeArcMode, out ParticleSystemShapeMultiModeValue shapeMode))
+                if (Enum.TryParse(mechanicParticleSystem.ModuleData.ShapeArcMode, out ParticleSystemShapeMultiModeValue shapeMode))
                 {
                     shapeModule.arcMode = shapeMode;
                 }
                 
-                shapeModule.arcSpread = mechanicParticleSystem.ShapeSpread;
-                shapeModule.arcSpeed = mechanicParticleSystem.ShapeArcSpeed; // Set arc speed
-                shapeModule.position = mechanicParticleSystem.ShapePosition;
-                shapeModule.rotation = mechanicParticleSystem.ShapeRotation;
-                shapeModule.scale = mechanicParticleSystem.ShapeScale;
+                shapeModule.arcSpread = mechanicParticleSystem.ModuleData.ShapeSpread;
+                shapeModule.arcSpeed = mechanicParticleSystem.ModuleData.ShapeArcSpeed; // Set arc speed
+                shapeModule.position = mechanicParticleSystem.ModuleData.ShapePosition;
+                shapeModule.rotation = mechanicParticleSystem.ModuleData.ShapeRotation;
+                shapeModule.scale = mechanicParticleSystem.ModuleData.ShapeScale;
 
                 // Renderer module settings
-                if (Enum.TryParse(mechanicParticleSystem.RendererSettings.RenderMode, out ParticleSystemRenderMode renderMode))
+                if (Enum.TryParse(mechanicParticleSystem.ModuleData.RendererSettings.RenderMode, out ParticleSystemRenderMode renderMode))
                 {
                     renderer.renderMode = renderMode;
                 }
-                renderer.normalDirection = mechanicParticleSystem.RendererSettings.NormalDirection;
-                if (Enum.TryParse(mechanicParticleSystem.RendererSettings.SortMode, out ParticleSystemSortMode sortMode))
+                renderer.normalDirection = mechanicParticleSystem.ModuleData.RendererSettings.NormalDirection;
+                if (Enum.TryParse(mechanicParticleSystem.ModuleData.RendererSettings.SortMode, out ParticleSystemSortMode sortMode))
                 {
                     renderer.sortMode = sortMode;
                 }
-                renderer.minParticleSize = mechanicParticleSystem.RendererSettings.MinParticleSize;
-                renderer.maxParticleSize = mechanicParticleSystem.RendererSettings.MaxParticleSize;
-                if (Enum.TryParse(mechanicParticleSystem.RendererSettings.RenderAlignment, out ParticleSystemRenderSpace renderAlignment))
+                renderer.minParticleSize = mechanicParticleSystem.ModuleData.RendererSettings.MinParticleSize;
+                renderer.maxParticleSize = mechanicParticleSystem.ModuleData.RendererSettings.MaxParticleSize;
+                if (Enum.TryParse(mechanicParticleSystem.ModuleData.RendererSettings.RenderAlignment, out ParticleSystemRenderSpace renderAlignment))
                 {
                     renderer.alignment = renderAlignment;
                 }
-                renderer.flip = new Vector3(mechanicParticleSystem.RendererSettings.FlipX ? 1 : 0, mechanicParticleSystem.RendererSettings.FlipY ? 1 : 0, 0);
-                renderer.pivot = mechanicParticleSystem.RendererSettings.Pivot;
-                renderer.allowRoll = mechanicParticleSystem.RendererSettings.AllowRoll;
-                renderer.receiveShadows = mechanicParticleSystem.RendererSettings.ReceiveShadows;
-                renderer.shadowCastingMode = mechanicParticleSystem.RendererSettings.CastShadows ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off;
-                if (Enum.TryParse(mechanicParticleSystem.RendererSettings.LightProbes, out LightProbeUsage lightProbeUsage))
+                renderer.flip = new Vector3(mechanicParticleSystem.ModuleData.RendererSettings.FlipX ? 1 : 0, mechanicParticleSystem.ModuleData.RendererSettings.FlipY ? 1 : 0, 0);
+                renderer.pivot = mechanicParticleSystem.ModuleData.RendererSettings.Pivot;
+                renderer.allowRoll = mechanicParticleSystem.ModuleData.RendererSettings.AllowRoll;
+                renderer.receiveShadows = mechanicParticleSystem.ModuleData.RendererSettings.ReceiveShadows;
+                renderer.shadowCastingMode = mechanicParticleSystem.ModuleData.RendererSettings.CastShadows ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off;
+                if (Enum.TryParse(mechanicParticleSystem.ModuleData.RendererSettings.LightProbes, out LightProbeUsage lightProbeUsage))
                 {
                     renderer.lightProbeUsage = lightProbeUsage;
                 }
 
-                renderer.sortingOrder = mechanicParticleSystem.RendererSettings.SortingOrder;
-                renderer.sortingLayerName = mechanicParticleSystem.RendererSettings.SortingLayer;
+                renderer.sortingOrder = mechanicParticleSystem.ModuleData.RendererSettings.SortingOrder;
+                renderer.sortingLayerName = mechanicParticleSystem.ModuleData.RendererSettings.SortingLayer;
                 
                 // Check if material properties are provided before generating the material
                 Material material = null;
-                if (!string.IsNullOrEmpty(mechanicParticleSystem.RendererSettings.Material) &&
-                    !string.IsNullOrEmpty(mechanicParticleSystem.RendererSettings.Shader))
+                if (!string.IsNullOrEmpty(mechanicParticleSystem.ModuleData.RendererSettings.Material) &&
+                    !string.IsNullOrEmpty(mechanicParticleSystem.ModuleData.RendererSettings.Shader))
                 {
                     material = BettrMaterialGenerator.CreateOrLoadMaterial(
-                        mechanicParticleSystem.RendererSettings.Material,
-                        mechanicParticleSystem.RendererSettings.Shader,
-                        mechanicParticleSystem.RendererSettings.Texture,
-                        mechanicParticleSystem.RendererSettings.Color,
+                        mechanicParticleSystem.ModuleData.RendererSettings.Material,
+                        mechanicParticleSystem.ModuleData.RendererSettings.Shader,
+                        mechanicParticleSystem.ModuleData.RendererSettings.Texture,
+                        mechanicParticleSystem.ModuleData.RendererSettings.Color,
                         runtimeAssetPath
                     );
                 }
@@ -1645,7 +1645,7 @@ namespace Bettr.Editor
                     renderer.material = material;
                 }
 
-                renderer.sortingOrder = mechanicParticleSystem.RendererSettings.SortingOrder;
+                renderer.sortingOrder = mechanicParticleSystem.ModuleData.RendererSettings.SortingOrder;
 
                 // Save changes to the prefab
                 PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
