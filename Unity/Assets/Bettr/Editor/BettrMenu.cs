@@ -1370,9 +1370,6 @@ namespace Bettr.Editor
             {
                 BaseGamePaylinesMechanic.Process(machineName, machineVariant, runtimeAssetPath);
             }
-            {
-                BaseGameWaysMechanic.Process(machineName, machineVariant, runtimeAssetPath);
-            }
             // if (HasTable($"{machineName}BaseGameScatterBonusFreeSpinsMechanic"))
             // {
             //     ProcessBaseGameScatterBonusFreeSpinsMechanic(machineName, machineVariant, runtimeAssetPath);
