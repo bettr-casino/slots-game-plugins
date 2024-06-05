@@ -1366,6 +1366,13 @@ namespace Bettr.Editor
             {
                 BaseGameWaysMechanic.Process(machineName, machineVariant, runtimeAssetPath);
             }
+            if (HasTable($"{machineName}BaseGamePaylines"))
+            {
+                BaseGamePaylinesMechanic.Process(machineName, machineVariant, runtimeAssetPath);
+            }
+            {
+                BaseGameWaysMechanic.Process(machineName, machineVariant, runtimeAssetPath);
+            }
             // if (HasTable($"{machineName}BaseGameScatterBonusFreeSpinsMechanic"))
             // {
             //     ProcessBaseGameScatterBonusFreeSpinsMechanic(machineName, machineVariant, runtimeAssetPath);
@@ -2282,6 +2289,39 @@ namespace Bettr.Editor
             }
             
             AssetDatabase.Refresh();
+        }
+    }
+
+    public static class BaseGamePaylinesMechanic
+    {
+        public static void Process(string machineName, string machineVariant, string runtimeAssetPath)
+        {
+            ProcessPaylinePrefab(machineName, runtimeAssetPath);
+        }
+        
+        private static void ProcessPaylinePrefab(string machineName, string runtimeAssetPath)
+        {
+            var templateName = "BaseGamePaylinePrefab";
+            var prefabName = templateName;
+            var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/paylines/", templateName);
+
+            var model = new Dictionary<string, object>
+            {
+                {"machineName", machineName},
+            };
+            
+            var json = scribanTemplate.Render(model);
+            Console.WriteLine(json);
+            
+            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
+            InstanceGameObject.IdGameObjects.Clear();
+            
+            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
+            hierarchyInstance.SetParent((GameObject) null);
+
+            BettrMenu.ProcessPrefab(prefabName, 
+                hierarchyInstance, 
+                runtimeAssetPath);
         }
     }
 }
