@@ -2310,7 +2310,33 @@ namespace Bettr.Editor
         public static void Process(string machineName, string machineVariant, string runtimeAssetPath)
         {
             ProcessPaylinePrefab(machineName, runtimeAssetPath);
+            ProcessBaseGameMachineModifications(machineName, machineVariant, runtimeAssetPath);
             ProcessBaseGameReelModifications(machineName, machineVariant, runtimeAssetPath);
+        }
+        
+        private static void ProcessBaseGameMachineModifications(string machineName, string machineVariant, string runtimeAssetPath)
+        {
+            string templateName = "BaseGamePaylinesMachineModifications";
+            var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/paylines", templateName);
+            
+            var model = new Dictionary<string, object>
+            {
+                { "machineName", machineName },
+                { "machineVariant", machineVariant },
+            };
+                
+            var json = scribanTemplate.Render(model);
+            Debug.Log(json);
+                
+            Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
+            if (mechanic == null)
+            {
+                throw new Exception($"Failed to deserialize mechanic from json: {json}");
+            }
+
+            mechanic.Process();
+            
+            AssetDatabase.Refresh();
         }
         
         private static void ProcessPaylinePrefab(string machineName, string runtimeAssetPath)
