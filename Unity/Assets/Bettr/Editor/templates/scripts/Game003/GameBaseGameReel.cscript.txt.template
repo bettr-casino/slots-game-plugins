@@ -488,7 +488,7 @@ function {{machineName}}BaseGameReel:CloneCurrentSymbol(rowIndex)
     return clonedSymbol
 end
 
-function {{machineName}}:DisplayPaylines(paylineSymbol, paylineMatrix, paylineCount, duration)
+function {{machineName}}BaseGameReel:DisplayPaylines(paylineSymbol, paylineMatrix, paylineCount, duration)
     for i = 1, paylineCount parallel do
         local paylineReelID = paylineMatrix[i].ReelID
         if paylineReelID == self.ReelID then
@@ -508,7 +508,7 @@ function {{machineName}}:DisplayPaylines(paylineSymbol, paylineMatrix, paylineCo
     end
 end
 
-function {{machineName}}:HidePaylines(paylineSymbol, paylineMatrix, paylineCount)
+function {{machineName}}BaseGameReel:HidePaylines(paylineSymbol, paylineMatrix, paylineCount)
     for i = 1, paylineCount parallel do
         local paylineReelID = paylineMatrix[i].ReelID
         if paylineReelID == self.ReelID then

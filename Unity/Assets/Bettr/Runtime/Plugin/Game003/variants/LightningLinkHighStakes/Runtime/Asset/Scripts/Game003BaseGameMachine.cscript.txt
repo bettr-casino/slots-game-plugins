@@ -36,7 +36,7 @@ function Game003BaseGameMachine:Start()
 end
 
 function Game003BaseGameMachine:OnSpinButtonClicked()
-    self:CancelWaysAnimation()
+    self:CancelPaylinesAnimation()
     series
         do
             self:WaitForPayToComplete()                       
@@ -48,17 +48,17 @@ function Game003BaseGameMachine:OnSpinButtonClicked()
     end
 end
 
-function Game003BaseGameMachine:CancelWaysAnimation()
+function Game003BaseGameMachine:CancelPaylinesAnimation()
     Game003BaseGameState.DisplayState.First.State = "CancelRequested"
 end
 
-function Game003BaseGameMachine:RollUpWaysWin(waysSummary)
+function Game003BaseGameMachine:RollUpPaylinesWin(paylinesSummary)
     series
         do
-            -- rollup ways win once
-            local startDelay = waysSummary.DisplayLoopStartDelay
-            local duration = waysSummary.DisplayLoopDuration
-            local pays = waysSummary.Pays 
+            -- rollup paylines win once
+            local startDelay = paylinesSummary.DisplayLoopStartDelay
+            local duration = paylinesSummary.DisplayLoopDuration
+            local pays = paylinesSummary.Pays 
             System.WaitForSeconds(startDelay)
             local winTextProperty = self.WinText
             
@@ -78,8 +78,8 @@ function Game003BaseGameMachine:WaitForPayToComplete()
     series
         do
             if Game003BaseGameState.SpinState.First.State == "WaitingForPayToComplete" then
-                local waysSummary = Game003BaseGameWaysSummary.Ways.First
-                local delay = waysSummary.DisplayLoopEndDelay
+                local paylinesSummary = Game003BaseGamePaylinesSummary.Paylines.First
+                local delay = paylinesSummary.DisplayLoopEndDelay
                 while Game003BaseGameState.SpinState.First.State == "WaitingForPayToComplete" do
                     Game003BaseGameState.DisplayState.First.State = "CancelRequested"
                     System.WaitForSeconds(delay)
@@ -153,23 +153,23 @@ end
 function Game003BaseGameMachine:BaseGamePayout()
     series
         do
-            local waysSummary = Game003BaseGameWaysSummary.Ways.First
-            local waysIndex = waysSummary.WaysIndex
-            local waysCount = waysSummary.WaysCount
-            if waysCount > 0 then
-                local ways = Game003BaseGameWays.Ways.Array
-                local waysMatrix = Game003BaseGameWaysMatrix
+            local paylinesSummary = Game003BaseGamePaylinesSummary.Paylines.First
+            local paylinesIndex = paylinesSummary.PaylinesIndex
+            local paylinesCount = paylinesSummary.PaylinesCount
+            if paylinesCount > 0 then
+                local paylines = Game003BaseGamePaylines.Paylines.Array
+                local paylinesMatrix = Game003BaseGamePaylinesMatrix
                 parallel
                     do
-                        self:DisplayWays(waysSummary, waysMatrix, ways)            
+                        self:DisplayPaylines(paylinesSummary, paylinesMatrix, paylines)            
                     end
                     do
-                        if waysIndex == 0 then
-                            self:RollUpWaysWin(waysSummary)
+                        if paylinesIndex == 0 then
+                            self:RollUpPaylinesWin(paylinesSummary)
                         end
                     end
                 end
-                if waysIndex >= 2 then
+                if paylinesIndex >= 2 then
                     self:OnPayingCompleted()
                 elseif Game003BaseGameState.DisplayState.First.State == "CancelRequested" then
                     self:OnPayingCompleted()
@@ -183,50 +183,50 @@ function Game003BaseGameMachine:BaseGamePayout()
     end      
 end
 
-function Game003BaseGameMachine:DisplayWays(waysSummary, waysMatrix, ways)
+function Game003BaseGameMachine:DisplayPaylines(paylinesSummary, paylinesMatrix, paylines)
     series
         do
-            local waysIndex = waysSummary.WaysIndex   
-            local waysCount = waysSummary.WaysCount 
-            local startDelay = waysSummary.DisplayLoopStartDelay
-            local duration = waysSummary.DisplayLoopDuration
-            local endDelay = waysSummary.DisplayLoopEndDelay            
-            if waysIndex == 0 then
+            local paylinesIndex = paylinesSummary.PaylinesIndex   
+            local paylinesCount = paylinesSummary.PaylinesCount 
+            local startDelay = paylinesSummary.DisplayLoopStartDelay
+            local duration = paylinesSummary.DisplayLoopDuration
+            local endDelay = paylinesSummary.DisplayLoopEndDelay            
+            if paylinesIndex == 0 then
                 System.WaitForSeconds(startDelay)
             end
-            for waysCounterIndex = 1, waysCount do
+            for paylinesCounterIndex = 1, paylinesCount do
                 series
                     do
                         if Game003BaseGameState.DisplayState.First.State == "CancelRequested" then
                             break
                         end
-                        local way = ways[waysCounterIndex]
-                        local waySymbol = way.Symbol
-                        local wayReelCount = way.ReelCount
-                        local waySymbolCount = way.SymbolCount
-                        local wayMultiplier = way.Multiplier
-                        local wayPay = way.Pay
-                        local wayTotalPay = way.Pays
-                        local wayMatrix = waysMatrix[waySymbol].Array
+                        local payline = paylines[paylinesCounterIndex]
+                        local paylineSymbol = payline.Symbol
+                        local paylineReelCount = payline.ReelCount
+                        local paylineSymbolCount = payline.SymbolCount
+                        local paylineMultiplier = payline.Multiplier
+                        local paylinePay = payline.Pay
+                        local paylineTotalPay = payline.Pays
+                        local paylineMatrix = paylinesMatrix[paylineSymbol].Array
                         -- update status text 
                         local statusTexts = self.StatusTexts
-                        -- {0}        Pays  {1} x {2} ways = {3} CREDITS!!
-                        statusTexts.FormatAndSetCurrentActive("PaysText", wayReelCount, wayPay, wayMultiplier, wayTotalPay)
+                        -- {0}        Pays  {1} x {2} paylines = {3} CREDITS!!
+                        statusTexts.FormatAndSetCurrentActive("PaysText", paylineReelCount, paylinePay, paylineMultiplier, paylineTotalPay)
                         local winSymbols = self.WinSymbols
-                        winSymbols.SetCurrentActive(waySymbol)
-                        -- display ways
-                        for i=1,wayReelCount parallel do
+                        winSymbols.SetCurrentActive(paylineSymbol)
+                        -- display paylines
+                        for i=1, paylineReelCount parallel do
                             local reel = _G["Game003BaseGameReel" .. i]
-                            if reel != nil then
-                                reel:DisplayWays(waySymbol, wayMatrix, waySymbolCount, duration)
+                            if reel ~= nil then
+                                reel:DisplayPaylines(paylineSymbol, paylineMatrix, paylineSymbolCount, duration)
                                 System.WaitForSeconds(duration)
-                                reel:HideWays(waySymbol, wayMatrix, waySymbolCount)
+                                reel:HidePaylines(paylineSymbol, paylineMatrix, paylineSymbolCount)
                             end
                         end
                     end
                 end                            
             end
-            waysSummary.WaysIndex = waysIndex + 1
+            paylinesSummary.PaylinesIndex = paylinesIndex + 1
             System.WaitForSeconds(endDelay) 
         end
     end
