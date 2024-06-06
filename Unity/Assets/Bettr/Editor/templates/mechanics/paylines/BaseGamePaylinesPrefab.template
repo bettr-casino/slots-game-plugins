@@ -2,61 +2,122 @@
     "Name": "Paylines",
     "Layer": "SLOT_REELS",
     "Components": [
-    {
-        "ComponentType": "AnimatorController",
-        "Filename": "{{symbolPrefabName}}",
-        "AnimationStates": [
-            {
-              "Name": "noop",
-              "Speed": 1,
-              "IsLoop": false,
-              "IsDefault": true
-            },
-            {
-              "Name": "win",
-              "Speed": 1,
-              "IsLoop": false,
-              "IsDefault": false,
-              "Dopesheet": [
+        {
+            "ComponentType": "AnimatorController",
+            "Filename": "{{symbolPrefabName}}",
+            "AnimationStates": [
                 {
-                  "Path": "Pivot/Quad",
-                  "Type": "Transform",
-                  "Property": "m_LocalScale.x",
-                  "Keyframes": {
-                    "Times": [0, 30, 60],
-                    "Values": [1.5, 1, 1.5]
-                  }
+                  "Name": "noop",
+                  "Speed": 1,
+                  "IsLoop": false,
+                  "IsDefault": true
                 },
                 {
-                  "Path": "Pivot/Quad",
-                  "Type": "Transform",
-                  "Property": "m_LocalScale.y",
-                  "Keyframes": {
-                    "Times": [0, 30, 60],
-                    "Values": [1, 1, 1]
-                  }
-                },
-                {
-                  "Path": "Pivot/Quad",
-                  "Type": "Transform",
-                  "Property": "m_LocalScale.z",
-                  "Keyframes": {
-                    "Times": [0, 30, 60],
-                    "Values": [1, 1, 1]
-                  }
+                  "Name": "win",
+                  "Speed": 1,
+                  "IsLoop": false,
+                  "IsDefault": false,
+                  "Dopesheet": [
+                    {
+                      "Path": "Pivot/Quad",
+                      "Type": "Transform",
+                      "Property": "m_LocalScale.x",
+                      "Keyframes": {
+                        "Times": [0, 30, 60],
+                        "Values": [1.5, 1, 1.5]
+                      }
+                    },
+                    {
+                      "Path": "Pivot/Quad",
+                      "Type": "Transform",
+                      "Property": "m_LocalScale.y",
+                      "Keyframes": {
+                        "Times": [0, 30, 60],
+                        "Values": [1, 1, 1]
+                      }
+                    },
+                    {
+                      "Path": "Pivot/Quad",
+                      "Type": "Transform",
+                      "Property": "m_LocalScale.z",
+                      "Keyframes": {
+                        "Times": [0, 30, 60],
+                        "Values": [1, 1, 1]
+                      }
+                    }
+                  ]
                 }
-              ]
-            }
-        ],
-        "AnimatorStateTransitions": [
-        ]
-    }
+            ],
+            "AnimatorStateTransitions": [
+            ]
+        },
+        {
+            "ComponentType": "ParticleSystem",
+            "ParticleSystemModuleData": {
+                "StartLifetime": 1.0,
+                "StartSpeed": 0.1,
+                "StartSize": 0.2,
+                "StartColor": "#0000FFFF", // Fully opaque blue
+                "GravityModifier": 0.0,
+                "Bursts": [
+                    {
+                        "Time": 0.0,
+                        "MinCount": 1000,
+                        "MaxCount": 1000,
+                        "Cycles": 60,
+                        "Interval": 1.0,
+                        "Probability": 1.0
+                    }
+                ],
+                "Shape": "BoxEdge",
+                "ShapeAngle": 0,
+                "ShapeRadius": 0,
+                "ShapeRadiusThickness": 1,
+                "ShapeArc": 360,
+                "ShapeArcMode": "Loop",
+                "ShapeSpread": 0,
+                "ShapeEmitFrom": "Edge",
+                "ShapePosition": { "x": 0, "y": -0.67, "z": 0 },
+                "ShapeRotation": { "x": 0, "y": 0, "z": 0 },
+                "ShapeScale": { "x": 1, "y": 3.5, "z": 1 },
+                "ShapeArcSpeed": 0.0,
+                "SimulationSpace": "Local",
+                "Looping": true,
+                "Duration": 60.0,
+                "PlayOnAwake": false,
+                "StartRotation": 0.0,
+                "StartDelay": 0.0,
+                "Prewarm": true,
+                "MaxParticles": 1000,
+                "RendererSettings": {
+                    "Material": "ParticleMaterial",
+                    "Shader": "Bettr/BluishGlow",
+                    "Texture": "GlowTexture.png",
+                    "Color": "#0000FF10", // Fully opaque blue
+                    "SortingOrder": -1,
+                    "SortingLayer": "SLOT_OVERLAY",
+                    "RenderMode": "Billboard",
+                    "NormalDirection": 1,
+                    "SortMode": "None",
+                    "MinParticleSize": 0.1,
+                    "MaxParticleSize": 0.1,
+                    "RenderAlignment": "View",
+                    "FlipX": false,
+                    "FlipY": false,
+                    "Pivot": { "x": 0, "y": 0, "z": 0 },
+                    "AllowRoll": true,
+                    "CastShadows": false,
+                    "ReceiveShadows": false,
+                    "LightProbes": "Off"
+                }        
+            }  
+        }
     ],
     "Child": {
         "Name": "Pivot",
         "Layer": "SLOT_REELS",
         "Child": {
-            "Name": "Payline",
+            "Name": "{{machineName}}PaylineModel",
             "Id": "Payline",
             "IsModel": true,
             "ModelName": "Payline" 
