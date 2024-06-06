@@ -158,7 +158,7 @@ function {{machineName}}BaseGameMachine:BaseGamePayout()
             local paylinesCount = paylinesSummary.PaylinesCount
             if paylinesCount > 0 then
                 local paylines = {{machineName}}BaseGamePaylines.Paylines.Array
-                local paylinesMatrix = {{machineName}}BaseGamePaylinesMatrix.Paylines.Array
+                local paylinesMatrix = {{machineName}}BaseGamePaylinesMatrix.Paylines
                 parallel
                     do
                         self:DisplayPaylines(paylinesSummary, paylinesMatrix, paylines)            
@@ -207,7 +207,7 @@ function {{machineName}}BaseGameMachine:DisplayPaylines(paylinesSummary, payline
                         local paylineMultiplier = payline.Multiplier
                         local paylinePay = payline.Pay
                         local paylineTotalPay = payline.Pays
-                        local paylineMatrix = paylinesMatrix[paylineSymbol].Array
+                        local paylineMatrix = paylinesMatrix[paylineSymbol]
                         -- update status text 
                         local statusTexts = self.StatusTexts
                         -- {0}        Pays  {1} x {2} paylines = {3} CREDITS!!
