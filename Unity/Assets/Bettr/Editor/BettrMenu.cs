@@ -2456,8 +2456,8 @@ namespace Bettr.Editor
         
         private static void ProcessBaseGameSymbolModifications(string machineName, string machineVariant, string runtimeAssetPath)
         {
-            string templateName = "BaseGameWaysSymbolModifications";
-            var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/ways", templateName);
+            string templateName = "BaseGamePaylinesSymbolModifications";
+            var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/paylines", templateName);
             
             var baseGameSymbolTable = BettrMenu.GetTable($"{machineName}BaseGameSymbolTable");
             var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
