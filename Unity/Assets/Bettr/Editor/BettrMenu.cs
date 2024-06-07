@@ -2320,6 +2320,7 @@ namespace Bettr.Editor
         public static void Process(string machineName, string machineVariant, string runtimeAssetPath)
         {
             ProcessPaylinePrefab(machineName, runtimeAssetPath);
+            ProcessBaseGameSymbolModifications(machineName, machineVariant, runtimeAssetPath);
             ProcessBaseGameMachineModifications(machineName, machineVariant, runtimeAssetPath);
             ProcessBaseGameReelModifications(machineName, machineVariant, runtimeAssetPath);
         }
@@ -2449,6 +2450,51 @@ namespace Bettr.Editor
                 mechanic.Process();
 
             }
+            
+            AssetDatabase.Refresh();
+        }
+        
+        private static void ProcessBaseGameSymbolModifications(string machineName, string machineVariant, string runtimeAssetPath)
+        {
+            string templateName = "BaseGameWaysSymbolModifications";
+            var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/ways", templateName);
+            
+            var baseGameSymbolTable = BettrMenu.GetTable($"{machineName}BaseGameSymbolTable");
+            var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
+            var symbolPrefabNames = baseGameSymbolTable.Pairs.Select(pair => $"{machineName}BaseGameSymbol{pair.Key.String}").ToList();
+            
+            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
+            InstanceGameObject.IdGameObjects.Clear();
+                
+            var model = new Dictionary<string, object>
+            {
+                { "machineName", machineName },
+                { "machineVariant", machineVariant },
+                { "symbolKeys", symbolKeys},
+                { "symbolPrefabNames", symbolPrefabNames},
+            };
+            
+            var json = scribanTemplate.Render(model);
+            Debug.Log(json);
+            
+            Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
+            if (mechanic == null)
+            {
+                throw new Exception($"Failed to deserialize mechanic from json: {json}");
+            }
+            
+            // Modified Animator Controllers
+            if (mechanic.AnimatorControllers != null)
+            {
+                foreach (var instanceComponent in mechanic.AnimatorControllers)
+                {
+                    AssetDatabase.Refresh();
+
+                    BettrAnimatorController.AddAnimationState(instanceComponent.Filename,
+                        instanceComponent.AnimationStates, instanceComponent.AnimatorTransitions, runtimeAssetPath);
+                }
+            }
+            
             
             AssetDatabase.Refresh();
         }
