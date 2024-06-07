@@ -212,8 +212,6 @@ function Game003BaseGameMachine:DisplayPaylines(paylinesSummary, paylinesMatrix,
                         local statusTexts = self.StatusTexts
                         -- Line {0} Wins  = {1} CREDITS!!
                         statusTexts.FormatAndSetCurrentActive("PaysText", paylineId, paylineTotalPay)
-                        local winSymbols = self.WinSymbols
-                        winSymbols.SetCurrentActive(paylineSymbol)
                         -- display paylines
                         for i=1, paylineReelCount parallel do
                             local reel = _G["Game003BaseGameReel" .. i]
@@ -293,8 +291,6 @@ function Game003BaseGameMachine:SpinEngines()
     Game003BaseGameState.SpinState.First.State = "Spinning"
     local statusTexts = self.StatusTexts
     statusTexts.SetCurrentActive("GoodLuckText")
-    local winSymbols = self.WinSymbols
-    winSymbols.SetAllInactive()
     self:ResetSettings()
     parallel
         
