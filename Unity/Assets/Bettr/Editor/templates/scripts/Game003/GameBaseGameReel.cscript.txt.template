@@ -491,7 +491,7 @@ end
 function {{machineName}}BaseGameReel:DisplayPaylines(paylineSymbol, paylineData, paylineId, duration)
     for i = 1, #paylineData do
         local position = paylineData[i]
-        if position.ReelIndex == self.ReelID then
+        if position.ReelID == self.ReelID then
             local paylinesGroupProperty = self.PaylinesGroup
             local rowIndex = position.RowIndex
             local luaRowIndex = rowIndex + 1
