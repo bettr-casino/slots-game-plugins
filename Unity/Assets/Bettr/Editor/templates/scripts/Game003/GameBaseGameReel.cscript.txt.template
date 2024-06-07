@@ -488,14 +488,14 @@ function {{machineName}}BaseGameReel:CloneCurrentSymbol(rowIndex)
     return clonedSymbol
 end
 
-function {{machineName}}BaseGameReel:DisplayPaylines(paylineSymbol, paylineMatrix, paylineCount, duration)
-    for i = 1, paylineCount parallel do
-        local paylineReelID = paylineMatrix[i].ReelID
-        if paylineReelID == self.ReelID then
-            local paylineGroupProperty = self.PaylineGroup
-            local rowIndex = paylineMatrix[i].RowIndex
+function {{machineName}}BaseGameReel:DisplayPaylines(paylineSymbol, paylineData, paylineId, duration)
+    for i = 1, #paylineData do
+        local position = paylineData[i]
+        if position.ReelIndex == self.ReelID then
+            local paylinesGroupProperty = self.PaylinesGroup
+            local rowIndex = position.RowIndex
             local luaRowIndex = rowIndex + 1
-            paylineGroupProperty["RowIndex" .. luaRowIndex].SetActive(true)
+            paylinesGroupProperty["RowIndex" .. luaRowIndex].SetActive(true)
             local animatorGroupProperty = self["SymbolPaylineWinAnimatorGroup" .. luaRowIndex]
             local symbolGroupProperty = self["SymbolGroup" .. luaRowIndex]
             local currentKey = symbolGroupProperty.CurrentKey
@@ -508,14 +508,14 @@ function {{machineName}}BaseGameReel:DisplayPaylines(paylineSymbol, paylineMatri
     end
 end
 
-function {{machineName}}BaseGameReel:HidePaylines(paylineSymbol, paylineMatrix, paylineCount)
-    for i = 1, paylineCount parallel do
-        local paylineReelID = paylineMatrix[i].ReelID
-        if paylineReelID == self.ReelID then
-            local paylineGroupProperty = self.PaylineGroup
-            local rowIndex = paylineMatrix[i].RowIndex
+function {{machineName}}BaseGameReel:HidePaylines(paylineSymbol, paylineData, paylineId)
+    for i = 1, #paylineData parallel do
+        local position = paylineData[i]
+        if position.ReelIndex == self.ReelID then
+            local paylinesGroupProperty = self.PaylinesGroup
+            local rowIndex = position.RowIndex
             local luaRowIndex = rowIndex + 1
-            paylineGroupProperty["RowIndex" .. luaRowIndex].SetActive(false)
+            paylinesGroupProperty["RowIndex" .. luaRowIndex].SetActive(false)
         end
     end
 end

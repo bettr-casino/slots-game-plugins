@@ -158,7 +158,7 @@ function Game003BaseGameMachine:BaseGamePayout()
             local paylinesCount = paylinesSummary.PaylinesCount
             if paylinesCount > 0 then
                 local paylines = Game003BaseGamePaylines.Paylines.Array
-                local paylinesMatrix = Game003BaseGamePaylinesMatrix.Paylines
+                local paylinesMatrix = Game003BaseGamePaylinesMatrix
                 parallel
                     do
                         self:DisplayPaylines(paylinesSummary, paylinesMatrix, paylines)            
@@ -201,26 +201,26 @@ function Game003BaseGameMachine:DisplayPaylines(paylinesSummary, paylinesMatrix,
                             break
                         end
                         local payline = paylines[paylinesCounterIndex]
+                        local paylineId = payline.PaylineId
                         local paylineSymbol = payline.Symbol
                         local paylineReelCount = payline.ReelCount
-                        local paylineSymbolCount = payline.SymbolCount
                         local paylineMultiplier = payline.Multiplier
                         local paylinePay = payline.Pay
                         local paylineTotalPay = payline.Pays
-                        local paylineMatrix = paylinesMatrix[paylineSymbol]
+                        local paylineData = paylinesMatrix[paylineId].Array
                         -- update status text 
                         local statusTexts = self.StatusTexts
                         -- Line {0} Wins  = {1} CREDITS!!
-                        statusTexts.FormatAndSetCurrentActive("PaysText", paylineReelCount, paylinePay, paylineMultiplier, paylineTotalPay)
+                        statusTexts.FormatAndSetCurrentActive("PaysText", paylineId, paylineTotalPay)
                         local winSymbols = self.WinSymbols
                         winSymbols.SetCurrentActive(paylineSymbol)
                         -- display paylines
                         for i=1, paylineReelCount parallel do
                             local reel = _G["Game003BaseGameReel" .. i]
                             if reel ~= nil then
-                                reel:DisplayPaylines(paylineSymbol, paylineMatrix, paylineSymbolCount, duration)
+                                reel:DisplayPaylines(paylineSymbol, paylineData, paylineId, duration)
                                 System.WaitForSeconds(duration)
-                                reel:HidePaylines(paylineSymbol, paylineMatrix, paylineSymbolCount)
+                                reel:HidePaylines(paylineSymbol, paylineData, paylineId)
                             end
                         end
                     end
