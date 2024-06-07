@@ -2061,6 +2061,13 @@ namespace Bettr.Editor
             return reelCount;
         }
 
+        public static List<string> GetSymbolKeys(string machineName)
+        {
+            var baseGameSymbolTable = BettrMenu.GetTable($"{machineName}BaseGameSymbolTable");
+            var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
+            return symbolKeys;
+        }
+
         public static int GetTopSymbolCount(string machineName, int reelIndex)
         {
             var reelStates = BettrMenu.GetTable($"{machineName}BaseGameReelState");
@@ -2202,27 +2209,33 @@ namespace Bettr.Editor
         
         private static void ProcessBaseGameMachineModifications(string machineName, string machineVariant, string runtimeAssetPath)
         {
-            string templateName = "BaseGameWaysMachineModifications";
-            var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/ways", templateName);
+            for (int i = 1; i <= 3; i++)
+            {
+                string templateName = $"BaseGameWaysMachineModifications{i}";
+                var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/ways", templateName);
             
-            var model = new Dictionary<string, object>
-            {
-                { "machineName", machineName },
-                { "machineVariant", machineVariant },
-            };
+                var symbolKeys = BettrMenu.GetSymbolKeys(machineName);
+            
+                var model = new Dictionary<string, object>
+                {
+                    { "machineName", machineName },
+                    { "machineVariant", machineVariant },
+                    { "symbolKeys", symbolKeys},
+                };
                 
-            var json = scribanTemplate.Render(model);
-            Debug.Log(json);
+                var json = scribanTemplate.Render(model);
+                Debug.Log(json);
                 
-            Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
-            if (mechanic == null)
-            {
-                throw new Exception($"Failed to deserialize mechanic from json: {json}");
-            }
+                Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
+                if (mechanic == null)
+                {
+                    throw new Exception($"Failed to deserialize mechanic from json: {json}");
+                }
 
-            mechanic.Process();
+                mechanic.Process();
             
-            AssetDatabase.Refresh();
+                AssetDatabase.Refresh();
+            }
         }
         
         private static void ProcessBaseGameReelModifications(string machineName, string machineVariant, string runtimeAssetPath)
@@ -2230,10 +2243,7 @@ namespace Bettr.Editor
             string templateName = "BaseGameWaysReelModifications";
             var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/ways", templateName);
             
-            var baseGameSymbolTable = BettrMenu.GetTable($"{machineName}BaseGameSymbolTable");
-            var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
-            
-            var reelStates = BettrMenu.GetTable($"{machineName}BaseGameReelState");
+            var symbolKeys = BettrMenu.GetSymbolKeys(machineName);
             var reelCount = BettrMenu.GetReelCount(machineName);
             
             for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)

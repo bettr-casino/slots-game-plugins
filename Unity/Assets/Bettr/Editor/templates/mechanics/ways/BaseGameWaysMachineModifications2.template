@@ -1,0 +1,59 @@
+{
+    "Prefabs": [
+        {
+            "Name": "{{machineName}}BaseGameMachine",
+            "PrefabName": "{{machineName}}BaseGameMachine",
+            "IsPrefab": true,
+            "PrefabIds": [
+                {
+                    "Index": 1,
+                    "Id": "Pivot"
+                }                
+            ],
+            "Action": "modify",
+            "ThisId": "Pivot",
+            "Children": [
+                {
+                    "Name": "WinSymbols",
+                    "Layer": "SLOT_REELS_OVERLAY",                
+                    "Position": {
+                        "X": -3.80,
+                        "Y": -2.20,
+                        "Z": 0
+                    },
+                    "Children": [
+                        {{ for symbolKey in symbolKeys }}
+                        {
+                            "Name": "WinSymbols{{symbolKey}}",
+                            "Id": "WinSymbols{{symbolKey}}",
+                            "Active": false,
+                            "Layer": "SLOT_REELS_OVERLAY",
+                            "Child": {
+                                "Name": "Pivot",
+                                "Layer": "SLOT_REELS_OVERLAY",
+                                "Child": {
+                                    "Name": "Quad",
+                                    "Layer": "SLOT_BACKGROUND",
+                                    "Active": true,
+                                    "IsPrimitive": true,
+                                    "Primitive": 5,
+                                    "PrimitiveMaterial": "{{machineName}}BaseGameSymbol{{symbolKey}}",
+                                    "PrimitiveShader": "Bettr/Symbol",
+                                    "PrimitiveTexture": "{{symbolKey}}",
+                                    "Scale": {
+                                        "X": 0.75,
+                                        "Y": 0.5,
+                                        "Z": 1
+                                    }
+                                }
+                            }
+                        }
+                        {{ if !for.last }},{{ end }}{{ end }}
+                    ]
+                }
+            ],
+            "Components": [                
+            ]
+        }
+    ]      
+}
