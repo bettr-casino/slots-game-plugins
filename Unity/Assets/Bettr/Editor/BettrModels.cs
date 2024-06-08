@@ -170,7 +170,7 @@ namespace Bettr.Editor
                     AssetDatabase.Refresh();
                     string prefabPath = Path.Combine(InstanceComponent.RuntimeAssetPath, "Prefabs",  $"{PrefabName}.prefab");
                     GameObject modelAsPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                    var modelGameObject = new PrefabGameObject(modelAsPrefab, PrefabName);
+                    var modelGameObject = new PrefabGameObject(modelAsPrefab, Name);
                     _go = modelGameObject.GameObject;
                 }
                 else if (IsPrefab)

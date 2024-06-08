@@ -496,14 +496,25 @@ function Game003BaseGameReel:DisplayPaylines(paylineSymbol, paylineData, payline
             local rowIndex = position.RowIndex
             local luaRowIndex = rowIndex + 1
             paylinesGroupProperty["RowIndex" .. luaRowIndex].SetActive(true)
-            local animatorGroupProperty = self["SymbolPaylineWinAnimatorGroup" .. luaRowIndex]
-            local symbolGroupProperty = self["SymbolGroup" .. luaRowIndex]
-            local currentKey = symbolGroupProperty.CurrentKey
-            local animatorProperty = animatorGroupProperty[currentKey]
-            animatorProperty.overrideAnimationDuration = true
-            animatorProperty.animationDuration = duration
-            BettrVisualsController.PlayAnimatorProperty(animatorProperty)
-            -- Core.Animator:PlayAnimatorProperty(currentKey, animatorProperty)
+            parallel
+                do
+                    local animatorGroupProperty = self["SymbolPaylineWinAnimatorGroup" .. luaRowIndex]
+                    local symbolGroupProperty = self["SymbolGroup" .. luaRowIndex]
+                    local currentKey = symbolGroupProperty.CurrentKey
+                    local animatorProperty = animatorGroupProperty[currentKey]
+                    animatorProperty.overrideAnimationDuration = true
+                    animatorProperty.animationDuration = duration
+                    BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+                    -- Core.Animator:PlayAnimatorProperty(currentKey, animatorProperty)
+                end
+                do
+                    local animatorGroupProperty = self["PaylinesAnimatorGroup"]
+                    local animatorProperty = animatorGroupProperty["RowIndex" .. luaRowIndex]
+                    animatorProperty.overrideAnimationDuration = true
+                    animatorProperty.animationDuration = duration
+                    BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+                end             
+            end
         end
     end
 end
