@@ -744,12 +744,7 @@ namespace Bettr.Editor
         {
             AssetDatabase.Refresh();
             
-            var reelStates = GetTable($"{machineName}BaseGameReelState");
-            var reelCount = 0;
-            foreach (var pair in reelStates.Pairs)
-            {
-                reelCount++;
-            }
+            var reelCount = BettrMenu.GetReelCount(machineName);
             
             string dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "templates", "scripts", machineName);
             string[] filePaths = Directory.GetFiles(dirPath, "*.cscript.txt.template");
@@ -856,44 +851,12 @@ namespace Bettr.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             
-            var reelStates = GetTable($"{machineName}BaseGameReelState");
-            var reelCount = 0;
-            foreach (var pair in reelStates.Pairs)
-            {
-                reelCount++;
-            }
-            
-            var reelHPositions = new List<float>();
-            var reelMaskUpperYs = new List<float>();
-            var reelMaskLowerYs = new List<float>();
-            var reelMaskScaleYs = new List<float>();
-            var reelBackgroundYs = new List<float>();
-            var reelBackgroundScaleYs = new List<float>();
-            
-            float maxOffsetY = 0.0f;
-            
-            for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
-            {
-                var topSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "TopSymbolCount");
-                var visibleSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "VisibleSymbolCount");
-                var bottomSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "BottomSymbolCount");
-                var symbolVerticalSpacing = GetTableValue<float>(reelStates, $"Reel{reelIndex}", "SymbolVerticalSpacing");
-                var horizontalSpacing = GetTableValue<float>(reelStates, $"Reel{reelIndex}", "HorizontalSpacing");
-                var zeroVisibleSymbolIndex = visibleSymbolCount % 2 == 0 ? visibleSymbolCount / 2 + 1 : (visibleSymbolCount - 1) / 2 + 1;
-                var reelMaskUpperY = visibleSymbolCount % 2 == 0? (zeroVisibleSymbolIndex) * symbolVerticalSpacing : (zeroVisibleSymbolIndex + 1) * symbolVerticalSpacing;
-                var reelMaskLowerY = -(zeroVisibleSymbolIndex + 1) * symbolVerticalSpacing;
-                var reelMaskScaleY = (topSymbolCount + 1) * symbolVerticalSpacing;
-                var reelBackgroundY = visibleSymbolCount % 2 == 0 ? -symbolVerticalSpacing/2 : 0;
-                var reelBackgroundScaleY = (visibleSymbolCount) * symbolVerticalSpacing;
-                reelMaskUpperYs.Add(reelMaskUpperY);
-                reelMaskLowerYs.Add(reelMaskLowerY);
-                reelMaskScaleYs.Add(reelMaskScaleY);
-                reelBackgroundYs.Add(reelBackgroundY);
-                reelBackgroundScaleYs.Add(reelBackgroundScaleY);
-
-                var offsetY = (visibleSymbolCount % 3) * symbolVerticalSpacing; 
-                maxOffsetY = Mathf.Max(maxOffsetY, offsetY);
-            }
+            var maxOffsetY = BettrMenu.GetReelMaxOffsetY(machineName);
+            var reelMaskUpperY = BettrMenu.GetReelMaskUpperY(machineName);
+            var reelMaskLowerY = BettrMenu.GetReelMaskLowerY(machineName);
+            var reelMaskScaleY = BettrMenu.GetReelMaskScaleY(machineName);
+            var reelBackgroundY = BettrMenu.GetReelBackgroundY(machineName);
+            var reelBackgroundScaleY = BettrMenu.GetReelBackgroundScaleY(machineName);
             
             var templateName = "BaseGameMachine";
             var scribanTemplate = ParseScribanTemplate("", templateName);
@@ -908,11 +871,11 @@ namespace Bettr.Editor
                 { "baseGameMachine", baseGameMachine },
                 { "baseGameSettings", baseGameSettings },
                 { "symbolKeys", symbolKeys},
-                { "reelMaskUpperY", reelMaskUpperYs[0]},
-                { "reelMaskLowerY", reelMaskLowerYs[0]},
-                { "reelMaskScaleY", reelMaskScaleYs[0]},
-                { "reelBackgroundY", reelBackgroundYs[0]},
-                { "reelBackgroundScaleY", reelBackgroundScaleYs[0]},
+                { "reelMaskUpperY", reelMaskUpperY},
+                { "reelMaskLowerY", reelMaskLowerY},
+                { "reelMaskScaleY", reelMaskScaleY},
+                { "reelBackgroundY", reelBackgroundY},
+                { "reelBackgroundScaleY", reelBackgroundScaleY},
                 { "offsetY", maxOffsetY },
             };
             
@@ -944,12 +907,11 @@ namespace Bettr.Editor
 
         private static void ProcessBaseGameReels(string machineName, string runtimeAssetPath)
         {
-            var baseGameReelState = GetTable($"{machineName}BaseGameReelState");
-            var reelCount = 0;
-            foreach (var pair in baseGameReelState.Pairs)
+            var reelCount = BettrMenu.GetReelCount(machineName);
+            for (int i = 0; i < reelCount; i++)
             {
-                reelCount++;
-                ProcessBaseGameReel(machineName, reelCount, runtimeAssetPath);
+                var reelIndex = i + 1;
+                ProcessBaseGameReel(machineName, reelIndex, runtimeAssetPath);
             }
         }
 
@@ -959,50 +921,17 @@ namespace Bettr.Editor
             AssetDatabase.Refresh();
             
             var reelName = $"{machineName}BaseGameReel{reelIndex}";
-            var baseGameSymbolTable = GetTable($"{machineName}BaseGameSymbolTable");
-            var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
 
-            var reelStates = GetTable($"{machineName}BaseGameReelState");
-            var topSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "TopSymbolCount");
-            var visibleSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "VisibleSymbolCount");
-            var bottomSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "BottomSymbolCount");
-            var symbolVerticalSpacing = GetTableValue<float>(reelStates, $"Reel{reelIndex}", "SymbolVerticalSpacing");
+            var symbolKeys = BettrMenu.GetSymbolKeys(machineName);
             
-            int half = (topSymbolCount + visibleSymbolCount + bottomSymbolCount) / 2;
-            var startVerticalPosition = half * symbolVerticalSpacing;
+            var symbolCount = BettrMenu.GetSymbolCount(machineName, reelIndex);
+            var symbolIndexes = Enumerable.Range(1, symbolCount).ToList();
             
-            var yPositions = new List<float>();
-            var symbolIndexes = new List<int>();
+            var symbolPositions = BettrMenu.GetSymbolPositions(machineName, reelIndex);
+            var symbolVerticalSpacing = BettrMenu.GetSymbolVerticalSpacing(machineName, reelIndex);
+            var yPositions = symbolPositions.Select(pos => pos * symbolVerticalSpacing).ToList();
 
-            yPositions.Add(0);
-            
-            for (int symbolIndex = 1; symbolIndex <= topSymbolCount; symbolIndex++)
-            {
-                symbolIndexes.Add(symbolIndex);
-                
-                var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
-                yPositions.Add(yPosition);
-            }
-
-            for (int symbolIndex = topSymbolCount + 1;
-                 symbolIndex <= topSymbolCount + visibleSymbolCount;
-                 symbolIndex++)
-            {
-                symbolIndexes.Add(symbolIndex);
-                
-                var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
-                yPositions.Add(yPosition);
-            }
-
-            for (int symbolIndex = topSymbolCount + visibleSymbolCount + 1;
-                 symbolIndex <= topSymbolCount + visibleSymbolCount + bottomSymbolCount;
-                 symbolIndex++)
-            {
-                symbolIndexes.Add(symbolIndex);
-                
-                var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
-                yPositions.Add(yPosition);
-            }
+            yPositions.Insert(0, 0);
 
             var templateName = "BaseGameReel";
             var scribanTemplate = ParseScribanTemplate("", templateName);
@@ -1086,11 +1015,7 @@ namespace Bettr.Editor
             AssetDatabase.Refresh();
             
             var reelStates = GetTable($"{machineName}BaseGameReelState");
-            var reelCount = 0;
-            foreach (var pair in reelStates.Pairs)
-            {
-                reelCount++;
-            }
+            var reelCount = BettrMenu.GetReelCount(machineName);
             
             var reelHPositions = new List<float>();
             var reelMaskUpperYs = new List<float>();
@@ -1385,19 +1310,13 @@ namespace Bettr.Editor
         {
             AssetDatabase.Refresh();
             
-            var baseGameReelState = GetTable($"{machineName}BaseGameReelState");
-            var reelCount = 0;
-            foreach (var pair in baseGameReelState.Pairs)
-            {
-                reelCount++;
-            }
+            var reelCount = BettrMenu.GetReelCount(machineName);
             
             var scatterSymbolIndexesByReel = new Dictionary<string, List<int>>();
             for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
             {
-                var reelStates = GetTable($"{machineName}BaseGameReelState");
-                var topSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "TopSymbolCount");
-                var visibleSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "VisibleSymbolCount");
+                var topSymbolCount = BettrMenu.GetTopSymbolCount(machineName, reelIndex);
+                var visibleSymbolCount = BettrMenu.GetVisibleSymbolCount(machineName, reelIndex);
                 
                 var scatterSymbolIndexes = new List<int>();
                 for (int symbolIndex = topSymbolCount + 1;
@@ -1564,97 +1483,97 @@ namespace Bettr.Editor
                 var referenceGameObject = InstanceGameObject.IdGameObjects[mechanicParticleSystem.ReferenceId];
                 
                 // Create the particle system
-                var particleSystem = BettrParticleSystem.AddOrGetParticleSystem(referenceGameObject.GameObject, runtimeAssetPath);
+                var particleSystem = BettrParticleSystem.AddOrGetParticleSystem(referenceGameObject.GameObject);
                 var mainModule = particleSystem.main;
                 var emissionModule = particleSystem.emission;
                 var shapeModule = particleSystem.shape;
                 var renderer = particleSystem.GetComponent<ParticleSystemRenderer>();
 
-                mainModule.playOnAwake = mechanicParticleSystem.PlayOnAwake;
-                mainModule.startLifetime = mechanicParticleSystem.StartLifetime;
-                mainModule.startSpeed = mechanicParticleSystem.StartSpeed;
-                mainModule.startSize = mechanicParticleSystem.StartSize;
-                mainModule.startColor = new ParticleSystem.MinMaxGradient(mechanicParticleSystem.GetStartColor());
-                mainModule.gravityModifier = mechanicParticleSystem.GravityModifier;
-                if (Enum.TryParse(mechanicParticleSystem.SimulationSpace, out ParticleSystemSimulationSpace simulationSpace))
+                mainModule.playOnAwake = mechanicParticleSystem.ModuleData.PlayOnAwake;
+                mainModule.startLifetime = mechanicParticleSystem.ModuleData.StartLifetime;
+                mainModule.startSpeed = mechanicParticleSystem.ModuleData.StartSpeed;
+                mainModule.startSize = mechanicParticleSystem.ModuleData.StartSize;
+                mainModule.startColor = new ParticleSystem.MinMaxGradient(mechanicParticleSystem.ModuleData.GetStartColor());
+                mainModule.gravityModifier = mechanicParticleSystem.ModuleData.GravityModifier;
+                if (Enum.TryParse(mechanicParticleSystem.ModuleData.SimulationSpace, out ParticleSystemSimulationSpace simulationSpace))
                 {
                     mainModule.simulationSpace = simulationSpace;
                 }
-                mainModule.loop = mechanicParticleSystem.Looping;
-                mainModule.duration = mechanicParticleSystem.Duration;
-                mainModule.startRotation = mechanicParticleSystem.StartRotation;
-                mainModule.startDelay = mechanicParticleSystem.StartDelay;
-                mainModule.prewarm = mechanicParticleSystem.Prewarm;
-                mainModule.maxParticles = mechanicParticleSystem.MaxParticles;
+                mainModule.loop = mechanicParticleSystem.ModuleData.Looping;
+                mainModule.duration = mechanicParticleSystem.ModuleData.Duration;
+                mainModule.startRotation = mechanicParticleSystem.ModuleData.StartRotation;
+                mainModule.startDelay = mechanicParticleSystem.ModuleData.StartDelay;
+                mainModule.prewarm = mechanicParticleSystem.ModuleData.Prewarm;
+                mainModule.maxParticles = mechanicParticleSystem.ModuleData.MaxParticles;
 
                 // Emission module settings
-                emissionModule.rateOverTime = mechanicParticleSystem.EmissionRateOverTime;
-                emissionModule.rateOverDistance = mechanicParticleSystem.EmissionRateOverDistance;
-                emissionModule.burstCount = mechanicParticleSystem.Bursts.Count;
-                for (int i = 0; i < mechanicParticleSystem.Bursts.Count; i++)
+                emissionModule.rateOverTime = mechanicParticleSystem.ModuleData.EmissionRateOverTime;
+                emissionModule.rateOverDistance = mechanicParticleSystem.ModuleData.EmissionRateOverDistance;
+                emissionModule.burstCount = mechanicParticleSystem.ModuleData.Bursts.Count;
+                for (int i = 0; i < mechanicParticleSystem.ModuleData.Bursts.Count; i++)
                 {
-                    var burst = mechanicParticleSystem.Bursts[i];
+                    var burst = mechanicParticleSystem.ModuleData.Bursts[i];
                     emissionModule.SetBurst(i, new ParticleSystem.Burst(burst.Time, burst.MinCount, burst.MaxCount, burst.Cycles, burst.Interval) { probability = burst.Probability });
                 }
 
                 // Shape module settings
-                shapeModule.shapeType = (ParticleSystemShapeType)Enum.Parse(typeof(ParticleSystemShapeType), mechanicParticleSystem.Shape);
-                shapeModule.angle = mechanicParticleSystem.ShapeAngle;
-                shapeModule.radius = mechanicParticleSystem.ShapeRadius;
-                shapeModule.radiusThickness = mechanicParticleSystem.ShapeRadiusThickness;
-                shapeModule.arc = mechanicParticleSystem.ShapeArc;
+                shapeModule.shapeType = (ParticleSystemShapeType)Enum.Parse(typeof(ParticleSystemShapeType), mechanicParticleSystem.ModuleData.Shape);
+                shapeModule.angle = mechanicParticleSystem.ModuleData.ShapeAngle;
+                shapeModule.radius = mechanicParticleSystem.ModuleData.ShapeRadius;
+                shapeModule.radiusThickness = mechanicParticleSystem.ModuleData.ShapeRadiusThickness;
+                shapeModule.arc = mechanicParticleSystem.ModuleData.ShapeArc;
                 
                 // Set shape mode if applicable
-                if (Enum.TryParse(mechanicParticleSystem.ShapeArcMode, out ParticleSystemShapeMultiModeValue shapeMode))
+                if (Enum.TryParse(mechanicParticleSystem.ModuleData.ShapeArcMode, out ParticleSystemShapeMultiModeValue shapeMode))
                 {
                     shapeModule.arcMode = shapeMode;
                 }
                 
-                shapeModule.arcSpread = mechanicParticleSystem.ShapeSpread;
-                shapeModule.arcSpeed = mechanicParticleSystem.ShapeArcSpeed; // Set arc speed
-                shapeModule.position = mechanicParticleSystem.ShapePosition;
-                shapeModule.rotation = mechanicParticleSystem.ShapeRotation;
-                shapeModule.scale = mechanicParticleSystem.ShapeScale;
+                shapeModule.arcSpread = mechanicParticleSystem.ModuleData.ShapeSpread;
+                shapeModule.arcSpeed = mechanicParticleSystem.ModuleData.ShapeArcSpeed; // Set arc speed
+                shapeModule.position = mechanicParticleSystem.ModuleData.ShapePosition;
+                shapeModule.rotation = mechanicParticleSystem.ModuleData.ShapeRotation;
+                shapeModule.scale = mechanicParticleSystem.ModuleData.ShapeScale;
 
                 // Renderer module settings
-                if (Enum.TryParse(mechanicParticleSystem.RendererSettings.RenderMode, out ParticleSystemRenderMode renderMode))
+                if (Enum.TryParse(mechanicParticleSystem.ModuleData.RendererSettings.RenderMode, out ParticleSystemRenderMode renderMode))
                 {
                     renderer.renderMode = renderMode;
                 }
-                renderer.normalDirection = mechanicParticleSystem.RendererSettings.NormalDirection;
-                if (Enum.TryParse(mechanicParticleSystem.RendererSettings.SortMode, out ParticleSystemSortMode sortMode))
+                renderer.normalDirection = mechanicParticleSystem.ModuleData.RendererSettings.NormalDirection;
+                if (Enum.TryParse(mechanicParticleSystem.ModuleData.RendererSettings.SortMode, out ParticleSystemSortMode sortMode))
                 {
                     renderer.sortMode = sortMode;
                 }
-                renderer.minParticleSize = mechanicParticleSystem.RendererSettings.MinParticleSize;
-                renderer.maxParticleSize = mechanicParticleSystem.RendererSettings.MaxParticleSize;
-                if (Enum.TryParse(mechanicParticleSystem.RendererSettings.RenderAlignment, out ParticleSystemRenderSpace renderAlignment))
+                renderer.minParticleSize = mechanicParticleSystem.ModuleData.RendererSettings.MinParticleSize;
+                renderer.maxParticleSize = mechanicParticleSystem.ModuleData.RendererSettings.MaxParticleSize;
+                if (Enum.TryParse(mechanicParticleSystem.ModuleData.RendererSettings.RenderAlignment, out ParticleSystemRenderSpace renderAlignment))
                 {
                     renderer.alignment = renderAlignment;
                 }
-                renderer.flip = new Vector3(mechanicParticleSystem.RendererSettings.FlipX ? 1 : 0, mechanicParticleSystem.RendererSettings.FlipY ? 1 : 0, 0);
-                renderer.pivot = mechanicParticleSystem.RendererSettings.Pivot;
-                renderer.allowRoll = mechanicParticleSystem.RendererSettings.AllowRoll;
-                renderer.receiveShadows = mechanicParticleSystem.RendererSettings.ReceiveShadows;
-                renderer.shadowCastingMode = mechanicParticleSystem.RendererSettings.CastShadows ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off;
-                if (Enum.TryParse(mechanicParticleSystem.RendererSettings.LightProbes, out LightProbeUsage lightProbeUsage))
+                renderer.flip = new Vector3(mechanicParticleSystem.ModuleData.RendererSettings.FlipX ? 1 : 0, mechanicParticleSystem.ModuleData.RendererSettings.FlipY ? 1 : 0, 0);
+                renderer.pivot = mechanicParticleSystem.ModuleData.RendererSettings.Pivot;
+                renderer.allowRoll = mechanicParticleSystem.ModuleData.RendererSettings.AllowRoll;
+                renderer.receiveShadows = mechanicParticleSystem.ModuleData.RendererSettings.ReceiveShadows;
+                renderer.shadowCastingMode = mechanicParticleSystem.ModuleData.RendererSettings.CastShadows ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off;
+                if (Enum.TryParse(mechanicParticleSystem.ModuleData.RendererSettings.LightProbes, out LightProbeUsage lightProbeUsage))
                 {
                     renderer.lightProbeUsage = lightProbeUsage;
                 }
 
-                renderer.sortingOrder = mechanicParticleSystem.RendererSettings.SortingOrder;
-                renderer.sortingLayerName = mechanicParticleSystem.RendererSettings.SortingLayer;
+                renderer.sortingOrder = mechanicParticleSystem.ModuleData.RendererSettings.SortingOrder;
+                renderer.sortingLayerName = mechanicParticleSystem.ModuleData.RendererSettings.SortingLayer;
                 
                 // Check if material properties are provided before generating the material
                 Material material = null;
-                if (!string.IsNullOrEmpty(mechanicParticleSystem.RendererSettings.Material) &&
-                    !string.IsNullOrEmpty(mechanicParticleSystem.RendererSettings.Shader))
+                if (!string.IsNullOrEmpty(mechanicParticleSystem.ModuleData.RendererSettings.Material) &&
+                    !string.IsNullOrEmpty(mechanicParticleSystem.ModuleData.RendererSettings.Shader))
                 {
                     material = BettrMaterialGenerator.CreateOrLoadMaterial(
-                        mechanicParticleSystem.RendererSettings.Material,
-                        mechanicParticleSystem.RendererSettings.Shader,
-                        mechanicParticleSystem.RendererSettings.Texture,
-                        mechanicParticleSystem.RendererSettings.Color,
+                        mechanicParticleSystem.ModuleData.RendererSettings.Material,
+                        mechanicParticleSystem.ModuleData.RendererSettings.Shader,
+                        mechanicParticleSystem.ModuleData.RendererSettings.Texture,
+                        mechanicParticleSystem.ModuleData.RendererSettings.Color,
                         runtimeAssetPath
                     );
                 }
@@ -1665,7 +1584,7 @@ namespace Bettr.Editor
                     renderer.material = material;
                 }
 
-                renderer.sortingOrder = mechanicParticleSystem.RendererSettings.SortingOrder;
+                renderer.sortingOrder = mechanicParticleSystem.ModuleData.RendererSettings.SortingOrder;
 
                 // Save changes to the prefab
                 PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
@@ -1738,19 +1657,13 @@ namespace Bettr.Editor
         {
             AssetDatabase.Refresh();
             
-            var baseGameReelState = GetTable($"{machineName}BaseGameReelState");
-            var reelCount = 0;
-            foreach (var pair in baseGameReelState.Pairs)
-            {
-                reelCount++;
-            }
+            var reelCount = BettrMenu.GetReelCount(machineName);
             
             var symbolIndexesByReel = new Dictionary<string, List<int>>();
             for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
             {
-                var reelStates = GetTable($"{machineName}BaseGameReelState");
-                var topSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "TopSymbolCount");
-                var visibleSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "VisibleSymbolCount");
+                var topSymbolCount = BettrMenu.GetTopSymbolCount(machineName, reelIndex);
+                var visibleSymbolCount = BettrMenu.GetVisibleSymbolCount(machineName, reelIndex);
                 
                 var scatterSymbolIndexes = new List<int>();
                 for (int symbolIndex = topSymbolCount + 1;
@@ -2030,10 +1943,10 @@ namespace Bettr.Editor
             Table valueTable = table;
             if (!string.IsNullOrEmpty(pk) && table[pk] is Table pkTable)
             {
-                valueTable = pkTable;
+                valueTable = pkTable["Array"] as Table;
             }
             
-            return valueTable.Pairs.Select(pair => pair.Value.Table[key]).ToList().Cast<T>().ToList();
+            return valueTable?.Pairs.Select(pair => pair.Value.Table[key]).ToList().Cast<T>().ToList();
         }
         
         public static T GetTableValue<T>(Table table, string pk, string key)
@@ -2074,6 +1987,115 @@ namespace Bettr.Editor
         {
             var table = TileController.LuaScript.Globals[tableName] as Table;
             return table != null;
+        }
+
+        public static int GetReelCount(string machineName)
+        {
+            var reelStates = BettrMenu.GetTable($"{machineName}BaseGameReelState");
+            var reelCount = 0;
+            foreach (var pair in reelStates.Pairs)
+            {
+                reelCount++;
+            }
+            return reelCount;
+        }
+        
+        public static float GetReelMaxOffsetY(string machineName)
+        {
+            var baseGameLayoutTable = BettrMenu.GetTable($"{machineName}BaseGameLayout");
+            var value = BettrMenu.GetTableValue<float>(baseGameLayoutTable, "ReelMaxOffsetY", "Value");
+            return value;
+        }
+        
+        public static float GetReelMaskUpperY(string machineName)
+        {
+            var baseGameLayoutTable = BettrMenu.GetTable($"{machineName}BaseGameLayout");
+            var value = BettrMenu.GetTableValue<float>(baseGameLayoutTable, "ReelMaskUpperY", "Value");
+            return value;
+        }
+        
+        public static float GetReelMaskLowerY(string machineName)
+        {
+            var baseGameLayoutTable = BettrMenu.GetTable($"{machineName}BaseGameLayout");
+            var value = BettrMenu.GetTableValue<float>(baseGameLayoutTable, "ReelMaskLowerY", "Value");
+            return value;
+        }
+        
+        public static float GetReelMaskScaleY(string machineName)
+        {
+            var baseGameLayoutTable = BettrMenu.GetTable($"{machineName}BaseGameLayout");
+            var value = BettrMenu.GetTableValue<float>(baseGameLayoutTable, "ReelMaskScaleY", "Value");
+            return value;
+        }
+        
+        public static float GetReelBackgroundY(string machineName)
+        {
+            var baseGameLayoutTable = BettrMenu.GetTable($"{machineName}BaseGameLayout");
+            var value = BettrMenu.GetTableValue<float>(baseGameLayoutTable, "ReelBackgroundY", "Value");
+            return value;
+        }
+        
+        public static float GetReelBackgroundScaleY(string machineName)
+        {
+            var baseGameLayoutTable = BettrMenu.GetTable($"{machineName}BaseGameLayout");
+            var value = BettrMenu.GetTableValue<float>(baseGameLayoutTable, "ReelBackgroundScaleY", "Value");
+            return value;
+        }
+
+        public static List<string> GetSymbolKeys(string machineName)
+        {
+            var baseGameSymbolTable = BettrMenu.GetTable($"{machineName}BaseGameSymbolTable");
+            var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
+            return symbolKeys;
+        }
+        
+        public static List<int> GetSymbolPositions(string machineName, int reelIndex)
+        {
+            var reelSymbolStates = BettrMenu.GetTable($"{machineName}BaseGameReelSymbolsState");
+            var symbolPositions = BettrMenu.GetTableArray<double>(reelSymbolStates, $"Reel{reelIndex}", "SymbolPosition");
+            return symbolPositions.Select(d => (int)d).ToList();
+        }
+        
+        public static int GetSymbolCount(string machineName, int reelIndex)
+        {
+            var reelStates = BettrMenu.GetTable($"{machineName}BaseGameReelState");
+            var topSymbolCount = BettrMenu.GetTableValue<int>(reelStates, $"Reel{reelIndex}", "SymbolCount");
+            return topSymbolCount;
+        }
+
+        public static int GetTopSymbolCount(string machineName, int reelIndex)
+        {
+            var reelStates = BettrMenu.GetTable($"{machineName}BaseGameReelState");
+            var topSymbolCount = BettrMenu.GetTableValue<int>(reelStates, $"Reel{reelIndex}", "TopSymbolCount");
+            return topSymbolCount;
+        }
+        
+        public static int GetVisibleSymbolCount(string machineName, int reelIndex)
+        {
+            var reelStates = BettrMenu.GetTable($"{machineName}BaseGameReelState");
+            var visibleSymbolCount = BettrMenu.GetTableValue<int>(reelStates, $"Reel{reelIndex}", "VisibleSymbolCount");
+            return visibleSymbolCount;
+        }
+        
+        public static int GetBottomSymbolCount(string machineName, int reelIndex)
+        {
+            var reelStates = BettrMenu.GetTable($"{machineName}BaseGameReelState");
+            var bottomSymbolCount = BettrMenu.GetTableValue<int>(reelStates, $"Reel{reelIndex}", "BottomSymbolCount");
+            return bottomSymbolCount;
+        }
+        
+        public static float GetSymbolVerticalSpacing(string machineName, int reelIndex)
+        {
+            var reelStates = BettrMenu.GetTable($"{machineName}BaseGameReelState");
+            var symbolVerticalSpacing = BettrMenu.GetTableValue<float>(reelStates, $"Reel{reelIndex}", "SymbolVerticalSpacing");
+            return symbolVerticalSpacing;
+        }
+        
+        public static float GetSymbolHorizontalSpacing(string machineName, int reelIndex)
+        {
+            var reelStates = BettrMenu.GetTable($"{machineName}BaseGameReelState");
+            var symbolVerticalSpacing = BettrMenu.GetTableValue<float>(reelStates, $"Reel{reelIndex}", "HorizontalSpacing");
+            return symbolVerticalSpacing;
         }
     }
     
@@ -2182,27 +2204,33 @@ namespace Bettr.Editor
         
         private static void ProcessBaseGameMachineModifications(string machineName, string machineVariant, string runtimeAssetPath)
         {
-            string templateName = "BaseGameWaysMachineModifications";
-            var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/ways", templateName);
+            for (int i = 1; i <= 3; i++)
+            {
+                string templateName = $"BaseGameWaysMachineModifications{i}";
+                var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/ways", templateName);
             
-            var model = new Dictionary<string, object>
-            {
-                { "machineName", machineName },
-                { "machineVariant", machineVariant },
-            };
+                var symbolKeys = BettrMenu.GetSymbolKeys(machineName);
+            
+                var model = new Dictionary<string, object>
+                {
+                    { "machineName", machineName },
+                    { "machineVariant", machineVariant },
+                    { "symbolKeys", symbolKeys},
+                };
                 
-            var json = scribanTemplate.Render(model);
-            Debug.Log(json);
+                var json = scribanTemplate.Render(model);
+                Debug.Log(json);
                 
-            Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
-            if (mechanic == null)
-            {
-                throw new Exception($"Failed to deserialize mechanic from json: {json}");
-            }
+                Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
+                if (mechanic == null)
+                {
+                    throw new Exception($"Failed to deserialize mechanic from json: {json}");
+                }
 
-            mechanic.Process();
+                mechanic.Process();
             
-            AssetDatabase.Refresh();
+                AssetDatabase.Refresh();
+            }
         }
         
         private static void ProcessBaseGameReelModifications(string machineName, string machineVariant, string runtimeAssetPath)
@@ -2210,54 +2238,20 @@ namespace Bettr.Editor
             string templateName = "BaseGameWaysReelModifications";
             var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/ways", templateName);
             
-            var baseGameSymbolTable = BettrMenu.GetTable($"{machineName}BaseGameSymbolTable");
-            var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
-            
-            var reelStates = BettrMenu.GetTable($"{machineName}BaseGameReelState");
-            var reelCount = 0;
-            foreach (var pair in reelStates.Pairs)
-            {
-                reelCount++;
-            }
+            var symbolKeys = BettrMenu.GetSymbolKeys(machineName);
+            var reelCount = BettrMenu.GetReelCount(machineName);
             
             for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
             {
-                var waysSymbolIndexes = new List<int>();
-                var yPositions = new List<float>();
+                var topSymbolCount = BettrMenu.GetTopSymbolCount(machineName, reelIndex);
+                var visibleSymbolCount = BettrMenu.GetVisibleSymbolCount(machineName, reelIndex);
+                var waysSymbolIndexes = Enumerable.Range(topSymbolCount+1, visibleSymbolCount).ToList();
                 
-                yPositions.Add(0);
-            
-                var topSymbolCount = BettrMenu.GetTableValue<int>(reelStates, $"Reel{reelIndex}", "TopSymbolCount");
-                var visibleSymbolCount = BettrMenu.GetTableValue<int>(reelStates, $"Reel{reelIndex}", "VisibleSymbolCount");
-                var bottomSymbolCount = BettrMenu.GetTableValue<int>(reelStates, $"Reel{reelIndex}", "BottomSymbolCount");
-                var symbolVerticalSpacing = BettrMenu.GetTableValue<float>(reelStates, $"Reel{reelIndex}", "SymbolVerticalSpacing");
-            
-                int half = (topSymbolCount + visibleSymbolCount + bottomSymbolCount) / 2;
-                var startVerticalPosition = half * symbolVerticalSpacing;
+                var symbolPositions = BettrMenu.GetSymbolPositions(machineName, reelIndex);
+                var symbolVerticalSpacing = BettrMenu.GetSymbolVerticalSpacing(machineName, reelIndex);
+                var yPositions = symbolPositions.Select(pos => pos * symbolVerticalSpacing).ToList();
 
-                for (int symbolIndex = 1; symbolIndex <= topSymbolCount; symbolIndex++)
-                {
-                    var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
-                    yPositions.Add(yPosition);
-                }
-
-                for (int symbolIndex = topSymbolCount + 1;
-                     symbolIndex <= topSymbolCount + visibleSymbolCount;
-                     symbolIndex++)
-                {
-                    waysSymbolIndexes.Add(symbolIndex);
-                
-                    var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
-                    yPositions.Add(yPosition);
-                }
-
-                for (int symbolIndex = topSymbolCount + visibleSymbolCount + 1;
-                     symbolIndex <= topSymbolCount + visibleSymbolCount + bottomSymbolCount;
-                     symbolIndex++)
-                {
-                    var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
-                    yPositions.Add(yPosition);
-                }
+                yPositions.Insert(0, 0);
                 
                 InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
                 InstanceGameObject.IdGameObjects.Clear();
@@ -2294,12 +2288,40 @@ namespace Bettr.Editor
         public static void Process(string machineName, string machineVariant, string runtimeAssetPath)
         {
             ProcessPaylinePrefab(machineName, runtimeAssetPath);
+            ProcessBaseGameSymbolModifications(machineName, machineVariant, runtimeAssetPath);
+            ProcessBaseGameMachineModifications(machineName, machineVariant, runtimeAssetPath);
+            ProcessBaseGameReelModifications(machineName, machineVariant, runtimeAssetPath);
+        }
+        
+        private static void ProcessBaseGameMachineModifications(string machineName, string machineVariant, string runtimeAssetPath)
+        {
+            string templateName = "BaseGamePaylinesMachineModifications";
+            var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/paylines", templateName);
+            
+            var model = new Dictionary<string, object>
+            {
+                { "machineName", machineName },
+                { "machineVariant", machineVariant },
+            };
+                
+            var json = scribanTemplate.Render(model);
+            Debug.Log(json);
+                
+            Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
+            if (mechanic == null)
+            {
+                throw new Exception($"Failed to deserialize mechanic from json: {json}");
+            }
+
+            mechanic.Process();
+            
+            AssetDatabase.Refresh();
         }
         
         private static void ProcessPaylinePrefab(string machineName, string runtimeAssetPath)
         {
-            var templateName = "BaseGamePaylinePrefab";
-            var prefabName = templateName;
+            var templateName = "BaseGamePaylinesPrefab";
+            var prefabName = $"{machineName}{templateName}";
             var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/paylines/", templateName);
 
             var model = new Dictionary<string, object>
@@ -2320,5 +2342,104 @@ namespace Bettr.Editor
                 hierarchyInstance, 
                 runtimeAssetPath);
         }
+        
+        private static void ProcessBaseGameReelModifications(string machineName, string machineVariant, string runtimeAssetPath)
+        {
+            string templateName = $"BaseGamePaylinesReelModifications";
+            var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/paylines", templateName);
+            
+            var baseGameSymbolTable = BettrMenu.GetTable($"{machineName}BaseGameSymbolTable");
+            var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
+            
+            var reelStates = BettrMenu.GetTable($"{machineName}BaseGameReelState");
+            var reelCount = BettrMenu.GetReelCount(machineName);
+            
+            for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
+            {
+                var topSymbolCount = BettrMenu.GetTopSymbolCount(machineName, reelIndex);
+                var visibleSymbolCount = BettrMenu.GetVisibleSymbolCount(machineName, reelIndex);
+                var paylinesSymbolIndexes = Enumerable.Range(topSymbolCount+1, visibleSymbolCount).ToList();
+                
+                var symbolPositions = BettrMenu.GetSymbolPositions(machineName, reelIndex);
+                var symbolVerticalSpacing = BettrMenu.GetSymbolVerticalSpacing(machineName, reelIndex);
+                var yPositions = symbolPositions.Select(pos => pos * symbolVerticalSpacing).ToList();
+
+                yPositions.Insert(0, 0);
+                
+                InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
+                InstanceGameObject.IdGameObjects.Clear();
+                
+                var model = new Dictionary<string, object>
+                {
+                    { "machineName", machineName },
+                    { "machineVariant", machineVariant },
+                    { "reelIndex", reelIndex },
+                    { "yPositions", yPositions },
+                    { "topSymbolCount", topSymbolCount },
+                    { "visibleSymbolCount", visibleSymbolCount },
+                    { "paylinesSymbolIndexes", paylinesSymbolIndexes },
+                    { "symbolKeys", symbolKeys},
+                };
+                
+                var json = scribanTemplate.Render(model);
+                Debug.Log(json);
+                
+                Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
+                if (mechanic == null)
+                {
+                    throw new Exception($"Failed to deserialize mechanic from json: {json}");
+                }
+
+                mechanic.Process();
+            }
+            
+            AssetDatabase.Refresh();
+        }
+        
+        private static void ProcessBaseGameSymbolModifications(string machineName, string machineVariant, string runtimeAssetPath)
+        {
+            string templateName = "BaseGamePaylinesSymbolModifications";
+            var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/paylines", templateName);
+            
+            var baseGameSymbolTable = BettrMenu.GetTable($"{machineName}BaseGameSymbolTable");
+            var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
+            var symbolPrefabNames = baseGameSymbolTable.Pairs.Select(pair => $"{machineName}BaseGameSymbol{pair.Key.String}").ToList();
+            
+            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
+            InstanceGameObject.IdGameObjects.Clear();
+                
+            var model = new Dictionary<string, object>
+            {
+                { "machineName", machineName },
+                { "machineVariant", machineVariant },
+                { "symbolKeys", symbolKeys},
+                { "symbolPrefabNames", symbolPrefabNames},
+            };
+            
+            var json = scribanTemplate.Render(model);
+            Debug.Log(json);
+            
+            Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
+            if (mechanic == null)
+            {
+                throw new Exception($"Failed to deserialize mechanic from json: {json}");
+            }
+            
+            // Modified Animator Controllers
+            if (mechanic.AnimatorControllers != null)
+            {
+                foreach (var instanceComponent in mechanic.AnimatorControllers)
+                {
+                    AssetDatabase.Refresh();
+
+                    BettrAnimatorController.AddAnimationState(instanceComponent.Filename,
+                        instanceComponent.AnimationStates, instanceComponent.AnimatorTransitions, runtimeAssetPath);
+                }
+            }
+            
+            
+            AssetDatabase.Refresh();
+        }
+        
     }
 }

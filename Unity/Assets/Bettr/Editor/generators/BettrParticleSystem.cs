@@ -1,15 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEditor;
-using UnityEditor.Animations;
 using UnityEngine;
 
 namespace Bettr.Editor.generators
 {
     public static class BettrParticleSystem
     {
-        public static ParticleSystem AddOrGetParticleSystem(GameObject go, string runtimeAssetPath)
+        public static ParticleSystem AddOrGetParticleSystem(GameObject go)
         {
             AssetDatabase.Refresh();
 

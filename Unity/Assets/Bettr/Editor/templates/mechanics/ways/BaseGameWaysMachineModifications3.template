@@ -1,0 +1,43 @@
+{
+    "Prefabs": [
+        {
+            "Name": "{{machineName}}BaseGameMachine",
+            "PrefabName": "{{machineName}}BaseGameMachine",
+            "IsPrefab": true,
+            "PrefabIds": [
+                {
+                    "Index": 0,
+                    "Id": "{{machineName}}BaseGameMachine"
+                },
+                {{ for symbolKey in symbolKeys }}
+                {
+                    "Index": 0,
+                    "Id": "WinSymbols{{symbolKey}}"
+                }
+                {{ if !for.last }},{{ end }}{{ end }}                
+            ],
+            "Action": "modify",
+            "ThisId": "{{machineName}}BaseGameMachine",
+            "Children": [                
+            ],
+            "Components": [
+                {
+                    "ComponentType": "TilePropertyGameObjects",
+                    "GameObjectGroupsProperty": [
+                        {
+                            "GroupKey": "WinSymbols",
+                            "Group": [
+                            {{ for symbolKey in symbolKeys }}
+                                {
+                                    "Key": "{{symbolKey}}",
+                                    "Id": "WinSymbols{{symbolKey}}"
+                                }
+                            {{ if !for.last }},{{ end }}{{ end }}                
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]        
+}

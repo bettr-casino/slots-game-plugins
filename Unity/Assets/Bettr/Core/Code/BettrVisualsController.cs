@@ -277,6 +277,11 @@ namespace Bettr.Core
             }
         }
 
+        public void StopAnimatorProperty(CrayonScriptContext context, PropertyAnimator animatorProperty)
+        {
+            
+        }
+
         public IEnumerator PlayAnimatorProperty(CrayonScriptContext context, PropertyAnimator animatorProperty)
         {
             if (animatorProperty == null)

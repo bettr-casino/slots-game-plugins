@@ -1,0 +1,86 @@
+{
+    "Prefabs": [
+        {
+            "Name": "{{machineName}}BaseGameReel{{reelIndex}}",
+            "PrefabName": "{{machineName}}BaseGameReel{{reelIndex}}",
+            "IsPrefab": true,
+            "PrefabIds": [
+                {
+                    "Index": 0,
+                    "Id": "{{machineName}}BaseGameReel{{reelIndex}}"
+                },
+                {{ for symbolIndex in paylinesSymbolIndexes }}
+                     {{ for symbolKey in symbolKeys }}
+                     {
+                         "Index": {{symbolIndex - 1}},
+                         "Prefix": "Symbol{{symbolIndex}}",
+                         "Id": "{{symbolKey}}"
+                     }
+                     {{ if !for.last }},{{ end }}{{ end }}
+                 {{ if !for.last }},{{ end }}{{ end }}                
+            ],
+            "Action": "modify",
+            "ThisId": "{{machineName}}BaseGameReel{{reelIndex}}",
+            "Components": [
+                {
+                     "ComponentType": "TilePropertyAnimators",
+                     "AnimatorsGroupProperty": [
+                     {{ for symbolIndex in paylinesSymbolIndexes }}
+                         {
+                             "GroupKey": "SymbolPaylineWinAnimatorGroup{{symbolIndex}}",
+                             "Group": [
+                                 {{ for symbolKey in symbolKeys }}
+                                 {
+                                     "Key": "{{symbolKey}}",
+                                     "Id": "Symbol{{symbolIndex}}{{symbolKey}}",
+                                     "State": "win"
+                                 }
+                                 {{ if !for.last }},{{ end }}{{ end }}
+                             ]
+                         }
+                     {{ if !for.last }},{{ end }}{{ end }}    
+                     ]
+                },
+                {
+                    "ComponentType": "TilePropertyAnimators",
+                    "AnimatorsGroupProperty": [
+                        {
+                            "GroupKey": "PaylinesAnimatorGroup",
+                            "Group": [
+                                {{ for paylineIndex in paylinesSymbolIndexes }}
+                                {
+                                    "Key": "WinStart{{paylineIndex}}",
+                                    "Id": "Paylines{{paylineIndex}}",
+                                    "State": "win_start"
+                                },
+                                {
+                                    "Key": "WinEnd{{paylineIndex}}",
+                                    "Id": "Paylines{{paylineIndex}}",
+                                    "State": "win_end"
+                                }
+                                {{ if !for.last }},{{ end }}{{ end }}
+                            ]
+                        }    
+                    ]
+                }           
+            ],
+            "Children": [
+                {{ for symbolIndex in paylinesSymbolIndexes }}
+                {
+                    "Name": "Paylines{{symbolIndex}}",
+                    "Id": "Paylines{{symbolIndex}}",
+                    "Layer": "SLOT_REELS",
+                    "Active": true,
+                    "IsPrefab": true,
+                    "PrefabName": "{{machineName}}BaseGamePaylinesPrefab",
+                    "Position": {
+                        "X": 0,
+                        "Y": {{yPositions[symbolIndex]}},
+                        "Z": 0
+                    }            
+                }
+                {{ if !for.last }},{{ end }}{{ end }}            
+            ]
+        }
+    ]
+}
