@@ -23,22 +23,6 @@
             "ThisId": "{{machineName}}BaseGameReel{{reelIndex}}",
             "Components": [
                 {
-                    "ComponentType": "TilePropertyGameObjects",
-                    "GameObjectGroupsProperty": [
-                        {
-                            "GroupKey": "PaylinesGroup",
-                            "Group": [
-                                 {{ for paylineIndex in paylinesSymbolIndexes }}
-                                 {
-                                     "Key": "RowIndex{{paylineIndex}}",
-                                     "Id": "Paylines{{paylineIndex}}"
-                                 }
-                                 {{ if !for.last }},{{ end }}{{ end }}
-                            ]
-                        }    
-                    ]
-                },
-                {
                      "ComponentType": "TilePropertyAnimators",
                      "AnimatorsGroupProperty": [
                      {{ for symbolIndex in paylinesSymbolIndexes }}

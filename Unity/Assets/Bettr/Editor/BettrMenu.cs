@@ -921,7 +921,6 @@ namespace Bettr.Editor
             AssetDatabase.Refresh();
             
             var reelName = $"{machineName}BaseGameReel{reelIndex}";
-            var baseGameSymbolTable = GetTable($"{machineName}BaseGameSymbolTable");
 
             var symbolKeys = BettrMenu.GetSymbolKeys(machineName);
             
@@ -2244,42 +2243,15 @@ namespace Bettr.Editor
             
             for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
             {
-                var waysSymbolIndexes = new List<int>();
-                var yPositions = new List<float>();
-                
-                yPositions.Add(0);
-            
                 var topSymbolCount = BettrMenu.GetTopSymbolCount(machineName, reelIndex);
                 var visibleSymbolCount = BettrMenu.GetVisibleSymbolCount(machineName, reelIndex);
-                var bottomSymbolCount = BettrMenu.GetBottomSymbolCount(machineName, reelIndex);
-                var symbolVerticalSpacing = BettrMenu.GetSymbolVerticalSpacing(machineName, reelIndex);
-            
-                int half = (topSymbolCount + visibleSymbolCount + bottomSymbolCount) / 2;
-                var startVerticalPosition = half * symbolVerticalSpacing;
-
-                for (int symbolIndex = 1; symbolIndex <= topSymbolCount; symbolIndex++)
-                {
-                    var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
-                    yPositions.Add(yPosition);
-                }
-
-                for (int symbolIndex = topSymbolCount + 1;
-                     symbolIndex <= topSymbolCount + visibleSymbolCount;
-                     symbolIndex++)
-                {
-                    waysSymbolIndexes.Add(symbolIndex);
+                var waysSymbolIndexes = Enumerable.Range(topSymbolCount+1, visibleSymbolCount).ToList();
                 
-                    var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
-                    yPositions.Add(yPosition);
-                }
+                var symbolPositions = BettrMenu.GetSymbolPositions(machineName, reelIndex);
+                var symbolVerticalSpacing = BettrMenu.GetSymbolVerticalSpacing(machineName, reelIndex);
+                var yPositions = symbolPositions.Select(pos => pos * symbolVerticalSpacing).ToList();
 
-                for (int symbolIndex = topSymbolCount + visibleSymbolCount + 1;
-                     symbolIndex <= topSymbolCount + visibleSymbolCount + bottomSymbolCount;
-                     symbolIndex++)
-                {
-                    var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
-                    yPositions.Add(yPosition);
-                }
+                yPositions.Insert(0, 0);
                 
                 InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
                 InstanceGameObject.IdGameObjects.Clear();
@@ -2373,78 +2345,55 @@ namespace Bettr.Editor
         
         private static void ProcessBaseGameReelModifications(string machineName, string machineVariant, string runtimeAssetPath)
         {
-            string templateName = "BaseGamePaylinesReelModifications";
-            var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/paylines", templateName);
-            
-            var baseGameSymbolTable = BettrMenu.GetTable($"{machineName}BaseGameSymbolTable");
-            var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
-            
-            var reelStates = BettrMenu.GetTable($"{machineName}BaseGameReelState");
-            var reelCount = BettrMenu.GetReelCount(machineName);
-            
-            for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
+            for (int i = 1; i <= 2; i++)
             {
-                var paylinesSymbolIndexes = new List<int>();
-                var yPositions = new List<float>();
+                string templateName = $"BaseGamePaylinesReelModifications{i}";
+                var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/paylines", templateName);
                 
-                yPositions.Add(0);
-            
-                var topSymbolCount = BettrMenu.GetTableValue<int>(reelStates, $"Reel{reelIndex}", "TopSymbolCount");
-                var visibleSymbolCount = BettrMenu.GetTableValue<int>(reelStates, $"Reel{reelIndex}", "VisibleSymbolCount");
-                var bottomSymbolCount = BettrMenu.GetTableValue<int>(reelStates, $"Reel{reelIndex}", "BottomSymbolCount");
-                var symbolVerticalSpacing = BettrMenu.GetTableValue<float>(reelStates, $"Reel{reelIndex}", "SymbolVerticalSpacing");
-            
-                int half = (topSymbolCount + visibleSymbolCount + bottomSymbolCount) / 2;
-                var startVerticalPosition = half * symbolVerticalSpacing;
-
-                for (int symbolIndex = 1; symbolIndex <= topSymbolCount; symbolIndex++)
+                var baseGameSymbolTable = BettrMenu.GetTable($"{machineName}BaseGameSymbolTable");
+                var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
+                
+                var reelStates = BettrMenu.GetTable($"{machineName}BaseGameReelState");
+                var reelCount = BettrMenu.GetReelCount(machineName);
+                
+                for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
                 {
-                    var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
-                    yPositions.Add(yPosition);
+                    var topSymbolCount = BettrMenu.GetTopSymbolCount(machineName, reelIndex);
+                    var visibleSymbolCount = BettrMenu.GetVisibleSymbolCount(machineName, reelIndex);
+                    var paylinesSymbolIndexes = Enumerable.Range(topSymbolCount+1, visibleSymbolCount).ToList();
+                    
+                    var symbolPositions = BettrMenu.GetSymbolPositions(machineName, reelIndex);
+                    var symbolVerticalSpacing = BettrMenu.GetSymbolVerticalSpacing(machineName, reelIndex);
+                    var yPositions = symbolPositions.Select(pos => pos * symbolVerticalSpacing).ToList();
+
+                    yPositions.Insert(0, 0);
+                    
+                    InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
+                    InstanceGameObject.IdGameObjects.Clear();
+                    
+                    var model = new Dictionary<string, object>
+                    {
+                        { "machineName", machineName },
+                        { "machineVariant", machineVariant },
+                        { "reelIndex", reelIndex },
+                        { "yPositions", yPositions },
+                        { "topSymbolCount", topSymbolCount },
+                        { "visibleSymbolCount", visibleSymbolCount },
+                        { "paylinesSymbolIndexes", paylinesSymbolIndexes },
+                        { "symbolKeys", symbolKeys},
+                    };
+                    
+                    var json = scribanTemplate.Render(model);
+                    Debug.Log(json);
+                    
+                    Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
+                    if (mechanic == null)
+                    {
+                        throw new Exception($"Failed to deserialize mechanic from json: {json}");
+                    }
+
+                    mechanic.Process();
                 }
-
-                for (int symbolIndex = topSymbolCount + 1;
-                     symbolIndex <= topSymbolCount + visibleSymbolCount;
-                     symbolIndex++)
-                {
-                    paylinesSymbolIndexes.Add(symbolIndex);
-                
-                    var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
-                    yPositions.Add(yPosition);
-                }
-
-                for (int symbolIndex = topSymbolCount + visibleSymbolCount + 1;
-                     symbolIndex <= topSymbolCount + visibleSymbolCount + bottomSymbolCount;
-                     symbolIndex++)
-                {
-                    var yPosition = startVerticalPosition - symbolIndex * symbolVerticalSpacing;
-                    yPositions.Add(yPosition);
-                }
-                
-                InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-                InstanceGameObject.IdGameObjects.Clear();
-                
-                var model = new Dictionary<string, object>
-                {
-                    { "machineName", machineName },
-                    { "machineVariant", machineVariant },
-                    { "reelIndex", reelIndex },
-                    { "yPositions", yPositions },
-                    { "paylinesSymbolIndexes", paylinesSymbolIndexes },
-                    { "symbolKeys", symbolKeys},
-                };
-                
-                var json = scribanTemplate.Render(model);
-                Debug.Log(json);
-                
-                Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
-                if (mechanic == null)
-                {
-                    throw new Exception($"Failed to deserialize mechanic from json: {json}");
-                }
-
-                mechanic.Process();
-
             }
             
             AssetDatabase.Refresh();

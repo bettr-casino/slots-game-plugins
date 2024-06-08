@@ -2099,17 +2099,26 @@ namespace Bettr.Editor
                         var gameObjectInPrefab = InstanceGameObject.IdGameObjects[instanceGameObject.ThisId];
                         
                         instanceGameObject.OnDeserialized(new StreamingContext());
+                        
+                        foreach (var child in instanceGameObject.Children)
+                        {
+                            child.SetParent(gameObjectInPrefab.GameObject);
+
+                            if (child.PrefabIds != null)
+                            {
+                                foreach (var prefabId in child.PrefabIds)
+                                {
+                                    var referencedGameObject = prefabGameObject.FindReferencedId(prefabId.Id, prefabId.Index);
+                                    InstanceGameObject.IdGameObjects[$"{prefabId.Prefix}{prefabId.Id}"] = new InstanceGameObject(referencedGameObject);
+                                }
+                            }
+                        }
 
                         foreach (var component in instanceGameObject.Components)
                         {
                             component.AddComponent(gameObjectInPrefab.GameObject);
                         }
                         
-                        foreach (var child in instanceGameObject.Children)
-                        {
-                            child.SetParent(gameObjectInPrefab.GameObject);
-                        }
-                    
                         PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
                     }
                 }
