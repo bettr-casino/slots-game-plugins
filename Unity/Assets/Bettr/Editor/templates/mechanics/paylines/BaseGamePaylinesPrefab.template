@@ -1,10 +1,10 @@
 {
     "Name": "Paylines",
-    "Layer": "SLOT_REELS",
+    "Layer": "SLOT_REELS_OVERLAY",
     "Components": [
         {
             "ComponentType": "AnimatorController",
-            "Filename": "{{symbolPrefabName}}",
+            "Filename": "{{machineName}}Payline",
             "AnimationStates": [
                 {
                   "Name": "noop",
@@ -15,7 +15,7 @@
                 {
                   "Name": "win",
                   "Speed": 1,
-                  "IsLoop": false,
+                  "IsLoop": true,
                   "IsDefault": false,
                   "Dopesheet": [
                     {
@@ -23,8 +23,8 @@
                       "Type": "GameObject",
                       "Property": "m_IsActive",
                       "Keyframes": {
-                        "Times": [0, 60],
-                        "Values": [0, 1]
+                        "Times": [0, 20, 40, 60],
+                        "Values": [0, 1, 0, 1]
                       }
                     }
                   ]
@@ -97,10 +97,12 @@
     ],
     "Child": {
         "Name": "Pivot",
-        "Layer": "SLOT_REELS",
+        "Layer": "SLOT_REELS_OVERLAY",
         "Child": {
             "Name": "Payline",
             "Id": "Payline",
+            "Active": false,
+            "Layer": "SLOT_REELS_OVERLAY",
             "IsModel": true,
             "PrefabName": "{{machineName}}Payline", 
             "ModelName": "Payline" 
