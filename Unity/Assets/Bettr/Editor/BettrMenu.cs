@@ -2345,55 +2345,52 @@ namespace Bettr.Editor
         
         private static void ProcessBaseGameReelModifications(string machineName, string machineVariant, string runtimeAssetPath)
         {
-            for (int i = 1; i <= 2; i++)
+            string templateName = $"BaseGamePaylinesReelModifications";
+            var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/paylines", templateName);
+            
+            var baseGameSymbolTable = BettrMenu.GetTable($"{machineName}BaseGameSymbolTable");
+            var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
+            
+            var reelStates = BettrMenu.GetTable($"{machineName}BaseGameReelState");
+            var reelCount = BettrMenu.GetReelCount(machineName);
+            
+            for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
             {
-                string templateName = $"BaseGamePaylinesReelModifications{i}";
-                var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/paylines", templateName);
+                var topSymbolCount = BettrMenu.GetTopSymbolCount(machineName, reelIndex);
+                var visibleSymbolCount = BettrMenu.GetVisibleSymbolCount(machineName, reelIndex);
+                var paylinesSymbolIndexes = Enumerable.Range(topSymbolCount+1, visibleSymbolCount).ToList();
                 
-                var baseGameSymbolTable = BettrMenu.GetTable($"{machineName}BaseGameSymbolTable");
-                var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
+                var symbolPositions = BettrMenu.GetSymbolPositions(machineName, reelIndex);
+                var symbolVerticalSpacing = BettrMenu.GetSymbolVerticalSpacing(machineName, reelIndex);
+                var yPositions = symbolPositions.Select(pos => pos * symbolVerticalSpacing).ToList();
+
+                yPositions.Insert(0, 0);
                 
-                var reelStates = BettrMenu.GetTable($"{machineName}BaseGameReelState");
-                var reelCount = BettrMenu.GetReelCount(machineName);
+                InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
+                InstanceGameObject.IdGameObjects.Clear();
                 
-                for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
+                var model = new Dictionary<string, object>
                 {
-                    var topSymbolCount = BettrMenu.GetTopSymbolCount(machineName, reelIndex);
-                    var visibleSymbolCount = BettrMenu.GetVisibleSymbolCount(machineName, reelIndex);
-                    var paylinesSymbolIndexes = Enumerable.Range(topSymbolCount+1, visibleSymbolCount).ToList();
-                    
-                    var symbolPositions = BettrMenu.GetSymbolPositions(machineName, reelIndex);
-                    var symbolVerticalSpacing = BettrMenu.GetSymbolVerticalSpacing(machineName, reelIndex);
-                    var yPositions = symbolPositions.Select(pos => pos * symbolVerticalSpacing).ToList();
-
-                    yPositions.Insert(0, 0);
-                    
-                    InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-                    InstanceGameObject.IdGameObjects.Clear();
-                    
-                    var model = new Dictionary<string, object>
-                    {
-                        { "machineName", machineName },
-                        { "machineVariant", machineVariant },
-                        { "reelIndex", reelIndex },
-                        { "yPositions", yPositions },
-                        { "topSymbolCount", topSymbolCount },
-                        { "visibleSymbolCount", visibleSymbolCount },
-                        { "paylinesSymbolIndexes", paylinesSymbolIndexes },
-                        { "symbolKeys", symbolKeys},
-                    };
-                    
-                    var json = scribanTemplate.Render(model);
-                    Debug.Log(json);
-                    
-                    Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
-                    if (mechanic == null)
-                    {
-                        throw new Exception($"Failed to deserialize mechanic from json: {json}");
-                    }
-
-                    mechanic.Process();
+                    { "machineName", machineName },
+                    { "machineVariant", machineVariant },
+                    { "reelIndex", reelIndex },
+                    { "yPositions", yPositions },
+                    { "topSymbolCount", topSymbolCount },
+                    { "visibleSymbolCount", visibleSymbolCount },
+                    { "paylinesSymbolIndexes", paylinesSymbolIndexes },
+                    { "symbolKeys", symbolKeys},
+                };
+                
+                var json = scribanTemplate.Render(model);
+                Debug.Log(json);
+                
+                Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
+                if (mechanic == null)
+                {
+                    throw new Exception($"Failed to deserialize mechanic from json: {json}");
                 }
+
+                mechanic.Process();
             }
             
             AssetDatabase.Refresh();

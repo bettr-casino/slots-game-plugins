@@ -47,13 +47,18 @@
                         {
                             "GroupKey": "PaylinesAnimatorGroup",
                             "Group": [
-                                 {{ for paylineIndex in paylinesSymbolIndexes }}
-                                 {
-                                     "Key": "RowIndex{{paylineIndex}}",
-                                     "Id": "Paylines{{paylineIndex}}",
-                                     "State": "win"
-                                 }
-                                 {{ if !for.last }},{{ end }}{{ end }}
+                                {{ for paylineIndex in paylinesSymbolIndexes }}
+                                {
+                                    "Key": "WinStart{{paylineIndex}}",
+                                    "Id": "Paylines{{paylineIndex}}",
+                                    "State": "win_start"
+                                },
+                                {
+                                    "Key": "WinEnd{{paylineIndex}}",
+                                    "Id": "Paylines{{paylineIndex}}",
+                                    "State": "win_end"
+                                }
+                                {{ if !for.last }},{{ end }}{{ end }}
                             ]
                         }    
                     ]

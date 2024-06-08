@@ -506,10 +506,9 @@ function Game003BaseGameReel:DisplayPaylines(paylineSymbol, paylineData, payline
                     -- Core.Animator:PlayAnimatorProperty(currentKey, animatorProperty)
                 end
                 do
-                    local animatorGroupProperty = self["PaylinesAnimatorGroup"]
-                    local animatorProperty = animatorGroupProperty["RowIndex" .. luaRowIndex]
-                    animatorProperty.overrideAnimationDuration = true
-                    animatorProperty.animationDuration = duration
+                    local animatorGroupProperty = self.PaylinesAnimatorGroup
+                    local animatorProperty = animatorGroupProperty["WinStart" .. luaRowIndex]
+                    animatorProperty.waitForAnimationComplete = true
                     BettrVisualsController.PlayAnimatorProperty(animatorProperty)
                 end 
             end
@@ -521,10 +520,12 @@ function Game003BaseGameReel:HidePaylines(paylineSymbol, paylineData, paylineId)
     for i = 1, #paylineData parallel do
         local position = paylineData[i]
         if position.ReelIndex == self.ReelID then
-            local paylinesGroupProperty = self.PaylinesGroup
             local rowIndex = position.RowIndex
             local luaRowIndex = rowIndex + 1
-            paylinesGroupProperty["RowIndex" .. luaRowIndex].SetActive(false)
+            local animatorGroupProperty = self.PaylinesAnimatorGroup
+            local animatorProperty = animatorGroupProperty["WinEnd" .. luaRowIndex]
+            animatorProperty.waitForAnimationComplete = true
+            BettrVisualsController.PlayAnimatorProperty(animatorProperty)
         end
     end
 end
