@@ -852,17 +852,26 @@ namespace Bettr.Editor
             AssetDatabase.Refresh();
             
             var maxOffsetY = BettrMenu.GetReelMaxOffsetY(machineName);
-            var reelMaskUpperY = BettrMenu.GetReelMaskUpperY(machineName);
-            var reelMaskLowerY = BettrMenu.GetReelMaskLowerY(machineName);
-            var reelMaskScaleY = BettrMenu.GetReelMaskScaleY(machineName);
             var reelBackgroundY = BettrMenu.GetReelBackgroundY(machineName);
             var reelBackgroundScaleY = BettrMenu.GetReelBackgroundScaleY(machineName);
+            
+            var reelMaskUpperX = BettrMenu.GetReelMaskUpperX(machineName);
+            var reelMaskUpperY = BettrMenu.GetReelMaskUpperY(machineName);
+            
+            var reelMaskLowerX = BettrMenu.GetReelMaskLowerX(machineName);
+            var reelMaskLowerY = BettrMenu.GetReelMaskLowerY(machineName);
+            
+            var reelMaskScaleX = BettrMenu.GetReelMaskScaleX(machineName);
+            var reelMaskScaleY = BettrMenu.GetReelMaskScaleY(machineName);
             
             var templateName = "BaseGameMachine";
             var scribanTemplate = ParseScribanTemplate("", templateName);
             
             var baseGameSymbolTable = GetTable($"{machineName}BaseGameSymbolTable");
             var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
+
+            var reelCount = BettrMenu.GetReelCount(machineName);
+            var horizontalReelPositions = BettrMenu.GetReelHorizontalPositions(machineName);
             
             var model = new Dictionary<string, object>
             {
@@ -871,12 +880,17 @@ namespace Bettr.Editor
                 { "baseGameMachine", baseGameMachine },
                 { "baseGameSettings", baseGameSettings },
                 { "symbolKeys", symbolKeys},
+                { "reelMaskUpperX", reelMaskUpperX},
                 { "reelMaskUpperY", reelMaskUpperY},
+                { "reelMaskLowerX", reelMaskLowerX},
                 { "reelMaskLowerY", reelMaskLowerY},
+                { "reelMaskScaleX", reelMaskScaleX},
                 { "reelMaskScaleY", reelMaskScaleY},
                 { "reelBackgroundY", reelBackgroundY},
                 { "reelBackgroundScaleY", reelBackgroundScaleY},
                 { "offsetY", maxOffsetY },
+                { "reelCount", reelCount },
+                { "horizontalReelPositions", horizontalReelPositions },
             };
             
             var json = scribanTemplate.Render(model);
@@ -1972,6 +1986,41 @@ namespace Bettr.Editor
             
             return default(T);
         }
+        
+        public static T GetTableKeyValue<T>(Table table, string pk, string key)
+        {
+            var valueTable = table;
+            if (!string.IsNullOrEmpty(pk) && table[pk] is Table pkTable)
+            {
+                valueTable = pkTable;
+            }
+            
+            var arr = valueTable["Array"] as Table;
+            if (arr == null)
+            {
+                Debug.LogError($"Key {pk} Array not found in table.");
+                return default(T);
+            }
+
+            foreach (var val in arr.Values)
+            {
+                var valTable = val.Table;
+                if (valTable == null)
+                {
+                    Debug.LogError($"Value is not a table.");
+                    return default(T);
+                }
+                
+                var keyVal = (string) valTable["Key"];
+                if (keyVal == key)
+                {
+                    Debug.LogError($"Key {key} not found in table.");
+                    return (T)Convert.ChangeType(valTable["Value"], typeof(T));
+                }
+            }
+
+            return default(T);
+        }
 
         public static Table GetTable(string tableName)
         {
@@ -2000,6 +2049,20 @@ namespace Bettr.Editor
             return reelCount;
         }
         
+        public static List<float> GetReelHorizontalPositions(string machineName)
+        {
+            var reelHorizontalPositions = new List<float>();
+            var baseGameReelStateTable = BettrMenu.GetTable($"{machineName}BaseGameReelState");
+            var reelCount = BettrMenu.GetReelCount(machineName);
+            for (int reelId = 1; reelId <= reelCount; reelId++)
+            {
+                var value = BettrMenu.GetTableValue<float>(baseGameReelStateTable, $"Reel{reelId}", "HorizontalPosition");
+                reelHorizontalPositions.Add(value);
+            }
+            
+            return reelHorizontalPositions;
+        }
+        
         public static float GetReelMaxOffsetY(string machineName)
         {
             var baseGameLayoutTable = BettrMenu.GetTable($"{machineName}BaseGameLayout");
@@ -2007,25 +2070,82 @@ namespace Bettr.Editor
             return value;
         }
         
-        public static float GetReelMaskUpperY(string machineName)
+        public static List<float> GetReelMaskUpperX(string machineName)
         {
-            var baseGameLayoutTable = BettrMenu.GetTable($"{machineName}BaseGameLayout");
-            var value = BettrMenu.GetTableValue<float>(baseGameLayoutTable, "ReelMaskUpperY", "Value");
-            return value;
+            var values = new List<float>();
+            var reelCount = BettrMenu.GetReelCount(machineName);
+            var baseGameLayoutTable = BettrMenu.GetTable($"{machineName}BaseGameReelsLayout");
+            for (int reelId = 1; reelId <= reelCount; reelId++)
+            {
+                var value = BettrMenu.GetTableKeyValue<float>(baseGameLayoutTable, $"Reel{reelId}", "ReelMaskUpperX");
+                values.Add(value);
+            }
+            return values;
         }
         
-        public static float GetReelMaskLowerY(string machineName)
+        public static List<float> GetReelMaskUpperY(string machineName)
         {
-            var baseGameLayoutTable = BettrMenu.GetTable($"{machineName}BaseGameLayout");
-            var value = BettrMenu.GetTableValue<float>(baseGameLayoutTable, "ReelMaskLowerY", "Value");
-            return value;
+            var values = new List<float>();
+            var reelCount = BettrMenu.GetReelCount(machineName);
+            var baseGameLayoutTable = BettrMenu.GetTable($"{machineName}BaseGameReelsLayout");
+            for (int reelId = 1; reelId <= reelCount; reelId++)
+            {
+                var value = BettrMenu.GetTableKeyValue<float>(baseGameLayoutTable, $"Reel{reelId}", "ReelMaskUpperY");
+                values.Add(value);
+            }
+            return values;
         }
         
-        public static float GetReelMaskScaleY(string machineName)
+        public static List<float> GetReelMaskLowerX(string machineName)
         {
-            var baseGameLayoutTable = BettrMenu.GetTable($"{machineName}BaseGameLayout");
-            var value = BettrMenu.GetTableValue<float>(baseGameLayoutTable, "ReelMaskScaleY", "Value");
-            return value;
+            var values = new List<float>();
+            var reelCount = BettrMenu.GetReelCount(machineName);
+            var baseGameLayoutTable = BettrMenu.GetTable($"{machineName}BaseGameReelsLayout");
+            for (int reelId = 1; reelId <= reelCount; reelId++)
+            {
+                var value = BettrMenu.GetTableKeyValue<float>(baseGameLayoutTable, $"Reel{reelId}", "ReelMaskLowerX");
+                values.Add(value);
+            }
+            return values;
+        }
+        
+        public static List<float> GetReelMaskLowerY(string machineName)
+        {
+            var values = new List<float>();
+            var reelCount = BettrMenu.GetReelCount(machineName);
+            var baseGameLayoutTable = BettrMenu.GetTable($"{machineName}BaseGameReelsLayout");
+            for (int reelId = 1; reelId <= reelCount; reelId++)
+            {
+                var value = BettrMenu.GetTableKeyValue<float>(baseGameLayoutTable, $"Reel{reelId}", "ReelMaskLowerY");
+                values.Add(value);
+            }
+            return values;
+        }
+        
+        public static List<float> GetReelMaskScaleX(string machineName)
+        {
+            var values = new List<float>();
+            var reelCount = BettrMenu.GetReelCount(machineName);
+            var baseGameLayoutTable = BettrMenu.GetTable($"{machineName}BaseGameReelsLayout");
+            for (int reelId = 1; reelId <= reelCount; reelId++)
+            {
+                var value = BettrMenu.GetTableKeyValue<float>(baseGameLayoutTable, $"Reel{reelId}", "ReelMaskScaleX");
+                values.Add(value);
+            }
+            return values;
+        }
+        
+        public static List<float> GetReelMaskScaleY(string machineName)
+        {
+            var values = new List<float>();
+            var reelCount = BettrMenu.GetReelCount(machineName);
+            var baseGameLayoutTable = BettrMenu.GetTable($"{machineName}BaseGameReelsLayout");
+            for (int reelId = 1; reelId <= reelCount; reelId++)
+            {
+                var value = BettrMenu.GetTableKeyValue<float>(baseGameLayoutTable, $"Reel{reelId}", "ReelMaskScaleY");
+                values.Add(value);
+            }
+            return values;
         }
         
         public static float GetReelBackgroundY(string machineName)

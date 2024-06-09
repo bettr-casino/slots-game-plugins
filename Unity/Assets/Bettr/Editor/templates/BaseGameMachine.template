@@ -33,136 +33,98 @@
                 "Child": {
                     "Name": "Pivot",
                     "Children": [
+                        
+                        {{ for reelIndex in 1..reelCount }}
                         {
-                            "Name": "Reel1",
+                            "Name": "Reel{{reelIndex}}",
                             "Layer": "SLOT_REELS",
                             "IsPrefab": true,
-                            "PrefabName": "{{machineName}}BaseGameReel1",
+                            "PrefabName": "{{machineName}}BaseGameReel{{reelIndex}}",
                             "Position": {
-                                "X": -5,
+                                "X": {{horizontalReelPositions[reelIndex-1]}},
                                 "Y": 0,
                                 "Z": 0
                             }
-                        },
-                        {
-                            "Name": "Reel2",
-                            "Layer": "SLOT_REELS",
-                            "IsPrefab": true,
-                            "PrefabName": "{{machineName}}BaseGameReel2",
-                            "Position": {
-                                "X": -2.5,
-                                "Y": 0,
-                                "Z": 0
-                            }
-                        },
-                        {
-                             "Name": "Reel3",
-                             "Layer": "SLOT_REELS",
-                             "IsPrefab": true,
-                             "PrefabName": "{{machineName}}BaseGameReel3",
-                             "Position": {
-                                 "X": 0,
-                                 "Y": 0,
-                                 "Z": 0
-                             }
-                        },
-                        {
-                            "Name": "Reel4",
-                            "Layer": "SLOT_REELS",
-                            "IsPrefab": true,
-                            "PrefabName": "{{machineName}}BaseGameReel4",
-                            "Position": {
-                                "X": 2.5,
-                                "Y": 0,
-                                "Z": 0
-                            }
-                        },
-                        {
-                            "Name": "Reel5",
-                            "Layer": "SLOT_REELS",
-                            "IsPrefab": true,
-                            "PrefabName": "{{machineName}}BaseGameReel5",
-                            "Position": {
-                                "X": 5,
-                                "Y": 0,
-                                "Z": 0
-                            }
-                        },
+                        }
+                        {{ if !for.last }},{{ end }}{{ end }}
+                        ,
                         {
                             "Name": "Masks",
                             "Children": [
+                                {{ for reelIndex in 1..reelCount }}
                                 {
-                                    "Name": "3D Mask Upper",
+                                    "Name": "Reel{{reelIndex}} 3D Mask Upper",
                                     "Layer": "SLOT_REELS",
                                     "IsPrimitive": true,
                                     "Primitive": 5,
                                     "PrimitiveMaterial": "{{machineName}}ReelMask",
                                     "PrimitiveShader": "Bettr/ReelMask",
                                     "Position": {
-                                        "X": 0,
-                                        "Y": {{reelMaskUpperY}},
+                                        "X": {{reelMaskUpperX[reelIndex-1]}},
+                                        "Y": {{reelMaskUpperY[reelIndex-1]}},
                                         "Z": -30
                                     },
                                     "Scale": {
-                                        "X": 14,
-                                        "Y": {{reelMaskScaleY}},
+                                        "X": {{reelMaskScaleX[reelIndex-1]}},
+                                        "Y": {{reelMaskScaleY[reelIndex-1]}},
                                         "Z": 1
                                     }
                                 },
                                 {
-                                    "Name": "3D Mask Upper Overlay",
+                                    "Name": "Reel{{reelIndex}} 3D Mask Upper Overlay",
                                     "Layer": "SLOT_OVERLAY",
                                     "IsPrimitive": true,
                                     "Primitive": 5,
                                     "PrimitiveMaterial": "{{machineName}}ReelMask",
                                     "PrimitiveShader": "Bettr/ReelMask",
                                     "Position": {
-                                        "X": 0,
-                                        "Y": {{reelMaskUpperY}},
+                                        "X": {{reelMaskUpperX[reelIndex-1]}},
+                                        "Y": {{reelMaskUpperY[reelIndex-1]}},
                                         "Z": -30
                                     },
                                     "Scale": {
-                                        "X": 14,
-                                        "Y": {{reelMaskScaleY}},
+                                        "X": {{reelMaskScaleX[reelIndex-1]}},
+                                        "Y": {{reelMaskScaleY[reelIndex-1]}},
                                         "Z": 1
                                     }
                                 },
                                 {
-                                    "Name": "3D Mask Lower",
+                                    "Name": "Reel{{reelIndex}} 3D Mask Lower",
                                     "Layer": "SLOT_REELS",
                                     "IsPrimitive": true,
                                     "Primitive": 5,
                                     "PrimitiveMaterial": "{{machineName}}ReelMask",
                                     "PrimitiveShader": "Bettr/ReelMask",
                                     "Position": {
-                                        "X": 0,
-                                        "Y": {{reelMaskLowerY}},
+                                        "X": {{reelMaskLowerX[reelIndex-1]}},
+                                        "Y": {{reelMaskLowerY[reelIndex-1]}},
                                         "Z": -30
                                     },
                                     "Scale": {
-                                        "X": 14,
-                                        "Y": {{reelMaskScaleY}},
+                                        "X": {{reelMaskScaleX[reelIndex-1]}},
+                                        "Y": {{reelMaskScaleY[reelIndex-1]}},
                                         "Z": 1
                                     }
                                 },
                                 {
-                                    "Name": "3D Mask Lower Overlay",
+                                    "Name": "Reel{{reelIndex}} 3D Mask Lower Overlay",
                                     "Layer": "SLOT_OVERLAY",
                                     "IsPrimitive": true,
                                     "Primitive": 5,
                                     "PrimitiveMaterial": "ReelMask",
                                     "PrimitiveShader": "Bettr/ReelMask",
                                     "Position": {
-                                        "X": 0,
-                                        "Y": {{reelMaskLowerY}},
+                                        "X": {{reelMaskLowerX[reelIndex-1]}},
+                                        "Y": {{reelMaskLowerY[reelIndex-1]}},
                                         "Z": -30
                                     },
                                     "Scale": {
-                                        "X": 14,
-                                        "Y": {{reelMaskScaleY}},
+                                        "X": {{reelMaskScaleX[reelIndex-1]}},
+                                        "Y": {{reelMaskScaleY[reelIndex-1]}},
                                         "Z": 1
                                     }
                                 }
+                                {{ if !for.last }},{{ end }}{{ end }}
                             ]
                         }
                     ]
