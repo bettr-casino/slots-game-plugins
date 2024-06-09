@@ -2014,7 +2014,6 @@ namespace Bettr.Editor
                 var keyVal = (string) valTable["Key"];
                 if (keyVal == key)
                 {
-                    Debug.LogError($"Key {key} not found in table.");
                     return (T)Convert.ChangeType(valTable["Value"], typeof(T));
                 }
             }
