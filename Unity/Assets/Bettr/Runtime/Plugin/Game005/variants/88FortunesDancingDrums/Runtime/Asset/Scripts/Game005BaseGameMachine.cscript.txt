@@ -52,22 +52,22 @@ function Game005BaseGameMachine:CancelWaysAnimation()
     Game005BaseGameState.DisplayState.First.State = "CancelRequested"
 end
 
-function Game005BaseGameMachine:RollUpWaysWin(waysSummary)
+function Game005BaseGameMachine:RollUpWaysWin(way, waysState, waysSummary, duration)
     series
         do
             -- rollup ways win once
             local startDelay = waysSummary.DisplayLoopStartDelay
             local duration = waysSummary.DisplayLoopDuration
-            local pays = waysSummary.Pays 
+            local pays = way.Pays
             System.WaitForSeconds(startDelay)
             local winTextProperty = self.WinText
             
             BettrVisualsController.RollUpCounter(winTextProperty, 0, pays, 1)
             
             local creditsTextProperty = self.CreditsText   
-            local oldCoins = BettrUser.Coins
+            local oldCoins = waysState.PaysRollup
             local newCoins = oldCoins + pays            
-            BettrUser.Coins = newCoins  
+            waysState.PaysRollup = newCoins  
                       
             BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 1)
         end
@@ -153,23 +153,15 @@ end
 function Game005BaseGameMachine:BaseGamePayout()
     series
         do
+            local waysState = Game005BaseGameWaysState.Ways.First
             local waysSummary = Game005BaseGameWaysSummary.Ways.First
-            local waysIndex = waysSummary.WaysIndex
             local waysCount = waysSummary.WaysCount
             if waysCount > 0 then
                 local ways = Game005BaseGameWays.Ways.Array
                 local waysMatrix = Game005BaseGameWaysMatrix
-                parallel
-                    do
-                        self:DisplayWays(waysSummary, waysMatrix, ways)            
-                    end
-                    do
-                        if waysIndex == 0 then
-                            self:RollUpWaysWin(waysSummary)
-                        end
-                    end
-                end
-                if waysIndex >= 2 then
+                self:DisplayWays(waysState, waysSummary, waysMatrix, ways)            
+                local waysIndex = waysState.WaysIndex
+                if waysIndex >= 1 then
                     self:OnPayingCompleted()
                 elseif Game005BaseGameState.DisplayState.First.State == "CancelRequested" then
                     self:OnPayingCompleted()
@@ -183,10 +175,11 @@ function Game005BaseGameMachine:BaseGamePayout()
     end      
 end
 
-function Game005BaseGameMachine:DisplayWays(waysSummary, waysMatrix, ways)
+function Game005BaseGameMachine:DisplayWays(waysState, waysSummary, waysMatrix, ways)
     series
         do
-            local waysIndex = waysSummary.WaysIndex   
+            local waysIndex = waysState.WaysIndex  
+            waysState.PaysRollup = BettrUser.Coins 
             local waysCount = waysSummary.WaysCount 
             local startDelay = waysSummary.DisplayLoopStartDelay
             local duration = waysSummary.DisplayLoopDuration
@@ -214,19 +207,26 @@ function Game005BaseGameMachine:DisplayWays(waysSummary, waysMatrix, ways)
                         statusTexts.FormatAndSetCurrentActive("PaysText", wayReelCount, wayPay, wayMultiplier, wayTotalPay)
                         local winSymbols = self.WinSymbols
                         winSymbols.SetCurrentActive(waySymbol)
-                        -- display ways
-                        for i=1,wayReelCount parallel do
-                            local reel = _G["Game005BaseGameReel" .. i]
-                            if reel != nil then
-                                reel:DisplayWays(waySymbol, wayMatrix, waySymbolCount, duration)
-                                System.WaitForSeconds(duration)
-                                reel:HideWays(waySymbol, wayMatrix, waySymbolCount)
+                        parallel
+                            do
+                                self:RollUpWaysWin(way, waysState, waysSummary, duration)
+                            end
+                            do
+                                -- display ways
+                                for i=1,wayReelCount parallel do
+                                    local reel = _G["Game005BaseGameReel" .. i]
+                                    if reel != nil then
+                                        reel:DisplayWays(waySymbol, wayMatrix, waySymbolCount, duration)
+                                        System.WaitForSeconds(duration)
+                                        reel:HideWays(waySymbol, wayMatrix, waySymbolCount)
+                                    end
+                                end
                             end
                         end
                     end
                 end                            
             end
-            waysSummary.WaysIndex = waysIndex + 1
+            waysState.WaysIndex = waysIndex + 1
             System.WaitForSeconds(endDelay) 
         end
     end
