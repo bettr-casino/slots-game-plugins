@@ -342,8 +342,9 @@ function {{machineName}}BaseGameReel:SlideSymbol(symbolIndex, slideDistanceInSym
     local localPosition = symbolProperty.gameObject.transform.localPosition
     local symbolPosition = symbolState.SymbolPosition
     local verticalSpacing = reelState.SymbolVerticalSpacing
+    local symbolOffsetY = reelState.SymbolOffsetY
     local yLocalPosition = verticalSpacing * symbolPosition
-    yLocalPosition = yLocalPosition + verticalSpacing * slideDistanceInSymbolUnits
+    yLocalPosition = yLocalPosition + verticalSpacing * slideDistanceInSymbolUnits + symbolOffsetY
     localPosition = Vector3:new(
                 localPosition.x,
                 yLocalPosition,
@@ -488,42 +489,34 @@ function {{machineName}}BaseGameReel:CloneCurrentSymbol(rowIndex)
     return clonedSymbol
 end
 
-function {{machineName}}BaseGameReel:DisplayPaylines(paylineSymbol, paylineData, paylineId, duration)
-    for i = 1, #paylineData do
-        local position = paylineData[i]
-        if position.ReelID == self.ReelID then
-            local rowIndex = position.RowIndex
-            local luaRowIndex = rowIndex + 1
-            parallel
-                do
-                    local animatorGroupProperty = self["SymbolPaylineWinAnimatorGroup" .. luaRowIndex]
-                    local symbolGroupProperty = self["SymbolGroup" .. luaRowIndex]
-                    local currentKey = symbolGroupProperty.CurrentKey
-                    local animatorProperty = animatorGroupProperty[currentKey]
-                    animatorProperty.overrideAnimationDuration = true
-                    animatorProperty.animationDuration = duration
-                    BettrVisualsController.PlayAnimatorProperty(animatorProperty)
-                    -- Core.Animator:PlayAnimatorProperty(currentKey, animatorProperty)
-                end
-                do
-                    local animatorGroupProperty = self.PaylinesAnimatorGroup
-                    local animatorProperty = animatorGroupProperty["WinStart" .. luaRowIndex]
-                    BettrVisualsController.PlayAnimatorProperty(animatorProperty)
-                end 
-            end
-        end
+function {{machineName}}BaseGameReel:DisplayWays(waySymbol, wayMatrix, waySymbolCount, duration)
+    for i=1,waySymbolCount parallel do
+        local wayReelID = wayMatrix[i].ReelID
+       if wayReelID == self.ReelID then
+           local waysGroupProperty = self.WaysGroup
+           local rowIndex = wayMatrix[i].RowIndex
+           local luaRowIndex = rowIndex + 1
+           waysGroupProperty["RowIndex" .. luaRowIndex].SetActive(true)
+           local animatorGroupProperty = self["SymbolWaysWinAnimatorGroup" .. luaRowIndex]
+           local symbolGroupProperty = self["SymbolGroup" .. luaRowIndex]
+           local currentKey = symbolGroupProperty.CurrentKey
+           local animatorProperty = animatorGroupProperty[currentKey]
+           animatorProperty.overrideAnimationDuration = true
+           animatorProperty.animationDuration = duration
+           BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+           -- Core.Animator:PlayAnimatorProperty(currentKey, animatorProperty)
+       end
     end
 end
 
-function {{machineName}}BaseGameReel:HidePaylines(paylineSymbol, paylineData, paylineId)
-    for i = 1, #paylineData parallel do
-        local position = paylineData[i]
-        if position.ReelID == self.ReelID then
-            local rowIndex = position.RowIndex
+function {{machineName}}BaseGameReel:HideWays(waySymbol, wayMatrix, wayMatrixCount)
+    for i=1,wayMatrixCount parallel do
+        local wayReelID = wayMatrix[i].ReelID
+        if wayReelID == self.ReelID then
+            local waysGroupProperty = self.WaysGroup
+            local rowIndex = wayMatrix[i].RowIndex
             local luaRowIndex = rowIndex + 1
-            local animatorGroupProperty = self.PaylinesAnimatorGroup
-            local animatorProperty = animatorGroupProperty["WinEnd" .. luaRowIndex]
-            BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+            waysGroupProperty["RowIndex" .. luaRowIndex].SetActive(false)
         end
     end
 end

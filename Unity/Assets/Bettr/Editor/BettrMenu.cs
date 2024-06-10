@@ -955,6 +955,8 @@ namespace Bettr.Editor
             
             var symbolScaleX = BettrMenu.GetSymbolScaleX(machineName, reelIndex);
             var symbolScaleY = BettrMenu.GetSymbolScaleY(machineName, reelIndex);
+            
+            var symbolOffsetY = BettrMenu.GetSymbolOffsetY(machineName, reelIndex);
 
             var templateName = "BaseGameReel";
             var scribanTemplate = ParseScribanTemplate("", templateName);
@@ -968,6 +970,7 @@ namespace Bettr.Editor
                 { "symbolIndexes", symbolIndexes },
                 { "symbolScaleX", symbolScaleX },
                 { "symbolScaleY", symbolScaleY },
+                { "symbolOffsetY", symbolOffsetY },
             };
             
             var json = scribanTemplate.Render(model);
@@ -2259,6 +2262,13 @@ namespace Bettr.Editor
             return symbolVerticalSpacing;
         }
         
+        public static float GetSymbolOffsetY(string machineName, int reelIndex)
+        {
+            var reelStates = BettrMenu.GetTable($"{machineName}BaseGameReelState");
+            var symbolVerticalSpacing = BettrMenu.GetTableValue<float>(reelStates, $"Reel{reelIndex}", "SymbolOffsetY");
+            return symbolVerticalSpacing;
+        }
+        
         public static float GetSymbolHorizontalSpacing(string machineName, int reelIndex)
         {
             var reelStates = BettrMenu.GetTable($"{machineName}BaseGameReelState");
@@ -2438,6 +2448,8 @@ namespace Bettr.Editor
                 var symbolScaleX = BettrMenu.GetSymbolScaleX(machineName, reelIndex);
                 var symbolScaleY = BettrMenu.GetSymbolScaleY(machineName, reelIndex);
                 
+                var symbolOffsetY = BettrMenu.GetSymbolOffsetY(machineName, reelIndex);
+                
                 InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
                 InstanceGameObject.IdGameObjects.Clear();
                 
@@ -2451,6 +2463,7 @@ namespace Bettr.Editor
                     { "symbolKeys", symbolKeys},
                     { "symbolScaleX", symbolScaleX},
                     { "symbolScaleY", symbolScaleY},
+                    { "symbolOffsetY", symbolOffsetY},
                 };
                 
                 var json = scribanTemplate.Render(model);
@@ -2553,6 +2566,8 @@ namespace Bettr.Editor
 
                 yPositions.Insert(0, 0);
                 
+                var symbolOffsetY = BettrMenu.GetSymbolOffsetY(machineName, reelIndex);
+                
                 InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
                 InstanceGameObject.IdGameObjects.Clear();
                 
@@ -2566,6 +2581,7 @@ namespace Bettr.Editor
                     { "visibleSymbolCount", visibleSymbolCount },
                     { "paylinesSymbolIndexes", paylinesSymbolIndexes },
                     { "symbolKeys", symbolKeys},
+                    { "symbolOffsetY", symbolOffsetY},
                 };
                 
                 var json = scribanTemplate.Render(model);
