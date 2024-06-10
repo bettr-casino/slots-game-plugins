@@ -1060,7 +1060,6 @@ namespace Bettr.Editor
                 var visibleSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "VisibleSymbolCount");
                 var bottomSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "BottomSymbolCount");
                 var symbolVerticalSpacing = GetTableValue<float>(reelStates, $"Reel{reelIndex}", "SymbolVerticalSpacing");
-                var horizontalSpacing = GetTableValue<float>(reelStates, $"Reel{reelIndex}", "HorizontalSpacing");
                 var zeroVisibleSymbolIndex = visibleSymbolCount % 2 == 0 ? visibleSymbolCount / 2 + 1 : (visibleSymbolCount - 1) / 2 + 1;
                 var reelMaskUpperY = visibleSymbolCount % 2 == 0? (zeroVisibleSymbolIndex) * symbolVerticalSpacing : (zeroVisibleSymbolIndex + 1) * symbolVerticalSpacing;
                 var reelMaskLowerY = -(zeroVisibleSymbolIndex + 1) * symbolVerticalSpacing;
@@ -2266,13 +2265,6 @@ namespace Bettr.Editor
         {
             var reelStates = BettrMenu.GetTable($"{machineName}BaseGameReelState");
             var symbolVerticalSpacing = BettrMenu.GetTableValue<float>(reelStates, $"Reel{reelIndex}", "SymbolOffsetY");
-            return symbolVerticalSpacing;
-        }
-        
-        public static float GetSymbolHorizontalSpacing(string machineName, int reelIndex)
-        {
-            var reelStates = BettrMenu.GetTable($"{machineName}BaseGameReelState");
-            var symbolVerticalSpacing = BettrMenu.GetTableValue<float>(reelStates, $"Reel{reelIndex}", "HorizontalSpacing");
             return symbolVerticalSpacing;
         }
         
