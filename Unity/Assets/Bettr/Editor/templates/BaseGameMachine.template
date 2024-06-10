@@ -134,26 +134,29 @@
                 "Name": "Reels Background",
                 "Child": {
                     "Name": "Pivot",
-                    "Child": {
-                        "Name": "ReelsBackground",
-                        "Layer": "SLOT_BACKGROUND",
-                        "IsPrimitive": true,
-                        "Primitive": 5,
-                        "PrimitiveMaterial": "Black",
-                        "PrimitiveShader": "Unlit/Color",
-                        "PrimitiveColor": "#000000",
-                        "Position": {
-                            "X": 0,
-                            "Y": {{reelBackgroundY}},
-                            "Z": 5
-                        },
-                        "Scale": {
-                            "X": 13.94468,
-                            "Y": {{reelBackgroundScaleY}},
-                            "Z": 1
+                    "Children": [
+                        {{ for reelIndex in 1..reelCount }}
+                        {
+                            "Name": "ReelsBackground",
+                            "Layer": "SLOT_BACKGROUND",
+                            "IsPrimitive": true,
+                            "Primitive": 5,
+                            "PrimitiveMaterial": "Black",
+                            "PrimitiveShader": "Unlit/Color",
+                            "PrimitiveColor": "#000000",
+                            "Position": {
+                                "X": {{reelBackgroundX[reelIndex-1]}},
+                                "Y": {{reelBackgroundY[reelIndex-1]}},
+                                "Z": 5
+                            },
+                            "Scale": {
+                                "X": {{reelBackgroundScaleX[reelIndex-1]}},
+                                "Y": {{reelBackgroundScaleY[reelIndex-1]}},
+                                "Z": 1
+                            }                        
                         }
-                        
-                    }
+                        {{ if !for.last }},{{ end }}{{ end }}
+                    ]
                 }                
             },
             {
@@ -263,7 +266,7 @@
                                         "Layer": "UI",
                                         "Position": {
                                             "X": 0,
-                                            "Y": -158,
+                                            "Y": -200,
                                             "Z": 0
                                         },
                                         "Components": [

@@ -852,7 +852,11 @@ namespace Bettr.Editor
             AssetDatabase.Refresh();
             
             var maxOffsetY = BettrMenu.GetReelMaxOffsetY(machineName);
+            
+            var reelBackgroundX = BettrMenu.GetReelBackgroundX(machineName);
             var reelBackgroundY = BettrMenu.GetReelBackgroundY(machineName);
+            
+            var reelBackgroundScaleX = BettrMenu.GetReelBackgroundScaleX(machineName);
             var reelBackgroundScaleY = BettrMenu.GetReelBackgroundScaleY(machineName);
             
             var reelMaskUpperX = BettrMenu.GetReelMaskUpperX(machineName);
@@ -886,7 +890,9 @@ namespace Bettr.Editor
                 { "reelMaskLowerY", reelMaskLowerY},
                 { "reelMaskScaleX", reelMaskScaleX},
                 { "reelMaskScaleY", reelMaskScaleY},
+                { "reelBackgroundX", reelBackgroundX},
                 { "reelBackgroundY", reelBackgroundY},
+                { "reelBackgroundScaleX", reelBackgroundScaleX},
                 { "reelBackgroundScaleY", reelBackgroundScaleY},
                 { "offsetY", maxOffsetY },
                 { "reelCount", reelCount },
@@ -946,6 +952,9 @@ namespace Bettr.Editor
             var yPositions = symbolPositions.Select(pos => pos * symbolVerticalSpacing).ToList();
 
             yPositions.Insert(0, 0);
+            
+            var symbolScaleX = BettrMenu.GetSymbolScaleX(machineName, reelIndex);
+            var symbolScaleY = BettrMenu.GetSymbolScaleY(machineName, reelIndex);
 
             var templateName = "BaseGameReel";
             var scribanTemplate = ParseScribanTemplate("", templateName);
@@ -957,6 +966,8 @@ namespace Bettr.Editor
                 { "symbolKeys", symbolKeys },
                 { "yPositions", yPositions },
                 { "symbolIndexes", symbolIndexes },
+                { "symbolScaleX", symbolScaleX },
+                { "symbolScaleY", symbolScaleY },
             };
             
             var json = scribanTemplate.Render(model);
@@ -1963,7 +1974,7 @@ namespace Bettr.Editor
             return valueTable?.Pairs.Select(pair => pair.Value.Table[key]).ToList().Cast<T>().ToList();
         }
         
-        public static T GetTableValue<T>(Table table, string pk, string key)
+        public static T GetTableValue<T>(Table table, string pk, string key, T d = default(T))
         {
             var valueTable = table;
             if (!string.IsNullOrEmpty(pk) && table[pk] is Table pkTable)
@@ -1984,7 +1995,7 @@ namespace Bettr.Editor
                 return (T)Convert.ChangeType(value, typeof(T));
             }
             
-            return default(T);
+            return d;
         }
         
         public static T GetTableKeyValue<T>(Table table, string pk, string key)
@@ -2147,18 +2158,56 @@ namespace Bettr.Editor
             return values;
         }
         
-        public static float GetReelBackgroundY(string machineName)
+        public static List<float> GetReelBackgroundX(string machineName)
         {
-            var baseGameLayoutTable = BettrMenu.GetTable($"{machineName}BaseGameLayout");
-            var value = BettrMenu.GetTableValue<float>(baseGameLayoutTable, "ReelBackgroundY", "Value");
-            return value;
+            var values = new List<float>();
+            var reelCount = BettrMenu.GetReelCount(machineName);
+            var baseGameLayoutTable = BettrMenu.GetTable($"{machineName}BaseGameReelsLayout");
+            for (int reelId = 1; reelId <= reelCount; reelId++)
+            {
+                var value = BettrMenu.GetTableKeyValue<float>(baseGameLayoutTable, $"Reel{reelId}", "ReelBackgroundX");
+                values.Add(value);
+            }
+            return values;
         }
         
-        public static float GetReelBackgroundScaleY(string machineName)
+        public static List<float> GetReelBackgroundY(string machineName)
         {
-            var baseGameLayoutTable = BettrMenu.GetTable($"{machineName}BaseGameLayout");
-            var value = BettrMenu.GetTableValue<float>(baseGameLayoutTable, "ReelBackgroundScaleY", "Value");
-            return value;
+            var values = new List<float>();
+            var reelCount = BettrMenu.GetReelCount(machineName);
+            var baseGameLayoutTable = BettrMenu.GetTable($"{machineName}BaseGameReelsLayout");
+            for (int reelId = 1; reelId <= reelCount; reelId++)
+            {
+                var value = BettrMenu.GetTableKeyValue<float>(baseGameLayoutTable, $"Reel{reelId}", "ReelBackgroundY");
+                values.Add(value);
+            }
+            return values;
+        }
+        
+        public static List<float> GetReelBackgroundScaleX(string machineName)
+        {
+            var values = new List<float>();
+            var reelCount = BettrMenu.GetReelCount(machineName);
+            var baseGameLayoutTable = BettrMenu.GetTable($"{machineName}BaseGameReelsLayout");
+            for (int reelId = 1; reelId <= reelCount; reelId++)
+            {
+                var value = BettrMenu.GetTableKeyValue<float>(baseGameLayoutTable, $"Reel{reelId}", "ReelBackgroundScaleX");
+                values.Add(value);
+            }
+            return values;
+        }
+        
+        public static List<float> GetReelBackgroundScaleY(string machineName)
+        {
+            var values = new List<float>();
+            var reelCount = BettrMenu.GetReelCount(machineName);
+            var baseGameLayoutTable = BettrMenu.GetTable($"{machineName}BaseGameReelsLayout");
+            for (int reelId = 1; reelId <= reelCount; reelId++)
+            {
+                var value = BettrMenu.GetTableKeyValue<float>(baseGameLayoutTable, $"Reel{reelId}", "ReelBackgroundScaleY");
+                values.Add(value);
+            }
+            return values;
         }
 
         public static List<string> GetSymbolKeys(string machineName)
@@ -2214,6 +2263,20 @@ namespace Bettr.Editor
         {
             var reelStates = BettrMenu.GetTable($"{machineName}BaseGameReelState");
             var symbolVerticalSpacing = BettrMenu.GetTableValue<float>(reelStates, $"Reel{reelIndex}", "HorizontalSpacing");
+            return symbolVerticalSpacing;
+        }
+        
+        public static float GetSymbolScaleX(string machineName, int reelIndex)
+        {
+            var reelStates = BettrMenu.GetTable($"{machineName}BaseGameReelState");
+            var symbolVerticalSpacing = BettrMenu.GetTableValue<float>(reelStates, $"Reel{reelIndex}", "SymbolScaleX", 1);
+            return symbolVerticalSpacing;
+        }
+        
+        public static float GetSymbolScaleY(string machineName, int reelIndex)
+        {
+            var reelStates = BettrMenu.GetTable($"{machineName}BaseGameReelState");
+            var symbolVerticalSpacing = BettrMenu.GetTableValue<float>(reelStates, $"Reel{reelIndex}", "SymbolScaleY", 1);
             return symbolVerticalSpacing;
         }
     }
@@ -2372,6 +2435,9 @@ namespace Bettr.Editor
 
                 yPositions.Insert(0, 0);
                 
+                var symbolScaleX = BettrMenu.GetSymbolScaleX(machineName, reelIndex);
+                var symbolScaleY = BettrMenu.GetSymbolScaleY(machineName, reelIndex);
+                
                 InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
                 InstanceGameObject.IdGameObjects.Clear();
                 
@@ -2383,6 +2449,8 @@ namespace Bettr.Editor
                     { "yPositions", yPositions },
                     { "waysSymbolIndexes", waysSymbolIndexes },
                     { "symbolKeys", symbolKeys},
+                    { "symbolScaleX", symbolScaleX},
+                    { "symbolScaleY", symbolScaleY},
                 };
                 
                 var json = scribanTemplate.Render(model);
