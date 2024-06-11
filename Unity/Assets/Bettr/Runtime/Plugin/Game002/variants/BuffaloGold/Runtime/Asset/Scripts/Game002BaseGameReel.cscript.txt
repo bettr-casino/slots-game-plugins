@@ -342,8 +342,9 @@ function Game002BaseGameReel:SlideSymbol(symbolIndex, slideDistanceInSymbolUnits
     local localPosition = symbolProperty.gameObject.transform.localPosition
     local symbolPosition = symbolState.SymbolPosition
     local verticalSpacing = reelState.SymbolVerticalSpacing
+    local symbolOffsetY = reelState.SymbolOffsetY
     local yLocalPosition = verticalSpacing * symbolPosition
-    yLocalPosition = yLocalPosition + verticalSpacing * slideDistanceInSymbolUnits
+    yLocalPosition = yLocalPosition + verticalSpacing * slideDistanceInSymbolUnits + symbolOffsetY
     localPosition = Vector3:new(
                 localPosition.x,
                 yLocalPosition,
