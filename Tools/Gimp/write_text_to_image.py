@@ -2,6 +2,8 @@ import os
 import sys
 from PIL import Image, ImageDraw, ImageFont
 
+from write_text_to_image_input import inputs
+
 def get_font_path(font_name):
     """
     Get the path to a specified system font.
@@ -119,15 +121,13 @@ def write_text_to_image(input_filename, lines, output_filename, font_name='Arial
     # Save the image with the text added
     image.save(output_image_path)
 
-# Example usage
-input_filename = 'DefaultLobbyCard.jpg'
-output_filename = input_filename 
-font_name = 'Verdana'
-font_size = 128
-text_color = (255, 255, 255)
-lines = [
-    ("This is the first line of text.", 'Center', 'Center', 0, -200),
-    ("Here is the second line.", 'Center', 'Center', 0, 0),
-    ("And this is the third line.", 'Center', 'Center', 0, 200)
-]
-write_text_to_image(input_filename, lines, output_filename, font_name=font_name, font_size=font_size, text_color=text_color)
+# Process each input set
+for input_set in inputs:
+    write_text_to_image(
+        input_set['input_filename'],
+        input_set['lines'],
+        input_set['output_filename'],
+        font_name=input_set['font_name'],
+        font_size=input_set['font_size'],
+        text_color=input_set['text_color']
+    )
