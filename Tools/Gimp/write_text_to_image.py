@@ -1,7 +1,7 @@
 import os
 import sys
 from PIL import Image, ImageDraw, ImageFont
-
+from collections import Counter
 from write_text_to_image_input import inputs
 
 def get_font_path(font_name):
@@ -19,6 +19,28 @@ def get_font_path(font_name):
         raise FileNotFoundError(f"Font '{font_name}' not found at path: {font_path}")
 
     return font_path
+
+def hex_to_rgb(hex_color):
+    """
+    Convert a hex color string to an RGB tuple.
+    """
+    hex_color = hex_color.lstrip('#')
+    return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+
+def replace_background_color(image, replacement_color):
+    """
+    Replace the target background color with the specified replacement color.
+    """
+    image = image.convert("RGBA")
+    data = image.load()
+
+    width, height = image.size
+    for y in range(height):
+        for x in range(width):
+            r, g, b, a = data[x, y]
+            data[x, y] = replacement_color + (a,)
+
+    return image
 
 def draw_text(draw, text, position, font, text_color, max_width, h_align):
     """
@@ -52,7 +74,7 @@ def draw_text(draw, text, position, font, text_color, max_width, h_align):
             draw.text((x, y), line, font=font, fill=text_color)
         y += height + 5
 
-def write_text_to_image(input_filename, lines, output_filename, font_name='Arial', font_size=20, text_start_pos=(10, 10), text_color=(0, 0, 0), max_width=None):
+def write_text_to_image(input_filename, lines, output_filename, font_name='Arial', font_size=20, text_start_pos=(10, 10), text_color=(0, 0, 0), background_color_hex=None, max_width=None):
     """
     Write an array of lines of text to an existing image file (PNG or JPG).
 
@@ -63,6 +85,7 @@ def write_text_to_image(input_filename, lines, output_filename, font_name='Arial
     :param font_size: Size of the font.
     :param text_start_pos: Tuple (x, y) indicating the start position for the text.
     :param text_color: Text color as an RGB tuple.
+    :param background_color_hex: Hex code of the background color.
     :param max_width: Maximum width for text wrapping.
     """
     # Directories
@@ -80,6 +103,11 @@ def write_text_to_image(input_filename, lines, output_filename, font_name='Arial
     
     # Open the existing image
     image = Image.open(input_image_path).convert("RGBA")
+    
+    # Replace background color if specified
+    if background_color_hex:
+        background_color = hex_to_rgb(background_color_hex)
+        image = replace_background_color(image, background_color)
     
     # Create a drawing context
     draw = ImageDraw.Draw(image)
@@ -121,7 +149,6 @@ def write_text_to_image(input_filename, lines, output_filename, font_name='Arial
     # Save the image with the text added
     image.save(output_image_path)
 
-# Process each input set
 for input_set in inputs:
     write_text_to_image(
         input_set['input_filename'],
@@ -129,5 +156,6 @@ for input_set in inputs:
         input_set['output_filename'],
         font_name=input_set['font_name'],
         font_size=input_set['font_size'],
-        text_color=input_set['text_color']
+        text_color=input_set['text_color'],
+        background_color_hex=input_set.get('background_color')  # Optional background color
     )
