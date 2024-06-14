@@ -26,6 +26,7 @@ namespace Bettr.Core
     public class BettrLobbyCardConfig
     {
         public string Group { get; set; }
+        public string Card { get; set; }
         public string MachineName { get; set; }
         public string MachineBundleName { get; set; }
         public string MachineBundleVariant { get; set; }
