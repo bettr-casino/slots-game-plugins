@@ -196,24 +196,25 @@ inputs = [
         "input_filename": 'LobbyCard.jpg',
         "output_filename": 'Game001__GuardiansOfOlympus__LobbyCard.jpg',
         "font_name": 'Verdana',
-        "font_size": 20,
+        "font_size": 18,
         "text_color": (255, 255, 255),
         "background_color": "#98FB98",
         "lines": [
-            ("GUARDIANS", 'Center', 'Center', 0, -28),
-            ("OF", 'Center', 'Center', 0, 0),
-            ("OLYMPUS", 'Center', 'Center', 0, 24),
+            ("EPIC", 'Center', 'Center', 0, -40),
+            ("GUARDIANS OF", 'Center', 'Center', 0, 0),
+            ("OLYMPUS", 'Center', 'Center', 0, 20),
         ]
     },
     {
         "input_filename": 'LobbyCard.jpg',
         "output_filename": 'Game001__AtlantisTreasures__LobbyCard.jpg',
         "font_name": 'Verdana',
-        "font_size": 20,
+        "font_size": 18,
         "text_color": (255, 255, 255),
         "background_color": "#F08080",
         "lines": [
-            ("ATLANTIS", 'Center', 'Center', 0, -20),
+            ("EPIC", 'Center', 'Center', 0, -40),
+            ("ATLANTIS", 'Center', 'Center', 0, 0),
             ("TREASURES", 'Center', 'Center', 0, 20),
         ]
     },
@@ -225,7 +226,8 @@ inputs = [
         "text_color": (255, 255, 255),
         "background_color": "#AAF0D1",
         "lines": [
-            ("CLOCKWORK", 'Center', 'Center', 0, -20),
+            ("EPIC", 'Center', 'Center', 0, -40),
+            ("CLOCKWORK", 'Center', 'Center', 0, 0),
             ("CHRONICLES", 'Center', 'Center', 0, 20),
         ]
     },
@@ -233,11 +235,12 @@ inputs = [
         "input_filename": 'LobbyCard.jpg',
         "output_filename": 'Game001__GalacticQuest__LobbyCard.jpg',
         "font_name": 'Verdana',
-        "font_size": 20,
+        "font_size": 18,
         "text_color": (255, 255, 255),
         "background_color": "#9AC4FF",
         "lines": [
-            ("GALACTIC", 'Center', 'Center', 0, -20),
+            ("EPIC", 'Center', 'Center', 0, -40),
+            ("GALACTIC", 'Center', 'Center', 0, 0),
             ("QUEST", 'Center', 'Center', 0, 20),
         ]
     },
@@ -245,11 +248,12 @@ inputs = [
         "input_filename": 'LobbyCard.jpg',
         "output_filename": 'Game001__PharosFortune__LobbyCard.jpg',
         "font_name": 'Verdana',
-        "font_size": 20,
+        "font_size": 18,
         "text_color": (255, 255, 255),
         "background_color": "#BAE1FF",
         "lines": [
-            ("PHAROS", 'Center', 'Center', 0, -20),
+            ("EPIC", 'Center', 'Center', 0, -40),
+            ("PHAROS", 'Center', 'Center', 0, 0),
             ("FORTUNE", 'Center', 'Center', 0, 20),
         ]
     },
@@ -257,11 +261,12 @@ inputs = [
         "input_filename": 'LobbyCard.jpg',
         "output_filename": 'Game001__MysticalLegends__LobbyCard.jpg',
         "font_name": 'Verdana',
-        "font_size": 20,
+        "font_size": 18,
         "text_color": (255, 255, 255),
         "background_color": "#BAFFC9",
         "lines": [
-            ("MYSTICAL", 'Center', 'Center', 0, -20),
+            ("EPIC", 'Center', 'Center', 0, -40),
+            ("MYSTICAL", 'Center', 'Center', 0, 0),
             ("LEGENDS", 'Center', 'Center', 0, 20),
         ]
     },
@@ -269,11 +274,12 @@ inputs = [
         "input_filename": 'LobbyCard.jpg',
         "output_filename": 'Game001__AncientAdventures__LobbyCard.jpg',
         "font_name": 'Verdana',
-        "font_size": 20,
+        "font_size": 18,
         "text_color": (255, 255, 255),
         "background_color": "#FFB3BA",
         "lines": [
-            ("ANCIENT", 'Center', 'Center', 0, -20),
+            ("EPIC", 'Center', 'Center', 0, -40),
+            ("ANCIENT", 'Center', 'Center', 0, 0),
             ("ADVENTURES", 'Center', 'Center', 0, 20),
         ]
     },
@@ -281,11 +287,12 @@ inputs = [
         "input_filename": 'LobbyCard.jpg',
         "output_filename": 'Game001__CosmicVoyage__LobbyCard.jpg',
         "font_name": 'Verdana',
-        "font_size": 20,
+        "font_size": 18,
         "text_color": (255, 255, 255),
         "background_color": "#FFB3BA",
         "lines": [
-            ("COSMIC", 'Center', 'Center', 0, -20),
+            ("EPIC", 'Center', 'Center', 0, -40),
+            ("COSMIC", 'Center', 'Center', 0, 0),
             ("VOYAGE", 'Center', 'Center', 0, 20),
         ]
     },
@@ -293,11 +300,11 @@ inputs = [
         "input_filename": "LobbyCard.jpg",
         "output_filename": "Game002__BuffaloTreasureHunter__LobbyCard.jpg",
         "font_name": "Verdana",
-        "font_size": 20,
+        "font_size": 18,
         "text_color": (255, 255, 255),
         "background_color": "#F08080",
         "lines": [
-            ("BUFFALO", "Center", "Center", 0, -20),
+            ("BUFFALO", "Center", "Center", 0, -40),
             ("TREASURE HUNTER", "Center", "Center", 0, 20)
         ]
     },
@@ -309,7 +316,7 @@ inputs = [
         "text_color": (255, 255, 255),
         "background_color": "#AAF0D1",
         "lines": [
-            ("BUFFALO", "Center", "Center", 0, -20),
+            ("BUFFALO", "Center", "Center", 0, -40),
             ("WHEEL OF RICHES", "Center", "Center", 0, 20)
         ]
     },
@@ -317,11 +324,11 @@ inputs = [
         "input_filename": "LobbyCard.jpg",
         "output_filename": "Game002__BuffaloJackpotMadness__LobbyCard.jpg",
         "font_name": "Verdana",
-        "font_size": 20,
+        "font_size": 18,
         "text_color": (255, 255, 255),
         "background_color": "#9AC4FF",
         "lines": [
-            ("BUFFALO", "Center", "Center", 0, -20),
+            ("BUFFALO", "Center", "Center", 0, -40),
             ("JACKPOT MADNESS", "Center", "Center", 0, 20)
         ]
     },
@@ -329,11 +336,11 @@ inputs = [
         "input_filename": "LobbyCard.jpg",
         "output_filename": "Game002__BuffaloWildPicks__LobbyCard.jpg",
         "font_name": "Verdana",
-        "font_size": 20,
+        "font_size": 18,
         "text_color": (255, 255, 255),
         "background_color": "#F08080",
         "lines": [
-            ("BUFFALO", "Center", "Center", 0, -20),
+            ("BUFFALO", "Center", "Center", 0, -40),
             ("WILD PICKS", "Center", "Center", 0, 20)
         ]
     },
@@ -341,11 +348,11 @@ inputs = [
         "input_filename": "LobbyCard.jpg",
         "output_filename": "Game002__BuffaloAdventureQuest__LobbyCard.jpg",
         "font_name": "Verdana",
-        "font_size": 20,
+        "font_size": 18,
         "text_color": (255, 255, 255),
         "background_color": "#ADD8E6",
         "lines": [
-            ("BUFFALO", "Center", "Center", 0, -20),
+            ("BUFFALO", "Center", "Center", 0, -40),
             ("ADVENTURE QUEST", "Center", "Center", 0, 20)
         ]
     },
@@ -353,11 +360,11 @@ inputs = [
         "input_filename": "LobbyCard.jpg",
         "output_filename": "Game002__BuffaloMagicSpins__LobbyCard.jpg",
         "font_name": "Verdana",
-        "font_size": 20,
+        "font_size": 18,
         "text_color": (255, 255, 255),
         "background_color": "#FFD700",
         "lines": [
-            ("BUFFALO", "Center", "Center", 0, -20),
+            ("BUFFALO", "Center", "Center", 0, -40),
             ("MAGIC SPINS", "Center", "Center", 0, 20)
         ]
     },
@@ -365,11 +372,11 @@ inputs = [
         "input_filename": "LobbyCard.jpg",
         "output_filename": "Game002__BuffaloFrontierFortune__LobbyCard.jpg",
         "font_name": "Verdana",
-        "font_size": 20,
+        "font_size": 18,
         "text_color": (255, 255, 255),
         "background_color": "#FFB6C1",
         "lines": [
-            ("BUFFALO", "Center", "Center", 0, -20),
+            ("BUFFALO", "Center", "Center", 0, -40),
             ("FRONTIER FORTUNE", "Center", "Center", 0, 20)
         ]
     },
@@ -377,11 +384,11 @@ inputs = [
         "input_filename": "LobbyCard.jpg",
         "output_filename": "Game002__BuffaloSafariExpedition__LobbyCard.jpg",
         "font_name": "Verdana",
-        "font_size": 20,
+        "font_size": 18,
         "text_color": (255, 255, 255),
         "background_color": "#98FB98",
         "lines": [
-            ("BUFFALO", "Center", "Center", 0, -20),
+            ("BUFFALO", "Center", "Center", 0, -40),
             ("SAFARI", "Center", "Center", 0, 20)
         ]
     }
