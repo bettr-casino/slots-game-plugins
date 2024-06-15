@@ -498,7 +498,7 @@ inputs = [
         "text_color": (255, 255, 255),
         "background_color": "#FFC0CB",
         "lines": [
-            ("HIGH STAKES", "Center", "Center", 0, -40),
+            ("HIGH STAKES", "Center", "Center", 0, -50),
             ("HOT", "Center", "Center", 0, 0),
             ("LINKS", "Center", "Center", 0, 20)
         ]
@@ -511,7 +511,7 @@ inputs = [
         "text_color": (255, 255, 255),
         "background_color": "#FFD700",
         "lines": [
-            ("HIGH STAKES", "Center", "Center", 0, -40),
+            ("HIGH STAKES", "Center", "Center", 0, -50),
             ("WILD", "Center", "Center", 0, 0),
             ("WINS", "Center", "Center", 0, 20)
         ]
@@ -524,7 +524,7 @@ inputs = [
         "text_color": (255, 255, 255),
         "background_color": "#BAE1FF",
         "lines": [
-            ("HIGH STAKES", "Center", "Center", 0, -40),
+            ("HIGH STAKES", "Center", "Center", 0, -50),
             ("MEGA", "Center", "Center", 0, 0),
             ("MULTIPLIERS", "Center", "Center", 0, 20)
         ]
@@ -537,7 +537,7 @@ inputs = [
         "text_color": (255, 255, 255),
         "background_color": "#BAFFC9",
         "lines": [
-            ("HIGH STAKES", "Center", "Center", 0, -40),
+            ("HIGH STAKES", "Center", "Center", 0, -50),
             ("WONDER", "Center", "Center", 0, 0),
             ("WAYS", "Center", "Center", 0, 20)
         ]
@@ -550,7 +550,7 @@ inputs = [
         "text_color": (255, 255, 255),
         "background_color": "#F08080",
         "lines": [
-            ("HIGH STAKES", "Center", "Center", 0, -40),
+            ("HIGH STAKES", "Center", "Center", 0, -50),
             ("CASCADING", "Center", "Center", 0, 0),
             ("CASH", "Center", "Center", 0, 20)
         ]
@@ -563,7 +563,7 @@ inputs = [
         "text_color": (255, 255, 255),
         "background_color": "#FFB6C1",
         "lines": [
-            ("HIGH STAKES", "Center", "Center", 0, -40),
+            ("HIGH STAKES", "Center", "Center", 0, -50),
             ("STACKED", "Center", "Center", 0, 0),
             ("SPINS", "Center", "Center", 0, 20)
         ]
@@ -576,7 +576,7 @@ inputs = [
         "text_color": (255, 255, 255),
         "background_color": "#98FB98",
         "lines": [
-            ("HIGH STAKES", "Center", "Center", 0, -40),
+            ("HIGH STAKES", "Center", "Center", 0, -50),
             ("MONACO", "Center", "Center", 0, 0),
             ("THRILLS", "Center", "Center", 0, 20)
         ]
@@ -589,7 +589,7 @@ inputs = [
         "text_color": (255, 255, 255),
         "background_color": "#ADD8E6",
         "lines": [
-            ("HIGH STAKES", "Center", "Center", 0, -40),
+            ("HIGH STAKES", "Center", "Center", 0, -50),
             ("ALPINE", "Center", "Center", 0, 0),
             ("ADVENTURE", "Center", "Center", 0, 20)
         ]
