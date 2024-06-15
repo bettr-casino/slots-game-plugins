@@ -191,7 +191,105 @@ inputs = [
             ("BUFFALO", "Center", "Center", 0, -200),
             ("SAFARI", "Center", "Center", 0, 200)
         ]
-    },    
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game003__HighStakesHotLinks__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("HIGH STAKES", "Center", "Center", 0, -200),
+            ("HOT LINKS", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game003__HighStakesWildWins__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("HIGH STAKES", "Center", "Center", 0, -200),
+            ("WILD WINS", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game003__HighStakesMegaMultipliers__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("HIGH STAKES", "Center", "Center", 0, -200),
+            ("MEGA", "Center", "Center", 0, 100),
+            ("MULTIPLIERS", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game003__HighStakesWonderWays__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("HIGH STAKES", "Center", "Center", 0, -200),
+            ("WONDER WAYS", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game003__HighStakesCascadingCash__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("HIGH STAKES", "Center", "Center", 0, -200),
+            ("CASCADING", "Center", "Center", 0, 100),
+            ("CASH", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": 'DefaultLobbyCard.jpg',
+        "output_filename": 'Game003__HighStakesStackedSpins__DefaultLobbyCard.jpg',
+        "font_name": 'Verdana',
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("HIGH STAKES", 'Center', 'Center', 0, -200),
+            ("STACKED SPINS", 'Center', 'Center', 0, 200)
+        ]
+    },
+    {
+        "input_filename": 'DefaultLobbyCard.jpg',
+        "output_filename": 'Game003__HighStakesMonacoThrills__DefaultLobbyCard.jpg',
+        "font_name": 'Verdana',
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("HIGH STAKES", 'Center', 'Center', 0, -200),
+            ("MONACO THRILLS", 'Center', 'Center', 0, 200)
+        ]
+    },
+    {
+        "input_filename": 'DefaultLobbyCard.jpg',
+        "output_filename": 'Game003__HighStakesAlpineAdventure__DefaultLobbyCard.jpg',
+        "font_name": 'Verdana',
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("HIGH STAKES", 'Center', 'Center', 0, -200),
+            ("ALPINE ADVENTURE", 'Center', 'Center', 0, 200)
+        ]
+    },
     {
         "input_filename": 'LobbyCard.jpg',
         "output_filename": 'Game001__GuardiansOfOlympus__LobbyCard.jpg',
@@ -390,6 +488,110 @@ inputs = [
         "lines": [
             ("BUFFALO", "Center", "Center", 0, -40),
             ("SAFARI", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game003__HighStakesHotLinks__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#FFC0CB",
+        "lines": [
+            ("HIGH STAKES", "Center", "Center", 0, -40),
+            ("HOT", "Center", "Center", 0, 0),
+            ("LINKS", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game003__HighStakesWildWins__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#FFD700",
+        "lines": [
+            ("HIGH STAKES", "Center", "Center", 0, -40),
+            ("WILD", "Center", "Center", 0, 0),
+            ("WINS", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game003__HighStakesMegaMultipliers__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAE1FF",
+        "lines": [
+            ("HIGH STAKES", "Center", "Center", 0, -40),
+            ("MEGA", "Center", "Center", 0, 0),
+            ("MULTIPLIERS", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game003__HighStakesWonderWays__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("HIGH STAKES", "Center", "Center", 0, -40),
+            ("WONDER", "Center", "Center", 0, 0),
+            ("WAYS", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game003__HighStakesCascadingCash__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#F08080",
+        "lines": [
+            ("HIGH STAKES", "Center", "Center", 0, -40),
+            ("CASCADING", "Center", "Center", 0, 0),
+            ("CASH", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game003__HighStakesStackedSpins__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#FFB6C1",
+        "lines": [
+            ("HIGH STAKES", "Center", "Center", 0, -40),
+            ("STACKED", "Center", "Center", 0, 0),
+            ("SPINS", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game003__HighStakesMonacoThrills__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("HIGH STAKES", "Center", "Center", 0, -40),
+            ("MONACO", "Center", "Center", 0, 0),
+            ("THRILLS", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game003__HighStakesAlpineAdventure__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#ADD8E6",
+        "lines": [
+            ("HIGH STAKES", "Center", "Center", 0, -40),
+            ("ALPINE", "Center", "Center", 0, 0),
+            ("ADVENTURE", "Center", "Center", 0, 20)
         ]
     }
 ]
