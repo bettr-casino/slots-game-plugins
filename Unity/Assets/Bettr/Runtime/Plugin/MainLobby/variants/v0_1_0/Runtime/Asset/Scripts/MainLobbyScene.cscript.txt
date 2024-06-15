@@ -48,6 +48,12 @@ function MainLobbyScene:LoadLobbyCards()
     System.Print("LoadLobbyCards invoked")          
     series
         do
+           local groupCount = #BettrUser.LobbyCardGroups
+           for i = 1, groupCount do
+               local lobbyCardGroup = BettrUser.LobbyCardGroups[i]
+               local groupLabelProperty = self[ lobbyCardGroup.Group .. "Label"]
+               groupLabelProperty.SetText(lobbyCardGroup.Text)                
+           end
            local cardCount = #BettrUser.LobbyCards
            System.Print("LoadApp lobbyCard cardCount={0}", cardCount)
            local LobbyCardMap = {}
