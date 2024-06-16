@@ -291,6 +291,102 @@ inputs = [
         ]
     },
     {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game004__PharaohsRiches__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#FFD700",
+        "lines": [
+            ("PHARAOH'S", "Center", "Center", 0, -200),
+            ("RICHES", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game004__RubyRush__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#FFB6C1",
+        "lines": [
+            ("RUBY", "Center", "Center", 0, -200),
+            ("RUSH", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game004__SapphireSprint__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#87CEEB",
+        "lines": [
+            ("SAPPHIRE", "Center", "Center", 0, -200),
+            ("SPRINT", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game004__DiamondDash__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#D3D3D3",
+        "lines": [
+            ("DIAMOND", "Center", "Center", 0, -200),
+            ("DASH", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game004__RaceToRiches__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#FFA07A",
+        "lines": [
+            ("RACE TO", "Center", "Center", 0, -200),
+            ("RICHES", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game004__BeverlyHillsMansions__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("BEVERLY HILLS", "Center", "Center", 0, -200),
+            ("MANSIONS", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game004__BillionaireBets__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#FFD700",
+        "lines": [
+            ("BILLIONAIRE", "Center", "Center", 0, -200),
+            ("BETS", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game004__JetsetJackpot__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("JETSET", "Center", "Center", 0, -200),
+            ("JACKPOT", "Center", "Center", 0, 200)
+        ]
+    },
+    {
         "input_filename": 'LobbyCard.jpg',
         "output_filename": 'Game001__GuardiansOfOlympus__LobbyCard.jpg',
         "font_name": 'Verdana',
@@ -592,6 +688,110 @@ inputs = [
             ("HIGH STAKES", "Center", "Center", 0, -50),
             ("ALPINE", "Center", "Center", 0, 0),
             ("ADVENTURE", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game004__RichesPharaohsRiches__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#FFD700",
+        "lines": [
+            ("RICHES", "Center", "Center", 0, -50),
+            ("PHARAOH'S", "Center", "Center", 0, 0),
+            ("RICHES", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game004__RichesRubyRush__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#FFB6C1",
+        "lines": [
+            ("RICHES", "Center", "Center", 0, -50),
+            ("RUBY", "Center", "Center", 0, 0),
+            ("RUSH", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game004__RichesSapphireSprint__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#87CEEB",
+        "lines": [
+            ("RICHES", "Center", "Center", 0, -50),
+            ("SAPPHIRE", "Center", "Center", 0, 0),
+            ("SPRINT", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game004__RichesDiamondDash__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#D3D3D3",
+        "lines": [
+            ("RICHES", "Center", "Center", 0, -50),
+            ("DIAMOND", "Center", "Center", 0, 0),
+            ("DASH", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game004__RichesRaceToRiches__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#FFA07A",
+        "lines": [
+            ("RICHES", "Center", "Center", 0, -50),
+            ("RACE TO", "Center", "Center", 0, 0),
+            ("RICHES", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game004__RichesBeverlyHillsMansions__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("RICHES", "Center", "Center", 0, -50),
+            ("BEVERLY HILLS", "Center", "Center", 0, 0),
+            ("MANSIONS", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game004__RichesBillionaireBets__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#FFD700",
+        "lines": [
+            ("RICHES", "Center", "Center", 0, -50),
+            ("BILLIONAIRE", "Center", "Center", 0, 0),
+            ("BETS", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game004__RichesJetsetJackpot__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("RICHES", "Center", "Center", 0, -50),
+            ("JETSET", "Center", "Center", 0, 0),
+            ("JACKPOT", "Center", "Center", 0, 20)
         ]
     }
 ]
