@@ -483,6 +483,102 @@ inputs = [
         ]
     },    
     {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game006__CapitalCityTycoon__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#FFD700",
+        "lines": [
+            ("WHEELS", "Center", "Center", 0, -200),
+            ("CAPITAL CITY TYCOON", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game006__EmpireBuilder__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAE1FF",
+        "lines": [
+            ("WHEELS", "Center", "Center", 0, -200),
+            ("EMPIRE BUILDER", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game006__RealEstateMogul__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#FFB6C1",
+        "lines": [
+            ("WHEELS", "Center", "Center", 0, -200),
+            ("REAL ESTATE MOGUL", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game006__GlobalInvestor__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("WHEELS", "Center", "Center", 0, -200),
+            ("GLOBAL INVESTOR", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game006__TreasureIslandTycoon__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#FFD700",
+        "lines": [
+            ("WHEELS", "Center", "Center", 0, -200),
+            ("TREASURE ISLAND TYCOON", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game006__SpaceColonization__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAE1FF",
+        "lines": [
+            ("WHEELS", "Center", "Center", 0, -200),
+            ("SPACE COLONIZATION", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game006__FantasyKingdom__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#FFB6C1",
+        "lines": [
+            ("WHEELS", "Center", "Center", 0, -200),
+            ("FANTASY KINGDOM", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game006__IndustrialRevolution__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("WHEELS", "Center", "Center", 0, -200),
+            ("INDUSTRIAL REVOLUTION", "Center", "Center", 0, 200)
+        ]
+    },
+    {
         "input_filename": 'LobbyCard.jpg',
         "output_filename": 'Game001__GuardiansOfOlympus__LobbyCard.jpg',
         "font_name": 'Verdana',
@@ -491,7 +587,7 @@ inputs = [
         "background_color": "#98FB98",
         "lines": [
             ("EPIC", 'Center', 'Center', 0, -40),
-            ("GUARDIANS OF", 'Center', 'Center', 0, 0),
+            ("GUARDIANS", 'Center', 'Center', 0, 0),
             ("OLYMPUS", 'Center', 'Center', 0, 20),
         ]
     },
@@ -691,8 +787,8 @@ inputs = [
         "background_color": "#FFC0CB",
         "lines": [
             ("HIGH STAKES", "Center", "Center", 0, -50),
-            ("HOT", "Center", "Center", 0, 0),
-            ("LINKS", "Center", "Center", 0, 20)
+            ("HOT", "Center", "Center", 0, 20),
+            ("LINKS", "Center", "Center", 0, 40)
         ]
     },
     {
@@ -704,8 +800,8 @@ inputs = [
         "background_color": "#FFD700",
         "lines": [
             ("HIGH STAKES", "Center", "Center", 0, -50),
-            ("WILD", "Center", "Center", 0, 0),
-            ("WINS", "Center", "Center", 0, 20)
+            ("WILD", "Center", "Center", 0, 20),
+            ("WINS", "Center", "Center", 0, 40)
         ]
     },
     {
@@ -717,8 +813,8 @@ inputs = [
         "background_color": "#BAE1FF",
         "lines": [
             ("HIGH STAKES", "Center", "Center", 0, -50),
-            ("MEGA", "Center", "Center", 0, 0),
-            ("MULTIPLIERS", "Center", "Center", 0, 20)
+            ("MEGA", "Center", "Center", 0, 20),
+            ("MULTIPLIERS", "Center", "Center", 0, 40)
         ]
     },
     {
@@ -730,8 +826,8 @@ inputs = [
         "background_color": "#BAFFC9",
         "lines": [
             ("HIGH STAKES", "Center", "Center", 0, -50),
-            ("WONDER", "Center", "Center", 0, 0),
-            ("WAYS", "Center", "Center", 0, 20)
+            ("WONDER", "Center", "Center", 0, 20),
+            ("WAYS", "Center", "Center", 0, 40)
         ]
     },
     {
@@ -743,8 +839,8 @@ inputs = [
         "background_color": "#F08080",
         "lines": [
             ("HIGH STAKES", "Center", "Center", 0, -50),
-            ("CASCADING", "Center", "Center", 0, 0),
-            ("CASH", "Center", "Center", 0, 20)
+            ("CASCADING", "Center", "Center", 0, 20),
+            ("CASH", "Center", "Center", 0, 40)
         ]
     },
     {
@@ -756,8 +852,8 @@ inputs = [
         "background_color": "#FFB6C1",
         "lines": [
             ("HIGH STAKES", "Center", "Center", 0, -50),
-            ("STACKED", "Center", "Center", 0, 0),
-            ("SPINS", "Center", "Center", 0, 20)
+            ("STACKED", "Center", "Center", 0, 20),
+            ("SPINS", "Center", "Center", 0, 40)
         ]
     },
     {
@@ -769,8 +865,8 @@ inputs = [
         "background_color": "#98FB98",
         "lines": [
             ("HIGH STAKES", "Center", "Center", 0, -50),
-            ("MONACO", "Center", "Center", 0, 0),
-            ("THRILLS", "Center", "Center", 0, 20)
+            ("MONACO", "Center", "Center", 0, 20),
+            ("THRILLS", "Center", "Center", 0, 40)
         ]
     },
     {
@@ -992,6 +1088,110 @@ inputs = [
             ("FORTUNES", "Center", "Center", 0, -50),
             ("MYSTIC", "Center", "Center", 0, 0),
             ("FORTUNES", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game006__WheelsCapitalCityTycoon__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#FFD700",
+        "lines": [
+            ("WHEELS", "Center", "Center", 0, -50),
+            ("CAPITAL", "Center", "Center", 0, 0),
+            ("CITY TYCOON", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game006__WheelsEmpireBuilder__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAE1FF",
+        "lines": [
+            ("WHEELS", "Center", "Center", 0, -50),
+            ("EMPIRE", "Center", "Center", 0, 0),
+            ("BUILDER", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game006__WheelsRealEstateMogul__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#FFB6C1",
+        "lines": [
+            ("WHEELS", "Center", "Center", 0, -50),
+            ("REAL", "Center", "Center", 0, 0),
+            ("ESTATE MOGUL", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game006__WheelsGlobalInvestor__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("WHEELS", "Center", "Center", 0, -50),
+            ("GLOBAL", "Center", "Center", 0, 0),
+            ("INVESTOR", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game006__WheelsTreasureIslandTycoon__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#FFD700",
+        "lines": [
+            ("WHEELS", "Center", "Center", 0, -50),
+            ("TREASURE", "Center", "Center", 0, 0),
+            ("ISLAND TYCOON", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game006__WheelsSpaceColonization__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAE1FF",
+        "lines": [
+            ("WHEELS", "Center", "Center", 0, -50),
+            ("SPACE", "Center", "Center", 0, 0),
+            ("COLONIZATION", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game006__WheelsFantasyKingdom__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#FFB6C1",
+        "lines": [
+            ("WHEELS", "Center", "Center", 0, -50),
+            ("FANTASY", "Center", "Center", 0, 0),
+            ("KINGDOM", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game006__WheelsIndustrialRevolution__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("WHEELS", "Center", "Center", 0, -50),
+            ("INDUSTRIAL", "Center", "Center", 0, 0),
+            ("REVOLUTION", "Center", "Center", 0, 20)
         ]
     }
 ]
