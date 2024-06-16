@@ -387,6 +387,102 @@ inputs = [
         ]
     },
     {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game005__FortunesFourLeafClover__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("FOUR LEAF", "Center", "Center", 0, -200),
+            ("CLOVER", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game005__FortunesNorseAcorns__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#8FBC8F",
+        "lines": [
+            ("NORSE", "Center", "Center", 0, -200),
+            ("ACORNS", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game005__FortunesManekiNeko__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#FFD700",
+        "lines": [
+            ("MANEKI", "Center", "Center", 0, -200),
+            ("NEKO", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game005__FortunesLuckyBamboo__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#32CD32",
+        "lines": [
+            ("LUCKY", "Center", "Center", 0, -200),
+            ("BAMBOO", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game005__FortunesJadeOfFortune__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#00CED1",
+        "lines": [
+            ("JADE OF", "Center", "Center", 0, -200),
+            ("FORTUNE", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game005__FortunesKeysOfFortune__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#FFA07A",
+        "lines": [
+            ("KEYS OF", "Center", "Center", 0, -200),
+            ("FORTUNE", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game005__FortunesShootingStars__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#6495ED",
+        "lines": [
+            ("SHOOTING", "Center", "Center", 0, -200),
+            ("STARS", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game005__FortunesMysticFortunes__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#8A2BE2",
+        "lines": [
+            ("MYSTIC", "Center", "Center", 0, -200),
+            ("FORTUNES", "Center", "Center", 0, 200)
+        ]
+    },    
+    {
         "input_filename": 'LobbyCard.jpg',
         "output_filename": 'Game001__GuardiansOfOlympus__LobbyCard.jpg',
         "font_name": 'Verdana',
@@ -792,6 +888,110 @@ inputs = [
             ("RICHES", "Center", "Center", 0, -50),
             ("JETSET", "Center", "Center", 0, 0),
             ("JACKPOT", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game005__FortunesFourLeafClover__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("FORTUNES", "Center", "Center", 0, -50),
+            ("FOUR LEAF", "Center", "Center", 0, 0),
+            ("CLOVER", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game005__FortunesNorseAcorns__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#8FBC8F",
+        "lines": [
+            ("FORTUNES", "Center", "Center", 0, -50),
+            ("NORSE", "Center", "Center", 0, 0),
+            ("ACORNS", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game005__FortunesManekiNeko__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#FFD700",
+        "lines": [
+            ("FORTUNES", "Center", "Center", 0, -50),
+            ("MANEKI", "Center", "Center", 0, 0),
+            ("NEKO", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game005__FortunesLuckyBamboo__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#32CD32",
+        "lines": [
+            ("FORTUNES", "Center", "Center", 0, -50),
+            ("LUCKY", "Center", "Center", 0, 0),
+            ("BAMBOO", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game005__FortunesJadeOfFortune__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#00CED1",
+        "lines": [
+            ("FORTUNES", "Center", "Center", 0, -50),
+            ("JADE OF", "Center", "Center", 0, 0),
+            ("FORTUNE", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game005__FortunesKeysOfFortune__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#FFA07A",
+        "lines": [
+            ("FORTUNES", "Center", "Center", 0, -50),
+            ("KEYS OF", "Center", "Center", 0, 0),
+            ("FORTUNE", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game005__FortunesShootingStars__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#6495ED",
+        "lines": [
+            ("FORTUNES", "Center", "Center", 0, -50),
+            ("SHOOTING", "Center", "Center", 0, 0),
+            ("STARS", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game005__FortunesMysticFortunes__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#8A2BE2",
+        "lines": [
+            ("FORTUNES", "Center", "Center", 0, -50),
+            ("MYSTIC", "Center", "Center", 0, 0),
+            ("FORTUNES", "Center", "Center", 0, 20)
         ]
     }
 ]
