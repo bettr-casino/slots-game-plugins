@@ -154,7 +154,7 @@ namespace Bettr.Editor
             BuildLocalServer();
         }
         
-        [MenuItem("Bettr/Build/Game001")]
+        [MenuItem("Bettr/Build/Game001 - Epic Wins!!!")]
         public static void BuildGame001()
         {
             BuildMachines("Game001", "AtlantisTreasures");
