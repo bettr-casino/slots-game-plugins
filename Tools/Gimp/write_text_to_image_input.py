@@ -579,6 +579,102 @@ inputs = [
         ]
     },
     {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game007__TrueVegasLucky7s__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("TRUE VEGAS", "Center", "Center", 0, -200),
+            ("LUCKY 7s", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game007__TrueVegasWheelBonanza__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#F08080",
+        "lines": [
+            ("TRUE VEGAS", "Center", "Center", 0, -200),
+            ("WHEEL BONANZA", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game007__TrueVegasWildCherries__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#AAF0D1",
+        "lines": [
+            ("TRUE VEGAS", "Center", "Center", 0, -200),
+            ("WILD CHERRIES", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game007__TrueVegasSuper7s__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#9AC4FF",
+        "lines": [
+            ("TRUE VEGAS", "Center", "Center", 0, -200),
+            ("SUPER 7s", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game007__TrueVegasMegaWheels__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#F08080",
+        "lines": [
+            ("TRUE VEGAS", "Center", "Center", 0, -200),
+            ("MEGA WHEELS", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game007__TrueVegasMegaJackpot__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("TRUE VEGAS", "Center", "Center", 0, -200),
+            ("MEGA JACKPOT", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game007__TrueVegasInfiniteSpins__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAE1FF",
+        "lines": [
+            ("TRUE VEGAS", "Center", "Center", 0, -200),
+            ("INFINITE SPINS", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game007__TrueVegasTripleSpins__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("TRUE VEGAS", "Center", "Center", 0, -200),
+            ("TRIPLE SPINS", "Center", "Center", 0, 200)             
+        ]
+    },
+    {
         "input_filename": 'LobbyCard.jpg',
         "output_filename": 'Game001__GuardiansOfOlympus__LobbyCard.jpg',
         "font_name": 'Verdana',
@@ -1192,6 +1288,110 @@ inputs = [
             ("WHEELS", "Center", "Center", 0, -50),
             ("INDUSTRIAL", "Center", "Center", 0, 0),
             ("REVOLUTION", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game007__TrueVegasLucky7s__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("TRUE VEGAS", "Center", "Center", 0, -50),
+            ("LUCKY", "Center", "Center", 0, 0),
+            ("7s", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game007__TrueVegasWheelBonanza__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#F08080",
+        "lines": [
+            ("TRUE VEGAS", "Center", "Center", 0, -50),
+            ("WHEEL", "Center", "Center", 0, 0),
+            ("BONANZA", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game007__TrueVegasWildCherries__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#AAF0D1",
+        "lines": [
+            ("TRUE VEGAS", "Center", "Center", 0, -50),
+            ("WILD", "Center", "Center", 0, 0),
+            ("CHERRIES", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game007__TrueVegasSuper7s__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#9AC4FF",
+        "lines": [
+            ("TRUE VEGAS", "Center", "Center", 0, -50),
+            ("SUPER", "Center", "Center", 0, 0),
+            ("7s", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game007__TrueVegasMegaWheels__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#F08080",
+        "lines": [
+            ("TRUE VEGAS", "Center", "Center", 0, -50),
+            ("MEGA", "Center", "Center", 0, 0),
+            ("WHEELS", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game007__TrueVegasMegaJackpot__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("TRUE VEGAS", "Center", "Center", 0, -50),
+            ("MEGA", "Center", "Center", 0, 0),
+            ("JACKPOT", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game007__TrueVegasInfiniteSpins__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAE1FF",
+        "lines": [
+            ("TRUE VEGAS", "Center", "Center", 0, -50),
+            ("INFINITE", "Center", "Center", 0, 0),
+            ("SPINS", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game007__TrueVegasTripleSpins__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("TRUE VEGAS", "Center", "Center", 0, -50),
+            ("TRIPLE", "Center", "Center", 0, 0),
+            ("SPINS", "Center", "Center", 0, 20)
         ]
     }
 ]
