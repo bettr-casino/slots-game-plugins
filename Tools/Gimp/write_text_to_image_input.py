@@ -1605,7 +1605,7 @@ inputs = [
         "font_name": "Verdana",
         "font_size": 18,
         "text_color": (255, 255, 255),
-        "background_color": "#BAFFC9",
+        "background_color": "#FFD1DC",
         "lines": [
             ("GODS", "Center", "Center", 0, -50),
             ("CELESTIAL", "Center", "Center", 0, 0),
@@ -1618,7 +1618,7 @@ inputs = [
         "font_name": "Verdana",
         "font_size": 18,
         "text_color": (255, 255, 255),
-        "background_color": "#BAFFC9",
+        "background_color": "#B0E57C",
         "lines": [
             ("GODS", "Center", "Center", 0, -50),
             ("MYSTIC", "Center", "Center", 0, 0),
@@ -1631,7 +1631,7 @@ inputs = [
         "font_name": "Verdana",
         "font_size": 18,
         "text_color": (255, 255, 255),
-        "background_color": "#BAFFC9",
+        "background_color": "#FFB6C1",
         "lines": [
             ("GODS", "Center", "Center", 0, -50),
             ("DIVINE", "Center", "Center", 0, 0),
@@ -1644,7 +1644,7 @@ inputs = [
         "font_name": "Verdana",
         "font_size": 18,
         "text_color": (255, 255, 255),
-        "background_color": "#BAFFC9",
+        "background_color": "#AEC6CF",
         "lines": [
             ("GODS", "Center", "Center", 0, -50),
             ("HEAVENLY", "Center", "Center", 0, 0),
@@ -1657,7 +1657,7 @@ inputs = [
         "font_name": "Verdana",
         "font_size": 18,
         "text_color": (255, 255, 255),
-        "background_color": "#BAFFC9",
+        "background_color": "#FDFD96",
         "lines": [
             ("GODS", "Center", "Center", 0, -50),
             ("MYTHIC", "Center", "Center", 0, 0),
@@ -1670,7 +1670,7 @@ inputs = [
         "font_name": "Verdana",
         "font_size": 18,
         "text_color": (255, 255, 255),
-        "background_color": "#BAFFC9",
+        "background_color": "#FF6961",
         "lines": [
             ("GODS", "Center", "Center", 0, -50),
             ("SACRED", "Center", "Center", 0, 0),
@@ -1696,7 +1696,7 @@ inputs = [
         "font_name": "Verdana",
         "font_size": 18,
         "text_color": (255, 255, 255),
-        "background_color": "#98FB98",
+        "background_color": "#FFD1DC",
         "lines": [
             ("SPACE", "Center", "Center", 0, -50),
             ("COSMIC", "Center", "Center", 0, 0),
@@ -1709,7 +1709,7 @@ inputs = [
         "font_name": "Verdana",
         "font_size": 18,
         "text_color": (255, 255, 255),
-        "background_color": "#98FB98",
+        "background_color": "#FFB347",
         "lines": [
             ("SPACE", "Center", "Center", 0, -50),
             ("INTERSTELLAR", "Center", "Center", 0, 0),
@@ -1722,7 +1722,7 @@ inputs = [
         "font_name": "Verdana",
         "font_size": 18,
         "text_color": (255, 255, 255),
-        "background_color": "#98FB98",
+        "background_color": "#B0E57C",
         "lines": [
             ("SPACE", "Center", "Center", 0, -50),
             ("APOLLO", "Center", "Center", 0, 0),
@@ -1735,7 +1735,7 @@ inputs = [
         "font_name": "Verdana",
         "font_size": 18,
         "text_color": (255, 255, 255),
-        "background_color": "#98FB98",
+        "background_color": "#AEC6CF",
         "lines": [
             ("SPACE", "Center", "Center", 0, -50),
             ("RAIDERS OF", "Center", "Center", 0, 0),
@@ -1748,7 +1748,7 @@ inputs = [
         "font_name": "Verdana",
         "font_size": 18,
         "text_color": (255, 255, 255),
-        "background_color": "#98FB98",
+        "background_color": "#FFB6C1",
         "lines": [
             ("SPACE", "Center", "Center", 0, -50),
             ("GALACTIC", "Center", "Center", 0, 0),
@@ -1761,7 +1761,7 @@ inputs = [
         "font_name": "Verdana",
         "font_size": 18,
         "text_color": (255, 255, 255),
-        "background_color": "#98FB98",
+        "background_color": "#FDFD96",
         "lines": [
             ("SPACE", "Center", "Center", 0, -50),
             ("NEBULA", "Center", "Center", 0, 0),
@@ -1774,7 +1774,7 @@ inputs = [
         "font_name": "Verdana",
         "font_size": 18,
         "text_color": (255, 255, 255),
-        "background_color": "#98FB98",
+        "background_color": "#FF6961",
         "lines": [
             ("SPACE", "Center", "Center", 0, -50),
             ("STELLAR", "Center", "Center", 0, 0),
