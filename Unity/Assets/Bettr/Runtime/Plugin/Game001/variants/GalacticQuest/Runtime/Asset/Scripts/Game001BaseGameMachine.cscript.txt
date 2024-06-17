@@ -1,0 +1,398 @@
+require "math"
+require "Core"
+require "Game001BaseGameReel"
+
+Game001BaseGameMachine = {
+}
+
+function Game001BaseGameMachine:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game001BaseGameMachine:destroy()
+	System.Print("Game001BaseGameMachine destroy tile id={0}", self.id)
+end
+
+function Game001BaseGameMachine:OnError(callStack)
+	System.Error("Game001BaseGameMachine Error CallStack: {0}", callStack)
+end
+
+function Game001BaseGameMachine:Awake()
+	System.Print("Game001BaseGameMachine Awake tile id={0}", self.id)
+end
+
+function Game001BaseGameMachine:Start()
+    series
+        do
+	        self:ConfigureSettings()
+	        self:ShowSettings()
+	        self:PlayStartAnimations()
+	        self:StartEngines()
+        end
+    end
+end
+
+function Game001BaseGameMachine:OnSpinButtonClicked()
+    self:CancelWaysAnimation()
+    series
+        do
+            self:WaitForPayToComplete()                       
+            self:SpinEngines()
+            self:WaitForApplyOutcomeDelay()
+            self:LoadServerOutcome()
+            self:OnOutcomeReceived()
+        end
+    end
+end
+
+function Game001BaseGameMachine:CancelWaysAnimation()
+    Game001BaseGameState.DisplayState.First.State = "CancelRequested"
+end
+
+function Game001BaseGameMachine:RollUpWaysWin(way, waysState, waysSummary, duration)
+    series
+        do
+            -- rollup ways win once
+            local startDelay = waysSummary.DisplayLoopStartDelay
+            local duration = waysSummary.DisplayLoopDuration
+            local pays = way.Pays
+            System.WaitForSeconds(startDelay)
+            local winTextProperty = self.WinText
+            
+            BettrVisualsController.RollUpCounter(winTextProperty, 0, pays, 1)
+            
+            local creditsTextProperty = self.CreditsText   
+            local oldCoins = waysState.PaysRollup
+            local newCoins = oldCoins + pays            
+            waysState.PaysRollup = newCoins  
+                      
+            BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 1)
+        end
+    end    
+end
+
+function Game001BaseGameMachine:WaitForPayToComplete()
+    series
+        do
+            if Game001BaseGameState.SpinState.First.State == "WaitingForPayToComplete" then
+                local waysSummary = Game001BaseGameWaysSummary.Ways.First
+                local delay = waysSummary.DisplayLoopEndDelay
+                while Game001BaseGameState.SpinState.First.State == "WaitingForPayToComplete" do
+                    Game001BaseGameState.DisplayState.First.State = "CancelRequested"
+                    System.WaitForSeconds(delay)
+                end
+            end
+            Game001BaseGameState.DisplayState.First.State = "Idle"            
+        end
+    end
+end
+
+function Game001BaseGameMachine:WaitingForPayToComplete()    
+end
+
+function Game001BaseGameMachine:BaseGamePaying()
+    Game001BaseGameState.SpinState.First.State = "WaitingForPayToComplete"
+    System.StartCoroutine(self, "BaseGamePayout")
+end
+
+function Game001BaseGameMachine:ConfigureSettings()
+    self.CreditsText.SetText(BettrUser.Coins)
+    self.WinText.SetText("0")       
+    self.BetText.SetText(Game001BetMultiplierState.Current.First.BetMultiplier) 
+end
+
+function Game001BaseGameMachine:ShowSettings()
+    series
+        do
+            local settings = self["Settings"]
+            settings.SetActive(true)
+        end
+    end
+end
+
+function Game001BaseGameMachine:HideSettings()
+    series
+        do
+            local settings = self["Settings"]
+            settings.SetActive(false)
+        end
+    end
+end
+
+function Game001BaseGameMachine:ResetSettings()
+    self.WinText.SetText("0")
+end
+
+function Game001BaseGameMachine:Update()
+    local spinState = Game001BaseGameState.SpinState.First.State
+    self.BaseGameStateDispatchTable[spinState](self)    
+end
+
+function Game001BaseGameMachine:BaseGameSpinning()    
+end
+
+function Game001BaseGameMachine:BaseGameWaiting()    
+end
+
+function Game001BaseGameMachine:BaseGameCompleted()
+   self:ShowSettings()
+   Game001BaseGameState.SpinState.First.State = "Waiting"
+end
+
+function Game001BaseGameMachine:OnBaseGameSpinCompleted()
+    series
+        do
+            Game001BaseGameState.SpinState.First.State = "Completed"
+        end
+    end
+end
+
+function Game001BaseGameMachine:BaseGamePayout()
+    series
+        do
+            local waysState = Game001BaseGameWaysState.Ways.First
+            local waysSummary = Game001BaseGameWaysSummary.Ways.First
+            local waysCount = waysSummary.WaysCount
+            if waysCount > 0 then
+                local ways = Game001BaseGameWays.Ways.Array
+                local waysMatrix = Game001BaseGameWaysMatrix
+                self:DisplayWays(waysState, waysSummary, waysMatrix, ways)            
+                local waysIndex = waysState.WaysIndex
+                if waysIndex >= 1 then
+                    self:OnPayingCompleted()
+                elseif Game001BaseGameState.DisplayState.First.State == "CancelRequested" then
+                    self:OnPayingCompleted()
+                else
+                    System.StartCoroutine(self, "BaseGamePayout")
+                end
+            else
+                self:OnPayingCompleted()
+            end
+        end
+    end      
+end
+
+function Game001BaseGameMachine:DisplayWays(waysState, waysSummary, waysMatrix, ways)
+    series
+        do
+            local waysIndex = waysState.WaysIndex  
+            waysState.PaysRollup = BettrUser.Coins 
+            local waysCount = waysSummary.WaysCount 
+            local startDelay = waysSummary.DisplayLoopStartDelay
+            local duration = waysSummary.DisplayLoopDuration
+            local endDelay = waysSummary.DisplayLoopEndDelay            
+            if waysIndex == 0 then
+                System.WaitForSeconds(startDelay)
+            end
+            for waysCounterIndex = 1, waysCount do
+                series
+                    do
+                        if Game001BaseGameState.DisplayState.First.State == "CancelRequested" then
+                            break
+                        end
+                        local way = ways[waysCounterIndex]
+                        local waySymbol = way.Symbol
+                        local wayReelCount = way.ReelCount
+                        local waySymbolCount = way.SymbolCount
+                        local wayMultiplier = way.Multiplier
+                        local wayPay = way.Pay
+                        local wayTotalPay = way.Pays
+                        local wayMatrix = waysMatrix[waySymbol].Array
+                        -- update status text 
+                        local statusTexts = self.StatusTexts
+                        -- {0}        Pays  {1} x {2} ways = {3} CREDITS!!
+                        statusTexts.FormatAndSetCurrentActive("PaysText", wayReelCount, wayPay, wayMultiplier, wayTotalPay)
+                        local winSymbols = self.WinSymbols
+                        winSymbols.SetCurrentActive(waySymbol)
+                        parallel
+                            do
+                                self:RollUpWaysWin(way, waysState, waysSummary, duration)
+                            end
+                            do
+                                -- display ways
+                                for i=1,wayReelCount parallel do
+                                    local reel = _G["Game001BaseGameReel" .. i]
+                                    if reel != nil then
+                                        reel:DisplayWays(waySymbol, wayMatrix, waySymbolCount, duration)
+                                        System.WaitForSeconds(duration)
+                                        reel:HideWays(waySymbol, wayMatrix, waySymbolCount)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end                            
+            end
+            waysState.WaysIndex = waysIndex + 1
+            System.WaitForSeconds(endDelay) 
+        end
+    end
+end
+
+function Game001BaseGameMachine:UpdateStatusText(text)
+end
+
+function Game001BaseGameMachine:PlayStartAnimations()
+    series
+        do
+            local animatorProperty = self["start"]
+            BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+        end        
+    end
+end
+
+function Game001BaseGameMachine:StartEngines()
+    parallel
+    
+            do
+                Game001BaseGameReel1:StartEngines()
+            end
+        
+            do
+                Game001BaseGameReel2:StartEngines()
+            end
+        
+            do
+                Game001BaseGameReel3:StartEngines()
+            end
+        
+            do
+                Game001BaseGameReel4:StartEngines()
+            end
+        
+            do
+                Game001BaseGameReel5:StartEngines()
+            end
+        
+    end
+end
+
+function Game001BaseGameMachine:LoadServerOutcome()
+    series
+        do
+            BettrOutcomeController.LoadServerOutcome("Game001")
+        end
+    end
+end
+
+function Game001BaseGameMachine:WaitForApplyOutcomeDelay()
+    series
+        do
+            local outcomeDelayInMs = Game001BaseGameSpinProperties.ApplyOutcomeDelay.First.Value
+            if outcomeDelayInMs > 0 then
+                System.WaitForSeconds(outcomeDelayInMs / 1000)
+            end
+        end
+    end
+end
+
+function Game001BaseGameMachine:SpinEngines()
+    Game001BaseGameState.SpinState.First.State = "Spinning"
+    local statusTexts = self.StatusTexts
+    statusTexts.SetCurrentActive("GoodLuckText")
+    local winSymbols = self.WinSymbols
+    winSymbols.SetAllInactive()
+    self:ResetSettings()
+    parallel
+        
+                    do
+                        Game001BaseGameReel1:SpinEngines()
+                    end
+                
+                    do
+                        Game001BaseGameReel2:SpinEngines()
+                    end
+                
+                    do
+                        Game001BaseGameReel3:SpinEngines()
+                    end
+                
+                    do
+                        Game001BaseGameReel4:SpinEngines()
+                    end
+                
+                    do
+                        Game001BaseGameReel5:SpinEngines()
+                    end
+                
+    end
+end
+
+function Game001BaseGameMachine:UpdateBaseGameReelsSpinState(state)
+
+    Game001BaseGameReelSpinState.Reel1.First.ReelSpinState = state
+
+    Game001BaseGameReelSpinState.Reel2.First.ReelSpinState = state
+
+    Game001BaseGameReelSpinState.Reel3.First.ReelSpinState = state
+
+    Game001BaseGameReelSpinState.Reel4.First.ReelSpinState = state
+
+    Game001BaseGameReelSpinState.Reel5.First.ReelSpinState = state
+
+end
+
+function Game001BaseGameMachine:TryPaying()
+    Game001BaseGameState.SpinState.First.State = "Paying"
+end
+
+function Game001BaseGameMachine:CurrentSpinState()
+    return Game001BaseGameState.SpinState.First.State
+end
+
+function Game001BaseGameMachine:OnPayingCompleted()
+    self:OnBaseGameSpinCompleted()
+end
+
+function Game001BaseGameMachine:OnSpinReelsStopped()
+    self:UpdateBaseGameReelsSpinState("Waiting")
+    self:TryPaying()
+end
+
+function Game001BaseGameMachine:OnOutcomeReceived()
+    parallel
+        
+                    do
+                        Game001BaseGameReel1:OnOutcomeReceived()
+                    end
+                
+                    do
+                        Game001BaseGameReel2:OnOutcomeReceived()
+                    end
+                
+                    do
+                        Game001BaseGameReel3:OnOutcomeReceived()
+                    end
+                
+                    do
+                        Game001BaseGameReel4:OnOutcomeReceived()
+                    end
+                
+                    do
+                        Game001BaseGameReel5:OnOutcomeReceived()
+                    end
+                
+    end
+end
+
+function Game001BaseGameMachine:OnPointerClick()
+    System.Print("Game001BaseGameMachine OnPointerClick tile id={0}", self.id)
+    System.StartCoroutine(self, "OnSpinButtonClicked")
+end
+
+function Game001BaseGameMachine:OnBecameVisible()
+	System.Print("Game001BaseGameMachine OnBecameVisible tile id={0}", self.id)
+end
+
+Game001BaseGameMachine.BaseGameStateDispatchTable = {
+    Waiting = Game001BaseGameMachine.BaseGameWaiting,
+    Spinning = Game001BaseGameMachine.BaseGameSpinning,
+    Completed = Game001BaseGameMachine.BaseGameCompleted,
+    Paying = Game001BaseGameMachine.BaseGamePaying,
+    WaitingForPayToComplete = Game001BaseGameMachine.WaitingForPayToComplete,
+}
+
+return Game001BaseGameMachine:new()
