@@ -11,6 +11,7 @@ namespace Bettr.Core
         {
             TileController.RegisterType<BettrSceneConfig>("BettrSceneConfig");
             TileController.RegisterType<BettrLobbyCardConfig>("BettrLobbyCardConfig");
+            TileController.RegisterType<BettrLobbyCardGroupConfig>("BettrLobbyCardGroupConfig");
             TileController.RegisterType<BettrUserConfig>("BettrUserConfig");
         }
     }
@@ -23,9 +24,17 @@ namespace Bettr.Core
     }
     
     [Serializable]
+    public class BettrLobbyCardGroupConfig
+    {
+        public string Group { get; set; }
+        public string Text { get; set; }
+    }
+    
+    [Serializable]
     public class BettrLobbyCardConfig
     {
         public string Group { get; set; }
+        public string Card { get; set; }
         public string MachineName { get; set; }
         public string MachineBundleName { get; set; }
         public string MachineBundleVariant { get; set; }
@@ -45,6 +54,7 @@ namespace Bettr.Core
         public long XP { get; set; }
         public long Level { get; set; }
         public BettrSceneConfig LobbyScene { get; set; }
+        public List<BettrLobbyCardGroupConfig> LobbyCardGroups { get; set; }
         public List<BettrLobbyCardConfig> LobbyCards { get; set; }
     }
 

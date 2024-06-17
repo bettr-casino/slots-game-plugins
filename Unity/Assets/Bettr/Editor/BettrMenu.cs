@@ -154,10 +154,10 @@ namespace Bettr.Editor
             BuildLocalServer();
         }
         
-        [MenuItem("Bettr/Build/Game002 - BuffaloGold")]
+        [MenuItem("Bettr/Build/Game002")]
         public static void BuildGame002()
         {
-            BuildMachines("Game002", "BuffaloGold");
+            BuildMachines("Game002", "BuffaloTreasureHunter");
         }
 
         [MenuItem("Bettr/Build/Game003 - LightningLinkHighStakes")]
