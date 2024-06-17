@@ -675,6 +675,198 @@ inputs = [
         ]
     },
     {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game008__GodsTitansOfWealth__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("GODS", "Center", "Center", 0, -200),
+            ("TITANS OF WEALTH", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game008__GodsCelestialGuardians__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("GODS", "Center", "Center", 0, -200),
+            ("CELESTIAL GUARDIANS", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game008__GodsMysticPantheon__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("GODS", "Center", "Center", 0, -200),
+            ("MYSTIC PANTHEON", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game008__GodsDivineRiches__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("GODS", "Center", "Center", 0, -200),
+            ("DIVINE RICHES", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game008__GodsHeavenlyMonarchs__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("GODS", "Center", "Center", 0, -200),
+            ("HEAVENLY MONARCHS", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game008__GodsMythicDeities__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("GODS", "Center", "Center", 0, -200),
+            ("MYTHIC DEITIES", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game008__GodsSacredLegends__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("GODS", "Center", "Center", 0, -200),
+            ("SACRED LEGENDS", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game008__GodsEternalDivinity__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("GODS", "Center", "Center", 0, -200),
+            ("ETERNAL DIVINITY", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game009__SpaceInvadersCosmicRaiders__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("SPACE INVADERS", "Center", "Center", 0, -200),
+            ("COSMIC RAIDERS", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game009__SpaceInvadersInterstellarTreasureHunters__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("SPACE INVADERS", "Center", "Center", 0, -200),
+            ("INTERSTELLAR TREASURE HUNTERS", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game009__SpaceInvadersApolloAdventurers__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("SPACE INVADERS", "Center", "Center", 0, -200),
+            ("APOLLO ADVENTURERS", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game009__SpaceInvadersRaidersOfPlanetMooney__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("SPACE INVADERS", "Center", "Center", 0, -200),
+            ("RAIDERS OF PLANET MOONEY", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game009__SpaceInvadersGalacticPioneers__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("SPACE INVADERS", "Center", "Center", 0, -200),
+            ("GALACTIC PIONEERS", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game009__SpaceInvadersNebulaNavigators__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("SPACE INVADERS", "Center", "Center", 0, -200),
+            ("NEBULA NAVIGATORS", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game009__SpaceInvadersStellarExpedition__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("SPACE INVADERS", "Center", "Center", 0, -200),
+            ("STELLAR EXPEDITION", "Center", "Center", 0, 200)
+        ]
+    },
+    {
+        "input_filename": "DefaultLobbyCard.jpg",
+        "output_filename": "Game009__SpaceInvadersVoyagersOfTheCosmos__DefaultLobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 200,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("SPACE INVADERS", "Center", "Center", 0, -200),
+            ("VOYAGERS OF THE COSMOS", "Center", "Center", 0, 200)
+        ]
+    },
+    {
         "input_filename": 'LobbyCard.jpg',
         "output_filename": 'Game001__GuardiansOfOlympus__LobbyCard.jpg',
         "font_name": 'Verdana',
@@ -1392,6 +1584,214 @@ inputs = [
             ("TRUE VEGAS", "Center", "Center", 0, -50),
             ("TRIPLE", "Center", "Center", 0, 0),
             ("SPINS", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game008__GodsTitansOfWealth__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("GODS", "Center", "Center", 0, -50),
+            ("TITANS", "Center", "Center", 0, 0),
+            ("OF WEALTH", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game008__GodsCelestialGuardians__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("GODS", "Center", "Center", 0, -50),
+            ("CELESTIAL", "Center", "Center", 0, 0),
+            ("GUARDIANS", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game008__GodsMysticPantheon__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("GODS", "Center", "Center", 0, -50),
+            ("MYSTIC", "Center", "Center", 0, 0),
+            ("PANTHEON", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game008__GodsDivineRiches__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("GODS", "Center", "Center", 0, -50),
+            ("DIVINE", "Center", "Center", 0, 0),
+            ("RICHES", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game008__GodsHeavenlyMonarchs__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("GODS", "Center", "Center", 0, -50),
+            ("HEAVENLY", "Center", "Center", 0, 0),
+            ("MONARCHS", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game008__GodsMythicDeities__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("GODS", "Center", "Center", 0, -50),
+            ("MYTHIC", "Center", "Center", 0, 0),
+            ("DEITIES", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game008__GodsSacredLegends__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("GODS", "Center", "Center", 0, -50),
+            ("SACRED", "Center", "Center", 0, 0),
+            ("LEGENDS", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game008__GodsEternalDivinity__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#BAFFC9",
+        "lines": [
+            ("GODS", "Center", "Center", 0, -50),
+            ("ETERNAL", "Center", "Center", 0, 0),
+            ("DIVINITY", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game009__SpaceInvadersCosmicRaiders__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("SPACE", "Center", "Center", 0, -50),
+            ("COSMIC", "Center", "Center", 0, 0),
+            ("RAIDERS", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game009__SpaceInvadersInterstellarTreasureHunters__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("SPACE", "Center", "Center", 0, -50),
+            ("INTERSTELLAR", "Center", "Center", 0, 0),
+            ("TREASURE HUNTERS", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game009__SpaceInvadersApolloAdventurers__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("SPACE", "Center", "Center", 0, -50),
+            ("APOLLO", "Center", "Center", 0, 0),
+            ("ADVENTURERS", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game009__SpaceInvadersRaidersOfPlanetMooney__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("SPACE", "Center", "Center", 0, -50),
+            ("RAIDERS OF", "Center", "Center", 0, 0),
+            ("PLANET MOONEY", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game009__SpaceInvadersGalacticPioneers__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("SPACE", "Center", "Center", 0, -50),
+            ("GALACTIC", "Center", "Center", 0, 0),
+            ("PIONEERS", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game009__SpaceInvadersNebulaNavigators__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("SPACE", "Center", "Center", 0, -50),
+            ("NEBULA", "Center", "Center", 0, 0),
+            ("NAVIGATORS", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game009__SpaceInvadersStellarExpedition__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("SPACE", "Center", "Center", 0, -50),
+            ("STELLAR", "Center", "Center", 0, 0),
+            ("EXPEDITION", "Center", "Center", 0, 20)
+        ]
+    },
+    {
+        "input_filename": "LobbyCard.jpg",
+        "output_filename": "Game009__SpaceInvadersVoyagersOfTheCosmos__LobbyCard.jpg",
+        "font_name": "Verdana",
+        "font_size": 18,
+        "text_color": (255, 255, 255),
+        "background_color": "#98FB98",
+        "lines": [
+            ("SPACE", "Center", "Center", 0, -50),
+            ("VOYAGERS OF", "Center", "Center", 0, 0),
+            ("THE COSMOS", "Center", "Center", 0, 20)
         ]
     }
 ]
