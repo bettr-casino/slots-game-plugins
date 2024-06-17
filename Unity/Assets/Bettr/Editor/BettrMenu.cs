@@ -158,12 +158,12 @@ namespace Bettr.Editor
         public static void BuildGame001()
         {
             BuildMachines("Game001", "AtlantisTreasures");
-            BuildMachines("Game001", "ClockworkChronicles");
-            BuildMachines("Game001", "GalacticQuest");
-            BuildMachines("Game001", "PharosFortune");
-            BuildMachines("Game001", "MysticalLegends");
-            BuildMachines("Game001", "AncientAdventures");
-            BuildMachines("Game001", "CosmicVoyage");
+            // BuildMachines("Game001", "ClockworkChronicles");
+            // BuildMachines("Game001", "GalacticQuest");
+            // BuildMachines("Game001", "PharosFortune");
+            // BuildMachines("Game001", "MysticalLegends");
+            // BuildMachines("Game001", "AncientAdventures");
+            // BuildMachines("Game001", "CosmicVoyage");
         }
         
         [MenuItem("Bettr/Build/Game002")]
