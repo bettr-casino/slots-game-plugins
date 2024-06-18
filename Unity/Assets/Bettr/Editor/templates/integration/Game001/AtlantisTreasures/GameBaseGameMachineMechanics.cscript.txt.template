@@ -1,7 +1,9 @@
 require "math"
 require "Core"
+require "{{machineName}}BaseGameMachineWaysMechanic"
 
 {{machineName}}BaseGameMachineMechanics = {
+    WaysMechanic = nil,
 }
 
 function {{machineName}}BaseGameMachineMechanics:new(o)
@@ -11,85 +13,15 @@ function {{machineName}}BaseGameMachineMechanics:new(o)
 	return o
 end
 
+function {{machineName}}BaseGameMachineMechanics:Initialize()
+    self.WaysMechanic = {{machineName}}BaseGameMachineWaysMechanic:new()
+    self.WaysMechanic:Initialize()
+end
+
 function {{machineName}}BaseGameMachineMechanics:BaseGamePayout(machine)
     series
         do
-            self:DisplayWays(machine)
-        end
-    end
-end
-
-function {{machineName}}BaseGameMachineMechanics:DisplayWays(machine)
-    series
-        do
-            local waysState = {{machineName}}BaseGameWaysState.Ways.First
-            local waysSummary = {{machineName}}BaseGameWaysSummary.Ways.First
-            local ways = {{machineName}}BaseGameWays.Ways.Array
-            local waysMatrix = {{machineName}}BaseGameWaysMatrix                        
-            local waysCount = waysSummary.WaysCount
-            if waysCount == 0 then
-                machine:OnPayingCompleted()
-                return
-            end
-            waysState.PaysRollup = BettrUser.Coins 
-            local waysCount = waysSummary.WaysCount 
-            local startDelay = waysSummary.DisplayLoopStartDelay
-            local duration = waysSummary.DisplayLoopDuration
-            local endDelay = waysSummary.DisplayLoopEndDelay            
-            if waysIndex == 0 then
-                System.WaitForSeconds(startDelay)
-            end
-            for waysCounterIndex = 1, waysCount do
-                series
-                    do
-                        if {{machineName}}BaseGameState.DisplayState.First.State == "CancelRequested" then
-                            break
-                        end
-                        local way = ways[waysCounterIndex]
-                        local waySymbol = way.Symbol
-                        local wayReelCount = way.ReelCount
-                        local waySymbolCount = way.SymbolCount
-                        local wayMultiplier = way.Multiplier
-                        local wayPay = way.Pay
-                        local wayTotalPay = way.Pays
-                        local wayMatrix = waysMatrix[waySymbol].Array
-                        -- update status text 
-                        local statusTexts = machine.StatusTexts
-                        -- {0}        Pays  {1} x {2} ways = {3} CREDITS!!
-                        statusTexts.FormatAndSetCurrentActive("PaysText", wayReelCount, wayPay, wayMultiplier, wayTotalPay)
-                        local winSymbols = machine.WinSymbols
-                        winSymbols.SetCurrentActive(waySymbol)
-                        parallel
-                            do
-                                machine:RollUpWaysWin(way, waysState, waysSummary, duration)
-                            end
-                            do
-                                -- display ways
-                                for i=1,wayReelCount parallel do
-                                    local reel = _G["{{machineName}}BaseGameReel" .. i]
-                                    if reel != nil then
-                                        reel.Mechanics:DisplayWays(reel, waySymbol, wayMatrix, waySymbolCount, duration)
-                                        System.WaitForSeconds(duration)
-                                        reel:HideWays(waySymbol, wayMatrix, waySymbolCount)
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end                            
-            end
-            local waysIndex = waysState.WaysIndex
-            waysState.WaysIndex = waysIndex + 1
-            System.WaitForSeconds(endDelay)
-            if waysIndex >= 1 then
-                machine:OnPayingCompleted()
-                return
-            end
-            if {{machineName}}BaseGameState.DisplayState.First.State == "CancelRequested" then
-                machine:OnPayingCompleted()
-                return
-            end
-            System.StartCoroutine(machine, "BaseGamePayout")
+            self.WaysMechanic:DisplayWays(machine)
         end
     end
 end
