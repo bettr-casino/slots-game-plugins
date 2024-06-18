@@ -18,7 +18,11 @@ function Game001BaseGameMachineMechanics:DisplayWays(machine)
             local waysSummary = Game001BaseGameWaysSummary.Ways.First
             local ways = Game001BaseGameWays.Ways.Array
             local waysMatrix = Game001BaseGameWaysMatrix                        
-            local waysIndex = waysState.WaysIndex  
+            local waysCount = waysSummary.WaysCount
+            if waysCount == 0 then
+                machine:OnPayingCompleted()
+                return
+            end
             waysState.PaysRollup = BettrUser.Coins 
             local waysCount = waysSummary.WaysCount 
             local startDelay = waysSummary.DisplayLoopStartDelay
@@ -66,8 +70,18 @@ function Game001BaseGameMachineMechanics:DisplayWays(machine)
                     end
                 end                            
             end
+            local waysIndex = waysState.WaysIndex
             waysState.WaysIndex = waysIndex + 1
-            System.WaitForSeconds(endDelay) 
+            System.WaitForSeconds(endDelay)
+            if waysIndex >= 1 then
+                machine:OnPayingCompleted()
+                return
+            end
+            if Game001BaseGameState.DisplayState.First.State == "CancelRequested" then
+                machine:OnPayingCompleted()
+                return
+            end
+            System.StartCoroutine(machine, "BaseGamePayout")
         end
     end
 end
