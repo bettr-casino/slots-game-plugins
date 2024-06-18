@@ -1,8 +1,10 @@
 require "math"
 require "Core"
 require "{{machineName}}BaseGameReel"
+require "{{machineName}}BaseGameMachineMechanics"
 
 {{machineName}}BaseGameMachine = {
+    Mechanics = nil,
 }
 
 function {{machineName}}BaseGameMachine:new(o)
@@ -22,6 +24,7 @@ end
 
 function {{machineName}}BaseGameMachine:Awake()
 	System.Print("{{machineName}}BaseGameMachine Awake tile id={0}", self.id)
+	self.Mechanics = {{machineName}}BaseGameMachineMechanics:new()
 end
 
 function {{machineName}}BaseGameMachine:Start()
@@ -159,7 +162,7 @@ function {{machineName}}BaseGameMachine:BaseGamePayout()
             if waysCount > 0 then
                 local ways = {{machineName}}BaseGameWays.Ways.Array
                 local waysMatrix = {{machineName}}BaseGameWaysMatrix
-                self:DisplayWays(waysState, waysSummary, waysMatrix, ways)            
+                self.Mechanics:DisplayWays(self, waysState, waysSummary, waysMatrix, ways)            
                 local waysIndex = waysState.WaysIndex
                 if waysIndex >= 1 then
                     self:OnPayingCompleted()
@@ -173,63 +176,6 @@ function {{machineName}}BaseGameMachine:BaseGamePayout()
             end
         end
     end      
-end
-
-function {{machineName}}BaseGameMachine:DisplayWays(waysState, waysSummary, waysMatrix, ways)
-    series
-        do
-            local waysIndex = waysState.WaysIndex  
-            waysState.PaysRollup = BettrUser.Coins 
-            local waysCount = waysSummary.WaysCount 
-            local startDelay = waysSummary.DisplayLoopStartDelay
-            local duration = waysSummary.DisplayLoopDuration
-            local endDelay = waysSummary.DisplayLoopEndDelay            
-            if waysIndex == 0 then
-                System.WaitForSeconds(startDelay)
-            end
-            for waysCounterIndex = 1, waysCount do
-                series
-                    do
-                        if {{machineName}}BaseGameState.DisplayState.First.State == "CancelRequested" then
-                            break
-                        end
-                        local way = ways[waysCounterIndex]
-                        local waySymbol = way.Symbol
-                        local wayReelCount = way.ReelCount
-                        local waySymbolCount = way.SymbolCount
-                        local wayMultiplier = way.Multiplier
-                        local wayPay = way.Pay
-                        local wayTotalPay = way.Pays
-                        local wayMatrix = waysMatrix[waySymbol].Array
-                        -- update status text 
-                        local statusTexts = self.StatusTexts
-                        -- {0}        Pays  {1} x {2} ways = {3} CREDITS!!
-                        statusTexts.FormatAndSetCurrentActive("PaysText", wayReelCount, wayPay, wayMultiplier, wayTotalPay)
-                        local winSymbols = self.WinSymbols
-                        winSymbols.SetCurrentActive(waySymbol)
-                        parallel
-                            do
-                                self:RollUpWaysWin(way, waysState, waysSummary, duration)
-                            end
-                            do
-                                -- display ways
-                                for i=1,wayReelCount parallel do
-                                    local reel = _G["{{machineName}}BaseGameReel" .. i]
-                                    if reel != nil then
-                                        reel:DisplayWays(waySymbol, wayMatrix, waySymbolCount, duration)
-                                        System.WaitForSeconds(duration)
-                                        reel:HideWays(waySymbol, wayMatrix, waySymbolCount)
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end                            
-            end
-            waysState.WaysIndex = waysIndex + 1
-            System.WaitForSeconds(endDelay) 
-        end
-    end
 end
 
 function {{machineName}}BaseGameMachine:UpdateStatusText(text)

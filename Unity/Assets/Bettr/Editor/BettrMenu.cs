@@ -782,6 +782,33 @@ namespace Bettr.Editor
                 var destinationPath = Path.Combine(runtimeAssetPath, "Scripts", $"{scriptName}");
                 File.WriteAllText(destinationPath, scriptText);
             }
+            
+            // Process variant scripts
+            
+            dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "templates", "integration", machineName, machineVariant);
+            filePaths = Directory.GetFiles(dirPath, "*.cscript.txt.template");
+            scriptsPath = $"integration/{machineName}/{machineVariant}";
+            foreach (string filePath in filePaths)
+            {
+                var scribanTemplate = ParseScribanTemplate(scriptsPath, filePath);
+                var model = new Dictionary<string, object>
+                {
+                    { "machineName", machineName },
+                    { "machineVariant", machineVariant },
+                    { "machines", new string[]
+                        {
+                            "BaseGame",
+                        } 
+                    },
+                    { "reelCount", reelCount },
+                };
+                var scriptText = scribanTemplate.Render(model);
+                var scriptName = Path.GetFileNameWithoutExtension(filePath); // remove the .template
+                scriptName = Regex.Replace(scriptName, @"^Game", machineName);
+                
+                var destinationPath = Path.Combine(runtimeAssetPath, "Scripts", $"{scriptName}");
+                File.WriteAllText(destinationPath, scriptText);
+            }
         }
 
         private static GameObject ProcessBaseGameSymbols(string machineName, string machineVariant, string runtimeAssetPath)
