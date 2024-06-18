@@ -11,9 +11,13 @@ function Game001BaseGameMachineMechanics:new(o)
 	return o
 end
 
-function Game001BaseGameMachineMechanics:DisplayWays(machine, waysState, waysSummary, waysMatrix, ways)
+function Game001BaseGameMachineMechanics:DisplayWays(machine)
     series
         do
+            local waysState = Game001BaseGameWaysState.Ways.First
+            local waysSummary = Game001BaseGameWaysSummary.Ways.First
+            local ways = Game001BaseGameWays.Ways.Array
+            local waysMatrix = Game001BaseGameWaysMatrix                        
             local waysIndex = waysState.WaysIndex  
             waysState.PaysRollup = BettrUser.Coins 
             local waysCount = waysSummary.WaysCount 

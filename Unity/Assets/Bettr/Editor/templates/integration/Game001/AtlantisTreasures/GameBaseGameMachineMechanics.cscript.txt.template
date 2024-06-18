@@ -11,9 +11,13 @@ function {{machineName}}BaseGameMachineMechanics:new(o)
 	return o
 end
 
-function {{machineName}}BaseGameMachineMechanics:DisplayWays(machine, waysState, waysSummary, waysMatrix, ways)
+function {{machineName}}BaseGameMachineMechanics:DisplayWays(machine)
     series
         do
+            local waysState = {{machineName}}BaseGameWaysState.Ways.First
+            local waysSummary = {{machineName}}BaseGameWaysSummary.Ways.First
+            local ways = {{machineName}}BaseGameWays.Ways.Array
+            local waysMatrix = {{machineName}}BaseGameWaysMatrix                        
             local waysIndex = waysState.WaysIndex  
             waysState.PaysRollup = BettrUser.Coins 
             local waysCount = waysSummary.WaysCount 
