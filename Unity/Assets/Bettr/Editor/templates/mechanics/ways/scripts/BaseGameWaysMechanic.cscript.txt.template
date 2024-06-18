@@ -1,20 +1,17 @@
 require "math"
 require "Core"
 
-{{machineName}}BaseGameMachineWaysMechanic = {
+{{machineName}}BaseGameWaysMechanic = {
 }
 
-function {{machineName}}BaseGameMachineWaysMechanic:new(o)
+function {{machineName}}BaseGameWaysMechanic:new(o)
 	o = o or {}
 	setmetatable(o, self)
 	self.__index = self
 	return o
 end
 
-function {{machineName}}BaseGameMachineWaysMechanic:Initialize()
-end
-
-function {{machineName}}BaseGameMachineWaysMechanic:DisplayWays(machine)
+function {{machineName}}BaseGameWaysMechanic:DisplayWays(machine)
     series
         do
             local waysState = {{machineName}}BaseGameWaysState.Ways.First
@@ -86,25 +83,5 @@ function {{machineName}}BaseGameMachineWaysMechanic:DisplayWays(machine)
             end
             System.StartCoroutine(machine, "BaseGamePayout")
         end
-    end
-end
-
-function {{machineName}}BaseGameReelMechanics:DisplayWays(reel, waySymbol, wayMatrix, waySymbolCount, duration)
-    for i=1,waySymbolCount parallel do
-        local wayReelID = wayMatrix[i].ReelID
-       if wayReelID == reel.ReelID then
-           local waysGroupProperty = reel.WaysGroup
-           local rowIndex = wayMatrix[i].RowIndex
-           local luaRowIndex = rowIndex + 1
-           waysGroupProperty["RowIndex" .. luaRowIndex].SetActive(true)
-           local animatorGroupProperty = reel["SymbolWaysWinAnimatorGroup" .. luaRowIndex]
-           local symbolGroupProperty = reel["SymbolGroup" .. luaRowIndex]
-           local currentKey = symbolGroupProperty.CurrentKey
-           local animatorProperty = animatorGroupProperty[currentKey]
-           animatorProperty.overrideAnimationDuration = true
-           animatorProperty.animationDuration = duration
-           BettrVisualsController.PlayAnimatorProperty(animatorProperty)
-           -- Core.Animator:PlayAnimatorProperty(currentKey, animatorProperty)
-       end
     end
 end
