@@ -24,3 +24,12 @@ function {{machineName}}BaseGameMachineMechanics:BaseGamePayout(machine)
         end
     end
 end
+
+function {{machineName}}BaseGameMachineMechanics:OnSpinButtonClicked(machine)
+    series
+        do
+            self.WaysMechanic:CancelWaysAnimation()
+            self.WaysMechanic:WaitForPayToComplete()
+        end
+    end
+end

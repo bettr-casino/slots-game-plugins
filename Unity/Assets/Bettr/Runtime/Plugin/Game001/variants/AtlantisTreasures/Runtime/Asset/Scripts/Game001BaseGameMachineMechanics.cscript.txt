@@ -24,3 +24,12 @@ function Game001BaseGameMachineMechanics:BaseGamePayout(machine)
         end
     end
 end
+
+function Game001BaseGameMachineMechanics:OnSpinButtonClicked(machine)
+    series
+        do
+            self.WaysMechanic:CancelWaysAnimation()
+            self.WaysMechanic:WaitForPayToComplete()
+        end
+    end
+end

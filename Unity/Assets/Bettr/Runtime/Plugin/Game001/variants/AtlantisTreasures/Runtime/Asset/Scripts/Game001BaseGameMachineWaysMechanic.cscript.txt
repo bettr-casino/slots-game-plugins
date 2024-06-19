@@ -11,6 +11,26 @@ function Game001BaseGameMachineWaysMechanic:new(o)
 	return o
 end
 
+function Game001BaseGameMachineWaysMechanic:CancelWaysAnimation()
+    Game001BaseGameState.DisplayState.First.State = "CancelRequested"
+end
+
+function Game001BaseGameMachineWaysMechanic:WaitForPayToComplete()
+    series
+        do
+            if Game001BaseGameState.SpinState.First.State == "WaitingForPayToComplete" then
+                local waysSummary = Game001BaseGameWaysSummary.Ways.First
+                local delay = waysSummary.DisplayLoopEndDelay
+                while Game001BaseGameState.SpinState.First.State == "WaitingForPayToComplete" do
+                    Game001BaseGameState.DisplayState.First.State = "CancelRequested"
+                    System.WaitForSeconds(delay)
+                end
+            end
+            Game001BaseGameState.DisplayState.First.State = "Idle"            
+        end
+    end
+end
+
 function Game001BaseGameMachineWaysMechanic:DisplayWays(machine)
     series
         do
@@ -53,7 +73,7 @@ function Game001BaseGameMachineWaysMechanic:DisplayWays(machine)
                         winSymbols.SetCurrentActive(waySymbol)
                         parallel
                             do
-                                machine:RollUpWaysWin(way, waysState, waysSummary, duration)
+                                self:RollUpWaysWin(machine, way, waysState, waysSummary, duration)
                             end
                             do
                                 -- display ways
@@ -84,4 +104,26 @@ function Game001BaseGameMachineWaysMechanic:DisplayWays(machine)
             System.StartCoroutine(machine, "BaseGamePayout")
         end
     end
+end
+
+function Game001BaseGameMachineWaysMechanic:RollUpWaysWin(machine, way, waysState, waysSummary, duration)
+    series
+        do
+            -- rollup ways win once
+            local startDelay = waysSummary.DisplayLoopStartDelay
+            local duration = waysSummary.DisplayLoopDuration
+            local pays = way.Pays
+            System.WaitForSeconds(startDelay)
+            local winTextProperty = machine.WinText
+            
+            BettrVisualsController.RollUpCounter(winTextProperty, 0, pays, 1)
+            
+            local creditsTextProperty = machine.CreditsText   
+            local oldCoins = waysState.PaysRollup
+            local newCoins = oldCoins + pays            
+            waysState.PaysRollup = newCoins  
+                      
+            BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 1)
+        end
+    end    
 end

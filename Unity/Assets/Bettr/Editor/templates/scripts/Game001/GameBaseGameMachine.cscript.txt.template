@@ -42,54 +42,11 @@ end
 function {{machineName}}BaseGameMachine:OnSpinButtonClicked()
     series
         do
-            self:CancelWaysAnimation()
-            self:WaitForPayToComplete()                       
+            self.Mechanics:OnSpinButtonClicked(self)
             self:SpinEngines()
             self:WaitForApplyOutcomeDelay()
             self:LoadServerOutcome()
             self:OnOutcomeReceived()
-        end
-    end
-end
-
-function {{machineName}}BaseGameMachine:CancelWaysAnimation()
-    {{machineName}}BaseGameState.DisplayState.First.State = "CancelRequested"
-end
-
-function {{machineName}}BaseGameMachine:RollUpWaysWin(way, waysState, waysSummary, duration)
-    series
-        do
-            -- rollup ways win once
-            local startDelay = waysSummary.DisplayLoopStartDelay
-            local duration = waysSummary.DisplayLoopDuration
-            local pays = way.Pays
-            System.WaitForSeconds(startDelay)
-            local winTextProperty = self.WinText
-            
-            BettrVisualsController.RollUpCounter(winTextProperty, 0, pays, 1)
-            
-            local creditsTextProperty = self.CreditsText   
-            local oldCoins = waysState.PaysRollup
-            local newCoins = oldCoins + pays            
-            waysState.PaysRollup = newCoins  
-                      
-            BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 1)
-        end
-    end    
-end
-
-function {{machineName}}BaseGameMachine:WaitForPayToComplete()
-    series
-        do
-            if {{machineName}}BaseGameState.SpinState.First.State == "WaitingForPayToComplete" then
-                local waysSummary = {{machineName}}BaseGameWaysSummary.Ways.First
-                local delay = waysSummary.DisplayLoopEndDelay
-                while {{machineName}}BaseGameState.SpinState.First.State == "WaitingForPayToComplete" do
-                    {{machineName}}BaseGameState.DisplayState.First.State = "CancelRequested"
-                    System.WaitForSeconds(delay)
-                end
-            end
-            {{machineName}}BaseGameState.DisplayState.First.State = "Idle"            
         end
     end
 end
