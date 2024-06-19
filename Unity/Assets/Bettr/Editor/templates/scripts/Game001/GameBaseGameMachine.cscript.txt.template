@@ -40,9 +40,9 @@ function {{machineName}}BaseGameMachine:Start()
 end
 
 function {{machineName}}BaseGameMachine:OnSpinButtonClicked()
-    self:CancelWaysAnimation()
     series
         do
+            self:CancelWaysAnimation()
             self:WaitForPayToComplete()                       
             self:SpinEngines()
             self:WaitForApplyOutcomeDelay()
