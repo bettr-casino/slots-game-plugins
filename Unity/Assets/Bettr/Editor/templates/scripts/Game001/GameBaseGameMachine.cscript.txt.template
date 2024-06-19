@@ -25,7 +25,7 @@ end
 function {{machineName}}BaseGameMachine:Awake()
 	System.Print("{{machineName}}BaseGameMachine Awake tile id={0}", self.id)
 	self.Mechanics = {{machineName}}BaseGameMachineMechanics:new()
-	self.Mechanics:Initialize()
+	self.Mechanics:Initialize(self)
 end
 
 function {{machineName}}BaseGameMachine:Start()
@@ -49,14 +49,6 @@ function {{machineName}}BaseGameMachine:OnSpinButtonClicked()
             self:OnOutcomeReceived()
         end
     end
-end
-
-function {{machineName}}BaseGameMachine:WaitingForPayToComplete()    
-end
-
-function {{machineName}}BaseGameMachine:BaseGamePaying()
-    {{machineName}}BaseGameState.SpinState.First.State = "WaitingForPayToComplete"
-    System.StartCoroutine(self, "BaseGamePayout")
 end
 
 function {{machineName}}BaseGameMachine:ConfigureSettings()
@@ -222,8 +214,6 @@ end
     Waiting = {{machineName}}BaseGameMachine.BaseGameWaiting,
     Spinning = {{machineName}}BaseGameMachine.BaseGameSpinning,
     Completed = {{machineName}}BaseGameMachine.BaseGameCompleted,
-    Paying = {{machineName}}BaseGameMachine.BaseGamePaying,
-    WaitingForPayToComplete = {{machineName}}BaseGameMachine.WaitingForPayToComplete,
 }
 
 return {{machineName}}BaseGameMachine:new()

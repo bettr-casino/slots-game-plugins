@@ -13,8 +13,9 @@ function {{machineName}}BaseGameMachineMechanics:new(o)
 	return o
 end
 
-function {{machineName}}BaseGameMachineMechanics:Initialize()
+function {{machineName}}BaseGameMachineMechanics:Initialize(machine)
     self.WaysMechanic = {{machineName}}BaseGameMachineWaysMechanic:new()
+    self.WaysMechanic:Initialize(machine)
 end
 
 function {{machineName}}BaseGameMachineMechanics:BaseGamePayout(machine)

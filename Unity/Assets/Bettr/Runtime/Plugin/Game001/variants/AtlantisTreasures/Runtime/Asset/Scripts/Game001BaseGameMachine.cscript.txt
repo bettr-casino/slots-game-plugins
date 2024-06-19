@@ -25,7 +25,7 @@ end
 function Game001BaseGameMachine:Awake()
 	System.Print("Game001BaseGameMachine Awake tile id={0}", self.id)
 	self.Mechanics = Game001BaseGameMachineMechanics:new()
-	self.Mechanics:Initialize()
+	self.Mechanics:Initialize(self)
 end
 
 function Game001BaseGameMachine:Start()
@@ -49,14 +49,6 @@ function Game001BaseGameMachine:OnSpinButtonClicked()
             self:OnOutcomeReceived()
         end
     end
-end
-
-function Game001BaseGameMachine:WaitingForPayToComplete()    
-end
-
-function Game001BaseGameMachine:BaseGamePaying()
-    Game001BaseGameState.SpinState.First.State = "WaitingForPayToComplete"
-    System.StartCoroutine(self, "BaseGamePayout")
 end
 
 function Game001BaseGameMachine:ConfigureSettings()
@@ -278,8 +270,6 @@ Game001BaseGameMachine.BaseGameStateDispatchTable = {
     Waiting = Game001BaseGameMachine.BaseGameWaiting,
     Spinning = Game001BaseGameMachine.BaseGameSpinning,
     Completed = Game001BaseGameMachine.BaseGameCompleted,
-    Paying = Game001BaseGameMachine.BaseGamePaying,
-    WaitingForPayToComplete = Game001BaseGameMachine.WaitingForPayToComplete,
 }
 
 return Game001BaseGameMachine:new()

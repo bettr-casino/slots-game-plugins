@@ -13,8 +13,9 @@ function Game001BaseGameMachineMechanics:new(o)
 	return o
 end
 
-function Game001BaseGameMachineMechanics:Initialize()
+function Game001BaseGameMachineMechanics:Initialize(machine)
     self.WaysMechanic = Game001BaseGameMachineWaysMechanic:new()
+    self.WaysMechanic:Initialize(machine)
 end
 
 function Game001BaseGameMachineMechanics:BaseGamePayout(machine)

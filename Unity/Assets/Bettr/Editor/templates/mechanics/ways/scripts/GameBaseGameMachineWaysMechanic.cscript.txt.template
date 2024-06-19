@@ -11,6 +11,24 @@ function {{machineName}}BaseGameMachineWaysMechanic:new(o)
 	return o
 end
 
+function {{machineName}}BaseGameMachineWaysMechanic:Initialize(machine)
+    -- Appending new entries to the table
+    {{machineName}}BaseGameMachine.BaseGameStateDispatchTable.Paying = function()
+        self:BaseGamePaying(machine)
+    end
+    {{machineName}}BaseGameMachine.BaseGameStateDispatchTable.WaitingForPayToComplete = function()
+        self:WaitingForPayToComplete(machine)
+    end
+end
+
+function {{machineName}}BaseGameMachineWaysMechanic:BaseGamePaying(machine)
+    {{machineName}}BaseGameState.SpinState.First.State = "WaitingForPayToComplete"
+    System.StartCoroutine(machine, "BaseGamePayout")
+end
+
+function {{machineName}}BaseGameMachineWaysMechanic:WaitingForPayToComplete(machine)    
+end
+
 function {{machineName}}BaseGameMachineWaysMechanic:CancelWaysAnimation()
     {{machineName}}BaseGameState.DisplayState.First.State = "CancelRequested"
 end
