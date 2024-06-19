@@ -752,63 +752,62 @@ namespace Bettr.Editor
             }
         }
 
+        private static void CopyScripts(string scriptsPath, string[] filePaths, string machineName, string machineVariant, string runtimeAssetPath)
+        {
+            foreach (string filePath in filePaths)
+            {
+                var reelCount = BettrMenu.GetReelCount(machineName);
+                var scribanTemplate = ParseScribanTemplate(scriptsPath, filePath);
+                var model = new Dictionary<string, object>
+                {
+                    { "machineName", machineName },
+                    { "machineVariant", machineVariant },
+                    { "machines", new string[]
+                        {
+                            "BaseGame",
+                        } 
+                    },
+                    { "reelCount", reelCount },
+                };
+                var scriptText = scribanTemplate.Render(model);
+                var scriptName = Path.GetFileNameWithoutExtension(filePath); // remove the .template
+                scriptName = Regex.Replace(scriptName, @"^Game", machineName);
+                
+                var destinationPath = Path.Combine(runtimeAssetPath, "Scripts", $"{scriptName}");
+                File.WriteAllText(destinationPath, scriptText);
+            }
+        }
+
         private static void ProcessScripts(string machineName, string machineVariant, string runtimeAssetPath)
         {
             AssetDatabase.Refresh();
             
-            var reelCount = BettrMenu.GetReelCount(machineName);
-            
             string dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "templates", "scripts", machineName);
             string[] filePaths = Directory.GetFiles(dirPath, "*.cscript.txt.template");
             string scriptsPath = $"scripts/{machineName}";
-            foreach (string filePath in filePaths)
-            {
-                var scribanTemplate = ParseScribanTemplate(scriptsPath, filePath);
-                var model = new Dictionary<string, object>
-                {
-                    { "machineName", machineName },
-                    { "machineVariant", machineVariant },
-                    { "machines", new string[]
-                        {
-                            "BaseGame",
-                        } 
-                    },
-                    { "reelCount", reelCount },
-                };
-                var scriptText = scribanTemplate.Render(model);
-                var scriptName = Path.GetFileNameWithoutExtension(filePath); // remove the .template
-                scriptName = Regex.Replace(scriptName, @"^Game", machineName);
-                
-                var destinationPath = Path.Combine(runtimeAssetPath, "Scripts", $"{scriptName}");
-                File.WriteAllText(destinationPath, scriptText);
-            }
+            CopyScripts(scriptsPath, filePaths, machineName, machineVariant, runtimeAssetPath);
             
             // Process variant scripts
-            
             dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "templates", "integration", machineName, machineVariant);
             filePaths = Directory.GetFiles(dirPath, "*.cscript.txt.template");
             scriptsPath = $"integration/{machineName}/{machineVariant}";
-            foreach (string filePath in filePaths)
+            CopyScripts(scriptsPath, filePaths, machineName, machineVariant, runtimeAssetPath);
+            
+            // Process Mechanics scripts
+            var mechanicsTable = GetTable($"{machineName}Mechanics");
+            var pkArray = GetTablePkArray(mechanicsTable);
+            foreach (var pk in pkArray)
             {
-                var scribanTemplate = ParseScribanTemplate(scriptsPath, filePath);
-                var model = new Dictionary<string, object>
+                var mechanicsData = GetTableArray<string>(mechanicsTable, pk, "Mechanic");
+                foreach (var mechanic in mechanicsData)
                 {
-                    { "machineName", machineName },
-                    { "machineVariant", machineVariant },
-                    { "machines", new string[]
-                        {
-                            "BaseGame",
-                        } 
-                    },
-                    { "reelCount", reelCount },
-                };
-                var scriptText = scribanTemplate.Render(model);
-                var scriptName = Path.GetFileNameWithoutExtension(filePath); // remove the .template
-                scriptName = Regex.Replace(scriptName, @"^Game", machineName);
-                
-                var destinationPath = Path.Combine(runtimeAssetPath, "Scripts", $"{scriptName}");
-                File.WriteAllText(destinationPath, scriptText);
+                    dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "templates", "mechanics", mechanic, "scripts");
+                    filePaths = Directory.GetFiles(dirPath, "*.cscript.txt.template");
+                    scriptsPath = $"mechanics/{mechanic}/scripts";
+                    CopyScripts(scriptsPath, filePaths, machineName, machineVariant, runtimeAssetPath);
+                }
             }
+
         }
 
         private static GameObject ProcessBaseGameSymbols(string machineName, string machineVariant, string runtimeAssetPath)
@@ -1311,7 +1310,7 @@ namespace Bettr.Editor
 
             var machineNames = HasTable($"{machineName}Machines") ? GetTableArray<string>(GetTable($"{machineName}Machines"), null, "Name") : new List<string>();
             var machineTransitionNames = HasTable($"{machineName}MachineTransitions") ? GetTableArray<string>(GetTable($"{machineName}MachineTransitions"), null, "Name") : new List<string>();
-            var machineActivations = HasTable($"{machineName}MachineTransitionDialogs") ? GetTablePkArray<string>(GetTable($"{machineName}MachineTransitionDialogs")) : new Dictionary<string, List<Dictionary<string, string>>>(); 
+            var machineActivations = HasTable($"{machineName}MachineTransitionDialogs") ? GetTablePkDict<string>(GetTable($"{machineName}MachineTransitionDialogs")) : new Dictionary<string, List<Dictionary<string, string>>>(); 
 
             // Create a model object with the machineName variable
             var model = new Dictionary<string, object>
@@ -1979,7 +1978,7 @@ namespace Bettr.Editor
             return material;
         }
         
-        private static Dictionary<string, List<Dictionary<string, T>>> GetTablePkArray<T>(Table table)
+        private static Dictionary<string, List<Dictionary<string, T>>> GetTablePkDict<T>(Table table)
         {
             var dict = new Dictionary<string, List<Dictionary<string, T>>>();
             foreach (var pair in table.Pairs)
@@ -1987,6 +1986,11 @@ namespace Bettr.Editor
                 dict[pair.Key.String] = GetTableArray<T>((Table) pair.Value.Table["Array"]);
             }
             return dict;
+        }
+        
+        private static List<string> GetTablePkArray(Table table)
+        {
+            return table.Pairs.Select(pair => pair.Key.String).ToList(); 
         }
         
         private static List<Dictionary<string, T>> GetTableArray<T>(Table table)
