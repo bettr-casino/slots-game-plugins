@@ -14,15 +14,15 @@ end
 function {{machineName}}BaseGameMachineWaysMechanic:DisplayWays(machine)
     series
         do
-            local waysState = {{machineName}}BaseGameWaysState.Ways.First
             local waysSummary = {{machineName}}BaseGameWaysSummary.Ways.First
-            local ways = {{machineName}}BaseGameWays.Ways.Array
-            local waysMatrix = {{machineName}}BaseGameWaysMatrix                        
             local waysCount = waysSummary.WaysCount
             if waysCount == 0 then
                 machine:OnPayingCompleted()
                 return
             end
+            local waysState = {{machineName}}BaseGameWaysState.Ways.First
+            local ways = {{machineName}}BaseGameWays.Ways.Array
+            local waysMatrix = {{machineName}}BaseGameWaysMatrix                        
             waysState.PaysRollup = BettrUser.Coins 
             local waysCount = waysSummary.WaysCount 
             local startDelay = waysSummary.DisplayLoopStartDelay
