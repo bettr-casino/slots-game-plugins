@@ -1352,13 +1352,30 @@ namespace Bettr.Editor
         {
             AssetDatabase.Refresh();
             
-            if (HasTable($"{machineName}BaseGameWays"))
+            var mechanicsTable = GetTable($"{machineName}Mechanics");
+            var pkArray = GetTablePkArray(mechanicsTable);
+            foreach (var pk in pkArray)
             {
-                BaseGameWaysMechanic.Process(machineName, machineVariant, runtimeAssetPath);
-            }
-            if (HasTable($"{machineName}BaseGamePaylines"))
-            {
-                BaseGamePaylinesMechanic.Process(machineName, machineVariant, runtimeAssetPath);
+                switch (pk)
+                {
+                    case "BaseGame":
+                        var baseGameMechanics = GetTableArray<string>(mechanicsTable, pk, "Mechanic");
+                        foreach (var baseGameMechanic in baseGameMechanics)
+                        {
+                            switch (baseGameMechanic)
+                            {
+                                case "ways":
+                                    BaseGameWaysMechanic.Process(machineName, machineVariant, runtimeAssetPath);
+                                    break;
+                                default:
+                                    BaseGamePaylinesMechanic.Process(machineName, machineVariant, runtimeAssetPath);
+                                    break;
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
             }
             // if (HasTable($"{machineName}BaseGameScatterBonusFreeSpinsMechanic"))
             // {
