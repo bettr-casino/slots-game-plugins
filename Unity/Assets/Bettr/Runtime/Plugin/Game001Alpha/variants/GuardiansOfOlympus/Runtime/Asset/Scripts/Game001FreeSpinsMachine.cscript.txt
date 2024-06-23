@@ -1,0 +1,1261 @@
+require "math"
+require "Core"
+
+Game001FreeSpinsMachine = {
+}
+
+function Game001FreeSpinsMachine:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game001FreeSpinsMachine:destroy()
+	System.Print("Game001FreeSpinsMachine destroy tile id={0}", self.id)
+end
+
+function Game001FreeSpinsMachine:OnError(callStack)
+	System.Error("Game001FreeSpinsMachine Error CallStack: {0}", callStack)
+end
+
+function Game001FreeSpinsMachine:Awake()
+	System.Print("Game001FreeSpinsMachine Awake tile id={0}", self.id)
+end
+
+function Game001FreeSpinsMachine:Start()
+	System.Print("Game001FreeSpinsMachine Start tile id={0}", self.id)
+end
+
+function Game001FreeSpinsMachine:StartFreeSpins()
+    series
+        do
+            parallel
+                do
+                    self:ScaleClonedSymbols()
+                    System.WaitForSeconds(1.0)
+                end
+                do
+                    local animatorProperty = self["overlay_fade_in"]
+                    BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+                end
+            end
+            parallel
+                do
+                    local animatorProperty = self["bonus_symbols_background_start"]
+                    BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+                end
+                do
+                    self:TweenClonedSymbols() 
+                end
+            end
+            self:ShowBonusSymbols()
+            local animatorProperty = self["bonus_symbols_background_hide"]
+            BettrVisualsController.PlayAnimatorProperty(animatorProperty)            
+            System.WaitForSeconds(0.2)
+            self:DeliverClonedSymbols()
+            self:ActivateBoostBonusSymbols()
+            self:SetupSpin1()
+        end
+    end
+end
+
+function Game001FreeSpinsMachine:SetupSpin1()
+    series
+        do
+            if self:HasNextFreeSpin() then
+                self:SwitchFromOverlayToSpinButton()
+                Game001FreeSpinsState.StartSpinButtonState.First.State = "IsWaiting"
+            end
+        end
+    end
+end
+
+function Game001FreeSpinsMachine:StartSpin1()
+    series
+        do
+            if self:HasNextFreeSpin() then
+                self:HideSpinButton()    
+                self:ResetSettings()                        
+                self:ShowSettings()                            
+                self:StartEngines()
+                self.FreeSpinsText.SetText(self:GetRemainingFreeSpins())
+                self:StartNextFreeSpin()             
+            end
+        end
+    end
+end
+
+function Game001FreeSpinsMachine:SetupSpinN()
+    series
+        do
+            if self:HasNextFreeSpin() then
+                self:WaitForNextSpinStartDelay()
+                local currentFreeSpin = self:GetCurrentFreeSpin()
+                local nextFreeSpin = currentFreeSpin + 1
+                local totalFreeSpins = self:GetTotalFreeSpins()
+                local statusTexts = self.StatusTexts
+                statusTexts.FormatAndSetCurrentActive("BonusSpinNText", nextFreeSpin, totalFreeSpins)
+                self.FreeSpinsText.SetText(self:GetRemainingFreeSpins())
+                self:StartSpinN()
+            end
+        end
+    end
+end
+
+function Game001FreeSpinsMachine:StartSpinN()
+    series
+        do
+            if self:HasNextFreeSpin() then
+                self:StartNextFreeSpin()   
+            end
+        end
+    end
+end
+
+function Game001FreeSpinsMachine:SetupAllSpinsCompleted()
+    series
+        do
+            Game001FreeSpinsState.StartSpinButtonState.First.State = "IsLocked"
+            self.FreeSpinsText.SetText(self:GetRemainingFreeSpins())
+            
+            -- initialize wins to 0
+            local summaryText = self.FreeSpinsBonusSummaryText
+            summaryText.Format(0)
+            
+            -- display the bonus summary wins
+            local showAnimatorProperty = self["FreeSpinsSummaryAnimatorGroup"]["show"]
+            BettrVisualsController.PlayAnimatorProperty(showAnimatorProperty)
+            
+            -- PAYS WINS
+            
+            -- play particle system and tween to bonus wins text
+            local settingsWinParticleSystem = self.SettingsWinParticleSystem           
+            BettrVisualsController.PlayParticleSystemProperty(settingsWinParticleSystem)                      
+            local settingsWinParticleTrailPropertyTween = self.BonusSummarySettingsWinRollupParticleTrail
+            BettrVisualsController.TweenMoveBetweenAndWait(settingsWinParticleSystem.GameObject, settingsWinParticleTrailPropertyTween)
+            -- rollup
+            local totalPays = Game001FreeSpinsSummary.TotalPays.First.Value
+            local rollupStartPays = Game001FreeSpinsCurrentState.CurrentBonusSummaryRollupPays.First.Value
+            local rollupEndPays = rollupStartPays + totalPays
+            Game001FreeSpinsCurrentState.CurrentBonusSummaryRollupPays.First.Value = rollupEndPays
+            BettrVisualsController.RollUpFormatCounter(summaryText, rollupStartPays, rollupEndPays, 0.1)
+            System.WaitForSeconds(0.1) 
+            BettrVisualsController.StopParticleSystemProperty(settingsWinParticleSystem)
+            
+            -- BONUS SYMBOLS WINS
+            
+            local bonusSummaryWinsParticleSystem = self.BonusSummaryWinsParticleEffect 
+            
+            for i=1,5 parallel do
+                do
+                    local col = "Column" .. i                        
+                    local particleSystem = self["ActiveBoostSymbolsGroup" .. col]["ParticleEffect"]
+                    BettrVisualsController.StopParticleSystemProperty(particleSystem)
+                end
+            end        
+            
+            System.WaitForSeconds(0.1)
+              
+            for i=1,5 do
+                series
+                    do
+                        local col = "Column" .. i                        
+                        local winItemColumn = Game001FreeSpinsBonusSymbolsWinsMatrix[col]
+                        for j=1,winItemColumn.Count do
+                            local winItem = winItemColumn.Array[j]
+                            if winItem.SymbolIndex > 0 then
+                                local winText = self["Row" .. winItem.SymbolIndex .. "Texts"][col]
+                                BettrVisualsController.OverlayFirstOverSecond(bonusSummaryWinsParticleSystem.GameObject, winText.GameObject)
+                                BettrVisualsController.PlayParticleSystemProperty(bonusSummaryWinsParticleSystem)
+                                local winsParticleTrailPropertyTween = self.BonusSummaryWinsRollupParticleTrail
+                                BettrVisualsController.TweenMoveBetweenAndWait(bonusSummaryWinsParticleSystem.GameObject, winsParticleTrailPropertyTween)
+                                -- rollup
+                                local totalPays = winItem.TotalPays
+                                local rollupStartPays = Game001FreeSpinsCurrentState.CurrentBonusSummaryRollupPays.First.Value
+                                local rollupEndPays = rollupStartPays + totalPays
+                                Game001FreeSpinsCurrentState.CurrentBonusSummaryRollupPays.First.Value = rollupEndPays
+                                BettrVisualsController.RollUpFormatCounter(summaryText, rollupStartPays, rollupEndPays, 0.1)
+                                System.WaitForSeconds(0.1) 
+                                BettrVisualsController.StopParticleSystemProperty(bonusSummaryWinsParticleSystem)
+                                System.WaitForSeconds(0.1) 
+                            end   
+                        end
+                    end
+                end
+            end
+            
+            self:HideWinMultiplierBonusSymbols()            
+            
+            for i=1,5 parallel do
+                do
+                    self:StopColumnWinBoostSymbolParticleSystem(i) 
+                end
+            end                           
+            
+            self:HideBonusSymbols()
+            
+            self:StopEngines()                      
+            
+            self:HideSettings()
+            
+            System.WaitForSeconds(3.0)
+            
+            local resetAnimatorProperty = self["FreeSpinsSummaryAnimatorGroup"]["reset"]
+            BettrVisualsController.PlayAnimatorProperty(resetAnimatorProperty)
+            
+            Game001:OnFreeSpinsTriggeringCompleted()
+        end
+    end
+end
+
+function Game001FreeSpinsMachine:CurrentSpinButtonClickState()
+    return Game001FreeSpinsState.StartSpinButtonState.First.State
+end
+
+function Game001FreeSpinsMachine:HasNextFreeSpin()
+    return Game001FreeSpinsCurrentState.CurrentSpin.First.Value < Game001FreeSpinsSummary.TotalSpins.First.Value
+end
+
+function Game001FreeSpinsMachine:GetCurrentFreeSpin()
+    return Game001FreeSpinsCurrentState.CurrentSpin.First.Value
+end
+
+function Game001FreeSpinsMachine:IncrCurrentFreeSpin()
+    Game001FreeSpinsCurrentState.CurrentSpin.First.Value = Game001FreeSpinsCurrentState.CurrentSpin.First.Value + 1
+end
+
+function Game001FreeSpinsMachine:GetTotalFreeSpins()
+    return Game001FreeSpinsSummary.TotalSpins.First.Value
+end
+
+function Game001FreeSpinsMachine:GetRemainingFreeSpins()
+    return self:GetTotalFreeSpins() - self:GetCurrentFreeSpin() 
+end
+
+function Game001FreeSpinsMachine:IncrTotalFreeSpins(incr)
+    Game001FreeSpinsSummary.TotalSpins.First.Value = Game001FreeSpinsSummary.TotalSpins.First.Value + incr
+end
+
+function Game001FreeSpinsMachine:ShowBonusSymbols()
+    local scaleTweenProperty = self['FreeSpinsValueSymbolScaleUp']
+    series
+        do
+            local tweenGroupProperty = self["BonusSymbolsRow8"]
+            local effectsGroupProperty = self["BonusSymbolsStartEffectGroup1"]
+            BettrVisualsController.TweenMultipleScaleTo(tweenGroupProperty, scaleTweenProperty)
+            BettrVisualsController.PlayParticleSystemPropertyGroup(effectsGroupProperty)           
+            System.WaitForSeconds(0.1)
+            local texts = self.Row1Texts
+            for i=1,5 do
+                local symbolData = Game001FreeSpinsBonusSymbolsData.Row1.Array[i]
+                local symbolValue = symbolData.BonusValue
+                local symbolTextProperty = texts["Column" .. i]
+                symbolTextProperty.SetText(symbolValue)
+            end
+        end
+        do
+            local tweenGroupProperty = self["BonusSymbolsRow7"]
+            local effectsGroupProperty = self["BonusSymbolsStartEffectGroup2"]
+            BettrVisualsController.TweenMultipleScaleTo(tweenGroupProperty, scaleTweenProperty)
+            BettrVisualsController.PlayParticleSystemPropertyGroup(effectsGroupProperty)           
+            System.WaitForSeconds(0.1)
+            local texts = self.Row2Texts
+            for i=1,5 do
+                local symbolData = Game001FreeSpinsBonusSymbolsData.Row2.Array[i]
+                local symbolValue = symbolData.BonusValue
+                local symbolTextProperty = texts["Column" .. i]
+                symbolTextProperty.SetText(symbolValue)
+            end
+        end
+        do
+            local tweenGroupProperty = self["BonusSymbolsRow6"]
+            local effectsGroupProperty = self["BonusSymbolsStartEffectGroup3"]
+            BettrVisualsController.TweenMultipleScaleTo(tweenGroupProperty, scaleTweenProperty)
+            BettrVisualsController.PlayParticleSystemPropertyGroup(effectsGroupProperty)           
+            System.WaitForSeconds(0.1)
+            local texts = self.Row3Texts
+            for i=1,5 do
+                local symbolData = Game001FreeSpinsBonusSymbolsData.Row3.Array[i]
+                local symbolValue = symbolData.BonusValue
+                local symbolTextProperty = texts["Column" .. i]
+                symbolTextProperty.SetText(symbolValue)
+            end
+        end
+        do
+            local tweenGroupProperty = self["BonusSymbolsRow5"]
+            local effectsGroupProperty = self["BonusSymbolsStartEffectGroup4"]
+            BettrVisualsController.TweenMultipleScaleTo(tweenGroupProperty, scaleTweenProperty)
+            BettrVisualsController.PlayParticleSystemPropertyGroup(effectsGroupProperty)           
+            System.WaitForSeconds(0.1)
+            local texts = self.Row4Texts
+            for i=1,5 do
+                local symbolData = Game001FreeSpinsBonusSymbolsData.Row4.Array[i]
+                local symbolValue = symbolData.BonusValue
+                local symbolTextProperty = texts["Column" .. i]
+                symbolTextProperty.SetText(symbolValue)
+            end
+        end
+        do
+            local tweenGroupProperty = self["BonusSymbolsRow4"]
+            local effectsGroupProperty = self["BonusSymbolsStartEffectGroup5"]
+            BettrVisualsController.TweenMultipleScaleTo(tweenGroupProperty, scaleTweenProperty)
+            BettrVisualsController.PlayParticleSystemPropertyGroup(effectsGroupProperty)           
+            System.WaitForSeconds(0.1)
+            local texts = self.Row5Texts
+            for i=1,5 do
+                local symbolData = Game001FreeSpinsBonusSymbolsData.Row5.Array[i]
+                local symbolValue = symbolData.BonusValue
+                local symbolTextProperty = texts["Column" .. i]
+                symbolTextProperty.SetText(symbolValue)
+            end
+        end
+        do
+            local tweenGroupProperty = self["BonusSymbolsRow3"]
+            local effectsGroupProperty = self["BonusSymbolsStartEffectGroup6"]
+            BettrVisualsController.TweenMultipleScaleTo(tweenGroupProperty, scaleTweenProperty)
+            BettrVisualsController.PlayParticleSystemPropertyGroup(effectsGroupProperty)           
+            System.WaitForSeconds(0.1)
+            local texts = self.Row6Texts
+            for i=1,5 do
+                local symbolData = Game001FreeSpinsBonusSymbolsData.Row6.Array[i]
+                local symbolValue = symbolData.BonusValue
+                local symbolTextProperty = texts["Column" .. i]
+                symbolTextProperty.SetText(symbolValue)
+            end
+        end
+        do
+            local tweenGroupProperty = self["BonusSymbolsRow2"]
+            local effectsGroupProperty = self["BonusSymbolsStartEffectGroup7"]
+            BettrVisualsController.TweenMultipleScaleTo(tweenGroupProperty, scaleTweenProperty)
+            BettrVisualsController.PlayParticleSystemPropertyGroup(effectsGroupProperty)           
+            System.WaitForSeconds(0.1)
+            local texts = self.Row7Texts
+            for i=1,5 do
+                local symbolData = Game001FreeSpinsBonusSymbolsData.Row7.Array[i]
+                local symbolValue = symbolData.BonusValue
+                local symbolTextProperty = texts["Column" .. i]
+                symbolTextProperty.SetText(symbolValue)
+            end
+        end
+        do
+            local tweenGroupProperty = self["BonusSymbolsRow1"]
+            local effectsGroupProperty = self["BonusSymbolsStartEffectGroup8"]
+            BettrVisualsController.TweenMultipleScaleTo(tweenGroupProperty, scaleTweenProperty)
+            BettrVisualsController.PlayParticleSystemPropertyGroup(effectsGroupProperty)           
+            System.WaitForSeconds(0.1)
+            local texts = self.Row8Texts
+            for i=1,5 do
+                local symbolData = Game001FreeSpinsBonusSymbolsData.Row8.Array[i]
+                local symbolValue = symbolData.BonusValue
+                local symbolTextProperty = texts["Column" .. i]
+                symbolTextProperty.SetText(symbolValue)
+            end
+        end
+    end
+end
+
+function Game001FreeSpinsMachine:HideBonusSymbols()
+    local scaleTweenProperty = self['FreeSpinsValueSymbolScaleDown']
+    series
+        do
+            local tweenGroupProperty = self["BonusSymbolsRow1"]
+            BettrVisualsController.TweenMultipleScaleTo(tweenGroupProperty, scaleTweenProperty)
+            System.WaitForSeconds(0.1)
+        end
+        do
+            local tweenGroupProperty = self["BonusSymbolsRow2"]
+            BettrVisualsController.TweenMultipleScaleTo(tweenGroupProperty, scaleTweenProperty)
+            System.WaitForSeconds(0.1)
+        end
+        do
+            local tweenGroupProperty = self["BonusSymbolsRow3"]
+            BettrVisualsController.TweenMultipleScaleTo(tweenGroupProperty, scaleTweenProperty)
+            System.WaitForSeconds(0.1)
+        end
+        do
+            local tweenGroupProperty = self["BonusSymbolsRow4"]
+            BettrVisualsController.TweenMultipleScaleTo(tweenGroupProperty, scaleTweenProperty)
+            System.WaitForSeconds(0.1)
+        end
+        do
+            local tweenGroupProperty = self["BonusSymbolsRow5"]
+            BettrVisualsController.TweenMultipleScaleTo(tweenGroupProperty, scaleTweenProperty)
+            System.WaitForSeconds(0.1)
+        end
+        do
+            local tweenGroupProperty = self["BonusSymbolsRow6"]
+            BettrVisualsController.TweenMultipleScaleTo(tweenGroupProperty, scaleTweenProperty)
+            System.WaitForSeconds(0.1)
+        end
+        do
+            local tweenGroupProperty = self["BonusSymbolsRow7"]
+            BettrVisualsController.TweenMultipleScaleTo(tweenGroupProperty, scaleTweenProperty)
+            System.WaitForSeconds(0.1)
+        end
+        do
+            local tweenGroupProperty = self["BonusSymbolsRow8"]
+            BettrVisualsController.TweenMultipleScaleTo(tweenGroupProperty, scaleTweenProperty)
+            System.WaitForSeconds(0.1)
+        end
+    end
+end
+
+function Game001FreeSpinsMachine:BoostBonusSymbols(boosterIndex)
+    series
+        do
+            local effectsGroupProperty = self["BonusSymbolsBoosterEffectGroup1"]
+            BettrVisualsController.PlayParticleSystemPropertyGroup(effectsGroupProperty)           
+            System.WaitForSeconds(0.1)
+            local texts = self.Row1Texts
+            for i=1,5 do
+                local symbolData = Game001FreeSpinsBonusSymbolsData.Row1.Array[i]
+                local symbolValue = symbolData["Booster" .. boosterIndex .. "BonusValue"]
+                local symbolTextProperty = texts["Column" .. i]
+                symbolTextProperty.SetText(symbolValue)
+            end            
+        end
+        do
+            local effectsGroupProperty = self["BonusSymbolsBoosterEffectGroup2"]
+            BettrVisualsController.PlayParticleSystemPropertyGroup(effectsGroupProperty)           
+            System.WaitForSeconds(0.1)
+            local texts = self.Row2Texts
+            for i=1,5 do
+                local symbolData = Game001FreeSpinsBonusSymbolsData.Row2.Array[i]
+                local symbolValue = symbolData["Booster" .. boosterIndex .. "BonusValue"]
+                local symbolTextProperty = texts["Column" .. i]
+                symbolTextProperty.SetText(symbolValue)
+            end            
+        end
+        do
+            local effectsGroupProperty = self["BonusSymbolsBoosterEffectGroup3"]
+            BettrVisualsController.PlayParticleSystemPropertyGroup(effectsGroupProperty)           
+            System.WaitForSeconds(0.1)
+            local texts = self.Row3Texts
+            for i=1,5 do
+                local symbolData = Game001FreeSpinsBonusSymbolsData.Row3.Array[i]
+                local symbolValue = symbolData["Booster" .. boosterIndex .. "BonusValue"]
+                local symbolTextProperty = texts["Column" .. i]
+                symbolTextProperty.SetText(symbolValue)
+            end            
+        end
+        do
+            local effectsGroupProperty = self["BonusSymbolsBoosterEffectGroup4"]
+            BettrVisualsController.PlayParticleSystemPropertyGroup(effectsGroupProperty)           
+            System.WaitForSeconds(0.1)
+            local texts = self.Row4Texts
+            for i=1,5 do
+                local symbolData = Game001FreeSpinsBonusSymbolsData.Row4.Array[i]
+                local symbolValue = symbolData["Booster" .. boosterIndex .. "BonusValue"]
+                local symbolTextProperty = texts["Column" .. i]
+                symbolTextProperty.SetText(symbolValue)
+            end            
+        end
+        do
+            local effectsGroupProperty = self["BonusSymbolsBoosterEffectGroup5"]
+            BettrVisualsController.PlayParticleSystemPropertyGroup(effectsGroupProperty)           
+            System.WaitForSeconds(0.1)
+            local texts = self.Row5Texts
+            for i=1,5 do
+                local symbolData = Game001FreeSpinsBonusSymbolsData.Row5.Array[i]
+                local symbolValue = symbolData["Booster" .. boosterIndex .. "BonusValue"]
+                local symbolTextProperty = texts["Column" .. i]
+                symbolTextProperty.SetText(symbolValue)
+            end            
+        end
+        do
+            local effectsGroupProperty = self["BonusSymbolsBoosterEffectGroup6"]
+            BettrVisualsController.PlayParticleSystemPropertyGroup(effectsGroupProperty)           
+            System.WaitForSeconds(0.1)
+            local texts = self.Row6Texts
+            for i=1,5 do
+                local symbolData = Game001FreeSpinsBonusSymbolsData.Row6.Array[i]
+                local symbolValue = symbolData["Booster" .. boosterIndex .. "BonusValue"]
+                local symbolTextProperty = texts["Column" .. i]
+                symbolTextProperty.SetText(symbolValue)
+            end            
+        end
+        do
+            local effectsGroupProperty = self["BonusSymbolsBoosterEffectGroup7"]
+            BettrVisualsController.PlayParticleSystemPropertyGroup(effectsGroupProperty)           
+            System.WaitForSeconds(0.1)
+            local texts = self.Row7Texts
+            for i=1,5 do
+                local symbolData = Game001FreeSpinsBonusSymbolsData.Row7.Array[i]
+                local symbolValue = symbolData["Booster" .. boosterIndex .. "BonusValue"]
+                local symbolTextProperty = texts["Column" .. i]
+                symbolTextProperty.SetText(symbolValue)
+            end            
+        end
+        do
+            local effectsGroupProperty = self["BonusSymbolsBoosterEffectGroup8"]
+            BettrVisualsController.PlayParticleSystemPropertyGroup(effectsGroupProperty)           
+            System.WaitForSeconds(0.1)
+            local texts = self.Row8Texts
+            for i=1,5 do
+                local symbolData = Game001FreeSpinsBonusSymbolsData.Row8.Array[i]
+                local symbolValue = symbolData["Booster" .. boosterIndex .. "BonusValue"]
+                local symbolTextProperty = texts["Column" .. i]
+                symbolTextProperty.SetText(symbolValue)
+            end            
+        end
+    end
+end
+
+function Game001FreeSpinsMachine:DeliverClonedSymbols()
+    series
+        do
+            local tweenMoveProperty = self["FreeSpinsBonusSymbolDeliveryMove"]
+            local tweenScaleProperty = self["FreeSpinsBonusSymbolDeliveryScale"]
+            local particleEffectProperty = self["FreeSpinsBonusSymbolDeliveryParticleEffect"]
+            local clonedSymbols = Game001MachineState.Current.First.FreeSpinsTriggerSymbols
+            local clonedSymbolsCount = #clonedSymbols
+            for i=1,clonedSymbolsCount do
+                local clonedSymbol = clonedSymbols[i]
+                BettrVisualsController.TweenMoveBetween(clonedSymbol, tweenMoveProperty)
+                BettrVisualsController.TweenScaleTo(clonedSymbol, tweenScaleProperty)
+                System.WaitForSeconds(0.4)
+                BettrVisualsController.PlayParticleSystemProperty(particleEffectProperty)
+                BettrVisualsController.DestroyGameObject(clonedSymbol)
+                self:BoostBonusSymbols(i)                
+            end
+            Game001MachineState.Current.First.FreeSpinsTriggerSymbols = {}    
+        end
+    end
+end
+
+function Game001FreeSpinsMachine:ActivateBoostBonusSymbols()
+    for i = 1,5 do
+        self:OverlayActiveBoostSymbolParticleTrail(i)
+        self:ActivateColumnBoostBonusSymbols(i)
+    end    
+end
+
+function Game001FreeSpinsMachine:ActivateColumnBoostBonusSymbols(colIndex)
+    local col = "Column" .. colIndex
+    local particleSystem = self["ActiveBoostSymbolsGroup" .. col]["ParticleEffect"]
+    BettrVisualsController.PlayParticleSystemProperty(particleSystem)
+end
+
+function Game001FreeSpinsMachine:GetActiveBoostSymbolState(colIndex)
+    local item = Game001FreeSpinsActiveBoostSymbolsState["Column" .. colIndex].First
+    return item
+end
+
+function Game001FreeSpinsMachine:IncrColumnActiveBoostSymbolState(colIndex)
+    local item = Game001FreeSpinsActiveBoostSymbolsState["Column" .. colIndex].First
+    item.SymbolIndex = item.SymbolIndex - 1
+end
+
+function Game001FreeSpinsMachine:OverlayActiveBoostSymbolParticleTrail(colIndex)
+    local col = "Column" .. colIndex
+    local item = self:GetActiveBoostSymbolState(colIndex)
+    local symbolIndex = item.SymbolIndex
+    local particleSystem = self["ActiveBoostSymbolsGroup" .. col]["ParticleEffect"]
+    local gameObjectProperty = self["BonusSymbolsRow" .. symbolIndex]["Reel" .. colIndex .. "Symbol"]
+    BettrVisualsController.OverlayFirstOverSecond(particleSystem.GameObject, gameObjectProperty.GameObject)    
+end
+
+function Game001FreeSpinsMachine:PlayActiveBoostSymbolParticleTrail(colIndex)
+    local col = "Column" .. colIndex
+    local activeBoostSymbolParticleTrail = self.ActiveBoostSymbolParticleTrail
+    activeBoostSymbolParticleTrail.useEndGameObject = true                                                                
+    local item = self:GetActiveBoostSymbolState(colIndex)
+    local symbolIndex = item.SymbolIndex
+    local gameObjectProperty = self["BonusSymbolsRow" .. symbolIndex]["Reel" .. colIndex .. "Symbol"]
+    activeBoostSymbolParticleTrail.endGameObject = gameObjectProperty.GameObject
+    local particleSystem = self["ActiveBoostSymbolsGroup" .. col]["ParticleEffect"]
+    BettrVisualsController.TweenMoveBetweenAndWait(particleSystem.GameObject, activeBoostSymbolParticleTrail)        
+end
+
+function Game001FreeSpinsMachine:MatchColumnWinBoostSymbolState(colIndex)
+    local col = "Column" .. colIndex
+    local winItem = Game001FreeSpinsWinBoostSymbolsState[col].First
+    local activeItem = Game001FreeSpinsActiveBoostSymbolsState[col].First
+    if activeItem.SymbolIndex > 0 then
+        winItem.SymbolIndex = activeItem.SymbolIndex
+        winItem.AllSymbolIndexes = table.insert(winItem.AllSymbolIndexes, activeItem.SymbolIndex)
+    end
+end
+
+function Game001FreeSpinsMachine:PlayColumnWinBoostSymbolParticleSystem(colIndex)
+    local col = "Column" .. colIndex
+    local winItem = Game001FreeSpinsWinBoostSymbolsState[col].First
+    if winItem.SymbolIndex > 0 then
+        local particleSystem = self["WinBoostSymbolsGroup" .. col]["ParticleEffect" .. winItem.SymbolIndex]
+        BettrVisualsController.PlayParticleSystemProperty(particleSystem)
+    end
+end
+
+function Game001FreeSpinsMachine:StopColumnWinBoostSymbolParticleSystem(colIndex)
+    local col = "Column" .. colIndex
+    local winItem = Game001FreeSpinsWinBoostSymbolsState[col].First
+    for i=1,#winItem.AllSymbolIndexes do
+        local symbolIndex = winItem.AllSymbolIndexes[i]
+        if symbolIndex > 0 then
+            local particleSystem = self["WinBoostSymbolsGroup" .. col]["ParticleEffect" .. symbolIndex]
+            BettrVisualsController.StopParticleSystemProperty(particleSystem)
+        end
+    end
+end
+
+function Game001FreeSpinsMachine:ScaleClonedSymbols()
+    series
+        do
+            local tweenProperty = self["FreeSpinsBonusSymbolStagingScale"]            
+            local clonedSymbols = Game001MachineState.Current.First.FreeSpinsTriggerSymbols
+            local clonedSymbolsCount = #clonedSymbols
+            for i=1,clonedSymbolsCount parallel do
+                local clonedSymbol = clonedSymbols[i]
+                BettrVisualsController.TweenScaleTo(clonedSymbol, tweenProperty)
+            end
+        end
+    end
+end
+
+function Game001FreeSpinsMachine:TweenClonedSymbols()
+    series
+        do
+            local tweenGroupProperty = self["FreeSpinsBonusSymbolStagingMoveGroup"]
+            local middleProperty = tweenGroupProperty["Middle"]
+            local leftProperty = tweenGroupProperty["Left"]
+            local topProperty = tweenGroupProperty["Top"]
+            local rightProperty = tweenGroupProperty["Right"]
+            local bottomProperty = tweenGroupProperty["Bottom"]
+            local clonedSymbols = Game001MachineState.Current.First.FreeSpinsTriggerSymbols
+            local clonedSymbolsCount = #clonedSymbols
+            if clonedSymbolsCount == 1 then
+                local clonedSymbol = clonedSymbols[1]
+                BettrVisualsController.TweenMoveBetween(clonedSymbol, middleProperty)
+            elseif clonedSymbolsCount == 2 then
+                local clonedSymbol = clonedSymbols[1]
+                BettrVisualsController.TweenMoveBetween(clonedSymbol, leftProperty)
+                clonedSymbol = clonedSymbols[2]
+                BettrVisualsController.TweenMoveBetween(clonedSymbol, rightProperty)
+            elseif clonedSymbolsCount == 3 then
+                local clonedSymbol = clonedSymbols[1]
+                BettrVisualsController.TweenMoveBetween(clonedSymbol, leftProperty)
+                clonedSymbol = clonedSymbols[2]
+                BettrVisualsController.TweenMoveBetween(clonedSymbol, middleProperty)
+                clonedSymbol = clonedSymbols[3]
+                BettrVisualsController.TweenMoveBetween(clonedSymbol, rightProperty)
+            elseif clonedSymbolsCount == 4 then
+                local clonedSymbol = clonedSymbols[1]
+                BettrVisualsController.TweenMoveBetween(clonedSymbol, leftProperty)
+                clonedSymbol = clonedSymbols[2]
+                BettrVisualsController.TweenMoveBetween(clonedSymbol, topProperty)
+                clonedSymbol = clonedSymbols[3]
+                BettrVisualsController.TweenMoveBetween(clonedSymbol, rightProperty)
+                clonedSymbol = clonedSymbols[4]
+                BettrVisualsController.TweenMoveBetween(clonedSymbol, bottomProperty)
+            elseif clonedSymbolsCount == 5 then
+                local clonedSymbol = clonedSymbols[1]
+                BettrVisualsController.TweenMoveBetween(clonedSymbol, middleProperty)
+                clonedSymbol = clonedSymbols[2]
+                BettrVisualsController.TweenMoveBetween(clonedSymbol, leftProperty)
+                clonedSymbol = clonedSymbols[3]
+                BettrVisualsController.TweenMoveBetween(clonedSymbol, topProperty)
+                clonedSymbol = clonedSymbols[4]
+                BettrVisualsController.TweenMoveBetween(clonedSymbol, rightProperty)
+                clonedSymbol = clonedSymbols[5]
+                BettrVisualsController.TweenMoveBetween(clonedSymbol, bottomProperty)
+            end
+            System.WaitForSeconds(1.0)
+        end
+    end
+end
+
+function Game001FreeSpinsMachine:StartEngines()
+    parallel
+        do
+            Game001FreeSpinsReel1:StartEngines()
+        end
+        do
+            Game001FreeSpinsReel2:StartEngines()
+        end
+        do
+            Game001FreeSpinsReel3:StartEngines()
+        end
+        do
+            Game001FreeSpinsReel4:StartEngines()
+        end
+        do
+            Game001FreeSpinsReel5:StartEngines()
+        end
+    end
+end
+
+function Game001FreeSpinsMachine:StopEngines()
+    parallel
+        do
+            Game001FreeSpinsReel1:StopEngines()
+        end
+        do
+            Game001FreeSpinsReel2:StopEngines()
+        end
+        do
+            Game001FreeSpinsReel3:StopEngines()
+        end
+        do
+            Game001FreeSpinsReel4:StopEngines()
+        end
+        do
+            Game001FreeSpinsReel5:StopEngines()
+        end
+    end
+end
+
+function Game001FreeSpinsMachine:StartNextFreeSpin()
+    series
+        do
+            self:IncrCurrentFreeSpin()
+            local currentFreeSpin = self:GetCurrentFreeSpin()            
+            self:SpinEngines()
+            self:WaitForApplyOutcomeDelay()
+            self:ApplyOutcome()
+            self:OnOutcomeReceived()
+        end
+    end
+end
+
+function Game001FreeSpinsMachine:SpinEngines()
+    Game001FreeSpinsState.SpinState.First.State = "Spinning"
+    parallel
+        do
+            Game001FreeSpinsReel1:SpinEngines()
+        end
+        do
+            Game001FreeSpinsReel2:SpinEngines()
+        end
+        do
+            Game001FreeSpinsReel3:SpinEngines()
+        end
+        do
+            Game001FreeSpinsReel4:SpinEngines()
+        end
+        do
+            Game001FreeSpinsReel5:SpinEngines()
+        end
+    end
+end
+
+function Game001FreeSpinsMachine:WaitForNextSpinStartDelay()
+    series
+        do
+            local spinDelayInMs = Game001FreeSpinsSpinProperties.NextSpinStartDelay.First.Value
+            if spinDelayInMs > 0 then
+                System.WaitForSeconds(spinDelayInMs / 1000)
+            end
+        end
+    end
+end
+
+function Game001FreeSpinsMachine:WaitForApplyOutcomeDelay()
+    series
+        do
+            local outcomeDelayInMs = Game001FreeSpinsSpinProperties.ApplyOutcomeDelay.First.Value
+            if outcomeDelayInMs > 0 then
+                System.WaitForSeconds(outcomeDelayInMs / 1000)
+            end
+        end
+    end
+end
+
+function Game001FreeSpinsMachine:ApplyOutcome()
+    series
+        do
+            local currentFreeSpin = self:GetCurrentFreeSpin()
+            local currentSpinOutcome = Game001FreeSpinsReelSpinOutcomeAllSpins["Spin" .. currentFreeSpin]
+            Game001FreeSpinsReelSpinOutcome = currentSpinOutcome
+            local currentWaysSummary = Game001FreeSpinsWaysSummaryAllSpins["Spin" .. currentFreeSpin]
+            Game001FreeSpinsWaysSummary = currentWaysSummary
+            Game001FreeSpinsWays = {}
+            Game001FreeSpinsWaysMatrix = {}
+            if Game001FreeSpinsWaysSummary.Ways.First.WaysCount > 0 then
+                Game001FreeSpinsWays = Game001FreeSpinsWaysAllSpins["Spin" .. currentFreeSpin]
+                Game001FreeSpinsWaysMatrix = Game001FreeSpinsWaysMatrixAllSpins["Spin" .. currentFreeSpin]
+            end
+            Game001FreeSpinsBonusSymbolsSummary = Game001FreeSpinsBonusSymbolsSummaryAllSpins["Spin" .. currentFreeSpin]
+            Game001FreeSpinsBonusSymbols = Game001FreeSpinsBonusSymbolsAllSpins["Spin" .. currentFreeSpin]
+            Game001FreeSpinsBonusSymbolsMatrix = Game001FreeSpinsBonusSymbolsMatrixAllSpins["Spin" .. currentFreeSpin]
+            Game001FreeSpinsAdded = Game001FreeSpinsAddedAllSpins["Spin" .. currentFreeSpin]
+            local addedFreeSpins = Game001FreeSpinsAdded.Added.First.Count
+            self:IncrTotalFreeSpins(addedFreeSpins)
+        end
+    end
+end
+
+function Game001FreeSpinsMachine:OnOutcomeReceived()
+    parallel
+        do
+            Game001FreeSpinsReel1:OnOutcomeReceived()
+        end
+        do
+            Game001FreeSpinsReel2:OnOutcomeReceived()
+        end
+        do
+            Game001FreeSpinsReel3:OnOutcomeReceived()
+        end
+        do
+            Game001FreeSpinsReel4:OnOutcomeReceived()
+        end
+        do
+            Game001FreeSpinsReel5:OnOutcomeReceived()
+        end
+    end
+end
+
+function Game001FreeSpinsMachine:OnSpinReelsStopped()
+    self:UpdateFreeSpinsReelsSpinState("Waiting")
+    self:TryTriggerBonusSymbols()
+end
+
+function Game001FreeSpinsMachine:UpdateFreeSpinsReelsSpinState(state)    
+    Game001FreeSpinsReelSpinState.Reel1.First.ReelSpinState = state
+    Game001FreeSpinsReelSpinState.Reel2.First.ReelSpinState = state
+    Game001FreeSpinsReelSpinState.Reel3.First.ReelSpinState = state
+    Game001FreeSpinsReelSpinState.Reel4.First.ReelSpinState = state
+    Game001FreeSpinsReelSpinState.Reel5.First.ReelSpinState = state
+end
+
+
+function Game001FreeSpinsMachine:SwitchFromOverlayToSpinButton()
+    parallel
+        do
+            local animatorProperty = self["overlay_fade_out"]
+            BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+        end
+        do
+            local animatorProperty = self["spin_button_fade_in"]
+            BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+        end
+    end
+end
+
+function Game001FreeSpinsMachine:HideSpinButton()
+    series
+        do
+            local animatorProperty = self["spin_button_fade_out"]
+            BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+        end
+    end
+end
+
+function Game001FreeSpinsMachine:ShowSettings()
+    local settings = self["Settings"]
+    settings.SetActive(true)
+end
+
+function Game001FreeSpinsMachine:HideSettings()
+    local settings = self["Settings"]
+    settings.SetActive(false)
+end
+
+function Game001FreeSpinsMachine:ResetSettings()
+    self.CreditsText.SetText(BettrUser.Coins)
+    self.WinText.SetText("0")
+    local statusTexts = self.StatusTexts
+    statusTexts.SetCurrentActive("BonusReelsInPlayText")    
+end
+
+function Game001FreeSpinsMachine:FreeSpinsBonusSymbolsPayout()
+    series
+        do
+            local winXTriggeredParticleTrailGroup = self.WinXTriggeredParticleTrailGroup
+            local boostTriggeredParticleTrailGroup = self.BoostTriggeredParticleTrailGroup
+            local boostALLTriggeredParticleTrailGroup = self.BoostALLTriggeredParticleTrailGroup
+            
+            -- start loop all payout symbols animations parallel across all reels
+            
+            for i=1,5 do
+                local reelID = "Reel" .. i
+                local reel = _G["Game001FreeSpins" .. reelID]
+                local reelBonusSymbol = Game001FreeSpinsBonusSymbols[reelID].First
+                if reelBonusSymbol.IsPayout then
+                    local matrixArray = Game001FreeSpinsBonusSymbolsMatrix[reelID]
+                    for j=1,matrixArray.Count series do
+                        local matrix = matrixArray.Array[j]
+                        local rowIndex = matrix.RowIndex
+                        local luaIndex = rowIndex + 1
+                        if matrix.IsWin then
+                            local winXAnimatorProperty = reel["SymbolWinXAnimatorGroup" .. luaIndex]["WinX"]
+                            BettrVisualsController.PlayAnimatorProperty(winXAnimatorProperty)
+                        end
+                        if matrix.IsBoost then
+                            local boostAnimatorProperty = reel["SymbolBoostAnimatorGroup" .. luaIndex]["Boost"]
+                            BettrVisualsController.PlayAnimatorProperty(boostAnimatorProperty)
+                        end
+                        if matrix.IsBoostALL then
+                            local boostALLAnimatorProperty = reel["SymbolBoostALLAnimatorGroup" .. luaIndex]["BoostALL"]
+                            BettrVisualsController.PlayAnimatorProperty(boostALLAnimatorProperty)
+                        end  
+                    end                 
+                end
+            end
+            
+            -- trigger particle effects in series and within a reel, top down in series
+            
+            for i=1,5 series do
+                local reelID = "Reel" .. i
+                local reel = _G["Game001FreeSpins" .. reelID]
+                local colIndex = i
+                local col = "Column" .. colIndex
+                local reelBonusSymbol = Game001FreeSpinsBonusSymbols[reelID].First
+                                
+                local winXTriggeredParticleTrail = winXTriggeredParticleTrailGroup["ParticleTrail" .. i]
+                local boostTriggeredParticleTrail = boostTriggeredParticleTrailGroup["ParticleTrail" .. i]
+                                        
+                winXTriggeredParticleTrail.useEndGameObject = true                                                                                       
+                boostTriggeredParticleTrail.useEndGameObject = true
+                
+                local activeBoostSymbolState = self:GetActiveBoostSymbolState(colIndex)
+    
+                if reelBonusSymbol.IsPayout then
+                    local matrixArray = Game001FreeSpinsBonusSymbolsMatrix[reelID]
+                    for j=1,matrixArray.Count series do
+                        local matrix = matrixArray.Array[j]
+                        local rowIndex = matrix.RowIndex
+                        local luaIndex = rowIndex + 1
+                        
+                        local symbolIndex = activeBoostSymbolState.SymbolIndex
+                        local symbolGameObjectProperty = self["BonusSymbolsRow" .. symbolIndex]["Reel" .. colIndex .. "Symbol"]
+                        winXTriggeredParticleTrail.endGameObject = symbolGameObjectProperty.GameObject
+                        boostTriggeredParticleTrail.endGameObject = symbolGameObjectProperty.GameObject                        
+                        
+                        if matrix.IsWin then
+                            local winParticleEffect = reel.WinXParticleSystemGroup["ParticleEffect" .. j]
+                            reel:OverlayGameObject(matrix.RowIndex, winParticleEffect.GameObject)
+                            local winXAnimatorProperty = reel["SymbolWinXAnimatorGroup" .. luaIndex]["WinX"]
+                            self:MatchColumnWinBoostSymbolState(i) 
+                            self:IncrColumnActiveBoostSymbolState(i)
+                            parallel
+                                do
+                                    BettrVisualsController.PlayParticleSystemProperty(winParticleEffect)
+                                    BettrVisualsController.StopParticleSystemProperty(winParticleEffect)
+                                end
+                                do
+                                    BettrVisualsController.TweenMoveBetweenAndWait(winParticleEffect.GameObject, winXTriggeredParticleTrail)
+                                end
+                                do
+                                    self:PlayColumnWinBoostSymbolParticleSystem(i)
+                                    if matrix.WinMultiplier > 1 then
+                                        local winXMultiplierTextProperty = self["BonusSymbolsMultiplierTextColumnGroup" .. luaIndex]["Symbol" .. symbolIndex]
+                                        winXMultiplierTextProperty.SetText(matrix.WinMultiplier)
+                                        local winXMultiplierAnimatorProperty = self["BonusSymbolsMultiplierAnimColumnGroup" .. luaIndex]["Symbol" .. symbolIndex]
+                                        BettrVisualsController.PlayAnimatorProperty(winXMultiplierAnimatorProperty)
+                                    end                                    
+                                    self:OverlayActiveBoostSymbolParticleTrail(i)
+                                end
+                            end
+                        end
+                        if matrix.IsBoost then
+                            local boostParticleEffect = reel.BoostParticleSystemGroup["ParticleEffect" .. j]
+                            reel:OverlayGameObject(matrix.RowIndex, boostParticleEffect.GameObject)
+                            local boostAnimatorProperty = reel["SymbolBoostAnimatorGroup" .. luaIndex]["Boost"]
+                            self:IncrColumnActiveBoostSymbolState(i)
+                            parallel
+                                do
+                                    BettrVisualsController.PlayParticleSystemProperty(boostParticleEffect)
+                                    BettrVisualsController.StopParticleSystemProperty(boostParticleEffect)
+                                end
+                                do
+                                    BettrVisualsController.TweenMoveBetweenAndWait(boostParticleEffect.GameObject, boostTriggeredParticleTrail)
+                                end
+                                do
+                                    self:PlayActiveBoostSymbolParticleTrail(i)
+                                end                                
+                            end
+                        end
+                        if matrix.IsBoostALL then                        
+                            for k=1,5 parallel do
+                                local kColIndex = k
+                                local kCol = "Column" .. kColIndex
+                                
+                                local kColActiveBoostSymbolState = self:GetActiveBoostSymbolState(kColIndex)
+                                                                
+                                local boostALLTriggeredParticleTrail = boostALLTriggeredParticleTrailGroup["ParticleTrail" .. kColIndex]
+                                boostALLTriggeredParticleTrail.useEndGameObject = true
+                                
+                                local kColSymbolIndex = kColActiveBoostSymbolState.SymbolIndex
+                                local kColSymbolGameObjectProperty = self["BonusSymbolsRow" .. kColSymbolIndex]["Reel" .. kColIndex .. "Symbol"]
+                                boostALLTriggeredParticleTrail.endGameObject = kColSymbolGameObjectProperty.GameObject
+                                
+                                local boostALLParticleEffect = reel.BoostALLParticleSystemGroup["ParticleEffect" .. kColIndex]
+                                reel:OverlayGameObject(matrix.RowIndex, boostALLParticleEffect.GameObject)
+                                self:IncrColumnActiveBoostSymbolState(k)
+                                parallel
+                                    do
+                                        BettrVisualsController.PlayParticleSystemProperty(boostALLParticleEffect)
+                                        BettrVisualsController.StopParticleSystemProperty(boostALLParticleEffect)
+                                    end
+                                    do
+                                        BettrVisualsController.TweenMoveBetweenAndWait(boostALLParticleEffect.GameObject, boostALLTriggeredParticleTrail)
+                                    end
+                                    do
+                                        self:PlayActiveBoostSymbolParticleTrail(k)
+                                    end                                    
+                                end
+                            end                        
+                        end
+                        if matrix.IsAddedSpins then
+                            parallel
+                                do
+                                    local particleSystemProperty = self["FreeSpinsSettingsParticleSystem"]
+                                    BettrVisualsController.PlayParticleSystemProperty(particleSystemProperty)
+                                    
+                                    local currentFreeSpin = self:GetCurrentFreeSpin()
+                                    local totalFreeSpins = self:GetTotalFreeSpins()
+                                    local statusTexts = self.StatusTexts
+                                    statusTexts.FormatAndSetCurrentActive("BonusSpinNText", currentFreeSpin, totalFreeSpins)
+                                    self.FreeSpinsText.SetText(self:GetRemainingFreeSpins())                                                                        
+                                end
+                                do
+                                    local addedSpins = matrix.AddedSpins
+                                    local addedSpinsTextProperty = self["FreeSpinsAddedText"]
+                                    addedSpinsTextProperty.Format(addedSpins)
+                                    local addedSpinsAnimatorProperty = self["FreeSpinsAddedAnimator"]
+                                    BettrVisualsController.PlayAnimatorProperty(addedSpinsAnimatorProperty)
+                                end
+                            end
+                        end
+                    end
+                end                
+            end
+             
+
+            -- reset all payout symbols animations parallel across all reels
+            
+            for i=1,5 do
+                local reelID = "Reel" .. i
+                local reel = _G["Game001FreeSpins" .. reelID]
+                local reelBonusSymbol = Game001FreeSpinsBonusSymbols[reelID].First
+                if reelBonusSymbol.IsPayout then
+                    local matrixArray = Game001FreeSpinsBonusSymbolsMatrix[reelID]
+                    for j=1,matrixArray.Count series do
+                        local matrix = matrixArray.Array[j]
+                        local rowIndex = matrix.RowIndex
+                        local luaIndex = rowIndex + 1
+                        if matrix.IsWin then
+                            local winXAnimatorProperty = reel["SymbolWinXAnimatorGroup" .. luaIndex]["Reset"]
+                            BettrVisualsController.PlayAnimatorProperty(winXAnimatorProperty)
+                        end
+                        if matrix.IsBoost then
+                            local boostAnimatorProperty = reel["SymbolBoostAnimatorGroup" .. luaIndex]["Reset"]
+                            BettrVisualsController.PlayAnimatorProperty(boostAnimatorProperty)
+                        end
+                        if matrix.IsBoostALL then
+                            local boostALLAnimatorProperty = reel["SymbolBoostALLAnimatorGroup" .. luaIndex]["Reset"]
+                            BettrVisualsController.PlayAnimatorProperty(boostALLAnimatorProperty)
+                        end  
+                    end                 
+                end
+            end
+      
+        end
+        do
+            self:TryWaysPaying()    
+        end
+    end
+end
+
+function Game001FreeSpinsMachine:HideWinMultiplierBonusSymbols()
+    for row=1,8 parallel do
+        for col=1,5 parallel do
+            local winXHideMultiplierAnimatorProperty = self["BonusSymbolsHideMultiplierAnimColumnGroup" .. col]["Symbol" .. row]
+            BettrVisualsController.PlayAnimatorProperty(winXHideMultiplierAnimatorProperty)
+        end
+        System.WaitForSeconds(0.1)
+    end
+end
+
+function Game001FreeSpinsMachine:FreeSpinsWaysPayout()
+    series
+        do
+            local waysSummary = Game001FreeSpinsWaysSummary.Ways.First
+            local waysIndex = waysSummary.WaysIndex
+            local waysCount = waysSummary.WaysCount
+            if waysCount > 0 then
+                local ways = Game001FreeSpinsWays.Ways.Array
+                local waysMatrix = Game001FreeSpinsWaysMatrix
+                parallel
+                    do
+                        self:DisplayWays(waysSummary, waysMatrix, ways)            
+                    end
+                    do
+                        if waysIndex == 0 then
+                            self:RollUpWaysWin(waysSummary)
+                        end
+                    end
+                end
+                if waysIndex >= 0 then
+                    self:OnWaysPayingCompleted()
+                else
+                    System.StartCoroutine(self, "FreeSpinsWaysPayout")
+                end
+            else
+                self:OnWaysPayingCompleted()
+            end
+        end
+    end      
+end
+
+function Game001FreeSpinsMachine:DisplayWays(waysSummary, waysMatrix, ways)
+    series
+        do
+            local waysIndex = waysSummary.WaysIndex   
+            local waysCount = waysSummary.WaysCount 
+            local startDelay = waysSummary.DisplayLoopStartDelay
+            local duration = waysSummary.DisplayLoopDuration
+            local endDelay = waysSummary.DisplayLoopEndDelay            
+            if waysIndex == 0 then
+                System.WaitForSeconds(startDelay)
+            end
+            for waysCounterIndex = 1, waysCount do
+                series
+                    do
+                        local way = ways[waysCounterIndex]
+                        local waySymbol = way.Symbol
+                        local wayReelCount = way.ReelCount
+                        local waySymbolCount = way.SymbolCount
+                        local wayMultiplier = way.Multiplier
+                        local wayPay = way.Pay
+                        local wayTotalPay = way.Pays
+                        local wayMatrix = waysMatrix[waySymbol].Array
+                        -- update status text 
+                        local statusTexts = self.StatusTexts
+                        -- {0}        Pays  {1} x {2} ways = {3} CREDITS!!
+                        statusTexts.FormatAndSetCurrentActive("PaysText", wayReelCount, wayPay, wayMultiplier, wayTotalPay)
+                        local winSymbols = self.WinSymbols
+                        winSymbols.SetCurrentActive(waySymbol)
+                        -- display ways
+                        for i=1,5 parallel do
+                            local reel = _G["Game001FreeSpinsReel" .. i]
+                            if reel != nil then
+                                reel:DisplayWays(waySymbol, wayMatrix, waySymbolCount, duration)
+                                System.WaitForSeconds(duration)
+                                reel:HideWays(waySymbol, wayMatrix, waySymbolCount)
+                            end
+                        end
+                    end
+                end                            
+            end
+            waysSummary.WaysIndex = waysIndex + 1
+            System.WaitForSeconds(endDelay) 
+        end
+    end
+end
+
+function Game001FreeSpinsMachine:RollUpWaysWin(waysSummary)
+    series
+        do
+            -- rollup ways win once
+            local startDelay = waysSummary.DisplayLoopStartDelay
+            local duration = waysSummary.DisplayLoopDuration
+            local pays = waysSummary.Pays 
+            System.WaitForSeconds(startDelay)
+            local winTextProperty = self.WinText
+            
+            local totalPays = Game001FreeSpinsSummary.TotalPays.First.Value
+            local startingPays = totalPays
+            local endingPays = startingPays + pays
+            
+            BettrVisualsController.RollUpCounter(winTextProperty, startingPays, endingPays, 1)
+            
+            Game001FreeSpinsSummary.TotalPays.First.Value = endingPays
+            
+            local creditsTextProperty = self.CreditsText   
+            local oldCoins = BettrUser.Coins
+            local newCoins = oldCoins + pays            
+            BettrUser.Coins = newCoins  
+                      
+            BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 1)
+        end
+    end    
+end
+
+function Game001FreeSpinsMachine:OnWaysPayingCompleted()
+    Game001FreeSpinsState.SpinState.First.State = "Completed"
+end
+
+function Game001FreeSpinsMachine:Update()
+    local spinState = Game001FreeSpinsState.SpinState.First.State
+    self.FreeSpinsStateDispatchTable[spinState](self)    
+end
+
+function Game001FreeSpinsMachine:TryTriggerBonusSymbols()
+    local totalCount = Game001FreeSpinsBonusSymbolsSummary.Current.First.TotalCount
+    if totalCount > 0 then
+        Game001FreeSpinsState.SpinState.First.State = "TriggerBonusSymbols"
+    else
+        self:TryWaysPaying()
+    end
+end
+
+function Game001FreeSpinsMachine:TryWaysPaying()
+    Game001FreeSpinsState.SpinState.First.State = "WaysPaying"
+end
+
+function Game001FreeSpinsMachine:FreeSpinsWaiting()    
+end
+
+function Game001FreeSpinsMachine:FreeSpinsSpinning()    
+end
+
+function Game001FreeSpinsMachine:FreeSpinsWaysPaying()
+    Game001FreeSpinsState.SpinState.First.State = "WaitingForPayToComplete"
+    System.StartCoroutine(self, "FreeSpinsWaysPayout") 
+end
+
+function Game001FreeSpinsMachine:WaitingForPayToComplete()    
+end
+
+function Game001FreeSpinsMachine:FreeSpinsTriggerBonusSymbols()
+    Game001FreeSpinsState.SpinState.First.State = "WaitingForTriggerBonusSymbolsToComplete"
+    System.StartCoroutine(self, "FreeSpinsBonusSymbolsPayout")   
+end
+
+function Game001FreeSpinsMachine:WaitingForTriggerBonusSymbolsToComplete()    
+end
+
+function Game001FreeSpinsMachine:FreeSpinsBonusSummary()    
+end
+
+function Game001FreeSpinsMachine:WaitingForFreeSpinsToComplete()    
+end
+
+function Game001FreeSpinsMachine:FreeSpinsCompleted()
+    if self:HasNextFreeSpin() then
+        Game001FreeSpinsState.SpinState.First.State = "WaitingForFreeSpinsToComplete"
+        System.StartCoroutine(self, "SetupSpinN")
+    else
+        Game001FreeSpinsState.SpinState.First.State = "Waiting"
+        System.StartCoroutine(self, "SetupAllSpinsCompleted")    
+    end    
+end
+
+Game001FreeSpinsMachine.FreeSpinsStateDispatchTable = {
+    Waiting = Game001FreeSpinsMachine.FreeSpinsWaiting,
+    Spinning = Game001FreeSpinsMachine.FreeSpinsSpinning,
+    WaysPaying = Game001FreeSpinsMachine.FreeSpinsWaysPaying,
+    WaitingForPayToComplete = Game001FreeSpinsMachine.WaitingForPayToComplete,
+    TriggerBonusSymbols = Game001FreeSpinsMachine.FreeSpinsTriggerBonusSymbols,
+    WaitingForTriggerBonusSymbolsToComplete = Game001FreeSpinsMachine.WaitingForTriggerBonusSymbolsToComplete,
+    FreeSpinsBonusSummary = Game001FreeSpinsMachine.FreeSpinsBonusSummary,
+    WaitingForFreeSpinsToComplete = Game001FreeSpinsMachine.WaitingForFreeSpinsToComplete,
+    Completed = Game001FreeSpinsMachine.FreeSpinsCompleted,
+}
+
+function Game001FreeSpinsMachine:OnPointerClick1Param(param)
+    System.Print("Game001FreeSpinsMachine OnPointerClick tile id={0} param={1}", self.id, param)
+    if Game001FreeSpinsState.StartSpinButtonState.First.State != "IsWaiting" then
+        return
+    end
+    Game001FreeSpinsState.StartSpinButtonState.First.State = "IsClicked"
+    System.StartCoroutine(self, "StartSpin1")
+end
+
+function Game001FreeSpinsMachine:OnBecameVisible()
+	System.Print("Game001FreeSpinsMachine OnBecameVisible tile id={0}", self.id)
+end
+
+return Game001FreeSpinsMachine:new()

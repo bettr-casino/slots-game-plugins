@@ -107,6 +107,45 @@ namespace Bettr.Editor
             // Optional: Log to confirm package creation
             Debug.Log("Package exported: " + outputPackagePath);
         }
+        
+        [MenuItem("Tools/Update Prefab References")]
+        static void UpdatePrefabReferences()
+        {
+            string newDirectoryPath = "Assets/Bettr/Runtime/Plugin/Game001Alpha"; // Path to the cloned directory
+            string oldDirectoryPath = "Assets/Bettr/Runtime/Plugin/Game001"; // Path to the cloned directory
+            
+            // Step 1: Get all prefabs in the new directory
+            string[] prefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { newDirectoryPath });
+
+            foreach (string prefabGuid in prefabGuids)
+            {
+                string prefabPath = AssetDatabase.GUIDToAssetPath(prefabGuid);
+                string[] prefabLines = File.ReadAllLines(prefabPath);
+
+                for (int i = 0; i < prefabLines.Length; i++)
+                {
+                    if (prefabLines[i].Contains("guid:"))
+                    {
+                        string oldGuid = Regex.Match(prefabLines[i], "guid: (.+?),").Groups[1].Value;
+                        string oldAssetPath = AssetDatabase.GUIDToAssetPath(oldGuid);
+
+                        if (!string.IsNullOrEmpty(oldAssetPath) && oldAssetPath.StartsWith(oldDirectoryPath))
+                        {
+                            string newAssetPath = oldAssetPath.Replace(oldDirectoryPath, newDirectoryPath);
+                            string newGuid = AssetDatabase.AssetPathToGUID(newAssetPath);
+
+                            prefabLines[i] = prefabLines[i].Replace(oldGuid, newGuid);
+                            Debug.Log($"Updated GUID in prefab: {prefabPath}");
+                        }
+                    }
+                }
+
+                File.WriteAllLines(prefabPath, prefabLines);
+                AssetDatabase.Refresh();
+            }
+
+            Debug.Log("GUIDs updated successfully.");
+        }
 
         [MenuItem("Bettr/Install/Verify")]
         public static void VerifyInstall()
