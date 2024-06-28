@@ -285,14 +285,14 @@ namespace Bettr.Editor
                                            BuildAssetBundleOptions.ChunkBasedCompression;
 
 #if UNITY_IOS
-            EmptyDirectory(new DirectoryInfo(AssetBundlesIOSDirectory));
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesIOSDirectory));
             AssetDatabase.Refresh();
             BuildPipeline.BuildAssetBundles(AssetBundlesIOSDirectory, 
                 sharedAssetBundleOptions,
                 BuildTarget.iOS);
             AssetDatabase.Refresh();
             
-            EmptyDirectory(new DirectoryInfo(AssetBundlesOSXDirectory));
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesOSXDirectory));
             AssetDatabase.Refresh();
             BuildPipeline.BuildAssetBundles(AssetBundlesOSXDirectory, 
                 sharedAssetBundleOptions,
@@ -449,9 +449,9 @@ namespace Bettr.Editor
             }
         }
 
-        private static void EmptyDirectory(this DirectoryInfo directory)
+        private static void EnsureEmptyDirectory(this DirectoryInfo directory)
         {
-            foreach(FileInfo file in directory.GetFiles()) file.Delete();
+            if (!directory.Exists) directory.Create();
             foreach(DirectoryInfo subDirectory in directory.GetDirectories()) subDirectory.Delete(true);
         }
         
