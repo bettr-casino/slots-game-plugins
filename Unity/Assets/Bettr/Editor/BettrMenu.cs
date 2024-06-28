@@ -266,6 +266,169 @@ namespace Bettr.Editor
             SyncMachine();
         }
         
+        private static void CreateOrReplaceMaterial(string machineName, string machineVariant)
+        {
+            string materialName = $"{machineName}__{machineVariant}__LobbyCard";
+            string materialPath = $"Assets/Bettr/Runtime/Plugin/LobbyCard/variants/v0_1_0/Runtime/Asset/{machineName}/LobbyCard/Materials/{materialName}.mat";
+            string texturePath = $"Assets/Bettr/Runtime/Plugin/LobbyCard/variants/v0_1_0/Runtime/Asset/{machineName}/LobbyCard/Materials/{materialName}.jpg";
+    
+            // Load or create the material
+            Material material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+            if (material == null)
+            {
+                material = new Material(Shader.Find("Unlit/Texture"));
+                AssetDatabase.CreateAsset(material, materialPath);
+                AssetDatabase.Refresh();
+            }
+
+            // Load the texture
+            Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(texturePath);
+            if (texture != null)
+            {
+                material.mainTexture = texture;
+            }
+            else
+            {
+                Debug.LogWarning($"Texture not found at path: {texturePath}");
+            }
+
+            // Create or replace the material asset
+            AssetDatabase.SaveAssets();
+        }
+        
+        [MenuItem("Bettr/Build/LobbyCard/Materials")]
+        public static void BuildMaterials()
+        {
+            // Game001 Variants
+            CreateOrReplaceMaterial("Game001", "AncientAdventures");
+            CreateOrReplaceMaterial("Game001", "AtlantisTreasures");
+            CreateOrReplaceMaterial("Game001", "ClockworkChronicles");
+            CreateOrReplaceMaterial("Game001", "DragonsHoard");
+            CreateOrReplaceMaterial("Game001", "EnchantedForest");
+            CreateOrReplaceMaterial("Game001", "GalacticQuest");
+            CreateOrReplaceMaterial("Game001", "GuardiansOfOlympus");
+            CreateOrReplaceMaterial("Game001", "LostCityOfGold");
+            CreateOrReplaceMaterial("Game001", "MysticalLegends");
+            CreateOrReplaceMaterial("Game001", "PharosFortune");
+            CreateOrReplaceMaterial("Game001", "PiratesPlunder");
+            CreateOrReplaceMaterial("Game001", "SamuraisFortune");
+
+            // Game002 Variants
+            CreateOrReplaceMaterial("Game002", "BuffaloAdventureQuest");
+            CreateOrReplaceMaterial("Game002", "BuffaloCanyonRiches");
+            CreateOrReplaceMaterial("Game002", "BuffaloFrontierFortune");
+            CreateOrReplaceMaterial("Game002", "BuffaloJackpotMadness");
+            CreateOrReplaceMaterial("Game002", "BuffaloMagicSpins");
+            CreateOrReplaceMaterial("Game002", "BuffaloMoonlitMagic");
+            CreateOrReplaceMaterial("Game002", "BuffaloSafariExpedition");
+            CreateOrReplaceMaterial("Game002", "BuffaloSpiritQuest");
+            CreateOrReplaceMaterial("Game002", "BuffaloThunderstorm");
+            CreateOrReplaceMaterial("Game002", "BuffaloTreasureHunter");
+            CreateOrReplaceMaterial("Game002", "BuffaloWheelOfRiches");
+            CreateOrReplaceMaterial("Game002", "BuffaloWildPicks");
+
+            // Game003 Variants
+            CreateOrReplaceMaterial("Game003", "HighStakesAlpineAdventure");
+            CreateOrReplaceMaterial("Game003", "HighStakesCascadingCash");
+            CreateOrReplaceMaterial("Game003", "HighStakesHotLinks");
+            CreateOrReplaceMaterial("Game003", "HighStakesJungleQuest");
+            CreateOrReplaceMaterial("Game003", "HighStakesMegaMultipliers");
+            CreateOrReplaceMaterial("Game003", "HighStakesMonacoThrills");
+            CreateOrReplaceMaterial("Game003", "HighStakesSafariAdventure");
+            CreateOrReplaceMaterial("Game003", "HighStakesSpaceOdyssey");
+            CreateOrReplaceMaterial("Game003", "HighStakesStackedSpins");
+            CreateOrReplaceMaterial("Game003", "HighStakesUnderwaterAdventure");
+            CreateOrReplaceMaterial("Game003", "HighStakesWildSpins");
+            CreateOrReplaceMaterial("Game003", "HighStakesWonderWays");
+
+            // Game004 Variants
+            CreateOrReplaceMaterial("Game004", "RichesBeverlyHillMansions");
+            CreateOrReplaceMaterial("Game004", "RichesBillionaireBets");
+            CreateOrReplaceMaterial("Game004", "RichesDiamondDash");
+            CreateOrReplaceMaterial("Game004", "RichesGalacticGoldRush");
+            CreateOrReplaceMaterial("Game004", "RichesJetsetJackpot");
+            CreateOrReplaceMaterial("Game004", "RichesMysticForest");
+            CreateOrReplaceMaterial("Game004", "RichesPharaohsRiches");
+            CreateOrReplaceMaterial("Game004", "RichesPiratesBounty");
+            CreateOrReplaceMaterial("Game004", "RichesRaceToRiches");
+            CreateOrReplaceMaterial("Game004", "RichesRoyalHeist");
+            CreateOrReplaceMaterial("Game004", "RichesRubyRush");
+            CreateOrReplaceMaterial("Game004", "RichesSapphireSprint");
+
+            // Game005 Variants
+            CreateOrReplaceMaterial("Game005", "FortunesCelestialFortune");
+            CreateOrReplaceMaterial("Game005", "FortunesFortuneTeller");
+            CreateOrReplaceMaterial("Game005", "FortunesFourLeafClover");
+            CreateOrReplaceMaterial("Game005", "FortunesJadeOfFortune");
+            CreateOrReplaceMaterial("Game005", "FortunesLuckyBamboo");
+            CreateOrReplaceMaterial("Game005", "FortunesLuckyCharms");
+            CreateOrReplaceMaterial("Game005", "FortunesManekiNeko");
+            CreateOrReplaceMaterial("Game005", "FortunesMysticForest");
+            CreateOrReplaceMaterial("Game005", "FortunesNorseAcorns");
+            CreateOrReplaceMaterial("Game005", "FortunesPharaohsRiches");
+            CreateOrReplaceMaterial("Game005", "FortunesShootingStars");
+            CreateOrReplaceMaterial("Game005", "FortunesVikingVoyage");
+
+            // Game006 Variants
+            CreateOrReplaceMaterial("Game006", "WheelsAncientKingdom");
+            CreateOrReplaceMaterial("Game006", "WheelsCapitalCityTycoon");
+            CreateOrReplaceMaterial("Game006", "WheelsEmpireBuilder");
+            CreateOrReplaceMaterial("Game006", "WheelsFantasyKingdom");
+            CreateOrReplaceMaterial("Game006", "WheelsGlobalInvestor");
+            CreateOrReplaceMaterial("Game006", "WheelsIndustrialRevolution");
+            CreateOrReplaceMaterial("Game006", "WheelsJurassicJungle");
+            CreateOrReplaceMaterial("Game006", "WheelsMythicalRealm");
+            CreateOrReplaceMaterial("Game006", "WheelsRealEstateMoghul");
+            CreateOrReplaceMaterial("Game006", "WheelsSpaceColonization");
+            CreateOrReplaceMaterial("Game006", "WheelsTreasuresIslandTycoon");
+            CreateOrReplaceMaterial("Game006", "WheelsUnderwaterEmpire");
+
+            // Game007 Variants
+            CreateOrReplaceMaterial("Game007", "TrueVegasDiamondDazzle");
+            CreateOrReplaceMaterial("Game007", "TrueVegasGoldRush");
+            CreateOrReplaceMaterial("Game007", "TrueVegasInfiniteSpins");
+            CreateOrReplaceMaterial("Game007", "TrueVegasLucky7s");
+            CreateOrReplaceMaterial("Game007", "TrueVegasLuckyCharms");
+            CreateOrReplaceMaterial("Game007", "TrueVegasMegaJackpot");
+            CreateOrReplaceMaterial("Game007", "TrueVegasMegaWheels");
+            CreateOrReplaceMaterial("Game007", "TrueVegasRubyRiches");
+            CreateOrReplaceMaterial("Game007", "TrueVegasSuper7s");
+            CreateOrReplaceMaterial("Game007", "TrueVegasTripleSpins");
+            CreateOrReplaceMaterial("Game007", "TrueVegasWheelBonanza");
+            CreateOrReplaceMaterial("Game007", "TrueVegasWildCherries");
+
+            // Game008 Variants
+            CreateOrReplaceMaterial("Game008", "GodsAncientEgyptian");
+            CreateOrReplaceMaterial("Game008", "GodsCelestialBeasts");
+            CreateOrReplaceMaterial("Game008", "GodsCelestialGuardians");
+            CreateOrReplaceMaterial("Game008", "GodsDivineRiches");
+            CreateOrReplaceMaterial("Game008", "GodsElementalMasters");
+            CreateOrReplaceMaterial("Game008", "GodsEternalDivinity");
+            CreateOrReplaceMaterial("Game008", "GodsHeavenlyMonarchs");
+            CreateOrReplaceMaterial("Game008", "GodsMysticPantheon");
+            CreateOrReplaceMaterial("Game008", "GodsMythicDeities");
+            CreateOrReplaceMaterial("Game008", "GodsNorseLegends");
+            CreateOrReplaceMaterial("Game008", "GodsSacredLegends");
+            CreateOrReplaceMaterial("Game008", "GodsTitansOfWealth");
+
+            // Game009 Variants
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersApolloAdventures");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersAsteroidMiners");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersBlackHoleExplorers");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersCosmicRaiders");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersGalacticPioneers");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersInterstellarTreasureHunters");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersNebulaNavigators");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersQuantumExplorers");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersRaidersOfPlanetMooney");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersStarshipSalvagers");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersStellarExpedition");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersVoyagersOfTheCosmos");
+            
+            Debug.Log($"LobbyCard materials updated successfully.");
+        }
+
+        
         //[MenuItem("Bettr/Assets/Cleanup")]
         private static void CleanupTestScenes()
         {
