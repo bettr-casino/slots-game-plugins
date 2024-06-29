@@ -280,6 +280,9 @@ namespace Bettr.Editor
                 AssetDatabase.CreateAsset(material, materialPath);
                 AssetDatabase.Refresh();
             }
+            
+            // Set the render queue to 3000
+            material.renderQueue = 3000;
 
             // Load the texture
             Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(texturePath);
