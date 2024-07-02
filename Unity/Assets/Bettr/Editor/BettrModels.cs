@@ -1451,8 +1451,9 @@ namespace Bettr.Editor
             gameObject.layer = LayerMask.NameToLayer("SLOT_BACKGROUND");
             uiCamera.clearFlags = CameraClearFlags.Depth;
             uiCamera.cullingMask = LayerMask.GetMask("SLOT_BACKGROUND");
-            uiCamera.orthographic = true;
-            uiCamera.orthographicSize = 4.1f;
+            uiCamera.orthographic = false;
+            uiCamera.fieldOfView = 5.8f;
+            // uiCamera.orthographicSize = 4.1f;
             uiCamera.nearClipPlane = 0.3f;
             uiCamera.farClipPlane = 1000;
             uiCamera.depth = -13;
