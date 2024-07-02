@@ -7,6 +7,10 @@ namespace Bettr.Editor.generators
 {
     public static class BettrMaterialGenerator
     {
+        public static string MachineName;
+        
+        public static string MachineVariant;
+        
         public static Material CreateOrLoadMaterial(string materialName, string shaderName, string textureName, string hexColor, string runtimeAssetPath)
         {
             AssetDatabase.Refresh();
@@ -36,7 +40,7 @@ namespace Bettr.Editor.generators
 
             if (!string.IsNullOrEmpty(textureName))
             {
-                string sourcePath = Path.Combine("Assets", "Bettr", "Editor", "textures", textureName);
+                string sourcePath = Path.Combine("Assets", "Bettr", "Editor", "textures", MachineName, MachineVariant, textureName);
                 var destPath = $"{runtimeAssetPath}/Textures/{textureName}";
                 string extension = Path.GetExtension(sourcePath);
                 if (string.IsNullOrEmpty(extension))

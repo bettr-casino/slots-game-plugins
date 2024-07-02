@@ -196,7 +196,8 @@ namespace Bettr.Editor
         [MenuItem("Bettr/Build/Game001 - Epic Wins!!!")]
         public static void BuildGame001()
         {
-            BuildMachines("Game001", "AtlantisTreasures");
+            BuildMachines("Game001", "AncientAdventures");
+            // BuildMachines("Game001", "AtlantisTreasures");
             // BuildMachines("Game001", "ClockworkChronicles");
             // BuildMachines("Game001", "GalacticQuest");
             // BuildMachines("Game001", "PharosFortune");
@@ -1027,7 +1028,7 @@ namespace Bettr.Editor
             
             foreach (var symbolKey in symbolKeys)
             {
-                ProcessBaseGameSymbol(symbolKey, $"{machineName}BaseGameSymbol{symbolKey}", runtimeAssetPath);
+                ProcessBaseGameSymbol(machineName, machineVariant, symbolKey, $"{machineName}BaseGameSymbol{symbolKey}", runtimeAssetPath);
             }
             
             AssetDatabase.SaveAssets();
@@ -1045,6 +1046,9 @@ namespace Bettr.Editor
             
             InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
             InstanceGameObject.IdGameObjects.Clear();
+
+            BettrMaterialGenerator.MachineName = machineName;
+            BettrMaterialGenerator.MachineVariant = machineVariant;
             
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
 
@@ -1056,7 +1060,7 @@ namespace Bettr.Editor
             return symbolGroup;
         }
 
-        private static GameObject ProcessBaseGameSymbol(string symbolName, string symbolPrefabName, string runtimeAssetPath)
+        private static GameObject ProcessBaseGameSymbol(string machineName, string machineVariant, string symbolName, string symbolPrefabName, string runtimeAssetPath)
         {
             var templateName = "BaseGameSymbol";
             var scribanTemplate = ParseScribanTemplate("common", templateName);
@@ -1072,6 +1076,10 @@ namespace Bettr.Editor
 
             InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
             InstanceGameObject.IdGameObjects.Clear();
+            
+            BettrMaterialGenerator.MachineName = machineName;
+            BettrMaterialGenerator.MachineVariant = machineVariant;
+            
             
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
 
@@ -1148,6 +1156,9 @@ namespace Bettr.Editor
             InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
             InstanceGameObject.IdGameObjects.Clear();
             
+            BettrMaterialGenerator.MachineName = machineName;
+            BettrMaterialGenerator.MachineVariant = machineVariant;
+            
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
             
             var baseGameMachinePrefab = ProcessPrefab($"{baseGameMachine}", 
@@ -1168,17 +1179,17 @@ namespace Bettr.Editor
             return symbolInstance;
         }
 
-        private static void ProcessBaseGameReels(string machineName, string runtimeAssetPath)
+        private static void ProcessBaseGameReels(string machineName, string machineVariant, string runtimeAssetPath)
         {
             var reelCount = BettrMenu.GetReelCount(machineName);
             for (int i = 0; i < reelCount; i++)
             {
                 var reelIndex = i + 1;
-                ProcessBaseGameReel(machineName, reelIndex, runtimeAssetPath);
+                ProcessBaseGameReel(machineName, machineVariant, reelIndex, runtimeAssetPath);
             }
         }
 
-        private static void ProcessBaseGameReel(string machineName, int reelIndex, string runtimeAssetPath)
+        private static void ProcessBaseGameReel(string machineName, string machineVariant, int reelIndex, string runtimeAssetPath)
         {
             // refresh the asset database
             AssetDatabase.Refresh();
@@ -1222,6 +1233,9 @@ namespace Bettr.Editor
             InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
             InstanceGameObject.IdGameObjects.Clear();
             
+            BettrMaterialGenerator.MachineName = machineName;
+            BettrMaterialGenerator.MachineVariant = machineVariant;
+            
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
             hierarchyInstance.SetParent((GameObject) null);
 
@@ -1262,6 +1276,9 @@ namespace Bettr.Editor
             
             InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
             InstanceGameObject.IdGameObjects.Clear();
+            
+            BettrMaterialGenerator.MachineName = machineName;
+            BettrMaterialGenerator.MachineVariant = machineVariant;
             
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
             hierarchyInstance.SetParent((GameObject) null);
@@ -1345,6 +1362,9 @@ namespace Bettr.Editor
             InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
             InstanceGameObject.IdGameObjects.Clear();
             
+            BettrMaterialGenerator.MachineName = machineName;
+            BettrMaterialGenerator.MachineVariant = machineVariant;
+            
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
             
             var baseGameMachinePrefab = ProcessPrefab($"{baseGameMachine}", 
@@ -1381,6 +1401,9 @@ namespace Bettr.Editor
             InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
             InstanceGameObject.IdGameObjects.Clear();
             
+            BettrMaterialGenerator.MachineName = machineName;
+            BettrMaterialGenerator.MachineVariant = machineVariant;
+            
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
             hierarchyInstance.SetParent((GameObject) null);
 
@@ -1415,6 +1438,9 @@ namespace Bettr.Editor
             InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
             InstanceGameObject.IdGameObjects.Clear();
             
+            BettrMaterialGenerator.MachineName = machineName;
+            BettrMaterialGenerator.MachineVariant = machineVariant;
+            
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
             
             var baseGameMachinePrefab = ProcessPrefab($"{wheelGameMachine}", 
@@ -1445,6 +1471,9 @@ namespace Bettr.Editor
             InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
             InstanceGameObject.IdGameObjects.Clear();
             
+            BettrMaterialGenerator.MachineName = machineName;
+            BettrMaterialGenerator.MachineVariant = machineVariant;
+            
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
             hierarchyInstance.SetParent((GameObject) null);
 
@@ -1463,7 +1492,7 @@ namespace Bettr.Editor
             {
                 ProcessBaseGameBackground(machineName, machineVariant, runtimeAssetPath);
                 ProcessBaseGameSymbols(machineName, machineVariant, runtimeAssetPath);
-                ProcessBaseGameReels(machineName, runtimeAssetPath);
+                ProcessBaseGameReels(machineName, machineVariant, runtimeAssetPath);
                 ProcessBaseGameMachine(machineName, machineVariant, runtimeAssetPath);
             }
             // else if (isBonus)
@@ -1540,6 +1569,9 @@ namespace Bettr.Editor
             
             InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
             InstanceGameObject.IdGameObjects.Clear();
+            
+            BettrMaterialGenerator.MachineName = machineName;
+            BettrMaterialGenerator.MachineVariant = machineVariant;
             
             JsonConvert.DeserializeObject<InstanceGameObject>(json);
             
@@ -2576,13 +2608,13 @@ namespace Bettr.Editor
     {
         public static void Process(string machineName, string machineVariant, string runtimeAssetPath)
         {
-            ProcessWinPrefab(machineName, runtimeAssetPath);
+            ProcessWinPrefab(machineName, machineVariant, runtimeAssetPath);
             ProcessBaseGameSymbolModifications(machineName, machineVariant, runtimeAssetPath);
             ProcessBaseGameMachineModifications(machineName, machineVariant, runtimeAssetPath);
             ProcessBaseGameReelModifications(machineName, machineVariant, runtimeAssetPath);
         }
 
-        private static void ProcessWinPrefab(string machineName, string runtimeAssetPath)
+        private static void ProcessWinPrefab(string machineName, string machineVariant, string runtimeAssetPath)
         {
             string symbolName = $"{machineName}BaseGameWaysWin";
             var templateName = "BaseGameWaysWinPrefab";
@@ -2597,6 +2629,9 @@ namespace Bettr.Editor
             
             InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
             InstanceGameObject.IdGameObjects.Clear();
+            
+            BettrMaterialGenerator.MachineName = machineName;
+            BettrMaterialGenerator.MachineVariant = machineVariant;
             
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
             hierarchyInstance.SetParent((GameObject) null);
@@ -2617,6 +2652,9 @@ namespace Bettr.Editor
             
             InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
             InstanceGameObject.IdGameObjects.Clear();
+            
+            BettrMaterialGenerator.MachineName = machineName;
+            BettrMaterialGenerator.MachineVariant = machineVariant;
                 
             var model = new Dictionary<string, object>
             {
@@ -2710,6 +2748,9 @@ namespace Bettr.Editor
                 InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
                 InstanceGameObject.IdGameObjects.Clear();
                 
+                BettrMaterialGenerator.MachineName = machineName;
+                BettrMaterialGenerator.MachineVariant = machineVariant;
+                
                 var model = new Dictionary<string, object>
                 {
                     { "machineName", machineName },
@@ -2744,7 +2785,7 @@ namespace Bettr.Editor
     {
         public static void Process(string machineName, string machineVariant, string runtimeAssetPath)
         {
-            ProcessPaylinePrefab(machineName, runtimeAssetPath);
+            ProcessPaylinePrefab(machineName, machineVariant, runtimeAssetPath);
             ProcessBaseGameSymbolModifications(machineName, machineVariant, runtimeAssetPath);
             ProcessBaseGameMachineModifications(machineName, machineVariant, runtimeAssetPath);
             ProcessBaseGameReelModifications(machineName, machineVariant, runtimeAssetPath);
@@ -2775,7 +2816,7 @@ namespace Bettr.Editor
             AssetDatabase.Refresh();
         }
         
-        private static void ProcessPaylinePrefab(string machineName, string runtimeAssetPath)
+        private static void ProcessPaylinePrefab(string machineName, string machineVariant, string runtimeAssetPath)
         {
             var templateName = "BaseGamePaylinesPrefab";
             var prefabName = $"{machineName}{templateName}";
@@ -2791,6 +2832,9 @@ namespace Bettr.Editor
             
             InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
             InstanceGameObject.IdGameObjects.Clear();
+            
+            BettrMaterialGenerator.MachineName = machineName;
+            BettrMaterialGenerator.MachineVariant = machineVariant;
             
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
             hierarchyInstance.SetParent((GameObject) null);
@@ -2827,6 +2871,9 @@ namespace Bettr.Editor
                 
                 InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
                 InstanceGameObject.IdGameObjects.Clear();
+                
+                BettrMaterialGenerator.MachineName = machineName;
+                BettrMaterialGenerator.MachineVariant = machineVariant;
                 
                 var model = new Dictionary<string, object>
                 {
@@ -2867,6 +2914,9 @@ namespace Bettr.Editor
             
             InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
             InstanceGameObject.IdGameObjects.Clear();
+            
+            BettrMaterialGenerator.MachineName = machineName;
+            BettrMaterialGenerator.MachineVariant = machineVariant;
                 
             var model = new Dictionary<string, object>
             {
