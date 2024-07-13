@@ -206,6 +206,14 @@ namespace Bettr.Editor
             // BuildMachines("Game001", "CosmicVoyage");
         }
         
+        public static void ImportFBX(string machineName, string machineVariant)
+        {
+            string sourcePath =  $"Assets/Bettr/Editor/fbx/{machineName}/{machineVariant}/";
+            string destinationPathPrefix = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset/";
+
+            BettrFBXController.ImportFBX(sourcePath, destinationPathPrefix);
+        }
+        
         [MenuItem("Bettr/Build/Game001 - Epic Wins!!!")]
         public static void BuildGame001()
         {
@@ -793,12 +801,6 @@ namespace Bettr.Editor
         private static bool IsExcluded(string fileName)
         {
             return ExcludedFileNames.Any(excluded => fileName.EndsWith(excluded, StringComparison.OrdinalIgnoreCase));
-        }
-
-        private static void ImportFBX(string machineGame, string machineVariant)
-        {
-            // construct the import path
-            string importPath = $"Assets/Bettr/Runtime/Plugin/{machineGame}/variants/{machineVariant}/Runtime/Asset/{machineGame}/{machineVariant}/FBX";
         }
 
         private static DirectoryNode GetDirectoryTree(DirectoryInfo directoryInfo)
