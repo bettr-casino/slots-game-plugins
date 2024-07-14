@@ -75,34 +75,51 @@ namespace Bettr.Editor.generators
                         // Set rotation to 0, 180, 0
                         instantiatedModel.transform.rotation = Quaternion.Euler(0, 180, 0);
 
-                        // Apply extracted textures to the model
                         Renderer[] renderers = instantiatedModel.GetComponentsInChildren<Renderer>();
+                        Dictionary<string, Material> materialMap = new Dictionary<string, Material>();
+
                         foreach (Renderer renderer in renderers)
                         {
-                            for (int i = 0; i < renderer.sharedMaterials.Length; i++)
+                            var sharedMaterials = renderer.sharedMaterials;
+                            var clonedSharedMaterials = new Material[sharedMaterials.Length];
+                            
+                            for (int i = 0; i < sharedMaterials.Length; i++)
                             {
                                 Material originalMat = renderer.sharedMaterials[i];
+                                clonedSharedMaterials[i] = originalMat;
                                 if (originalMat != null)
                                 {
-                                    // Clone the material
-                                    Material clonedMat = new Material(originalMat);
-                                    string texturePath = Path.Combine(texturesDestinationPath, originalMat.name + ".png");
-                                    texturesPath.Add(texturePath);
-                                    var materialPath = Path.Combine(materialsDestinationPath, originalMat.name + ".mat");
-                                    materialsPath.Add(materialPath);
-                                    Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(GetRelativePath(texturePath));
-                                    if (texture != null)
+                                    if (!materialMap.TryGetValue(originalMat.name, out Material clonedMat))
                                     {
-                                        clonedMat.mainTexture = texture;
+                                        // Clone the material
+                                        clonedMat = new Material(originalMat);
+                                        var materialPath = Path.Combine(materialsDestinationPath, originalMat.name + ".mat");
+                                        materialsPath.Add(materialPath);
+                                        AssetDatabase.CreateAsset(clonedMat, GetRelativePath(materialPath));
+                                        
+                                        // Extract textures
+                                        string[] texturePropertyNames = originalMat.GetTexturePropertyNames();
+                                        foreach (string propertyName in texturePropertyNames)
+                                        {
+                                            Texture texture = originalMat.GetTexture(propertyName);
+                                            if (texture != null)
+                                            {
+                                                string texturePath = AssetDatabase.GetAssetPath(texture);
+                                                if (!string.IsNullOrEmpty(texturePath))
+                                                {
+                                                    string newTexturePath = Path.Combine(texturesDestinationPath, Path.GetFileName(texturePath));
+                                                    AssetDatabase.CopyAsset(texturePath, newTexturePath);
+                                                    clonedMat.SetTexture(propertyName, AssetDatabase.LoadAssetAtPath<Texture>(newTexturePath));
+                                                }
+                                            }
+                                        }
+
+                                        clonedSharedMaterials[i] = clonedMat;
                                     }
-
-                                    // Save the cloned material
-                                    CreateDirectoryIfNotExists(Path.GetDirectoryName(materialPath));
-                                    AssetDatabase.CreateAsset(clonedMat, GetRelativePath(materialPath));
-
-                                    // Assign the cloned material
-                                    renderer.sharedMaterials[i] = clonedMat;
                                 }
+                                
+                                // Assign the cloned material
+                                renderer.sharedMaterials = clonedSharedMaterials;
                             }
                         }
 
