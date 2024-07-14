@@ -192,30 +192,7 @@ namespace Bettr.Editor
             BuildAssetBundles();
             BuildLocalServer();
         }
-        
-        [MenuItem("Bettr/Install/Import/FBX/Game001 - Epic Wins!!!")]
-        public static void ImportFBXGame001()
-        {
-            ImportFBX("Game001", "AncientAdventures");
-            // BuildMachines("Game001", "AtlantisTreasures");
-            // BuildMachines("Game001", "ClockworkChronicles");
-            // BuildMachines("Game001", "GalacticQuest");
-            // BuildMachines("Game001", "PharosFortune");
-            // BuildMachines("Game001", "MysticalLegends");
-            // BuildMachines("Game001", "AncientAdventures");
-            // BuildMachines("Game001", "CosmicVoyage");
-        }
-        
-        public static void ImportFBX(string machineName, string machineVariant)
-        {
-            string sourcePath =  $"Assets/Bettr/Editor/fbx/{machineName}/{machineVariant}/";
-            string destinationPathPrefix = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset/";
-            string fbxFilename = $"Background_fbx_optimized_textured.fbx";
-            string targetFbxFilename = $"BackgroundFBX.fbx";
 
-            BettrFBXController.ImportFBX(sourcePath, destinationPathPrefix, fbxFilename, targetFbxFilename);
-        }
-        
         [MenuItem("Bettr/Build/Game001 - Epic Wins!!!")]
         public static void BuildGame001()
         {
@@ -276,6 +253,16 @@ namespace Bettr.Editor
         {
             BuildMachines("Game009", "PlanetMooneyMooCash");
         }
+        
+        private static void ImportFBX(string machineName, string machineVariant)
+        {
+            string sourcePath =  $"Assets/Bettr/Editor/fbx/{machineName}/{machineVariant}/";
+            string destinationPathPrefix = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset/";
+            string fbxFilename = $"Background_fbx_optimized_textured.fbx";
+            string targetFbxFilename = $"BackgroundFBX.fbx";
+
+            BettrFBXController.ImportFBX(sourcePath, destinationPathPrefix, fbxFilename, targetFbxFilename);
+        }
 
         private static void BuildMachines(string machineName, string machineVariant)
         {
@@ -285,9 +272,20 @@ namespace Bettr.Editor
             Environment.SetEnvironmentVariable("machineName", machineName);
             Environment.SetEnvironmentVariable("machineVariant", machineVariant);
             Environment.SetEnvironmentVariable("machineModel", $"{modelsDir}/{machineName}/{machineName}Models.lua");
+
+            BuildMachinesFromEnv();
+        }
+
+        private static void BuildMachinesFromEnv()
+        {
+            string machineName = GetArgument("-machineName");
+            string machineVariant = GetArgument("-machineVariant");
+            string machineModel = GetArgument("-machineModel");
             
-            ClearRuntimeAssetPath();
-            SyncMachine();
+            ClearRuntimeAssetPath(machineName, machineVariant);
+            SetupMachine(machineName, machineVariant, machineModel);
+            ImportFBX(machineName, machineVariant);
+            BuildMachine(machineName, machineVariant);
         }
         
         private static void CreateOrReplaceMaterial(string machineName, string machineVariant)
@@ -870,12 +868,8 @@ namespace Bettr.Editor
             }
         }
 
-        private static void ClearRuntimeAssetPath()
+        private static void ClearRuntimeAssetPath(string machineName, string machineVariant)
         {
-            string machineName = GetArgument("-machineName");
-            string machineVariant = GetArgument("-machineVariant");
-            string machineModel = GetArgument("-machineModel");
-            
             string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset";
             
             if (Directory.Exists(runtimeAssetPath))
@@ -901,12 +895,9 @@ namespace Bettr.Editor
             
             AssetDatabase.Refresh();
         }
-
-        private static void SyncMachine()
+        
+        private static void SetupMachine(string machineName, string machineVariant, string machineModel)
         {
-            string machineName = GetArgument("-machineName");
-            string machineVariant = GetArgument("-machineVariant");
-            string machineModel = GetArgument("-machineModel");
             string machineModelName = Path.GetFileNameWithoutExtension(machineModel);
 
             string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset";
@@ -956,7 +947,13 @@ namespace Bettr.Editor
             TileController.LuaScript.Call(dynValue);
             
             ProcessScripts(machineName, machineVariant, runtimeAssetPath);
-            
+        }
+
+        private static void BuildMachine(string machineName, string machineVariant)
+        {
+            string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset";
+            EnsureDirectory(runtimeAssetPath);
+
             var machines = GetTable($"{machineName}Machines");
             for (var index = 1; index <= machines.Length; index++)
             {
