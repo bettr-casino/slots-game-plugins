@@ -19,7 +19,7 @@ namespace Bettr.Editor.generators
             CreateDirectoryIfNotExists(texturesDestinationPath);
 
             // Import the FBX file
-            var sourceFilePath = Path.Combine(sourcePath, fbxFilename);
+            var sourceFilePath = $"{sourcePath}/{fbxFilename}";
             var destinationFilePath = Path.Combine(fbxDestinationPath, fbxFilename);
 
             File.Copy(sourceFilePath, destinationFilePath, overwrite: true);
@@ -64,6 +64,9 @@ namespace Bettr.Editor.generators
 
                     if (instantiatedModel != null)
                     {
+                        // Set rotation to 0, 180, 0
+                        instantiatedModel.transform.rotation = Quaternion.Euler(0, 180, 0);
+
                         // Apply extracted textures to the model
                         Renderer[] renderers = instantiatedModel.GetComponentsInChildren<Renderer>();
                         foreach (Renderer renderer in renderers)
@@ -84,9 +87,11 @@ namespace Bettr.Editor.generators
                         }
 
                         // Save the instantiated model as a prefab
-                        string prefabPath = Path.Combine(destinationPathPrefix, "FBX", Path.GetFileNameWithoutExtension(fbxFilename) + ".prefab");
+                        string prefabPath = Path.Combine(destinationPathPrefix, "Prefabs", Path.GetFileNameWithoutExtension(fbxFilename) + ".prefab");
                         CreateDirectoryIfNotExists(Path.GetDirectoryName(prefabPath));
                         PrefabUtility.SaveAsPrefabAsset(instantiatedModel, GetRelativePath(prefabPath));
+                        
+                        AssetDatabase.SaveAssets();
 
                         Debug.Log("FBX imported and textures assigned successfully. Prefab saved at: " + prefabPath);
                     }
@@ -102,16 +107,15 @@ namespace Bettr.Editor.generators
             }
             finally
             {
-                // Close the new scene without saving
+                // Delete the new scene without saving
                 EditorSceneManager.CloseScene(newScene, true);
 
+                // Reload the previously active scene
                 if (currentScene.IsValid())
                 {
-                    // Reload the previously active scene
                     EditorSceneManager.OpenScene(currentScene.path, OpenSceneMode.Single);
                     EditorSceneManager.SetActiveScene(currentScene);
                 }
-
             }
         }
 
