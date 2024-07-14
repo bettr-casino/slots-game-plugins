@@ -72,9 +72,6 @@ namespace Bettr.Editor.generators
 
                     if (instantiatedModel != null)
                     {
-                        // Set rotation to 0, 180, 0
-                        instantiatedModel.transform.rotation = Quaternion.Euler(0, 180, 0);
-
                         Renderer[] renderers = instantiatedModel.GetComponentsInChildren<Renderer>();
                         Dictionary<string, Material> materialMap = new Dictionary<string, Material>();
 
