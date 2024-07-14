@@ -1,97 +1,149 @@
 using UnityEditor;
 using UnityEngine;
 using System.IO;
+using UnityEditor.SceneManagement;
+using UnityEngine.SceneManagement;
 
 namespace Bettr.Editor.generators
 {
     public static class BettrFBXController
     {
-        public static void ImportFBX(string sourcePath, string destinationPathPrefix)
+        public static void ImportFBX(string sourcePath, string destinationPathPrefix, string fbxFilename)
         {
             // Construct paths for FBX and textures
-            string fbxDestinationPath = Path.Combine(destinationPathPrefix, "FBX");
-            string texturesDestinationPath = Path.Combine(destinationPathPrefix, "Textures");
+            var fbxDestinationPath = Path.Combine(destinationPathPrefix, "FBX");
+            var texturesDestinationPath = Path.Combine(destinationPathPrefix, "Textures");
 
             // Ensure the FBX and textures directories exist
-            if (!Directory.Exists(fbxDestinationPath))
-            {
-                Directory.CreateDirectory(fbxDestinationPath);
-            }
-            if (!Directory.Exists(texturesDestinationPath))
-            {
-                Directory.CreateDirectory(texturesDestinationPath);
-            }
+            CreateDirectoryIfNotExists(fbxDestinationPath);
+            CreateDirectoryIfNotExists(texturesDestinationPath);
 
             // Import the FBX file
-            string destinationFilePath = Path.Combine(fbxDestinationPath, Path.GetFileName(sourcePath));
-            File.Copy(sourcePath, destinationFilePath, true);
+            var sourceFilePath = Path.Combine(sourcePath, fbxFilename);
+            var destinationFilePath = Path.Combine(fbxDestinationPath, fbxFilename);
+
+            File.Copy(sourceFilePath, destinationFilePath, overwrite: true);
+
             AssetDatabase.Refresh();
 
-            Object asset = AssetDatabase.LoadAssetAtPath<Object>(destinationFilePath);
+            var asset = AssetDatabase.LoadAssetAtPath<Object>(GetRelativePath(destinationFilePath));
             if (asset == null)
             {
                 Debug.LogError("Failed to load FBX file at path: " + destinationFilePath);
                 return;
             }
 
-            // Extract textures
-            string assetPath = AssetDatabase.GetAssetPath(asset);
-            ModelImporter modelImporter = AssetImporter.GetAtPath(assetPath) as ModelImporter;
+            // Save the currently active scene
+            Scene currentScene = EditorSceneManager.GetActiveScene();
+            var newScene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
-            if (modelImporter == null)
+            try
             {
-                Debug.LogError("Failed to get ModelImporter for asset at path: " + assetPath);
-                return;
-            }
+                // Extract textures
+                string assetPath = AssetDatabase.GetAssetPath(asset);
+                ModelImporter modelImporter = AssetImporter.GetAtPath(assetPath) as ModelImporter;
 
-            modelImporter.ExtractTextures(texturesDestinationPath);
-
-            // Re-import the model to apply changes
-            AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
-
-            // Find the imported model
-            GameObject fbxModel = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
-
-            if (fbxModel != null)
-            {
-                // Instantiate the model in the scene
-                GameObject instantiatedModel = PrefabUtility.InstantiatePrefab(fbxModel) as GameObject;
-
-                if (instantiatedModel != null)
+                if (modelImporter == null)
                 {
-                    // Apply extracted textures to the model
-                    Renderer[] renderers = instantiatedModel.GetComponentsInChildren<Renderer>();
-                    foreach (Renderer renderer in renderers)
+                    Debug.LogError("Failed to get ModelImporter for asset at path: " + assetPath);
+                    return;
+                }
+
+                modelImporter.ExtractTextures(GetRelativePath(texturesDestinationPath));
+
+                // Re-import the model to apply changes
+                AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
+
+                // Find the imported model
+                GameObject fbxModel = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
+
+                if (fbxModel != null)
+                {
+                    // Instantiate the model in the scene
+                    GameObject instantiatedModel = PrefabUtility.InstantiatePrefab(fbxModel) as GameObject;
+
+                    if (instantiatedModel != null)
                     {
-                        foreach (Material mat in renderer.sharedMaterials)
+                        // Apply extracted textures to the model
+                        Renderer[] renderers = instantiatedModel.GetComponentsInChildren<Renderer>();
+                        foreach (Renderer renderer in renderers)
                         {
-                            if (mat != null)
+                            foreach (Material mat in renderer.sharedMaterials)
                             {
-                                string texturePath = Path.Combine(texturesDestinationPath, mat.name + ".png");
-                                Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(texturePath);
-                                if (texture != null)
+                                if (mat != null)
                                 {
-                                    mat.mainTexture = texture;
-                                    EditorUtility.SetDirty(mat); // Mark the material as dirty
+                                    string texturePath = Path.Combine(texturesDestinationPath, mat.name + ".png");
+                                    Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(GetRelativePath(texturePath));
+                                    if (texture != null)
+                                    {
+                                        mat.mainTexture = texture;
+                                        EditorUtility.SetDirty(mat); // Mark the material as dirty
+                                    }
                                 }
                             }
                         }
+
+                        // Save the instantiated model as a prefab
+                        string prefabPath = Path.Combine(destinationPathPrefix, "FBX", Path.GetFileNameWithoutExtension(fbxFilename) + ".prefab");
+                        CreateDirectoryIfNotExists(Path.GetDirectoryName(prefabPath));
+                        PrefabUtility.SaveAsPrefabAsset(instantiatedModel, GetRelativePath(prefabPath));
+
+                        Debug.Log("FBX imported and textures assigned successfully. Prefab saved at: " + prefabPath);
                     }
-
-                    // Save changes to the asset
-                    PrefabUtility.SaveAsPrefabAsset(instantiatedModel, assetPath);
-
-                    Debug.Log("FBX imported and textures assigned successfully.");
+                    else
+                    {
+                        Debug.LogError("Failed to instantiate the model in the scene.");
+                    }
                 }
                 else
                 {
-                    Debug.LogError("Failed to instantiate the model in the scene.");
+                    Debug.LogError("Failed to load imported model at path: " + assetPath);
                 }
             }
-            else
+            finally
             {
-                Debug.LogError("Failed to load imported model at path: " + assetPath);
+                // Close the new scene without saving
+                EditorSceneManager.CloseScene(newScene, true);
+
+                if (currentScene.IsValid())
+                {
+                    // Reload the previously active scene
+                    EditorSceneManager.OpenScene(currentScene.path, OpenSceneMode.Single);
+                    EditorSceneManager.SetActiveScene(currentScene);
+                }
+
             }
+        }
+
+        private static void CreateDirectoryIfNotExists(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                return;
+
+            if (!AssetDatabase.IsValidFolder(path))
+            {
+                string[] folders = path.Split(Path.DirectorySeparatorChar);
+                string currentPath = folders[0];
+
+                for (int i = 1; i < folders.Length; i++)
+                {
+                    string nextFolder = Path.Combine(currentPath, folders[i]);
+                    if (!AssetDatabase.IsValidFolder(nextFolder))
+                    {
+                        AssetDatabase.CreateFolder(currentPath, folders[i]);
+                    }
+                    currentPath = nextFolder;
+                }
+            }
+        }
+
+        private static string GetRelativePath(string fullPath)
+        {
+            if (fullPath.StartsWith(Application.dataPath))
+            {
+                return "Assets" + fullPath.Substring(Application.dataPath.Length).Replace('\\', '/');
+            }
+            return fullPath;
         }
     }
 }

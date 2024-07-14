@@ -193,7 +193,7 @@ namespace Bettr.Editor
             BuildLocalServer();
         }
         
-        [MenuItem("Bettr/Import/FBX/Game001 - Epic Wins!!!")]
+        [MenuItem("Bettr/Install/Import/FBX/Game001 - Epic Wins!!!")]
         public static void ImportFBXGame001()
         {
             ImportFBX("Game001", "AncientAdventures");
@@ -210,8 +210,9 @@ namespace Bettr.Editor
         {
             string sourcePath =  $"Assets/Bettr/Editor/fbx/{machineName}/{machineVariant}/";
             string destinationPathPrefix = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset/";
+            string fbxFilename = $"Background_fbx_optimized_textured.fbx";
 
-            BettrFBXController.ImportFBX(sourcePath, destinationPathPrefix);
+            BettrFBXController.ImportFBX(sourcePath, destinationPathPrefix, fbxFilename);
         }
         
         [MenuItem("Bettr/Build/Game001 - Epic Wins!!!")]
