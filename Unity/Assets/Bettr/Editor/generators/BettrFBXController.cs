@@ -36,6 +36,7 @@ namespace Bettr.Editor.generators
             // Save the currently active scene
             Scene currentScene = EditorSceneManager.GetActiveScene();
             var newScene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            newScene.name = "ImportFBX";
 
             try
             {
@@ -107,15 +108,17 @@ namespace Bettr.Editor.generators
             }
             finally
             {
-                // Delete the new scene without saving
-                EditorSceneManager.CloseScene(newScene, true);
-
-                // Reload the previously active scene
-                if (currentScene.IsValid())
+                // Ensure the new scene is closed properly
+                try
                 {
-                    EditorSceneManager.OpenScene(currentScene.path, OpenSceneMode.Single);
-                    EditorSceneManager.SetActiveScene(currentScene);
+                    EditorSceneManager.CloseScene(newScene, false);
                 }
+                catch (System.Exception e)
+                {
+                    Debug.LogError("Failed to close the new scene 'ImportFBX': " + e.Message);
+                }
+
+                
             }
         }
 
