@@ -6,21 +6,18 @@
     "X": 0,
     "Y": 0,
     "Z": 10
-  },      
+  },
   "Child": {
     "Name": "Pivot",
     "Id": "Pivot",
     "Layer": "SLOT_BACKGROUND",
     "Children": [
       {
-        "Name": "Quad",
+        "Name": "BackgroundFBX",
         "Layer": "SLOT_BACKGROUND",
-        "Active": false,
-        "IsPrimitive": true,
-        "Primitive": 5,
-        "PrimitiveMaterial": "{{backgroundName}}",
-        "PrimitiveShader": "Unlit/Texture",
-        "PrimitiveTexture": "BaseGameBackground",
+        "Active": true,
+        "IsPrefab": true,
+        "PrefabName": "BackgroundFBX",
         "Position": {
           "X": 0,
           "Y": 0,
@@ -85,62 +82,61 @@
     ],
     "Components": [
       {
-          "ComponentType": "AnimatorController",
-          "Filename": "{{backgroundName}}",
-          "AnimationStates": [
-            {
-                "Name": "noop",
-                "Speed": 1,
-                "IsLoop": false,
-                "IsDefault": true
-            },
-            {
-                "Name": "start",
-                "Speed": 1,
-                "IsLoop": false,
-                "IsDefault": false,
-                "Dopesheet": [
-                    {
-                        "Path": "AnimationText",
-                        "Type": "GameObject",
-                        "Property": "m_IsActive",
-                        "Keyframes": {
-                            "Times":  [0, 10, 20, 30, 40, 50, 60],
-                            "Values": [1, 0,  1,  0,  1,  1,  0]
-                        }
-                    },
-                    {
-                        "Path": "Quad",
-                        "Type": "GameObject",
-                        "Property": "m_IsActive",
-                        "Keyframes": {
-                            "Times": [0, 60],
-                            "Values": [1, 1]
-                        }
-                    }
-                ] 
-            }
-          ],
-          "AnimatorStateTransitions": [
-          ]
-      }          
+        "ComponentType": "AnimatorController",
+        "Filename": "{{backgroundName}}",
+        "AnimationStates": [
+          {
+            "Name": "noop",
+            "Speed": 1,
+            "IsLoop": false,
+            "IsDefault": true
+          },
+          {
+            "Name": "start",
+            "Speed": 1,
+            "IsLoop": false,
+            "IsDefault": false,
+            "Dopesheet": [
+              {
+                "Path": "AnimationText",
+                "Type": "GameObject",
+                "Property": "m_IsActive",
+                "Keyframes": {
+                  "Times": [0, 10, 20, 30, 40, 50, 60],
+                  "Values": [1, 0, 1, 0, 1, 1, 0]
+                }
+              },
+              {
+                "Path": "BackgroundFBX",
+                "Type": "GameObject",
+                "Property": "m_IsActive",
+                "Keyframes": {
+                  "Times": [0, 60],
+                  "Values": [1, 1]
+                }
+              }
+            ]
+          }
+        ],
+        "AnimatorStateTransitions": []
+      }
     ]
   },
   "Components": [
-      {
-          "ComponentType": "Tile",
-          "FileName": "{{backgroundName}}"
-      },
-      {
-          "ComponentType": "TilePropertyAnimators",
-          "AnimatorsProperty": [
-            {
-              "Key": "start",
-              "Id": "Pivot",
-              "State": "start",
-              "WaitForComplete": true             
-            }
-          ]
-      }
-  ]    
+    {
+      "ComponentType": "Tile",
+      "FileName": "{{backgroundName}}"
+    },
+    {
+      "ComponentType": "TilePropertyAnimators",
+      "AnimatorsProperty": [
+        {
+          "Key": "start",
+          "Id": "Pivot",
+          "State": "start",
+          "WaitForComplete": true
+        }
+      ]
+    }
+  ]
 }

@@ -147,7 +147,7 @@ namespace Bettr.Editor
             Debug.Log("GUIDs updated successfully.");
         }
 
-        [MenuItem("Bettr/Install/Verify")]
+        // [MenuItem("Bettr/Install/Verify")]
         public static void VerifyInstall()
         {
             var canPost = PostToService();

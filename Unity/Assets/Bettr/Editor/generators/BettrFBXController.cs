@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using System.IO;
@@ -10,17 +11,24 @@ namespace Bettr.Editor.generators
     {
         public static void ImportFBX(string sourcePath, string destinationPathPrefix, string fbxFilename, string targetFbxFilename)
         {
-            // Construct paths for FBX and textures
+            // Construct paths for FBX, textures, and materials
             var fbxDestinationPath = Path.Combine(destinationPathPrefix, "FBX");
             var texturesDestinationPath = Path.Combine(destinationPathPrefix, "Textures");
-
-            // Ensure the FBX and textures directories exist
-            CreateDirectoryIfNotExists(fbxDestinationPath);
-            CreateDirectoryIfNotExists(texturesDestinationPath);
+            var materialsDestinationPath = Path.Combine(destinationPathPrefix, "Materials");
+            var prefabsDestinationPath = Path.Combine(destinationPathPrefix, "Prefabs");
 
             // Import the FBX file
             var sourceFilePath = Path.Combine(sourcePath, fbxFilename);
             var destinationFilePath = Path.Combine(fbxDestinationPath, targetFbxFilename);
+
+            List<string> texturesPath = new List<string>();
+            List<string> materialsPath = new List<string>();
+
+            // Ensure the directories exist
+            CreateDirectoryIfNotExists(fbxDestinationPath);
+            CreateDirectoryIfNotExists(texturesDestinationPath);
+            CreateDirectoryIfNotExists(materialsDestinationPath);
+            CreateDirectoryIfNotExists(prefabsDestinationPath);
 
             File.Copy(sourceFilePath, destinationFilePath, overwrite: true);
 
@@ -71,29 +79,44 @@ namespace Bettr.Editor.generators
                         Renderer[] renderers = instantiatedModel.GetComponentsInChildren<Renderer>();
                         foreach (Renderer renderer in renderers)
                         {
-                            foreach (Material mat in renderer.sharedMaterials)
+                            for (int i = 0; i < renderer.sharedMaterials.Length; i++)
                             {
-                                if (mat != null)
+                                Material originalMat = renderer.sharedMaterials[i];
+                                if (originalMat != null)
                                 {
-                                    string texturePath = Path.Combine(texturesDestinationPath, mat.name + ".png");
+                                    // Clone the material
+                                    Material clonedMat = new Material(originalMat);
+                                    string texturePath = Path.Combine(texturesDestinationPath, originalMat.name + ".png");
+                                    texturesPath.Add(texturePath);
+                                    var materialPath = Path.Combine(materialsDestinationPath, originalMat.name + ".mat");
+                                    materialsPath.Add(materialPath);
                                     Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(GetRelativePath(texturePath));
                                     if (texture != null)
                                     {
-                                        mat.mainTexture = texture;
-                                        EditorUtility.SetDirty(mat); // Mark the material as dirty
+                                        clonedMat.mainTexture = texture;
                                     }
+
+                                    // Save the cloned material
+                                    CreateDirectoryIfNotExists(Path.GetDirectoryName(materialPath));
+                                    AssetDatabase.CreateAsset(clonedMat, GetRelativePath(materialPath));
+
+                                    // Assign the cloned material
+                                    renderer.sharedMaterials[i] = clonedMat;
                                 }
                             }
                         }
 
                         // Save the instantiated model as a prefab
-                        string prefabPath = Path.Combine(destinationPathPrefix, "Prefabs", Path.GetFileNameWithoutExtension(targetFbxFilename) + ".prefab");
+                        string prefabPath = Path.Combine(prefabsDestinationPath, Path.GetFileNameWithoutExtension(targetFbxFilename) + ".prefab");
                         CreateDirectoryIfNotExists(Path.GetDirectoryName(prefabPath));
                         PrefabUtility.SaveAsPrefabAsset(instantiatedModel, GetRelativePath(prefabPath));
                         
                         AssetDatabase.SaveAssets();
+                        AssetDatabase.Refresh();
 
-                        Debug.Log("FBX imported and textures assigned successfully. Prefab saved at: " + prefabPath);
+                        Debug.Log($"FBX imported successfully. Prefab saved at: {prefabPath}");
+                        Debug.Log($"FBX textures extracted successfully. Textures saved at: {string.Join(",", texturesPath)}");
+                        Debug.Log($"FBX materials extracted successfully. Materials saved at: {string.Join(",", materialsPath)}");
                     }
                     else
                     {
@@ -111,13 +134,12 @@ namespace Bettr.Editor.generators
                 {
                     var replacementScene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
                     SceneManager.SetActiveScene(replacementScene);
+                    EditorSceneManager.CloseScene(newScene, true);
                 }
                 catch (System.Exception e)
                 {
                     Debug.LogError("Failed to replace the new scene 'ImportFBX': " + e.Message);
                 }
-
-                
             }
         }
 
