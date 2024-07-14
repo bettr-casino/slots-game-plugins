@@ -211,8 +211,9 @@ namespace Bettr.Editor
             string sourcePath =  $"Assets/Bettr/Editor/fbx/{machineName}/{machineVariant}/";
             string destinationPathPrefix = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset/";
             string fbxFilename = $"Background_fbx_optimized_textured.fbx";
+            string targetFbxFilename = $"BackgroundFBX.fbx";
 
-            BettrFBXController.ImportFBX(sourcePath, destinationPathPrefix, fbxFilename);
+            BettrFBXController.ImportFBX(sourcePath, destinationPathPrefix, fbxFilename, targetFbxFilename);
         }
         
         [MenuItem("Bettr/Build/Game001 - Epic Wins!!!")]

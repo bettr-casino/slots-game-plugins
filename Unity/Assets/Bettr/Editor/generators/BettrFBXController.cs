@@ -8,7 +8,7 @@ namespace Bettr.Editor.generators
 {
     public static class BettrFBXController
     {
-        public static void ImportFBX(string sourcePath, string destinationPathPrefix, string fbxFilename)
+        public static void ImportFBX(string sourcePath, string destinationPathPrefix, string fbxFilename, string targetFbxFilename)
         {
             // Construct paths for FBX and textures
             var fbxDestinationPath = Path.Combine(destinationPathPrefix, "FBX");
@@ -19,8 +19,8 @@ namespace Bettr.Editor.generators
             CreateDirectoryIfNotExists(texturesDestinationPath);
 
             // Import the FBX file
-            var sourceFilePath = $"{sourcePath}/{fbxFilename}";
-            var destinationFilePath = Path.Combine(fbxDestinationPath, fbxFilename);
+            var sourceFilePath = Path.Combine(sourcePath, fbxFilename);
+            var destinationFilePath = Path.Combine(fbxDestinationPath, targetFbxFilename);
 
             File.Copy(sourceFilePath, destinationFilePath, overwrite: true);
 
@@ -87,7 +87,7 @@ namespace Bettr.Editor.generators
                         }
 
                         // Save the instantiated model as a prefab
-                        string prefabPath = Path.Combine(destinationPathPrefix, "Prefabs", Path.GetFileNameWithoutExtension(fbxFilename) + ".prefab");
+                        string prefabPath = Path.Combine(destinationPathPrefix, "Prefabs", Path.GetFileNameWithoutExtension(targetFbxFilename) + ".prefab");
                         CreateDirectoryIfNotExists(Path.GetDirectoryName(prefabPath));
                         PrefabUtility.SaveAsPrefabAsset(instantiatedModel, GetRelativePath(prefabPath));
                         
