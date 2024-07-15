@@ -1,8 +1,10 @@
 require "math"
 require "Core"
 require "Game001BaseGameReel"
+require "Game001BaseGameMachineMechanics"
 
 Game001BaseGameMachine = {
+    Mechanics = nil,
 }
 
 function Game001BaseGameMachine:new(o)
@@ -22,6 +24,8 @@ end
 
 function Game001BaseGameMachine:Awake()
 	System.Print("Game001BaseGameMachine Awake tile id={0}", self.id)
+	self.Mechanics = Game001BaseGameMachineMechanics:new()
+	self.Mechanics:Initialize(self)
 end
 
 function Game001BaseGameMachine:Start()
@@ -36,66 +40,15 @@ function Game001BaseGameMachine:Start()
 end
 
 function Game001BaseGameMachine:OnSpinButtonClicked()
-    self:CancelWaysAnimation()
     series
         do
-            self:WaitForPayToComplete()                       
+            self.Mechanics:OnSpinButtonClicked(self)
             self:SpinEngines()
             self:WaitForApplyOutcomeDelay()
             self:LoadServerOutcome()
             self:OnOutcomeReceived()
         end
     end
-end
-
-function Game001BaseGameMachine:CancelWaysAnimation()
-    Game001BaseGameState.DisplayState.First.State = "CancelRequested"
-end
-
-function Game001BaseGameMachine:RollUpWaysWin(way, waysState, waysSummary, duration)
-    series
-        do
-            -- rollup ways win once
-            local startDelay = waysSummary.DisplayLoopStartDelay
-            local duration = waysSummary.DisplayLoopDuration
-            local pays = way.Pays
-            System.WaitForSeconds(startDelay)
-            local winTextProperty = self.WinText
-            
-            BettrVisualsController.RollUpCounter(winTextProperty, 0, pays, 1)
-            
-            local creditsTextProperty = self.CreditsText   
-            local oldCoins = waysState.PaysRollup
-            local newCoins = oldCoins + pays            
-            waysState.PaysRollup = newCoins  
-                      
-            BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 1)
-        end
-    end    
-end
-
-function Game001BaseGameMachine:WaitForPayToComplete()
-    series
-        do
-            if Game001BaseGameState.SpinState.First.State == "WaitingForPayToComplete" then
-                local waysSummary = Game001BaseGameWaysSummary.Ways.First
-                local delay = waysSummary.DisplayLoopEndDelay
-                while Game001BaseGameState.SpinState.First.State == "WaitingForPayToComplete" do
-                    Game001BaseGameState.DisplayState.First.State = "CancelRequested"
-                    System.WaitForSeconds(delay)
-                end
-            end
-            Game001BaseGameState.DisplayState.First.State = "Idle"            
-        end
-    end
-end
-
-function Game001BaseGameMachine:WaitingForPayToComplete()    
-end
-
-function Game001BaseGameMachine:BaseGamePaying()
-    Game001BaseGameState.SpinState.First.State = "WaitingForPayToComplete"
-    System.StartCoroutine(self, "BaseGamePayout")
 end
 
 function Game001BaseGameMachine:ConfigureSettings()
@@ -153,83 +106,9 @@ end
 function Game001BaseGameMachine:BaseGamePayout()
     series
         do
-            local waysState = Game001BaseGameWaysState.Ways.First
-            local waysSummary = Game001BaseGameWaysSummary.Ways.First
-            local waysCount = waysSummary.WaysCount
-            if waysCount > 0 then
-                local ways = Game001BaseGameWays.Ways.Array
-                local waysMatrix = Game001BaseGameWaysMatrix
-                self:DisplayWays(waysState, waysSummary, waysMatrix, ways)            
-                local waysIndex = waysState.WaysIndex
-                if waysIndex >= 1 then
-                    self:OnPayingCompleted()
-                elseif Game001BaseGameState.DisplayState.First.State == "CancelRequested" then
-                    self:OnPayingCompleted()
-                else
-                    System.StartCoroutine(self, "BaseGamePayout")
-                end
-            else
-                self:OnPayingCompleted()
-            end
+            self.Mechanics:BaseGamePayout(self)
         end
     end      
-end
-
-function Game001BaseGameMachine:DisplayWays(waysState, waysSummary, waysMatrix, ways)
-    series
-        do
-            local waysIndex = waysState.WaysIndex  
-            waysState.PaysRollup = BettrUser.Coins 
-            local waysCount = waysSummary.WaysCount 
-            local startDelay = waysSummary.DisplayLoopStartDelay
-            local duration = waysSummary.DisplayLoopDuration
-            local endDelay = waysSummary.DisplayLoopEndDelay            
-            if waysIndex == 0 then
-                System.WaitForSeconds(startDelay)
-            end
-            for waysCounterIndex = 1, waysCount do
-                series
-                    do
-                        if Game001BaseGameState.DisplayState.First.State == "CancelRequested" then
-                            break
-                        end
-                        local way = ways[waysCounterIndex]
-                        local waySymbol = way.Symbol
-                        local wayReelCount = way.ReelCount
-                        local waySymbolCount = way.SymbolCount
-                        local wayMultiplier = way.Multiplier
-                        local wayPay = way.Pay
-                        local wayTotalPay = way.Pays
-                        local wayMatrix = waysMatrix[waySymbol].Array
-                        -- update status text 
-                        local statusTexts = self.StatusTexts
-                        -- {0}        Pays  {1} x {2} ways = {3} CREDITS!!
-                        statusTexts.FormatAndSetCurrentActive("PaysText", wayReelCount, wayPay, wayMultiplier, wayTotalPay)
-                        local winSymbols = self.WinSymbols
-                        winSymbols.SetCurrentActive(waySymbol)
-                        parallel
-                            do
-                                self:RollUpWaysWin(way, waysState, waysSummary, duration)
-                            end
-                            do
-                                -- display ways
-                                for i=1,wayReelCount parallel do
-                                    local reel = _G["Game001BaseGameReel" .. i]
-                                    if reel != nil then
-                                        reel:DisplayWays(waySymbol, wayMatrix, waySymbolCount, duration)
-                                        System.WaitForSeconds(duration)
-                                        reel:HideWays(waySymbol, wayMatrix, waySymbolCount)
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end                            
-            end
-            waysState.WaysIndex = waysIndex + 1
-            System.WaitForSeconds(endDelay) 
-        end
-    end
 end
 
 function Game001BaseGameMachine:UpdateStatusText(text)
@@ -391,8 +270,6 @@ Game001BaseGameMachine.BaseGameStateDispatchTable = {
     Waiting = Game001BaseGameMachine.BaseGameWaiting,
     Spinning = Game001BaseGameMachine.BaseGameSpinning,
     Completed = Game001BaseGameMachine.BaseGameCompleted,
-    Paying = Game001BaseGameMachine.BaseGamePaying,
-    WaitingForPayToComplete = Game001BaseGameMachine.WaitingForPayToComplete,
 }
 
 return Game001BaseGameMachine:new()
