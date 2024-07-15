@@ -90,11 +90,13 @@ namespace Bettr.Editor.generators
                                     {
                                         // Clone the material
                                         clonedMat = new Material(originalMat);
+                                        clonedMat.shader = Shader.Find("Unlit/Texture"); // Switch shader to Unlit/Texture
+
                                         var materialPath = Path.Combine(materialsDestinationPath, originalMat.name + ".mat");
                                         materialsPath.Add(materialPath);
                                         AssetDatabase.CreateAsset(clonedMat, GetRelativePath(materialPath));
-                                        
-                                        // Extract textures
+
+                                        // Extract textures and assign to cloned material
                                         string[] texturePropertyNames = originalMat.GetTexturePropertyNames();
                                         foreach (string propertyName in texturePropertyNames)
                                         {
@@ -105,19 +107,23 @@ namespace Bettr.Editor.generators
                                                 if (!string.IsNullOrEmpty(texturePath))
                                                 {
                                                     string newTexturePath = Path.Combine(texturesDestinationPath, Path.GetFileName(texturePath));
+                                                    texturesPath.Add(newTexturePath);
                                                     AssetDatabase.CopyAsset(texturePath, newTexturePath);
                                                     clonedMat.SetTexture(propertyName, AssetDatabase.LoadAssetAtPath<Texture>(newTexturePath));
                                                 }
                                             }
                                         }
 
-                                        clonedSharedMaterials[i] = clonedMat;
+                                        materialMap[originalMat.name] = clonedMat;
                                     }
+
+                                    // Assign the cloned material
+                                    clonedSharedMaterials[i] = clonedMat;
                                 }
-                                
-                                // Assign the cloned material
-                                renderer.sharedMaterials = clonedSharedMaterials;
                             }
+
+                            // Apply cloned materials to renderer
+                            renderer.sharedMaterials = clonedSharedMaterials;
                         }
 
                         // Save the instantiated model as a prefab
