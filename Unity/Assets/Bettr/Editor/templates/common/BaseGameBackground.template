@@ -21,7 +21,7 @@
         "Position": {
           "X": -21.1421,
           "Y": -10.89,
-          "Z": 0
+          "Z": -60
         },
         "Rotation": {
           "X": 0,
@@ -102,24 +102,33 @@
             "IsLoop": false,
             "IsDefault": false,
             "Dopesheet": [
-              {
-                "Path": "AnimationText",
-                "Type": "GameObject",
-                "Property": "m_IsActive",
-                "Keyframes": {
-                  "Times": [0, 10, 20, 30, 40, 50, 60],
-                  "Values": [1, 0, 1, 0, 1, 1, 0]
+                {
+                    "Path": "BackgroundFBX",
+                    "Type": "Transform",
+                    "Property": "m_LocalPosition.x",
+                    "Keyframes": {
+                        "Times": [0, 120],
+                        "Values": [-21.1421, -21.1421]
+                    }
+                },
+                {
+                    "Path": "BackgroundFBX",
+                    "Type": "Transform",
+                    "Property": "m_LocalPosition.y",
+                    "Keyframes": {
+                        "Times": [0, 120],
+                        "Values": [-10.89, -10.89]
+                    }
+                },
+                {
+                    "Path": "BackgroundFBX",
+                    "Type": "Transform",
+                    "Property": "m_LocalPosition.z",
+                    "Keyframes": {
+                        "Times": [0, 30, 120],
+                        "Values": [-60, -60, 0]
+                    }
                 }
-              },
-              {
-                "Path": "BackgroundFBX",
-                "Type": "GameObject",
-                "Property": "m_IsActive",
-                "Keyframes": {
-                  "Times": [0, 60],
-                  "Values": [1, 1]
-                }
-              }
             ]
           }
         ],
@@ -139,6 +148,7 @@
           "Key": "start",
           "Id": "Pivot",
           "State": "start",
+          "DelayBeforeStart": 0.5,
           "WaitForComplete": true
         }
       ]

@@ -61,6 +61,8 @@ namespace Bettr.Editor
         
         public string Layer { get; set; }
         
+        public Vector3? LocalPosition { get; set; }
+        
         public Vector3? Position { get; set; }
         
         public Vector3? Rotation { get; set; }
@@ -1449,7 +1451,8 @@ namespace Bettr.Editor
         {
             var uiCamera = gameObject.AddComponent<Camera>();
             gameObject.layer = LayerMask.NameToLayer("SLOT_BACKGROUND");
-            uiCamera.clearFlags = CameraClearFlags.Depth;
+            uiCamera.clearFlags = CameraClearFlags.SolidColor;
+            uiCamera.backgroundColor = Color.black;
             uiCamera.cullingMask = LayerMask.GetMask("SLOT_BACKGROUND");
             uiCamera.orthographic = false;
             uiCamera.fieldOfView = 12.3f;
