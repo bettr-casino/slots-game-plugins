@@ -34,6 +34,9 @@ end
 function {{machineName}}:Start()
     series
         do
+            BettrVisualsController.SwitchOrientationToLandscape()
+        end
+        do
             System.Print("{{machineName}}:Start tile id={0}", self.id)
             {{- for machine in machines }}
             self:Load{{machine}}BackgroundPrefab()
@@ -41,7 +44,8 @@ function {{machineName}}:Start()
             {{- for machine in machines }}
             self:Load{{machine}}Prefab()
             {{- end }}
-            BettrVisualsController.SwitchOrientationToLandscape()
+        end
+        do
             {{machineName}}BaseGameBackground:StartBackground()
             self:SetBaseGameActive(true)
         end
