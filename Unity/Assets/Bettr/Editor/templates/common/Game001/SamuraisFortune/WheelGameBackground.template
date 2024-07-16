@@ -1,0 +1,146 @@
+{
+  "Name": "{{backgroundName}}",
+  "Id": "{{backgroundName}}",
+  "Layer": "SLOT_BACKGROUND",
+  "Position": {
+    "X": 0,
+    "Y": 0,
+    "Z": 10
+  },      
+  "Child": {
+    "Name": "Pivot",
+    "Id": "Pivot",
+    "Layer": "SLOT_BACKGROUND",
+    "Children": [
+      {
+        "Name": "Quad",
+        "Layer": "SLOT_BACKGROUND",
+        "Active": false,
+        "IsPrimitive": true,
+        "Primitive": 5,
+        "PrimitiveMaterial": "{{backgroundName}}",
+        "PrimitiveShader": "Unlit/Texture",
+        "PrimitiveTexture": "BaseGameBackground",
+        "Position": {
+          "X": 0,
+          "Y": 0,
+          "Z": 0
+        },
+        "Scale": {
+          "X": 17.74431,
+          "Y": 8.16528,
+          "Z": 1
+        }
+      },
+      {
+        "Name": "AnimationText",
+        "Layer": "SLOT_BACKGROUND",
+        "Active": false,
+        "Position": {
+          "X": 0.021,
+          "Y": 2.5311,
+          "Z": 0
+        },
+        "Components": [
+          {
+            "ComponentType": "TextMeshPro",
+            "Text": "Background Animations...",
+            "Font": "LiberationSans SDF",
+            "FontSize": 12,
+            "Color": "#FF0000",
+            "Rect": {
+              "X": 0.5,
+              "Y": 0.5,
+              "Width": 17.6577,
+              "Height": 1.4192
+            }
+          }
+        ]
+      },
+      {
+        "Name": "FreeSpinsTriggerText",
+        "Layer": "SLOT_BACKGROUND",
+        "Active": false,
+        "Position": {
+          "X": 0.021,
+          "Y": 2.5311,
+          "Z": 0
+        },
+        "Components": [
+          {
+            "ComponentType": "TextMeshPro",
+            "Text": "FreeSpins Trigger ...",
+            "Font": "LiberationSans SDF",
+            "FontSize": 12,
+            "Color": "#FF0000",
+            "Rect": {
+              "X": 0.5,
+              "Y": 0.5,
+              "Width": 17.6577,
+              "Height": 1.4192
+            }
+          }
+        ]
+      }
+    ],
+    "Components": [
+      {
+          "ComponentType": "AnimatorController",
+          "Filename": "{{backgroundName}}",
+          "AnimationStates": [
+            {
+                "Name": "noop",
+                "Speed": 1,
+                "IsLoop": false,
+                "IsDefault": true
+            },
+            {
+                "Name": "start",
+                "Speed": 1,
+                "IsLoop": false,
+                "IsDefault": false,
+                "Dopesheet": [
+                    {
+                        "Path": "AnimationText",
+                        "Type": "GameObject",
+                        "Property": "m_IsActive",
+                        "Keyframes": {
+                            "Times":  [0, 10, 20, 30, 40, 50, 60],
+                            "Values": [1, 0,  1,  0,  1,  1,  0]
+                        }
+                    },
+                    {
+                        "Path": "Quad",
+                        "Type": "GameObject",
+                        "Property": "m_IsActive",
+                        "Keyframes": {
+                            "Times": [0, 60],
+                            "Values": [1, 1]
+                        }
+                    }
+                ] 
+            }
+          ],
+          "AnimatorStateTransitions": [
+          ]
+      }          
+    ]
+  },
+  "Components": [
+      {
+          "ComponentType": "Tile",
+          "FileName": "{{backgroundName}}"
+      },
+      {
+          "ComponentType": "TilePropertyAnimators",
+          "AnimatorsProperty": [
+            {
+              "Key": "start",
+              "Id": "Pivot",
+              "State": "start",
+              "WaitForComplete": true             
+            }
+          ]
+      }
+  ]    
+}

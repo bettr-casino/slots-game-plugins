@@ -1044,7 +1044,7 @@ namespace Bettr.Editor
         private static GameObject ProcessBaseGameSymbols(string machineName, string machineVariant, string runtimeAssetPath)
         {
             var templateName = "BaseGameSymbolGroup";
-            var scribanTemplate = ParseScribanTemplate("common", templateName);
+            var scribanTemplate = ParseScribanTemplate($"common/{machineName}/{machineVariant}", templateName);
             
             var baseGameSymbolTable = GetTable($"{machineName}BaseGameSymbolTable");
             var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
@@ -1088,7 +1088,7 @@ namespace Bettr.Editor
         private static GameObject ProcessBaseGameSymbol(string machineName, string machineVariant, string symbolName, string symbolPrefabName, string runtimeAssetPath)
         {
             var templateName = "BaseGameSymbol";
-            var scribanTemplate = ParseScribanTemplate("common", templateName);
+            var scribanTemplate = ParseScribanTemplate($"common/{machineName}/{machineVariant}", templateName);
             
             var model = new Dictionary<string, object>
             {
@@ -1145,7 +1145,7 @@ namespace Bettr.Editor
             var reelMaskScaleY = BettrMenu.GetReelMaskScaleY(machineName);
             
             var templateName = "BaseGameMachine";
-            var scribanTemplate = ParseScribanTemplate("common", templateName);
+            var scribanTemplate = ParseScribanTemplate($"common/{machineName}/{machineVariant}", templateName);
             
             var baseGameSymbolTable = GetTable($"{machineName}BaseGameSymbolTable");
             var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
@@ -1238,7 +1238,7 @@ namespace Bettr.Editor
             var symbolOffsetY = BettrMenu.GetSymbolOffsetY(machineName, reelIndex);
 
             var templateName = "BaseGameReel";
-            var scribanTemplate = ParseScribanTemplate("common", templateName);
+            var scribanTemplate = ParseScribanTemplate($"common/{machineName}/{machineVariant}", templateName);
 
             var model = new Dictionary<string, object>
             {
@@ -1287,7 +1287,7 @@ namespace Bettr.Editor
             BettrScriptGenerator.CreateOrLoadScript(backgroundScriptName, runtimeAssetPath);
             
             string templateName = "BaseGameBackground";
-            var scribanTemplate = ParseScribanTemplate("common", templateName);
+            var scribanTemplate = ParseScribanTemplate($"common/{machineName}/{machineVariant}", templateName);
 
             var model = new Dictionary<string, object>
             {
@@ -1362,7 +1362,7 @@ namespace Bettr.Editor
             }
             
             var templateName = "BaseGameMachine";
-            var scribanTemplate = ParseScribanTemplate("common", templateName);
+            var scribanTemplate = ParseScribanTemplate($"common/{machineName}/{machineVariant}", templateName);
             
             var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
             
@@ -1405,7 +1405,7 @@ namespace Bettr.Editor
             BettrScriptGenerator.CreateOrLoadScript(backgroundScriptName, runtimeAssetPath);
             
             string templateName = "FreeSpinsBackground";
-            var scribanTemplate = ParseScribanTemplate("common", templateName);
+            var scribanTemplate = ParseScribanTemplate($"common/{machineName}/{machineVariant}", templateName);
 
             if (scribanTemplate.HasErrors)
             {
@@ -1448,7 +1448,7 @@ namespace Bettr.Editor
             AssetDatabase.Refresh();
             
             var templateName = "WheelGameMachine";
-            var scribanTemplate = ParseScribanTemplate("common", templateName);
+            var scribanTemplate = ParseScribanTemplate($"common/{machineName}/{machineVariant}", templateName);
             
             var model = new Dictionary<string, object>
             {
@@ -1481,7 +1481,7 @@ namespace Bettr.Editor
             BettrScriptGenerator.CreateOrLoadScript(backgroundScriptName, runtimeAssetPath);
             
             string templateName = "WheelGameBackground";
-            var scribanTemplate = ParseScribanTemplate("common", templateName);
+            var scribanTemplate = ParseScribanTemplate($"common/{machineName}/{machineVariant}", templateName);
 
             var model = new Dictionary<string, object>
             {
@@ -1565,7 +1565,7 @@ namespace Bettr.Editor
             EditorSceneManager.OpenScene(scenePath);
             
             var templateName = "Scene";
-            var scribanTemplate = ParseScribanTemplate("common", templateName);
+            var scribanTemplate = ParseScribanTemplate($"common/{machineName}/{machineVariant}", templateName);
 
             var machineNames = HasTable($"{machineName}Machines") ? GetTableArray<string>(GetTable($"{machineName}Machines"), null, "Name") : new List<string>();
             var machineTransitionNames = HasTable($"{machineName}MachineTransitions") ? GetTableArray<string>(GetTable($"{machineName}MachineTransitions"), null, "Name") : new List<string>();
@@ -2021,7 +2021,7 @@ namespace Bettr.Editor
             }
 
             string templateName = "BaseGameRandomMultiplierWildsMechanic";
-            var scribanTemplate = ParseScribanTemplate("common", templateName);
+            var scribanTemplate = ParseScribanTemplate($"common/{machineName}/{machineVariant}", templateName);
 
             var model = new Dictionary<string, object>
             {
