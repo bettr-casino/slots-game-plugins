@@ -197,18 +197,18 @@ namespace Bettr.Editor
         public static void BuildGame001()
         {
             BuildMachines("Game001", "AncientAdventures");
-            // BuildMachines("Game001", "AtlantisTreasures");
-            // BuildMachines("Game001", "ClockworkChronicles");
-            // BuildMachines("Game001", "CosmicVoyage");
-            // BuildMachines("Game001", "DragonsHoard");
-            // BuildMachines("Game001", "EnchantedForest");
-            // BuildMachines("Game001", "GalacticQuest");
-            // BuildMachines("Game001", "GuardiansOfOlympus");
-            // BuildMachines("Game001", "LostCityOfGold");
-            // BuildMachines("Game001", "MysticalLegends");
-            // BuildMachines("Game001", "PharosFortune");
-            // BuildMachines("Game001", "PiratesPlunder");
-            // BuildMachines("Game001", "SamuraisFortune");
+            BuildMachines("Game001", "AtlantisTreasures");
+            BuildMachines("Game001", "ClockworkChronicles");
+            BuildMachines("Game001", "CosmicVoyage");
+            BuildMachines("Game001", "DragonsHoard");
+            BuildMachines("Game001", "EnchantedForest");
+            BuildMachines("Game001", "GalacticQuest");
+            BuildMachines("Game001", "GuardiansOfOlympus");
+            BuildMachines("Game001", "LostCityOfGold");
+            BuildMachines("Game001", "MysticalLegends");
+            BuildMachines("Game001", "PharosFortune");
+            BuildMachines("Game001", "PiratesPlunder");
+            BuildMachines("Game001", "SamuraisFortune");
         }
         
         [MenuItem("Bettr/Build/Game002")]
@@ -263,7 +263,7 @@ namespace Bettr.Editor
         {
             string sourcePath =  $"Assets/Bettr/Editor/fbx/{machineName}/{machineVariant}/";
             string destinationPathPrefix = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset/";
-            string fbxFilename = $"Background_fbx_optimized_textured.fbx";
+            string fbxFilename = $"Background_fbx_common_textured.fbx";
             string targetFbxFilename = $"BackgroundFBX.fbx";
 
             BettrFBXController.ImportFBX(sourcePath, destinationPathPrefix, fbxFilename, targetFbxFilename);
