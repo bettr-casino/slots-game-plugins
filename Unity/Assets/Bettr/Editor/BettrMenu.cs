@@ -278,10 +278,11 @@ namespace Bettr.Editor
             Environment.SetEnvironmentVariable("machineVariant", machineVariant);
             Environment.SetEnvironmentVariable("machineModel", $"{modelsDir}/{machineName}/{machineName}Models.lua");
 
-            BuildMachinesFromEnv();
+            BuildMachinesFromCommandLine();
         }
 
-        private static void BuildMachinesFromEnv()
+        // ReSharper disable once MemberCanBePrivate.Global
+        public static void BuildMachinesFromCommandLine()
         {
             string machineName = GetArgument("-machineName");
             string machineVariant = GetArgument("-machineVariant");
@@ -1308,7 +1309,7 @@ namespace Bettr.Editor
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
             hierarchyInstance.SetParent((GameObject) null);
 
-            var settingsPrefab = ProcessPrefab(backgroundName, 
+            ProcessPrefab(backgroundName, 
                 hierarchyInstance, 
                 runtimeAssetPath);
         }
