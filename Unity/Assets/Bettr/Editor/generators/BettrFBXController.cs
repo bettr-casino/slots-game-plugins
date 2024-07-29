@@ -106,10 +106,10 @@ namespace Bettr.Editor.generators
                                                 string texturePath = AssetDatabase.GetAssetPath(texture);
                                                 if (!string.IsNullOrEmpty(texturePath))
                                                 {
-                                                    string newTexturePath = Path.Combine(texturesDestinationPath, Path.GetFileName(texturePath));
-                                                    texturesPath.Add(newTexturePath);
-                                                    AssetDatabase.CopyAsset(texturePath, newTexturePath);
-                                                    clonedMat.SetTexture(propertyName, AssetDatabase.LoadAssetAtPath<Texture>(newTexturePath));
+                                                    string destinationTexturePath = Path.Combine(texturesDestinationPath, Path.GetFileName(texturePath));
+                                                    texturesPath.Add(destinationTexturePath);
+                                                    AssetDatabase.CopyAsset(texturePath, destinationTexturePath);
+                                                    clonedMat.SetTexture(propertyName, AssetDatabase.LoadAssetAtPath<Texture>(destinationTexturePath));
                                                 }
                                             }
                                         }
