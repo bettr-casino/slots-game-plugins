@@ -1,0 +1,40 @@
+{
+  "Name": "{{symbolName}}",
+  "Layer": "SLOT_REELS",
+  "Components": [
+    {
+      "ComponentType": "AnimatorController",
+      "Filename": "{{symbolPrefabName}}",
+      "AnimationStates": [
+        {
+          "Name": "noop",
+          "Speed": 1,
+          "IsLoop": false,
+          "IsDefault": true
+        }
+      ],
+      "AnimatorStateTransitions": [
+      ]
+    }
+  ],
+  "Child": {
+    "Name": "Pivot",
+    "Layer": "SLOT_REELS",
+    "Children": [
+      {
+        "Name": "Quad",
+        "Layer": "SLOT_REELS",
+        "IsPrimitive": true,
+        "Primitive": 5,
+        "PrimitiveMaterial": "{{symbolName}}",
+        "PrimitiveShader": "Bettr/Symbol",
+        "PrimitiveTexture": "{{symbolName}}",
+        "Scale": {
+          "X": 1.5,
+          "Y": 1,
+          "Z": 1
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+{
+    "Name": "{{machineName}}BaseGameSymbolGroup",
+    "Children": [
+        {{ for symbolKey in symbolKeys }}
+        {
+            "Name": "{{symbolKey}}",
+            "Active": false,
+            "IsPrefab": true,
+            "PrefabName": "{{machineName}}BaseGameSymbol{{symbolKey}}"
+        }
+        {{ if !for.last }},{{ end }}{{ end }}
+    ]
+}

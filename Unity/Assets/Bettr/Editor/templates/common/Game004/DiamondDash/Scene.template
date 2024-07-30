@@ -1,0 +1,408 @@
+{
+  "Name": "Pivot",
+  "Children": [
+    {
+      "Name": "Cameras",
+      "Child": {
+        "Name": "Pivot",
+        "Children": [
+          {
+            "Name": "Camera_Background",
+            "Id": "backgroundCamera",
+            "Layer": "SLOT_BACKGROUND",
+            "Position": {
+                "X": 0,
+                "Y": 0,
+                "Z": -70
+            },
+            "Components": [
+              {
+                "ComponentType": "BackgroundCamera"
+              }
+            ]
+          },
+          {
+            "Name": "Camera_Reels",
+            "Id": "reelsCamera",
+            "Layer": "SLOT_REELS",
+            "Position": {
+                "X": 0,
+                "Y": 0,
+                "Z": -70
+            },
+            "Components": [
+              {
+                "ComponentType": "ReelsCamera"
+              }
+            ]
+          },
+          {
+            "Name": "Camera_Frame",
+            "Id": "frameCamera",
+            "Layer": "SLOT_FRAME",
+            "Position": {
+                "X": 0,
+                "Y": 0,
+                "Z": -60
+            },
+            "Components": [
+              {
+                "ComponentType": "FrameCamera"
+              }
+            ]
+          },
+          {
+            "Name": "Camera_Overlay",
+            "Id": "overlayCamera",
+            "Layer": "SLOT_OVERLAY",
+            "Position": {
+                "X": 0,
+                "Y": 0,
+                "Z": -50
+            },
+            "Components": [
+              {
+                "ComponentType": "OverlayCamera"
+              }
+            ]
+          },
+          {
+            "Name": "Camera_Reels_Overlay",
+            "Id": "reelsOverlayCamera",
+            "Layer": "SLOT_REELS_OVERLAY",
+            "Position": {
+                "X": 0,
+                "Y": 0,
+                "Z": -40
+            },
+            "Components": [
+              {
+                "ComponentType": "ReelsOverlayCamera"
+              }
+            ]
+          },
+          {
+            "Name": "Camera_Transition",
+            "Id": "transitionCamera",
+            "Layer": "SLOT_TRANSITION",
+            "Position": {
+                "X": 0,
+                "Y": 0,
+                "Z": -30
+            },
+            "Components": [
+              {
+                "ComponentType": "TransitionCamera"
+              }
+            ]
+          },
+          {
+            "Name": "UI Camera",
+            "Id": "uiCamera",
+            "Layer": "UI",
+            "Components": [
+              {
+                "ComponentType": "UICamera"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "Name": "EventSystem",
+      "Components": [
+        {
+          "ComponentType": "EventSystem"
+        }
+      ]
+    },
+    {
+      "Name": "Game",
+      "Children": [
+        {
+          "Name": "Machines",
+          "Child": {
+            "Name": "Pivot",
+            "Children": [
+            {{ for machine in machines }}
+              {
+                "Name": "{{ machine }}MachineParent",
+                "Id": "{{ machine }}MachineParent",
+                "Active": false,
+                "Child": {
+                    "Name": "Pivot",
+                    "Active": true
+                }
+              }{{ if !for.last }},{{ end }}
+            {{ end }}
+            ]
+          }
+        },
+        {
+          "Name": "Backgrounds",
+          "Child": {
+            "Name": "Pivot",
+            "Children": [
+            {{ for machine in machines }}
+              {
+                "Name": "{{ machine }}BackgroundParent",
+                "Id": "{{ machine }}BackgroundParent",
+                "Child": {
+                    "Name": "Pivot"
+                }
+              }{{ if !for.last }},{{ end }}
+            {{ end }}
+            ]
+          }
+        },
+        {
+            "Name": "Dialogs",
+            "Layer": "UI",
+            "Children": [
+            {{ for machineTransition in machineTransitions }}
+              {
+                "Name": "{{ machineTransition }}Dialog",
+                "Layer": "UI",
+                "Active": false,
+                "Child": {
+                    "Name": "Pivot",
+                    "Layer": "UI",
+                    "Children": [
+                        {
+                            "Name": "DialogPanel",
+                            "Layer": "UI",
+                            "Components": [
+                                {
+                                  "ComponentType": "Image",
+                                  "Filename": "MachineTransitionDialog",
+                                  "Rect": {
+                                    "X": 0.5,
+                                    "Y": 0.5,
+                                    "Width": 500,
+                                    "Height": 300
+                                  }
+                                }
+                            ],
+                            "Child": {
+                                "Name": "Pivot",
+                                "Layer": "UI",
+                                "Children": [
+                                    {{ for machineActivationList in machineActivations[machineTransition] }}
+                                    {
+                                        "Name": "{{machineActivationList["ActivationKey"]}}",
+                                        "Children": [
+                                            {
+                                              "Name": "TitleText",
+                                              "Layer": "UI",
+                                              "Components": [
+                                                {
+                                                  "ComponentType": "TextMeshProUI",
+                                                  "Text": "{{machineActivationList["TitleText"]}}",
+                                                  "FontSize": 48,
+                                                  "Color": "#FFFFFF",
+                                                  "Rect": {
+                                                    "X": 0.5,
+                                                    "Y": 0.8,
+                                                    "Width": 480,
+                                                    "Height": 100
+                                                  }
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "Name": "MainText",
+                                              "Layer": "UI",
+                                              "Components": [
+                                                {
+                                                  "ComponentType": "TextMeshProUI",
+                                                  "Text": "{{machineActivationList["MainText"]}}",
+                                                  "FontSize": 48,
+                                                  "Color": "#FFFFFF",
+                                                  "Rect": {
+                                                    "X": 0.5,
+                                                    "Y": 0.8,
+                                                    "Width": 480,
+                                                    "Height": 100
+                                                  }
+                                                }
+                                              ]
+                                            }{{ if machineActivationList["SubtitleText"] != "none" }},
+                                            {
+                                              "Name": "SubtitleText",
+                                              "Layer": "UI",
+                                              "Components": [
+                                                {
+                                                  "ComponentType": "TextMeshProUI",
+                                                  "Text": "{{machineActivationList["SubtitleText"]}}",
+                                                  "FontSize": 24,
+                                                  "Color": "#FFFFFF",
+                                                  "Rect": {
+                                                    "X": 0.5,
+                                                    "Y": 0.3,
+                                                    "Width": 480,
+                                                    "Height": 50
+                                                  }
+                                                }
+                                              ]
+                                            }
+                                            {{- end -}}{{ if machineActivationList["ButtonText"] != "none" }},
+                                            {
+                                                "Name": "{{machineActivationList["ButtonText"]}}",
+                                                "Id": "{{machineActivationList["ButtonText"]}}",
+                                                "Layer": "UI",
+                                                "Components": [
+                                                    {
+                                                        "ComponentType": "Image",
+                                                        "Filename": "{{machineActivationList["ButtonText"]}}",
+                                                        "Color": "#FFFFFF",
+                                                        "Rect": {
+                                                            "X": 0.5,
+                                                            "Y": 0.5,
+                                                            "Width": 84.21,
+                                                            "Height": 42.06
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                            {{- end -}}
+                                        ]
+                                    }{{ if !for.last }},{{ end }}
+                                    {{ end }}
+                                ]
+                            }
+                        }
+                    ]
+                }
+              }{{ if !for.last }},{{ end }}
+            {{ end }}
+            ],
+            "Components": [
+                {
+                    "ComponentType": "Canvas",
+                    "ReferenceId": "uiCamera",
+                    "Rect": {
+                        "X": 0.5,
+                        "Y": 0.5,
+                        "Width": 0,
+                        "Height": 0
+                    }
+                }
+            ]            
+        }        
+      ],
+      "Components": [
+        {
+            "ComponentType": "Tile",
+            "FileName": "{{machineName}}",
+            "EventTriggers": [
+            {{ for machineTransition in machineTransitions }}
+            {{ for machineActivationList in machineActivations[machineTransition] }}
+            {{ if machineActivationList["ButtonText"] != "none" }}
+                {
+                    "ReferenceId": "{{machineActivationList["ButtonText"]}}",
+                    "Params": [
+                        "{{machineActivationList["ButtonText"]}}{{machineTransition}}"
+                    ]
+                }{{ end }}{{ if !for.last }},{{ end }}
+            {{- end -}}
+            {{- end -}}
+            ]
+        },
+        {
+            "ComponentType": "TilePropertyGameObjects",
+            GameObjectsProperty: [
+            {{ for machine in machines }}
+            {
+            "Key": "{{ machine }}BackgroundParent",
+            "Id": "{{ machine }}BackgroundParent"
+            }{{ if !for.last }},{{ end }}
+            {{ end }}
+            ]
+        },
+        {
+            "ComponentType": "TilePropertyGameObjects",
+            GameObjectsProperty: [
+            {{ for machine in machines }}
+            {
+            "Key": "{{ machine }}MachineParent",
+            "Id": "{{ machine }}MachineParent"
+            }{{ if !for.last }},{{ end }}
+            {{ end }}
+            ]
+        }
+      ]
+    },
+    {
+      "Name": "Debug",
+      "Layer": "SLOT_TRANSITION",
+      "Position": {
+          "X": 0.3617,
+          "Y": 3.7579,
+          "Z": 0
+      },
+      "Scale": {
+          "X": 1.756439,
+          "Y": 0.4085908,
+          "Z": 1
+      },
+      "Children": [
+        {
+            "Name": "Frame",
+            "Id": "Frame",
+            "Layer": "SLOT_TRANSITION",
+            "Position": {
+                "X": -0.0173,
+                "Y": -0.021,
+                "Z": 0
+            },                  
+            "Scale": {
+                "X": 1.47,
+                "Y": 1.041,
+                "Z": 1
+            },
+            "IsPrimitive": true,
+            "Primitive": 5,
+            "PrimitiveMaterial": "White",
+            "PrimitiveShader": "Bettr/Symbol",
+            "PrimitiveTexture": "{{symbolName}}",
+            "PrimitiveColor": "#FFFFFF",
+            "Components": [
+                {
+                    "ComponentType": "Tile",
+                    "FileName": "{{machineName}}Debug",
+                    "EventTriggers": [
+                       {
+                         "ReferenceId": "Frame"
+                       }
+                    ]
+                }
+            ]
+        },
+        {
+            "Name": "Text (TMP)",
+            "Layer": "SLOT_TRANSITION",
+            "Position": {
+                "X": -0.0153,
+                "Y": 0,
+                "Z": -1
+            },
+            "Components": [
+                {
+                    "ComponentType": "TextMeshPro",
+                    "Text": "SpeedUp",
+                    "FontSize": 3,
+                    "Color": "#FF0000",
+                    "Rect": {
+                        "X": 0.5,
+                        "Y": 0.5,
+                        "Width": 1.4901,
+                        "Height": 0.905
+                    }
+                }
+            ]
+        }
+      ]
+    }
+  ]
+}
