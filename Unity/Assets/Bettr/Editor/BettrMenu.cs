@@ -261,6 +261,13 @@ namespace Bettr.Editor
         
         private static void ImportFBX(string machineName, string machineVariant)
         {
+            // Copy across the background texture
+            string sourceTexturePath =  $"Assets/Bettr/Editor/textures/{machineName}/{machineVariant}/Background.jpg";
+            string destinationTexturePath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset/Textures/Background.jpg";
+            File.Copy(sourceTexturePath, destinationTexturePath, overwrite: true);
+            AssetDatabase.Refresh();
+
+            
             string sourcePath =  $"Assets/Bettr/Editor/fbx/{machineName}/{machineVariant}/";
             string destinationPathPrefix = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset/";
             string fbxFilename = $"Background_fbx_common_textured.fbx";
