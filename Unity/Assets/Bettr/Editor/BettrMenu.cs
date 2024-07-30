@@ -297,8 +297,8 @@ namespace Bettr.Editor
             
             ClearRuntimeAssetPath(machineName, machineVariant);
             SetupMachine(machineName, machineVariant, machineModel);
-            // ImportFBX(machineName, machineVariant);
-            // BuildMachine(machineName, machineVariant);
+            ImportFBX(machineName, machineVariant);
+            BuildMachine(machineName, machineVariant);
         }
         
         private static void CreateOrReplaceMaterial(string machineName, string machineVariant)
