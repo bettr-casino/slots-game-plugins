@@ -261,11 +261,11 @@ namespace Bettr.Editor
         
         private static void ImportFBX(string machineName, string machineVariant)
         {
-            // Copy across the background texture
-            string sourceTexturePath =  $"Assets/Bettr/Editor/textures/{machineName}/{machineVariant}/Background.jpg";
-            string destinationTexturePath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset/Textures/Background.jpg";
-            File.Copy(sourceTexturePath, destinationTexturePath, overwrite: true);
-            AssetDatabase.Refresh();
+            // // Copy across the background texture
+            // string sourceTexturePath =  $"Assets/Bettr/Editor/textures/{machineName}/{machineVariant}/Background.jpg";
+            // string destinationTexturePath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset/Textures/Background.jpg";
+            // File.Copy(sourceTexturePath, destinationTexturePath, overwrite: true);
+            // AssetDatabase.Refresh();
 
             
             string sourcePath =  $"Assets/Bettr/Editor/fbx/{machineName}/{machineVariant}/";
@@ -297,8 +297,8 @@ namespace Bettr.Editor
             
             ClearRuntimeAssetPath(machineName, machineVariant);
             SetupMachine(machineName, machineVariant, machineModel);
-            ImportFBX(machineName, machineVariant);
-            BuildMachine(machineName, machineVariant);
+            // ImportFBX(machineName, machineVariant);
+            // BuildMachine(machineName, machineVariant);
         }
         
         private static void CreateOrReplaceMaterial(string machineName, string machineVariant)
