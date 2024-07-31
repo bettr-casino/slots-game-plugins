@@ -3,6 +3,7 @@ import os
 # Base directories
 base_dir_fbx = "/Users/rvergis/Documents/External/Bettr/GitHub/bettr-casino/slots-game-plugins/Unity/Assets/Bettr/Editor/fbx"
 base_dir_templates = "/Users/rvergis/Documents/External/Bettr/GitHub/bettr-casino/slots-game-plugins/Unity/Assets/Bettr/Editor/templates/common"
+base_dir_templates_integration = "/Users/rvergis/Documents/External/Bettr/GitHub/bettr-casino/slots-game-plugins/Unity/Assets/Bettr/Editor/templates/integration"
 base_dir_textures = "/Users/rvergis/Documents/External/Bettr/GitHub/bettr-casino/slots-game-plugins/Unity/Assets/Bettr/Editor/textures"
 
 # Function to create directories
@@ -96,6 +97,7 @@ for file_path in file_paths:
         # Create directories for fbx, templates, and textures
         create_directories(base_dir_fbx, machine_name, machine_variant)
         create_directories(base_dir_templates, machine_name, machine_variant)
+        create_directories(base_dir_templates_integration, machine_name, machine_variant)
         create_directories(base_dir_textures, machine_name, machine_variant)
 
 print("Directory creation process completed.")

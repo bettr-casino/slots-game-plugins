@@ -1,0 +1,36 @@
+require "math"
+require "Core"
+require "{{machineName}}BaseGameMachineWaysMechanic"
+
+{{machineName}}BaseGameMachineMechanics = {
+    WaysMechanic = nil,
+}
+
+function {{machineName}}BaseGameMachineMechanics:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function {{machineName}}BaseGameMachineMechanics:Initialize(machine)
+    self.WaysMechanic = {{machineName}}BaseGameMachineWaysMechanic:new()
+    self.WaysMechanic:Initialize(machine)
+end
+
+function {{machineName}}BaseGameMachineMechanics:BaseGamePayout(machine)
+    series
+        do
+            self.WaysMechanic:DisplayWays(machine)
+        end
+    end
+end
+
+function {{machineName}}BaseGameMachineMechanics:OnSpinButtonClicked(machine)
+    series
+        do
+            self.WaysMechanic:CancelWaysAnimation()
+            self.WaysMechanic:WaitForPayToComplete()
+        end
+    end
+end
