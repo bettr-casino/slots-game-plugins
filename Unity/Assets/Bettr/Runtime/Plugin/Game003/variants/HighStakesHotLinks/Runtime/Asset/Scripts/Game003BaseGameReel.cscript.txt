@@ -1,0 +1,543 @@
+require "math"
+require "Core"
+require "Utils"
+
+Game003BaseGameReel = {
+}
+
+function Game003BaseGameReel:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game003BaseGameReel:destroy()
+	System.Print("Game003BaseGameReel destroy tile id={0}", self.id)
+end
+
+function Game003BaseGameReel:OnError(callStack)
+	System.Error("Game003BaseGameReel Error CallStack: {0}", callStack)
+end
+
+function Game003BaseGameReel:Awake()
+	System.Print("Game003BaseGameReel Awake tile id={0}", self.id)
+end
+
+function Game003BaseGameReel:Start()
+    series
+        do
+	        System.Print("Game003BaseGameReel Start tile id={0}", self.id)	        
+        end
+    end
+end
+
+function Game003BaseGameReel:StartEngines()
+    System.Print("Game003BaseGameReel StartEngines tile id={0}", self.id)
+    series
+        do
+            local reelGo = self.gameObject
+            local reelSymbols = Game003BaseGameReelSet[self.ReelID].Array
+            local reelState = Game003BaseGameReelState[self.ReelID].First
+            local reelSpinState = Game003BaseGameReelSpinState[self.ReelID].First
+            local reelSymbolsState = Game003BaseGameReelSymbolsState[self.ReelID].Array
+            local reelStopIndex = reelSpinState.ReelStopIndex
+            local reelSymbolCount = reelState.ReelSymbolCount                        
+            for i = 1, #reelSymbolsState do
+                local symbolState = reelSymbolsState[i]
+                local reelPosition = symbolState.ReelPosition
+                local symbolStopIndex = 1 + (reelSymbolCount + reelStopIndex + reelPosition) % reelSymbolCount 
+                local reelSymbol = reelSymbols[symbolStopIndex].ReelSymbol
+                local symbolGroupProperty = self["SymbolGroup" .. i]
+                if symbolGroupProperty.Current ~= nil then
+                    symbolGroupProperty.Current.SetActive(false)
+                    symbolGroupProperty.CurrentKey = null
+                end
+                local currentValue = symbolGroupProperty[reelSymbol]
+                currentValue.SetActive(true)
+                symbolGroupProperty.Current = currentValue
+                symbolGroupProperty.CurrentKey = reelSymbol
+            end                                
+        end
+    end
+end
+
+function Game003BaseGameReel:OnOutcomeReceived()
+    series
+        do
+            local reelState = Game003BaseGameReelState[self.ReelID].First
+            local delayInSeconds = reelState.ReelStopDelayInSeconds
+            System.WaitForSeconds(delayInSeconds)
+            self:SpliceReel()
+            reelState.OutcomeReceived = true
+        end
+    end
+end
+
+function Game003BaseGameReel:SpinEngines()
+    local reelSpinState = Game003BaseGameReelSpinState[self.ReelID].First
+    reelSpinState.ReelSpinState = "SpinStartedRollBack"
+    local reelState = Game003BaseGameReelState[self.ReelID].First
+    reelState.OutcomeReceived = false
+end
+
+function Game003BaseGameReel:Update()
+    local reelState = Game003BaseGameReelState[self.ReelID].First
+    local reelIsLocked = reelState.ReelIsLocked
+    if reelIsLocked then
+        return
+    end
+    local reelSpinState = Game003BaseGameReelSpinState[self.ReelID].First
+    local spinState = reelSpinState.ReelSpinState
+    self.ReelSpinStateDispatchTable[spinState](self)    
+end
+
+function Game003BaseGameReel:SpinReelSpinStartedRollBack()
+    local reelState = Game003BaseGameReelState[self.ReelID].First
+    local reelSpinState = Game003BaseGameReelSpinState[self.ReelID].First
+    reelSpinState.SpeedInSymbolUnitsPerSecond = reelState.SpinStartedRollBackSpeedInSymbolUnitsPerSecond
+    local reelSpinDirection = reelSpinState.ReelSpinDirection
+    local spinDirectionIsDown = reelSpinDirection == "Down"
+    local slideDistanceThresholdInSymbolUnits = reelState.SpinStartedRollBackDistanceInSymbolUnits
+    local slideDistanceInSymbolUnits = self:CalculateSlideDistanceInSymbolUnits()
+    if spinDirectionIsDown then
+        if slideDistanceInSymbolUnits > slideDistanceThresholdInSymbolUnits then
+            self:SlideReelSymbols(slideDistanceThresholdInSymbolUnits)
+            reelSpinState.ReelSpinState = "SpinStartedRollForward"
+        else
+            self:SlideReelSymbols(slideDistanceInSymbolUnits)
+        end
+    else
+        if slideDistanceInSymbolUnits < slideDistanceThresholdInSymbolUnits then
+            self:SlideReelSymbols(slideDistanceThresholdInSymbolUnits)
+            reelSpinState.ReelSpinState = "SpinStartedRollForward"
+        else
+            self:SlideReelSymbols(slideDistanceInSymbolUnits)
+        end
+    end    
+end
+
+function Game003BaseGameReel:SpinReelSpinStartedRollForward()
+    local reelState = Game003BaseGameReelState[self.ReelID].First
+    local reelSpinState = Game003BaseGameReelSpinState[self.ReelID].First
+    reelSpinState.SpeedInSymbolUnitsPerSecond = reelState.SpinStartedRollForwardSpeedInSymbolUnitsPerSecond
+    local reelSpinDirection = reelSpinState.ReelSpinDirection
+    local spinDirectionIsDown = reelSpinDirection == "Down"
+    local slideDistanceInSymbolUnits = self:CalculateSlideDistanceInSymbolUnits()
+    if spinDirectionIsDown then
+        if slideDistanceInSymbolUnits < 0 then
+            self:SlideReelSymbols(0)
+            reelSpinState.ReelSpinState = "Spinning"
+        else
+            self:SlideReelSymbols(slideDistanceInSymbolUnits)
+        end
+    else
+        if slideDistanceInSymbolUnits > 0 then
+            self:SlideReelSymbols(0)
+            reelSpinState.ReelSpinState = "Spinning"
+        else
+            self:SlideReelSymbols(slideDistanceInSymbolUnits)
+        end
+    end    
+end
+
+function Game003BaseGameReel:SpinReelSpinEndingRollBack()    
+    
+    -- spin ending roll back animation
+    System.StartCoroutine(self, "PlaySpinReelSpinEndingRollBackAnimation")
+    
+    local reelState = Game003BaseGameReelState[self.ReelID].First
+    local reelSpinState = Game003BaseGameReelSpinState[self.ReelID].First
+    local reelSymbolsState = Game003BaseGameReelSymbolsState[self.ReelID].Array
+    
+    local reelStopIndex = reelSpinState.ReelStopIndex
+    
+    reelSpinState.SpeedInSymbolUnitsPerSecond = reelState.SpinEndingRollBackSpeedInSymbolUnitsPerSecond
+    local reelSpinDirection = reelSpinState.ReelSpinDirection
+    local spinDirectionIsDown = reelSpinDirection == "Down"
+    local slideDistanceInSymbolUnits = self:CalculateSlideDistanceInSymbolUnits()
+    if spinDirectionIsDown then
+        if slideDistanceInSymbolUnits > 0 then
+            self:SlideReelSymbols(0)
+            reelSpinState.ReelSpinState = "Stopped"
+        else
+            self:SlideReelSymbols(slideDistanceInSymbolUnits)
+        end
+    else
+        if slideDistanceInSymbolUnits < 0 then
+            self:SlideReelSymbols(0)
+            reelSpinState.ReelSpinState = "Stopped"
+        else
+            self:SlideReelSymbols(slideDistanceInSymbolUnits)
+        end
+    end    
+end
+
+function Game003BaseGameReel:SpinReelSpinEndingRollForward()
+    local reelState = Game003BaseGameReelState[self.ReelID].First
+    local reelSpinState = Game003BaseGameReelSpinState[self.ReelID].First
+    reelSpinState.SpeedInSymbolUnitsPerSecond = reelState.SpinEndingRollForwardSpeedInSymbolUnitsPerSecond
+    local reelSpinDirection = reelSpinState.ReelSpinDirection
+    local spinDirectionIsDown = reelSpinDirection == "Down"
+    local slideDistanceThresholdInSymbolUnits = reelState.SpinEndingRollForwardDistanceInSymbolUnits
+    local slideDistanceInSymbolUnits = self:CalculateSlideDistanceInSymbolUnits()
+    if spinDirectionIsDown then
+        if slideDistanceInSymbolUnits < slideDistanceThresholdInSymbolUnits then
+            self:SlideReelSymbols(slideDistanceThresholdInSymbolUnits)
+            reelSpinState.ReelSpinState = "SpinEndingRollBack"
+        else
+            self:SlideReelSymbols(slideDistanceInSymbolUnits)
+        end
+    else
+        if slideDistanceInSymbolUnits > slideDistanceThresholdInSymbolUnits then
+            self:SlideReelSymbols(slideDistanceThresholdInSymbolUnits)
+            reelSpinState.ReelSpinState = "SpinEndingRollBack"
+        else
+            self:SlideReelSymbols(slideDistanceInSymbolUnits)
+        end
+    end    
+end
+
+function Game003BaseGameReel:SpinReelReachedOutcomeStopIndex()
+    local reelSpinState = Game003BaseGameReelSpinState[self.ReelID].First
+    reelSpinState.ReelSpinState = "SpinEndingRollForward"
+end
+
+function Game003BaseGameReel:SpinReelStopped()
+    if self.ReelID == "Reel5" then
+        Game003BaseGameMachine:OnSpinReelsStopped()
+    end 
+end
+
+function Game003BaseGameReel:SpinReelWaiting()
+end
+
+function Game003BaseGameReel:SpinReelSpinning()
+    local reelState = Game003BaseGameReelState[self.ReelID].First
+    local reelSpinState = Game003BaseGameReelSpinState[self.ReelID].First
+    reelSpinState.SpeedInSymbolUnitsPerSecond = reelState.SpinSpeedInSymbolUnitsPerSecond
+    local slideDistanceInSymbolUnits = self:AdvanceReel()
+    self:SlideReelSymbols(slideDistanceInSymbolUnits)
+    return true    
+end
+
+function Game003BaseGameReel:CalculateSlideDistanceInSymbolUnits()
+    local frameDurationInSeconds = Time.deltaTime;
+    local reelSpinState = Game003BaseGameReelSpinState[self.ReelID].First
+    local speedInSymbolUnits = reelSpinState.SpeedInSymbolUnitsPerSecond;
+    local distanceInSymbolUnits = speedInSymbolUnits * frameDurationInSeconds;
+    local reelSpinDirection = reelSpinState.ReelSpinDirection
+    local spinDirectionIsDown = reelSpinDirection == "Down"
+    local slideDistanceInSymbolUnits = reelSpinState.SlideDistanceInSymbolUnits
+    slideDistanceInSymbolUnits = slideDistanceInSymbolUnits + distanceInSymbolUnits
+    return slideDistanceInSymbolUnits
+end
+
+function Game003BaseGameReel:AdvanceReel()
+    local reelSpinState = Game003BaseGameReelSpinState[self.ReelID].First
+    local reelSpinDirection = reelSpinState.ReelSpinDirection
+    local spinDirectionIsDown = reelSpinDirection == "Down"
+    local slideDistanceOffsetInSymbolUnits = (spinDirectionIsDown and 1 or -1)
+    local slideDistanceInSymbolUnits = self:CalculateSlideDistanceInSymbolUnits()
+    while ( (spinDirectionIsDown and slideDistanceInSymbolUnits < -1) or (not spinDirectionIsDown and slideDistanceInSymbolUnits > 1))
+    do
+        self:AdvanceSymbols()        
+        self:UpdateReelStopIndexes()        
+        self:ApplySpinReelStop()    
+        slideDistanceInSymbolUnits = slideDistanceInSymbolUnits + slideDistanceOffsetInSymbolUnits
+    end
+    local spinState = reelSpinState.ReelSpinState     
+    if spinState == "ReachedOutcomeStopIndex" then
+        slideDistanceInSymbolUnits = 0
+    end
+    if spinState == "Stopped" then
+        slideDistanceInSymbolUnits = 0
+    end      
+    return slideDistanceInSymbolUnits
+end
+
+function Game003BaseGameReel:AdvanceSymbols()
+    local reelState = Game003BaseGameReelState[self.ReelID].First
+    local symbolCount = reelState.SymbolCount
+    for i = 1, symbolCount do        
+        self:UpdateReelSymbolForSpin(i)
+    end    
+end
+
+function Game003BaseGameReel:UpdateReelSymbolForSpin(symbolIndex)    
+    local reelState = Game003BaseGameReelState[self.ReelID].First
+    local reelSpinState = Game003BaseGameReelSpinState[self.ReelID].First
+    local reelSymbolsState = Game003BaseGameReelSymbolsState[self.ReelID].Array
+    local symbolState = reelSymbolsState[symbolIndex]
+    local symbolIsLocked = symbolState.SymbolIsLocked
+    if symbolIsLocked then
+        return
+    end
+    local reelSymbols = Game003BaseGameReelSet[self.ReelID].Array
+    local rowVisible = symbolState.RowVisible 
+    local reelStopIndex = reelSpinState.ReelStopIndex
+    local reelSymbolCount = reelState.ReelSymbolCount
+    local reelPosition = symbolState.ReelPosition
+    local symbolStopIndex = 1 + (reelSymbolCount + reelStopIndex + reelPosition) % reelSymbolCount
+    local reelSymbol = reelSymbols[symbolStopIndex].ReelSymbol
+    local symbolGroupProperty = self["SymbolGroup" .. symbolIndex]
+    if symbolGroupProperty.Current ~= nil then
+        symbolGroupProperty.Current.SetActive(false)
+        symbolGroupProperty.CurrentKey = null
+    end
+    local currentValue = symbolGroupProperty[reelSymbol]
+    currentValue.SetActive(true)
+    symbolGroupProperty.Current = currentValue
+    symbolGroupProperty.CurrentKey = reelSymbol
+end
+
+function Game003BaseGameReel:UpdateReelStopIndexes()
+    local reelState = Game003BaseGameReelState[self.ReelID].First
+    local reelSpinState = Game003BaseGameReelSpinState[self.ReelID].First
+    local reelSymbolCount = reelState.ReelSymbolCount
+    local reelStopIndex = reelSpinState.ReelStopIndex
+    local reelStopIndexAdvanceOffset = reelState.ReelStopIndexAdvanceOffset
+    reelStopIndex = reelStopIndex + reelStopIndexAdvanceOffset
+    reelStopIndex = (reelSymbolCount + reelStopIndex) % reelSymbolCount
+    reelSpinState.ReelStopIndex = reelStopIndex
+end
+
+function Game003BaseGameReel:ApplySpinReelStop()
+    local reelState = Game003BaseGameReelState[self.ReelID].First
+    if not reelState.OutcomeReceived then
+        return
+    end
+    local reelSpinState = Game003BaseGameReelSpinState[self.ReelID].First    
+    local spinOutcome = Game003BaseGameReelSpinOutcome[self.ReelID].First   
+    local reelSymbolCount = reelState.ReelSymbolCount     
+    local reelStopIndex = reelSpinState.ReelStopIndex
+    local reelStopIndexAdvanceOffset = reelState.ReelStopIndexAdvanceOffset
+    reelStopIndex = reelStopIndex - reelStopIndexAdvanceOffset
+    reelStopIndex = (reelSymbolCount + reelStopIndex) % reelSymbolCount
+    local outcomeReelStopIndex = spinOutcome.OutcomeReelStopIndex
+    if outcomeReelStopIndex == reelStopIndex then
+        reelSpinState.ReelSpinState = "ReachedOutcomeStopIndex"
+    end
+end
+
+function Game003BaseGameReel:SlideReelSymbols(slideDistanceInSymbolUnits)
+    local reelSpinState = Game003BaseGameReelSpinState[self.ReelID].First
+    local reelState = Game003BaseGameReelState[self.ReelID].First
+    local symbolCount = reelState.SymbolCount
+    for i = 1, symbolCount do        
+        self:SlideSymbol(i, slideDistanceInSymbolUnits)
+    end
+    reelSpinState.SlideDistanceInSymbolUnits = slideDistanceInSymbolUnits    
+end
+
+function Game003BaseGameReel:SlideSymbol(symbolIndex, slideDistanceInSymbolUnits)
+    local reelState = Game003BaseGameReelState[self.ReelID].First
+    local reelSymbolsState = Game003BaseGameReelSymbolsState[self.ReelID].Array
+    local symbolState = reelSymbolsState[symbolIndex]
+    local symbolIsLocked = symbolState.SymbolIsLocked
+    if symbolIsLocked then
+        return
+    end
+    local symbolProperty = self["Symbol" .. symbolIndex]
+    local localPosition = symbolProperty.gameObject.transform.localPosition
+    local symbolPosition = symbolState.SymbolPosition
+    local verticalSpacing = reelState.SymbolVerticalSpacing
+    local symbolOffsetY = reelState.SymbolOffsetY
+    local yLocalPosition = verticalSpacing * symbolPosition
+    yLocalPosition = yLocalPosition + verticalSpacing * slideDistanceInSymbolUnits + symbolOffsetY
+    localPosition = Vector3:new(
+                localPosition.x,
+                yLocalPosition,
+                localPosition.z)
+    symbolProperty.gameObject.transform.localPosition = localPosition
+end
+
+function Game003BaseGameReel:SpliceReel()
+    local reelState = Game003BaseGameReelState[self.ReelID].First
+    local reelSpinState = Game003BaseGameReelSpinState[self.ReelID].First
+    local spinOutcome = Game003BaseGameReelSpinOutcome[self.ReelID].First
+    local d1 = spinOutcome.OutcomeReelStopIndex
+    local d2 = reelState.SpliceDistance
+    local reelSymbolCount = reelState.ReelSymbolCount
+    local spinDirectionIsDown = reelSpinState.ReelSpinDirection == "Down"    
+    
+    local skipSplice = self:SkipSpliceReel()          
+    if spinDirectionIsDown then
+        if not skipSplice then
+            local reelStopIndex = (d1 + d2 + reelSymbolCount) % reelSymbolCount
+            reelSpinState.ReelStopIndex = reelStopIndex - 1
+        end
+    elseif not spinDirectionIsDown then
+        if not skipSplice then
+            local reelStopIndex = (d1 - d2 + reelSymbolCount) % reelSymbolCount
+            reelSpinState.ReelStopIndex = reelStopIndex + 1
+        end
+    end
+end
+
+function Game003BaseGameReel:SkipSpliceReel()
+    -- if the reel stop index will be reached by current spin
+    -- there is no need to splice
+    
+    local reelState = Game003BaseGameReelState[self.ReelID].First
+    local reelSpinState = Game003BaseGameReelSpinState[self.ReelID].First
+    local spinOutcome = Game003BaseGameReelSpinOutcome[self.ReelID].First
+    local spinDirectionIsDown = reelSpinState.ReelSpinDirection == "Down"
+    local reelStopIndex = reelSpinState.ReelStopIndex
+    local outcomeReelStopIndex = spinOutcome.OutcomeReelStopIndex
+    
+    local topSymbolCount = reelState.TopSymbolCount
+    local bottomSymbolCount = reelState.BottomSymbolCount
+    local visibleSymbolCount = reelState.VisibleSymbolCount
+    
+    local inTopSymbolOffset = outcomeReelStopIndex >= reelStopIndex - topSymbolCount and outcomeReelStopIndex < reelStopIndex
+    local inBottomSymbolOffset = outcomeReelStopIndex >= reelStopIndex + visibleSymbolCount and outcomeReelStopIndex < reelStopIndex + visibleSymbolCount + bottomSymbolCount
+        
+    if spinDirectionIsDown then
+        -- for a spin down, this would occur if the outcome reel stop index is 
+        -- in the top symbol offset or visible symbols
+        -- but not the bottom visible symbols
+        local skipSlice = inTopSymbolOffset
+        return skipSlice
+    end
+    
+    if not spinDirectionIsDown then
+        -- for a spin up, this would occur if the reel stop index is 
+        -- in the bottom symbol offset 
+        -- but not in the top symbol offset or visible symbols
+        local skipSlice = inBottomSymbolOffset
+        return skipSlice
+    end
+    
+    return false
+end
+
+function Game003BaseGameReel:PlaySpinReelSpinEndingRollBackAnimation()
+    series
+        do        
+            local spinEndingRollbackAnimation = Game003BaseGameSpinEndingRollBackAnimation[self.ReelID]
+            
+            if spinEndingRollbackAnimation == nil then
+                return
+            end
+                      
+            if spinEndingRollbackAnimation.First.Counter > 0 then
+                return                
+            end               
+            
+            spinEndingRollbackAnimation.First.Counter = 1 
+                                                       
+            local reelState = Game003BaseGameReelState[self.ReelID].First
+            local reelSpinState = Game003BaseGameReelSpinState[self.ReelID].First
+            local reelSymbolsState = Game003BaseGameReelSymbolsState[self.ReelID].Array
+                        
+            local rollbackAnimationArray = spinEndingRollbackAnimation.Array            
+            
+            local animatorGroupPrefix = "SymbolLandWinAnimatorGroup"
+            
+            for i=1,#rollbackAnimationArray do
+                local rowIndex = rollbackAnimationArray[i].RowIndex
+                self:PlaySymbolAnimation(rowIndex, animatorGroupPrefix, false)
+            end
+        end
+    end
+end
+
+function Game003BaseGameReel:PlaySymbolAnimation(rowIndex, animatorGroupPrefix, waitForAnimationComplete)
+    local animationDuration = 0.0
+    series
+        do                    
+            if rowIndex >= 0 then
+                local luaIndex = rowIndex + 1       
+                local animatorGroupProperty = self[animatorGroupPrefix .. luaIndex]
+                local symbolGroupProperty = self["SymbolGroup" .. luaIndex]
+                local currentKey = symbolGroupProperty.CurrentKey
+                local animatorProperty = animatorGroupProperty[currentKey]
+                animatorProperty.waitForAnimationComplete = waitForAnimationComplete
+                -- animationDuration = Core.Animator:PlayAnimatorProperty(currentKey, animatorProperty)
+                animationDuration = BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+            end
+        end
+    end
+    return animationDuration
+end
+
+function Game003BaseGameReel:CloneAndOverlayCurrentSymbol(rowIndex)
+    local overlaySymbol = nil
+    series
+        do                    
+            overlaySymbol = self:CloneCurrentSymbol(rowIndex)
+            if overlaySymbol ~= nil then
+                BettrVisualsController.SetLayerRecursively(overlaySymbol, Core.Layers.SLOT_REELS_OVERLAY)
+            end
+        end
+    end
+    return overlaySymbol
+end
+
+function Game003BaseGameReel:CloneCurrentSymbol(rowIndex)
+    local clonedSymbol = nil
+    series
+        do                    
+            if rowIndex >= 0 then
+                local luaIndex = rowIndex + 1       
+                local symbolGroupProperty = self["SymbolGroup" .. luaIndex] 
+                clonedSymbol = symbolGroupProperty.CloneCurrent                               
+            end
+        end
+    end
+    return clonedSymbol
+end
+
+function Game003BaseGameReel:DisplayPaylines(paylineSymbol, paylineData, paylineId, duration)
+    for i = 1, #paylineData do
+        local position = paylineData[i]
+        if position.ReelID == self.ReelID then
+            local rowIndex = position.RowIndex
+            local luaRowIndex = rowIndex + 1
+            parallel
+                do
+                    local animatorGroupProperty = self["SymbolPaylineWinAnimatorGroup" .. luaRowIndex]
+                    local symbolGroupProperty = self["SymbolGroup" .. luaRowIndex]
+                    local currentKey = symbolGroupProperty.CurrentKey
+                    local animatorProperty = animatorGroupProperty[currentKey]
+                    animatorProperty.overrideAnimationDuration = true
+                    animatorProperty.animationDuration = duration
+                    BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+                    -- Core.Animator:PlayAnimatorProperty(currentKey, animatorProperty)
+                end
+                do
+                    local animatorGroupProperty = self.PaylinesAnimatorGroup
+                    local animatorProperty = animatorGroupProperty["WinStart" .. luaRowIndex]
+                    BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+                end 
+            end
+        end
+    end
+end
+
+function Game003BaseGameReel:HidePaylines(paylineSymbol, paylineData, paylineId)
+    for i = 1, #paylineData parallel do
+        local position = paylineData[i]
+        if position.ReelID == self.ReelID then
+            local rowIndex = position.RowIndex
+            local luaRowIndex = rowIndex + 1
+            local animatorGroupProperty = self.PaylinesAnimatorGroup
+            local animatorProperty = animatorGroupProperty["WinEnd" .. luaRowIndex]
+            BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+        end
+    end
+end
+
+Game003BaseGameReel.ReelSpinStateDispatchTable = {
+    Waiting = Game003BaseGameReel.SpinReelWaiting,
+    Spinning = Game003BaseGameReel.SpinReelSpinning,
+    Stopped = Game003BaseGameReel.SpinReelStopped,
+    ReachedOutcomeStopIndex = Game003BaseGameReel.SpinReelReachedOutcomeStopIndex,
+    SpinStartedRollBack = Game003BaseGameReel.SpinReelSpinStartedRollBack,
+    SpinStartedRollForward = Game003BaseGameReel.SpinReelSpinStartedRollForward,
+    SpinEndingRollForward = Game003BaseGameReel.SpinReelSpinEndingRollForward,
+    SpinEndingRollBack = Game003BaseGameReel.SpinReelSpinEndingRollBack
+}
+
+return Game003BaseGameReel:new()

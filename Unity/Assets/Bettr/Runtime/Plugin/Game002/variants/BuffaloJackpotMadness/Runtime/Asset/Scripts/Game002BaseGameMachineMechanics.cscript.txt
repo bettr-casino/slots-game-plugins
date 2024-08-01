@@ -1,0 +1,36 @@
+require "math"
+require "Core"
+require "Game002BaseGameMachineWaysMechanic"
+
+Game002BaseGameMachineMechanics = {
+    WaysMechanic = nil,
+}
+
+function Game002BaseGameMachineMechanics:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game002BaseGameMachineMechanics:Initialize(machine)
+    self.WaysMechanic = Game002BaseGameMachineWaysMechanic:new()
+    self.WaysMechanic:Initialize(machine)
+end
+
+function Game002BaseGameMachineMechanics:BaseGamePayout(machine)
+    series
+        do
+            self.WaysMechanic:DisplayWays(machine)
+        end
+    end
+end
+
+function Game002BaseGameMachineMechanics:OnSpinButtonClicked(machine)
+    series
+        do
+            self.WaysMechanic:CancelWaysAnimation()
+            self.WaysMechanic:WaitForPayToComplete()
+        end
+    end
+end

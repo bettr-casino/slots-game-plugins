@@ -1,0 +1,36 @@
+require "math"
+require "Core"
+require "Game003BaseGameMachinePaylinesMechanic"
+
+Game003BaseGameMachineMechanics = {
+    PaylinesMechanic = nil,
+}
+
+function Game003BaseGameMachineMechanics:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game003BaseGameMachineMechanics:Initialize(machine)
+    self.PaylinesMechanic = Game003BaseGameMachinePaylinesMechanic:new()
+    self.PaylinesMechanic:Initialize(machine)
+end
+
+function Game003BaseGameMachineMechanics:BaseGamePayout(machine)
+    series
+        do
+            self.PaylinesMechanic:DisplayPaylines(machine)
+        end
+    end
+end
+
+function Game003BaseGameMachineMechanics:OnSpinButtonClicked(machine)
+    series
+        do
+            self.PaylinesMechanic:CancelPaylinesAnimation()
+            self.PaylinesMechanic:WaitForPayToComplete()
+        end
+    end
+end

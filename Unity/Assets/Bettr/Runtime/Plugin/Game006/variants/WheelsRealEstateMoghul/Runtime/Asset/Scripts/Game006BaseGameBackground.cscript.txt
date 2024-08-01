@@ -1,0 +1,57 @@
+require "math"
+require "Core"
+
+Game006BaseGameBackground = {
+}
+
+function Game006BaseGameBackground:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game006BaseGameBackground:destroy()
+	System.Print("Game006BaseGameBackground destroy tile id={0}", self.id)
+end
+
+function Game006BaseGameBackground:OnError(callStack)
+	System.Error("Game006BaseGameBackground Error CallStack: {0}", callStack)
+end
+
+function Game006BaseGameBackground:Awake()
+	System.Print("Game006BaseGameBackground Awake tile id={0}", self.id)
+end
+
+function Game006BaseGameBackground:StartBackground()
+    series
+        do
+	        local animatorProperty = self["start"]
+            BettrVisualsController.PlayAnimatorProperty(animatorProperty)        
+        end
+    end
+end
+
+function Game006BaseGameBackground:ShowBackground()
+    series
+        do
+	        local animatorProperty = self["show"]
+            BettrVisualsController.PlayAnimatorProperty(animatorProperty)        
+        end
+    end
+end
+
+function Game006BaseGameBackground:HideBackground()
+    series
+        do
+	        local animatorProperty = self["hide"]
+            BettrVisualsController.PlayAnimatorProperty(animatorProperty)        
+        end
+    end
+end
+
+function Game006BaseGameBackground:OnBecameVisible()
+	System.Print("Game006BaseGameBackground OnBecameVisible tile id={0}", self.id)
+end
+
+return Game006BaseGameBackground:new()

@@ -1,0 +1,93 @@
+require "math"
+require "Core"
+
+Game004 = {
+    Manifest = {        
+        BundleName = "game004",
+        BundleVersion = "richesjetsetjackpot",
+        BaseGameBackgroundPrefabName = "Game004BaseGameBackground",
+        BaseGameMachinePrefabName = "Game004BaseGameMachine",
+    }
+}
+
+function Game004:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game004:destroy()
+	System.Print("Game004 destroy tile id={0}", self.id)
+end
+
+function Game004:OnError(callStack)
+	System.Error("Game004 Error CallStack: {0}", callStack)
+end
+
+function Game004:Awake()
+	System.Print("Game004 Awake tile id={0}", self.id)
+end
+
+function Game004:Start()
+    series
+        do
+            System.Print("Game004:Start tile id={0}", self.id)
+            self:LoadBaseGameBackgroundPrefab()
+            self:LoadBaseGamePrefab()
+            BettrVisualsController.SwitchOrientationToLandscape()
+            Game004BaseGameBackground:StartBackground()
+            self:SetBaseGameActive(true)
+        end
+    end
+end
+
+function Game004:LoadBaseGameBackgroundPrefab()
+    series
+        do
+            System.Print("Game004:LoadBaseGameBackgroundPrefab tile id={0}", self.id)
+            local manifest = self.Manifest
+            local backgroundParentProperty = self.BaseGameBackgroundParent
+            local backgroundParent = backgroundParentProperty["Pivot"]                        
+            BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, manifest.BaseGameBackgroundPrefabName, backgroundParent)
+        end
+    end
+end
+
+function Game004:LoadBaseGamePrefab()
+    series
+        do            
+            local manifest = self.Manifest
+            local baseGameMachineParentProperty = self.BaseGameMachineParent
+            local baseGameMachineParent = baseGameMachineParentProperty["Pivot"]
+            BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, manifest.BaseGameMachinePrefabName, baseGameMachineParent)
+        end
+    end
+end
+
+function Game004:SetBaseGameActive(active)
+    if active then
+        self.BaseGameMachineParent.SetActive(true)
+        Game004MachineState.Current.First.ActiveGame = "BaseGame"
+    else
+        self.BaseGameMachineParent.SetActive(false)
+    end
+end
+
+function Game004:ActiveGame()
+    return Game004MachineState.Current.First.ActiveGame
+end
+
+function Game004:OnBecameVisible()
+	System.Print("Game004 OnBecameVisible tile id={0}", self.id)
+end
+
+function Game004:OnPointerClick()
+	System.Print("Game004 OnPointerClick tile id={0}", self.id)
+end
+
+function Game004:OnPointerClick1Param(param)
+	System.Print("Game004 OnPointerClick1Param param={0} tile id={1}", param, self.id)
+end
+
+return Game004:new()

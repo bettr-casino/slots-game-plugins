@@ -1,0 +1,51 @@
+require "math"
+require "Core"
+
+Game008BaseGameMachinePaylinesMechanic = {
+}
+
+function Game008BaseGameMachinePaylinesMechanic:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game008BaseGameMachinePaylinesMechanic:Initialize(machine)
+    -- Appending new entries to the table
+    Game008BaseGameMachine.BaseGameStateDispatchTable.Paying = function()
+        self:BaseGamePaying(machine)
+    end
+    Game008BaseGameMachine.BaseGameStateDispatchTable.WaitingForPayToComplete = function()
+        self:WaitingForPayToComplete(machine)
+    end
+end
+
+function Game008BaseGameMachinePaylinesMechanic:BaseGamePaying(machine)
+    Game008BaseGameState.SpinState.First.State = "WaitingForPayToComplete"
+    System.StartCoroutine(machine, "BaseGamePayout")
+end
+
+function Game008BaseGameMachinePaylinesMechanic:CancelPaylinesAnimation()
+    Game008BaseGameState.DisplayState.First.State = "CancelRequested"
+end
+
+function Game008BaseGameMachinePaylinesMechanic:WaitingForPayToComplete(machine)    
+end
+
+function Game008BaseGameMachinePaylinesMechanic:WaitForPayToComplete()
+    series
+        do
+            Game008BaseGameState.DisplayState.First.State = "Idle"            
+        end
+    end
+end
+
+function Game008BaseGameMachinePaylinesMechanic:DisplayPaylines(machine)
+    series
+        do
+            System.Print("TODO: complete BaseGameMachinePaylinesMechanic:DisplayPaylines")
+        end
+    end
+end
+

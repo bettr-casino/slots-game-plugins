@@ -1,9 +1,9 @@
 require "math"
 require "Core"
-require "{{machineName}}BaseGameMachineWaysMechanic"
+require "{{machineName}}BaseGameMachinePaylinesMechanic"
 
 {{machineName}}BaseGameMachineMechanics = {
-    WaysMechanic = nil,
+    PaylinesMechanic = nil,
 }
 
 function {{machineName}}BaseGameMachineMechanics:new(o)
@@ -14,14 +14,14 @@ function {{machineName}}BaseGameMachineMechanics:new(o)
 end
 
 function {{machineName}}BaseGameMachineMechanics:Initialize(machine)
-    self.WaysMechanic = {{machineName}}BaseGameMachineWaysMechanic:new()
-    self.WaysMechanic:Initialize(machine)
+    self.PaylinesMechanic = {{machineName}}BaseGameMachinePaylinesMechanic:new()
+    self.PaylinesMechanic:Initialize(machine)
 end
 
 function {{machineName}}BaseGameMachineMechanics:BaseGamePayout(machine)
     series
         do
-            self.WaysMechanic:DisplayWays(machine)
+            self.PaylinesMechanic:DisplayPaylines(machine)
         end
     end
 end
@@ -29,8 +29,8 @@ end
 function {{machineName}}BaseGameMachineMechanics:OnSpinButtonClicked(machine)
     series
         do
-            self.WaysMechanic:CancelWaysAnimation()
-            self.WaysMechanic:WaitForPayToComplete()
+            self.PaylinesMechanic:CancelPaylinesAnimation()
+            self.PaylinesMechanic:WaitForPayToComplete()
         end
     end
 end
