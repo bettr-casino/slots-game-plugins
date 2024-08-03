@@ -70,6 +70,9 @@ namespace Bettr.Editor.generators
                             case "Transform":
                                 AnimationUtility.SetEditorCurve(animationClip, EditorCurveBinding.FloatCurve(dopesheet.Path, typeof(Transform), dopesheet.Property), curve);
                                 break;
+                            case "MeshRenderer":
+                                AnimationUtility.SetEditorCurve(animationClip, EditorCurveBinding.FloatCurve(dopesheet.Path, typeof(MeshRenderer), dopesheet.Property), curve);
+                                break;
                         }
                     }
                 }
@@ -187,6 +190,9 @@ namespace Bettr.Editor.generators
                                 break;
                             case "Transform":
                                 AnimationUtility.SetEditorCurve(animationClip, EditorCurveBinding.FloatCurve(dopesheet.Path, typeof(Transform), dopesheet.Property), curve);
+                                break;
+                            case "MeshRenderer":
+                                AnimationUtility.SetEditorCurve(animationClip, EditorCurveBinding.FloatCurve(dopesheet.Path, typeof(MeshRenderer), dopesheet.Property), curve);
                                 break;
                         }
                     }
