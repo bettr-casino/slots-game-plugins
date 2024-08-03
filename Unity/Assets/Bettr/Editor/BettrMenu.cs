@@ -1926,6 +1926,7 @@ namespace Bettr.Editor
                         mechanicParticleSystem.ModuleData.RendererSettings.Shader,
                         mechanicParticleSystem.ModuleData.RendererSettings.Texture,
                         mechanicParticleSystem.ModuleData.RendererSettings.Color,
+                        mechanicParticleSystem.ModuleData.RendererSettings.Alpha,
                         runtimeAssetPath
                     );
                 }

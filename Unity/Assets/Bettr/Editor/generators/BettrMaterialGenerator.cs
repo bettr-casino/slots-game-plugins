@@ -11,7 +11,7 @@ namespace Bettr.Editor.generators
         
         public static string MachineVariant;
         
-        public static Material CreateOrLoadMaterial(string materialName, string shaderName, string textureName, string hexColor, string runtimeAssetPath)
+        public static Material CreateOrLoadMaterial(string materialName, string shaderName, string textureName, string hexColor, float alpha, string runtimeAssetPath)
         {
             AssetDatabase.Refresh();
             
@@ -69,6 +69,12 @@ namespace Bettr.Editor.generators
                 {
                     throw new Exception($"Invalid color {hexColor}.");
                 }
+            }
+            if (alpha >= 0)
+            {
+                Color color = material.GetColor((int) Color);
+                color.a = alpha;
+                material.SetColor((int) Color, color);
             }
             
             AssetDatabase.SaveAssets();

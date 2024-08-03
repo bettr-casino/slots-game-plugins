@@ -53,6 +53,8 @@ namespace Bettr.Editor
         
         public string PrimitiveColor { get; set; }
         
+        public float PrimitiveAlpha { get; set; } = 1.0f;
+        
         public int Primitive { get; set; }
         
         public bool IsPrimitive { get; set; }
@@ -193,7 +195,7 @@ namespace Bettr.Editor
                 else if (IsPrimitive)
                 {
                     var primitiveGameObject = GameObject.CreatePrimitive(Enum.GetValues(typeof(PrimitiveType)).GetValue(Primitive) as PrimitiveType? ?? PrimitiveType.Quad);
-                    var primitiveMaterial = BettrMaterialGenerator.CreateOrLoadMaterial(PrimitiveMaterial, PrimitiveShader, PrimitiveTexture, PrimitiveColor, InstanceComponent.RuntimeAssetPath);
+                    var primitiveMaterial = BettrMaterialGenerator.CreateOrLoadMaterial(PrimitiveMaterial, PrimitiveShader, PrimitiveTexture, PrimitiveColor, PrimitiveAlpha, InstanceComponent.RuntimeAssetPath);
                     
                     var primitiveMeshRenderer = primitiveGameObject.GetComponent<MeshRenderer>();
                     primitiveMeshRenderer.material = primitiveMaterial;
@@ -1108,6 +1110,8 @@ namespace Bettr.Editor
             // ReSharper disable once InconsistentNaming
             public string Color { get; set; }
             // ReSharper disable once InconsistentNaming
+            public float Alpha { get; set; }
+            // ReSharper disable once InconsistentNaming
             public string Shader { get; set; }
             // ReSharper disable once InconsistentNaming
             public int SortingOrder { get; set; }
@@ -1280,6 +1284,7 @@ namespace Bettr.Editor
                     _moduleData.RendererSettings.Shader,
                     _moduleData.RendererSettings.Texture,
                     _moduleData.RendererSettings.Color,
+                    _moduleData.RendererSettings.Alpha,
                     _runtimeAssetPath
                 );
             }
