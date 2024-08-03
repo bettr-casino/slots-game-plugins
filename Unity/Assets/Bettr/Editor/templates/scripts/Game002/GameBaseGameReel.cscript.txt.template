@@ -509,18 +509,6 @@ function {{machineName}}BaseGameReel:DisplayWays(waySymbol, wayMatrix, waySymbol
     end
 end
 
-function {{machineName}}BaseGameReel:HideWays(waySymbol, wayMatrix, wayMatrixCount)
-    for i=1,wayMatrixCount parallel do
-        local wayReelID = wayMatrix[i].ReelID
-        if wayReelID == self.ReelID then
-            local waysGroupProperty = self.WaysGroup
-            local rowIndex = wayMatrix[i].RowIndex
-            local luaRowIndex = rowIndex + 1
-            waysGroupProperty["RowIndex" .. luaRowIndex].SetActive(false)
-        end
-    end
-end
-
 {{machineName}}BaseGameReel.ReelSpinStateDispatchTable = {
     Waiting = {{machineName}}BaseGameReel.SpinReelWaiting,
     Spinning = {{machineName}}BaseGameReel.SpinReelSpinning,

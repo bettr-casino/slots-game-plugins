@@ -70,14 +70,11 @@ namespace Bettr.Editor.generators
                     throw new Exception($"Invalid color {hexColor}.");
                 }
             }
-            if (alpha is >= 0 and <= 1)
+            if (alpha >= 0)
             {
-                if (!string.IsNullOrEmpty(textureName) || !string.IsNullOrEmpty(hexColor))
-                {
-                    Color color = material.GetColor((int) Color);
-                    color.a = alpha;
-                    material.SetColor((int) Color, color);
-                }
+                Color color = material.GetColor((int) Color);
+                color.a = alpha;
+                material.SetColor((int) Color, color);
             }
             
             AssetDatabase.SaveAssets();
