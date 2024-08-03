@@ -72,9 +72,12 @@ namespace Bettr.Editor.generators
             }
             if (alpha >= 0)
             {
-                Color color = material.GetColor((int) Color);
-                color.a = alpha;
-                material.SetColor((int) Color, color);
+                if (!string.IsNullOrEmpty(textureName) || !string.IsNullOrEmpty(hexColor))
+                {
+                    Color color = material.GetColor((int) Color);
+                    color.a = alpha;
+                    material.SetColor((int) Color, color);
+                }
             }
             
             AssetDatabase.SaveAssets();

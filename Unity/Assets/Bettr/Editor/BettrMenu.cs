@@ -2642,39 +2642,11 @@ namespace Bettr.Editor
     {
         public static void Process(string machineName, string machineVariant, string runtimeAssetPath)
         {
-            ProcessWinPrefab(machineName, machineVariant, runtimeAssetPath);
             ProcessBaseGameSymbolModifications(machineName, machineVariant, runtimeAssetPath);
             ProcessBaseGameMachineModifications(machineName, machineVariant, runtimeAssetPath);
             ProcessBaseGameReelModifications(machineName, machineVariant, runtimeAssetPath);
         }
 
-        private static void ProcessWinPrefab(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            string symbolName = $"{machineName}BaseGameWaysWin";
-            var templateName = "BaseGameWaysWinPrefab";
-            var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/ways/", templateName);
-
-            var model = new Dictionary<string, object>
-            {
-            };
-            
-            var json = scribanTemplate.Render(model);
-            Console.WriteLine(json);
-            
-            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-            InstanceGameObject.IdGameObjects.Clear();
-            
-            BettrMaterialGenerator.MachineName = machineName;
-            BettrMaterialGenerator.MachineVariant = machineVariant;
-            
-            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
-            hierarchyInstance.SetParent((GameObject) null);
-
-            BettrMenu.ProcessPrefab(symbolName, 
-                hierarchyInstance, 
-                runtimeAssetPath);
-        }
-        
         private static void ProcessBaseGameSymbolModifications(string machineName, string machineVariant, string runtimeAssetPath)
         {
             string templateName = "BaseGameWaysSymbolModifications";
