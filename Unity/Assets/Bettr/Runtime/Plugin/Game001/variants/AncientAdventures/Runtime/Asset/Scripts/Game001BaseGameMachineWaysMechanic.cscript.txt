@@ -66,6 +66,7 @@ function Game001BaseGameMachineWaysMechanic:DisplayWays(machine)
             local startDelay = waysSummary.DisplayLoopStartDelay
             local duration = waysSummary.DisplayLoopDuration
             local endDelay = waysSummary.DisplayLoopEndDelay            
+            local waysIndex = waysState.WaysIndex
             if waysIndex == 0 then
                 System.WaitForSeconds(startDelay)
             end
@@ -108,7 +109,7 @@ function Game001BaseGameMachineWaysMechanic:DisplayWays(machine)
                     end
                 end                            
             end
-            local waysIndex = waysState.WaysIndex
+            waysIndex = waysState.WaysIndex
             waysState.WaysIndex = waysIndex + 1
             System.WaitForSeconds(endDelay)
             if waysIndex >= 1 then
