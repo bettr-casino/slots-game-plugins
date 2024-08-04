@@ -44,42 +44,24 @@
                 {
                     "ComponentType": "TilePropertyAnimators",
                     "AnimatorsGroupProperty": [
+                    {{ for symbolIndex in paylinesSymbolIndexes }}
                         {
-                            "GroupKey": "PaylinesAnimatorGroup",
-                            "Group": [
-                                {{ for paylineIndex in paylinesSymbolIndexes }}
-                                {
-                                    "Key": "WinStart{{paylineIndex}}",
-                                    "Id": "Paylines{{paylineIndex}}",
-                                    "State": "win_start"
-                                },
-                                {
-                                    "Key": "WinEnd{{paylineIndex}}",
-                                    "Id": "Paylines{{paylineIndex}}",
-                                    "State": "win_end"
-                                }
-                                {{ if !for.last }},{{ end }}{{ end }}
-                            ]
-                        }    
+                             "GroupKey": "SymbolPaylinesWinAnimatorGroup{{symbolIndex}}",
+                             "Group": [
+                                 {{ for symbolKey in symbolKeys }}
+                                 {
+                                     "Key": "{{symbolKey}}",
+                                     "Id": "Symbol{{symbolIndex}}{{symbolKey}}",
+                                     "State": "win"
+                                 }
+                                 {{ if !for.last }},{{ end }}{{ end }}
+                             ]
+                        }
+                    {{ if !for.last }},{{ end }}{{ end }}    
                     ]
                 }           
             ],
-            "Children": [
-                {{ for symbolIndex in paylinesSymbolIndexes }}
-                {
-                    "Name": "Paylines{{symbolIndex}}",
-                    "Id": "Paylines{{symbolIndex}}",
-                    "Layer": "SLOT_REELS",
-                    "Active": true,
-                    "IsPrefab": true,
-                    "PrefabName": "{{machineName}}BaseGamePaylinesPrefab",
-                    "Position": {
-                        "X": 0,
-                        "Y": {{yPositions[symbolIndex]}},
-                        "Z": 0
-                    }            
-                }
-                {{ if !for.last }},{{ end }}{{ end }}            
+            "Children": [                          
             ]
         }
     ]

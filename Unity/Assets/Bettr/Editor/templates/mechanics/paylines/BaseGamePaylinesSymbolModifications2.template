@@ -1,0 +1,40 @@
+{
+    "Prefabs": [
+    {{ for symbolKey in symbolKeys }}    
+    {
+        "Name": "{{machineName}}BaseGameSymbol{{symbolKey}}",
+        "Layer": "SLOT_REELS",
+        "PrefabName": "{{machineName}}BaseGameSymbol{{symbolKey}}",
+        "IsPrefab": true,
+        "PrefabIds": [
+            {
+                "Index": 0,
+                "Id": "Pivot"
+            }
+        ],
+        "Action": "modify",
+        "ThisId": "Pivot",           
+        "Components": [             
+        ],
+        "Children": [      
+            {
+                "Name": "PaylinesQuad",
+                "Layer": "SLOT_REELS",
+                "Active": false,
+                "IsPrimitive": true,
+                "Primitive": 5,
+                "PrimitiveMaterial": "Paylines{{symbolKey}}",
+                "PrimitiveShader": "Bettr/Symbol",
+                "PrimitiveTexture": "{{symbolKey}}",
+                "PrimitiveAlpha": 1,
+                "Scale": {
+                    "X": 1,
+                    "Y": 1,
+                    "Z": 1
+                }
+            }
+        ]
+    }    
+    {{ if !for.last }},{{ end }}{{ end }}
+    ]
+}

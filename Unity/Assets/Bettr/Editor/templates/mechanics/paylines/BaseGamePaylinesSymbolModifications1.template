@@ -1,0 +1,31 @@
+{
+    "AnimatorControllers" : [
+        {{ for symbolPrefabName in symbolPrefabNames }}        
+        {
+            "Filename": "{{symbolPrefabName}}",
+            "Action": "add_states",
+            "AnimationStates": [
+                {
+                  "Name": "win",
+                  "Speed": 1,
+                  "IsLoop": false,
+                  "IsDefault": false,
+                  "Dopesheet": [
+                     {
+                        "Path": "Pivot/PaylinesQuad",
+                        "Type": "GameObject",
+                        "Property": "m_IsActive",
+                        "Keyframes": {
+                            "Times": [0, 20, 40, 60],
+                            "Values": [0, 1, 1, 0]
+                        }
+                    }
+                  ]
+                }
+            ],
+            "AnimatorStateTransitions": [
+            ]           
+        }        
+        {{ if !for.last }},{{ end }}{{ end }}        
+    ]
+}

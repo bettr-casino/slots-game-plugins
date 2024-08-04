@@ -44,8 +44,98 @@ end
 function {{machineName}}BaseGameMachinePaylinesMechanic:DisplayPaylines(machine)
     series
         do
-            System.Print("TODO: complete BaseGameMachinePaylinesMechanic:DisplayPaylines")
+            local summary = {{machineName}}BaseGamePaylinesSummary.Paylines.First
+            local count = summary.WaysCount
+            if count == 0 then
+                machine:OnPayingCompleted()
+                return
+            end
+            local state = {{machineName}}BaseGamePaylinesState.Paylines.First
+            local paylines = {{machineName}}BaseGamePaylines.Paylines.Array
+            local matrix = {{machineName}}BaseGamePaylinesMatrix                        
+            state.PaysRollup = BettrUser.Coins 
+            count = summary.WaysCount
+            local startDelay = summary.DisplayLoopStartDelay
+            local duration = summary.DisplayLoopDuration
+            local endDelay = summary.DisplayLoopEndDelay
+            local index = state.WaysIndex            
+            if index == 0 then
+                System.WaitForSeconds(startDelay)
+            end
+            for counterIndex = 1, count do
+                series
+                    do
+                        if {{machineName}}BaseGameState.DisplayState.First.State == "CancelRequested" then
+                            break
+                        end
+                        local payline = paylines[counterIndex]
+                        local symbol = payline.Symbol
+                        local reelCount = way.ReelCount
+                        local symbolCount = way.SymbolCount
+                        local multiplier = way.Multiplier
+                        local pay = way.Pay
+                        local totalPay = way.Pays
+                        local matrix = matrix[symbol].Array
+                        -- update status text 
+                        local statusTexts = machine.StatusTexts
+                        -- {0}        Pays  {1} x {2} ways = {3} CREDITS!!
+                        statusTexts.FormatAndSetCurrentActive("PaysText", reelCount, pay, multiplier, totalPay)
+                        local winSymbols = machine.WinSymbols
+                        winSymbols.SetCurrentActive(symbol)
+                        parallel
+                            do
+                                self:RollUpPaylinesWin(machine, way, state, summary, duration)
+                            end
+                            do
+                                -- display ways
+                                for i=1,reelCount parallel do
+                                    local reel = _G["{{machineName}}BaseGameReel" .. i]
+                                    if reel != nil then
+                                        reel.Mechanics.PaylinesMechanic:DisplayPaylines(reel, symbol, matrix, symbolCount, duration)
+                                        System.WaitForSeconds(duration)
+                                        reel.Mechanics.PaylinesMechanic:HidePaylines(reel, symbol, matrix, symbolCount)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end                            
+            end
+            waysIndex = state.WaysIndex
+            state.WaysIndex = waysIndex + 1
+            System.WaitForSeconds(endDelay)
+            if waysIndex >= 1 then
+                machine:OnPayingCompleted()
+                return
+            end
+            if {{machineName}}BaseGameState.DisplayState.First.State == "CancelRequested" then
+                machine:OnPayingCompleted()
+                return
+            end
+            System.StartCoroutine(machine, "BaseGamePayout")
         end
     end
+end
+
+function {{machineName}}BaseGameMachinePaylinesMechanic:RollUpPaylinesWin(machine, way, paylinesState, paylinesSummary, duration)
+    series
+        do
+            -- rollup ways win once
+            local startDelay = paylinesSummary.DisplayLoopStartDelay
+            local duration = paylinesSummary.DisplayLoopDuration
+            local pays = way.Pays
+            System.WaitForSeconds(startDelay)
+            local winTextProperty = machine.WinText
+            
+            BettrVisualsController.RollUpCounter(winTextProperty, 0, pays, 1)
+            
+            local creditsTextProperty = machine.CreditsText   
+            local oldCoins = paylinesState.PaysRollup
+            local newCoins = oldCoins + pays            
+            waysState.PaysRollup = newCoins  
+                      
+            BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 1)
+        end
+    end    
 end
 

@@ -193,7 +193,7 @@ namespace Bettr.Editor
             BuildLocalServer();
         }
 
-        [MenuItem("Bettr/Build/Game001 - Epic Wins!!!")]
+        [MenuItem("Bettr/Build/Game001 - Epic Wins")]
         public static void BuildGame001()
         {
             BuildMachines("Game001", "AncientAdventures");
@@ -211,16 +211,16 @@ namespace Bettr.Editor
             // BuildMachines("Game001", "SamuraisFortune");
         }
         
-        [MenuItem("Bettr/Build/Game002")]
+        [MenuItem("Bettr/Build/Game002 - Buffalo")]
         public static void BuildGame002()
         {
             BuildMachines("Game002", "BuffaloTreasureHunter");
         }
 
-        [MenuItem("Bettr/Build/Game003 - LightningLinkHighStakes")]
+        [MenuItem("Bettr/Build/Game003 - HighStakes")]
         public static void BuildGame003()
         {
-            BuildMachines("Game003", "LightningLinkHighStakes");
+            BuildMachines("Game003", "HighStakesAlpineAdventure");
         }
 
         [MenuItem("Bettr/Build/Game004 - CleopatraRiches")]
@@ -2797,7 +2797,6 @@ namespace Bettr.Editor
     {
         public static void Process(string machineName, string machineVariant, string runtimeAssetPath)
         {
-            ProcessPaylinePrefab(machineName, machineVariant, runtimeAssetPath);
             ProcessBaseGameSymbolModifications(machineName, machineVariant, runtimeAssetPath);
             ProcessBaseGameMachineModifications(machineName, machineVariant, runtimeAssetPath);
             ProcessBaseGameReelModifications(machineName, machineVariant, runtimeAssetPath);
@@ -2805,55 +2804,33 @@ namespace Bettr.Editor
         
         private static void ProcessBaseGameMachineModifications(string machineName, string machineVariant, string runtimeAssetPath)
         {
-            string templateName = "BaseGamePaylinesMachineModifications";
-            var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/paylines", templateName);
+            for (int i = 1; i <= 3; i++)
+            {
+                string templateName = $"BaseGameWaysMachineModifications{i}";
+                var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/ways", templateName);
             
-            var model = new Dictionary<string, object>
-            {
-                { "machineName", machineName },
-                { "machineVariant", machineVariant },
-            };
+                var symbolKeys = BettrMenu.GetSymbolKeys(machineName);
+            
+                var model = new Dictionary<string, object>
+                {
+                    { "machineName", machineName },
+                    { "machineVariant", machineVariant },
+                    { "symbolKeys", symbolKeys},
+                };
                 
-            var json = scribanTemplate.Render(model);
-            Debug.Log(json);
+                var json = scribanTemplate.Render(model);
+                Debug.Log(json);
                 
-            Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
-            if (mechanic == null)
-            {
-                throw new Exception($"Failed to deserialize mechanic from json: {json}");
+                Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
+                if (mechanic == null)
+                {
+                    throw new Exception($"Failed to deserialize mechanic from json: {json}");
+                }
+
+                mechanic.Process();
+            
+                AssetDatabase.Refresh();
             }
-
-            mechanic.Process();
-            
-            AssetDatabase.Refresh();
-        }
-        
-        private static void ProcessPaylinePrefab(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            var templateName = "BaseGamePaylinesPrefab";
-            var prefabName = $"{machineName}{templateName}";
-            var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/paylines/", templateName);
-
-            var model = new Dictionary<string, object>
-            {
-                {"machineName", machineName},
-            };
-            
-            var json = scribanTemplate.Render(model);
-            Console.WriteLine(json);
-            
-            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-            InstanceGameObject.IdGameObjects.Clear();
-            
-            BettrMaterialGenerator.MachineName = machineName;
-            BettrMaterialGenerator.MachineVariant = machineVariant;
-            
-            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
-            hierarchyInstance.SetParent((GameObject) null);
-
-            BettrMenu.ProcessPrefab(prefabName, 
-                hierarchyInstance, 
-                runtimeAssetPath);
         }
         
         private static void ProcessBaseGameReelModifications(string machineName, string machineVariant, string runtimeAssetPath)
@@ -2917,50 +2894,56 @@ namespace Bettr.Editor
         
         private static void ProcessBaseGameSymbolModifications(string machineName, string machineVariant, string runtimeAssetPath)
         {
-            string templateName = "BaseGamePaylinesSymbolModifications";
-            var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/paylines", templateName);
-            
-            var baseGameSymbolTable = BettrMenu.GetTable($"{machineName}BaseGameSymbolTable");
-            var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
-            var symbolPrefabNames = baseGameSymbolTable.Pairs.Select(pair => $"{machineName}BaseGameSymbol{pair.Key.String}").ToList();
-            
-            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-            InstanceGameObject.IdGameObjects.Clear();
-            
-            BettrMaterialGenerator.MachineName = machineName;
-            BettrMaterialGenerator.MachineVariant = machineVariant;
+            for (int i = 1; i <= 2; i++)
+            {
+                string templateName = $"BaseGamePaylinesSymbolModifications{i}";
+                var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/paylines", templateName);
                 
-            var model = new Dictionary<string, object>
-            {
-                { "machineName", machineName },
-                { "machineVariant", machineVariant },
-                { "symbolKeys", symbolKeys},
-                { "symbolPrefabNames", symbolPrefabNames},
-            };
-            
-            var json = scribanTemplate.Render(model);
-            Debug.Log(json);
-            
-            Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
-            if (mechanic == null)
-            {
-                throw new Exception($"Failed to deserialize mechanic from json: {json}");
-            }
-            
-            // Modified Animator Controllers
-            if (mechanic.AnimatorControllers != null)
-            {
-                foreach (var instanceComponent in mechanic.AnimatorControllers)
+                var baseGameSymbolTable = BettrMenu.GetTable($"{machineName}BaseGameSymbolTable");
+                var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
+                var symbolPrefabNames = baseGameSymbolTable.Pairs.Select(pair => $"{machineName}BaseGameSymbol{pair.Key.String}").ToList();
+                
+                InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
+                InstanceGameObject.IdGameObjects.Clear();
+                
+                BettrMaterialGenerator.MachineName = machineName;
+                BettrMaterialGenerator.MachineVariant = machineVariant;
+                    
+                var model = new Dictionary<string, object>
                 {
-                    AssetDatabase.Refresh();
-
-                    BettrAnimatorController.AddAnimationState(instanceComponent.Filename,
-                        instanceComponent.AnimationStates, instanceComponent.AnimatorTransitions, runtimeAssetPath);
+                    { "machineName", machineName },
+                    { "machineVariant", machineVariant },
+                    { "symbolKeys", symbolKeys},
+                    { "symbolPrefabNames", symbolPrefabNames},
+                };
+                
+                var json = scribanTemplate.Render(model);
+                Debug.Log(json);
+                
+                Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
+                if (mechanic == null)
+                {
+                    throw new Exception($"Failed to deserialize mechanic from json: templateName: {templateName}");
                 }
+                
+                // Modified Animator Controllers
+                if (mechanic.AnimatorControllers != null)
+                {
+                    foreach (var instanceComponent in mechanic.AnimatorControllers)
+                    {
+                        AssetDatabase.Refresh();
+
+                        BettrAnimatorController.AddAnimationState(instanceComponent.Filename,
+                            instanceComponent.AnimationStates, instanceComponent.AnimatorTransitions, runtimeAssetPath);
+                    }
+                }
+                else
+                {
+                    mechanic.Process();
+                }
+                
+                AssetDatabase.Refresh();
             }
-            
-            
-            AssetDatabase.Refresh();
         }
         
     }
