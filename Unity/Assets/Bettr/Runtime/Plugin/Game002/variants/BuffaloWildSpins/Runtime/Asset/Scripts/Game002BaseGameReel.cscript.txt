@@ -1,8 +1,10 @@
 require "math"
 require "Core"
 require "Utils"
+require "Game002BaseGameReelMechanics"
 
 Game002BaseGameReel = {
+    Mechanics = nil,
 }
 
 function Game002BaseGameReel:new(o)
@@ -22,6 +24,8 @@ end
 
 function Game002BaseGameReel:Awake()
 	System.Print("Game002BaseGameReel Awake tile id={0}", self.id)
+	self.Mechanics = Game002BaseGameReelMechanics:new()
+	self.Mechanics:Initialize(self)
 end
 
 function Game002BaseGameReel:Start()
@@ -487,38 +491,6 @@ function Game002BaseGameReel:CloneCurrentSymbol(rowIndex)
         end
     end
     return clonedSymbol
-end
-
-function Game002BaseGameReel:DisplayWays(waySymbol, wayMatrix, waySymbolCount, duration)
-    for i=1,waySymbolCount parallel do
-        local wayReelID = wayMatrix[i].ReelID
-       if wayReelID == self.ReelID then
-           local waysGroupProperty = self.WaysGroup
-           local rowIndex = wayMatrix[i].RowIndex
-           local luaRowIndex = rowIndex + 1
-           waysGroupProperty["RowIndex" .. luaRowIndex].SetActive(true)
-           local animatorGroupProperty = self["SymbolWaysWinAnimatorGroup" .. luaRowIndex]
-           local symbolGroupProperty = self["SymbolGroup" .. luaRowIndex]
-           local currentKey = symbolGroupProperty.CurrentKey
-           local animatorProperty = animatorGroupProperty[currentKey]
-           animatorProperty.overrideAnimationDuration = true
-           animatorProperty.animationDuration = duration
-           BettrVisualsController.PlayAnimatorProperty(animatorProperty)
-           -- Core.Animator:PlayAnimatorProperty(currentKey, animatorProperty)
-       end
-    end
-end
-
-function Game002BaseGameReel:HideWays(waySymbol, wayMatrix, wayMatrixCount)
-    for i=1,wayMatrixCount parallel do
-        local wayReelID = wayMatrix[i].ReelID
-        if wayReelID == self.ReelID then
-            local waysGroupProperty = self.WaysGroup
-            local rowIndex = wayMatrix[i].RowIndex
-            local luaRowIndex = rowIndex + 1
-            waysGroupProperty["RowIndex" .. luaRowIndex].SetActive(false)
-        end
-    end
 end
 
 Game002BaseGameReel.ReelSpinStateDispatchTable = {

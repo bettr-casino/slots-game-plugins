@@ -32,10 +32,14 @@ end
 function Game003:Start()
     series
         do
+            BettrVisualsController.SwitchOrientationToLandscape()
+        end
+        do
             System.Print("Game003:Start tile id={0}", self.id)
             self:LoadBaseGameBackgroundPrefab()
             self:LoadBaseGamePrefab()
-            BettrVisualsController.SwitchOrientationToLandscape()
+        end
+        do
             Game003BaseGameBackground:StartBackground()
             self:SetBaseGameActive(true)
         end

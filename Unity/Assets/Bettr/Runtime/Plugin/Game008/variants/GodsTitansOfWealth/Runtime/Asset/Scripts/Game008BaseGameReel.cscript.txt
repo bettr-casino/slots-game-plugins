@@ -1,8 +1,10 @@
 require "math"
 require "Core"
 require "Utils"
+require "Game008BaseGameReelMechanics"
 
 Game008BaseGameReel = {
+    Mechanics = nil,
 }
 
 function Game008BaseGameReel:new(o)
@@ -22,6 +24,8 @@ end
 
 function Game008BaseGameReel:Awake()
 	System.Print("Game008BaseGameReel Awake tile id={0}", self.id)
+	self.Mechanics = Game008BaseGameReelMechanics:new()
+	self.Mechanics:Initialize(self)
 end
 
 function Game008BaseGameReel:Start()
@@ -487,46 +491,6 @@ function Game008BaseGameReel:CloneCurrentSymbol(rowIndex)
         end
     end
     return clonedSymbol
-end
-
-function Game008BaseGameReel:DisplayPaylines(paylineSymbol, paylineData, paylineId, duration)
-    for i = 1, #paylineData do
-        local position = paylineData[i]
-        if position.ReelID == self.ReelID then
-            local rowIndex = position.RowIndex
-            local luaRowIndex = rowIndex + 1
-            parallel
-                do
-                    local animatorGroupProperty = self["SymbolPaylineWinAnimatorGroup" .. luaRowIndex]
-                    local symbolGroupProperty = self["SymbolGroup" .. luaRowIndex]
-                    local currentKey = symbolGroupProperty.CurrentKey
-                    local animatorProperty = animatorGroupProperty[currentKey]
-                    animatorProperty.overrideAnimationDuration = true
-                    animatorProperty.animationDuration = duration
-                    BettrVisualsController.PlayAnimatorProperty(animatorProperty)
-                    -- Core.Animator:PlayAnimatorProperty(currentKey, animatorProperty)
-                end
-                do
-                    local animatorGroupProperty = self.PaylinesAnimatorGroup
-                    local animatorProperty = animatorGroupProperty["WinStart" .. luaRowIndex]
-                    BettrVisualsController.PlayAnimatorProperty(animatorProperty)
-                end 
-            end
-        end
-    end
-end
-
-function Game008BaseGameReel:HidePaylines(paylineSymbol, paylineData, paylineId)
-    for i = 1, #paylineData parallel do
-        local position = paylineData[i]
-        if position.ReelID == self.ReelID then
-            local rowIndex = position.RowIndex
-            local luaRowIndex = rowIndex + 1
-            local animatorGroupProperty = self.PaylinesAnimatorGroup
-            local animatorProperty = animatorGroupProperty["WinEnd" .. luaRowIndex]
-            BettrVisualsController.PlayAnimatorProperty(animatorProperty)
-        end
-    end
 end
 
 Game008BaseGameReel.ReelSpinStateDispatchTable = {
