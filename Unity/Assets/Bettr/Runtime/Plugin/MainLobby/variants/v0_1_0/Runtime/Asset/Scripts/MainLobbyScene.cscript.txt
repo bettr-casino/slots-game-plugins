@@ -65,13 +65,17 @@ function MainLobbyScene:LoadLobbyCards()
                System.Print("LoadApp lobbyCard={0} lobbyCard.MachineName={1} lobbyCard.MaterialName={2}", lobbyCard, lobbyCard.MachineName, lobbyCard.MaterialName)
                local machineGroupProperty = self[group]
                local machineCardProperty = machineGroupProperty[card]
-               local lobbyCardGameObject = machineCardProperty.GameObject
-               System.Print("LoadApp lobbyCardGameObject={0}", lobbyCardGameObject.name)
-               local lobbyCardKey = group .. "__" .. card
-               lobbyCardGameObject.name = lobbyCardKey
-               local quadGameObject = lobbyCardGameObject.transform.GetChild(0).GetChild(0).gameObject 
-               BettrAssetController.LoadMaterial(lobbyCard.BundleName, lobbyCard.BundleVersion, lobbyCard.MaterialName, quadGameObject)
-               LobbyCardMap[lobbyCardKey] = lobbyCard                
+               if machineCardProperty == nil then
+                   System.Print("LoadApp machineCardProperty is nil lobbyCard={0} lobbyCard.MachineName={1} lobbyCard.MaterialName={2} group={3} card={4}", lobbyCard, lobbyCard.MachineName, lobbyCard.MaterialName, group, card)
+               else
+                   local lobbyCardGameObject = machineCardProperty.GameObject
+                   System.Print("LoadApp lobbyCardGameObject={0}", lobbyCardGameObject.name)
+                   local lobbyCardKey = group .. "__" .. card
+                   lobbyCardGameObject.name = lobbyCardKey
+                   local quadGameObject = lobbyCardGameObject.transform.GetChild(0).GetChild(0).gameObject 
+                   BettrAssetController.LoadMaterial(lobbyCard.BundleName, lobbyCard.BundleVersion, lobbyCard.MaterialName, quadGameObject)
+                   LobbyCardMap[lobbyCardKey] = lobbyCard
+               end
             end
         end
     end
