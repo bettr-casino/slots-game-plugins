@@ -241,10 +241,10 @@ namespace Bettr.Editor
             BuildMachines("Game006", "WheelOfFortuneTripleExtremeSpin");
         }
 
-        [MenuItem("Bettr/Build/Game007 - DoubleDiamondVegas")]
+        [MenuItem("Bettr/Build/Game007 - TrueVegas")]
         public static void BuildGame007()
         {
-            BuildMachines("Game007", "DoubleDiamondVegas");
+            BuildMachines("Game007", "TrueVegasInfiniteSpins");
         }
 
         [MenuItem("Bettr/Build/Game008 - GodsOfOlympusZeus")]

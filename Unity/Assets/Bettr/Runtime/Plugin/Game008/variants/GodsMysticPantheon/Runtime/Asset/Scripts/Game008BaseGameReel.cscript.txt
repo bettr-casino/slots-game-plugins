@@ -208,7 +208,9 @@ function Game008BaseGameReel:SpinReelReachedOutcomeStopIndex()
 end
 
 function Game008BaseGameReel:SpinReelStopped()
-    if self.ReelID == "Reel5" then
+    local reelCount = Game008BaseGameLayout.ReelCount.First.Value
+    local lastReeID = "Reel" .. reelCount
+    if self.ReelID == lastReeID then
         Game008BaseGameMachine:OnSpinReelsStopped()
     end 
 end
