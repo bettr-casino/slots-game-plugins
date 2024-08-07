@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -47,10 +48,12 @@ namespace Bettr.Core
     {
         [NonSerialized]  public bool UseFileSystemOutcomes = true;
         
-        [NonSerialized]  public string FileSystemOutcomesBaseURL = "Assets/Bettr/LocalStore/Outcomes";
+        [NonSerialized]  public string FileSystemOutcomesBaseURL = "Assets/Bettr/LocalStore/LocalOutcomes";
         
         // ReSharper disable once UnassignedField.Global
         [NonSerialized]  public string WebOutcomesBaseURL;
+
+        [NonSerialized] public Dictionary<string, int> OutcomeCounts = new Dictionary<string, int>();
         
         public int OutcomeNumber { get; set; }
         
@@ -140,10 +143,18 @@ namespace Bettr.Core
 
         private int GetRandomOutcomeNumber(string gameId)
         {
+            if (OutcomeCounts.TryGetValue(gameId, out var count))
+            {
+                return Random.Range(1, count + 1);
+            }
+            
             var regex = new Regex($@"^{gameId}Outcome\d{{9}}\.cscript.txt$");
             var files = Directory.GetFiles($"{FileSystemOutcomesBaseURL}");
             var filteredFiles = files.Where(file => regex.IsMatch(Path.GetFileName(file))).ToArray();
             var outcomeCount = filteredFiles.Length;
+            
+            OutcomeCounts[gameId] = outcomeCount;
+            
             return outcomeCount > 0 ? Random.Range(1, outcomeCount + 1) : 0;
         }
     }

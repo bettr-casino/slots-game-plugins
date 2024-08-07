@@ -35,6 +35,18 @@ namespace Bettr.Editor
         internal readonly List<string> Files = new List<string>();
     }
     
+    [Serializable]
+    public class GameConfigsWrapper
+    {
+        // Dictionary to hold game configurations
+        public Dictionary<string, GameDetails> GameConfigs { get; set; }
+    }
+
+    public class GameDetails
+    {
+        public int OutcomeCount { get; set; }
+    }
+    
     public static class BettrMenu
     {
         private const string PluginRootDirectory = "Assets/Bettr/Runtime/Plugin";
@@ -55,7 +67,9 @@ namespace Bettr.Editor
         private const string OutcomesDirectory = "Assets/Bettr/LocalStore/Outcomes";
         // ReSharper disable once UnusedMember.Local
         private const string LocalServerDirectory = "Assets/Bettr/LocalStore/LocalServer";
+        private const string LocalOutcomesDirectory = "Assets/Bettr/LocalStore/LocalOutcomes";
         private const string AssetsServerBaseURL = "https://bettr-casino-assets.s3.us-west-2.amazonaws.com";
+        private const string OutcomesServerBaseURL = "https://bettr-casino-outcomes.s3.us-west-2.amazonaws.com";
         private const string GatewayUrl = "https://3wcgnl14qb.execute-api.us-west-2.amazonaws.com/gateway";
         
         public static void ExportPackage()
@@ -191,6 +205,7 @@ namespace Bettr.Editor
         {
             BuildAssetBundles();
             BuildLocalServer();
+            BuildLocalOutcomes();
         }
 
         [MenuItem("Bettr/Build/Game001 - Epic Wins")]
@@ -782,6 +797,31 @@ namespace Bettr.Editor
             AssetDatabase.Refresh();
         }
         
+        private static void BuildLocalOutcomes()
+        {
+            Debug.Log("Refreshing database before building local outcomes.");
+            
+            BuildDirectory(new DirectoryInfo(LocalOutcomesDirectory));
+
+            var allGameOutcomes = LoadOutcomesFromWeb();
+            foreach (var gameOutcomes in allGameOutcomes)
+            {
+                var localGameOutcomesDirectory = $"{LocalOutcomesDirectory}/{gameOutcomes.Key}";
+                BuildDirectory(new DirectoryInfo(localGameOutcomesDirectory));
+
+                foreach (var gameOutcome in gameOutcomes.Value)
+                {
+                    var localGameOutcomeDirectory = $"{localGameOutcomesDirectory}/{gameOutcome.Key}";
+                    File.WriteAllText(localGameOutcomeDirectory, gameOutcome.Value);
+
+                }
+            }
+
+            Debug.Log("Refreshing database after building local outcomes.");
+            
+            AssetDatabase.Refresh();
+        }
+        
         // Method to extract a specific command line argument
         private static string GetArgument(string name)
         {
@@ -879,6 +919,61 @@ namespace Bettr.Editor
                     return null;
                 }
             }
+        }
+
+        private static Dictionary<string, Dictionary<string, string>> LoadOutcomesFromWeb()
+        {
+            var allOutcomes = new Dictionary<string, Dictionary<string, string>>();
+            var gameConfigs = DownloadGameConfigs();
+            foreach (var gameConfig in gameConfigs.GameConfigs)
+            {
+                var gameId = gameConfig.Key;
+                var gameDetails = gameConfig.Value;
+                var outcomes = DownloadOutcomes(gameId, gameDetails.OutcomeCount);
+                allOutcomes[gameId] = outcomes;
+            }
+            return allOutcomes;
+        }
+        
+        public static GameConfigsWrapper DownloadGameConfigs()
+        {
+            var configAssetName = "latest/Configs/GameConfigs.yaml";
+            var configAssetURL = $"{OutcomesServerBaseURL}/{configAssetName}";
+            using var webClient = new WebClient();
+            var yamlContent = webClient.DownloadString(configAssetURL);
+
+            var deserializer = new DeserializerBuilder()
+                .Build();
+            
+            // Deserialize the YAML content to the GameConfig object
+            var gameConfigs = deserializer.Deserialize<GameConfigsWrapper>(yamlContent);
+
+            return gameConfigs;
+        }
+        
+        static Dictionary<string, string> DownloadOutcomes(string gameId, int outcomeCount)
+        {
+            var outcomes = new Dictionary<string, string>();
+            using var webClient = new WebClient();
+            for (var i = 0; i < outcomeCount; i++)
+            {
+                var outcomeId = i.ToString("D9"); // Format as a 9-digit number with leading zeros
+                var fileName = $"{gameId}Outcome{outcomeId}.cscript.txt";
+                var fileUrl = $"{OutcomesServerBaseURL}/latest/Outcomes/{fileName}";
+
+                try
+                {
+                    var fileContents = webClient.DownloadString(fileUrl);
+                    outcomes[fileName] = fileContents;
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to download {fileUrl}: {ex.Message}");
+                }
+            }
+
+            return outcomes;
         }
 
         private static void ClearRuntimeAssetPath(string machineName, string machineVariant)
