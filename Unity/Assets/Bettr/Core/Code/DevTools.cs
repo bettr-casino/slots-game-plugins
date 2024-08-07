@@ -79,16 +79,15 @@ namespace Bettr.Core
                     KeyCode key = (KeyCode)System.Enum.Parse(typeof(KeyCode), "Alpha" + i);
                     if (Input.GetKeyDown(key))
                     {
-                        firstKey = key;
-                        currentState = State.WaitingForSecondKey;
-                        Debug.Log($"First key '{i}' pressed. Waiting for second key...");
-                        return; // Exit the method once a key is detected
+                        HandleKey(key);
+                        ResetState();
+                        return; 
                     }
                 }
 
                 for (char c = 'A'; c <= 'Z'; c++)
                 {
-                    KeyCode key = (KeyCode)System.Enum.Parse(typeof(KeyCode), "Alpha" + c);
+                    KeyCode key = (KeyCode)Enum.Parse(typeof(KeyCode), c.ToString());
                     if (Input.GetKeyDown(key))
                     {
                         firstKey = key;
@@ -114,12 +113,16 @@ namespace Bettr.Core
             }
         }
         
-        private void HandleKeyCombination(KeyCode firstKey, KeyCode secondKey)
+        private void HandleKey(KeyCode firstKeyCode)
         {
-            // Create a valid combination string
-            string firstKeyString = firstKey.ToString();
-            string secondKeyString = secondKey.ToString();
-            ValidCombination = TranslateToInteger(this.firstKey, secondKey);
+            ValidCombination = TranslateKeyToValue(firstKeyCode);
+            Debug.Log("ValidCombination: " + ValidCombination);
+        }
+        
+        private void HandleKeyCombination(KeyCode firstKeyCode, KeyCode secondKeyCode)
+        {
+            ValidCombination = TranslateToInteger(firstKeyCode, secondKeyCode);
+            Debug.Log("ValidCombination: " + ValidCombination);
         }
         
         private int TranslateToInteger(KeyCode firstKey, KeyCode secondKey)
@@ -144,7 +147,7 @@ namespace Bettr.Core
 
             if (key >= KeyCode.A && key <= KeyCode.Z)
             {
-                return 10 + (key - KeyCode.A); // Map 'A'-'Z' to 10-35
+                return 1 + (key - KeyCode.A); // Map 'A'-'Z' to 10-35
             }
 
             return -1; // Invalid key
