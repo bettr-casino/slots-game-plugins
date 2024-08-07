@@ -47,6 +47,17 @@ namespace Bettr.Core
         
         private bool _isEnabled = false;
         public void Enable() { _isEnabled = true; }
+        
+        private enum State
+        {
+            WaitingForFirstKey,
+            WaitingForSecondKey
+        }
+
+        private State currentState = State.WaitingForFirstKey;
+        private KeyCode firstKey;
+
+        public int ValidCombination { get; set; } = -1;
 
         private void Awake()
         {
@@ -56,6 +67,93 @@ namespace Bettr.Core
         void Start()
         {
             DontDestroyOnLoad(gameObject);
+        }
+        
+        void LateUpdate()
+        {
+            if (currentState == State.WaitingForFirstKey)
+            {
+                // Check for specific key presses from '1' to '9' and 'A' to 'Z'
+                for (int i = 0; i <= 9; i++)
+                {
+                    KeyCode key = (KeyCode)System.Enum.Parse(typeof(KeyCode), "Alpha" + i);
+                    if (Input.GetKeyDown(key))
+                    {
+                        firstKey = key;
+                        currentState = State.WaitingForSecondKey;
+                        Debug.Log($"First key '{i}' pressed. Waiting for second key...");
+                        return; // Exit the method once a key is detected
+                    }
+                }
+
+                for (char c = 'A'; c <= 'Z'; c++)
+                {
+                    KeyCode key = (KeyCode)System.Enum.Parse(typeof(KeyCode), "Alpha" + c);
+                    if (Input.GetKeyDown(key))
+                    {
+                        firstKey = key;
+                        currentState = State.WaitingForSecondKey;
+                        Debug.Log($"First key '{c}' pressed. Waiting for second key...");
+                        return; // Exit the method once a key is detected
+                    }
+                }
+            }
+            else if (currentState == State.WaitingForSecondKey)
+            {
+                // Check for numeric keys (1-9)
+                for (int i = 0; i <= 9; i++)
+                {
+                    KeyCode key = (KeyCode)System.Enum.Parse(typeof(KeyCode), "Alpha" + i);
+                    if (Input.GetKeyDown(key))
+                    {
+                        HandleKeyCombination(firstKey, key);
+                        ResetState();
+                        return; // Exit the method once a key is detected
+                    }
+                }
+            }
+        }
+        
+        private void HandleKeyCombination(KeyCode firstKey, KeyCode secondKey)
+        {
+            // Create a valid combination string
+            string firstKeyString = firstKey.ToString();
+            string secondKeyString = secondKey.ToString();
+            ValidCombination = TranslateToInteger(this.firstKey, secondKey);
+        }
+        
+        private int TranslateToInteger(KeyCode firstKey, KeyCode secondKey)
+        {
+            int firstValue = TranslateKeyToValue(firstKey);
+            int secondValue = TranslateKeyToValue(secondKey);
+
+            if (firstValue == -1 || secondValue == -1)
+            {
+                return -1; // Invalid combination
+            }
+
+            return firstValue * 10 + secondValue;
+        }
+
+        private int TranslateKeyToValue(KeyCode key)
+        {
+            if (key >= KeyCode.Alpha0 && key <= KeyCode.Alpha9)
+            {
+                return key - KeyCode.Alpha0; // Map '0'-'9' to 0-9
+            }
+
+            if (key >= KeyCode.A && key <= KeyCode.Z)
+            {
+                return 10 + (key - KeyCode.A); // Map 'A'-'Z' to 10-35
+            }
+
+            return -1; // Invalid key
+        }
+
+        private void ResetState()
+        {
+            // Reset the state to wait for the first key again
+            currentState = State.WaitingForFirstKey;
         }
 
         public IEnumerator CaptureSceneState()
