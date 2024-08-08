@@ -3,6 +3,7 @@ using System.Collections;
 using System.Linq;
 using CrayonScript.Code;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
 // ReSharper disable once CheckNamespace
@@ -44,6 +45,22 @@ namespace Bettr.Core
             yield return new WaitForSeconds(3.0f);
             
             DevTools.Instance.Enable();
+            
+            DevTools.Instance.OnKeyPressed.AddListener(() =>
+            {
+                // Find the SpinImage GameObject
+                var spinImage = GameObject.Find("SpinImage");
+                if (spinImage != null)
+                {
+                    // Use Unity's EventSystem to simulate a click event
+                    var eventData = new PointerEventData(EventSystem.current);
+                    ExecuteEvents.Execute(spinImage, eventData, ExecuteEvents.pointerClickHandler);
+                }
+                else
+                {
+                    Debug.LogWarning("SpinImage GameObject not found.");
+                }
+            });
         }
 
         private IEnumerator OneTimeSetup()

@@ -5,6 +5,7 @@ using System.IO;
 using System.IO.Compression;
 using Newtonsoft.Json;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 
@@ -47,6 +48,8 @@ namespace Bettr.Core
         
         private bool _isEnabled = false;
         public void Enable() { _isEnabled = true; }
+        
+        public UnityEvent OnKeyPressed = new UnityEvent();
         
         private enum State
         {
@@ -117,12 +120,14 @@ namespace Bettr.Core
         {
             ValidCombination = TranslateKeyToValue(firstKeyCode);
             Debug.Log("ValidCombination: " + ValidCombination);
+            OnKeyPressed.Invoke();
         }
         
         private void HandleKeyCombination(KeyCode firstKeyCode, KeyCode secondKeyCode)
         {
             ValidCombination = TranslateToInteger(firstKeyCode, secondKeyCode);
             Debug.Log("ValidCombination: " + ValidCombination);
+            OnKeyPressed.Invoke();
         }
         
         private int TranslateToInteger(KeyCode firstKey, KeyCode secondKey)
