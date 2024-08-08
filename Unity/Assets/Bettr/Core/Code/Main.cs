@@ -52,6 +52,8 @@ namespace Bettr.Core
                 var spinImage = GameObject.Find("SpinImage");
                 if (spinImage != null)
                 {
+                    _bettrOutcomeController.OutcomeNumber = DevTools.Instance.ValidCombination;
+                    
                     // Use Unity's EventSystem to simulate a click event
                     var eventData = new PointerEventData(EventSystem.current);
                     ExecuteEvents.Execute(spinImage, eventData, ExecuteEvents.pointerClickHandler);
