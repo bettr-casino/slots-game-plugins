@@ -131,7 +131,9 @@ namespace Bettr.Core
         {
             var outcomeNumber = (OutcomeNumber > 0) ? OutcomeNumber : GetRandomOutcomeNumber(gameId);
             var className = $"{gameId}Outcome{outcomeNumber:D9}";
-            var assetBundleManifestURL = $"{FileSystemOutcomesBaseURL}/{className}.cscript.txt";
+            var fileName = $"{className}.cscript.txt";
+            var filePath = Path.Combine(FileSystemOutcomesBaseURL, gameId, fileName);
+            var assetBundleManifestURL = filePath;
             var assetBundleManifestBytes = File.ReadAllBytes(assetBundleManifestURL);
 
             var script = Encoding.ASCII.GetString(assetBundleManifestBytes);
@@ -145,11 +147,15 @@ namespace Bettr.Core
         {
             if (OutcomeCounts.TryGetValue(gameId, out var count))
             {
-                return Random.Range(1, count + 1);
+                if (count > 0)
+                {
+                    return Random.Range(1, count + 1);
+                }
             }
             
             var regex = new Regex($@"^{gameId}Outcome\d{{9}}\.cscript.txt$");
-            var files = Directory.GetFiles($"{FileSystemOutcomesBaseURL}");
+            var directoryPath = Path.Combine(FileSystemOutcomesBaseURL, gameId);
+            var files = Directory.GetFiles(directoryPath);
             var filteredFiles = files.Where(file => regex.IsMatch(Path.GetFileName(file))).ToArray();
             var outcomeCount = filteredFiles.Length;
             
