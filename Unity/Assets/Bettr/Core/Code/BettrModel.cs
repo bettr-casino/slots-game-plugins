@@ -57,6 +57,12 @@ namespace Bettr.Core
         public List<BettrLobbyCardGroupConfig> LobbyCardGroups { get; set; }
         public List<BettrLobbyCardConfig> LobbyCards { get; set; }
     }
+    
+    [Serializable]
+    public class BettrMechanicConfig
+    {
+        public string MechanicName { get; set; }
+    }
 
     [Serializable]
     public class BettrUserEvents

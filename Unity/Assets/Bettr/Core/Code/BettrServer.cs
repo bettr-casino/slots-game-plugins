@@ -250,6 +250,46 @@ namespace Bettr.Core
             yield return PutStorage(requestUri, bodyData, 0, true, storageCallback, SessionTokenHeader, ApplicationJsonHeader);
         }
         
+        public IEnumerator LoadMechanicBlob(string mechanicName, GetStorageCallback storageCallback)
+        {
+            Debug.Log($"Starting LoadGameBlob");
+            if (useLocalServer)
+            {
+                string localFilePath = Path.Combine(fileSystemLocalStorageBaseURL, "users", $"default.json");
+                if (File.Exists(localFilePath))
+                {
+                    string json = File.ReadAllText(localFilePath);
+                    StorageResponse storageResponse = new StorageResponse()
+                    {
+                        value = json,
+                        cas = "local",
+                    };
+                    storageCallback(localFilePath, storageResponse, true, null);
+                }
+                else
+                {
+                    var error = $"Local mechanic blob file not found at path: {localFilePath}";
+                    Debug.LogError(error);
+                    storageCallback(localFilePath, null, false, error);
+                }
+                yield break;
+            }
+            var requestUri = $"/storage/owner/{AuthResponse.User.Id}/protected/blobs/mechanic__{mechanicName}";
+            yield return GetStorage(requestUri, storageCallback, SessionTokenHeader, ApplicationJsonHeader);
+        }
+        
+        public IEnumerator PutMechanicBlob(BettrMechanicConfig mechanicConfig, PutStorageCallback storageCallback)
+        {
+            Debug.Log($"Starting PutMechanicBlob");
+            if (useLocalServer)
+            {
+                yield break;
+            }
+            string bodyData = JsonConvert.SerializeObject(mechanicConfig);
+            string requestUri = $"/storage/owner/{AuthResponse.User.Id}/protected/blobs/mechanic__{mechanicConfig.MechanicName}";
+            yield return PutStorage(requestUri, bodyData, 0, true, storageCallback, SessionTokenHeader, ApplicationJsonHeader);
+        }
+        
         public IEnumerator LoadEvents(GetStorageCallback storageCallback)
         {
             Debug.Log($"Starting PutEvent");

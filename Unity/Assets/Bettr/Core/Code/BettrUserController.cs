@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Text;
 using CrayonScript.Code;
 using Newtonsoft.Json;
@@ -29,6 +28,7 @@ namespace Bettr.Core
             TileController.AddToGlobals("BettrUserController", this);
             
             TileController.RegisterType<BettrUserConfig>("BettrUserConfig");
+            TileController.RegisterType<BettrMechanicConfig>("BettrMechanicConfig");
         }
         
         public string GetUserId()
