@@ -11,6 +11,34 @@ namespace Bettr.Editor.generators
         
         public static string MachineVariant;
         
+        public static Material CreateOrLoadMaterial(string materialName, string shaderName, string runtimeAssetPath)
+        {
+            AssetDatabase.Refresh();
+            
+            var materialFilename = $"{materialName}.mat";
+            var materialFilepath = $"{runtimeAssetPath}/Materials/{materialFilename}";
+            var material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
+            if (material == null)
+            {
+                Debug.Log($"Creating material for {materialName} at {materialFilepath}");
+                try
+                {
+                    material = new Material(Shader.Find(shaderName));
+                    AssetDatabase.CreateAsset(material, materialFilepath);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e);
+                }
+            }
+            
+            AssetDatabase.Refresh();
+            
+            material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
+
+            return material;
+        }
+        
         public static Material CreateOrLoadMaterial(string materialName, string shaderName, string textureName, string hexColor, float alpha, string runtimeAssetPath)
         {
             AssetDatabase.Refresh();

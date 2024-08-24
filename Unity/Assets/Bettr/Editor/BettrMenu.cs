@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using Bettr.Editor.generators;
+using Bettr.Editor.generators.mechanics;
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
 using UnityEditor;
@@ -18,10 +18,7 @@ using UnityEngine.SceneManagement;
 using DirectoryInfo = System.IO.DirectoryInfo;
 
 using Scriban;
-using Scriban.Parsing;
 using Scriban.Runtime;
-using TMPro;
-using UnityEngine.Rendering;
 using Exception = System.Exception;
 
 namespace Bettr.Editor
@@ -934,7 +931,7 @@ namespace Bettr.Editor
             }
             return allOutcomes;
         }
-        
+
         public static GameConfigsWrapper DownloadGameConfigs()
         {
             var configAssetName = "latest/Configs/GameConfigs.yaml";
@@ -1181,7 +1178,7 @@ namespace Bettr.Editor
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
 
             var scriptGroupName = $"{machineName}BaseGameSymbolGroup"; 
-            var symbolGroup = ProcessPrefab(scriptGroupName, 
+            var symbolGroup = BettrPrefabController.ProcessPrefab(scriptGroupName, 
                 hierarchyInstance, 
                 runtimeAssetPath);
             
@@ -1211,7 +1208,7 @@ namespace Bettr.Editor
             
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
 
-            var settingsPrefab = ProcessPrefab(symbolPrefabName, 
+            var settingsPrefab = BettrPrefabController.ProcessPrefab(symbolPrefabName, 
                 hierarchyInstance, 
                 runtimeAssetPath);
 
@@ -1289,7 +1286,7 @@ namespace Bettr.Editor
             
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
             
-            var baseGameMachinePrefab = ProcessPrefab($"{baseGameMachine}", 
+            var baseGameMachinePrefab = BettrPrefabController.ProcessPrefab($"{baseGameMachine}", 
                 hierarchyInstance, 
                 runtimeAssetPath);
         }
@@ -1367,14 +1364,14 @@ namespace Bettr.Editor
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
             hierarchyInstance.SetParent((GameObject) null);
 
-            var reelPrefab = ProcessPrefab(reelName, 
+            var reelPrefab = BettrPrefabController.ProcessPrefab(reelName, 
                 hierarchyInstance, 
                 runtimeAssetPath);
         }
         
         private static void ProcessUICamera(string cameraName, bool includeAudioListener, string runtimeAssetPath)
         {
-            ProcessPrefab(cameraName, new List<IComponent>
+            BettrPrefabController.ProcessPrefab(cameraName, new List<IComponent>
                 {
                     new UICameraComponent(includeAudioListener),
                 }, 
@@ -1411,201 +1408,7 @@ namespace Bettr.Editor
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
             hierarchyInstance.SetParent((GameObject) null);
 
-            ProcessPrefab(backgroundName, 
-                hierarchyInstance, 
-                runtimeAssetPath);
-        }
-        
-        private static void ProcessFreeSpinsMachine(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            string baseGameMachine = $"{machineName}FreeSpinsMachine";
-            
-            string baseGameSettings = $"{machineName}FreeSpinsSettings";
-            
-            var baseGameSymbolTable = GetTable($"{machineName}FreeSpinsSymbolTable");
-            
-            var scriptName = $"{machineName}FreeSpinsReel";   
-            BettrScriptGenerator.CreateOrLoadScript(scriptName, runtimeAssetPath);
-            
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-            
-            var reelStates = GetTable($"{machineName}BaseGameReelState");
-            var reelCount = BettrMenu.GetReelCount(machineName);
-            
-            var reelHPositions = new List<float>();
-            var reelMaskUpperYs = new List<float>();
-            var reelMaskLowerYs = new List<float>();
-            var reelMaskScaleYs = new List<float>();
-            var reelBackgroundYs = new List<float>();
-            var reelBackgroundScaleYs = new List<float>();
-            
-            float maxOffsetY = 0.0f;
-            
-            for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
-            {
-                var topSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "TopSymbolCount");
-                var visibleSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "VisibleSymbolCount");
-                var bottomSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "BottomSymbolCount");
-                var symbolVerticalSpacing = GetTableValue<float>(reelStates, $"Reel{reelIndex}", "SymbolVerticalSpacing");
-                var zeroVisibleSymbolIndex = visibleSymbolCount % 2 == 0 ? visibleSymbolCount / 2 + 1 : (visibleSymbolCount - 1) / 2 + 1;
-                var reelMaskUpperY = visibleSymbolCount % 2 == 0? (zeroVisibleSymbolIndex) * symbolVerticalSpacing : (zeroVisibleSymbolIndex + 1) * symbolVerticalSpacing;
-                var reelMaskLowerY = -(zeroVisibleSymbolIndex + 1) * symbolVerticalSpacing;
-                var reelMaskScaleY = (topSymbolCount + 1) * symbolVerticalSpacing;
-                var reelBackgroundY = visibleSymbolCount % 2 == 0 ? -symbolVerticalSpacing/2 : 0;
-                var reelBackgroundScaleY = (visibleSymbolCount) * symbolVerticalSpacing;
-                reelMaskUpperYs.Add(reelMaskUpperY);
-                reelMaskLowerYs.Add(reelMaskLowerY);
-                reelMaskScaleYs.Add(reelMaskScaleY);
-                reelBackgroundYs.Add(reelBackgroundY);
-                reelBackgroundScaleYs.Add(reelBackgroundScaleY);
-
-                var offsetY = (visibleSymbolCount % 3) * symbolVerticalSpacing; 
-                maxOffsetY = Mathf.Max(maxOffsetY, offsetY);
-            }
-            
-            var templateName = "BaseGameMachine";
-            var scribanTemplate = ParseScribanTemplate($"common", templateName);
-            
-            var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
-            
-            var model = new Dictionary<string, object>
-            {
-                { "machineName", machineName },
-                { "machineVariant", machineVariant },
-                { "baseGameMachine", baseGameMachine },
-                { "baseGameSettings", baseGameSettings },
-                { "symbolKeys", symbolKeys},
-                { "reelMaskUpperY", reelMaskUpperYs[0]},
-                { "reelMaskLowerY", reelMaskLowerYs[0]},
-                { "reelMaskScaleY", reelMaskScaleYs[0]},
-                { "reelBackgroundY", reelBackgroundYs[0]},
-                { "reelBackgroundScaleY", reelBackgroundScaleYs[0]},
-                { "offsetY", maxOffsetY },
-            };
-            
-            var json = scribanTemplate.Render(model);
-            Debug.Log($"BaseGameMachine: {json}");
-            
-            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-            InstanceGameObject.IdGameObjects.Clear();
-            
-            BettrMaterialGenerator.MachineName = machineName;
-            BettrMaterialGenerator.MachineVariant = machineVariant;
-            
-            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
-            
-            var baseGameMachinePrefab = ProcessPrefab($"{baseGameMachine}", 
-                hierarchyInstance, 
-                runtimeAssetPath);
-        }
-        
-        private static void ProcessFreeSpinsBackground(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            string backgroundName = $"{machineName}FreeSpinsBackground";
-            
-            var backgroundScriptName = $"{machineName}FreeSpinsBackground";   
-            BettrScriptGenerator.CreateOrLoadScript(backgroundScriptName, runtimeAssetPath);
-            
-            string templateName = "FreeSpinsBackground";
-            var scribanTemplate = ParseScribanTemplate($"common", templateName);
-
-            if (scribanTemplate.HasErrors)
-            {
-                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} template: {templateName}");
-                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} template: {{templateName}}");
-            }
-            
-            var model = new Dictionary<string, object>
-            {
-                { "machineName", machineName },
-                { "machineVariant", machineVariant },
-                { "backgroundName", backgroundName },
-            };
-            
-            var json = scribanTemplate.Render(model);
-            Console.WriteLine(json);
-            
-            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-            InstanceGameObject.IdGameObjects.Clear();
-            
-            BettrMaterialGenerator.MachineName = machineName;
-            BettrMaterialGenerator.MachineVariant = machineVariant;
-            
-            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
-            hierarchyInstance.SetParent((GameObject) null);
-
-            var settingsPrefab = ProcessPrefab(backgroundName, 
-                hierarchyInstance, 
-                runtimeAssetPath);
-        }
-        
-        private static void ProcessWheelGameMachine(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            string wheelGameMachine = $"{machineName}WheelGameMachine";
-            
-            var scriptName = $"{machineName}WheelGameReel";   
-            BettrScriptGenerator.CreateOrLoadScript(scriptName, runtimeAssetPath);
-            
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-            
-            var templateName = "WheelGameMachine";
-            var scribanTemplate = ParseScribanTemplate($"common", templateName);
-            
-            var model = new Dictionary<string, object>
-            {
-                { "machineName", machineName },
-                { "machineVariant", machineVariant },
-                { "wheelGameMachine", wheelGameMachine },
-            };
-            
-            var json = scribanTemplate.Render(model);
-            Debug.Log($"WheelGameMachine: {json}");
-            
-            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-            InstanceGameObject.IdGameObjects.Clear();
-            
-            BettrMaterialGenerator.MachineName = machineName;
-            BettrMaterialGenerator.MachineVariant = machineVariant;
-            
-            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
-            
-            var baseGameMachinePrefab = ProcessPrefab($"{wheelGameMachine}", 
-                hierarchyInstance, 
-                runtimeAssetPath);
-        }
-        
-        private static void ProcessWheelGameBackground(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            string backgroundName = $"{machineName}WheelGameBackground";
-            
-            var backgroundScriptName = $"{machineName}WheelGameBackground";   
-            BettrScriptGenerator.CreateOrLoadScript(backgroundScriptName, runtimeAssetPath);
-            
-            string templateName = "WheelGameBackground";
-            var scribanTemplate = ParseScribanTemplate($"common", templateName);
-
-            var model = new Dictionary<string, object>
-            {
-                { "machineName", machineName },
-                { "machineVariant", machineVariant },
-                { "backgroundName", backgroundName },
-            };
-            
-            var json = scribanTemplate.Render(model);
-            Console.WriteLine(json);
-            
-            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-            InstanceGameObject.IdGameObjects.Clear();
-            
-            BettrMaterialGenerator.MachineName = machineName;
-            BettrMaterialGenerator.MachineVariant = machineVariant;
-            
-            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
-            hierarchyInstance.SetParent((GameObject) null);
-
-            var settingsPrefab = ProcessPrefab(backgroundName, 
+            BettrPrefabController.ProcessPrefab(backgroundName, 
                 hierarchyInstance, 
                 runtimeAssetPath);
         }
@@ -1732,9 +1535,32 @@ namespace Bettr.Editor
                                 case "ways":
                                     BaseGameWaysMechanic.Process(machineName, machineVariant, runtimeAssetPath);
                                     break;
-                                default:
+                                case "paylines":
                                     BaseGamePaylinesMechanic.Process(machineName, machineVariant, runtimeAssetPath);
                                     break;
+                                case "cascadingreels":
+                                    BaseGameCascadingReelsMechanic.Process(machineName, machineVariant, runtimeAssetPath);
+                                    break;
+                                case "chooseaside":
+                                    BaseGameChooseASideMechanic.Process(machineName, machineVariant, runtimeAssetPath);
+                                    break;
+                                case "expandingreels":
+                                    BaseGameExpandingReelsMechanic.Process(machineName, machineVariant, runtimeAssetPath);
+                                    break;
+                                case "horizontalreels":
+                                    BaseGameHorizontalReelsMechanic.Process(machineName, machineVariant, runtimeAssetPath);
+                                    break;
+                                case "horizontalreelsshift":
+                                    BaseGameHorizontalReelsShiftMechanic.Process(machineName, machineVariant, runtimeAssetPath);
+                                    break;
+                                case "wildsmultiplier":
+                                    BaseGameWildsMultiplierMechanic.Process(machineName, machineVariant, runtimeAssetPath);
+                                    break;
+                                case "megaways":
+                                    BaseGameMegawaysMechanic.Process(machineName, machineVariant, runtimeAssetPath);
+                                    break;
+                                default:
+                                    throw new Exception($"BaseGame mechanic not found: {baseGameMechanic}");
                             }
                         }
                         break;
@@ -1751,466 +1577,6 @@ namespace Bettr.Editor
             // {
             //     ProcessBaseGameRandomMultiplierWildsMechanic(machineName, machineVariant, runtimeAssetPath);
             // }
-        }
-        
-        private static void ProcessBaseGameScatterBonusFreeSpinsMechanic(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            AssetDatabase.Refresh();
-            
-            var reelCount = BettrMenu.GetReelCount(machineName);
-            
-            var scatterSymbolIndexesByReel = new Dictionary<string, List<int>>();
-            for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
-            {
-                var topSymbolCount = BettrMenu.GetTopSymbolCount(machineName, reelIndex);
-                var visibleSymbolCount = BettrMenu.GetVisibleSymbolCount(machineName, reelIndex);
-                
-                var scatterSymbolIndexes = new List<int>();
-                for (int symbolIndex = topSymbolCount + 1;
-                     symbolIndex <= topSymbolCount + visibleSymbolCount;
-                     symbolIndex++)
-                {
-                    scatterSymbolIndexes.Add(symbolIndex);
-                }
-                
-                scatterSymbolIndexesByReel.Add($"{reelIndex}", scatterSymbolIndexes);
-            }
-            
-            string templateName = "BaseGameScatterBonusFreeSpinsMechanic";
-            var scribanTemplate = ParseScribanTemplate("mechanics/scatterbonusfreespins", templateName);
-
-            var model = new Dictionary<string, object>
-            {
-                { "machineName", machineName },
-                { "machineVariant", machineVariant },
-                { "reelCount", reelCount },
-                { "scatterSymbolIndexesByReel", scatterSymbolIndexesByReel },
-            };
-            
-            var json = scribanTemplate.Render(model);
-            Debug.Log(json);
-            
-            Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
-            if (mechanic == null)
-            {
-                throw new Exception($"Failed to deserialize mechanic from json: {json}");
-            }
-            
-            foreach (var mechanicAnimation in mechanic.Animations)
-            {
-                BettrAnimatorController.AddAnimationState(mechanicAnimation.Filename, mechanicAnimation.AnimationStates, mechanicAnimation.AnimatorTransitions, runtimeAssetPath);
-            }
-            
-            foreach (var tilePropertyAnimator in mechanic.TilePropertyAnimators)
-            {
-                var prefabPath =
-                    $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{tilePropertyAnimator.PrefabName}.prefab";
-                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                var prefabGameObject = new PrefabGameObject(prefab, tilePropertyAnimator.PrefabName);
-                if (tilePropertyAnimator.PrefabIds != null)
-                {
-                    foreach (var prefabId in tilePropertyAnimator.PrefabIds)
-                    {
-                        var referencedGameObject = prefabGameObject.FindReferencedId(prefabId.Id, prefabId.Index);
-                        InstanceGameObject.IdGameObjects[$"{prefabId.Prefix}{prefabId.Id}"] = new InstanceGameObject(referencedGameObject);
-                    }
-                }
-                if (tilePropertyAnimator.AnimatorsProperty != null)
-                {
-                    var properties = new List<TilePropertyAnimator>();
-                    foreach (var animatorProperty in tilePropertyAnimator.AnimatorsProperty)
-                    {
-                        InstanceGameObject.IdGameObjects.TryGetValue(animatorProperty.Id, out var referenceGameObject);
-                        var tileProperty = new TilePropertyAnimator()
-                        {
-                            key = animatorProperty.Key,
-                            value = new PropertyAnimator()
-                            {
-                                animator = referenceGameObject?.Animator, 
-                                animationStateName = animatorProperty.State,
-                                delayBeforeAnimationStart = animatorProperty.DelayBeforeStart,
-                                waitForAnimationComplete = animatorProperty.WaitForComplete,
-                                overrideAnimationDuration = animatorProperty.OverrideDuration,
-                                animationDuration = animatorProperty.AnimationDuration,
-                            },
-                        };
-                        if (tileProperty.value.animator == null)
-                        {
-                            Debug.LogError($"Failed to find animator with id: {animatorProperty.Id}");
-                        }
-                        properties.Add(tileProperty);                        
-                    }
-                    var groupProperties = new List<TilePropertyAnimatorGroup>();
-                    foreach (var animatorGroupProperty in tilePropertyAnimator.AnimatorsGroupProperty)
-                    {
-                        List<TilePropertyAnimator> animatorProperties = new List<TilePropertyAnimator>();
-                        foreach (var property in animatorGroupProperty.Group)
-                        {
-                            InstanceGameObject.IdGameObjects.TryGetValue(property.Id, out var referenceGameObject);
-                            var tileProperty = new TilePropertyAnimator()
-                            {
-                                key = property.Key,
-                                value = new PropertyAnimator() {
-                                    animator = referenceGameObject?.Animator, 
-                                    animationStateName = property.State,
-                                    delayBeforeAnimationStart = property.DelayBeforeStart,
-                                    waitForAnimationComplete = property.WaitForComplete,
-                                    overrideAnimationDuration = property.OverrideDuration,
-                                    animationDuration = property.AnimationDuration,
-                                },
-                            };
-                            if (tileProperty.value.animator == null)
-                            {
-                                Debug.LogError($"Failed to find animator with id: {property.Id}");
-                            }
-                            animatorProperties.Add(tileProperty);
-                        }
-                        groupProperties.Add(new TilePropertyAnimatorGroup()
-                        {
-                            groupKey = animatorGroupProperty.GroupKey,
-                            tileAnimatorProperties = animatorProperties,
-                        });
-                    }
-                    var component = prefabGameObject.GameObject.GetComponent<TilePropertyAnimators>();
-                    component.tileAnimatorProperties.AddRange(properties);
-                    component.tileAnimatorGroupProperties.AddRange(groupProperties);
-                }
-                
-                PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
-            }
-            
-            // save the changes
-            AssetDatabase.SaveAssets();            
-            
-            // Modified Prefabs
-            foreach (var modifiedPrefab in mechanic.Prefabs)
-            {
-                AssetDatabase.Refresh();
-                
-                var prefabPath =
-                    $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{modifiedPrefab.PrefabName}.prefab";
-                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                var prefabGameObject = new PrefabGameObject(prefab, modifiedPrefab.PrefabName);
-                if (modifiedPrefab.PrefabIds != null)
-                {
-                    foreach (var prefabId in modifiedPrefab.PrefabIds)
-                    {
-                        var referencedGameObject = prefabGameObject.FindReferencedId(prefabId.Id, prefabId.Index);
-                        InstanceGameObject.IdGameObjects[$"{prefabId.Prefix}{prefabId.Id}"] = new InstanceGameObject(referencedGameObject);
-                    }
-                }
-
-                var parentGameObject = InstanceGameObject.IdGameObjects[modifiedPrefab.ParentId];
-                
-                modifiedPrefab.SetParent(parentGameObject.GameObject);
-                
-                modifiedPrefab.OnDeserialized(new StreamingContext());
-                
-                PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
-            }
-            
-            AssetDatabase.Refresh();
-
-            // Anticipation animation
-            foreach (var mechanicParticleSystem in mechanic.ParticleSystems)
-            {
-                var prefabPath =
-                    $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{mechanicParticleSystem.PrefabName}.prefab";
-                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                var prefabGameObject = new PrefabGameObject(prefab, mechanicParticleSystem.PrefabName);
-                if (mechanicParticleSystem.PrefabIds != null)
-                {
-                    foreach (var prefabId in mechanicParticleSystem.PrefabIds)
-                    {
-                        var referencedGameObject = prefabGameObject.FindReferencedId(prefabId.Id, prefabId.Index);
-                        InstanceGameObject.IdGameObjects[$"{prefabId.Prefix}{prefabId.Id}"] = new InstanceGameObject(referencedGameObject);
-                    }
-                }
-                
-                var referenceGameObject = InstanceGameObject.IdGameObjects[mechanicParticleSystem.ReferenceId];
-                
-                // Create the particle system
-                var particleSystem = BettrParticleSystem.AddOrGetParticleSystem(referenceGameObject.GameObject);
-                var mainModule = particleSystem.main;
-                var emissionModule = particleSystem.emission;
-                var shapeModule = particleSystem.shape;
-                var renderer = particleSystem.GetComponent<ParticleSystemRenderer>();
-
-                mainModule.playOnAwake = mechanicParticleSystem.ModuleData.PlayOnAwake;
-                mainModule.startLifetime = mechanicParticleSystem.ModuleData.StartLifetime;
-                mainModule.startSpeed = mechanicParticleSystem.ModuleData.StartSpeed;
-                mainModule.startSize = mechanicParticleSystem.ModuleData.StartSize;
-                mainModule.startColor = new ParticleSystem.MinMaxGradient(mechanicParticleSystem.ModuleData.GetStartColor());
-                mainModule.gravityModifier = mechanicParticleSystem.ModuleData.GravityModifier;
-                if (Enum.TryParse(mechanicParticleSystem.ModuleData.SimulationSpace, out ParticleSystemSimulationSpace simulationSpace))
-                {
-                    mainModule.simulationSpace = simulationSpace;
-                }
-                mainModule.loop = mechanicParticleSystem.ModuleData.Looping;
-                mainModule.duration = mechanicParticleSystem.ModuleData.Duration;
-                mainModule.startRotation = mechanicParticleSystem.ModuleData.StartRotation;
-                mainModule.startDelay = mechanicParticleSystem.ModuleData.StartDelay;
-                mainModule.prewarm = mechanicParticleSystem.ModuleData.Prewarm;
-                mainModule.maxParticles = mechanicParticleSystem.ModuleData.MaxParticles;
-
-                // Emission module settings
-                emissionModule.rateOverTime = mechanicParticleSystem.ModuleData.EmissionRateOverTime;
-                emissionModule.rateOverDistance = mechanicParticleSystem.ModuleData.EmissionRateOverDistance;
-                emissionModule.burstCount = mechanicParticleSystem.ModuleData.Bursts.Count;
-                for (int i = 0; i < mechanicParticleSystem.ModuleData.Bursts.Count; i++)
-                {
-                    var burst = mechanicParticleSystem.ModuleData.Bursts[i];
-                    emissionModule.SetBurst(i, new ParticleSystem.Burst(burst.Time, burst.MinCount, burst.MaxCount, burst.Cycles, burst.Interval) { probability = burst.Probability });
-                }
-
-                // Shape module settings
-                shapeModule.shapeType = (ParticleSystemShapeType)Enum.Parse(typeof(ParticleSystemShapeType), mechanicParticleSystem.ModuleData.Shape);
-                shapeModule.angle = mechanicParticleSystem.ModuleData.ShapeAngle;
-                shapeModule.radius = mechanicParticleSystem.ModuleData.ShapeRadius;
-                shapeModule.radiusThickness = mechanicParticleSystem.ModuleData.ShapeRadiusThickness;
-                shapeModule.arc = mechanicParticleSystem.ModuleData.ShapeArc;
-                
-                // Set shape mode if applicable
-                if (Enum.TryParse(mechanicParticleSystem.ModuleData.ShapeArcMode, out ParticleSystemShapeMultiModeValue shapeMode))
-                {
-                    shapeModule.arcMode = shapeMode;
-                }
-                
-                shapeModule.arcSpread = mechanicParticleSystem.ModuleData.ShapeSpread;
-                shapeModule.arcSpeed = mechanicParticleSystem.ModuleData.ShapeArcSpeed; // Set arc speed
-                shapeModule.position = mechanicParticleSystem.ModuleData.ShapePosition;
-                shapeModule.rotation = mechanicParticleSystem.ModuleData.ShapeRotation;
-                shapeModule.scale = mechanicParticleSystem.ModuleData.ShapeScale;
-
-                // Renderer module settings
-                if (Enum.TryParse(mechanicParticleSystem.ModuleData.RendererSettings.RenderMode, out ParticleSystemRenderMode renderMode))
-                {
-                    renderer.renderMode = renderMode;
-                }
-                renderer.normalDirection = mechanicParticleSystem.ModuleData.RendererSettings.NormalDirection;
-                if (Enum.TryParse(mechanicParticleSystem.ModuleData.RendererSettings.SortMode, out ParticleSystemSortMode sortMode))
-                {
-                    renderer.sortMode = sortMode;
-                }
-                renderer.minParticleSize = mechanicParticleSystem.ModuleData.RendererSettings.MinParticleSize;
-                renderer.maxParticleSize = mechanicParticleSystem.ModuleData.RendererSettings.MaxParticleSize;
-                if (Enum.TryParse(mechanicParticleSystem.ModuleData.RendererSettings.RenderAlignment, out ParticleSystemRenderSpace renderAlignment))
-                {
-                    renderer.alignment = renderAlignment;
-                }
-                renderer.flip = new Vector3(mechanicParticleSystem.ModuleData.RendererSettings.FlipX ? 1 : 0, mechanicParticleSystem.ModuleData.RendererSettings.FlipY ? 1 : 0, 0);
-                renderer.pivot = mechanicParticleSystem.ModuleData.RendererSettings.Pivot;
-                renderer.allowRoll = mechanicParticleSystem.ModuleData.RendererSettings.AllowRoll;
-                renderer.receiveShadows = mechanicParticleSystem.ModuleData.RendererSettings.ReceiveShadows;
-                renderer.shadowCastingMode = mechanicParticleSystem.ModuleData.RendererSettings.CastShadows ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off;
-                if (Enum.TryParse(mechanicParticleSystem.ModuleData.RendererSettings.LightProbes, out LightProbeUsage lightProbeUsage))
-                {
-                    renderer.lightProbeUsage = lightProbeUsage;
-                }
-
-                renderer.sortingOrder = mechanicParticleSystem.ModuleData.RendererSettings.SortingOrder;
-                renderer.sortingLayerName = mechanicParticleSystem.ModuleData.RendererSettings.SortingLayer;
-                
-                // Check if material properties are provided before generating the material
-                Material material = null;
-                if (!string.IsNullOrEmpty(mechanicParticleSystem.ModuleData.RendererSettings.Material) &&
-                    !string.IsNullOrEmpty(mechanicParticleSystem.ModuleData.RendererSettings.Shader))
-                {
-                    material = BettrMaterialGenerator.CreateOrLoadMaterial(
-                        mechanicParticleSystem.ModuleData.RendererSettings.Material,
-                        mechanicParticleSystem.ModuleData.RendererSettings.Shader,
-                        mechanicParticleSystem.ModuleData.RendererSettings.Texture,
-                        mechanicParticleSystem.ModuleData.RendererSettings.Color,
-                        mechanicParticleSystem.ModuleData.RendererSettings.Alpha,
-                        runtimeAssetPath
-                    );
-                }
-
-                // Set the material to the renderer
-                if (material != null)
-                {
-                    renderer.material = material;
-                }
-
-                renderer.sortingOrder = mechanicParticleSystem.ModuleData.RendererSettings.SortingOrder;
-
-                // Save changes to the prefab
-                PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
-            }
-            
-            // save the changes
-            AssetDatabase.SaveAssets();
-            
-            AssetDatabase.Refresh();
-            
-            foreach (var tilePropertyParticleSystem in mechanic.TilePropertyParticleSystems)
-            {
-                var prefabPath =
-                    $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{tilePropertyParticleSystem.PrefabName}.prefab";
-                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                var prefabGameObject = new PrefabGameObject(prefab, tilePropertyParticleSystem.PrefabName);
-                if (tilePropertyParticleSystem.PrefabIds != null)
-                {
-                    foreach (var prefabId in tilePropertyParticleSystem.PrefabIds)
-                    {
-                        var referencedGameObject = prefabGameObject.FindReferencedId(prefabId.Id, prefabId.Index);
-                        InstanceGameObject.IdGameObjects[$"{prefabId.Prefix}{prefabId.Id}"] = new InstanceGameObject(referencedGameObject);
-                    }
-                }
-                if (tilePropertyParticleSystem.ParticleSystemsProperty != null)
-                {
-                    var properties = new List<TilePropertyParticleSystem>();
-                    var groupProperties = new List<TilePropertyParticleSystemGroup>();
-                    foreach (var particleSystemProperty in tilePropertyParticleSystem.ParticleSystemsProperty)
-                    {
-                        InstanceGameObject.IdGameObjects.TryGetValue(particleSystemProperty.Id, out var referenceGameObject);
-                        var tileProperty = new TilePropertyParticleSystem()
-                        {
-                            key = particleSystemProperty.Key,
-                            value = new PropertyParticleSystem()
-                            {
-                                particleSystem = referenceGameObject?.ParticleSystem, 
-                                particleSystemDuration = particleSystemProperty.Duration,
-                                delayBeforeParticleSystemStart = particleSystemProperty.DelayBeforeStart,
-                                waitForParticleSystemComplete = particleSystemProperty.WaitForComplete,
-                            },
-                        };
-                        if (tileProperty.value.particleSystem == null)
-                        {
-                            Debug.LogError($"Failed to find particleSystem with id: {particleSystemProperty.Id}");
-                        }
-                        properties.Add(tileProperty);                        
-                    }
-                    var component = prefabGameObject.GameObject.GetComponent<TilePropertyParticleSystems>();
-                    if (component == null)
-                    {
-                        component = prefabGameObject.GameObject.AddComponent<TilePropertyParticleSystems>();
-                        component.tileParticleSystemProperties = new List<TilePropertyParticleSystem>();
-                        component.tileParticleSystemGroupProperties = new List<TilePropertyParticleSystemGroup>();
-                    }
-                    component.tileParticleSystemProperties.AddRange(properties);
-                    component.tileParticleSystemGroupProperties.AddRange(groupProperties);
-                }
-                
-                PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
-            }
-            
-            // save the changes
-            AssetDatabase.SaveAssets();
-            
-            AssetDatabase.Refresh();
-        }
-        
-        private static void ProcessBaseGameRandomMultiplierWildsMechanic(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            AssetDatabase.Refresh();
-            
-            var reelCount = BettrMenu.GetReelCount(machineName);
-            
-            var symbolIndexesByReel = new Dictionary<string, List<int>>();
-            for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
-            {
-                var topSymbolCount = BettrMenu.GetTopSymbolCount(machineName, reelIndex);
-                var visibleSymbolCount = BettrMenu.GetVisibleSymbolCount(machineName, reelIndex);
-                
-                var scatterSymbolIndexes = new List<int>();
-                for (int symbolIndex = topSymbolCount + 1;
-                     symbolIndex <= topSymbolCount + visibleSymbolCount;
-                     symbolIndex++)
-                {
-                    scatterSymbolIndexes.Add(symbolIndex);
-                }
-                
-                symbolIndexesByReel.Add($"{reelIndex}", scatterSymbolIndexes);
-            }
-
-            string templateName = "BaseGameRandomMultiplierWildsMechanic";
-            var scribanTemplate = ParseScribanTemplate($"common", templateName);
-
-            var model = new Dictionary<string, object>
-            {
-                { "machineName", machineName },
-                { "machineVariant", machineVariant },
-                { "reelCount", reelCount },
-                { "randomMultiplierWildsSymbolIndexesByReel", symbolIndexesByReel },
-            };
-            
-            var json = scribanTemplate.Render(model);
-            Debug.Log(json);
-            
-            Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
-            if (mechanic == null)
-            {
-                throw new Exception($"Failed to deserialize mechanic from json: {json}");
-            }
-            
-            foreach (var mechanicAnimation in mechanic.Animations)
-            {
-                BettrAnimatorController.AddAnimationState(mechanicAnimation.Filename, mechanicAnimation.AnimationStates, mechanicAnimation.AnimatorTransitions, runtimeAssetPath);
-            }
-            
-            foreach (var tilePropertyAnimator in mechanic.TilePropertyAnimators)
-            {
-                var prefabPath =
-                    $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{tilePropertyAnimator.PrefabName}.prefab";
-                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                var prefabGameObject = new PrefabGameObject(prefab, tilePropertyAnimator.PrefabName);
-                if (tilePropertyAnimator.PrefabIds != null)
-                {
-                    foreach (var prefabId in tilePropertyAnimator.PrefabIds)
-                    {
-                        var referencedGameObject = prefabGameObject.FindReferencedId(prefabId.Id, prefabId.Index);
-                        InstanceGameObject.IdGameObjects[$"{prefabId.Prefix}{prefabId.Id}"] = new InstanceGameObject(referencedGameObject);
-                    }
-                }
-                if (tilePropertyAnimator.AnimatorsProperty != null)
-                {
-                    var properties = new List<TilePropertyAnimator>();
-                    var groupProperties = new List<TilePropertyAnimatorGroup>();
-                    foreach (var animatorProperty in tilePropertyAnimator.AnimatorsProperty)
-                    {
-                        InstanceGameObject.IdGameObjects.TryGetValue(animatorProperty.Id, out var referenceGameObject);
-                        var tileProperty = new TilePropertyAnimator()
-                        {
-                            key = animatorProperty.Key,
-                            value = new PropertyAnimator()
-                            {
-                                animator = referenceGameObject?.Animator, 
-                                animationStateName = animatorProperty.State,
-                                delayBeforeAnimationStart = animatorProperty.DelayBeforeStart,
-                                waitForAnimationComplete = animatorProperty.WaitForComplete,
-                                overrideAnimationDuration = animatorProperty.OverrideDuration,
-                                animationDuration = animatorProperty.AnimationDuration,
-                            },
-                        };
-                        if (tileProperty.value.animator == null)
-                        {
-                            Debug.LogError($"Failed to find animator with id: {animatorProperty.Id}");
-                        }
-                        properties.Add(tileProperty);                        
-                    }
-                    var component = prefabGameObject.GameObject.GetComponent<TilePropertyAnimators>();
-                    component.tileAnimatorProperties.AddRange(properties);
-                    component.tileAnimatorGroupProperties.AddRange(groupProperties);
-                }
-                
-                PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
-            }
-            
-            // save the changes
-            AssetDatabase.SaveAssets();
-        }
-        
-        private static string ReadJson(string fileName)
-        {
-            string path = Path.Combine(Application.dataPath, "Bettr", "Editor", "json", $"{fileName}.json");
-            if (!File.Exists(path))
-            {
-                Debug.LogError($"JSON file not found at path: {path}");
-                return null;
-            }
-
-            return File.ReadAllText(path);
         }
         
         public static Template ParseScribanTemplate(string prefixPath, string templateName)
@@ -2280,85 +1646,6 @@ namespace Bettr.Editor
             }
 
             return false;
-        }
-        
-        public static GameObject ProcessPrefab(string prefabName, IGameObject rootGameObject, string runtimeAssetPath)
-        {
-            AssetDatabase.Refresh();
-            
-            var prefabPath = $"{runtimeAssetPath}/Prefabs/{prefabName}.prefab";
-            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-
-            if (prefab == null)
-            {
-                prefab = rootGameObject.GameObject;
-                PrefabUtility.SaveAsPrefabAsset(prefab, prefabPath);
-            }
-            
-            AssetDatabase.Refresh();
-            
-            prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-            
-            return prefab;
-        }
-        
-        private static GameObject ProcessPrefab(string prefabName, List<IComponent> components, List<IGameObject> gameObjects, string runtimeAssetPath)
-        {
-            AssetDatabase.Refresh();
-            
-            var prefabPath = $"{runtimeAssetPath}/Prefabs/{prefabName}.prefab";
-            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-
-            if (prefab == null)
-            {
-                prefab = new GameObject(prefabName);
-                foreach (var component in components)
-                {
-                    component.AddComponent(prefab);
-                }
-                
-                foreach (var go in gameObjects)
-                {
-                    go.SetParent(prefab);
-                }
-            
-                PrefabUtility.SaveAsPrefabAsset(prefab, prefabPath);
-            }
-            
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-            
-            prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-            
-            return prefab;
-        }
-
-        private static Material CreateOrLoadMaterial(string materialName, string shaderName, string runtimeAssetPath)
-        {
-            AssetDatabase.Refresh();
-            
-            var materialFilename = $"{materialName}.mat";
-            var materialFilepath = $"{runtimeAssetPath}/Materials/{materialFilename}";
-            var material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
-            if (material == null)
-            {
-                Debug.Log($"Creating material for {materialName} at {materialFilepath}");
-                try
-                {
-                    material = new Material(Shader.Find(shaderName));
-                    AssetDatabase.CreateAsset(material, materialFilepath);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError(e);
-                }
-            }
-            
-            AssetDatabase.Refresh();
-            
-            material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
-
-            return material;
         }
         
         private static Dictionary<string, List<Dictionary<string, T>>> GetTablePkDict<T>(Table table)
@@ -2731,315 +2018,5 @@ namespace Bettr.Editor
                 return _variables.TryGetValue(key, out string value) ? value : match.Value;
             });
         }
-    }
-
-    public static class BaseGameWaysMechanic
-    {
-        public static void Process(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            ProcessBaseGameSymbolModifications(machineName, machineVariant, runtimeAssetPath);
-            ProcessBaseGameMachineModifications(machineName, machineVariant, runtimeAssetPath);
-            ProcessBaseGameReelModifications(machineName, machineVariant, runtimeAssetPath);
-        }
-
-        private static void ProcessBaseGameSymbolModifications(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            for (int i = 1; i <= 2; i++)
-            {
-                string templateName = $"BaseGameWaysSymbolModifications{i}";
-                var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/ways", templateName);
-                
-                var baseGameSymbolTable = BettrMenu.GetTable($"{machineName}BaseGameSymbolTable");
-                var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
-                var symbolPrefabNames = baseGameSymbolTable.Pairs.Select(pair => $"{machineName}BaseGameSymbol{pair.Key.String}").ToList();
-                
-                InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-                InstanceGameObject.IdGameObjects.Clear();
-                
-                BettrMaterialGenerator.MachineName = machineName;
-                BettrMaterialGenerator.MachineVariant = machineVariant;
-                    
-                var model = new Dictionary<string, object>
-                {
-                    { "machineName", machineName },
-                    { "machineVariant", machineVariant },
-                    { "symbolKeys", symbolKeys},
-                    { "symbolPrefabNames", symbolPrefabNames},
-                };
-                
-                var json = scribanTemplate.Render(model);
-                Debug.Log(json);
-                
-                Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
-                if (mechanic == null)
-                {
-                    throw new Exception($"Failed to deserialize mechanic from json: {json}");
-                }
-                
-                // Modified Animator Controllers
-                if (mechanic.AnimatorControllers != null)
-                {
-                    foreach (var instanceComponent in mechanic.AnimatorControllers)
-                    {
-                        AssetDatabase.Refresh();
-
-                        BettrAnimatorController.AddAnimationState(instanceComponent.Filename,
-                            instanceComponent.AnimationStates, instanceComponent.AnimatorTransitions, runtimeAssetPath);
-                    }
-                }
-                else
-                {
-                    mechanic.Process();
-                }
-                
-                AssetDatabase.Refresh();
-            }
-        }
-        
-        private static void ProcessBaseGameMachineModifications(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            for (int i = 1; i <= 3; i++)
-            {
-                string templateName = $"BaseGameWaysMachineModifications{i}";
-                var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/ways", templateName);
-            
-                var symbolKeys = BettrMenu.GetSymbolKeys(machineName);
-            
-                var model = new Dictionary<string, object>
-                {
-                    { "machineName", machineName },
-                    { "machineVariant", machineVariant },
-                    { "symbolKeys", symbolKeys},
-                };
-                
-                var json = scribanTemplate.Render(model);
-                Debug.Log(json);
-                
-                Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
-                if (mechanic == null)
-                {
-                    throw new Exception($"Failed to deserialize mechanic from json: {json}");
-                }
-
-                mechanic.Process();
-            
-                AssetDatabase.Refresh();
-            }
-        }
-        
-        private static void ProcessBaseGameReelModifications(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            string templateName = "BaseGameWaysReelModifications";
-            var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/ways", templateName);
-            
-            var symbolKeys = BettrMenu.GetSymbolKeys(machineName);
-            var reelCount = BettrMenu.GetReelCount(machineName);
-            
-            for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
-            {
-                var topSymbolCount = BettrMenu.GetTopSymbolCount(machineName, reelIndex);
-                var visibleSymbolCount = BettrMenu.GetVisibleSymbolCount(machineName, reelIndex);
-                var waysSymbolIndexes = Enumerable.Range(topSymbolCount+1, visibleSymbolCount).ToList();
-                
-                var symbolPositions = BettrMenu.GetSymbolPositions(machineName, reelIndex);
-                var symbolVerticalSpacing = BettrMenu.GetSymbolVerticalSpacing(machineName, reelIndex);
-                var yPositions = symbolPositions.Select(pos => pos * symbolVerticalSpacing).ToList();
-
-                yPositions.Insert(0, 0);
-                
-                var symbolScaleX = BettrMenu.GetSymbolScaleX(machineName, reelIndex);
-                var symbolScaleY = BettrMenu.GetSymbolScaleY(machineName, reelIndex);
-                
-                var symbolOffsetY = BettrMenu.GetSymbolOffsetY(machineName, reelIndex);
-                
-                InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-                InstanceGameObject.IdGameObjects.Clear();
-                
-                BettrMaterialGenerator.MachineName = machineName;
-                BettrMaterialGenerator.MachineVariant = machineVariant;
-                
-                var model = new Dictionary<string, object>
-                {
-                    { "machineName", machineName },
-                    { "machineVariant", machineVariant },
-                    { "reelIndex", reelIndex },
-                    { "yPositions", yPositions },
-                    { "waysSymbolIndexes", waysSymbolIndexes },
-                    { "symbolKeys", symbolKeys},
-                    { "symbolScaleX", symbolScaleX},
-                    { "symbolScaleY", symbolScaleY},
-                    { "symbolOffsetY", symbolOffsetY},
-                };
-                
-                var json = scribanTemplate.Render(model);
-                Debug.Log(json);
-                
-                Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
-                if (mechanic == null)
-                {
-                    throw new Exception($"Failed to deserialize mechanic from json: {json}");
-                }
-
-                mechanic.Process();
-
-            }
-            
-            AssetDatabase.Refresh();
-        }
-    }
-
-    public static class BaseGamePaylinesMechanic
-    {
-        public static void Process(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            ProcessBaseGameSymbolModifications(machineName, machineVariant, runtimeAssetPath);
-            ProcessBaseGameMachineModifications(machineName, machineVariant, runtimeAssetPath);
-            ProcessBaseGameReelModifications(machineName, machineVariant, runtimeAssetPath);
-        }
-        
-        private static void ProcessBaseGameMachineModifications(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            for (int i = 1; i <= 3; i++)
-            {
-                string templateName = $"BaseGameWaysMachineModifications{i}";
-                var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/ways", templateName);
-            
-                var symbolKeys = BettrMenu.GetSymbolKeys(machineName);
-            
-                var model = new Dictionary<string, object>
-                {
-                    { "machineName", machineName },
-                    { "machineVariant", machineVariant },
-                    { "symbolKeys", symbolKeys},
-                };
-                
-                var json = scribanTemplate.Render(model);
-                Debug.Log(json);
-                
-                Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
-                if (mechanic == null)
-                {
-                    throw new Exception($"Failed to deserialize mechanic from json: {json}");
-                }
-
-                mechanic.Process();
-            
-                AssetDatabase.Refresh();
-            }
-        }
-        
-        private static void ProcessBaseGameReelModifications(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            string templateName = $"BaseGamePaylinesReelModifications";
-            var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/paylines", templateName);
-            
-            var baseGameSymbolTable = BettrMenu.GetTable($"{machineName}BaseGameSymbolTable");
-            var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
-            
-            var reelStates = BettrMenu.GetTable($"{machineName}BaseGameReelState");
-            var reelCount = BettrMenu.GetReelCount(machineName);
-            
-            for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
-            {
-                var topSymbolCount = BettrMenu.GetTopSymbolCount(machineName, reelIndex);
-                var visibleSymbolCount = BettrMenu.GetVisibleSymbolCount(machineName, reelIndex);
-                var paylinesSymbolIndexes = Enumerable.Range(topSymbolCount+1, visibleSymbolCount).ToList();
-                
-                var symbolPositions = BettrMenu.GetSymbolPositions(machineName, reelIndex);
-                var symbolVerticalSpacing = BettrMenu.GetSymbolVerticalSpacing(machineName, reelIndex);
-                var yPositions = symbolPositions.Select(pos => pos * symbolVerticalSpacing).ToList();
-
-                yPositions.Insert(0, 0);
-                
-                var symbolOffsetY = BettrMenu.GetSymbolOffsetY(machineName, reelIndex);
-                
-                InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-                InstanceGameObject.IdGameObjects.Clear();
-                
-                BettrMaterialGenerator.MachineName = machineName;
-                BettrMaterialGenerator.MachineVariant = machineVariant;
-                
-                var model = new Dictionary<string, object>
-                {
-                    { "machineName", machineName },
-                    { "machineVariant", machineVariant },
-                    { "reelIndex", reelIndex },
-                    { "yPositions", yPositions },
-                    { "topSymbolCount", topSymbolCount },
-                    { "visibleSymbolCount", visibleSymbolCount },
-                    { "paylinesSymbolIndexes", paylinesSymbolIndexes },
-                    { "symbolKeys", symbolKeys},
-                    { "symbolOffsetY", symbolOffsetY},
-                };
-                
-                var json = scribanTemplate.Render(model);
-                Debug.Log(json);
-                
-                Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
-                if (mechanic == null)
-                {
-                    throw new Exception($"Failed to deserialize mechanic from json: {json}");
-                }
-
-                mechanic.Process();
-            }
-            
-            AssetDatabase.Refresh();
-        }
-        
-        private static void ProcessBaseGameSymbolModifications(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            for (int i = 1; i <= 2; i++)
-            {
-                string templateName = $"BaseGamePaylinesSymbolModifications{i}";
-                var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/paylines", templateName);
-                
-                var baseGameSymbolTable = BettrMenu.GetTable($"{machineName}BaseGameSymbolTable");
-                var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
-                var symbolPrefabNames = baseGameSymbolTable.Pairs.Select(pair => $"{machineName}BaseGameSymbol{pair.Key.String}").ToList();
-                
-                InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-                InstanceGameObject.IdGameObjects.Clear();
-                
-                BettrMaterialGenerator.MachineName = machineName;
-                BettrMaterialGenerator.MachineVariant = machineVariant;
-                    
-                var model = new Dictionary<string, object>
-                {
-                    { "machineName", machineName },
-                    { "machineVariant", machineVariant },
-                    { "symbolKeys", symbolKeys},
-                    { "symbolPrefabNames", symbolPrefabNames},
-                };
-                
-                var json = scribanTemplate.Render(model);
-                Debug.Log(json);
-                
-                Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
-                if (mechanic == null)
-                {
-                    throw new Exception($"Failed to deserialize mechanic from json: templateName: {templateName}");
-                }
-                
-                // Modified Animator Controllers
-                if (mechanic.AnimatorControllers != null)
-                {
-                    foreach (var instanceComponent in mechanic.AnimatorControllers)
-                    {
-                        AssetDatabase.Refresh();
-
-                        BettrAnimatorController.AddAnimationState(instanceComponent.Filename,
-                            instanceComponent.AnimationStates, instanceComponent.AnimatorTransitions, runtimeAssetPath);
-                    }
-                }
-                else
-                {
-                    mechanic.Process();
-                }
-                
-                AssetDatabase.Refresh();
-            }
-        }
-        
     }
 }
