@@ -1,0 +1,26 @@
+require "math"
+require "Core"
+{{for mechanic in baseGameMechanics}}
+require "{{machineName}}BaseGameReel{{mechanic}}Mechanic"
+{{end}}
+
+{{machineName}}BaseGameReelMechanics = {
+{{for mechanic in baseGameMechanics}}
+    {{mechanic}}Mechanic = nil,
+{{end}}
+}
+
+function {{machineName}}BaseGameReelMechanics:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function {{machineName}}BaseGameReelMechanics:Initialize(reel)
+{{for mechanic in baseGameMechanics}}
+    self.{{mechanic}}Mechanic = {{machineName}}BaseGameReel{{mechanic}}Mechanic:new()
+    self.{{mechanic}}Mechanic:Initialize(reel)
+{{end}}
+end
+

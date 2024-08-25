@@ -1,0 +1,45 @@
+require "math"
+require "Core"
+{{for mechanic in baseGameMechanics}}
+require "{{machineName}}BaseGameMachine{{mechanic}}Mechanic"
+{{end}}
+
+{{machineName}}BaseGameMachineMechanics = {
+{{for mechanic in baseGameMechanics}}
+    {{mechanic}}Mechanic = nil,
+{{end}}
+}
+
+function {{machineName}}BaseGameMachineMechanics:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function {{machineName}}BaseGameMachineMechanics:Initialize(machine)
+{{for mechanic in baseGameMechanics}}
+    self.{{mechanic}}Mechanic = {{machineName}}BaseGameMachine{{mechanic}}Mechanic:new()
+    self.{{mechanic}}Mechanic:Initialize(machine)
+{{end}}
+end
+
+function {{machineName}}BaseGameMachineMechanics:BaseGamePayout(machine)
+    series
+        do
+{{for mechanic in baseGameMechanics}}        
+            self.{{mechanic}}Mechanic:BaseGamePayout(machine)
+{{end}}            
+        end
+    end
+end
+
+function {{machineName}}BaseGameMachineMechanics:OnSpinButtonClicked(machine)
+    series
+        do
+{{for mechanic in baseGameMechanics}}        
+            self.{{mechanic}}Mechanic:OnSpinButtonClicked()
+{{end}}            
+        end
+    end
+end

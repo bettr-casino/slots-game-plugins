@@ -1,9 +1,13 @@
 require "math"
 require "Core"
+
 require "Game007BaseGameMachinePaylinesMechanic"
 
+
 Game007BaseGameMachineMechanics = {
+
     PaylinesMechanic = nil,
+
 }
 
 function Game007BaseGameMachineMechanics:new(o)
@@ -14,14 +18,18 @@ function Game007BaseGameMachineMechanics:new(o)
 end
 
 function Game007BaseGameMachineMechanics:Initialize(machine)
+
     self.PaylinesMechanic = Game007BaseGameMachinePaylinesMechanic:new()
     self.PaylinesMechanic:Initialize(machine)
+
 end
 
 function Game007BaseGameMachineMechanics:BaseGamePayout(machine)
     series
         do
+        
             self.PaylinesMechanic:BaseGamePayout(machine)
+            
         end
     end
 end
@@ -29,7 +37,9 @@ end
 function Game007BaseGameMachineMechanics:OnSpinButtonClicked(machine)
     series
         do
+        
             self.PaylinesMechanic:OnSpinButtonClicked()
+            
         end
     end
 end

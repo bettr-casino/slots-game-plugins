@@ -1085,6 +1085,11 @@ namespace Bettr.Editor
 
         private static void CopyScripts(string scriptsPath, string[] filePaths, string machineName, string machineVariant, string runtimeAssetPath)
         {
+            var mechanicsTable = BettrMenu.GetTable($"{machineName}Mechanics");
+            var baseGameMechanics = BettrMenu.GetTableArray<string>(mechanicsTable, "BaseGame", "Mechanic");
+            // convert baseGameMechanics array to PascalCase using ConvertCamelToPascalCase
+            baseGameMechanics = new List<string>(baseGameMechanics.Select(ConvertCamelToPascalCase).ToArray());
+            
             foreach (string filePath in filePaths)
             {
                 var reelCount = BettrMenu.GetReelCount(machineName);
@@ -1099,6 +1104,7 @@ namespace Bettr.Editor
                         } 
                     },
                     { "reelCount", reelCount },
+                    { "baseGameMechanics", baseGameMechanics},
                 };
                 var scriptText = scribanTemplate.Render(model);
                 var scriptName = Path.GetFileNameWithoutExtension(filePath); // remove the .template
@@ -1116,12 +1122,6 @@ namespace Bettr.Editor
             string dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "templates", "scripts");
             string[] filePaths = Directory.GetFiles(dirPath, "*.cscript.txt.template");
             string scriptsPath = $"scripts";
-            CopyScripts(scriptsPath, filePaths, machineName, machineVariant, runtimeAssetPath);
-            
-            // Process variant scripts
-            dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "templates", "integration", machineName, machineVariant);
-            filePaths = Directory.GetFiles(dirPath, "*.cscript.txt.template");
-            scriptsPath = $"integration/{machineName}/{machineVariant}";
             CopyScripts(scriptsPath, filePaths, machineName, machineVariant, runtimeAssetPath);
             
             // Process Mechanics scripts
@@ -1993,6 +1993,16 @@ namespace Bettr.Editor
             var reelStates = BettrMenu.GetTable($"{machineName}BaseGameReelState");
             var symbolVerticalSpacing = BettrMenu.GetTableValue<float>(reelStates, $"Reel{reelIndex}", "SymbolScaleY", 1);
             return symbolVerticalSpacing;
+        }
+        
+        public static string ConvertCamelToPascalCase(string camelCaseString)
+        {
+            if (string.IsNullOrEmpty(camelCaseString) || char.IsUpper(camelCaseString[0]))
+            {
+                return camelCaseString;
+            }
+
+            return char.ToUpper(camelCaseString[0]) + camelCaseString.Substring(1);
         }
     }
     
