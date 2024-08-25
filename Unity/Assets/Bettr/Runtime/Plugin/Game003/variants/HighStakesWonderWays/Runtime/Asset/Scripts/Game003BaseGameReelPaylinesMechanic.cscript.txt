@@ -17,7 +17,7 @@ end
 function Game003BaseGameReelPaylinesMechanic:DisplayPaylines(reel, paylineSymbol, paylineId, paylineMatrix, paylineSymbolCount, duration)
     for i=1,paylineSymbolCount parallel do
         local reelID = paylineMatrix[i].ReelID
-        local matrixPaylineId = paylineMatrix[i].PaylineID
+        local matrixPaylineId = paylineMatrix[i].PaylineId
         if reelID == reel.ReelID and matrixPaylineId == paylineId then
            local rowIndex = paylineMatrix[i].RowIndex
            local luaRowIndex = rowIndex + 1

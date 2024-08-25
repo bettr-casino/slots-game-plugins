@@ -29,6 +29,15 @@ end
 function {{machineName}}BaseGameMachineWaysMechanic:WaitingForPayToComplete(machine)    
 end
 
+function {{machineName}}BaseGameMachineWaysMechanic:OnSpinButtonClicked()
+    series
+        do
+            self.CancelWaysAnimation()
+            self.WaitForPayToComplete()
+        end
+    end
+end
+
 function {{machineName}}BaseGameMachineWaysMechanic:CancelWaysAnimation()
     {{machineName}}BaseGameState.DisplayState.First.State = "CancelRequested"
 end
@@ -47,6 +56,14 @@ function {{machineName}}BaseGameMachineWaysMechanic:WaitForPayToComplete()
             {{machineName}}BaseGameState.DisplayState.First.State = "Idle"            
         end
     end
+end
+
+function {{machineName}}BaseGameMachineWaysMechanic:BaseGamePayout(machine)
+    series
+        do
+            self.DisplayWays(machine)
+        end
+    end        
 end
 
 function {{machineName}}BaseGameMachineWaysMechanic:DisplayWays(machine)

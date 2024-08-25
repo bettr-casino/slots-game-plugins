@@ -21,7 +21,7 @@ end
 function Game004BaseGameMachineMechanics:BaseGamePayout(machine)
     series
         do
-            self.PaylinesMechanic:DisplayPaylines(machine)
+            self.PaylinesMechanic:BaseGamePayout(machine)
         end
     end
 end
@@ -29,8 +29,7 @@ end
 function Game004BaseGameMachineMechanics:OnSpinButtonClicked(machine)
     series
         do
-            self.PaylinesMechanic:CancelPaylinesAnimation()
-            self.PaylinesMechanic:WaitForPayToComplete()
+            self.PaylinesMechanic:OnSpinButtonClicked()
         end
     end
 end

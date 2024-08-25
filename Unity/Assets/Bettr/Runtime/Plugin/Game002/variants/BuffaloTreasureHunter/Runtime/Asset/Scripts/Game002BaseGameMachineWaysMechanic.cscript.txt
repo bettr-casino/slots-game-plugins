@@ -29,6 +29,15 @@ end
 function Game002BaseGameMachineWaysMechanic:WaitingForPayToComplete(machine)    
 end
 
+function Game002BaseGameMachineWaysMechanic:OnSpinButtonClicked()
+    series
+        do
+            self.CancelWaysAnimation()
+            self.WaitForPayToComplete()
+        end
+    end
+end
+
 function Game002BaseGameMachineWaysMechanic:CancelWaysAnimation()
     Game002BaseGameState.DisplayState.First.State = "CancelRequested"
 end
@@ -47,6 +56,14 @@ function Game002BaseGameMachineWaysMechanic:WaitForPayToComplete()
             Game002BaseGameState.DisplayState.First.State = "Idle"            
         end
     end
+end
+
+function Game002BaseGameMachineWaysMechanic:BaseGamePayout(machine)
+    series
+        do
+            self.DisplayWays(machine)
+        end
+    end        
 end
 
 function Game002BaseGameMachineWaysMechanic:DisplayWays(machine)

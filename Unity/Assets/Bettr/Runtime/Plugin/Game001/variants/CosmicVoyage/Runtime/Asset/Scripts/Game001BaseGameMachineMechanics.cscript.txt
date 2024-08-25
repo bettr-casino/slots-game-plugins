@@ -21,7 +21,7 @@ end
 function Game001BaseGameMachineMechanics:BaseGamePayout(machine)
     series
         do
-            self.WaysMechanic:DisplayWays(machine)
+            self.WaysMechanic:BaseGamePayout(machine)
         end
     end
 end
@@ -29,8 +29,7 @@ end
 function Game001BaseGameMachineMechanics:OnSpinButtonClicked(machine)
     series
         do
-            self.WaysMechanic:CancelWaysAnimation()
-            self.WaysMechanic:WaitForPayToComplete()
+            self.WaysMechanic:OnSpinButtonClicked()
         end
     end
 end

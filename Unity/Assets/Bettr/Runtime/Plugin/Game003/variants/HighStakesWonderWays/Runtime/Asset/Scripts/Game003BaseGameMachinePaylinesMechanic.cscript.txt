@@ -26,6 +26,23 @@ function Game003BaseGameMachinePaylinesMechanic:BaseGamePaying(machine)
     System.StartCoroutine(machine, "BaseGamePayout")
 end
 
+function Game003BaseGameMachinePaylinesMechanic:BaseGamePayout(machine)
+    series
+        do
+            self.DisplayPaylines(machine)
+        end
+    end
+end
+
+function Game003BaseGameMachinePaylinesMechanic:OnSpinButtonClicked(machine)
+    series
+        do
+            self.CancelPaylinesAnimation()
+            self.WaitForPayToComplete()
+        end
+    end
+end
+
 function Game003BaseGameMachinePaylinesMechanic:CancelPaylinesAnimation()
     Game003BaseGameState.DisplayState.First.State = "CancelRequested"
 end
