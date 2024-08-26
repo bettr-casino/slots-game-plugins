@@ -3,10 +3,14 @@ require "Core"
 
 require "Game001BaseGameMachineWaysMechanic"
 
+require "Game001BaseGameMachineCascadingReelsMechanic"
+
 
 Game001BaseGameMachineMechanics = {
 
     WaysMechanic = nil,
+
+    CascadingReelsMechanic = nil,
 
 }
 
@@ -22,6 +26,9 @@ function Game001BaseGameMachineMechanics:Initialize(machine)
     self.WaysMechanic = Game001BaseGameMachineWaysMechanic:new()
     self.WaysMechanic:Initialize(machine)
 
+    self.CascadingReelsMechanic = Game001BaseGameMachineCascadingReelsMechanic:new()
+    self.CascadingReelsMechanic:Initialize(machine)
+
 end
 
 function Game001BaseGameMachineMechanics:BaseGamePayout(machine)
@@ -29,6 +36,8 @@ function Game001BaseGameMachineMechanics:BaseGamePayout(machine)
         do
         
             self.WaysMechanic:BaseGamePayout(machine)
+        
+            self.CascadingReelsMechanic:BaseGamePayout(machine)
             
         end
     end
@@ -39,6 +48,8 @@ function Game001BaseGameMachineMechanics:OnSpinButtonClicked(machine)
         do
         
             self.WaysMechanic:OnSpinButtonClicked()
+        
+            self.CascadingReelsMechanic:OnSpinButtonClicked()
             
         end
     end
