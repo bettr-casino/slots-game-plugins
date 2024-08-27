@@ -2,7 +2,6 @@ require "math"
 require "Core"
 
 {{machineName}}BaseGameMachinePaylinesMechanic = {
-    machine = nil,
 }
 
 function {{machineName}}BaseGameMachinePaylinesMechanic:new(o)
@@ -13,7 +12,6 @@ function {{machineName}}BaseGameMachinePaylinesMechanic:new(o)
 end
 
 function {{machineName}}BaseGameMachinePaylinesMechanic:Initialize(machine)
-    self.machine = machine
     -- Appending new entries to the table
     {{machineName}}BaseGameMachine.BaseGameStateDispatchTable.Paying = function()
         self:BaseGamePaying(machine)
@@ -25,13 +23,12 @@ end
 
 function {{machineName}}BaseGameMachinePaylinesMechanic:BaseGamePaying(machine)
     {{machineName}}BaseGameState.SpinState.First.State = "WaitingForPayToComplete"
-    System.StartCoroutine(self, "BaseGamePayout")
+    System.StartCoroutine(machine, "BaseGamePayout")
 end
 
-function {{machineName}}BaseGameMachinePaylinesMechanic:BaseGamePayout()
+function {{machineName}}BaseGameMachinePaylinesMechanic:BaseGamePayout(machine)
     series
         do
-            local machine = self.machine
             self:DisplayPaylines(machine)
         end
     end
@@ -56,14 +53,6 @@ end
 function {{machineName}}BaseGameMachinePaylinesMechanic:WaitForPayToComplete()
     series
         do
-            if {{machineName}}BaseGameState.SpinState.First.State == "WaitingForPayToComplete" then
-                local paylinesSummary = {{machineName}}BaseGamePaylinesSummary.Paylines.First
-                local delay = paylinesSummary.DisplayLoopEndDelay
-                while {{machineName}}BaseGameState.SpinState.First.State == "WaitingForPayToComplete" do
-                    {{machineName}}BaseGameState.DisplayState.First.State = "CancelRequested"
-                    System.WaitForSeconds(delay)
-                end
-            end
             {{machineName}}BaseGameState.DisplayState.First.State = "Idle"            
         end
     end
@@ -140,7 +129,7 @@ function {{machineName}}BaseGameMachinePaylinesMechanic:DisplayPaylines(machine)
                 machine:OnPayingCompleted()
                 return
             end
-            System.StartCoroutine(self, "BaseGamePayout")
+            System.StartCoroutine(machine, "BaseGamePayout")
         end
     end
 end
