@@ -3,14 +3,10 @@ require "Core"
 
 require "Game003BaseGameReelPaylinesMechanic"
 
-require "Game003BaseGameReelCascadingReelsMechanic"
-
 
 Game003BaseGameReelMechanics = {
 
     PaylinesMechanic = nil,
-
-    CascadingReelsMechanic = nil,
 
 }
 
@@ -25,9 +21,6 @@ function Game003BaseGameReelMechanics:Initialize(reel)
 
     self.PaylinesMechanic = Game003BaseGameReelPaylinesMechanic:new()
     self.PaylinesMechanic:Initialize(reel)
-
-    self.CascadingReelsMechanic = Game003BaseGameReelCascadingReelsMechanic:new()
-    self.CascadingReelsMechanic:Initialize(reel)
 
 end
 

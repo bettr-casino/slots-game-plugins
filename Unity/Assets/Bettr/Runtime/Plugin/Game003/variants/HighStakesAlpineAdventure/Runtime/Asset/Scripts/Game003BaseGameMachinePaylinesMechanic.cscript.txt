@@ -2,7 +2,6 @@ require "math"
 require "Core"
 
 Game003BaseGameMachinePaylinesMechanic = {
-    machine = nil,
 }
 
 function Game003BaseGameMachinePaylinesMechanic:new(o)
@@ -13,7 +12,6 @@ function Game003BaseGameMachinePaylinesMechanic:new(o)
 end
 
 function Game003BaseGameMachinePaylinesMechanic:Initialize(machine)
-    self.machine = machine
     -- Appending new entries to the table
     Game003BaseGameMachine.BaseGameStateDispatchTable.Paying = function()
         self:BaseGamePaying(machine)
@@ -25,13 +23,12 @@ end
 
 function Game003BaseGameMachinePaylinesMechanic:BaseGamePaying(machine)
     Game003BaseGameState.SpinState.First.State = "WaitingForPayToComplete"
-    System.StartCoroutine(self, "BaseGamePayout")
+    System.StartCoroutine(machine, "BaseGamePayout")
 end
 
-function Game003BaseGameMachinePaylinesMechanic:BaseGamePayout()
+function Game003BaseGameMachinePaylinesMechanic:BaseGamePayout(machine)
     series
         do
-            local machine = self.machine
             self:DisplayPaylines(machine)
         end
     end
@@ -56,14 +53,6 @@ end
 function Game003BaseGameMachinePaylinesMechanic:WaitForPayToComplete()
     series
         do
-            if Game003BaseGameState.SpinState.First.State == "WaitingForPayToComplete" then
-                local paylinesSummary = Game003BaseGamePaylinesSummary.Paylines.First
-                local delay = paylinesSummary.DisplayLoopEndDelay
-                while Game003BaseGameState.SpinState.First.State == "WaitingForPayToComplete" do
-                    Game003BaseGameState.DisplayState.First.State = "CancelRequested"
-                    System.WaitForSeconds(delay)
-                end
-            end
             Game003BaseGameState.DisplayState.First.State = "Idle"            
         end
     end
@@ -140,7 +129,7 @@ function Game003BaseGameMachinePaylinesMechanic:DisplayPaylines(machine)
                 machine:OnPayingCompleted()
                 return
             end
-            System.StartCoroutine(self, "BaseGamePayout")
+            System.StartCoroutine(machine, "BaseGamePayout")
         end
     end
 end

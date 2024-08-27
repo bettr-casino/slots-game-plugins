@@ -3,14 +3,10 @@ require "Core"
 
 require "Game001BaseGameMachineWaysMechanic"
 
-require "Game001BaseGameMachineCascadingReelsMechanic"
-
 
 Game001BaseGameMachineMechanics = {
 
     WaysMechanic = nil,
-
-    CascadingReelsMechanic = nil,
 
 }
 
@@ -26,31 +22,28 @@ function Game001BaseGameMachineMechanics:Initialize(machine)
     self.WaysMechanic = Game001BaseGameMachineWaysMechanic:new()
     self.WaysMechanic:Initialize(machine)
 
-    self.CascadingReelsMechanic = Game001BaseGameMachineCascadingReelsMechanic:new()
-    self.CascadingReelsMechanic:Initialize(machine)
-
 end
 
 function Game001BaseGameMachineMechanics:BaseGamePayout(machine)
-    series
-        do
-        
-            self.WaysMechanic:BaseGamePayout(machine)
-        
-            self.CascadingReelsMechanic:BaseGamePayout(machine)
-            
-        end
+    -- this is hardcoded
+    -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
+    if self.CascadingReelsMechanic ~= nil then
+       self.CascadingReelsMechanic:BaseGamePayout(machine)
+    elseif self.WaysMechanic ~= nil then
+       self.WaysMechanic:BaseGamePayout(machine)
+    elseif self.PaylinesMechanic ~= nil then
+       self.PaylinesMechanic:BaseGamePayout(machine)
     end
 end
 
 function Game001BaseGameMachineMechanics:OnSpinButtonClicked(machine)
-    series
-        do
-        
-            self.WaysMechanic:OnSpinButtonClicked()
-        
-            self.CascadingReelsMechanic:OnSpinButtonClicked()
-            
-        end
+    -- this is hardcoded
+    -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
+    if self.CascadingReelsMechanic ~= nil then
+       self.CascadingReelsMechanic:OnSpinButtonClicked(machine)
+    elseif self.WaysMechanic ~= nil then
+       self.WaysMechanic:OnSpinButtonClicked(machine)
+    elseif self.PaylinesMechanic ~= nil then
+       self.PaylinesMechanic:OnSpinButtonClicked(machine)
     end
 end

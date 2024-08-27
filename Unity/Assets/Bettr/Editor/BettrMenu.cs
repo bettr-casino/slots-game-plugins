@@ -1089,9 +1089,6 @@ namespace Bettr.Editor
             var baseGameMechanics = BettrMenu.GetTableArray<string>(mechanicsTable, "BaseGame", "Mechanic");
             // convert baseGameMechanics array to PascalCase using ConvertCamelToPascalCase
             baseGameMechanics = new List<string>(baseGameMechanics.Select(ConvertCamelToPascalCase).ToArray());
-            // TODO: FIXME remove this once the spreadsheet is updated
-            // add the CascadingReelsMechanic to the baseGameMechanics array
-            baseGameMechanics.Add("CascadingReels");
             
             foreach (string filePath in filePaths)
             {
@@ -1133,9 +1130,6 @@ namespace Bettr.Editor
             foreach (var pk in pkArray)
             {
                 var mechanicsData = GetTableArray<string>(mechanicsTable, pk, "Mechanic");
-                // TODO: FIXME remove once the spreadsheet is updated
-                // add the CascadingReelsMechanic to the mechanicsData array
-                mechanicsData.Add("CascadingReels");
                 foreach (var mechanic in mechanicsData)
                 {
                     dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "templates", "mechanics", mechanic, "scripts");
