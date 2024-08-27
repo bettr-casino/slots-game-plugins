@@ -12,7 +12,19 @@ function {{machineName}}BaseGameMachineCascadingReelsMechanic:new(o)
 end
 
 function {{machineName}}BaseGameMachineCascadingReelsMechanic:Initialize(machine)
-    System.Print("{{machineName}}BaseGameMachineCascadingReelsMechanic:Initialize")
+    -- Appending new entries to the table
+    -- Hijack Paylines and Ways
+    -- {{machineName}}BaseGameMachine.BaseGameStateDispatchTable.Paying = function()
+    --     self:BaseGameCascadePaying(machine)
+    -- end
+    -- {{machineName}}BaseGameMachine.BaseGameStateDispatchTable.WaitingForPayToComplete = function()
+    --    -- do nothing
+    -- end
+end
+
+function {{machineName}}BaseGameMachineCascadingReelsMechanic:BaseGameCascadePaying(machine)
+    {{machineName}}BaseGameState.SpinState.First.State = "WaitingForPayToComplete"
+    System.StartCoroutine(machine, "BaseGamePayout")
 end
 
 function {{machineName}}BaseGameMachineCascadingReelsMechanic:BaseGamePayout()

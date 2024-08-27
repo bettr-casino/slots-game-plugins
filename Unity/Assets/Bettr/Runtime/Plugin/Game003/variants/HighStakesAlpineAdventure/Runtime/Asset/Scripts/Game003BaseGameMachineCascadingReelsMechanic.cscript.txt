@@ -1,0 +1,45 @@
+require "math"
+require "Core"
+
+Game003BaseGameMachineCascadingReelsMechanic = {
+}
+
+function Game003BaseGameMachineCascadingReelsMechanic:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game003BaseGameMachineCascadingReelsMechanic:Initialize(machine)
+    -- Appending new entries to the table
+    -- Hijack Paylines and Ways
+    -- Game003BaseGameMachine.BaseGameStateDispatchTable.Paying = function()
+    --     self:BaseGameCascadePaying(machine)
+    -- end
+    -- Game003BaseGameMachine.BaseGameStateDispatchTable.WaitingForPayToComplete = function()
+    --    -- do nothing
+    -- end
+end
+
+function Game003BaseGameMachineCascadingReelsMechanic:BaseGameCascadePaying(machine)
+    Game003BaseGameState.SpinState.First.State = "WaitingForPayToComplete"
+    System.StartCoroutine(machine, "BaseGamePayout")
+end
+
+function Game003BaseGameMachineCascadingReelsMechanic:BaseGamePayout()
+    series
+        do
+            System.Print("Game003BaseGameMachineCascadingReelsMechanic:BaseGamePayout")
+        end
+    end
+end
+
+function Game003BaseGameMachineCascadingReelsMechanic:OnSpinButtonClicked()
+    series
+        do
+            System.Print("Game003BaseGameMachineCascadingReelsMechanic:OnSpinButtonClicked")
+        end
+    end
+end
+

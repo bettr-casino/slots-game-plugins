@@ -2,6 +2,7 @@ require "math"
 require "Core"
 
 {{machineName}}BaseGameMachineWaysMechanic = {
+    machine = nil,
 }
 
 function {{machineName}}BaseGameMachineWaysMechanic:new(o)
@@ -12,6 +13,7 @@ function {{machineName}}BaseGameMachineWaysMechanic:new(o)
 end
 
 function {{machineName}}BaseGameMachineWaysMechanic:Initialize(machine)
+    self.machine = machine
     -- Appending new entries to the table
     {{machineName}}BaseGameMachine.BaseGameStateDispatchTable.Paying = function()
         self:BaseGamePaying(machine)
@@ -23,7 +25,7 @@ end
 
 function {{machineName}}BaseGameMachineWaysMechanic:BaseGamePaying(machine)
     {{machineName}}BaseGameState.SpinState.First.State = "WaitingForPayToComplete"
-    System.StartCoroutine(machine, "BaseGamePayout")
+    System.StartCoroutine(self, "BaseGamePayout")
 end
 
 function {{machineName}}BaseGameMachineWaysMechanic:WaitingForPayToComplete(machine)    
@@ -58,9 +60,10 @@ function {{machineName}}BaseGameMachineWaysMechanic:WaitForPayToComplete()
     end
 end
 
-function {{machineName}}BaseGameMachineWaysMechanic:BaseGamePayout(machine)
+function {{machineName}}BaseGameMachineWaysMechanic:BaseGamePayout()
     series
         do
+            local machine = self.machine
             self:DisplayWays(machine)
         end
     end        
@@ -137,7 +140,7 @@ function {{machineName}}BaseGameMachineWaysMechanic:DisplayWays(machine)
                 machine:OnPayingCompleted()
                 return
             end
-            System.StartCoroutine(machine, "BaseGamePayout")
+            System.StartCoroutine(self, "BaseGamePayout")
         end
     end
 end
