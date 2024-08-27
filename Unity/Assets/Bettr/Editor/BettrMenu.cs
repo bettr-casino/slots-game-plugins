@@ -1530,7 +1530,7 @@ namespace Bettr.Editor
                         var baseGameMechanics = GetTableArray<string>(mechanicsTable, pk, "Mechanic");
                         foreach (var baseGameMechanic in baseGameMechanics)
                         {
-                            switch (baseGameMechanic)
+                            switch (baseGameMechanic.ToLower())
                             {
                                 case "ways":
                                     BaseGameWaysMechanic.Process(machineName, machineVariant, runtimeAssetPath);
