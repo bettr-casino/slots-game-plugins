@@ -821,6 +821,21 @@ namespace Bettr.Editor
 
                 }
             }
+            
+            var allGameVariantOutcomes = LoadGameVariantOutcomesFromWeb();
+            foreach (var gameOutcomes in allGameVariantOutcomes)
+            {
+                foreach (var gameVariantOutcomes in gameOutcomes.Value)
+                {
+                    var localGameVariantOutcomesDirectory = $"{LocalOutcomesDirectory}/{gameOutcomes.Key}/{gameVariantOutcomes.Key}";
+                    BuildDirectory(new DirectoryInfo(localGameVariantOutcomesDirectory));
+                    foreach (var gameVariantOutcome in gameVariantOutcomes.Value)
+                    {
+                        var localGameVariantOutcomeFile = $"{localGameVariantOutcomesDirectory}/{gameVariantOutcome.Key}";
+                        File.WriteAllText(localGameVariantOutcomeFile, gameVariantOutcome.Value);
+                    }
+                }
+            }
 
             Debug.Log("Refreshing database after building local outcomes.");
             
@@ -939,6 +954,29 @@ namespace Bettr.Editor
             }
             return allOutcomes;
         }
+        
+        private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> LoadGameVariantOutcomesFromWeb()
+        {
+            var allOutcomes = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
+            var gameConfigs = DownloadGameConfigs();
+            foreach (var gameConfig in gameConfigs.GameConfigs)
+            {
+                var gameId = gameConfig.Key;
+                var gameDetails = gameConfig.Value;
+                if (gameDetails.GameVariantConfigs != null)
+                {
+                    allOutcomes[gameId] = new Dictionary<string, Dictionary<string, string>>();
+                    foreach (var gameVariantConfig in gameDetails.GameVariantConfigs)
+                    {
+                        var gameVariantId = gameVariantConfig.Key;
+                        var gameVariantDetails = gameVariantConfig.Value;
+                        var outcomes = DownloadGameVariantOutcomes(gameId, gameVariantId, gameVariantDetails.OutcomeCount);
+                        allOutcomes[gameId][gameVariantId] = outcomes;
+                    }
+                }
+            }
+            return allOutcomes;
+        }
 
         public static GameConfigsWrapper DownloadGameConfigs()
         {
@@ -965,6 +1003,31 @@ namespace Bettr.Editor
                 var outcomeId = (i+1).ToString("D9"); // Format as a 9-digit number with leading zeros
                 var fileName = $"{gameId}Outcome{outcomeId}.cscript.txt";
                 var fileUrl = $"{OutcomesServerBaseURL}/latest/Outcomes/{fileName}";
+
+                try
+                {
+                    var fileContents = webClient.DownloadString(fileUrl);
+                    outcomes[fileName] = fileContents;
+
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"Failed to download {fileUrl}: {ex.Message}");
+                }
+            }
+
+            return outcomes;
+        }
+        
+        static Dictionary<string, string> DownloadGameVariantOutcomes(string gameId, string gameVariantId, int outcomeCount)
+        {
+            var outcomes = new Dictionary<string, string>();
+            using var webClient = new WebClient();
+            for (var i = 0; i < outcomeCount; i++)
+            {
+                var outcomeId = (i+1).ToString("D9"); // Format as a 9-digit number with leading zeros
+                var fileName = $"{gameId}Outcome{outcomeId}.cscript.txt";
+                var fileUrl = $"{OutcomesServerBaseURL}/latest/Outcomes/{gameId}/{gameVariantId}/{fileName}";
 
                 try
                 {
