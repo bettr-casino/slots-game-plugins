@@ -954,7 +954,7 @@ namespace Bettr.Editor
             using var webClient = new WebClient();
             for (var i = 0; i < outcomeCount; i++)
             {
-                var outcomeId = i.ToString("D9"); // Format as a 9-digit number with leading zeros
+                var outcomeId = (i+1).ToString("D9"); // Format as a 9-digit number with leading zeros
                 var fileName = $"{gameId}Outcome{outcomeId}.cscript.txt";
                 var fileUrl = $"{OutcomesServerBaseURL}/latest/Outcomes/{fileName}";
 
@@ -966,7 +966,7 @@ namespace Bettr.Editor
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Failed to download {fileUrl}: {ex.Message}");
+                    Debug.LogError($"Failed to download {fileUrl}: {ex.Message}");
                 }
             }
 

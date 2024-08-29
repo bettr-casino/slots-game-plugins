@@ -69,7 +69,7 @@ function {{machineName}}BaseGameMachinePaylinesMechanic:DisplayPaylines(machine)
             end
             local state = {{machineName}}BaseGamePaylinesState.Paylines.First
             local paylines = {{machineName}}BaseGamePaylines.Paylines.Array
-            local matrix = {{machineName}}BaseGamePaylinesMatrix                        
+            local paylinesMatrix = {{machineName}}BaseGamePaylinesMatrix                        
             state.PaysRollup = BettrUser.Coins 
             count = summary.PaylinesCount
             local startDelay = summary.DisplayLoopStartDelay
@@ -92,7 +92,7 @@ function {{machineName}}BaseGameMachinePaylinesMechanic:DisplayPaylines(machine)
                         local paylineId = payline.PaylineId
                         local pay = payline.Pay
                         local totalPay = payline.Pays
-                        local matrix = matrix[symbol].Array
+                        local matrix = paylinesMatrix[symbol].Array
                         -- update status text 
                         local statusTexts = machine.StatusTexts
                         -- {0}        Pays  {1} x {2} ways = {3} CREDITS!!
