@@ -39,6 +39,7 @@ namespace Bettr.Editor
         public Dictionary<string, GameDetails> GameConfigs { get; set; }
     }
 
+    [Serializable]
     public class GameDetails
     {
         public int OutcomeCount { get; set; }
