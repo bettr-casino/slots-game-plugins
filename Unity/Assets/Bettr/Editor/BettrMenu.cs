@@ -43,6 +43,13 @@ namespace Bettr.Editor
     public class GameDetails
     {
         public int OutcomeCount { get; set; }
+        public Dictionary<string, GameVariantDetails> GameVariantConfigs { get; set; }
+    }
+    
+    [Serializable]
+    public class GameVariantDetails
+    {
+        public int OutcomeCount { get; set; }
     }
     
     public static class BettrMenu
