@@ -73,12 +73,12 @@ namespace Bettr.Core
             this.HashKey = hashKey;
         }
         
-        public IEnumerator LoadServerOutcome(string gameId)
+        public IEnumerator LoadServerOutcome(string gameId, string gameVariantId)
         {
             // Load the Outcomes
             if (UseFileSystemOutcomes)
             {
-                yield return LoadFileSystemOutcome(gameId);
+                yield return LoadFileSystemOutcome(gameId, gameVariantId);
             }
             else
             {
@@ -86,6 +86,7 @@ namespace Bettr.Core
             }
         }
         
+        // TODO: FIXME: Include the variant 
         IEnumerator LoadWebOutcome(string gameId)
         {
             var bettrOutcomeRequestPayload = new BettrOutcomeRequestPayload()
@@ -127,12 +128,12 @@ namespace Bettr.Core
             }
         }
 
-        IEnumerator LoadFileSystemOutcome(string gameId)
+        IEnumerator LoadFileSystemOutcome(string gameId, string gameVariantId)
         {
             var outcomeNumber = (OutcomeNumber > 0) ? OutcomeNumber : GetRandomOutcomeNumber(gameId);
             var className = $"{gameId}Outcome{outcomeNumber:D9}";
             var fileName = $"{className}.cscript.txt";
-            var filePath = Path.Combine(FileSystemOutcomesBaseURL, gameId, fileName);
+            var filePath = Path.Combine(FileSystemOutcomesBaseURL, gameId, gameVariantId, fileName);
             var assetBundleManifestURL = filePath;
             var assetBundleManifestBytes = File.ReadAllBytes(assetBundleManifestURL);
 
