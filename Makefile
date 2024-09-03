@@ -57,8 +57,8 @@ BUILD_WEBGL := ${BUILDS_HOME}/WebGL
 LOGS_WEBGL := ${LOGS_HOME}/WebGL
 BUILD_METHOD_WEBGL := "Bettr.Editor.CommandLine.BuildWebGL"
 
-S3_WEBGL_BUCKET := bettr-casino-assets
-S3_WEBGL_OBJECT_KEY := "builds/webgl"
+S3_WEBGL_BUCKET := bettr-casino-static-website
+S3_WEBGL_OBJECT_KEY := ""
 
 APPLE_ID := ${APPLE_ID}
 APPLE_PASSWORD := ${APPLE_PASSWORD}
