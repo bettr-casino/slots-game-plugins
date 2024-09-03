@@ -166,6 +166,8 @@ sync-machines:
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game002 -machineVariant BuffaloAdventureQuest -machineModel $(MODELS_DIR)/Game002/Game002Models.lua
 	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game002 -machineVariant BuffaloCanyonRiches -machineModel $(MODELS_DIR)/Game002/Game002Models.lua
+	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game002 -machineVariant BuffaloFrontierFortune -machineModel $(MODELS_DIR)/Game002/Game002Models.lua
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game002 -machineVariant BuffaloJackpotMadness -machineModel $(MODELS_DIR)/Game002/Game002Models.lua
@@ -173,6 +175,10 @@ sync-machines:
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game002 -machineVariant BuffaloMagicSpins -machineModel $(MODELS_DIR)/Game002/Game002Models.lua
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game002 -machineVariant BuffaloSafariExpedition -machineModel $(MODELS_DIR)/Game002/Game002Models.lua
+	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game002 -machineVariant BuffaloSpiritQuest -machineModel $(MODELS_DIR)/Game002/Game002Models.lua
+	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game002 -machineVariant BuffaloThunderstorm -machineModel $(MODELS_DIR)/Game002/Game002Models.lua
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game002 -machineVariant BuffaloTreasureHunter -machineModel $(MODELS_DIR)/Game002/Game002Models.lua
 	sleep $(SLEEP_DURATION)
@@ -188,11 +194,21 @@ sync-machines:
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game003 -machineVariant HighStakesHotLinks -machineModel $(MODELS_DIR)/Game003/Game003Models.lua
 	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game003 -machineVariant HighStakesJungleQuest -machineModel $(MODELS_DIR)/Game003/Game003Models.lua
+	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game003 -machineVariant HighStakesMegaMultipliers -machineModel $(MODELS_DIR)/Game003/Game003Models.lua
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game003 -machineVariant HighStakesMonacoThrills -machineModel $(MODELS_DIR)/Game003/Game003Models.lua
 	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game003 -machineVariant HighStakesSafariAdventure -machineModel $(MODELS_DIR)/Game003/Game003Models.lua
+	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game003 -machineVariant HighStakesSpaceOdyssey -machineModel $(MODELS_DIR)/Game003/Game003Models.lua
+	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game003 -machineVariant HighStakesStackedSpins -machineModel $(MODELS_DIR)/Game003/Game003Models.lua
+	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game003 -machineVariant HighStakesUnderwaterAdventure -machineModel $(MODELS_DIR)/Game003/Game003Models.lua
+	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game003 -machineVariant HighStakesWildSpins -machineModel $(MODELS_DIR)/Game003/Game003Models.lua
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game003 -machineVariant HighStakesWonderWays -machineModel $(MODELS_DIR)/Game003/Game003Models.lua
 	sleep $(SLEEP_DURATION)
@@ -202,21 +218,31 @@ sync-machines:
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game004 -machineVariant RichesDiamondDash -machineModel $(MODELS_DIR)/Game004/Game004Models.lua
 	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game004 -machineVariant RichesGalacticGoldRush -machineModel $(MODELS_DIR)/Game004/Game004Models.lua
+	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game004 -machineVariant RichesJetsetJackpot -machineModel $(MODELS_DIR)/Game004/Game004Models.lua
+	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game004 -machineVariant RichesMysticForest -machineModel $(MODELS_DIR)/Game004/Game004Models.lua
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game004 -machineVariant RichesPharaohsRiches -machineModel $(MODELS_DIR)/Game004/Game004Models.lua
 	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game004 -machineVariant RichesPiratesBounty -machineModel $(MODELS_DIR)/Game004/Game004Models.lua
+	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game004 -machineVariant RichesRaceToRiches -machineModel $(MODELS_DIR)/Game004/Game004Models.lua
+	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game004 -machineVariant RichesRoyalHeist -machineModel $(MODELS_DIR)/Game004/Game004Models.lua
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game004 -machineVariant RichesRubyRush -machineModel $(MODELS_DIR)/Game004/Game004Models.lua
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game004 -machineVariant RichesSapphireSprint -machineModel $(MODELS_DIR)/Game004/Game004Models.lua
 	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game005 -machineVariant FortunesCelestialFortune -machineModel $(MODELS_DIR)/Game004/Game004Models.lua
+	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game005 -machineVariant FortunesFortuneTeller -machineModel $(MODELS_DIR)/Game004/Game004Models.lua
+	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game005 -machineVariant FortunesFourLeafClover -machineModel $(MODELS_DIR)/Game005/Game005Models.lua
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game005 -machineVariant FortunesJadeOfFortune -machineModel $(MODELS_DIR)/Game005/Game005Models.lua
-	sleep $(SLEEP_DURATION)
-	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game005 -machineVariant FortunesKeysOfFortune -machineModel $(MODELS_DIR)/Game005/Game005Models.lua
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game005 -machineVariant FortunesLuckyBamboo -machineModel $(MODELS_DIR)/Game005/Game005Models.lua
 	sleep $(SLEEP_DURATION)
@@ -224,9 +250,17 @@ sync-machines:
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game005 -machineVariant FortunesManekiNeko -machineModel $(MODELS_DIR)/Game005/Game005Models.lua
 	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game005 -machineVariant FortunesMysticForest -machineModel $(MODELS_DIR)/Game005/Game005Models.lua
+	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game005 -machineVariant FortunesNorseAcorns -machineModel $(MODELS_DIR)/Game005/Game005Models.lua
 	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game005 -machineVariant FortunesPharosRiches -machineModel $(MODELS_DIR)/Game005/Game005Models.lua
+	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game005 -machineVariant FortunesShootingStars -machineModel $(MODELS_DIR)/Game005/Game005Models.lua
+	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game005 -machineVariant FortunesVikingVoyage -machineModel $(MODELS_DIR)/Game005/Game005Models.lua
+	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game006 -machineVariant WheelsAncientKingdom -machineModel $(MODELS_DIR)/Game006/Game006Models.lua
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game006 -machineVariant WheelsCapitalCityTycoon -machineModel $(MODELS_DIR)/Game006/Game006Models.lua
 	sleep $(SLEEP_DURATION)
@@ -238,11 +272,21 @@ sync-machines:
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game006 -machineVariant WheelsIndustrialRevolution -machineModel $(MODELS_DIR)/Game006/Game006Models.lua
 	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game006 -machineVariant WheelsJurassicJungle -machineModel $(MODELS_DIR)/Game006/Game006Models.lua
+	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game006 -machineVariant WheelsMythicalRealm -machineModel $(MODELS_DIR)/Game006/Game006Models.lua
+	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game006 -machineVariant WheelsRealEstateMogul -machineModel $(MODELS_DIR)/Game006/Game006Models.lua
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game006 -machineVariant WheelsSpaceColonization -machineModel $(MODELS_DIR)/Game006/Game006Models.lua
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game006 -machineVariant WheelsTreasureIslandTycoon -machineModel $(MODELS_DIR)/Game006/Game006Models.lua
+	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game006 -machineVariant WheelsUnderwaterEmpire -machineModel $(MODELS_DIR)/Game006/Game006Models.lua
+	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game007 -machineVariant TrueVegasDiamondDazzle -machineModel $(MODELS_DIR)/Game007/Game007Models.lua
+	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game007 -machineVariant TrueVegasGoldRush -machineModel $(MODELS_DIR)/Game007/Game007Models.lua
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game007 -machineVariant TrueVegasInfiniteSpins -machineModel $(MODELS_DIR)/Game007/Game007Models.lua
 	sleep $(SLEEP_DURATION)
@@ -252,6 +296,8 @@ sync-machines:
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game007 -machineVariant TrueVegasMegaWheels -machineModel $(MODELS_DIR)/Game007/Game007Models.lua
 	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game007 -machineVariant TrueVegasRubyRiches -machineModel $(MODELS_DIR)/Game007/Game007Models.lua
+	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game007 -machineVariant TrueVegasSuper7s -machineModel $(MODELS_DIR)/Game007/Game007Models.lua
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game007 -machineVariant TrueVegasTripleSpins -machineModel $(MODELS_DIR)/Game007/Game007Models.lua
@@ -260,9 +306,15 @@ sync-machines:
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game007 -machineVariant TrueVegasWildCherries -machineModel $(MODELS_DIR)/Game007/Game007Models.lua
 	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game008 -machineVariant GodsAncientEgyptian -machineModel $(MODELS_DIR)/Game008/Game008Models.lua
+	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game008 -machineVariant GodsCelestialBeasts -machineModel $(MODELS_DIR)/Game008/Game008Models.lua
+	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game008 -machineVariant GodsCelestialGuardians -machineModel $(MODELS_DIR)/Game008/Game008Models.lua
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game008 -machineVariant GodsDivineRiches -machineModel $(MODELS_DIR)/Game008/Game008Models.lua
+	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game008 -machineVariant GodsElementalMasters -machineModel $(MODELS_DIR)/Game008/Game008Models.lua
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game008 -machineVariant GodsEternalDivinity -machineModel $(MODELS_DIR)/Game008/Game008Models.lua
 	sleep $(SLEEP_DURATION)
@@ -272,11 +324,17 @@ sync-machines:
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game008 -machineVariant GodsMythicDeities -machineModel $(MODELS_DIR)/Game008/Game008Models.lua
 	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game008 -machineVariant GodsNorseLegends -machineModel $(MODELS_DIR)/Game008/Game008Models.lua
+	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game008 -machineVariant GodsSacredLegends -machineModel $(MODELS_DIR)/Game008/Game008Models.lua
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game008 -machineVariant GodsTitansOfWealth -machineModel $(MODELS_DIR)/Game008/Game008Models.lua
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game009 -machineVariant SpaceInvadersApolloAdventurers -machineModel $(MODELS_DIR)/Game009/Game009Models.lua
+	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game009 -machineVariant SpaceInvadersAsteroidMiners -machineModel $(MODELS_DIR)/Game009/Game009Models.lua
+	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game009 -machineVariant SpaceInvadersBlackHoleExplorers -machineModel $(MODELS_DIR)/Game009/Game009Models.lua
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game009 -machineVariant SpaceInvadersCosmicRaiders -machineModel $(MODELS_DIR)/Game009/Game009Models.lua
 	sleep $(SLEEP_DURATION)
@@ -286,7 +344,11 @@ sync-machines:
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game009 -machineVariant SpaceInvadersNebulaNavigators -machineModel $(MODELS_DIR)/Game009/Game009Models.lua
 	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game009 -machineVariant SpaceInvadersQuantumExplorers -machineModel $(MODELS_DIR)/Game009/Game009Models.lua
+	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game009 -machineVariant SpaceInvadersRaidersOfPlanetMooney -machineModel $(MODELS_DIR)/Game009/Game009Models.lua
+	sleep $(SLEEP_DURATION)
+	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game009 -machineVariant SpaceInvadersStarshipSalvagers -machineModel $(MODELS_DIR)/Game009/Game009Models.lua
 	sleep $(SLEEP_DURATION)
 	${UNITY_APP} -batchmode -logFile $(ASSET_DATA_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(SYNC_MACHINE_METHOD) -machineName Game009 -machineVariant SpaceInvadersStellarExpedition -machineModel $(MODELS_DIR)/Game009/Game009Models.lua
 	sleep $(SLEEP_DURATION)
