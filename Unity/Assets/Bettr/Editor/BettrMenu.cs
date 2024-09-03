@@ -522,35 +522,35 @@ namespace Bettr.Editor
             
 #endif
 #if UNITY_ANDROID
-            EmptyDirectory(new DirectoryInfo(AssetBundlesAndroidDirectory));
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesAndroidDirectory));
             AssetDatabase.Refresh();
             BuildPipeline.BuildAssetBundles(AssetBundlesAndroidDirectory, 
                 sharedAssetBundleOptions,
                 BuildTarget.Android);
 #endif
 #if UNITY_WEBGL
-            EmptyDirectory(new DirectoryInfo(AssetBundlesWebglDirectory));
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesWebglDirectory));
             AssetDatabase.Refresh();
             BuildPipeline.BuildAssetBundles(AssetBundlesWebglDirectory, 
                 sharedAssetBundleOptions,
                 BuildTarget.WebGL);
 #endif
 #if UNITY_OSX
-            EmptyDirectory(new DirectoryInfo(AssetBundlesOSXDirectory));
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesOSXDirectory));
             AssetDatabase.Refresh();
             BuildPipeline.BuildAssetBundles(AssetBundlesOSXDirectory, 
                 sharedAssetBundleOptions,
                 BuildTarget.StandaloneOSX);
 #endif
 #if UNITY_WIN
-            EmptyDirectory(new DirectoryInfo(AssetBundlesWindowsDirectory));
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesWindowsDirectory));
             AssetDatabase.Refresh();
             BuildPipeline.BuildAssetBundles(AssetBundlesWindowsDirectory, 
                 sharedAssetBundleOptions,
                 BuildTarget.StandaloneWindows64);
 #endif
 #if UNITY_LINUX   
-            EmptyDirectory(new DirectoryInfo(AssetBundlesLinuxDirectory));
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesLinuxDirectory));
             AssetDatabase.Refresh();
             BuildPipeline.BuildAssetBundles(AssetBundlesLinuxDirectory, 
                 sharedAssetBundleOptions,
