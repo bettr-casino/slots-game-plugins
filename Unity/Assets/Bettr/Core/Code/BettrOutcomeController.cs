@@ -19,6 +19,9 @@ namespace Bettr.Core
     {
         [JsonProperty("gameId")]
         public string GameId { get; set; }
+
+        [JsonProperty("gameVariantId")]
+        public string GameVariantId { get; set; }
         
         [JsonProperty("userId")]
         public string UserId { get; set; }
@@ -82,16 +85,17 @@ namespace Bettr.Core
             }
             else
             {
-                yield return LoadWebOutcome(gameId);
+                yield return LoadWebOutcome(gameId, gameVariantId);
             }
         }
         
         // TODO: FIXME: Include the variant 
-        IEnumerator LoadWebOutcome(string gameId)
+        IEnumerator LoadWebOutcome(string gameId, string gameVariantId)
         {
             var bettrOutcomeRequestPayload = new BettrOutcomeRequestPayload()
             {
                 GameId = gameId,
+                GameVariantId = gameVariantId,
                 UserId = BettrUserController.BettrUserConfig.UserId,
                 HashKey = HashKey,
             };
@@ -130,7 +134,7 @@ namespace Bettr.Core
 
         IEnumerator LoadFileSystemOutcome(string gameId, string gameVariantId)
         {
-            var outcomeNumber = (OutcomeNumber > 0) ? OutcomeNumber : GetRandomOutcomeNumber(gameId);
+            var outcomeNumber = (OutcomeNumber > 0) ? OutcomeNumber : GetRandomOutcomeNumber(gameId, gameVariantId);
             var className = $"{gameId}Outcome{outcomeNumber:D9}";
             var fileName = $"{className}.cscript.txt";
             var filePath = Path.Combine(FileSystemOutcomesBaseURL, gameId, gameVariantId, fileName);
@@ -144,7 +148,7 @@ namespace Bettr.Core
             yield break;
         }
 
-        private int GetRandomOutcomeNumber(string gameId)
+        private int GetRandomOutcomeNumber(string gameId, string gameVariantId)
         {
             if (OutcomeCounts.TryGetValue(gameId, out var count))
             {
@@ -155,7 +159,7 @@ namespace Bettr.Core
             }
             
             var regex = new Regex($@"^{gameId}Outcome\d{{9}}\.cscript.txt$");
-            var directoryPath = Path.Combine(FileSystemOutcomesBaseURL, gameId);
+            var directoryPath = Path.Combine(FileSystemOutcomesBaseURL, gameId, gameVariantId);
             var files = Directory.GetFiles(directoryPath);
             var filteredFiles = files.Where(file => regex.IsMatch(Path.GetFileName(file))).ToArray();
             var outcomeCount = filteredFiles.Length;
