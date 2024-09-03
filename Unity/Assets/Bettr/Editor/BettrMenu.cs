@@ -303,7 +303,7 @@ namespace Bettr.Editor
             
             Environment.SetEnvironmentVariable("machineName", machineName);
             Environment.SetEnvironmentVariable("machineVariant", machineVariant);
-            Environment.SetEnvironmentVariable("machineModel", $"{modelsDir}/{machineName}/{machineName}Models.lua");
+            Environment.SetEnvironmentVariable("machineModel", $"{modelsDir}/{machineName}/{machineVariant}/{machineName}Models.lua");
 
             BuildMachinesFromCommandLine();
         }
