@@ -25,21 +25,25 @@ function Game003BaseGameMachineMechanics:Initialize(machine)
 end
 
 function Game003BaseGameMachineMechanics:BaseGamePayout(machine)
-    series
-        do
-        
-            self.PaylinesMechanic:BaseGamePayout(machine)
-            
-        end
+    -- this is hardcoded
+    -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
+    if self.CascadingReelsMechanic ~= nil then
+       self.CascadingReelsMechanic:BaseGamePayout(machine)
+    elseif self.WaysMechanic ~= nil then
+       self.WaysMechanic:BaseGamePayout(machine)
+    elseif self.PaylinesMechanic ~= nil then
+       self.PaylinesMechanic:BaseGamePayout(machine)
     end
 end
 
 function Game003BaseGameMachineMechanics:OnSpinButtonClicked(machine)
-    series
-        do
-        
-            self.PaylinesMechanic:OnSpinButtonClicked()
-            
-        end
+    -- this is hardcoded
+    -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
+    if self.CascadingReelsMechanic ~= nil then
+       self.CascadingReelsMechanic:OnSpinButtonClicked(machine)
+    elseif self.WaysMechanic ~= nil then
+       self.WaysMechanic:OnSpinButtonClicked(machine)
+    elseif self.PaylinesMechanic ~= nil then
+       self.PaylinesMechanic:OnSpinButtonClicked(machine)
     end
 end
