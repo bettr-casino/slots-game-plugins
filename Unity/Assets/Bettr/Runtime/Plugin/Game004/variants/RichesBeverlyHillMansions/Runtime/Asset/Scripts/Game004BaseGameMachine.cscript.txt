@@ -1,8 +1,10 @@
 require "math"
 require "Core"
 require "Game004BaseGameReel"
+require "Game004BaseGameMachineMechanics"
 
 Game004BaseGameMachine = {
+    Mechanics = nil,
 }
 
 function Game004BaseGameMachine:new(o)
@@ -22,6 +24,8 @@ end
 
 function Game004BaseGameMachine:Awake()
 	System.Print("Game004BaseGameMachine Awake tile id={0}", self.id)
+	self.Mechanics = Game004BaseGameMachineMechanics:new()
+	self.Mechanics:Initialize(self)
 end
 
 function Game004BaseGameMachine:Start()
@@ -36,66 +40,15 @@ function Game004BaseGameMachine:Start()
 end
 
 function Game004BaseGameMachine:OnSpinButtonClicked()
-    self:CancelPaylinesAnimation()
     series
         do
-            self:WaitForPayToComplete()                       
+            self.Mechanics:OnSpinButtonClicked(self)
             self:SpinEngines()
             self:WaitForApplyOutcomeDelay()
             self:LoadServerOutcome()
             self:OnOutcomeReceived()
         end
     end
-end
-
-function Game004BaseGameMachine:CancelPaylinesAnimation()
-    Game004BaseGameState.DisplayState.First.State = "CancelRequested"
-end
-
-function Game004BaseGameMachine:RollUpPaylinesWin(paylinesSummary)
-    series
-        do
-            -- rollup paylines win once
-            local startDelay = paylinesSummary.DisplayLoopStartDelay
-            local duration = paylinesSummary.DisplayLoopDuration
-            local pays = paylinesSummary.Pays 
-            System.WaitForSeconds(startDelay)
-            local winTextProperty = self.WinText
-            
-            BettrVisualsController.RollUpCounter(winTextProperty, 0, pays, 1)
-            
-            local creditsTextProperty = self.CreditsText   
-            local oldCoins = BettrUser.Coins
-            local newCoins = oldCoins + pays            
-            BettrUser.Coins = newCoins  
-                      
-            BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 1)
-        end
-    end    
-end
-
-function Game004BaseGameMachine:WaitForPayToComplete()
-    series
-        do
-            if Game004BaseGameState.SpinState.First.State == "WaitingForPayToComplete" then
-                local paylinesSummary = Game004BaseGamePaylinesSummary.Paylines.First
-                local delay = paylinesSummary.DisplayLoopEndDelay
-                while Game004BaseGameState.SpinState.First.State == "WaitingForPayToComplete" do
-                    Game004BaseGameState.DisplayState.First.State = "CancelRequested"
-                    System.WaitForSeconds(delay)
-                end
-            end
-            Game004BaseGameState.DisplayState.First.State = "Idle"            
-        end
-    end
-end
-
-function Game004BaseGameMachine:WaitingForPayToComplete()    
-end
-
-function Game004BaseGameMachine:BaseGamePaying()
-    Game004BaseGameState.SpinState.First.State = "WaitingForPayToComplete"
-    System.StartCoroutine(self, "BaseGamePayout")
 end
 
 function Game004BaseGameMachine:ConfigureSettings()
@@ -153,81 +106,9 @@ end
 function Game004BaseGameMachine:BaseGamePayout()
     series
         do
-            local paylinesSummary = Game004BaseGamePaylinesSummary.Paylines.First
-            local paylinesIndex = paylinesSummary.PaylinesIndex
-            local paylinesCount = paylinesSummary.PaylinesCount
-            if paylinesCount > 0 then
-                local paylines = Game004BaseGamePaylines.Paylines.Array
-                local paylinesMatrix = Game004BaseGamePaylinesMatrix
-                parallel
-                    do
-                        self:DisplayPaylines(paylinesSummary, paylinesMatrix, paylines)            
-                    end
-                    do
-                        if paylinesIndex == 0 then
-                            self:RollUpPaylinesWin(paylinesSummary)
-                        end
-                    end
-                end
-                if paylinesIndex >= 1 then
-                    self:OnPayingCompleted()
-                elseif Game004BaseGameState.DisplayState.First.State == "CancelRequested" then
-                    self:OnPayingCompleted()
-                else
-                    System.StartCoroutine(self, "BaseGamePayout")
-                end
-            else
-                self:OnPayingCompleted()
-            end
+            self.Mechanics:BaseGamePayout(self)
         end
     end      
-end
-
-function Game004BaseGameMachine:DisplayPaylines(paylinesSummary, paylinesMatrix, paylines)
-    series
-        do
-            local paylinesIndex = paylinesSummary.PaylinesIndex   
-            local paylinesCount = paylinesSummary.PaylinesCount 
-            local startDelay = paylinesSummary.DisplayLoopStartDelay
-            local duration = paylinesSummary.DisplayLoopDuration
-            local endDelay = paylinesSummary.DisplayLoopEndDelay            
-            if paylinesIndex == 0 then
-                System.WaitForSeconds(startDelay)
-            end
-            for paylinesCounterIndex = 1, paylinesCount do
-                series
-                    do
-                        if Game004BaseGameState.DisplayState.First.State == "CancelRequested" then
-                            break
-                        end
-                        local payline = paylines[paylinesCounterIndex]
-                        local paylineId = payline.PaylineId
-                        local paylineSymbol = payline.Symbol
-                        local paylineReelCount = payline.ReelCount
-                        local paylineMultiplier = payline.Multiplier
-                        local paylinePay = payline.Pay
-                        local paylineTotalPay = payline.Pays
-                        local paylineData = paylinesMatrix[paylineId].Array
-                        -- update status text 
-                        local statusTexts = self.StatusTexts
-                        -- Line {0} Wins  = {1} CREDITS!!
-                        statusTexts.FormatAndSetCurrentActive("PaysText", paylineId, paylineTotalPay)
-                        -- display paylines
-                        for i=1, paylineReelCount parallel do
-                            local reel = _G["Game004BaseGameReel" .. i]
-                            if reel ~= nil then
-                                reel:DisplayPaylines(paylineSymbol, paylineData, paylineId, duration)
-                                System.WaitForSeconds(duration)
-                                reel:HidePaylines(paylineSymbol, paylineData, paylineId)
-                            end
-                        end
-                    end
-                end                            
-            end
-            paylinesSummary.PaylinesIndex = paylinesIndex + 1
-            System.WaitForSeconds(endDelay) 
-        end
-    end
 end
 
 function Game004BaseGameMachine:UpdateStatusText(text)
@@ -271,7 +152,7 @@ end
 function Game004BaseGameMachine:LoadServerOutcome()
     series
         do
-            BettrOutcomeController.LoadServerOutcome("Game004")
+            BettrOutcomeController.LoadServerOutcome("Game004", "RichesBeverlyHillMansions")
         end
     end
 end
@@ -291,6 +172,8 @@ function Game004BaseGameMachine:SpinEngines()
     Game004BaseGameState.SpinState.First.State = "Spinning"
     local statusTexts = self.StatusTexts
     statusTexts.SetCurrentActive("GoodLuckText")
+    local winSymbols = self.WinSymbols
+    winSymbols.SetAllInactive()
     self:ResetSettings()
     parallel
         
@@ -387,8 +270,6 @@ Game004BaseGameMachine.BaseGameStateDispatchTable = {
     Waiting = Game004BaseGameMachine.BaseGameWaiting,
     Spinning = Game004BaseGameMachine.BaseGameSpinning,
     Completed = Game004BaseGameMachine.BaseGameCompleted,
-    Paying = Game004BaseGameMachine.BaseGamePaying,
-    WaitingForPayToComplete = Game004BaseGameMachine.WaitingForPayToComplete,
 }
 
 return Game004BaseGameMachine:new()

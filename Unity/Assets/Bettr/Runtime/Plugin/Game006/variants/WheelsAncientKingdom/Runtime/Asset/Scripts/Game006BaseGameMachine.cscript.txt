@@ -1,0 +1,275 @@
+require "math"
+require "Core"
+require "Game006BaseGameReel"
+require "Game006BaseGameMachineMechanics"
+
+Game006BaseGameMachine = {
+    Mechanics = nil,
+}
+
+function Game006BaseGameMachine:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game006BaseGameMachine:destroy()
+	System.Print("Game006BaseGameMachine destroy tile id={0}", self.id)
+end
+
+function Game006BaseGameMachine:OnError(callStack)
+	System.Error("Game006BaseGameMachine Error CallStack: {0}", callStack)
+end
+
+function Game006BaseGameMachine:Awake()
+	System.Print("Game006BaseGameMachine Awake tile id={0}", self.id)
+	self.Mechanics = Game006BaseGameMachineMechanics:new()
+	self.Mechanics:Initialize(self)
+end
+
+function Game006BaseGameMachine:Start()
+    series
+        do
+	        self:ConfigureSettings()
+	        self:ShowSettings()
+	        self:PlayStartAnimations()
+	        self:StartEngines()
+        end
+    end
+end
+
+function Game006BaseGameMachine:OnSpinButtonClicked()
+    series
+        do
+            self.Mechanics:OnSpinButtonClicked(self)
+            self:SpinEngines()
+            self:WaitForApplyOutcomeDelay()
+            self:LoadServerOutcome()
+            self:OnOutcomeReceived()
+        end
+    end
+end
+
+function Game006BaseGameMachine:ConfigureSettings()
+    self.CreditsText.SetText(BettrUser.Coins)
+    self.WinText.SetText("0")       
+    self.BetText.SetText(Game006BetMultiplierState.Current.First.BetMultiplier) 
+end
+
+function Game006BaseGameMachine:ShowSettings()
+    series
+        do
+            local settings = self["Settings"]
+            settings.SetActive(true)
+        end
+    end
+end
+
+function Game006BaseGameMachine:HideSettings()
+    series
+        do
+            local settings = self["Settings"]
+            settings.SetActive(false)
+        end
+    end
+end
+
+function Game006BaseGameMachine:ResetSettings()
+    self.WinText.SetText("0")
+end
+
+function Game006BaseGameMachine:Update()
+    local spinState = Game006BaseGameState.SpinState.First.State
+    self.BaseGameStateDispatchTable[spinState](self)    
+end
+
+function Game006BaseGameMachine:BaseGameSpinning()    
+end
+
+function Game006BaseGameMachine:BaseGameWaiting()    
+end
+
+function Game006BaseGameMachine:BaseGameCompleted()
+   self:ShowSettings()
+   Game006BaseGameState.SpinState.First.State = "Waiting"
+end
+
+function Game006BaseGameMachine:OnBaseGameSpinCompleted()
+    series
+        do
+            Game006BaseGameState.SpinState.First.State = "Completed"
+        end
+    end
+end
+
+function Game006BaseGameMachine:BaseGamePayout()
+    series
+        do
+            self.Mechanics:BaseGamePayout(self)
+        end
+    end      
+end
+
+function Game006BaseGameMachine:UpdateStatusText(text)
+end
+
+function Game006BaseGameMachine:PlayStartAnimations()
+    series
+        do
+            local animatorProperty = self["start"]
+            BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+        end        
+    end
+end
+
+function Game006BaseGameMachine:StartEngines()
+    parallel
+    
+            do
+                Game006BaseGameReel1:StartEngines()
+            end
+        
+            do
+                Game006BaseGameReel2:StartEngines()
+            end
+        
+            do
+                Game006BaseGameReel3:StartEngines()
+            end
+        
+            do
+                Game006BaseGameReel4:StartEngines()
+            end
+        
+            do
+                Game006BaseGameReel5:StartEngines()
+            end
+        
+    end
+end
+
+function Game006BaseGameMachine:LoadServerOutcome()
+    series
+        do
+            BettrOutcomeController.LoadServerOutcome("Game006", "WheelsAncientKingdom")
+        end
+    end
+end
+
+function Game006BaseGameMachine:WaitForApplyOutcomeDelay()
+    series
+        do
+            local outcomeDelayInMs = Game006BaseGameSpinProperties.ApplyOutcomeDelay.First.Value
+            if outcomeDelayInMs > 0 then
+                System.WaitForSeconds(outcomeDelayInMs / 1000)
+            end
+        end
+    end
+end
+
+function Game006BaseGameMachine:SpinEngines()
+    Game006BaseGameState.SpinState.First.State = "Spinning"
+    local statusTexts = self.StatusTexts
+    statusTexts.SetCurrentActive("GoodLuckText")
+    local winSymbols = self.WinSymbols
+    winSymbols.SetAllInactive()
+    self:ResetSettings()
+    parallel
+        
+                    do
+                        Game006BaseGameReel1:SpinEngines()
+                    end
+                
+                    do
+                        Game006BaseGameReel2:SpinEngines()
+                    end
+                
+                    do
+                        Game006BaseGameReel3:SpinEngines()
+                    end
+                
+                    do
+                        Game006BaseGameReel4:SpinEngines()
+                    end
+                
+                    do
+                        Game006BaseGameReel5:SpinEngines()
+                    end
+                
+    end
+end
+
+function Game006BaseGameMachine:UpdateBaseGameReelsSpinState(state)
+
+    Game006BaseGameReelSpinState.Reel1.First.ReelSpinState = state
+
+    Game006BaseGameReelSpinState.Reel2.First.ReelSpinState = state
+
+    Game006BaseGameReelSpinState.Reel3.First.ReelSpinState = state
+
+    Game006BaseGameReelSpinState.Reel4.First.ReelSpinState = state
+
+    Game006BaseGameReelSpinState.Reel5.First.ReelSpinState = state
+
+end
+
+function Game006BaseGameMachine:TryPaying()
+    Game006BaseGameState.SpinState.First.State = "Paying"
+end
+
+function Game006BaseGameMachine:CurrentSpinState()
+    return Game006BaseGameState.SpinState.First.State
+end
+
+function Game006BaseGameMachine:OnPayingCompleted()
+    self:OnBaseGameSpinCompleted()
+end
+
+function Game006BaseGameMachine:OnSpinReelsStopped()
+    self:UpdateBaseGameReelsSpinState("Waiting")
+    self:TryPaying()
+end
+
+function Game006BaseGameMachine:OnOutcomeReceived()
+    parallel
+        
+                    do
+                        Game006BaseGameReel1:OnOutcomeReceived()
+                    end
+                
+                    do
+                        Game006BaseGameReel2:OnOutcomeReceived()
+                    end
+                
+                    do
+                        Game006BaseGameReel3:OnOutcomeReceived()
+                    end
+                
+                    do
+                        Game006BaseGameReel4:OnOutcomeReceived()
+                    end
+                
+                    do
+                        Game006BaseGameReel5:OnOutcomeReceived()
+                    end
+                
+    end
+end
+
+function Game006BaseGameMachine:OnPointerClick()
+    System.Print("Game006BaseGameMachine OnPointerClick tile id={0}", self.id)
+    System.StartCoroutine(self, "OnSpinButtonClicked")
+end
+
+function Game006BaseGameMachine:OnBecameVisible()
+	System.Print("Game006BaseGameMachine OnBecameVisible tile id={0}", self.id)
+end
+
+Game006BaseGameMachine.BaseGameStateDispatchTable = {
+    Waiting = Game006BaseGameMachine.BaseGameWaiting,
+    Spinning = Game006BaseGameMachine.BaseGameSpinning,
+    Completed = Game006BaseGameMachine.BaseGameCompleted,
+}
+
+return Game006BaseGameMachine:new()
