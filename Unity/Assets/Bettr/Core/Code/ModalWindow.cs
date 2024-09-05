@@ -49,6 +49,8 @@ namespace Bettr.Core
             
             _activateInputFieldListeners = true;
             
+            StartApp();
+            
         }
         
         private void SplitAndStoreCode(string code)
