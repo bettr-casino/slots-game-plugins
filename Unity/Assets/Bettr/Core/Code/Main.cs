@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Linq;
+using System.Text.RegularExpressions;
 using CrayonScript.Code;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -48,6 +49,14 @@ namespace Bettr.Core
             
             DevTools.Instance.OnKeyPressed.AddListener(() =>
             {
+                // Check for Backspace or Delete key press
+                if (Input.GetKeyDown(KeyCode.Backspace) ||
+                    Input.GetKeyDown(KeyCode.Delete))
+                {
+                    // unload active scene
+                    StartCoroutine(BackToLobby());
+                    return;
+                }
                 // Find the SpinImage GameObject
                 var spinImage = GameObject.Find("SpinImage");
                 if (spinImage != null)
@@ -166,6 +175,27 @@ namespace Bettr.Core
             var appGameObject = allRootGameObjects.First((o => o.name == "App"));
             var appTile = appGameObject.GetComponent<Tile>();
             appTile.Call("SetCommitHash", _configData.AssetsVersion);
+        }
+        
+        public IEnumerator BackToLobby()
+        {
+            var mainLobbySceneName = "MainLobbyScene";
+            var activeSceneName = SceneManager.GetActiveScene().name;
+            if (activeSceneName == mainLobbySceneName)
+            {
+                yield break; // Do nothing and exit the coroutine
+            }
+            const string gameScenePattern = @"^Game\d{3}Scene$";
+            if (!Regex.IsMatch(activeSceneName, gameScenePattern))
+            {
+                yield break; // Exit the coroutine early if it doesn't match
+            }
+            AsyncOperation loadNewSceneOperation = SceneManager.LoadSceneAsync(mainLobbySceneName, LoadSceneMode.Single);
+            while (!loadNewSceneOperation.isDone)
+            {
+                yield return null; // Wait for the next frame
+            }
+            BettrVisualsController.SwitchOrientationToPortrait();
         }
     }
 }

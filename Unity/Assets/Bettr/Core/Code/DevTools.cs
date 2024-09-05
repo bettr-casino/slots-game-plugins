@@ -76,6 +76,14 @@ namespace Bettr.Core
         {
             if (currentState == State.WaitingForFirstKey)
             {
+                // Handle Backspace and Delete keys
+                if (Input.GetKeyDown(KeyCode.Backspace) || Input.GetKeyDown(KeyCode.Delete))
+                {
+                    OnKeyPressed.Invoke();
+                    ResetState();
+                    return;
+                }
+                
                 // Check for specific key presses from '1' to '9' and 'A' to 'Z'
                 for (int i = 0; i <= 9; i++)
                 {
