@@ -211,6 +211,7 @@ function Game007BaseGameReel:SpinReelStopped()
     local reelCount = Game007BaseGameLayout.ReelCount.First.Value
     local lastReeID = "Reel" .. reelCount
     if self.ReelID == lastReeID then
+        System.Print("Game007BaseGameReel:SpinReelStopped")
         Game007BaseGameMachine:OnSpinReelsStopped()
     end 
 end
