@@ -158,6 +158,28 @@ sync-machines:
 	done
 
 
+# adjust the MACHINE_NAME pattern accordingly
+sync-machines-specific:
+	@echo "Running sync-machines..."
+	@MODELS_DIR="${MODELS_DIR}"; \
+	for MACHINE_NAME_DIR in "$${MODELS_DIR}/"*/; do \
+		MACHINE_NAME=$$(basename "$${MACHINE_NAME_DIR}"); \
+		if [[ "$${MACHINE_NAME}" =~ ^Game007$$ ]]; then \
+			echo "Processing MACHINE_NAME: $${MACHINE_NAME}"; \
+			for MACHINE_VARIANT_DIR in "$${MACHINE_NAME_DIR}/"*/; do \
+				MACHINE_VARIANT=$$(basename "$${MACHINE_VARIANT_DIR}"); \
+				echo "Processing MACHINE_VARIANT: $${MACHINE_VARIANT}"; \
+				MACHINE_MODEL="$${MODELS_DIR}/$${MACHINE_NAME}/$${MACHINE_VARIANT}/$${MACHINE_NAME}Models.lua"; \
+				${UNITY_APP} -batchmode -logFile "${ASSET_DATA_LOG_FILE_PATH}" -quit -projectPath "${UNITY_PROJECT_PATH}" -executeMethod "${SYNC_MACHINE_METHOD}" -machineName "$${MACHINE_NAME}" -machineVariant "$${MACHINE_VARIANT}" -machineModel "$${MACHINE_MODEL}"; \
+				echo "Executed for MACHINE_NAME=$${MACHINE_NAME}, MACHINE_VARIANT=$${MACHINE_VARIANT}, MACHINE_MODEL=$${MACHINE_MODEL}"; \
+				sleep ${SLEEP_DURATION}; \
+			done; \
+		else \
+			echo "Skipping directory: $${MACHINE_NAME} (does not match Game<NNN> pattern)"; \
+		fi; \
+	done
+
+
 
 # =============================================================================
 #
