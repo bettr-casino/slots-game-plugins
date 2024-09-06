@@ -250,6 +250,7 @@ publish_webgl:
 	@aws s3 sync $(BUILD_WEBGL)/BettrSlots s3://$(S3_WEBGL_BUCKET)/$(S3_WEBGL_OBJECT_KEY) --profile $(AWS_DEFAULT_PROFILE) --include "*.gz" --content-encoding "gzip"
 	@echo "Publish completed."
 
+deploy-webgl: build_assets_webgl build_webgl publish_webgl
 
 # =============================================================================
 #
