@@ -39,7 +39,11 @@ AWS_DEFAULT_PROFILE := ${AWS_DEFAULT_PROFILE}
 MODELS_DIR := $(PWD)/../../bettr-infrastructure/bettr-infrastructure/tools/publish-data/published_models
 
 S3_BUCKET := bettr-casino-assets
+S3_ASSETS_LATEST_OBJECT_KEY := "assets/latest"
+
 S3_OBJECT_KEY := tasks
+
+ASSET_BUNDLES_BASE_DIRECTORY="$(PWD)/Unity/Assets/Bettr/LocalStore/AssetBundles"
 
 BETTR_CASINO_HOME := ${BETTR_CASINO_HOME}
 
@@ -106,30 +110,48 @@ prepare-project: preparedll
 
 # =============================================================================
 #
-# BUILD ASSETS
+# DEPLOY ASSETS
 #
 # =============================================================================
 
-build_assets_all:
+build-assets-all: prepare-project
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.CleanupTestScenes
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssets -buildTarget Android
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssets -buildTarget WebGL 
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssets -buildTarget iOS
 
-build_assets_ios:
+build-assets-ios: prepare-project
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.CleanupTestScenes
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssets -buildTarget iOS
 
-build_assets_android:
+build-assets-android: prepare-project
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.CleanupTestScenes
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssets -buildTarget Android
 
-build_assets_webgl:
+build_assets_webgl: prepare-project
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.CleanupTestScenes
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssets -buildTarget WebGL 
 
-build-assets: prepare-project build_assets_all
+publish-assets-all: build-assets-all
+# --delete flag will remove any files in the S3 bucket that are not present in the local directory
+	aws s3 sync $(ASSET_BUNDLES_BASE_DIRECTORY) s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY) --delete --profile $(AWS_DEFAULT_PROFILE)
 
+publish-assets-ios: build-assets-ios
+	aws s3 sync $(ASSET_BUNDLES_BASE_DIRECTORY) s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY)/iOS --delete --profile $(AWS_DEFAULT_PROFILE)
+
+publish-assets-android: build-assets-android
+	aws s3 sync $(ASSET_BUNDLES_BASE_DIRECTORY) s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY)/Android --delete --profile $(AWS_DEFAULT_PROFILE)
+
+publish-assets-webgl: build_assets_webgl
+	aws s3 sync $(ASSET_BUNDLES_BASE_DIRECTORY) s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY)/WebGL --delete --profile $(AWS_DEFAULT_PROFILE)
+
+deploy-assets-all: build-assets-all publish-assets-all
+
+deploy-assets-ios: build-assets-ios publish-assets-ios
+
+deploy-assets-android: build-assets-android publish-assets-android
+
+deploy-assets-webgl: build_assets_webgl publish-assets-webgl
 
 # =============================================================================
 #
@@ -137,7 +159,7 @@ build-assets: prepare-project build_assets_all
 #
 # =============================================================================
 
-sync-machines:
+sync-machines: prepare-project
 	@echo "Running sync-machines..."
 	@MODELS_DIR="${MODELS_DIR}"; \
 	for MACHINE_NAME_DIR in "$${MODELS_DIR}/"*/; do \
@@ -159,7 +181,7 @@ sync-machines:
 
 
 # adjust the MACHINE_NAME pattern accordingly
-sync-machines-specific:
+sync-machines-specific: prepare-project
 	@echo "Running sync-machines..."
 	@MODELS_DIR="${MODELS_DIR}"; \
 	for MACHINE_NAME_DIR in "$${MODELS_DIR}/"*/; do \
@@ -183,35 +205,35 @@ sync-machines-specific:
 
 # =============================================================================
 #
-# BUILD & DEPLOY UNITY IOS
+# DEPLOY UNITY IOS
 #
 # =============================================================================
 
-build_ios:
+build-target-ios: prepare-project
 	@echo "Building iOS project..."
 	@$(UNITY_APP) -quit -batchmode -logFile $(LOGS_IOS)/logfile.log -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(BUILD_METHOD_IOS) -buildOutput $(BUILD_IOS) -buildTarget iOS -development -scriptDebugging
 	@echo "Build completed."
 
-deploy_ios:
+deploy-target-ios: build-target-ios archive-target-ios
 	@echo "Creating IPA file and deploying to TestFlight..."
 	echo "(API_PRIVATE_KEYS_DIR is set in the environment to the path to the auth key file)"
 	CFBundleShortVersionString=$$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" $(APPLE_BUILD_INFO_PLIST)); \
 	echo "CFBundleShortVersionString: $$CFBundleShortVersionString"; \
 	xcodebuild -exportArchive -archivePath $(APPLE_ARCHIVE_PATH)/BettrSlots-$$CFBundleShortVersionString.xcarchive -exportOptionsPlist $(APPLE_EXPORT_OPTIONS_PLIST) -allowProvisioningUpdates
 
-clean_ios:
+clean-target-ios: 
 	@echo "Cleaning previous build artifacts..."
 	@rm -rf $(BUILD_IOS)/BettrSlots
 
-archive_ios:
+archive-target-ios: clean-target-ios build-target-ios
 	@echo "Archiving Xcode project..."
 	CFBundleShortVersionString=$$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" $(APPLE_BUILD_INFO_PLIST)); \
 	echo "CFBundleShortVersionString: $$CFBundleShortVersionString"; \
 	xcodebuild -project $(BUILD_IOS)/BettrSlots/Unity-iPhone.xcodeproj -scheme $(APPLE_BUILD_SCHEME) -configuration $(APPLE_BUILD_CONFIGURATION) -destination $(APPLE_BUILD_DESTINATION) -archivePath $(APPLE_ARCHIVE_PATH)/BettrSlots-$$CFBundleShortVersionString.xcarchive archive	
 
-bump: unity_patch_ios_build_version
+bump: unity-patch-version-target-ios
 
-unity_patch_bundle_version:
+unity-patch-bundle-version:
 	@echo "Incrementing Unity bundleVersion..."
 	$(eval CURRENT_BUNDLE_VERSION := $(shell grep 'bundleVersion' $(UNITY_PROJECT_SETTINGS) | sed -E 's/.*bundleVersion: (.*)/\1/'))
 	$(eval NEW_BUNDLE_VERSION := $(shell echo $(CURRENT_BUNDLE_VERSION) | awk -F'.' '{$$NF+=1;OFS="."}1' OFS='.'))
@@ -219,7 +241,7 @@ unity_patch_bundle_version:
 	@echo "New bundleVersion: $(NEW_BUNDLE_VERSION)"
 	@sed -i '' 's/bundleVersion: $(CURRENT_BUNDLE_VERSION)/bundleVersion: $(NEW_BUNDLE_VERSION)/' $(UNITY_PROJECT_SETTINGS)
 
-unity_patch_ios_build_version:
+unity-patch-version-target-ios:
 	@echo "Incrementing Unity iPhone buildNumber..."
 	# Extract the current build number for iPhone using grep with context lines
 	$(eval CURRENT_BUILD_NUMBER := $(shell grep -A 5 'buildNumber:' $(UNITY_PROJECT_SETTINGS) | grep 'iPhone:' | awk '{print $$2}'))
@@ -233,16 +255,16 @@ unity_patch_ios_build_version:
 
 # =============================================================================
 #
-# BUILD & DEPLOY UNITY WEBGL
+# DEPLOY UNITY WEBGL
 #
 # =============================================================================
 
-build_webgl:
+build-target-webgl: prepare-project
 	@echo "Building WebGL project..."
 	@$(UNITY_APP) -quit -batchmode -logFile $(LOGS_WEBGL)/logfile.log -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(BUILD_METHOD_WEBGL) -buildOutput $(BUILD_WEBGL) -buildTarget WebGL -development -scriptDebugging
 	@echo "Build completed."
 
-publish_webgl:
+publish-target-webgl: build-target-webgl
 	@echo "Publishing WebGL project to S3..."
 	# Sync all files except .gz files first
 	@aws s3 sync $(BUILD_WEBGL)/BettrSlots s3://$(S3_WEBGL_BUCKET)/$(S3_WEBGL_OBJECT_KEY) --profile $(AWS_DEFAULT_PROFILE) --exclude "*.gz"
@@ -250,7 +272,9 @@ publish_webgl:
 	@aws s3 sync $(BUILD_WEBGL)/BettrSlots s3://$(S3_WEBGL_BUCKET)/$(S3_WEBGL_OBJECT_KEY) --profile $(AWS_DEFAULT_PROFILE) --include "*.gz" --content-encoding "gzip"
 	@echo "Publish completed."
 
-deploy-webgl: build_assets_webgl build_webgl publish_webgl
+deploy-target-webgl: build-target-webgl publish-target-webgl
+
+deploy-webgl:  deploy-assets-webgl deploy-target-webgl
 
 # =============================================================================
 #
