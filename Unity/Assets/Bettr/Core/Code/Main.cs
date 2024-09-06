@@ -23,6 +23,7 @@ namespace Bettr.Core
 
         [NonSerialized] private ConfigData _configData;
         [NonSerialized] private BettrServer _bettrServer;
+        [NonSerialized] private BettrMainLobbySceneController _bettrMainLobbySceneController;
         [NonSerialized] private BettrAssetController _bettrAssetController;
         [NonSerialized] private BettrAssetScriptsController _bettrAssetScriptsController;
         [NonSerialized] private BettrUserController _bettrUserController;
@@ -132,6 +133,10 @@ namespace Bettr.Core
             Debug.Log($"userId={userId} AssetsVersion={_configData.AssetsVersion} AssetsBaseURL={_configData.AssetsServerBaseURL} WebAssetsBaseURL={_configData.WebAssetsBaseURL} WebOutcomesBaseURL={_configData.WebOutcomesBaseURL} MainBundleName={_configData.MainBundleName} MainBundleVariant={_configData.MainBundleVariant}");
             
             BettrModel.Init();
+
+            _bettrMainLobbySceneController = new BettrMainLobbySceneController
+            {
+            };
 
             _bettrAssetController = new BettrAssetController
             {

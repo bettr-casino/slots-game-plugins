@@ -392,6 +392,8 @@ namespace Bettr.Core
         private readonly HashSet<string> _loadingHashes = new HashSet<string>();
         
         private readonly Dictionary<string, string> _loadedBundleHashes = new Dictionary<string, string>();
+        
+        public static BettrAssetController Instance { get; private set; }
 
         public BettrAssetController()
         {
@@ -403,6 +405,8 @@ namespace Bettr.Core
             BettrAssetScenesController = new BettrAssetScenesController(this, BettrAssetPackageController);
             BettrAssetPrefabsController = new BettrAssetPrefabsController(this, BettrAssetPackageController);
             BettrAssetMaterialsController = new BettrAssetMaterialsController(this, BettrAssetPackageController);
+            
+            Instance = this;
         }
 
         public IEnumerator LoadPackage(string packageName, string packageVersion, bool loadScenes)

@@ -18,6 +18,8 @@ namespace Bettr.Core
         
         public BettrUserConfig BettrUserConfig { get; private set; }
         
+        public static BettrUserController Instance { get; private set; }
+        
         public bool UserIsLoggedIn { get; private set; }
         
         const string ErrorBlobDoesNotExist = "HTTP/1.1 404 Not Found";
@@ -29,6 +31,8 @@ namespace Bettr.Core
             
             TileController.RegisterType<BettrUserConfig>("BettrUserConfig");
             TileController.RegisterType<BettrMechanicConfig>("BettrMechanicConfig");
+            
+            Instance = this;
         }
         
         public string GetUserId()
@@ -40,35 +44,42 @@ namespace Bettr.Core
 
         public IEnumerator Login()
         {
+            bool replaceBlob = true;
             Debug.Log($"Starting User Login");
             
             BettrUserConfig = null;
             UserIsLoggedIn = false;
             
             var userId = GetUserId();
+            
             yield return bettrServer.Login(userId);
-
+            
             UserIsLoggedIn = !bettrServer.AuthResponse.isError;
-            if (UserIsLoggedIn)
+            
+             if (UserIsLoggedIn)
             {
-                var userDoesNotExist = false;
-                yield return bettrServer.LoadUserBlob(storageCallback: (_, payload, success, error) =>
+                // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+                if (!replaceBlob)
                 {
-                    if (error == ErrorBlobDoesNotExist)
+                    yield return bettrServer.LoadUserBlob(storageCallback: (_, payload, success, error) =>
                     {
-                        userDoesNotExist = true;
-                        return;
-                    }
-                    if (!success)
-                    {
-                        Debug.LogError($"Error loading user blob: {error}");
-                        return;
-                    }
-                    var userBlob = JsonConvert.DeserializeObject<BettrUserConfig>(payload.value);
-                    BettrUserConfig = userBlob;
-                });
-
-                if (userDoesNotExist)
+                        if (error == ErrorBlobDoesNotExist)
+                        {
+                            replaceBlob = true;
+                            return;
+                        }
+                        if (!success)
+                        {
+                            Debug.LogError($"Error loading user blob: {error}");
+                            return;
+                        }
+                        var userBlob = JsonConvert.DeserializeObject<BettrUserConfig>(payload.value);
+                        BettrUserConfig = userBlob;
+                    });
+                }
+            
+                // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+                if (replaceBlob)
                 {
                     yield return LoadUserJsonFromWebAssets((_, payload, success, error) =>
                     {
@@ -81,14 +92,14 @@ namespace Bettr.Core
                         BettrUserConfig = user;
                     });
                     
-                    // put this back into the server
-                    yield return bettrServer.PutUserBlob(BettrUserConfig, (_, _, success, error) =>
-                    {
-                        if (!success)
-                        {
-                            Debug.LogError($"Error putting user blob: {error}");
-                        }
-                    });
+                    // // put this back into the server
+                    // yield return bettrServer.PutUserBlob(BettrUserConfig, (_, _, success, error) =>
+                    // {
+                    //     if (!success)
+                    //     {
+                    //         Debug.LogError($"Error putting user blob: {error}");
+                    //     }
+                    // });
                 }
             }
             TileController.AddToGlobals("BettrUser", BettrUserConfig);

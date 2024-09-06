@@ -179,8 +179,8 @@ namespace Bettr.Editor
             EditorUtility.DisplayDialog("Success", "Verify Successful.", "OK");
         }
         
-        [MenuItem("Bettr/PlayMode/Start")] 
-        public static void Start()
+        [MenuItem("Bettr/PlayMode/Rebuild Assets + Start")] 
+        public static void StartAfterRebuild()
         {
             // Ensure you are not in play mode when making these changes
             if (EditorApplication.isPlaying)
@@ -191,6 +191,29 @@ namespace Bettr.Editor
 
             CleanupTestScenes();
             BuildAssets();
+
+            // Switch to iOS build target
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.iOS, BuildTarget.iOS);
+
+            // Path to your specific scene. Adjust the path as necessary.
+            const string scenePath = "Assets/Bettr/Core/Scenes/MainScene.unity";
+
+            // Open the specified scene
+            EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+
+            // Enter play mode
+            EditorApplication.EnterPlaymode();
+        }
+        
+        [MenuItem("Bettr/PlayMode/Start")] 
+        public static void Start()
+        {
+            // Ensure you are not in play mode when making these changes
+            if (EditorApplication.isPlaying)
+            {
+                Debug.LogWarning("Exiting play mode before executing this command.");
+                EditorApplication.isPlaying = false;
+            }
 
             // Switch to iOS build target
             EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.iOS, BuildTarget.iOS);
