@@ -6,6 +6,7 @@ using CrayonScript.Code;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
 // ReSharper disable once CheckNamespace
 namespace Bettr.Core
@@ -13,7 +14,12 @@ namespace Bettr.Core
     [Serializable]
     public class Main : MonoBehaviour
     {
-        [SerializeField] private TextAsset configFile;
+        [SerializeField] private TextAsset unityEditorConfigFile;
+        [SerializeField] private TextAsset iOSConfigFile;
+        [SerializeField] private TextAsset androidConfigFile;
+        [SerializeField] private TextAsset webGLConfigFile;
+        [SerializeField] private TextAsset macOSConfigFile;
+        [SerializeField] private TextAsset windowsConfigFile;
 
         [NonSerialized] private ConfigData _configData;
         [NonSerialized] private BettrServer _bettrServer;
@@ -83,9 +89,27 @@ namespace Bettr.Core
             TileController.StaticInit();
             TileController.RegisterModule("Bettr.dll");
             TileController.RegisterModule("casino.bettr.plugin.Core.dll");
-            
-            // load the config file
-            _configData = ConfigReader.Parse(configFile.text);
+
+            _configData = null;
+#if UNITY_EDITOR_OSX || UNITY_EDITOR_WIN || UNITY_EDITOR_LINUX || UNITY_EDITOR
+            _configData = ConfigReader.Parse(unityEditorConfigFile.text);
+#elif UNITY_IOS
+            _configData = ConfigReader.Parse(iOSConfigFile.text);
+#elif UNITY_ANDROID
+            _configData = ConfigReader.Parse(androidConfigFile.text);
+#elif UNITY_WEBGL
+            _configData = ConfigReader.Parse(webGLConfigFile.text);
+#elif UNITY_STANDALONE_OSX
+            _configData = ConfigReader.Parse(macOSConfigFile.text);
+#elif UNITY_STANDALONE_WIN
+            _configData = ConfigReader.Parse(windowsConfigFile.text);
+#endif
+            // throw an error if the config data is not set
+            if (_configData == null)
+            {
+                Debug.LogError("Config data is not set.");
+                yield break;
+            }
 
             _bettrServer = new BettrServer()
             {
