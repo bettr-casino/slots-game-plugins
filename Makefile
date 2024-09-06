@@ -137,13 +137,13 @@ publish-assets-all: build-assets-all
 	aws s3 sync $(ASSET_BUNDLES_BASE_DIRECTORY) s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY) --delete --profile $(AWS_DEFAULT_PROFILE)
 
 publish-assets-ios: build-assets-ios
-	aws s3 sync $(ASSET_BUNDLES_BASE_DIRECTORY) s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY)/iOS --delete --profile $(AWS_DEFAULT_PROFILE)
+	aws s3 sync $(ASSET_BUNDLES_BASE_DIRECTORY)/iOS s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY)/iOS --delete --profile $(AWS_DEFAULT_PROFILE)
 
 publish-assets-android: build-assets-android
-	aws s3 sync $(ASSET_BUNDLES_BASE_DIRECTORY) s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY)/Android --delete --profile $(AWS_DEFAULT_PROFILE)
+	aws s3 sync $(ASSET_BUNDLES_BASE_DIRECTORY)/Android s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY)/Android --delete --profile $(AWS_DEFAULT_PROFILE)
 
 publish-assets-webgl: build_assets_webgl
-	aws s3 sync $(ASSET_BUNDLES_BASE_DIRECTORY) s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY)/WebGL --delete --profile $(AWS_DEFAULT_PROFILE)
+	aws s3 sync $(ASSET_BUNDLES_BASE_DIRECTORY)/WebGL s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY)/WebGL --delete --profile $(AWS_DEFAULT_PROFILE)
 
 deploy-assets-all: build-assets-all publish-assets-all
 
