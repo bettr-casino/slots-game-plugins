@@ -58,11 +58,15 @@ namespace Bettr.Core
             Console.WriteLine($"LoadApp lobbyCard cardCount={cardCount}");
 
             State.LobbyCardMap.Clear();
+            
+            var lobbyCard = bettrUser.LobbyCards[0];
+            
+            yield return BettrAssetController.Instance.LoadPackage(lobbyCard.BundleName, lobbyCard.BundleVersion, false);
 
             // Iterate over LobbyCards
             for (int i = 0; i < cardCount; i++)
             {
-                var lobbyCard = bettrUser.LobbyCards[i];
+                lobbyCard = bettrUser.LobbyCards[i];
                 string group = lobbyCard.Group;
                 string card = lobbyCard.Card;
                 Console.WriteLine($"LoadApp lobbyCard={lobbyCard} lobbyCard.MachineName={lobbyCard.MachineName} lobbyCard.MaterialName={lobbyCard.MaterialName}");

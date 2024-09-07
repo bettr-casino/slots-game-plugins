@@ -193,7 +193,7 @@ namespace Bettr.Editor
             BuildAssets();
 
             // Switch to iOS build target
-            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.iOS, BuildTarget.iOS);
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.WebGL, BuildTarget.WebGL);
 
             // Path to your specific scene. Adjust the path as necessary.
             const string scenePath = "Assets/Bettr/Core/Scenes/MainScene.unity";
@@ -216,7 +216,7 @@ namespace Bettr.Editor
             }
 
             // Switch to iOS build target
-            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.iOS, BuildTarget.iOS);
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.WebGL, BuildTarget.WebGL);
 
             // Path to your specific scene. Adjust the path as necessary.
             const string scenePath = "Assets/Bettr/Core/Scenes/MainScene.unity";

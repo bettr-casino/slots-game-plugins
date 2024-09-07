@@ -179,8 +179,6 @@ namespace Bettr.Core
         public IEnumerator LoadMaterial(string bettrAssetBundleName, string bettrAssetBundleVersion, string materialName,
             GameObject targetGameObject)
         {
-            yield return _bettrAssetPackageController.LoadPackage(bettrAssetBundleName, bettrAssetBundleVersion, false);
-            
             var assetBundle = _bettrAssetController.GetCachedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);
             
             var material = assetBundle.LoadAsset<Material>(materialName);

@@ -50,8 +50,6 @@ namespace Bettr.Core
 
             yield return LoadMainLobby();
 
-            yield return new WaitForSeconds(3.0f);
-            
             DevTools.Instance.Enable();
             
             DevTools.Instance.OnKeyPressed.AddListener(() =>
@@ -188,7 +186,7 @@ namespace Bettr.Core
             yield return scriptRunner.CallAsyncAction("LoadLobbyScene");
             ScriptRunner.Release(scriptRunner);
 
-            yield return UpdateCommitHash();
+            // yield return UpdateCommitHash();
         }
         
         private IEnumerator UpdateCommitHash()
