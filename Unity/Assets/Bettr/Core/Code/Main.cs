@@ -48,7 +48,7 @@ namespace Bettr.Core
 
             yield return LoginUser();
 
-            yield return LoadMainLobby();
+            yield return LoadMachine();
 
             DevTools.Instance.Enable();
             
@@ -179,11 +179,11 @@ namespace Bettr.Core
             ScriptRunner.Release(scriptRunner);
         }
 
-        private IEnumerator LoadMainLobby()
+        private IEnumerator LoadMachine()
         {
             var mainTable = _bettrAssetScriptsController.GetScript("Main");
             var scriptRunner = ScriptRunner.Acquire(mainTable);
-            yield return scriptRunner.CallAsyncAction("LoadLobbyScene");
+            yield return scriptRunner.CallAsyncAction("LoadMachine");
             ScriptRunner.Release(scriptRunner);
 
             // yield return UpdateCommitHash();

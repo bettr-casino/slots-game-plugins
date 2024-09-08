@@ -28,8 +28,9 @@ namespace Bettr.Core
             TileController.AddToGlobals("BettrMainLobbySceneController", this);
         }
 
-        public IEnumerator LoadMachineScene(string lobbyCardName)
+        public IEnumerator LoadMachine()
         {
+            string lobbyCardName = "";
             var lobbyCard = State.LobbyCardMap[lobbyCardName];
             yield return BettrAssetController.Instance.LoadScene(lobbyCard.MachineBundleName,
                 lobbyCard.MachineBundleVariant, lobbyCard.MachineSceneName);

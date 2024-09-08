@@ -38,11 +38,13 @@ function Main:Login()
     end
 end
 
-function Main:LoadLobbyScene()
+function Main:LoadMachine()
     series
         do
-            System.Print("LoadLobbyScene starting...")
-            BettrAssetController.LoadScene(BettrUser.LobbyScene.BundleName, BettrUser.LobbyScene.BundleVersion, "MainLobbyScene")
+            System.Print("LoadMachine starting...")
+            -- TODO: this should be from the user preferences
+            local lobbyCard = BettrUser.LobbyCards[1]
+            BettrAssetController.LoadScene(lobbyCard.MachineBundleName, lobbyCard.MachineBundleVariant, lobbyCard.MachineSceneName)
         end
     end
 end

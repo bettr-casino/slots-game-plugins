@@ -133,11 +133,13 @@ namespace Bettr.Editor.generators
         
         public static Shader LoadShader(string shaderName, string runtimeAssetPath)
         {
+            var mainAssetPath = InstanceComponent.MainAssetPath;
+            
             Shader shader = null;
             if (shaderName.StartsWith("Bettr/"))
             {
                 shaderName = shaderName.Substring(6);
-                var shaderFilepath = $"{runtimeAssetPath}/Shaders/{shaderName}.shader";
+                var shaderFilepath = $"{mainAssetPath}/Shaders/{shaderName}.shader";
                 shader = AssetDatabase.LoadAssetAtPath<Shader>(shaderFilepath);
             }
             else

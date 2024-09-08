@@ -361,6 +361,7 @@ namespace Bettr.Editor
             string machineVariant = GetArgument("-machineVariant");
             string machineModel = GetArgument("-machineModel");
             
+            SetupMainAssetPath();
             ClearRuntimeAssetPath(machineName, machineVariant);
             SetupMachine(machineName, machineVariant, machineModel);
             ImportFBX(machineName, machineVariant);
@@ -1090,6 +1091,15 @@ namespace Bettr.Editor
             return outcomes;
         }
 
+        private static void SetupMainAssetPath()
+        {
+            // TODO: ensure the v_0_1_0 variant is the correct one
+            string mainAssetPath = $"Assets/Bettr/Runtime/Plugin/Main/variants/v_0_1_0/Runtime/Asset/";
+            EnsureDirectory(mainAssetPath);
+            
+            InstanceComponent.MainAssetPath = mainAssetPath;
+        }
+
         private static void ClearRuntimeAssetPath(string machineName, string machineVariant)
         {
             string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset";
@@ -1131,29 +1141,6 @@ namespace Bettr.Editor
                 EnsureDirectory(Path.Combine(runtimeAssetPath, subDir));
             }
             
-            // Copy the shader files
-            string shaderSourcePath = Path.Combine("Assets", "Bettr", "Editor", "Shaders");
-            string shaderDestinationPath = Path.Combine(runtimeAssetPath, "Shaders");
-            Debug.Log($"Copying shaders from: {machineModel} to: {shaderDestinationPath}");
-            // Ensure the destination directory exists
-            if (!Directory.Exists(shaderDestinationPath))
-            {
-                Directory.CreateDirectory(shaderDestinationPath);
-            }
-
-            // Get all shader files in the source directory
-            string[] shaderFiles = Directory.GetFiles(shaderSourcePath, "*.shader");
-
-            // Copy each shader file to the destination directory
-            foreach (string file in shaderFiles)
-            {
-                string fileName = Path.GetFileName(file);
-                string destFile = Path.Combine(shaderDestinationPath, fileName);
-                AssetDatabase.CopyAsset(file, destFile);
-            }
-
-            Debug.Log("Shader files copied successfully.");
-            
             // Copy the machine model file and rename its extension
             string modelDestinationPath = Path.Combine(runtimeAssetPath, "Models",  $"{machineModelName}.cscript.txt");
             Debug.Log($"Copying machine model {machineName} {machineVariant} from: {machineModel} to: {modelDestinationPath}");
@@ -1175,7 +1162,7 @@ namespace Bettr.Editor
         {
             string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset";
             EnsureDirectory(runtimeAssetPath);
-
+            
             var machines = GetTable($"{machineName}Machines");
             for (var index = 1; index <= machines.Length; index++)
             {
