@@ -56,6 +56,7 @@ namespace Bettr.Core
         public BettrSceneConfig LobbyScene { get; set; }
         public List<BettrLobbyCardGroupConfig> LobbyCardGroups { get; set; }
         public List<BettrLobbyCardConfig> LobbyCards { get; set; }
+        public int LobbyCardIndex { get; set; } = -1;
     }
     
     [Serializable]

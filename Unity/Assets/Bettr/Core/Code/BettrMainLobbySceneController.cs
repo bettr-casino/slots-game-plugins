@@ -30,8 +30,34 @@ namespace Bettr.Core
 
         public IEnumerator LoadMachine()
         {
-            string lobbyCardName = "";
-            var lobbyCard = State.LobbyCardMap[lobbyCardName];
+            // TODO: this should be from the user preferences
+            var bettrUser = BettrUserController.Instance.BettrUserConfig;
+            var lobbyCard = bettrUser.LobbyCards[0];
+            bettrUser.LobbyCardIndex = 0;
+            yield return BettrAssetController.Instance.LoadScene(lobbyCard.MachineBundleName,
+                lobbyCard.MachineBundleVariant, lobbyCard.MachineSceneName);
+        }
+        
+        public IEnumerator LoadPreviousMachine()
+        {
+            var bettrUser = BettrUserController.Instance.BettrUserConfig;
+            var bettrUserLobbyCardIndex = bettrUser.LobbyCardIndex;
+            // Wrap around
+            var previousIndex = (bettrUserLobbyCardIndex - 1 + bettrUser.LobbyCards.Count) % bettrUser.LobbyCards.Count;
+            var lobbyCard = bettrUser.LobbyCards[previousIndex];
+            bettrUser.LobbyCardIndex = previousIndex;
+            yield return BettrAssetController.Instance.LoadScene(lobbyCard.MachineBundleName,
+                lobbyCard.MachineBundleVariant, lobbyCard.MachineSceneName);
+        }
+        
+        public IEnumerator LoadNextMachine()
+        {
+            var bettrUser = BettrUserController.Instance.BettrUserConfig;
+            var bettrUserLobbyCardIndex = bettrUser.LobbyCardIndex;
+            // Wrap around
+            var nextIndex = (bettrUserLobbyCardIndex + 1) % bettrUser.LobbyCards.Count;
+            var lobbyCard = bettrUser.LobbyCards[nextIndex];
+            bettrUser.LobbyCardIndex = nextIndex;
             yield return BettrAssetController.Instance.LoadScene(lobbyCard.MachineBundleName,
                 lobbyCard.MachineBundleVariant, lobbyCard.MachineSceneName);
         }

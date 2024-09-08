@@ -42,9 +42,25 @@ function Main:LoadMachine()
     series
         do
             System.Print("LoadMachine starting...")
-            -- TODO: this should be from the user preferences
-            local lobbyCard = BettrUser.LobbyCards[1]
-            BettrAssetController.LoadScene(lobbyCard.MachineBundleName, lobbyCard.MachineBundleVariant, lobbyCard.MachineSceneName)
+            BettrMainLobbySceneController.LoadMachine()
+        end
+    end
+end
+
+function Main:LoadPreviousMachine()
+    series
+        do
+            System.Print("LoadPreviousMachine starting...")
+            BettrMainLobbySceneController.LoadPreviousMachine()
+        end
+    end
+end
+
+function Main:LoadNextMachine()
+    series
+        do
+            System.Print("LoadNextMachine starting...")
+            BettrMainLobbySceneController.LoadNextMachine()
         end
     end
 end

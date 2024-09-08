@@ -77,7 +77,10 @@ namespace Bettr.Core
             if (currentState == State.WaitingForFirstKey)
             {
                 // Handle Backspace and Delete keys
-                if (Input.GetKeyDown(KeyCode.Backspace) || Input.GetKeyDown(KeyCode.Delete))
+                if (
+                    Input.GetKeyDown(KeyCode.Backspace) 
+                    || Input.GetKeyDown(KeyCode.Delete)
+                    || Input.GetKeyDown(KeyCode.Return))
                 {
                     OnKeyPressed.Invoke();
                     ResetState();
