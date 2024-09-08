@@ -179,8 +179,8 @@ namespace Bettr.Editor
             EditorUtility.DisplayDialog("Success", "Verify Successful.", "OK");
         }
         
-        [MenuItem("Bettr/PlayMode/Rebuild Assets + Start")] 
-        public static void StartAfterRebuild()
+        [MenuItem("Bettr/PlayMode/Start/Rebuild Assets + WebGL")] 
+        public static void StartRebuildAssetsWebGL()
         {
             // Ensure you are not in play mode when making these changes
             if (EditorApplication.isPlaying)
@@ -205,8 +205,8 @@ namespace Bettr.Editor
             EditorApplication.EnterPlaymode();
         }
         
-        [MenuItem("Bettr/PlayMode/Start")] 
-        public static void Start()
+        [MenuItem("Bettr/PlayMode/Start/WebGL")] 
+        public static void StartWebGL()
         {
             // Ensure you are not in play mode when making these changes
             if (EditorApplication.isPlaying)
@@ -217,6 +217,29 @@ namespace Bettr.Editor
 
             // Switch to iOS build target
             EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.WebGL, BuildTarget.WebGL);
+
+            // Path to your specific scene. Adjust the path as necessary.
+            const string scenePath = "Assets/Bettr/Core/Scenes/MainScene.unity";
+
+            // Open the specified scene
+            EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+
+            // Enter play mode
+            EditorApplication.EnterPlaymode();
+        }
+
+        [MenuItem("Bettr/PlayMode/Start/iOS")] 
+        public static void StartiOS()
+        {
+            // Ensure you are not in play mode when making these changes
+            if (EditorApplication.isPlaying)
+            {
+                Debug.LogWarning("Exiting play mode before executing this command.");
+                EditorApplication.isPlaying = false;
+            }
+
+            // Switch to iOS build target
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.iOS, BuildTarget.iOS);
 
             // Path to your specific scene. Adjust the path as necessary.
             const string scenePath = "Assets/Bettr/Core/Scenes/MainScene.unity";
