@@ -1,4 +1,4 @@
-Shader "Bettr/LobbyUnlitTexture"
+Shader "Bettr/LobbyCardUnlitTexture"
 {
     Properties
     {
