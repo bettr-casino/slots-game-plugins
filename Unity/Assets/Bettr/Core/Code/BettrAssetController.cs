@@ -378,7 +378,20 @@ namespace Bettr.Core
     {
         public bool useFileSystemAssetBundles = true;
         public string webAssetBaseURL;
-        public string fileSystemAssetBaseURL = "Assets/Bettr/LocalStore/AssetBundles/OSX";
+        
+#if UNITY_IOS
+        public string fileSystemAssetBaseURL => "Assets/Bettr/LocalStore/AssetBundles//iOS";
+#endif
+#if UNITY_ANDROID
+        public string fileSystemAssetBaseURL => "Assets/Bettr/LocalStore/AssetBundles//Android";
+#endif
+#if UNITY_WEBGL
+        public string fileSystemAssetBaseURL => "Assets/Bettr/LocalStore/AssetBundles//WebGL";
+#endif
+#if UNITY_STANDALONE_OSX
+        public string fileSystemAssetBaseURL => "Assets/Bettr/LocalStore/AssetBundles//OSX";
+#endif
+
 
         public BettrAssetScriptsController BettrAssetScriptsController { get; private set; }
         public BettrAssetPrefabsController BettrAssetPrefabsController { get; private set; }
