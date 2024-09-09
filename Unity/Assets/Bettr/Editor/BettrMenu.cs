@@ -1094,7 +1094,7 @@ namespace Bettr.Editor
         private static void SetupMainAssetPath()
         {
             // TODO: ensure the v_0_1_0 variant is the correct one
-            string mainAssetPath = $"Assets/Bettr/Runtime/Plugin/Main/variants/v_0_1_0/Runtime/Asset/";
+            string mainAssetPath = $"Assets/Bettr/Runtime/Plugin/Main/variants/v0_1_0/Runtime/Asset/";
             EnsureDirectory(mainAssetPath);
             
             InstanceComponent.MainAssetPath = mainAssetPath;
