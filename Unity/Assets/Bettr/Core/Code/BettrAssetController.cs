@@ -95,6 +95,9 @@ namespace Bettr.Core
         [NonSerialized] private BettrAssetController _bettrAssetController;
         [NonSerialized] private BettrAssetPackageController _bettrAssetPackageController;
 
+        [NonSerialized]
+        private Dictionary<string, Shader> _shaderCache = new Dictionary<string, Shader>();
+
         public BettrAssetPrefabsController(
             BettrAssetController bettrAssetController,
             BettrAssetPackageController bettrAssetPackageController)
@@ -104,6 +107,28 @@ namespace Bettr.Core
 
             _bettrAssetController = bettrAssetController;
             _bettrAssetPackageController = bettrAssetPackageController;
+
+            var shaderNames = new string[]
+            {
+                "Bettr/BluishGlow",
+                "Bettr/Frame",
+                "Bettr/LobbyCardUnlitTexture",
+                "Bettr/LobbyMask",
+                "Bettr/ReelMask",
+                "Bettr/Symbol",
+            };
+            
+            // load the shaders into the cache
+            foreach (var shaderName in shaderNames)
+            {
+                var shader = Shader.Find(shaderName);
+                if (shader == null)
+                {
+                    Debug.LogError($"Failed to load shader={shaderName}");
+                    continue;
+                }
+                _shaderCache[shaderName] = shader;
+            }
         }
         
         public IEnumerator ReplacePrefab(string bettrAssetBundleName, string bettrAssetBundleVersion, string prefabName,
@@ -153,6 +178,23 @@ namespace Bettr.Core
                 Debug.LogError(
                     $"Failed to load prefab={prefabName} from asset bundle={bettrAssetBundleName} version={bettrAssetBundleVersion}");
                 yield break;
+            }
+            
+            // Get all renderers in the prefab (and its children)
+            Renderer[] renderers = prefab.GetComponentsInChildren<Renderer>(true);
+            
+            foreach (Renderer renderer in renderers)
+            {
+                foreach (Material mat in renderer.sharedMaterials)
+                {
+                    // Reassign the shader to the material
+                    Debug.Log("Shared Material: " + mat.name + " is using shader: " + mat.shader.name);
+                    // check if the shader is in the cache
+                    if (_shaderCache.TryGetValue(mat.shader.name, out Shader bettrShader))
+                    {
+                        mat.shader = bettrShader;
+                    }
+                }
             }
 
             Object.Instantiate(prefab, parent == null ? null : parent.transform);
