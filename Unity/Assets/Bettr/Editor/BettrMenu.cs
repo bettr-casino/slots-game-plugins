@@ -551,7 +551,7 @@ namespace Bettr.Editor
 
             var sharedAssetBundleOptions = BuildAssetBundleOptions.StrictMode |
                                            BuildAssetBundleOptions.ForceRebuildAssetBundle |
-                                           BuildAssetBundleOptions.UncompressedAssetBundle;
+                                           BuildAssetBundleOptions.ChunkBasedCompression;
 
 #if UNITY_IOS
             EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesIOSDirectory));
