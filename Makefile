@@ -114,44 +114,62 @@ prepare-project: preparedll
 #
 # =============================================================================
 
-build-assets-all: prepare-project
+clean-assets-all: clean-assets-ios clean-assets-android clean-assets-webgl
+
+clean-assets-ios:
+	@echo "Cleaning iOS asset bundles..."
+	@rm -rf $(ASSET_BUNDLES_BASE_DIRECTORY)/iOS
+
+clean-assets-android:
+	@echo "Cleaning Android asset bundles..."
+	@rm -rf $(ASSET_BUNDLES_BASE_DIRECTORY)/Android
+
+clean-assets-webgl:
+	@echo "Cleaning WebGL asset bundles..."
+	@rm -rf $(ASSET_BUNDLES_BASE_DIRECTORY)/WebGL
+
+build-assets-all: prepare-project clean-assets-all build-assets-ios build-assets-android build_assets_webgl
+
+build-assets-ios: prepare-project clean-assets-ios
+	@echo "Building iOS asset bundles..."
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.CleanupTestScenes
-	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssets -buildTarget Android
-	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssets -buildTarget WebGL 
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssets -buildTarget iOS
 
-build-assets-ios: prepare-project
-	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.CleanupTestScenes
-	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssets -buildTarget iOS
-
-build-assets-android: prepare-project
+build-assets-android: prepare-project clean-assets-android
+	@echo "Building Android asset bundles..."
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.CleanupTestScenes
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssets -buildTarget Android
 
-build_assets_webgl: prepare-project
+build_assets_webgl: prepare-project clean-assets-webgl
+	@echo "Building WebGL asset bundles..."
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.CleanupTestScenes
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssets -buildTarget WebGL 
 
-publish-assets-all: build-assets-all
-# --delete flag will remove any files in the S3 bucket that are not present in the local directory
-	aws s3 sync $(ASSET_BUNDLES_BASE_DIRECTORY) s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY) --delete --profile $(AWS_DEFAULT_PROFILE)
+publish-assets-all: publish-assets-ios publish-assets-android publish-assets-webgl
 
 publish-assets-ios: build-assets-ios
+	@echo "Publishing iOS asset bundles..."
 	aws s3 sync $(ASSET_BUNDLES_BASE_DIRECTORY)/iOS s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY)/iOS --delete --profile $(AWS_DEFAULT_PROFILE)
 
 publish-assets-android: build-assets-android
+	@echo "Publishing Android asset bundles..."
 	aws s3 sync $(ASSET_BUNDLES_BASE_DIRECTORY)/Android s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY)/Android --delete --profile $(AWS_DEFAULT_PROFILE)
 
 publish-assets-webgl: build_assets_webgl
+	@echo "Publishing WebGL asset bundles..."
 	aws s3 sync $(ASSET_BUNDLES_BASE_DIRECTORY)/WebGL s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY)/WebGL --delete --profile $(AWS_DEFAULT_PROFILE)
 
 deploy-assets-all: build-assets-all publish-assets-all
+	@echo "Deploying asset bundles..."
 
 deploy-assets-ios: build-assets-ios publish-assets-ios
+	@echo "Deploying iOS asset bundles..."
 
 deploy-assets-android: build-assets-android publish-assets-android
+	@echo "Deploying Android asset bundles..."
 
 deploy-assets-webgl: build_assets_webgl publish-assets-webgl
+	@echo "Deploying WebGL asset bundles..."
 
 # =============================================================================
 #

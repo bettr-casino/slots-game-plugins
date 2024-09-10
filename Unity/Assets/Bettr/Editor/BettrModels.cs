@@ -327,7 +327,7 @@ namespace Bettr.Editor
     public class InstanceComponent : IComponent
     {
         public static string RuntimeAssetPath;
-        public static string MainAssetPath;
+        public static string CorePath;
         
         public string Name { get; set; }
         

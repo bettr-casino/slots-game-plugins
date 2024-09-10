@@ -32,7 +32,7 @@ namespace Bettr.Core
         {
             // TODO: this should be from the user preferences
             var bettrUser = BettrUserController.Instance.BettrUserConfig;
-            var lobbyCard = bettrUser.LobbyCards[0];
+            var lobbyCard = bettrUser.LobbyCards[1];
             bettrUser.LobbyCardIndex = 0;
             yield return BettrAssetController.Instance.LoadScene(lobbyCard.MachineBundleName,
                 lobbyCard.MachineBundleVariant, lobbyCard.MachineSceneName);

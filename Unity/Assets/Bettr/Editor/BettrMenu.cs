@@ -361,7 +361,7 @@ namespace Bettr.Editor
             string machineVariant = GetArgument("-machineVariant");
             string machineModel = GetArgument("-machineModel");
             
-            SetupMainAssetPath();
+            SetupCoreAssetPath();
             ClearRuntimeAssetPath(machineName, machineVariant);
             SetupMachine(machineName, machineVariant, machineModel);
             ImportFBX(machineName, machineVariant);
@@ -550,7 +550,8 @@ namespace Bettr.Editor
             AssetDatabase.Refresh();
 
             var sharedAssetBundleOptions = BuildAssetBundleOptions.StrictMode |
-                                           BuildAssetBundleOptions.ChunkBasedCompression;
+                                           BuildAssetBundleOptions.ForceRebuildAssetBundle |
+                                           BuildAssetBundleOptions.UncompressedAssetBundle;
 
 #if UNITY_IOS
             EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesIOSDirectory));
@@ -746,50 +747,65 @@ namespace Bettr.Editor
         
         private static void ModifyAssetBundleManifestFiles()
         {
-            var files = Directory.GetFiles(AssetBundlesDirectory);
-            foreach (var file in files)
+            var directories = Directory.GetDirectories(AssetBundlesDirectory);
+            // get the current build target
+            var buildTarget = EditorUserBuildSettings.activeBuildTarget;
+            foreach (var directory in directories)
             {
-                if (file.EndsWith(".manifest"))
+                // get the base name of the directory
+                var subDirectory = Path.GetFileName(directory);
+                if (subDirectory == "iOS" && buildTarget != BuildTarget.iOS) continue;
+                if (subDirectory == "OSX" && buildTarget != BuildTarget.StandaloneOSX) continue;
+                if (subDirectory == "Android" && buildTarget != BuildTarget.Android) continue;
+                if (subDirectory == "WebGL" && buildTarget != BuildTarget.WebGL) continue;
+                if (subDirectory == "Windows" && buildTarget != BuildTarget.StandaloneWindows64) continue;
+                if (subDirectory == "Linux" && buildTarget != BuildTarget.StandaloneLinux64) continue;
+                
+                var files = Directory.GetFiles(directory);
+                foreach (var file in files)
                 {
-                    try
+                    if (file.EndsWith(".manifest"))
                     {
-                        var yamlContent = File.ReadAllText(file);
-                        var deserializer = new DeserializerBuilder()
-                            .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                            .Build();
-                        var yamlObject = deserializer.Deserialize<Dictionary<string, object>>(yamlContent);
-                        
-                        if (yamlObject.TryGetValue("Assets", out var assets))
+                        try
                         {
-                            if (assets is List<object> assetList)
+                            var yamlContent = File.ReadAllText(file);
+                            var deserializer = new DeserializerBuilder()
+                                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                                .Build();
+                            var yamlObject = deserializer.Deserialize<Dictionary<string, object>>(yamlContent);
+                            
+                            if (yamlObject.TryGetValue("Assets", out var assets))
                             {
-                                // Sort assetList so that all files ending in .cscript.txt are first
-                                var sortedAssetList = assetList
-                                    .OrderByDescending(asset => asset.ToString().EndsWith(".cscript.txt"))
-                                    .ToList();
+                                if (assets is List<object> assetList)
+                                {
+                                    // Sort assetList so that all files ending in .cscript.txt are first
+                                    var sortedAssetList = assetList
+                                        .OrderByDescending(asset => asset.ToString().EndsWith(".cscript.txt"))
+                                        .ToList();
 
-                                yamlObject["Assets"] = sortedAssetList;
+                                    yamlObject["Assets"] = sortedAssetList;
 
-                                // Serialize the updated yamlObject and save it
-                                var serializer = new SerializerBuilder()
-                                    .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                                    .Build();
-                                var updatedYamlContent = serializer.Serialize(yamlObject);
-                                File.WriteAllText(file, updatedYamlContent);
+                                    // Serialize the updated yamlObject and save it
+                                    var serializer = new SerializerBuilder()
+                                        .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                                        .Build();
+                                    var updatedYamlContent = serializer.Serialize(yamlObject);
+                                    File.WriteAllText(file, updatedYamlContent);
+                                }
+                                else
+                                {
+                                    Debug.LogWarning("The 'Assets' key does not contain a list.");
+                                }
                             }
-                            else
-                            {
-                                Debug.LogWarning("The 'Assets' key does not contain a list.");
-                            }
+
+                            // Process the YAML object as needed
+                            // For example, you can modify the YAML content or just log it
+                            Debug.Log(yamlObject);
                         }
-
-                        // Process the YAML object as needed
-                        // For example, you can modify the YAML content or just log it
-                        Debug.Log(yamlObject);
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.LogError($"Error processing manifest file '{file}': {ex.Message}");
+                        catch (Exception ex)
+                        {
+                            Debug.LogError($"Error processing manifest file '{file}': {ex.Message}");
+                        }
                     }
                 }
             }
@@ -1091,13 +1107,12 @@ namespace Bettr.Editor
             return outcomes;
         }
 
-        private static void SetupMainAssetPath()
+        private static void SetupCoreAssetPath()
         {
-            // TODO: ensure the v_0_1_0 variant is the correct one
-            string mainAssetPath = $"Assets/Bettr/Runtime/Plugin/Main/variants/v0_1_0/Runtime/Asset/";
-            EnsureDirectory(mainAssetPath);
+            string corePath = $"Assets/Bettr/Core";
+            EnsureDirectory(corePath);
             
-            InstanceComponent.MainAssetPath = mainAssetPath;
+            InstanceComponent.CorePath = corePath;
         }
 
         private static void ClearRuntimeAssetPath(string machineName, string machineVariant)

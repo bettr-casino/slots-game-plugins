@@ -380,16 +380,16 @@ namespace Bettr.Core
         public string webAssetBaseURL;
         
 #if UNITY_IOS
-        public string fileSystemAssetBaseURL => "Assets/Bettr/LocalStore/AssetBundles//iOS";
+        public string fileSystemAssetBaseURL => "Assets/Bettr/LocalStore/AssetBundles/iOS";
 #endif
 #if UNITY_ANDROID
-        public string fileSystemAssetBaseURL => "Assets/Bettr/LocalStore/AssetBundles//Android";
+        public string fileSystemAssetBaseURL => "Assets/Bettr/LocalStore/AssetBundles/Android";
 #endif
 #if UNITY_WEBGL
-        public string fileSystemAssetBaseURL => "Assets/Bettr/LocalStore/AssetBundles//WebGL";
+        public string fileSystemAssetBaseURL => "Assets/Bettr/LocalStore/AssetBundles/WebGL";
 #endif
 #if UNITY_STANDALONE_OSX
-        public string fileSystemAssetBaseURL => "Assets/Bettr/LocalStore/AssetBundles//OSX";
+        public string fileSystemAssetBaseURL => "Assets/Bettr/LocalStore/AssetBundles/OSX";
 #endif
 
 

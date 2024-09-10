@@ -159,7 +159,7 @@ namespace Bettr.Core
 
             _bettrAudioController = new BettrAudioController();
 
-            BettrVisualsController.SwitchOrientationToPortrait();
+            BettrVisualsController.SwitchOrientationToLandscape();
             
             if (_oneTimeSetUpComplete) yield break;
             yield return _bettrAssetController.LoadPackage(_configData.MainBundleName, _configData.MainBundleVariant, false);
