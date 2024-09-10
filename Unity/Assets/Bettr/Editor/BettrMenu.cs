@@ -1170,7 +1170,7 @@ namespace Bettr.Editor
             string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset";
             EnsureDirectory(runtimeAssetPath);
 
-            string[] subDirectories = { "Animators", "Materials", "Models", "FBX", "Prefabs", "Scenes", "Scripts", "Shaders", "Textures" };
+            string[] subDirectories = { "Animators", "Materials", "Models", "FBX", "Prefabs", "Scenes", "Scripts", "Textures" };
             foreach (string subDir in subDirectories)
             {
                 EnsureDirectory(Path.Combine(runtimeAssetPath, subDir));
