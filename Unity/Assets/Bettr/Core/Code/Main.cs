@@ -19,9 +19,7 @@ namespace Bettr.Core
         [SerializeField] private TextAsset androidConfigFile;
         [SerializeField] private TextAsset webGLConfigFile;
         [SerializeField] private TextAsset macOSConfigFile;
-        [SerializeField] private TextAsset windowsConfigFile;
-        [SerializeField] public ShaderVariantCollection shaderVariantCollection;
-    
+        [SerializeField] private TextAsset windowsConfigFile;    
 
         [NonSerialized] private ConfigData _configData;
         [NonSerialized] private BettrServer _bettrServer;
@@ -92,11 +90,6 @@ namespace Bettr.Core
             
             Debug.Log("OneTimeSetup started");
             
-            if (shaderVariantCollection != null && shaderVariantCollection.isWarmedUp == false)
-            {
-                shaderVariantCollection.WarmUp();
-            }
-
             TileController.StaticInit();
             TileController.RegisterModule("Bettr.dll");
             TileController.RegisterModule("casino.bettr.plugin.Core.dll");
