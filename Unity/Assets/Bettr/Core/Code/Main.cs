@@ -20,6 +20,8 @@ namespace Bettr.Core
         [SerializeField] private TextAsset webGLConfigFile;
         [SerializeField] private TextAsset macOSConfigFile;
         [SerializeField] private TextAsset windowsConfigFile;
+        [SerializeField] public ShaderVariantCollection shaderVariantCollection;
+    
 
         [NonSerialized] private ConfigData _configData;
         [NonSerialized] private BettrServer _bettrServer;
@@ -33,7 +35,7 @@ namespace Bettr.Core
         [NonSerialized] private BettrOutcomeController _bettrOutcomeController;
         // ReSharper disable once NotAccessedField.Local
         [NonSerialized] private BettrAudioController _bettrAudioController;
-        
+
         private bool _oneTimeSetUpComplete;
 
         public void StartApp()
@@ -89,6 +91,11 @@ namespace Bettr.Core
             if (_oneTimeSetUpComplete) yield break;
             
             Debug.Log("OneTimeSetup started");
+            
+            if (shaderVariantCollection != null && shaderVariantCollection.isWarmedUp == false)
+            {
+                shaderVariantCollection.WarmUp();
+            }
 
             TileController.StaticInit();
             TileController.RegisterModule("Bettr.dll");

@@ -778,10 +778,30 @@ namespace Bettr.Editor
                             {
                                 if (assets is List<object> assetList)
                                 {
-                                    // Sort assetList so that all files ending in .cscript.txt are first
+                                    // Sort assets in the desired order: Shaders, Scripts, Materials, and then others
                                     var sortedAssetList = assetList
-                                        .OrderByDescending(asset => asset.ToString().EndsWith(".cscript.txt"))
+                                        .OrderBy(asset =>
+                                        {
+                                            string assetStr = asset.ToString();
+
+                                            // Sort shaders first
+                                            if (assetStr.EndsWith(".shader", StringComparison.OrdinalIgnoreCase))
+                                                return 0;
+
+                                            // Sort scripts second
+                                            if (assetStr.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) || assetStr.EndsWith(".js", StringComparison.OrdinalIgnoreCase))
+                                                return 1;
+
+                                            // Sort materials third
+                                            if (assetStr.EndsWith(".mat", StringComparison.OrdinalIgnoreCase))
+                                                return 2;
+
+                                            // Everything else last
+                                            return 3;
+                                        })
+                                        .ThenBy(asset => asset.ToString()) // Secondary alphabetical sort
                                         .ToList();
+
 
                                     yamlObject["Assets"] = sortedAssetList;
 

@@ -210,7 +210,7 @@ sync-machines-specific: prepare-project
 	@MODELS_DIR="${MODELS_DIR}"; \
 	for MACHINE_NAME_DIR in "$${MODELS_DIR}/"*/; do \
 		MACHINE_NAME=$$(basename "$${MACHINE_NAME_DIR}"); \
-		if [[ "$${MACHINE_NAME}" =~ ^Game009$$ ]]; then \
+		if [[ "$${MACHINE_NAME}" =~ ^Game001$$ ]]; then \
 			echo "Processing MACHINE_NAME: $${MACHINE_NAME}"; \
 			for MACHINE_VARIANT_DIR in "$${MACHINE_NAME_DIR}/"*/; do \
 				MACHINE_VARIANT=$$(basename "$${MACHINE_VARIANT_DIR}"); \
