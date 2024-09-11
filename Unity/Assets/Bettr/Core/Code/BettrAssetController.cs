@@ -32,6 +32,56 @@ namespace Bettr.Core
     public delegate void AssetClearCompleteCallback(string assetBundleName, string assetBundleVersion,
         BettrAssetBundleManifest assetBundleManifest, bool success, string error);
 
+    public static class ShaderCaches
+    {
+        [NonSerialized]
+        public static readonly Dictionary<string, Shader> ShaderCache = new Dictionary<string, Shader>();
+        [NonSerialized]
+        public static readonly Dictionary<string, Shader> TmProShaderCache = new Dictionary<string, Shader>();
+
+        static ShaderCaches()
+        {
+            var shaderNames = new string[]
+            {
+                "Bettr/BluishGlow",
+                "Bettr/Frame",
+                "Bettr/LobbyCardUnlitTexture",
+                "Bettr/LobbyMask",
+                "Bettr/ReelMask",
+                "Bettr/Symbol",
+            };
+            
+            // load the shaders into the cache
+            foreach (var shaderName in shaderNames)
+            {
+                var shader = Shader.Find(shaderName);
+                if (shader == null)
+                {
+                    Debug.LogError($"Failed to load shader={shaderName}");
+                    continue;
+                }
+                ShaderCache[shaderName] = shader;
+            }
+            
+            var tmProShaderNames = new string[]
+            {
+                "TextMeshPro/Distance Field"
+            };
+            
+            // load the shaders into the cache
+            foreach (var tmProShaderName in tmProShaderNames)
+            {
+                var shader = Shader.Find(tmProShaderName);
+                if (shader == null)
+                {
+                    Debug.LogError($"Failed to load TextMeshPro shader={tmProShaderName}");
+                    continue;
+                }
+                TmProShaderCache[tmProShaderName] = shader;
+            }
+        }
+    }
+
     [Serializable]
     public class BettrAssetPackageController
     {
@@ -94,12 +144,7 @@ namespace Bettr.Core
     {
         [NonSerialized] private BettrAssetController _bettrAssetController;
         [NonSerialized] private BettrAssetPackageController _bettrAssetPackageController;
-
-        [NonSerialized]
-        private Dictionary<string, Shader> _shaderCache = new Dictionary<string, Shader>();
-        [NonSerialized]
-        private Dictionary<string, Shader> _tmProShaderCache = new Dictionary<string, Shader>();
-
+        
         public BettrAssetPrefabsController(
             BettrAssetController bettrAssetController,
             BettrAssetPackageController bettrAssetPackageController)
@@ -109,45 +154,6 @@ namespace Bettr.Core
 
             _bettrAssetController = bettrAssetController;
             _bettrAssetPackageController = bettrAssetPackageController;
-
-            var shaderNames = new string[]
-            {
-                "Bettr/BluishGlow",
-                "Bettr/Frame",
-                "Bettr/LobbyCardUnlitTexture",
-                "Bettr/LobbyMask",
-                "Bettr/ReelMask",
-                "Bettr/Symbol",
-            };
-            
-            // load the shaders into the cache
-            foreach (var shaderName in shaderNames)
-            {
-                var shader = Shader.Find(shaderName);
-                if (shader == null)
-                {
-                    Debug.LogError($"Failed to load shader={shaderName}");
-                    continue;
-                }
-                _shaderCache[shaderName] = shader;
-            }
-            
-            var tmProShaderNames = new string[]
-            {
-                "TextMeshPro/Distance Field"
-            };
-            
-            // load the shaders into the cache
-            foreach (var tmProShaderName in tmProShaderNames)
-            {
-                var shader = Shader.Find(tmProShaderName);
-                if (shader == null)
-                {
-                    Debug.LogError($"Failed to load TextMeshPro shader={tmProShaderName}");
-                    continue;
-                }
-                _tmProShaderCache[tmProShaderName] = shader;
-            }
         }
         
         public IEnumerator ReplacePrefab(string bettrAssetBundleName, string bettrAssetBundleVersion, string prefabName,
@@ -204,7 +210,7 @@ namespace Bettr.Core
             {
                 foreach (Material mat in renderer.sharedMaterials)
                 {
-                    if (_shaderCache.TryGetValue(mat.shader.name, out Shader bettrShader))
+                    if (ShaderCaches.ShaderCache.TryGetValue(mat.shader.name, out Shader bettrShader))
                     {
                         mat.shader = bettrShader;
                     }
@@ -216,7 +222,7 @@ namespace Bettr.Core
             foreach (var textMeshProUGUI in textMeshProUGUIs)
             {
                 // check if the shader is in the cache
-                if (_tmProShaderCache.TryGetValue(textMeshProUGUI.fontMaterial.shader.name, out Shader bettrShader))
+                if (ShaderCaches.TmProShaderCache.TryGetValue(textMeshProUGUI.fontMaterial.shader.name, out Shader bettrShader))
                 {
                     textMeshProUGUI.fontMaterial.shader = bettrShader;
                 }
@@ -226,7 +232,7 @@ namespace Bettr.Core
             foreach (var textMeshPro in textMeshPros)
             {
                 // check if the shader is in the cache
-                if (_tmProShaderCache.TryGetValue(textMeshPro.fontMaterial.shader.name, out Shader bettrShader))
+                if (ShaderCaches.TmProShaderCache.TryGetValue(textMeshPro.fontMaterial.shader.name, out Shader bettrShader))
                 {
                     textMeshPro.fontMaterial.shader = bettrShader;
                 }
@@ -314,8 +320,48 @@ namespace Bettr.Core
             var scenePath = string.IsNullOrWhiteSpace(bettrSceneName)
                 ? allScenePaths[0]
                 : allScenePaths.First(s => Path.GetFileNameWithoutExtension(s).Equals(bettrSceneName));
+            
+            AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(scenePath, LoadSceneMode.Single);
+    
+            // Wait until the scene has fully loaded
+            while (!asyncLoad.isDone)
+            {
+                yield return null;
+            }
+            
+            // Update shaders for all active and inactive Renderer components in the scene
+            Renderer[] renderers = Object.FindObjectsOfType<Renderer>(true); // 'true' includes inactive objects
+            foreach (var renderer in renderers)
+            {
+                foreach (var mat in renderer.sharedMaterials)
+                {
+                    if (ShaderCaches.ShaderCache.TryGetValue(mat.shader.name, out Shader bettrShader))
+                    {
+                        mat.shader = bettrShader;
+                    }
+                }
+            }
 
-            SceneManager.LoadScene(scenePath, LoadSceneMode.Single);
+            // Update shaders for all active and inactive TextMeshProUGUI components in the scene
+            // ReSharper disable once InconsistentNaming
+            var textMeshProUGUIs = Object.FindObjectsOfType<TMPro.TextMeshProUGUI>(true);
+            foreach (var textMeshProUGUI in textMeshProUGUIs)
+            {
+                if (ShaderCaches.TmProShaderCache.TryGetValue(textMeshProUGUI.fontMaterial.shader.name, out Shader bettrShader))
+                {
+                    textMeshProUGUI.fontMaterial.shader = bettrShader;
+                }
+            }
+
+            // Update shaders for all active and inactive TextMeshPro components in the scene
+            var textMeshPros = Object.FindObjectsOfType<TMPro.TextMeshPro>(true);
+            foreach (var textMeshPro in textMeshPros)
+            {
+                if (ShaderCaches.TmProShaderCache.TryGetValue(textMeshPro.fontMaterial.shader.name, out Shader bettrShader))
+                {
+                    textMeshPro.fontMaterial.shader = bettrShader;
+                }
+            }
         }
     }
 
