@@ -204,7 +204,7 @@ sync-machines: prepare-project
 	done
 
 
-# adjust the MACHINE_NAME pattern accordingly
+# adjust the MACHINE_NAME and MACHINE_VARIANT pattern accordingly
 sync-machines-specific: prepare-project
 	@echo "Running sync-machines..."
 	@MODELS_DIR="${MODELS_DIR}"; \
@@ -214,22 +214,27 @@ sync-machines-specific: prepare-project
 			echo "Processing MACHINE_NAME: $${MACHINE_NAME}"; \
 			for MACHINE_VARIANT_DIR in "$${MACHINE_NAME_DIR}/"*/; do \
 				MACHINE_VARIANT=$$(basename "$${MACHINE_VARIANT_DIR}"); \
-				echo "Processing MACHINE_VARIANT: $${MACHINE_VARIANT}"; \
-				MACHINE_MODEL="$${MODELS_DIR}/$${MACHINE_NAME}/$${MACHINE_VARIANT}/$${MACHINE_NAME}Models.lua"; \
-				UNITY_OUTPUT=$$(${UNITY_APP} -batchmode -logFile "${ASSET_DATA_LOG_FILE_PATH}" -quit -projectPath "${UNITY_PROJECT_PATH}" -executeMethod "${SYNC_MACHINE_METHOD}" -machineName "$${MACHINE_NAME}" -machineVariant "$${MACHINE_VARIANT}" -machineModel "$${MACHINE_MODEL}" 2>&1); \
-				UNITY_EXIT_STATUS=$$?; \
-				if [ "$$UNITY_EXIT_STATUS" -ne 0 ]; then \
-					echo "Error executing Unity for MACHINE_NAME=$${MACHINE_NAME}, MACHINE_VARIANT=$${MACHINE_VARIANT} ASSET_DATA_LOG_FILE_PATH=${ASSET_DATA_LOG_FILE_PATH}"; \
-					echo "Unity Output: $$UNITY_OUTPUT"; \
-					exit $$UNITY_EXIT_STATUS; \
+				if [[ "$${MACHINE_VARIANT}" =~ ^EpicAncientAdventures$$ ]]; then \
+					echo "Processing MACHINE_VARIANT: $${MACHINE_VARIANT}"; \
+					MACHINE_MODEL="$${MODELS_DIR}/$${MACHINE_NAME}/$${MACHINE_VARIANT}/$${MACHINE_NAME}Models.lua"; \
+					UNITY_OUTPUT=$$(${UNITY_APP} -batchmode -logFile "${ASSET_DATA_LOG_FILE_PATH}" -quit -projectPath "${UNITY_PROJECT_PATH}" -executeMethod "${SYNC_MACHINE_METHOD}" -machineName "$${MACHINE_NAME}" -machineVariant "$${MACHINE_VARIANT}" -machineModel "$${MACHINE_MODEL}" 2>&1); \
+					UNITY_EXIT_STATUS=$$?; \
+					if [ "$$UNITY_EXIT_STATUS" -ne 0 ]; then \
+						echo "Error executing Unity for MACHINE_NAME=$${MACHINE_NAME}, MACHINE_VARIANT=$${MACHINE_VARIANT} ASSET_DATA_LOG_FILE_PATH=${ASSET_DATA_LOG_FILE_PATH}"; \
+						echo "Unity Output: $$UNITY_OUTPUT"; \
+						exit $$UNITY_EXIT_STATUS; \
+					fi; \
+					echo "Executed for MACHINE_NAME=$${MACHINE_NAME}, MACHINE_VARIANT=$${MACHINE_VARIANT}, MACHINE_MODEL=$${MACHINE_MODEL} ASSET_DATA_LOG_FILE_PATH=${ASSET_DATA_LOG_FILE_PATH}"; \
+					sleep ${SLEEP_DURATION}; \
+				else \
+					echo "Skipping MACHINE_VARIANT: $${MACHINE_VARIANT} (does not match Variant001 pattern)"; \
 				fi; \
-				echo "Executed for MACHINE_NAME=$${MACHINE_NAME}, MACHINE_VARIANT=$${MACHINE_VARIANT}, MACHINE_MODEL=$${MACHINE_MODEL} ASSET_DATA_LOG_FILE_PATH=${ASSET_DATA_LOG_FILE_PATH}"; \
-				sleep ${SLEEP_DURATION}; \
 			done; \
 		else \
-			echo "Skipping directory: $${MACHINE_NAME} (does not match Game<NNN> pattern)"; \
+			echo "Skipping directory: $${MACHINE_NAME} (does not match Game001 pattern)"; \
 		fi; \
 	done
+
 
 
 

@@ -262,19 +262,19 @@ namespace Bettr.Editor
         [MenuItem("Bettr/Build/Game001 - Epic Wins")]
         public static void BuildGame001()
         {
-            BuildMachines("Game001", "AncientAdventures");
-            // BuildMachines("Game001", "AtlantisTreasures");
-            // BuildMachines("Game001", "ClockworkChronicles");
-            // BuildMachines("Game001", "CosmicVoyage");
-            // BuildMachines("Game001", "DragonsHoard");
-            // BuildMachines("Game001", "EnchantedForest");
-            // BuildMachines("Game001", "GalacticQuest");
-            // BuildMachines("Game001", "GuardiansOfOlympus");
-            // BuildMachines("Game001", "LostCityOfGold");
-            // BuildMachines("Game001", "MysticalLegends");
-            // BuildMachines("Game001", "PharosFortune");
-            // BuildMachines("Game001", "PiratesPlunder");
-            // BuildMachines("Game001", "SamuraisFortune");
+            BuildMachines("Game001", "EpicAncientAdventures");
+            // BuildMachines("Game001", "EpicAtlantisTreasures");
+            // BuildMachines("Game001", "EpicClockworkChronicles");
+            // BuildMachines("Game001", "EpicCosmicVoyage");
+            // BuildMachines("Game001", "EpicDragonsHoard");
+            // BuildMachines("Game001", "EpicEnchantedForest");
+            // BuildMachines("Game001", "EpicGalacticQuest");
+            // BuildMachines("Game001", "EpicGuardiansOfOlympus");
+            // BuildMachines("Game001", "EpicLostCityOfGold");
+            // BuildMachines("Game001", "EpicMysticalLegends");
+            // BuildMachines("Game001", "EpicPharosFortune");
+            // BuildMachines("Game001", "EpicPiratesPlunder");
+            // BuildMachines("Game001", "EpicSamuraisFortune");
         }
         
         [MenuItem("Bettr/Build/Game002 - Buffalo")]

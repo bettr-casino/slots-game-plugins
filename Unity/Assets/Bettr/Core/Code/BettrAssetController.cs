@@ -97,6 +97,8 @@ namespace Bettr.Core
 
         [NonSerialized]
         private Dictionary<string, Shader> _shaderCache = new Dictionary<string, Shader>();
+        [NonSerialized]
+        private Dictionary<string, Shader> _tmProShaderCache = new Dictionary<string, Shader>();
 
         public BettrAssetPrefabsController(
             BettrAssetController bettrAssetController,
@@ -128,6 +130,23 @@ namespace Bettr.Core
                     continue;
                 }
                 _shaderCache[shaderName] = shader;
+            }
+            
+            var tmProShaderNames = new string[]
+            {
+                "TextMeshPro/Distance Field"
+            };
+            
+            // load the shaders into the cache
+            foreach (var tmProShaderName in tmProShaderNames)
+            {
+                var shader = Shader.Find(tmProShaderName);
+                if (shader == null)
+                {
+                    Debug.LogError($"Failed to load TextMeshPro shader={tmProShaderName}");
+                    continue;
+                }
+                _tmProShaderCache[tmProShaderName] = shader;
             }
         }
         
@@ -180,23 +199,38 @@ namespace Bettr.Core
                 yield break;
             }
             
-            // Get all renderers in the prefab (and its children)
             Renderer[] renderers = prefab.GetComponentsInChildren<Renderer>(true);
-            
             foreach (Renderer renderer in renderers)
             {
                 foreach (Material mat in renderer.sharedMaterials)
                 {
-                    // Reassign the shader to the material
-                    Debug.Log("Shared Material: " + mat.name + " is using shader: " + mat.shader.name);
-                    // check if the shader is in the cache
                     if (_shaderCache.TryGetValue(mat.shader.name, out Shader bettrShader))
                     {
                         mat.shader = bettrShader;
                     }
                 }
             }
-
+            
+            // update the TextMeshProUI shaders
+            var textMeshProUGUIs = prefab.GetComponentsInChildren<TMPro.TextMeshProUGUI>(true);
+            foreach (var textMeshProUGUI in textMeshProUGUIs)
+            {
+                // check if the shader is in the cache
+                if (_tmProShaderCache.TryGetValue(textMeshProUGUI.fontMaterial.shader.name, out Shader bettrShader))
+                {
+                    textMeshProUGUI.fontMaterial.shader = bettrShader;
+                }
+            }
+            // similarly for TextMeshPro shaders
+            var textMeshPros = prefab.GetComponentsInChildren<TMPro.TextMeshPro>(true);
+            foreach (var textMeshPro in textMeshPros)
+            {
+                // check if the shader is in the cache
+                if (_tmProShaderCache.TryGetValue(textMeshPro.fontMaterial.shader.name, out Shader bettrShader))
+                {
+                    textMeshPro.fontMaterial.shader = bettrShader;
+                }
+            }
             Object.Instantiate(prefab, parent == null ? null : parent.transform);
         }
     }

@@ -1720,6 +1720,7 @@ namespace Bettr.Editor
             textMeshPro.horizontalAlignment = (HorizontalAlignmentOptions) Enum.Parse(typeof(HorizontalAlignmentOptions), HorizontalAlignment);
             textMeshPro.verticalAlignment = (VerticalAlignmentOptions) Enum.Parse(typeof(VerticalAlignmentOptions), VerticalAlignment);
             textMeshPro.enableWordWrapping = false;
+            textMeshPro.font = FontAsset;
             
             if (Rect is not null)
             {
