@@ -63,6 +63,7 @@ BUILD_METHOD_WEBGL := "Bettr.Editor.CommandLine.BuildWebGL"
 
 S3_WEBGL_BUCKET := "bettr.casino"
 S3_WEBGL_OBJECT_KEY := ""
+S3_WEBGL_CLOUDFRONT_DISTRIBUTION_ID := "E1SZKTT445YO6X"
 
 APPLE_ID := ${APPLE_ID}
 APPLE_PASSWORD := ${APPLE_PASSWORD}
@@ -301,13 +302,20 @@ build-target-webgl: prepare-project
 
 publish-target-webgl: build-target-webgl
 	@echo "Publishing WebGL project to S3..."
-	# Sync all files except .gz files first
-	@aws s3 sync $(BUILD_WEBGL)/BettrSlots s3://$(S3_WEBGL_BUCKET)/$(S3_WEBGL_OBJECT_KEY) --profile $(AWS_DEFAULT_PROFILE) --exclude "*.gz"
-	# Now sync only .gz files with the Content-Encoding header set to gzip
-	@aws s3 sync $(BUILD_WEBGL)/BettrSlots s3://$(S3_WEBGL_BUCKET)/$(S3_WEBGL_OBJECT_KEY) --profile $(AWS_DEFAULT_PROFILE) --include "*.gz" --content-encoding "gzip"
+	# Sync all files except .gz files and disable caching
+	@aws s3 sync $(BUILD_WEBGL)/BettrSlots s3://$(S3_WEBGL_BUCKET)/$(S3_WEBGL_OBJECT_KEY) --profile $(AWS_DEFAULT_PROFILE) --exclude "*.gz" --cache-control "no-cache, no-store, must-revalidate"
+	# Sync only .gz files with the Content-Encoding header set to gzip and disable caching
+	@aws s3 sync $(BUILD_WEBGL)/BettrSlots s3://$(S3_WEBGL_BUCKET)/$(S3_WEBGL_OBJECT_KEY) --profile $(AWS_DEFAULT_PROFILE) --include "*.gz" --content-encoding "gzip" --cache-control "no-cache, no-store, must-revalidate"
 	@echo "Publish completed."
 
-deploy-target-webgl: build-target-webgl publish-target-webgl
+invalidate-target_webgl: publish-target-webgl
+	@echo "Invalidating CloudFront cache..."
+	aws cloudfront create-invalidation --distribution-id $(S3_WEBGL_CLOUDFRONT_DISTRIBUTION_ID) --paths "/*" --profile $(AWS_DEFAULT_PROFILE)
+	@echo "CloudFront invalidation completed."
+
+deploy-target-webgl: publish-target-webgl invalidate-target_webgl
+	@echo "Deploying WebGL project..."
+	@echo "Deployment completed."
 
 deploy-webgl:  deploy-assets-webgl deploy-target-webgl
 
