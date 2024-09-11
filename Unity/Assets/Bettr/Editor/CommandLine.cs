@@ -44,7 +44,7 @@ namespace Bettr.Editor
                 scenes = EditorBuildSettings.scenes.Where(scene => scene.enabled).Select(scene => scene.path).ToArray(),
                 locationPathName = buildPath, // Specify the build name here
                 target = BuildTarget.iOS,
-                options = BuildOptions.None
+                options = BuildOptions.Development | BuildOptions.AllowDebugging
             };
 
             // Perform the build
@@ -96,7 +96,7 @@ namespace Bettr.Editor
                 scenes = EditorBuildSettings.scenes.Where(scene => scene.enabled).Select(scene => scene.path).ToArray(),
                 locationPathName = buildPath, // Specify the build name here
                 target = BuildTarget.WebGL,
-                options = BuildOptions.None
+                options = BuildOptions.Development | BuildOptions.AllowDebugging
             };
 
             // Perform the build
