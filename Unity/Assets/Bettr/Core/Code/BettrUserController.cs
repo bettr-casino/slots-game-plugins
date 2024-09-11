@@ -38,6 +38,7 @@ namespace Bettr.Core
         public string GetUserId()
         {
             var deviceId = SystemInfo.deviceUniqueIdentifier;
+            deviceId = "EE0DE516-5053-5142-80AC-2D878E91215C"; // TODO: remove this line after testing
             var uniqueId = $"{deviceId}";
             return uniqueId;            
         }
@@ -49,7 +50,7 @@ namespace Bettr.Core
             
             BettrUserConfig = null;
             UserIsLoggedIn = false;
-            
+
             var userId = GetUserId();
             
             yield return bettrServer.Login(userId);
