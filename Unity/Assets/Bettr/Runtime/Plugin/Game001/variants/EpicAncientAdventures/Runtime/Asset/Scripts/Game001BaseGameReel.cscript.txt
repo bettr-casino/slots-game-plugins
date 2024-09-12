@@ -28,16 +28,7 @@ function Game001BaseGameReel:Awake()
 	self.Mechanics:Initialize(self)
 end
 
-function Game001BaseGameReel:Start()
-    series
-        do
-	        System.Print("Game001BaseGameReel Start tile id={0}", self.id)	        
-        end
-    end
-end
-
 function Game001BaseGameReel:StartEngines()
-    System.Print("Game001BaseGameReel StartEngines tile id={0}", self.id)
     series
         do
             local reelGo = self.gameObject
@@ -222,8 +213,14 @@ function Game001BaseGameReel:SpinReelSpinning()
     local reelState = Game001BaseGameReelState[self.ReelID].First
     local reelSpinState = Game001BaseGameReelSpinState[self.ReelID].First
     reelSpinState.SpeedInSymbolUnitsPerSecond = reelState.SpinSpeedInSymbolUnitsPerSecond
-    local slideDistanceInSymbolUnits = self:AdvanceReel()
-    self:SlideReelSymbols(slideDistanceInSymbolUnits)
+    local spinOutcome = Game001BaseGameReelSpinOutcome[self.ReelID].First
+    local reelSymbolsState = Game001BaseGameReelSymbolsState[self.ReelID].Array
+    local reelSymbols = Game001BaseGameReelSet[self.ReelID].Array
+    -- replace call with BettrReelController
+    -- local slideDistanceInSymbolUnits = self:AdvanceReel()
+    -- self:SlideReelSymbols(slideDistanceInSymbolUnits)
+    local slideDistanceInSymbolUnits = BettrReelController.AdvanceReel(self, reelState, reelSpinState, reelSymbolsState, reelSymbols, spinOutcome)
+    BettrReelController.SlideReelSymbols(slideDistanceInSymbolUnits, self, reelState, reelSpinState, reelSymbolsState)
     return true    
 end
 

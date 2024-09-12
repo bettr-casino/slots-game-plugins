@@ -213,8 +213,14 @@ function {{machineName}}BaseGameReel:SpinReelSpinning()
     local reelState = {{machineName}}BaseGameReelState[self.ReelID].First
     local reelSpinState = {{machineName}}BaseGameReelSpinState[self.ReelID].First
     reelSpinState.SpeedInSymbolUnitsPerSecond = reelState.SpinSpeedInSymbolUnitsPerSecond
-    local slideDistanceInSymbolUnits = self:AdvanceReel()
-    self:SlideReelSymbols(slideDistanceInSymbolUnits)
+    local spinOutcome = {{machineName}}BaseGameReelSpinOutcome[self.ReelID].First
+    local reelSymbolsState = {{machineName}}BaseGameReelSymbolsState[self.ReelID].Array
+    local reelSymbols = {{machineName}}BaseGameReelSet[self.ReelID].Array
+    -- replace call with BettrReelController
+    -- local slideDistanceInSymbolUnits = self:AdvanceReel()
+    -- self:SlideReelSymbols(slideDistanceInSymbolUnits)
+    local slideDistanceInSymbolUnits = BettrReelController.AdvanceReel(self, reelState, reelSpinState, reelSymbolsState, reelSymbols, spinOutcome)
+    BettrReelController.SlideReelSymbols(slideDistanceInSymbolUnits, self, reelState, reelSpinState, reelSymbolsState)
     return true    
 end
 
