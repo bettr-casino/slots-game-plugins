@@ -23,6 +23,9 @@ namespace Bettr.Core
         [NonSerialized] private Table ReelSymbolsStateTable;
         [NonSerialized] private Table ReelSymbolsTable;
         
+        // TODO: FIXME move this to ReelStateTable
+        [NonSerialized] private bool ShouldSpliceReel; 
+        
         private void Awake()
         {
             ReelTile = GetComponent<TileWithUpdate>();
@@ -109,7 +112,7 @@ namespace Bettr.Core
             this.SpinOutcomeTable = GetTableFirst("BaseGameReelSpinOutcome", this.MachineID, this.ReelID);
             float delayInSeconds = (float) (double) this.ReelStateTable["ReelStopDelayInSeconds"];
             yield return new WaitForSeconds(delayInSeconds);
-            SpliceReel();
+            this.ShouldSpliceReel = true;
             this.ReelStateTable["OutcomeReceived"] = true;
         }
         
@@ -117,6 +120,7 @@ namespace Bettr.Core
         {
             this.ReelSpinStateTable["ReelSpinState"] = "SpinStartedRollBack";
             this.ReelStateTable["OutcomeReceived"] = false;
+            this.ShouldSpliceReel = false;
         }
         
         public void SpinReelSpinStartedRollBack()
@@ -351,6 +355,11 @@ namespace Bettr.Core
             if (!(bool) this.ReelStateTable["OutcomeReceived"])
             {
                 return;
+            }
+            if (this.ShouldSpliceReel)
+            {
+                SpliceReel();
+                this.ShouldSpliceReel = false;
             }
             // Get the current stop index and outcome-related values
             var reelSymbolCount = (int) (double) this.ReelStateTable["ReelSymbolCount"];
