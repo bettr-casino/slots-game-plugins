@@ -1482,6 +1482,7 @@ namespace Bettr.Editor
             var model = new Dictionary<string, object>
             {
                 { "machineName", machineName },
+                { "machineVariant", machineVariant },
                 { "reelIndex", reelIndex },
                 { "symbolKeys", symbolKeys },
                 { "yPositions", yPositions },

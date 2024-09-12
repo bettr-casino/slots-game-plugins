@@ -1,16 +1,55 @@
+// ReSharper disable All
+using System;
+using System.Collections;
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
 using UnityEngine;
-
-// ReSharper disable once CheckNamespace
 namespace Bettr.Core
 {
-    public class BettrReelController
+    [Serializable]
+    public class BettrReelController : MonoBehaviour
     {
-        public BettrReelController()
+        [NonSerialized] private TileWithUpdate ReelTile;
+
+        [NonSerialized] private string ReelID;
+        [NonSerialized] private string MachineID;
+        [NonSerialized] private string MachineVariantID;
+        
+        [NonSerialized] private Table ReelTable;
+        [NonSerialized] private Table ReelStateTable;
+        [NonSerialized] private Table ReelSpinStateTable;
+        [NonSerialized] private Table SpinOutcomeTable;
+        [NonSerialized] private Table ReelSymbolsStateTable;
+        [NonSerialized] private Table ReelSymbolsTable;
+        
+        private void Awake()
         {
-            TileController.RegisterType<BettrReelController>("BettrReelController");
-            TileController.AddToGlobals("BettrReelController", this);
+            ReelTile = GetComponent<TileWithUpdate>();
+        }
+        
+        private IEnumerator Start()
+        {
+            this.ReelID = ReelTile.GetProperty<string>("ReelID");
+            this.MachineID = ReelTile.GetProperty<string>("MachineID");
+            this.MachineVariantID = ReelTile.GetProperty<string>("MachineVariantID");
+
+            this.ReelTable = GetGlobalTable(ReelTile.globalTileId);
+            this.ReelStateTable = GetTableFirst("BaseGameReelState", this.MachineID, this.ReelID);
+            this.ReelSpinStateTable = GetTableFirst("BaseGameReelSpinState", this.MachineID, this.ReelID);
+            this.SpinOutcomeTable = GetTableFirst("BaseGameReelSpinOutcome", this.MachineID, this.ReelID);
+            this.ReelSymbolsStateTable = GetTableArray("BaseGameReelSymbolsState", this.MachineID, this.ReelID);
+            this.ReelSymbolsTable = GetTableArray("BaseGameReelSet", this.MachineID, this.ReelID);
+            
+            // add this to the ReelTile properties
+            this.ReelTile.SetProperty("BettrReelController", this);
+            
+            yield break;
+        }
+        
+        private Table GetGlobalTable(string tableName)
+        {
+            var globalTable = (Table) TileController.LuaScript.Globals[tableName];
+            return globalTable;
         }
 
         private Table GetTableFirst(string tableName, string machineID, string reelID)
@@ -27,6 +66,22 @@ namespace Bettr.Core
             var reelTable = (Table) machineTable[reelID];
             var reelStateTable = (Table) reelTable["Array"];
             return reelStateTable;
+        }
+        
+        public IEnumerator OnOutcomeReceived()
+        {
+            // Replace the outcome table with this new one
+            this.SpinOutcomeTable = GetTableFirst("BaseGameReelSpinOutcome", this.MachineID, this.ReelID);
+            float delayInSeconds = (float) (double) this.ReelStateTable["ReelStopDelayInSeconds"];
+
+            // Wait for the delay
+            yield return new WaitForSeconds(delayInSeconds);
+
+            // Execute SpliceReel logic
+            SpliceReel();
+
+            // Mark the outcome as received
+            this.ReelStateTable["OutcomeReceived"] = true;
         }
         
         public float CalculateSlideDistanceInSymbolUnits(Table reelSpinStateTable)
@@ -46,22 +101,22 @@ namespace Bettr.Core
             return slideDistanceInSymbolUnits;
         }
         
-        public float AdvanceReel(Table reelTable, Table reelStateTable, Table reelSpinStateTable, Table reelSymbolsStateTable, Table reelSymbolsTable, Table spinOutcomeTable)
+        public float AdvanceReel()
         {
-            var reelSpinDirection = (string) reelSpinStateTable["ReelSpinDirection"];
+            var reelSpinDirection = (string) this.ReelSpinStateTable["ReelSpinDirection"];
             bool spinDirectionIsDown = reelSpinDirection == "Down";
             float slideDistanceOffsetInSymbolUnits = spinDirectionIsDown ? 1 : -1;
-            float slideDistanceInSymbolUnits = CalculateSlideDistanceInSymbolUnits(reelSpinStateTable);
+            float slideDistanceInSymbolUnits = CalculateSlideDistanceInSymbolUnits(this.ReelSpinStateTable);
 
             while ((spinDirectionIsDown && slideDistanceInSymbolUnits < -1) || (!spinDirectionIsDown && slideDistanceInSymbolUnits > 1))
             {
-                AdvanceSymbols(reelTable, reelStateTable, reelSpinStateTable, reelSymbolsStateTable, reelSymbolsTable);
-                UpdateReelStopIndexes(reelStateTable, reelSpinStateTable);
-                ApplySpinReelStop( reelStateTable, reelSpinStateTable, spinOutcomeTable);
+                AdvanceSymbols();
+                UpdateReelStopIndexes();
+                ApplySpinReelStop();
                 slideDistanceInSymbolUnits += slideDistanceOffsetInSymbolUnits;
             }
 
-            var spinState = (string) reelSpinStateTable["ReelSpinState"];
+            var spinState = (string) this.ReelSpinStateTable["ReelSpinState"];
             if (spinState is "ReachedOutcomeStopIndex" or "Stopped")
             {
                 slideDistanceInSymbolUnits = 0;
@@ -70,19 +125,18 @@ namespace Bettr.Core
             return slideDistanceInSymbolUnits;
         }
 
-        public void AdvanceSymbols(Table reelTable, Table reelStateTable, Table reelSpinStateTable, Table reelSymbolsStateTable, Table reelSymbolsTable)
+        public void AdvanceSymbols()
         {
-            var symbolCount = (int) (double) reelStateTable["SymbolCount"];
+            var symbolCount = (int) (double) this.ReelStateTable["SymbolCount"];
             for (var i = 1; i <= symbolCount; i++)
             {
-                UpdateReelSymbolForSpin(i, reelTable, reelStateTable, reelSpinStateTable, reelSymbolsStateTable, reelSymbolsTable);
+                UpdateReelSymbolForSpin(i);
             }
         }
 
-        public void UpdateReelSymbolForSpin(int symbolIndex, Table reelTable, Table reelStateTable,
-            Table reelSpinStateTable, Table reelSymbolsStateTable, Table reelSymbolsTable)
+        public void UpdateReelSymbolForSpin(int symbolIndex)
         {
-            var symbolState = (Table) reelSymbolsStateTable[symbolIndex];
+            var symbolState = (Table) this.ReelSymbolsStateTable[symbolIndex];
             var symbolIsLocked = (bool) symbolState["SymbolIsLocked"];
             if (symbolIsLocked)
             {
@@ -90,12 +144,12 @@ namespace Bettr.Core
             }
 
             var rowVisible = (bool) symbolState["RowVisible"];
-            var reelStopIndex = (int) (double) reelSpinStateTable["ReelStopIndex"];
-            var reelSymbolCount = (int) (double) reelStateTable["ReelSymbolCount"];
+            var reelStopIndex = (int) (double) this.ReelSpinStateTable["ReelStopIndex"];
+            var reelSymbolCount = (int) (double) this.ReelStateTable["ReelSymbolCount"];
             var reelPosition = (int) (double) symbolState["ReelPosition"];
             var symbolStopIndex = 1 + (reelSymbolCount + reelStopIndex + reelPosition) % reelSymbolCount;
-            var reelSymbol = (string) ((Table) reelSymbolsTable[symbolStopIndex])["ReelSymbol"];
-            var symbolGroupProperty = (TilePropertyGameObjectGroup) reelTable[$"SymbolGroup{symbolIndex}"];
+            var reelSymbol = (string) ((Table) this.ReelSymbolsTable[symbolStopIndex])["ReelSymbol"];
+            var symbolGroupProperty = (TilePropertyGameObjectGroup) this.ReelTable[$"SymbolGroup{symbolIndex}"];
             if (symbolGroupProperty.Current != null)
             {
                 symbolGroupProperty.Current.SetActive(false);
@@ -108,73 +162,73 @@ namespace Bettr.Core
             symbolGroupProperty.CurrentKey = reelSymbol;
         }
         
-        public void UpdateReelStopIndexes(Table reelStateTable, Table reelSpinStateTable)
+        public void UpdateReelStopIndexes()
         {
-            var reelSymbolCount = (int) (double) reelStateTable["ReelSymbolCount"];
+            var reelSymbolCount = (int) (double) this.ReelStateTable["ReelSymbolCount"];
             // Get the current stop index and advance offset
-            var reelStopIndex = (int) (double) reelSpinStateTable["ReelStopIndex"];
-            var reelStopIndexAdvanceOffset = (int) (double) reelStateTable["ReelStopIndexAdvanceOffset"];
+            var reelStopIndex = (int) (double) this.ReelSpinStateTable["ReelStopIndex"];
+            var reelStopIndexAdvanceOffset = (int) (double) this.ReelStateTable["ReelStopIndexAdvanceOffset"];
             // Update the reel stop index
             reelStopIndex += reelStopIndexAdvanceOffset;
             // Wrap the stop index to keep it within bounds using modulus
             reelStopIndex = (reelSymbolCount + reelStopIndex) % reelSymbolCount;
             // Assign the updated stop index back to the spin state
-            reelSpinStateTable["ReelStopIndex"] = reelStopIndex;
+            this.ReelSpinStateTable["ReelStopIndex"] = reelStopIndex;
         }
         
-        public void ApplySpinReelStop(Table reelStateTable, Table reelSpinStateTable, Table spinOutcomeTable)
+        public void ApplySpinReelStop()
         {
             // Check if the outcome has been received
-            if (!(bool) reelStateTable["OutcomeReceived"])
+            if (!(bool) this.ReelStateTable["OutcomeReceived"])
             {
                 return;
             }
             // Get the current stop index and outcome-related values
-            var reelSymbolCount = (int) (double) reelStateTable["ReelSymbolCount"];
-            var reelStopIndex = (int) (double) reelSpinStateTable["ReelStopIndex"];
-            var reelStopIndexAdvanceOffset = (int) (double) reelStateTable["ReelStopIndexAdvanceOffset"];
+            var reelSymbolCount = (int) (double) this.ReelStateTable["ReelSymbolCount"];
+            var reelStopIndex = (int) (double) this.ReelSpinStateTable["ReelStopIndex"];
+            var reelStopIndexAdvanceOffset = (int) (double) this.ReelStateTable["ReelStopIndexAdvanceOffset"];
             // Adjust the stop index
             reelStopIndex -= reelStopIndexAdvanceOffset;
             reelStopIndex = (reelSymbolCount + reelStopIndex) % reelSymbolCount;
             // Get the outcome's stop index
-            var outcomeReelStopIndex = (int) (double) spinOutcomeTable["OutcomeReelStopIndex"];
+            var outcomeReelStopIndex = (int) (double) this.SpinOutcomeTable["OutcomeReelStopIndex"];
             // Check if the reel stop index matches the outcome stop index
             if (outcomeReelStopIndex == reelStopIndex)
             {
-                reelSpinStateTable["ReelSpinState"] = "ReachedOutcomeStopIndex";
+                this.ReelSpinStateTable["ReelSpinState"] = "ReachedOutcomeStopIndex";
             }
         }
         
-        public void SlideReelSymbols(float slideDistanceInSymbolUnits, Table reelTable, Table reelStateTable, Table reelSpinStateTable, Table reelSymbolsStateTable)
+        public void SlideReelSymbols(float slideDistanceInSymbolUnits)
         {
             // Get the symbol count from reelState
-            var symbolCount = (int) (double) reelStateTable["SymbolCount"];
+            var symbolCount = (int) (double) this.ReelStateTable["SymbolCount"];
             // Iterate through each symbol and apply the slide distance
             for (int i = 1; i <= symbolCount; i++)
             {
-                SlideSymbol(i, slideDistanceInSymbolUnits, reelTable, reelStateTable, reelSymbolsStateTable);
+                SlideSymbol(i, slideDistanceInSymbolUnits);
             }
             // Set the SlideDistanceInSymbolUnits for the reel spin state
-            reelSpinStateTable["SlideDistanceInSymbolUnits"] = slideDistanceInSymbolUnits;
+            this.ReelSpinStateTable["SlideDistanceInSymbolUnits"] = slideDistanceInSymbolUnits;
         }
         
-        public void SlideSymbol(int symbolIndex, float slideDistanceInSymbolUnits, Table reelTable, Table reelStateTable, Table reelSymbolsStateTable)
+        public void SlideSymbol(int symbolIndex, float slideDistanceInSymbolUnits)
         {
             // Get the state of the current symbol
-            var symbolState = (Table) reelSymbolsStateTable[symbolIndex];
+            var symbolState = (Table) this.ReelSymbolsStateTable[symbolIndex];
             // If the symbol is locked, return early
             if ((bool) symbolState["SymbolIsLocked"])
             {
                 return;
             }
             // Access the symbol property (assuming you have a way to reference symbols like this)
-            var symbolProperty = (PropertyGameObject) reelTable[$"Symbol{symbolIndex}"];
+            var symbolProperty = (PropertyGameObject) this.ReelTable[$"Symbol{symbolIndex}"];
             // Get the current local position of the symbol's game object
             Vector3 localPosition = symbolProperty.gameObject.transform.localPosition;
             // Get symbol's position and other relevant values from the reel state
             float symbolPosition = (float) (double) symbolState["SymbolPosition"];
-            float verticalSpacing = (float) (double) reelStateTable["SymbolVerticalSpacing"];
-            float symbolOffsetY = (float) (double) reelStateTable["SymbolOffsetY"];
+            float verticalSpacing = (float) (double) this.ReelStateTable["SymbolVerticalSpacing"];
+            float symbolOffsetY = (float) (double) this.ReelStateTable["SymbolOffsetY"];
 
             // Calculate the new Y position
             float yLocalPosition = verticalSpacing * symbolPosition;
@@ -185,15 +239,15 @@ namespace Bettr.Core
             symbolProperty.gameObject.transform.localPosition = localPosition;
         }
         
-        public void SpliceReel(Table reelStateTable, Table reelSpinStateTable, Table spinOutcomeTable)
+        public void SpliceReel()
         {
-            var d1 = (int) (double) spinOutcomeTable["OutcomeReelStopIndex"];
-            var d2 = (int) (double) reelStateTable["SpliceDistance"];
-            var reelSymbolCount = (int) (double) reelStateTable["ReelSymbolCount"];
-            var spinDirectionIsDown = (string) reelSpinStateTable["ReelSpinDirection"] == "Down";
+            var d1 = (int) (double) this.SpinOutcomeTable["OutcomeReelStopIndex"];
+            var d2 = (int) (double) this.ReelStateTable["SpliceDistance"];
+            var reelSymbolCount = (int) (double) this.ReelStateTable["ReelSymbolCount"];
+            var spinDirectionIsDown = (string) this.ReelSpinStateTable["ReelSpinDirection"] == "Down";
 
             // Check if splicing should be skipped
-            bool skipSplice = SkipSpliceReel(reelStateTable, reelSpinStateTable, spinOutcomeTable);
+            bool skipSplice = SkipSpliceReel();
     
             // Perform splicing if it shouldn't be skipped
             if (spinDirectionIsDown)
@@ -201,7 +255,7 @@ namespace Bettr.Core
                 if (!skipSplice)
                 {
                     int reelStopIndex = (d1 + d2 + reelSymbolCount) % reelSymbolCount;
-                    reelSpinStateTable["ReelStopIndex"] = reelStopIndex - 1;
+                    this.ReelSpinStateTable["ReelStopIndex"] = reelStopIndex - 1;
                 }
             }
             else
@@ -209,20 +263,20 @@ namespace Bettr.Core
                 if (!skipSplice)
                 {
                     int reelStopIndex = (d1 - d2 + reelSymbolCount) % reelSymbolCount;
-                    reelSpinStateTable["ReelStopIndex"] = reelStopIndex + 1;
+                    this.ReelSpinStateTable["ReelStopIndex"] = reelStopIndex + 1;
                 }
             }
         }
         
-        public bool SkipSpliceReel(Table reelStateTable, Table reelSpinStateTable, Table spinOutcomeTable)
+        public bool SkipSpliceReel()
         {
-            var spinDirectionIsDown = (string) reelSpinStateTable["ReelSpinDirection"] == "Down";
-            var reelStopIndex = (int) (double) reelSpinStateTable["ReelStopIndex"];
-            var outcomeReelStopIndex = (int) (double) spinOutcomeTable["OutcomeReelStopIndex"];
+            var spinDirectionIsDown = (string) this.ReelSpinStateTable["ReelSpinDirection"] == "Down";
+            var reelStopIndex = (int) (double) this.ReelSpinStateTable["ReelStopIndex"];
+            var outcomeReelStopIndex = (int) (double) this.SpinOutcomeTable["OutcomeReelStopIndex"];
 
-            var topSymbolCount = (int) (double) reelStateTable["TopSymbolCount"];
-            var bottomSymbolCount = (int) (double) reelStateTable["BottomSymbolCount"];
-            var visibleSymbolCount = (int) (double) reelStateTable["VisibleSymbolCount"];
+            var topSymbolCount = (int) (double) this.ReelStateTable["TopSymbolCount"];
+            var bottomSymbolCount = (int) (double) this.ReelStateTable["BottomSymbolCount"];
+            var visibleSymbolCount = (int) (double) this.ReelStateTable["VisibleSymbolCount"];
 
             // Check if the outcome reel stop index is within top or bottom symbol offsets
             bool inTopSymbolOffset = outcomeReelStopIndex >= reelStopIndex - topSymbolCount && outcomeReelStopIndex < reelStopIndex;

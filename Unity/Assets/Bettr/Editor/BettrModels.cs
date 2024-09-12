@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
+using Bettr.Core;
 using Bettr.Editor.generators;
 using CrayonScript.Code;
 using TMPro;
@@ -469,6 +470,10 @@ namespace Bettr.Editor
                     var eventSystemComponent = new EventSystemComponent();
                     eventSystemComponent.AddComponent(gameObject);
                     break;
+                case "MonoBehaviour":
+                    var monoBehaviourComponent = new MonoBehaviourComponent(Name);
+                    monoBehaviourComponent.AddComponent(gameObject);
+                    break;
                 case "Tile":
                 {
                     var globalTileId = string.IsNullOrEmpty(Name) ? Filename : Name;
@@ -774,6 +779,22 @@ namespace Bettr.Editor
             var tile = gameObject.AddComponent<TileWithUpdate>();
             tile.scriptAsset = _scriptAsset;
             tile.globalTileId = _globalTileId;
+        }
+    }
+    
+    [Serializable]
+    public class MonoBehaviourComponent : IComponent
+    {
+        private readonly Type _scriptType;
+        
+        public MonoBehaviourComponent(string assemblyQualifiedName)
+        {
+            _scriptType = Type.GetType(assemblyQualifiedName);
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            gameObject.AddComponent(_scriptType);
         }
     }
 
