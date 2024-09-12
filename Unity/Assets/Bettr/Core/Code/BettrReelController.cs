@@ -10,6 +10,7 @@ namespace Bettr.Core
     public class BettrReelController : MonoBehaviour
     {
         [NonSerialized] private TileWithUpdate ReelTile;
+        [NonSerialized] private GameObject ReelGo;
 
         [NonSerialized] private string ReelID;
         [NonSerialized] private string MachineID;
@@ -29,6 +30,8 @@ namespace Bettr.Core
         
         private IEnumerator Start()
         {
+            this.ReelGo = ReelTile.GetProperty<GameObject>("gameObject");
+            
             this.ReelID = ReelTile.GetProperty<string>("ReelID");
             this.MachineID = ReelTile.GetProperty<string>("MachineID");
             this.MachineVariantID = ReelTile.GetProperty<string>("MachineVariantID");
@@ -41,7 +44,7 @@ namespace Bettr.Core
             this.ReelSymbolsTable = GetTableArray("BaseGameReelSet", this.MachineID, this.ReelID);
             
             // add this to the ReelTile properties
-            this.ReelTile.SetProperty("BettrReelController", this);
+            this.ReelTable["BettrReelController"] = this;
             
             yield break;
         }
@@ -68,34 +71,200 @@ namespace Bettr.Core
             return reelStateTable;
         }
         
+        private int GetTableCount(string tableName, string machineID, string reelID)
+        {
+            var machineTable = (Table) TileController.LuaScript.Globals[$"{machineID}{tableName}"];
+            var reelTable = (Table) machineTable[reelID];
+            var reelTableCount = (int) (double) reelTable["Count"];
+            return reelTableCount;
+        }
+        
+        public IEnumerator StartEngines()
+        {
+            var reelStopIndex = (int) (double) this.ReelSpinStateTable["ReelStopIndex"];
+            var reelSymbolCount = (int) (double) this.ReelStateTable["ReelSymbolCount"];
+            var reelSymbolsCount = this.ReelSymbolsStateTable.Length;
+            for (int i = 1; i <= reelSymbolsCount; i++)
+            {
+                var symbolStateTable = (Table) this.ReelSymbolsStateTable[i];
+                var reelPosition = (int) (double) symbolStateTable["ReelPosition"];
+                int symbolStopIndex = 1 + (reelSymbolCount + reelStopIndex + reelPosition) % reelSymbolCount;
+                var reelSymbol = (string) ((Table) this.ReelSymbolsTable[symbolStopIndex])["ReelSymbol"];
+                var symbolGroupProperty = (TilePropertyGameObjectGroup) this.ReelTable[$"SymbolGroup{i}"];
+                if (symbolGroupProperty.Current != null)
+                {
+                    symbolGroupProperty.Current.SetActive(false);
+                    symbolGroupProperty.CurrentKey = null;
+                }
+                var currentValue = (PropertyGameObject) symbolGroupProperty[reelSymbol];
+                currentValue.SetActive(true);
+                symbolGroupProperty.Current = currentValue;
+                symbolGroupProperty.CurrentKey = reelSymbol;
+            }
+            yield break;
+        }
+        
         public IEnumerator OnOutcomeReceived()
         {
-            // Replace the outcome table with this new one
             this.SpinOutcomeTable = GetTableFirst("BaseGameReelSpinOutcome", this.MachineID, this.ReelID);
             float delayInSeconds = (float) (double) this.ReelStateTable["ReelStopDelayInSeconds"];
-
-            // Wait for the delay
             yield return new WaitForSeconds(delayInSeconds);
-
-            // Execute SpliceReel logic
             SpliceReel();
-
-            // Mark the outcome as received
             this.ReelStateTable["OutcomeReceived"] = true;
         }
         
-        public float CalculateSlideDistanceInSymbolUnits(Table reelSpinStateTable)
+        public void SpinEngines()
+        {
+            this.ReelSpinStateTable["ReelSpinState"] = "SpinStartedRollBack";
+            this.ReelStateTable["OutcomeReceived"] = false;
+        }
+        
+        public void SpinReelSpinStartedRollBack()
+        {
+            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = this.ReelStateTable["SpinStartedRollBackSpeedInSymbolUnitsPerSecond"];
+            var reelSpinDirection = (string) this.ReelSpinStateTable["ReelSpinDirection"];
+            var spinDirectionIsDown = reelSpinDirection == "Down";
+            var slideDistanceThresholdInSymbolUnits = (float) (double) this.ReelStateTable["SpinStartedRollBackDistanceInSymbolUnits"];
+            float slideDistanceInSymbolUnits = CalculateSlideDistanceInSymbolUnits();
+            if (spinDirectionIsDown)
+            {
+                if (slideDistanceInSymbolUnits > slideDistanceThresholdInSymbolUnits)
+                {
+                    SlideReelSymbols(slideDistanceThresholdInSymbolUnits);
+                    this.ReelSpinStateTable["ReelSpinState"] = "SpinStartedRollForward";
+                }
+                else
+                {
+                    SlideReelSymbols(slideDistanceInSymbolUnits);
+                }
+            }
+            else
+            {
+                if (slideDistanceInSymbolUnits < slideDistanceThresholdInSymbolUnits)
+                {
+                    SlideReelSymbols(slideDistanceThresholdInSymbolUnits);
+                    this.ReelSpinStateTable["ReelSpinState"] = "SpinStartedRollForward";
+                }
+                else
+                {
+                    SlideReelSymbols(slideDistanceInSymbolUnits);
+                }
+            }
+        }
+        
+        public void SpinReelSpinStartedRollForward()
+        {
+            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = this.ReelStateTable["SpinStartedRollForwardSpeedInSymbolUnitsPerSecond"];
+            var reelSpinDirection = (string) this.ReelSpinStateTable["ReelSpinDirection"];
+            var spinDirectionIsDown = reelSpinDirection == "Down";
+            var slideDistanceInSymbolUnits = CalculateSlideDistanceInSymbolUnits();
+            if (spinDirectionIsDown)
+            {
+                if (slideDistanceInSymbolUnits < 0)
+                {
+                    SlideReelSymbols(0);
+                    this.ReelSpinStateTable["ReelSpinState"] = "Spinning";
+                }
+                else
+                {
+                    SlideReelSymbols(slideDistanceInSymbolUnits);
+                }
+            }
+            else
+            {
+                if (slideDistanceInSymbolUnits > 0)
+                {
+                    SlideReelSymbols(0);
+                    this.ReelSpinStateTable["ReelSpinState"] = "Spinning";
+                }
+                else
+                {
+                    SlideReelSymbols(slideDistanceInSymbolUnits);
+                }
+            }
+        }
+        
+        public void SpinReelSpinEndingRollBack()
+        {
+            // -- spin ending roll back animation
+            StartCoroutine(this.ReelTile.CallAction("PlaySpinReelSpinEndingRollBackAnimation"));
+            
+            var reelStopIndex = (int) (double) this.ReelSpinStateTable["ReelStopIndex"];
+            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = this.ReelStateTable["SpinEndingRollBackSpeedInSymbolUnitsPerSecond"];
+            var reelSpinDirection = (string) this.ReelSpinStateTable["ReelSpinDirection"];
+            var spinDirectionIsDown = reelSpinDirection == "Down";
+            var slideDistanceInSymbolUnits = CalculateSlideDistanceInSymbolUnits();
+            if (spinDirectionIsDown)
+            {
+                if (slideDistanceInSymbolUnits > 0)
+                {
+                    SlideReelSymbols(0);
+                    this.ReelSpinStateTable["ReelSpinState"] = "Stopped";
+                }
+                else
+                {
+                    SlideReelSymbols(slideDistanceInSymbolUnits);
+                }
+            }
+            else
+            {
+                if (slideDistanceInSymbolUnits < 0)
+                {
+                    SlideReelSymbols(0);
+                    this.ReelSpinStateTable["ReelSpinState"] = "Stopped";
+                }
+                else
+                {
+                    SlideReelSymbols(slideDistanceInSymbolUnits);
+                }
+            }
+        }
+        
+        public void SpinReelSpinEndingRollForward()
+        {
+            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = this.ReelStateTable["SpinEndingRollForwardSpeedInSymbolUnitsPerSecond"];
+            var reelSpinDirection = (string) this.ReelSpinStateTable["ReelSpinDirection"];
+            var spinDirectionIsDown = reelSpinDirection == "Down";
+            var slideDistanceThresholdInSymbolUnits = (float) (double) this.ReelStateTable["SpinEndingRollForwardDistanceInSymbolUnits"];
+            var slideDistanceInSymbolUnits = CalculateSlideDistanceInSymbolUnits();
+            if (spinDirectionIsDown)
+            {
+                if (slideDistanceInSymbolUnits < slideDistanceThresholdInSymbolUnits)
+                {
+                    SlideReelSymbols(slideDistanceThresholdInSymbolUnits);
+                    this.ReelSpinStateTable["ReelSpinState"] = "SpinEndingRollBack";
+                }
+                else
+                {
+                    SlideReelSymbols(slideDistanceInSymbolUnits);
+                }
+            }
+            else
+            {
+                if (slideDistanceInSymbolUnits > slideDistanceThresholdInSymbolUnits)
+                {
+                    SlideReelSymbols(slideDistanceThresholdInSymbolUnits);
+                    this.ReelSpinStateTable["ReelSpinState"] = "SpinEndingRollBack";
+                }
+                else
+                {
+                    SlideReelSymbols(slideDistanceInSymbolUnits);
+                }
+            }
+        }
+        
+        public float CalculateSlideDistanceInSymbolUnits()
         {
             // Unity's Time.deltaTime provides the duration of the last frame in seconds
             float frameDurationInSeconds = Time.deltaTime;
             // Get the speed in symbol units per second from reelSpinState
-            float speedInSymbolUnits = (float) (double) reelSpinStateTable["SpeedInSymbolUnitsPerSecond"];
+            float speedInSymbolUnits = (float) (double) this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"];
             // Calculate distance traveled in this frame
             float distanceInSymbolUnits = speedInSymbolUnits * frameDurationInSeconds;
             // Check spin direction
-            bool spinDirectionIsDown = (string) reelSpinStateTable["ReelSpinDirection"] == "Down";
+            bool spinDirectionIsDown = (string) this.ReelSpinStateTable["ReelSpinDirection"] == "Down";
             // Get the current slide distance
-            float slideDistanceInSymbolUnits = (float) (double) reelSpinStateTable["SlideDistanceInSymbolUnits"];
+            float slideDistanceInSymbolUnits = (float) (double) this.ReelSpinStateTable["SlideDistanceInSymbolUnits"];
             // Update the slide distance by adding the distance traveled
             slideDistanceInSymbolUnits += distanceInSymbolUnits;
             return slideDistanceInSymbolUnits;
@@ -106,7 +275,7 @@ namespace Bettr.Core
             var reelSpinDirection = (string) this.ReelSpinStateTable["ReelSpinDirection"];
             bool spinDirectionIsDown = reelSpinDirection == "Down";
             float slideDistanceOffsetInSymbolUnits = spinDirectionIsDown ? 1 : -1;
-            float slideDistanceInSymbolUnits = CalculateSlideDistanceInSymbolUnits(this.ReelSpinStateTable);
+            float slideDistanceInSymbolUnits = CalculateSlideDistanceInSymbolUnits();
 
             while ((spinDirectionIsDown && slideDistanceInSymbolUnits < -1) || (!spinDirectionIsDown && slideDistanceInSymbolUnits > 1))
             {
