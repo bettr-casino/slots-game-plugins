@@ -50,6 +50,13 @@ namespace Bettr.Core
                 lobbyCard.MachineBundleVariant, lobbyCard.MachineSceneName);
         }
         
+        public IEnumerator LoadMainLobby()
+        {
+            var bettrUser = BettrUserController.Instance.BettrUserConfig;
+            yield return BettrAssetController.Instance.LoadScene(bettrUser.LobbyScene.BundleName,
+                bettrUser.LobbyScene.BundleVersion, "MainLobbyScene");
+        }
+        
         public IEnumerator LoadNextMachine()
         {
             var bettrUser = BettrUserController.Instance.BettrUserConfig;

@@ -1382,6 +1382,9 @@ namespace Bettr.Editor
             
             var reelMaskScaleX = BettrMenu.GetReelMaskScaleX(machineName);
             var reelMaskScaleY = BettrMenu.GetReelMaskScaleY(machineName);
+
+            var scaleX = 0.90;
+            var scaleY = 0.90;
             
             var templateName = "BaseGameMachine";
             var scribanTemplate = ParseScribanTemplate($"common", templateName);
@@ -1410,6 +1413,8 @@ namespace Bettr.Editor
                 { "reelBackgroundScaleX", reelBackgroundScaleX},
                 { "reelBackgroundScaleY", reelBackgroundScaleY},
                 { "offsetY", maxOffsetY },
+                { "scaleX", scaleX },
+                { "scaleY", scaleY },
                 { "reelCount", reelCount },
                 { "horizontalReelPositions", horizontalReelPositions },
             };

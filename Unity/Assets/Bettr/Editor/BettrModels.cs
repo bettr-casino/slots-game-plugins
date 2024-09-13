@@ -72,6 +72,8 @@ namespace Bettr.Editor
         
         public Vector3? Scale { get; set; }
         
+        public string AnchorPresets { get; set; }
+        
         public List<InstanceComponent> Components { get; set; }
 
         public InstanceGameObject Child { get; set; }
@@ -151,6 +153,71 @@ namespace Bettr.Editor
             if (Scale != null)
             {
                 _go.transform.localScale = (Vector3) Scale;
+            }
+            
+            // Set the AnchorPresets
+            if (AnchorPresets != null)
+            {
+                RectTransform rectTransform = _go.GetComponent<RectTransform>();
+                if (rectTransform == null)
+                {
+                    Debug.LogError($"RectTransform component not found on gameObject={_go.name}");
+                    return;
+                }
+                switch (AnchorPresets)
+                {
+                    case "BottomStretch":
+                        rectTransform.anchorMin = new Vector2(0, 0);
+                        rectTransform.anchorMax = new Vector2(1, 0);
+                        rectTransform.pivot = new Vector2(0.5f, 0);
+                        rectTransform.anchoredPosition = Vector2.zero;
+                        break;
+                    case "TopStretch":
+                        rectTransform.anchorMin = new Vector2(0, 1);
+                        rectTransform.anchorMax = new Vector2(1, 1);
+                        rectTransform.pivot = new Vector2(0.5f, 1);
+                        rectTransform.anchoredPosition = Vector2.zero;
+                        break;
+                    case "LeftStretch":
+                        rectTransform.anchorMin = new Vector2(0, 0);
+                        rectTransform.anchorMax = new Vector2(0, 1);
+                        rectTransform.pivot = new Vector2(0, 0.5f);
+                        rectTransform.anchoredPosition = Vector2.zero;
+                        break;
+                    case "RightStretch":
+                        rectTransform.anchorMin = new Vector2(1, 0);
+                        rectTransform.anchorMax = new Vector2(1, 1);
+                        rectTransform.pivot = new Vector2(1, 0.5f);
+                        rectTransform.anchoredPosition = Vector2.zero;
+                        break;
+                    case "TopLeft":
+                        rectTransform.anchorMin = new Vector2(0, 1);
+                        rectTransform.anchorMax = new Vector2(0, 1);
+                        rectTransform.pivot = new Vector2(0, 1);
+                        rectTransform.anchoredPosition = Vector2.zero;
+                        break;
+                    case "TopRight":
+                        rectTransform.anchorMin = new Vector2(1, 1);
+                        rectTransform.anchorMax = new Vector2(1, 1);
+                        rectTransform.pivot = new Vector2(1, 1);
+                        rectTransform.anchoredPosition = Vector2.zero;
+                        break;
+                    case "BottomLeft":
+                        rectTransform.anchorMin = new Vector2(0, 0);
+                        rectTransform.anchorMax = new Vector2(0, 0);
+                        rectTransform.pivot = new Vector2(0, 0);
+                        rectTransform.anchoredPosition = Vector2.zero;
+                        break;
+                    case "BottomRight":
+                        rectTransform.anchorMin = new Vector2(1, 0);
+                        rectTransform.anchorMax = new Vector2(1, 0);
+                        rectTransform.pivot = new Vector2(1, 0);
+                        rectTransform.anchoredPosition = Vector2.zero;
+                        break;
+                    default:
+                        Debug.LogError($"AnchorPresets={AnchorPresets} is not supported.");
+                        throw new ArgumentOutOfRangeException(nameof(AnchorPresets), AnchorPresets, "Unsupported anchor preset.");
+                }
             }
         }
         
@@ -461,7 +528,7 @@ namespace Bettr.Editor
                 case "Canvas":
                     {
                         InstanceGameObject.IdGameObjects.TryGetValue(ReferenceId, out var referenceGameObject);
-                        var renderCamera = referenceGameObject?.GameObject.GetComponent<Camera>();
+                        var renderCamera = ReferenceId == "screenspaceoverlay" ? null : referenceGameObject?.GameObject.GetComponent<Camera>();
                         var canvasComponent = new CanvasComponent(renderCamera);
                         canvasComponent.AddComponent(gameObject);
                     }
@@ -1854,7 +1921,7 @@ namespace Bettr.Editor
         public static CanvasScaler.ScreenMatchMode DefaultScreenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
         public static CanvasScaler.ScaleMode DefaultScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         public static RenderMode DefaultRenderMode = RenderMode.ScreenSpaceCamera;
-        public static Vector2 DefaultReferenceResolution = new Vector2(800, 600);
+        public static Vector2 DefaultReferenceResolution = new Vector2(960, 600);
         public static int DefaultSortOrder = 0;
         public static int DefaultPlaneDistance = 100;
         public static bool DefaultPixelPerfect = false;
@@ -1883,12 +1950,21 @@ namespace Bettr.Editor
 
             // Add the Canvas component
             Canvas canvas = gameObject.AddComponent<Canvas>();
-            canvas.pixelPerfect = DefaultPixelPerfect;
-            canvas.worldCamera = RenderCamera;
-            canvas.planeDistance = DefaultPlaneDistance;
-            canvas.renderMode = DefaultRenderMode;
-            canvas.sortingLayerName = DefaultSortingLayerName;
-            canvas.sortingOrder = DefaultSortOrder;
+            if (RenderCamera != null)
+            {
+                canvas.pixelPerfect = DefaultPixelPerfect;
+                canvas.worldCamera = RenderCamera;
+                canvas.planeDistance = DefaultPlaneDistance;
+                canvas.renderMode = DefaultRenderMode;
+                canvas.sortingLayerName = DefaultSortingLayerName;
+                canvas.sortingOrder = DefaultSortOrder;
+            }
+            else
+            {
+                // ScreenSpace Overlay settings
+                canvas.pixelPerfect = DefaultPixelPerfect;
+                canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            }
 
             // Add the Canvas Scaler component
             CanvasScaler scaler = gameObject.AddComponent<CanvasScaler>();

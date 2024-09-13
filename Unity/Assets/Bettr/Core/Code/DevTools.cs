@@ -86,6 +86,16 @@ namespace Bettr.Core
                     ResetState();
                     return;
                 }
+                // Handle Lobby, Previous and Next Keys
+                if (
+                    Input.GetKeyDown(KeyCode.L) 
+                    || Input.GetKeyDown(KeyCode.P)
+                    || Input.GetKeyDown(KeyCode.N))
+                {
+                    OnKeyPressed.Invoke();
+                    ResetState();
+                    return;
+                }
                 
                 // Check for specific key presses from '1' to '9' and 'A' to 'Z'
                 for (int i = 0; i <= 9; i++)

@@ -55,16 +55,19 @@ namespace Bettr.Core
             DevTools.Instance.OnKeyPressed.AddListener(() =>
             {
                 // Check for Backspace or Delete key press
-                if (Input.GetKeyDown(KeyCode.Backspace) || Input.GetKeyDown(KeyCode.Delete))
+                if (Input.GetKeyDown(KeyCode.P))
                 {
-                    // unload active scene
                     StartCoroutine(LoadPreviousMachine());
                     return;
                 }
-                if (Input.GetKeyDown(KeyCode.Return))
+                if (Input.GetKeyDown(KeyCode.N))
                 {
-                    // unload active scene
                     StartCoroutine(LoadNextMachine());
+                    return;
+                }
+                if (Input.GetKeyDown(KeyCode.L))
+                {
+                    StartCoroutine(LoadMainLobby());
                     return;
                 }
                 // Find the SpinImage GameObject
@@ -212,6 +215,16 @@ namespace Bettr.Core
             var mainTable = _bettrAssetScriptsController.GetScript("Main");
             var scriptRunner = ScriptRunner.Acquire(mainTable);
             yield return scriptRunner.CallAsyncAction("LoadPreviousMachine");
+            ScriptRunner.Release(scriptRunner);
+
+            // yield return UpdateCommitHash();
+        }
+        
+        private IEnumerator LoadMainLobby()
+        {
+            var mainTable = _bettrAssetScriptsController.GetScript("Main");
+            var scriptRunner = ScriptRunner.Acquire(mainTable);
+            yield return scriptRunner.CallAsyncAction("LoadMainLobby");
             ScriptRunner.Release(scriptRunner);
 
             // yield return UpdateCommitHash();
