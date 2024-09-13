@@ -92,12 +92,7 @@ function Game001BaseGameReel:SpinReelWaiting()
 end
 
 function Game001BaseGameReel:SpinReelSpinning()
-    local reelState = Game001BaseGameReelState[self.ReelID].First
-    local reelSpinState = Game001BaseGameReelSpinState[self.ReelID].First
-    reelSpinState.SpeedInSymbolUnitsPerSecond = reelState.SpinSpeedInSymbolUnitsPerSecond
-    local slideDistanceInSymbolUnits = self.BettrReelController.AdvanceReel()
-    self.BettrReelController.SlideReelSymbols(slideDistanceInSymbolUnits)
-    return true    
+    return self.BettrReelController.SpinReelSpinning()    
 end
 
 function Game001BaseGameReel:PlaySpinReelSpinEndingRollBackAnimation()
