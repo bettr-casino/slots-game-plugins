@@ -257,6 +257,14 @@ namespace Bettr.Core
             }
         }
         
+        public bool SpinReelSpinning()
+        {
+            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = this.ReelStateTable["SpinSpeedInSymbolUnitsPerSecond"];
+            float slideDistanceInSymbolUnits = AdvanceReel();
+            SlideReelSymbols(slideDistanceInSymbolUnits);
+            return true;
+        }
+        
         public float CalculateSlideDistanceInSymbolUnits()
         {
             // Unity's Time.deltaTime provides the duration of the last frame in seconds
@@ -419,20 +427,20 @@ namespace Bettr.Core
         
         public void SpliceReel()
         {
-            var d1 = (int) (double) this.SpinOutcomeTable["OutcomeReelStopIndex"];
-            var d2 = (int) (double) this.ReelStateTable["SpliceDistance"];
+            var outcomeReelStopIndex = (int) (double) this.SpinOutcomeTable["OutcomeReelStopIndex"];
+            var spliceDistance = (int) (double) this.ReelStateTable["SpliceDistance"];
             var reelSymbolCount = (int) (double) this.ReelStateTable["ReelSymbolCount"];
             var spinDirectionIsDown = (string) this.ReelSpinStateTable["ReelSpinDirection"] == "Down";
 
             // Check if splicing should be skipped
-            bool skipSplice = SkipSpliceReel();
+            bool skipSplice = SkipSpliceReel(spliceDistance, outcomeReelStopIndex, spinDirectionIsDown);
     
             // Perform splicing if it shouldn't be skipped
             if (spinDirectionIsDown)
             {
                 if (!skipSplice)
                 {
-                    int reelStopIndex = (d1 + d2 + reelSymbolCount) % reelSymbolCount;
+                    int reelStopIndex = (outcomeReelStopIndex + spliceDistance + reelSymbolCount) % reelSymbolCount;
                     this.ReelSpinStateTable["ReelStopIndex"] = reelStopIndex - 1;
                 }
             }
@@ -440,36 +448,32 @@ namespace Bettr.Core
             {
                 if (!skipSplice)
                 {
-                    int reelStopIndex = (d1 - d2 + reelSymbolCount) % reelSymbolCount;
+                    int reelStopIndex = (outcomeReelStopIndex - spliceDistance + reelSymbolCount) % reelSymbolCount;
                     this.ReelSpinStateTable["ReelStopIndex"] = reelStopIndex + 1;
                 }
             }
         }
         
-        public bool SkipSpliceReel()
+        public bool SkipSpliceReel(int spliceDistance, int outcomeReelStopIndex, bool spinDirectionIsDown)
         {
-            var spinDirectionIsDown = (string) this.ReelSpinStateTable["ReelSpinDirection"] == "Down";
             var reelStopIndex = (int) (double) this.ReelSpinStateTable["ReelStopIndex"];
-            var outcomeReelStopIndex = (int) (double) this.SpinOutcomeTable["OutcomeReelStopIndex"];
-
-            var topSymbolCount = (int) (double) this.ReelStateTable["TopSymbolCount"];
-            var bottomSymbolCount = (int) (double) this.ReelStateTable["BottomSymbolCount"];
+            
             var visibleSymbolCount = (int) (double) this.ReelStateTable["VisibleSymbolCount"];
 
-            // Check if the outcome reel stop index is within top or bottom symbol offsets
-            bool inTopSymbolOffset = outcomeReelStopIndex >= reelStopIndex - topSymbolCount && outcomeReelStopIndex < reelStopIndex;
-            bool inBottomSymbolOffset = outcomeReelStopIndex >= reelStopIndex + visibleSymbolCount && 
-                                        outcomeReelStopIndex < reelStopIndex + visibleSymbolCount + bottomSymbolCount;
+            // Check if the outcome reel stop index is within top or bottom splice bands
+            bool inTopSpliceBand = outcomeReelStopIndex >= reelStopIndex - 1 - spliceDistance && outcomeReelStopIndex < reelStopIndex;
+            bool inBottomSpliceBand = outcomeReelStopIndex >= reelStopIndex + visibleSymbolCount && 
+                                        outcomeReelStopIndex < reelStopIndex + visibleSymbolCount + spliceDistance;
 
             if (spinDirectionIsDown)
             {
                 // For spin down, skip if the outcome stop index is in the top symbol offset
-                return inTopSymbolOffset;
+                return inTopSpliceBand;
             }
             else
             {
                 // For spin up, skip if the outcome stop index is in the bottom symbol offset
-                return inBottomSymbolOffset;
+                return inBottomSpliceBand;
             }
         }
         
