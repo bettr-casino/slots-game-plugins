@@ -259,7 +259,7 @@ namespace Bettr.Core
         
         public bool SpinReelSpinning()
         {
-            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = this.ReelStateTable["SpinSpeedInSymbolUnitsPerSecond"];
+            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = (double) this.ReelStateTable["SpinSpeedInSymbolUnitsPerSecond"] * 2;
             float slideDistanceInSymbolUnits = AdvanceReel();
             SlideReelSymbols(slideDistanceInSymbolUnits);
             return true;
