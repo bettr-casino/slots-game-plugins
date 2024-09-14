@@ -596,7 +596,11 @@ namespace Bettr.Core
                 yield break;
             }
 
-            yield return assetBundle.UnloadAsync(true);
+            AsyncOperation asyncOperation = assetBundle.UnloadAsync(true);
+            while (!asyncOperation.isDone)
+            {
+                yield return null;
+            }
         }
         
         public IEnumerator ClearAssetBundle(string bettrAssetBundleName, string bettrAssetBundleVersion,
