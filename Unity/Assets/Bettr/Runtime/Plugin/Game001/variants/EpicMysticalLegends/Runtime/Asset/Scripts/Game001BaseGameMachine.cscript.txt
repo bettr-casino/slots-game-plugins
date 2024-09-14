@@ -262,6 +262,17 @@ function Game001BaseGameMachine:OnPointerClick()
     System.StartCoroutine(self, "OnSpinButtonClicked")
 end
 
+function Game001BaseGameMachine:OnPointerClick1Param(param)
+	System.Print("Game001BaseGameMachine OnPointerClick1Param param={0} tile id={1}", param, self.id)
+	if param == "Prev" then
+        BettrMainLobbySceneController.LoadPreviousMachine()
+    elseif param == "Next" then
+        BettrMainLobbySceneController.LoadNextMachine()
+    elseif param == "Lobby" then
+        BettrMainLobbySceneController.LoadMainLobby()
+    end
+end
+
 function Game001BaseGameMachine:OnBecameVisible()
 	System.Print("Game001BaseGameMachine OnBecameVisible tile id={0}", self.id)
 end
