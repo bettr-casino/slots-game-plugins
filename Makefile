@@ -180,6 +180,8 @@ deploy-assets-webgl: build-assets-webgl publish-assets-webgl
 
 sync-machines: prepare-project
 	@echo "Running sync-machines..."
+	@echo "Running caffeinate to keep the drives awake..."
+	caffeinate -d -i -m -u &
 	@MODELS_DIR="${MODELS_DIR}"; \
 	for MACHINE_NAME_DIR in "$${MODELS_DIR}/"*/; do \
 		MACHINE_NAME=$$(basename "$${MACHINE_NAME_DIR}"); \
@@ -203,6 +205,9 @@ sync-machines: prepare-project
 			echo "Skipping directory: $${MACHINE_NAME} (does not match Game<NNN> pattern)"; \
 		fi; \
 	done
+	# Kill the caffeinate process
+	@echo "Killing caffeinate..."
+	killall caffeinate
 
 
 # adjust the MACHINE_NAME and MACHINE_VARIANT pattern accordingly
