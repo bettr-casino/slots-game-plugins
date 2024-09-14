@@ -810,7 +810,7 @@ namespace Bettr.Core
             var downloadedAssetBundle = AssetBundle.LoadFromFile(assetBundleURL, crc);
             if (downloadedAssetBundle == null)
             {
-                var error = $"null bundle for webAssetName={assetBundleName}";
+                var error = $"null bundle for fileSystem assetBundleName={assetBundleName}";
                 Debug.LogError(error);
                 callback(assetBundleName, null, false, false, error);
                 yield break;
