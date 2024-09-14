@@ -170,6 +170,8 @@ namespace Bettr.Core
             if (_oneTimeSetUpComplete) yield break;
             yield return _bettrAssetController.LoadPackage(_configData.MainBundleName, _configData.MainBundleVariant, false);
             
+            ScriptRunner.Initialize();
+            
             var mainTable = _bettrAssetScriptsController.GetScript("Main");
             var scriptRunner = ScriptRunner.Acquire(mainTable);
             yield return scriptRunner.CallAsyncAction("Init");
