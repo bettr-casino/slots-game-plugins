@@ -1,9 +1,12 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Text.RegularExpressions;
+using Bettr.Core;
 using Bettr.Editor.generators;
 using Bettr.Editor.generators.mechanics;
 using CrayonScript.Code;
@@ -77,6 +80,153 @@ namespace Bettr.Editor
         private const string OutcomesServerBaseURL = "https://bettr-casino-outcomes.s3.us-west-2.amazonaws.com";
         private const string GatewayUrl = "https://3wcgnl14qb.execute-api.us-west-2.amazonaws.com/gateway";
         
+        
+        [MenuItem("Bettr/Tools/Compare Asset Bundles")]
+        public static void CompareAssetBundles()
+        {
+            string bundle1Path = EditorUtility.OpenFilePanel("Select first AssetBundle", "", "");
+            if (string.IsNullOrEmpty(bundle1Path))
+            {
+                Debug.LogError($"AssetBundle path {bundle1Path} is not valid.");
+                return;
+            }
+            string bundle1Name = Path.GetFileNameWithoutExtension(bundle1Path);
+            AssetBundle bundle1 = AssetBundle.LoadFromFile(bundle1Path);
+            if (bundle1 == null)
+            {
+                Debug.LogError($"AssetBundle at {bundle1Path} failed to load.");
+                return;
+            }
+            List<string> bundle1Assets = new List<string>(bundle1.GetAllAssetNames());
+            bundle1.Unload(false);
+
+            string bundle2Path = EditorUtility.OpenFilePanel("Select second AssetBundle", "", "");
+            if (string.IsNullOrEmpty(bundle2Path))
+            {
+                Debug.LogError($"AssetBundle path {bundle2Path} is not valid.");
+                return;
+            }
+            string bundle2Name = Path.GetFileNameWithoutExtension(bundle2Path);
+            AssetBundle bundle2 = AssetBundle.LoadFromFile(bundle2Path);
+            if (bundle2 == null)
+            {
+                Debug.LogError($"AssetBundle at {bundle2Path} failed to load.");
+                return;
+            }
+            List<string> bundle2Assets = new List<string>(bundle2.GetAllAssetNames());
+            bundle2.Unload(false);
+
+            CompareAssetNames(bundle1Path, bundle2Path, bundle1Assets, bundle2Assets);
+            
+            string manifest1Path = $"{bundle1Path}.manifest";
+            string manifest2Path = $"{bundle2Path}.manifest";
+            
+            CompareAssetBundleDependencies(manifest1Path, manifest2Path);
+        }
+
+        private static void CompareAssetNames(string bundle1Path, string bundle2Path, List<string> bundle1Assets, List<string> bundle2Assets)
+        {
+            // Compare asset names
+            List<string> common1Assets = new List<string>(bundle1Assets);
+            common1Assets = common1Assets.Intersect(bundle2Assets).ToList();
+
+            if (common1Assets.Count > 0)
+            {
+                Debug.Log($"{bundle1Path} has {bundle1Assets.Count} Assets, {common1Assets.Count} Common assets found in {bundle1Path} that are also in {bundle2Path} :");
+            }
+            else
+            {
+                Debug.Log("No common asset names found comparing bundle1 with bundle2");
+            }
+
+            List<string> common2Assets = new List<string>(bundle2Assets);
+            common2Assets = common2Assets.Intersect(bundle1Assets).ToList();
+
+            if (common2Assets.Count > 0)
+            {
+                Debug.Log($"{bundle2Path} has {bundle2Assets.Count} Assets, {common2Assets.Count} Common assets found in {bundle2Path} that are also in {bundle1Path} :");
+            }
+            else
+            {
+                Debug.Log("No common asset names found comparing bundle2 with bundle1");
+            }
+
+            if (common1Assets.Count > 0)
+            {
+                Debug.Log($"List of {common1Assets.Count} Common assets found in {bundle1Path} that are also in {bundle2Path} :");
+                foreach (string asset in common1Assets)
+                {
+                    Debug.Log(asset);
+                }
+            }
+
+            if (common2Assets.Count > 0)
+            {
+                Debug.Log($"List of {common2Assets.Count}  Common assets found in {bundle2Path} that are also in {bundle1Path} :");
+                foreach (string asset in common2Assets)
+                {
+                    Debug.Log(asset);
+                }
+            }
+        }
+
+        public static void CompareAssetBundleDependencies(string manifest1Path, string manifest2Path)
+        {
+            // Helper function to read dependencies from the .manifest file
+            List<string> LoadManifestDependencies(string manifestFilePath)
+            {
+                List<string> dependencies = new List<string>();
+
+                // Read the manifest file as a text file
+                string[] lines = File.ReadAllLines(manifestFilePath);
+
+                // Find the "Dependencies:" section and capture the dependencies listed under it
+                bool dependenciesSection = false;
+                foreach (var line in lines)
+                {
+                    if (line.Contains("Dependencies:"))
+                    {
+                        dependenciesSection = true;
+                        continue;
+                    }
+
+                    if (dependenciesSection)
+                    {
+                        if (string.IsNullOrWhiteSpace(line)) // End of the dependencies section
+                            break;
+
+                        dependencies.Add(line.Trim());
+                    }
+                }
+
+                return dependencies;
+            }
+
+            // Load the dependencies for both manifest files
+            List<string> dependencies1 = LoadManifestDependencies(manifest1Path);
+            List<string> dependencies2 = LoadManifestDependencies(manifest2Path);
+
+            // Compare the dependencies
+            var commonDependencies = dependencies1.Intersect(dependencies2).ToList();
+
+            // Output the results
+            if (commonDependencies.Count > 0)
+            {
+                Debug.Log($"Found {commonDependencies.Count} common dependencies between {Path.GetFileName(manifest1Path)} and {Path.GetFileName(manifest2Path)}:");
+                var index = 0;
+                foreach (var dependency in commonDependencies)
+                {
+                    Debug.Log($"Common Dependency {index+1}: {dependency}");
+                    index += 1;
+                }
+            }
+            else
+            {
+                Debug.Log($"No common dependencies found between {Path.GetFileName(manifest1Path)} and {Path.GetFileName(manifest2Path)}.");
+            }
+        }
+
+
         public static void ExportPackage()
         {
             // Base directory to prepend
