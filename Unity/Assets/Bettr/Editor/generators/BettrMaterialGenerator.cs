@@ -43,6 +43,7 @@ namespace Bettr.Editor.generators
         {
             AssetDatabase.Refresh();
             
+            var shader = LoadShader(shaderName, runtimeAssetPath);
             var materialFilename = $"{materialName}.mat";
             var materialFilepath = $"{runtimeAssetPath}/Materials/{materialFilename}";
             var material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
@@ -51,7 +52,6 @@ namespace Bettr.Editor.generators
                 Debug.Log($"Creating material for {materialName} at {materialFilepath}");
                 try
                 {
-                    var shader = LoadShader(shaderName, runtimeAssetPath);
                     material = new Material(shader);
                     AssetDatabase.CreateAsset(material, materialFilepath);
                 }
@@ -65,6 +65,7 @@ namespace Bettr.Editor.generators
             AssetDatabase.Refresh();
             
             material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
+            material.shader = shader;
 
             if (!string.IsNullOrEmpty(textureName))
             {
@@ -133,19 +134,7 @@ namespace Bettr.Editor.generators
         
         public static Shader LoadShader(string shaderName, string runtimeAssetPath)
         {
-            var mainAssetPath = InstanceComponent.CorePath;
-            
-            Shader shader = null;
-            if (shaderName.StartsWith("Bettr/"))
-            {
-                shaderName = shaderName.Substring(6);
-                var shaderFilepath = $"{mainAssetPath}/Shaders/{shaderName}.shader";
-                shader = AssetDatabase.LoadAssetAtPath<Shader>(shaderFilepath);
-            }
-            else
-            {
-                shader = Shader.Find(shaderName);
-            }
+            Shader shader = Shader.Find(shaderName);
             return shader;
         }
 
