@@ -48,8 +48,6 @@ namespace Bettr.Core
 
             yield return LoginUser();
 
-            yield return LoadMachine();
-
             DevTools.Instance.Enable();
             
             DevTools.Instance.OnKeyPressed.AddListener(() =>
@@ -85,6 +83,8 @@ namespace Bettr.Core
                     Debug.LogWarning("SpinImage GameObject not found.");
                 }
             });
+            
+            yield return LoadMachine();
         }
 
         private IEnumerator OneTimeSetup()

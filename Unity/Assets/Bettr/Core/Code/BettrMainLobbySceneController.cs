@@ -50,13 +50,6 @@ namespace Bettr.Core
                 lobbyCard.MachineBundleVariant, lobbyCard.MachineSceneName);
         }
         
-        public IEnumerator LoadMainLobby()
-        {
-            var bettrUser = BettrUserController.Instance.BettrUserConfig;
-            yield return BettrAssetController.Instance.LoadScene(bettrUser.LobbyScene.BundleName,
-                bettrUser.LobbyScene.BundleVersion, "MainLobbyScene");
-        }
-        
         public IEnumerator LoadNextMachine()
         {
             var bettrUser = BettrUserController.Instance.BettrUserConfig;
@@ -67,6 +60,13 @@ namespace Bettr.Core
             bettrUser.LobbyCardIndex = nextIndex;
             yield return BettrAssetController.Instance.LoadScene(lobbyCard.MachineBundleName,
                 lobbyCard.MachineBundleVariant, lobbyCard.MachineSceneName);
+        }
+        
+        public IEnumerator LoadMainLobby()
+        {
+            var bettrUser = BettrUserController.Instance.BettrUserConfig;
+            yield return BettrAssetController.Instance.LoadScene(bettrUser.LobbyScene.BundleName,
+                bettrUser.LobbyScene.BundleVersion, "MainLobbyScene");
         }
         
         // Convert the method from Lua to C#
