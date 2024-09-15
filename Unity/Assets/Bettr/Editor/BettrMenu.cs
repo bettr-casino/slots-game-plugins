@@ -79,6 +79,18 @@ namespace Bettr.Editor
         private const string AssetsServerBaseURL = "https://bettr-casino-assets.s3.us-west-2.amazonaws.com";
         private const string OutcomesServerBaseURL = "https://bettr-casino-outcomes.s3.us-west-2.amazonaws.com";
         private const string GatewayUrl = "https://3wcgnl14qb.execute-api.us-west-2.amazonaws.com/gateway";
+
+        [MenuItem("Bettr/Tools/Check Asset Bundle Load")]
+        public static void CheckAssetBundleLoad()
+        {
+            string mainPath = "Assets/Bettr/LocalStore/AssetBundles/WebGL/main.v0_1_0";
+            AssetBundle mainBundle = AssetBundle.LoadFromFile(mainPath);
+
+            string bundle1Path = "Assets/Bettr/LocalStore/AssetBundles/WebGL/game001.epicancientadventures";
+            AssetBundle bundle1 = AssetBundle.LoadFromFile(bundle1Path);
+            string bundle2Path = "Assets/Bettr/LocalStore/AssetBundles/WebGL/game001.epicatlantistreasures";
+            AssetBundle bundle2 = AssetBundle.LoadFromFile(bundle2Path);
+        }
         
         
         [MenuItem("Bettr/Tools/Compare Asset Bundles")]
