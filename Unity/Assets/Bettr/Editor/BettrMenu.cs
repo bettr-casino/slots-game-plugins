@@ -549,8 +549,7 @@ namespace Bettr.Editor
             Debug.Log("...refreshing database before building asset bundles..");
             AssetDatabase.Refresh();
 
-            var sharedAssetBundleOptions = BuildAssetBundleOptions.StrictMode |
-                                           BuildAssetBundleOptions.ForceRebuildAssetBundle |
+            var sharedAssetBundleOptions = BuildAssetBundleOptions.ForceRebuildAssetBundle |
                                            BuildAssetBundleOptions.ChunkBasedCompression;
 
 #if UNITY_IOS
