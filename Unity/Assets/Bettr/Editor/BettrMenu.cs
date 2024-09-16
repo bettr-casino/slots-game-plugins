@@ -79,6 +79,23 @@ namespace Bettr.Editor
         private const string AssetsServerBaseURL = "https://bettr-casino-assets.s3.us-west-2.amazonaws.com";
         private const string OutcomesServerBaseURL = "https://bettr-casino-outcomes.s3.us-west-2.amazonaws.com";
         private const string GatewayUrl = "https://3wcgnl14qb.execute-api.us-west-2.amazonaws.com/gateway";
+        
+        [MenuItem("Bettr/Tools/Check Asset Bundle Load")]
+        public static void CheckAssetBundleLoad()
+        {
+            string mainPath = "Assets/Bettr/LocalStore/AssetBundles/WebGL/main.v0_1_0";
+            AssetBundle mainBundle = AssetBundle.LoadFromFile(mainPath);
+
+            string bundle1Path = "Assets/Bettr/LocalStore/AssetBundles/WebGL/game003.highstakeswonderways";
+            AssetBundle bundle1 = AssetBundle.LoadFromFile(bundle1Path);
+            Debug.Log("Bundle 1 loaded successfully.");
+            string bundle2Path = "Assets/Bettr/LocalStore/AssetBundles/WebGL/game004.richesrubyrush";
+            AssetBundle bundle2 = AssetBundle.LoadFromFile(bundle2Path);
+            Debug.Log("Bundle 2 loaded successfully.");
+            mainBundle.Unload(false);
+            bundle1.Unload(false);
+            bundle2.Unload(false);
+        }
 
         [MenuItem("Bettr/Tools/Compare Asset Bundles")]
         public static void CompareAssetBundles()
