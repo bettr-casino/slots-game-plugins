@@ -212,40 +212,33 @@ sync-machines: prepare-project
 
 
 # Define the arrays for MACHINE_NAME and MACHINE_VARIANT
-MACHINE_NAMES := Game001
-MACHINE_VARIANTS := EpicAncientAdventures EpicAtlantisTreasures
-
+MACHINE_NAME_ARRAY := Game001
+MACHINE_VARIANT_ARRAY := EpicAncientAdventures EpicAtlantisTreasures
 sync-machines-specific: prepare-project
-	@echo "Running sync-machines..."
+	@echo "Running sync-machines-specific..."
+	@echo "Running caffeinate to keep the drives awake..."
+	# Keep the drives awake
+	caffeinate -i -m -u &
 	@MODELS_DIR="${MODELS_DIR}"; \
-	for MACHINE_NAME_DIR in "$${MODELS_DIR}/"*/; do \
-		MACHINE_NAME=$$(basename "$${MACHINE_NAME_DIR}"); \
-		# Check if MACHINE_NAME exists in the MACHINE_NAMES array
-		if [[ " ${MACHINE_NAMES[@]} " =~ " $${MACHINE_NAME} " ]]; then \
-			echo "Processing MACHINE_NAME: $${MACHINE_NAME}"; \
-			for MACHINE_VARIANT_DIR in "$${MACHINE_NAME_DIR}/"*/; do \
-				MACHINE_VARIANT=$$(basename "$${MACHINE_VARIANT_DIR}"); \
-				# Check if MACHINE_VARIANT exists in the MACHINE_VARIANTS array
-				if [[ " ${MACHINE_VARIANTS[@]} " =~ " $${MACHINE_VARIANT} " ]]; then \
-					echo "Processing MACHINE_VARIANT: $${MACHINE_VARIANT}"; \
-					MACHINE_MODEL="$${MODELS_DIR}/$${MACHINE_NAME}/$${MACHINE_VARIANT}/$${MACHINE_NAME}Models.lua"; \
-					UNITY_OUTPUT=$$(${UNITY_APP} -batchmode -logFile "${ASSET_DATA_LOG_FILE_PATH}" -quit -projectPath "${UNITY_PROJECT_PATH}" -executeMethod "${SYNC_MACHINE_METHOD}" -machineName "$${MACHINE_NAME}" -machineVariant "$${MACHINE_VARIANT}" -machineModel "$${MACHINE_MODEL}" 2>&1); \
-					UNITY_EXIT_STATUS=$$?; \
-					if [ "$$UNITY_EXIT_STATUS" -ne 0 ]; then \
-						echo "Error executing Unity for MACHINE_NAME=$${MACHINE_NAME}, MACHINE_VARIANT=$${MACHINE_VARIANT} ASSET_DATA_LOG_FILE_PATH=${ASSET_DATA_LOG_FILE_PATH}"; \
-						echo "Unity Output: $$UNITY_OUTPUT"; \
-						exit $$UNITY_EXIT_STATUS; \
-					fi; \
-					echo "Executed for MACHINE_NAME=$${MACHINE_NAME}, MACHINE_VARIANT=$${MACHINE_VARIANT}, MACHINE_MODEL=$${MACHINE_MODEL} ASSET_DATA_LOG_FILE_PATH=${ASSET_DATA_LOG_FILE_PATH}"; \
-					sleep ${SLEEP_DURATION}; \
-				else \
-					echo "Skipping MACHINE_VARIANT: $${MACHINE_VARIANT} (does not match the variant pattern)"; \
-				fi; \
-			done; \
-		else \
-			echo "Skipping directory: $${MACHINE_NAME} (does not match the machine pattern)"; \
-		fi; \
+	for MACHINE_NAME in $(MACHINE_NAME_ARRAY); do \
+		echo "Processing MACHINE_NAME: $${MACHINE_NAME}"; \
+		for MACHINE_VARIANT in $(MACHINE_VARIANT_ARRAY); do \
+			echo "Processing MACHINE_VARIANT: $${MACHINE_VARIANT}"; \
+			MACHINE_MODEL="$${MODELS_DIR}/$${MACHINE_NAME}/$${MACHINE_VARIANT}/$${MACHINE_NAME}Models.lua"; \
+			UNITY_OUTPUT=$$(${UNITY_APP} -batchmode -logFile "${ASSET_DATA_LOG_FILE_PATH}" -quit -projectPath "${UNITY_PROJECT_PATH}" -executeMethod "${SYNC_MACHINE_METHOD}" -machineName "$${MACHINE_NAME}" -machineVariant "$${MACHINE_VARIANT}" -machineModel "$${MACHINE_MODEL}" 2>&1); \
+			UNITY_EXIT_STATUS=$$?; \
+			if [ "$$UNITY_EXIT_STATUS" -ne 0 ]; then \
+				echo "Error executing Unity for MACHINE_NAME=$${MACHINE_NAME}, MACHINE_VARIANT=$${MACHINE_VARIANT} ASSET_DATA_LOG_FILE_PATH=${ASSET_DATA_LOG_FILE_PATH}"; \
+				echo "Unity Output: $$UNITY_OUTPUT"; \
+				exit $$UNITY_EXIT_STATUS; \
+			fi; \
+			echo "Executed for MACHINE_NAME=$${MACHINE_NAME}, MACHINE_VARIANT=$${MACHINE_VARIANT}, MACHINE_MODEL=$${MACHINE_MODEL} ASSET_DATA_LOG_FILE_PATH=${ASSET_DATA_LOG_FILE_PATH}"; \
+			sleep ${SLEEP_DURATION}; \
+		done; \
 	done
+	# Kill the caffeinate process
+	@echo "Killing caffeinate..."
+	killall caffeinate
 
 
 
