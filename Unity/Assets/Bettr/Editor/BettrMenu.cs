@@ -129,8 +129,8 @@ namespace Bettr.Editor
             mainBundle.Unload(false);
             if (bundle1 != null) bundle1.Unload(false);
             if (bundle2 != null) bundle2.Unload(false);
-            // if (bundle3 != null) bundle3.Unload(false);
-            // if (bundle4 != null) bundle4.Unload(false);
+            if (bundle3 != null) bundle3.Unload(false);
+            if (bundle4 != null) bundle4.Unload(false);
         }
 
         [MenuItem("Bettr/Tools/Compare Asset Bundles")]
