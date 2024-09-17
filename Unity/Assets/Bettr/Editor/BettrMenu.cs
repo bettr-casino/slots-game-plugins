@@ -86,7 +86,7 @@ namespace Bettr.Editor
             string mainPath = "Assets/Bettr/LocalStore/AssetBundles/WebGL/main.v0_1_0";
             AssetBundle mainBundle = AssetBundle.LoadFromFile(mainPath);
 
-            string bundle1Path = "Assets/Bettr/LocalStore/AssetBundles/WebGL/game001.epicancientadventures";
+            string bundle1Path = "Assets/Bettr/LocalStore/AssetBundles/WebGL/game001epicancientadventures.epicancientadventures";
             AssetBundle bundle1 = AssetBundle.LoadFromFile(bundle1Path);
             if (bundle1 == null)
             {
@@ -96,7 +96,7 @@ namespace Bettr.Editor
             {
                 Debug.Log("Bundle 1 loaded successfully.");
             }
-            string bundle2Path = "Assets/Bettr/LocalStore/AssetBundles/WebGL/game001.epicatlantistreasures";
+            string bundle2Path = "Assets/Bettr/LocalStore/AssetBundles/WebGL/game001epicatlantistreasures.epicatlantistreasures";
             AssetBundle bundle2 = AssetBundle.LoadFromFile(bundle2Path);
             if (bundle2 == null)
             {
@@ -106,7 +106,7 @@ namespace Bettr.Editor
             {
                 Debug.Log("Bundle 2 loaded successfully.");
             }
-            string bundle3Path = "Assets/Bettr/LocalStore/AssetBundles/WebGL/game001_scenes.epicancientadventures";
+            string bundle3Path = "Assets/Bettr/LocalStore/AssetBundles/WebGL/game001epicancientadventures_scenes.epicancientadventures";
             AssetBundle bundle3 = AssetBundle.LoadFromFile(bundle3Path);
             if (bundle3 == null)
             {
@@ -116,7 +116,7 @@ namespace Bettr.Editor
             {
                 Debug.Log("Bundle 3 loaded successfully.");
             }
-            string bundle4Path = "Assets/Bettr/LocalStore/AssetBundles/WebGL/game001_scenes.epicatlantistreasures";
+            string bundle4Path = "Assets/Bettr/LocalStore/AssetBundles/WebGL/game001epicatlantistreasures_scenes.epicatlantistreasures";
             AssetBundle bundle4 = AssetBundle.LoadFromFile(bundle4Path);
             if (bundle4 == null)
             {
@@ -129,8 +129,8 @@ namespace Bettr.Editor
             mainBundle.Unload(false);
             if (bundle1 != null) bundle1.Unload(false);
             if (bundle2 != null) bundle2.Unload(false);
-            if (bundle3 != null) bundle3.Unload(false);
-            if (bundle4 != null) bundle4.Unload(false);
+            // if (bundle3 != null) bundle3.Unload(false);
+            // if (bundle4 != null) bundle4.Unload(false);
         }
 
         [MenuItem("Bettr/Tools/Compare Asset Bundles")]
@@ -889,7 +889,7 @@ namespace Bettr.Editor
             {
                 if (assetType != null && assetType != typeof(MonoScript))
                 {
-                    importer.assetBundleName = GetAssetBundleName(assetLabel, assetType);
+                    importer.assetBundleName = GetAssetBundleName(assetLabel, assetSubLabel, assetType);
                     importer.assetBundleVariant = GetAssetBundleVariant(assetSubLabel);
                 }
             }
@@ -906,7 +906,7 @@ namespace Bettr.Editor
                 {
                     if (assetType != null && assetType != typeof(MonoScript))
                     {
-                        importer.assetBundleName = GetAssetBundleName(assetLabel, assetType);
+                        importer.assetBundleName = GetAssetBundleName(assetLabel, assetSubLabel, assetType);
                         importer.assetBundleVariant = GetAssetBundleVariant(assetSubLabel);
                     }
                 }
@@ -933,11 +933,11 @@ namespace Bettr.Editor
             }
         }
 
-        private static string GetAssetBundleName(string assetLabel, Type assetType)
+        private static string GetAssetBundleName(string assetLabel, string assetSubLabel, Type assetType)
         {
             var isScene = assetType.Name == "SceneAsset";
             var suffix = isScene ? "_scenes" :"";
-            var assetBundleName = $"{assetLabel}{suffix}";
+            var assetBundleName = $"{assetLabel}assetSubLabel{suffix}";
             return assetBundleName;
         }
         
@@ -1794,7 +1794,7 @@ namespace Bettr.Editor
             SceneAsset sceneAsset = null;
             Scene scene = default;
             
-            var sceneName = $"{machineName}Scene";
+            var sceneName = $"{machineName}{machineVariant}Scene";
             string scenePath = $"{runtimeAssetPath}/Scenes/{sceneName}.unity";
             
             sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePath);
