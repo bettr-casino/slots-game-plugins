@@ -87,32 +87,32 @@ namespace Bettr.Editor
             AssetBundle mainBundle = AssetBundle.LoadFromFile(mainPath);
 
             string bundle1Path = "Assets/Bettr/LocalStore/AssetBundles/WebGL/game001.epicancientadventures";
-            // AssetBundle bundle1 = AssetBundle.LoadFromFile(bundle1Path);
-            // if (bundle1 == null)
-            // {
-            //     Debug.LogError($"Bundle 1 AssetBundle at {bundle1Path} failed to load.");
-            // }
-            // else
-            // {
-            //     Debug.Log("Bundle 1 loaded successfully.");
-            // }
-            // string bundle2Path = "Assets/Bettr/LocalStore/AssetBundles/WebGL/game001.epicatlantistreasures";
-            // AssetBundle bundle2 = AssetBundle.LoadFromFile(bundle2Path);
-            // if (bundle2 == null)
-            // {
-            //     Debug.LogError($"Bundle 2 AssetBundle at {bundle2Path} failed to load.");
-            // }
-            // else
-            // {
-            //     Debug.Log("Bundle 2 loaded successfully.");
-            // }
+            AssetBundle bundle1 = AssetBundle.LoadFromFile(bundle1Path);
+            if (bundle1 == null)
+            {
+                Debug.LogError($"Bundle 1 AssetBundle at {bundle1Path} failed to load.");
+                return;
+            }
+            {
+                Debug.Log("Bundle 1 loaded successfully.");
+            }
+            string bundle2Path = "Assets/Bettr/LocalStore/AssetBundles/WebGL/game001.epicatlantistreasures";
+            AssetBundle bundle2 = AssetBundle.LoadFromFile(bundle2Path);
+            if (bundle2 == null)
+            {
+                Debug.LogError($"Bundle 2 AssetBundle at {bundle2Path} failed to load.");
+                return;
+            }
+            {
+                Debug.Log("Bundle 2 loaded successfully.");
+            }
             string bundle3Path = "Assets/Bettr/LocalStore/AssetBundles/WebGL/game001_scenes.epicancientadventures";
             AssetBundle bundle3 = AssetBundle.LoadFromFile(bundle3Path);
             if (bundle3 == null)
             {
                 Debug.LogError($"Bundle 3 AssetBundle at {bundle3Path} failed to load.");
+                return;
             }
-            else
             {
                 Debug.Log("Bundle 3 loaded successfully.");
             }
@@ -121,14 +121,14 @@ namespace Bettr.Editor
             if (bundle4 == null)
             {
                 Debug.LogError($"Bundle 4 AssetBundle at {bundle4Path} failed to load.");
+                return;
             }
-            else
             {
                 Debug.Log("Bundle 4 loaded successfully.");
             }
             mainBundle.Unload(false);
-            // if (bundle1 != null) bundle1.Unload(false);
-            // if (bundle2 != null) bundle2.Unload(false);
+            if (bundle1 != null) bundle1.Unload(false);
+            if (bundle2 != null) bundle2.Unload(false);
             if (bundle3 != null) bundle3.Unload(false);
             if (bundle4 != null) bundle4.Unload(false);
         }
