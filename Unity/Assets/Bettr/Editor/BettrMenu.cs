@@ -80,6 +80,71 @@ namespace Bettr.Editor
         private const string OutcomesServerBaseURL = "https://bettr-casino-outcomes.s3.us-west-2.amazonaws.com";
         private const string GatewayUrl = "https://3wcgnl14qb.execute-api.us-west-2.amazonaws.com/gateway";
         
+        [MenuItem("Bettr/Tools/Check Material Shader")]
+        public static void CheckMaterialShaderFromMenu()
+        {
+            // Get the asset bundle path and material name using file panels
+            string assetBundlePath =
+                "Assets/Bettr/LocalStore/AssetBundles/WebGL/game001epicancientadventures.epicancientadventures";
+
+            // Input dialog for the material name
+            string materialName = "F5.mat";
+
+            if (string.IsNullOrEmpty(materialName))
+            {
+                Debug.LogError("Material name is invalid.");
+                return;
+            }
+
+            // Call the method to check the material shader
+            CheckMaterialShader(assetBundlePath, materialName);
+        }
+
+        public static void CheckMaterialShader(string assetBundlePath, string materialName)
+        {
+            // Load the asset bundle
+            AssetBundle bundle = AssetBundle.LoadFromFile(assetBundlePath);
+            if (bundle == null)
+            {
+                Debug.LogError("Failed to load AssetBundle!");
+                return;
+            }
+
+            // Load the material
+            Material material = bundle.LoadAsset<Material>(materialName);
+            if (material == null)
+            {
+                Debug.LogError($"Material {materialName} not found in the AssetBundle.");
+                bundle.Unload(false);
+                return;
+            }
+
+            // Check the shader being used by the material
+            Shader shader = material.shader;
+            if (shader == null)
+            {
+                Debug.LogError($"Material {materialName} does not have a valid shader assigned.");
+            }
+            else
+            {
+                Debug.Log($"Material {materialName} is using shader: {shader.name}");
+
+                // Compare if the shader matches the expected shader in the main build
+                Shader expectedShader = Shader.Find("Bettr/Symbol"); // Replace with your actual shader path
+                if (shader == expectedShader)
+                {
+                    Debug.Log("The material is using the correct shader.");
+                }
+                else
+                {
+                    Debug.LogError("The material is not using the expected shader.");
+                }
+            }
+
+            // Always unload the bundle after use
+            bundle.Unload(false);
+        }
+        
         [MenuItem("Bettr/Tools/Check Asset Bundle Load")]
         public static void CheckAssetBundleLoad()
         {
