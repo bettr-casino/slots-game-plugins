@@ -937,7 +937,7 @@ namespace Bettr.Editor
         {
             var isScene = assetType.Name == "SceneAsset";
             var suffix = isScene ? "_scenes" :"";
-            var assetBundleName = $"{assetLabel}assetSubLabel{suffix}";
+            var assetBundleName = $"{assetLabel}{assetSubLabel}{suffix}";
             return assetBundleName;
         }
         
