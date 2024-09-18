@@ -574,7 +574,7 @@ namespace Bettr.Core
             yield return BettrAssetMaterialsController.LoadMaterial(bettrAssetBundleName, bettrAssetBundleVersion, materialName, targetGameObject);
         }
 
-        public AssetBundle GetCachedAssetBundle(string bettrAssetBundleName, string bettrAssetBundleVersion, bool isScene = true)
+        public AssetBundle GetCachedAssetBundle(string bettrAssetBundleName, string bettrAssetBundleVersion, bool isScene = false)
         {
             var assetBundleName = GetAssetBundleName(bettrAssetBundleName, bettrAssetBundleVersion, isScene);
             
