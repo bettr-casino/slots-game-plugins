@@ -60,24 +60,21 @@ namespace Bettr.Core
              if (UserIsLoggedIn)
             {
                 // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-                if (!replaceBlob)
+                yield return bettrServer.LoadUserBlob(storageCallback: (_, payload, success, error) =>
                 {
-                    yield return bettrServer.LoadUserBlob(storageCallback: (_, payload, success, error) =>
+                    if (error == ErrorBlobDoesNotExist)
                     {
-                        if (error == ErrorBlobDoesNotExist)
-                        {
-                            replaceBlob = true;
-                            return;
-                        }
-                        if (!success)
-                        {
-                            Debug.LogError($"Error loading user blob: {error}");
-                            return;
-                        }
-                        var userBlob = JsonConvert.DeserializeObject<BettrUserConfig>(payload.value);
-                        BettrUserConfig = userBlob;
-                    });
-                }
+                        replaceBlob = true;
+                        return;
+                    }
+                    if (!success)
+                    {
+                        Debug.LogError($"Error loading user blob: {error}");
+                        return;
+                    }
+                    var userBlob = JsonConvert.DeserializeObject<BettrUserConfig>(payload.value);
+                    BettrUserConfig = userBlob;
+                });
             
                 // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                 if (replaceBlob)
@@ -93,14 +90,14 @@ namespace Bettr.Core
                         BettrUserConfig = user;
                     });
                     
-                    // // put this back into the server
-                    // yield return bettrServer.PutUserBlob(BettrUserConfig, (_, _, success, error) =>
-                    // {
-                    //     if (!success)
-                    //     {
-                    //         Debug.LogError($"Error putting user blob: {error}");
-                    //     }
-                    // });
+                    // put this back into the server
+                    yield return bettrServer.PutUserBlob(BettrUserConfig, (_, _, success, error) =>
+                    {
+                        if (!success)
+                        {
+                            Debug.LogError($"Error putting user blob: {error}");
+                        }
+                    });
                 }
             }
             TileController.AddToGlobals("BettrUser", BettrUserConfig);
