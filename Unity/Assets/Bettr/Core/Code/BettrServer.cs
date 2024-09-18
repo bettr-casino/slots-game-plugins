@@ -413,6 +413,7 @@ namespace Bettr.Core
                 foreach (var kvPair in headers)
                 {
                     www.SetRequestHeader(kvPair.Key, kvPair.Value);
+                    Debug.Log("Header: " + kvPair.Key + " = " + kvPair.Value);
                 }              
             }
         }

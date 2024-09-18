@@ -87,6 +87,7 @@ namespace Bettr.Core
                             return;
                         }
                         var user = JsonConvert.DeserializeObject<BettrUserConfig>(payload.value);
+                        user.UserId = userId; // device id
                         BettrUserConfig = user;
                     });
                     
