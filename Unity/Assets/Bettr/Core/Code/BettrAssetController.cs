@@ -49,6 +49,8 @@ namespace Bettr.Core
                 "Bettr/LobbyMask",
                 "Bettr/ReelMask",
                 "Bettr/Symbol",
+                "Unlit/Texture",
+                "Unlit/Color",
             };
             
             // load the shaders into the cache
