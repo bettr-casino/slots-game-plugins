@@ -14,9 +14,6 @@ namespace Bettr.Core
         
         public string AssetsVersion { get; set; }
         
-        public string MainBundleName { get; set; }
-        public string MainBundleVariant { get; set; }
-        
         public string AssetsServerBaseURL { get; set; }
         public string OutcomesServerBaseURL { get; set; }
         

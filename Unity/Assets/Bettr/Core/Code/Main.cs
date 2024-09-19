@@ -46,8 +46,6 @@ namespace Bettr.Core
         {
             yield return OneTimeSetup();
 
-            yield return LoginUser();
-
             DevTools.Instance.Enable();
             
             DevTools.Instance.OnKeyPressed.AddListener(() =>
@@ -136,7 +134,7 @@ namespace Bettr.Core
 
             _configData.AssetsVersion = assetVersion;
             
-            Debug.Log($"userId={userId} AssetsVersion={_configData.AssetsVersion} AssetsBaseURL={_configData.AssetsServerBaseURL} WebAssetsBaseURL={_configData.WebAssetsBaseURL} WebOutcomesBaseURL={_configData.WebOutcomesBaseURL} MainBundleName={_configData.MainBundleName} MainBundleVariant={_configData.MainBundleVariant}");
+            Debug.Log($"userId={userId} AssetsVersion={_configData.AssetsVersion} AssetsBaseURL={_configData.AssetsServerBaseURL} WebAssetsBaseURL={_configData.WebAssetsBaseURL} WebOutcomesBaseURL={_configData.WebOutcomesBaseURL}");
             
             BettrModel.Init();
 
@@ -168,7 +166,12 @@ namespace Bettr.Core
             BettrVisualsController.SwitchOrientationToLandscape();
             
             if (_oneTimeSetUpComplete) yield break;
-            yield return _bettrAssetController.LoadPackage(_configData.MainBundleName, _configData.MainBundleVariant, false);
+            
+            yield return LoginUser();
+
+            var bettrUser = BettrUserController.Instance.BettrUserConfig;
+            
+            yield return _bettrAssetController.LoadPackage(bettrUser.Main.BundleName, bettrUser.Main.BundleVersion, false);
             
             ScriptRunner.Initialize();
             
@@ -186,10 +189,7 @@ namespace Bettr.Core
 
         private IEnumerator LoginUser()
         {
-            var mainTable = _bettrAssetScriptsController.GetScript("Main");
-            var scriptRunner = ScriptRunner.Acquire(mainTable);
-            yield return scriptRunner.CallAsyncAction("Login");
-            ScriptRunner.Release(scriptRunner);
+            yield return BettrUserController.Instance.Login();
         }
 
         private IEnumerator LoadMachine()

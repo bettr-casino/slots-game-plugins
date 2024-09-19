@@ -9,7 +9,7 @@ namespace Bettr.Core
     {
         public static void Init()
         {
-            TileController.RegisterType<BettrSceneConfig>("BettrSceneConfig");
+            TileController.RegisterType<BettrBundleConfig>("BettrSceneConfig");
             TileController.RegisterType<BettrLobbyCardConfig>("BettrLobbyCardConfig");
             TileController.RegisterType<BettrLobbyCardGroupConfig>("BettrLobbyCardGroupConfig");
             TileController.RegisterType<BettrUserConfig>("BettrUserConfig");
@@ -17,7 +17,7 @@ namespace Bettr.Core
     }
     
     [Serializable]
-    public class BettrSceneConfig
+    public class BettrBundleConfig
     {
         public string BundleName { get; set; }
         public string BundleVersion { get; set; }
@@ -53,7 +53,8 @@ namespace Bettr.Core
         // ReSharper disable once InconsistentNaming
         public long XP { get; set; }
         public long Level { get; set; }
-        public BettrSceneConfig LobbyScene { get; set; }
+        public BettrBundleConfig Main { get; set; }
+        public BettrBundleConfig LobbyScene { get; set; }
         public List<BettrLobbyCardGroupConfig> LobbyCardGroups { get; set; }
         public List<BettrLobbyCardConfig> LobbyCards { get; set; }
         public int LobbyCardIndex { get; set; } = -1;
