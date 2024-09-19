@@ -58,6 +58,19 @@ namespace Bettr.Core
         public List<BettrLobbyCardGroupConfig> LobbyCardGroups { get; set; }
         public List<BettrLobbyCardConfig> LobbyCards { get; set; }
         public int LobbyCardIndex { get; set; } = -1;
+
+        public int FindLobbyCardIndexById(string lobbyCardId)
+        {
+            for (var index = 0; index < LobbyCards.Count; index++)
+            {
+                var t = LobbyCards[index];
+                if (t.Card == lobbyCardId)
+                {
+                    return index;
+                }
+            }
+            return -1;
+        }
     }
     
     [Serializable]

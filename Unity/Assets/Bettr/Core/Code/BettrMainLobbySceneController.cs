@@ -27,6 +27,17 @@ namespace Bettr.Core
             TileController.RegisterType<BettrMainLobbySceneController>("BettrMainLobbySceneController");
             TileController.AddToGlobals("BettrMainLobbySceneController", this);
         }
+        
+        public IEnumerator LoadLobbyCardMachine(string lobbyCardName)
+        {
+            var bettrUser = BettrUserController.Instance.BettrUserConfig;
+            // lobbyCardName example Game001__LobbyCard001
+            var lobbyCardIndex = bettrUser.FindLobbyCardIndexById(lobbyCardName.Split("__")[1]);
+            var lobbyCard = bettrUser.LobbyCards[lobbyCardIndex];
+            bettrUser.LobbyCardIndex = 1;
+            yield return BettrAssetController.Instance.LoadScene(lobbyCard.MachineBundleName,
+                lobbyCard.MachineBundleVariant, lobbyCard.MachineSceneName);
+        }
 
         public IEnumerator LoadMachine()
         {
@@ -115,6 +126,7 @@ namespace Bettr.Core
                 else
                 {
                     var lobbyCardGameObject = machineCardProperty.GameObject;
+                    if (lobbyCardGameObject == null) continue;
                     Console.WriteLine($"LoadApp lobbyCardGameObject={lobbyCardGameObject.name}");
 
                     string lobbyCardKey = group + "__" + card;
