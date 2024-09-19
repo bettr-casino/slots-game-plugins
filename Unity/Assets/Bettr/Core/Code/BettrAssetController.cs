@@ -538,12 +538,12 @@ namespace Bettr.Core
         
         private string GetAssetBundleName(string bundleName, string bundleVariant, bool isScene)
         {
-            return isScene ? $"{bundleName}{bundleVariant}_scenes.{bundleVariant}" : $"{bundleName}{bundleVariant}.{bundleVariant}";
+            return isScene ? $"{bundleName}_scenes.{bundleVariant}" : $"{bundleName}.{bundleVariant}";
         }
         
         private string GetAssetBundleManifestName(string bundleName, string bundleVariant, bool isScene)
         {
-            return isScene ? $"{bundleName}{bundleVariant}_scenes.{bundleVariant}.manifest" : $"{bundleName}{bundleVariant}.{bundleVariant}.manifest";
+            return isScene ? $"{bundleName}_scenes.{bundleVariant}.manifest" : $"{bundleName}.{bundleVariant}.manifest";
         }
 
         public IEnumerator LoadPackage(string packageName, string packageVersion, bool loadScenes)

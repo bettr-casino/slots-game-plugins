@@ -592,7 +592,7 @@ namespace Bettr.Editor
             BuildMachines("Game009", "PlanetMooneyMooCash");
         }
         
-        private static void ImportFBX(string machineName, string machineVariant)
+        private static void ImportFBX(string machineName, string machineVariant, string experimentVariant)
         {
             // // Copy across the background texture
             // string sourceTexturePath =  $"Assets/Bettr/Editor/textures/{machineName}/{machineVariant}/Background.jpg";
@@ -602,7 +602,7 @@ namespace Bettr.Editor
 
             
             string sourcePath =  $"Assets/Bettr/Editor/fbx/{machineName}/{machineVariant}/";
-            string destinationPathPrefix = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset/";
+            string destinationPathPrefix = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset/";
             string fbxFilename = $"Background_fbx_common_textured.fbx";
             string targetFbxFilename = $"BackgroundFBX.fbx";
 
@@ -624,15 +624,24 @@ namespace Bettr.Editor
         // ReSharper disable once MemberCanBePrivate.Global
         public static void BuildMachinesFromCommandLine()
         {
+            SetupCoreAssetPath();
             string machineName = GetArgument("-machineName");
             string machineVariant = GetArgument("-machineVariant");
             string machineModel = GetArgument("-machineModel");
             
-            SetupCoreAssetPath();
-            ClearRuntimeAssetPath(machineName, machineVariant);
-            SetupMachine(machineName, machineVariant, machineModel);
-            ImportFBX(machineName, machineVariant);
-            BuildMachine(machineName, machineVariant);
+            string experimentVariant = "control";
+            
+            ClearRuntimeAssetPath(machineName, machineVariant, experimentVariant);
+            SetupMachine(machineName, machineVariant, experimentVariant, machineModel);
+            ImportFBX(machineName, machineVariant, experimentVariant);
+            BuildMachine(machineName, machineVariant, experimentVariant);
+            
+            experimentVariant = "variant1";
+            
+            ClearRuntimeAssetPath(machineName, machineVariant, experimentVariant);
+            SetupMachine(machineName, machineVariant, experimentVariant, machineModel);
+            ImportFBX(machineName, machineVariant, experimentVariant);
+            BuildMachine(machineName, machineVariant, experimentVariant);
         }
         
         private static void CreateOrReplaceMaterial(string machineName, string machineVariant)
@@ -910,21 +919,28 @@ namespace Bettr.Editor
             {
                 return;
             }
-            
-            var pluginDirectories = Directory.GetDirectories(pluginRootDirectory);
-            
-            foreach (var pluginDirectory in pluginDirectories)
+            var pluginMachineGroupDirectories = Directory.GetDirectories(pluginRootDirectory);
+            foreach (var pluginMachineGroupDirectory in pluginMachineGroupDirectories)
             {
-                var assetLabel = ReadAssetLabel(pluginDirectory);
+                var assetLabel = ReadAssetLabel(pluginMachineGroupDirectory);
+                if (assetLabel.Contains('.')) throw new Exception("Asset sub label cannot contain a period.");
                 if (!string.IsNullOrEmpty(assetLabel))
                 {
-                    var variantsRootDirectory = Path.Combine(pluginDirectory, "variants");
-                    var variantsDirectories = Directory.GetDirectories(variantsRootDirectory);
-                    foreach (var variantDirectory in variantsDirectories)
+                    var rootDirectory = Path.Combine(pluginMachineGroupDirectory, "variants");
+                    var pluginMachineDirectories = Directory.GetDirectories(rootDirectory);
+                    foreach (var pluginMachineDirectory in pluginMachineDirectories)
                     {
-                        var assetSubLabel = ReadAssetSubLabel(variantDirectory);
-                        var pluginRuntimeDirectory = Path.Combine(variantDirectory, "Runtime");
-                        WalkDirectoryRecursive(pluginRuntimeDirectory, assetLabel, assetSubLabel);
+                        // all the Experiment variants are under this directory
+                        var assetSubLabel = ReadAssetSubLabel(pluginMachineDirectory);
+                        if (assetSubLabel.Contains('.')) throw new Exception("Asset sub label cannot contain a period.");
+                        var experimentVariantsDirectory = Directory.GetDirectories(pluginMachineDirectory);
+                        foreach (var experimentVariantDirectory in experimentVariantsDirectory)
+                        {
+                            var assetVariantLabel = ReadAssetVariantLabel(experimentVariantDirectory);
+                            if (assetVariantLabel.Contains('.')) throw new Exception("Asset variant label cannot contain a period.");
+                            var pluginRuntimeDirectory = Path.Combine(experimentVariantDirectory, "Runtime");
+                            WalkDirectoryRecursive(pluginRuntimeDirectory, assetLabel, assetSubLabel, assetVariantLabel);
+                        }
                     }
                 }
             }
@@ -944,10 +960,16 @@ namespace Bettr.Editor
             return baseName;
         }
         
-        private static void WalkDirectoryRecursive(string directoryPath, string assetLabel, string assetSubLabel)
+        private static string ReadAssetVariantLabel(string directoryPath)
+        {
+            var di = new DirectoryInfo(directoryPath);
+            var baseName = di.Name.ToLower();
+            return baseName;
+        }
+        
+        private static void WalkDirectoryRecursive(string directoryPath, string assetLabel, string assetSubLabel, string assetVariantLabel)
         {
             if (Path.GetFileNameWithoutExtension(directoryPath).Equals("Editor")) return; // skip special Editor folder
-            if (assetSubLabel.Contains('.')) throw new Exception("Asset sub label cannot contain a period.");
             var importer = AssetImporter.GetAtPath(directoryPath);
             var assetType = AssetDatabase.GetMainAssetTypeAtPath(directoryPath);
             if (importer != null)
@@ -955,7 +977,8 @@ namespace Bettr.Editor
                 if (assetType != null && assetType != typeof(MonoScript))
                 {
                     importer.assetBundleName = GetAssetBundleName(assetLabel, assetSubLabel, assetType);
-                    importer.assetBundleVariant = GetAssetBundleVariant(assetSubLabel);
+                    importer.assetBundleVariant = GetAssetBundleVariant(assetVariantLabel);
+                    Debug.Log($"setting asset labels for assetBundleName={importer.assetBundleName} assetBundleVariant={importer.assetBundleVariant} assetPath={directoryPath}");
                 }
             }
             
@@ -972,7 +995,8 @@ namespace Bettr.Editor
                     if (assetType != null && assetType != typeof(MonoScript))
                     {
                         importer.assetBundleName = GetAssetBundleName(assetLabel, assetSubLabel, assetType);
-                        importer.assetBundleVariant = GetAssetBundleVariant(assetSubLabel);
+                        importer.assetBundleVariant = GetAssetBundleVariant(assetVariantLabel);
+                        Debug.Log($"setting asset labels for assetBundleName={importer.assetBundleName} assetBundleVariant={importer.assetBundleVariant} assetPath={assetPath}");
                     }
                 }
             }
@@ -980,7 +1004,7 @@ namespace Bettr.Editor
             var subDirectories = Directory.GetDirectories(directoryPath);
             foreach (var subDirectory in subDirectories)
             {
-                WalkDirectoryRecursive(subDirectory, assetLabel, assetSubLabel);
+                WalkDirectoryRecursive(subDirectory, assetLabel, assetSubLabel, assetVariantLabel);
             }
         }
 
@@ -1006,9 +1030,9 @@ namespace Bettr.Editor
             return assetBundleName;
         }
         
-        private static string GetAssetBundleVariant(string assetSubLabel)
+        private static string GetAssetBundleVariant(string label)
         {
-            return assetSubLabel;
+            return label;
         }
         
         private static void ModifyAssetBundleManifestFiles()
@@ -1401,9 +1425,9 @@ namespace Bettr.Editor
             InstanceComponent.CorePath = corePath;
         }
 
-        private static void ClearRuntimeAssetPath(string machineName, string machineVariant)
+        private static void ClearRuntimeAssetPath(string machineName, string machineVariant, string experimentVariant)
         {
-            string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset";
+            string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
             
             if (Directory.Exists(runtimeAssetPath))
             {
@@ -1429,7 +1453,7 @@ namespace Bettr.Editor
             AssetDatabase.Refresh();
         }
         
-        private static void SetupMachine(string machineName, string machineVariant, string machineModel)
+        private static void SetupMachine(string machineName, string machineVariant, string experimentVariant, string machineModel)
         {
             string machineModelName = Path.GetFileNameWithoutExtension(machineModel);
 
@@ -1459,9 +1483,9 @@ namespace Bettr.Editor
             ProcessScripts(machineName, machineVariant, runtimeAssetPath);
         }
 
-        private static void BuildMachine(string machineName, string machineVariant)
+        private static void BuildMachine(string machineName, string machineVariant, string experimentVariant)
         {
-            string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset";
+            string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
             EnsureDirectory(runtimeAssetPath);
             
             var machines = GetTable($"{machineName}Machines");
