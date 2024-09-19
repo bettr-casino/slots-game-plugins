@@ -596,7 +596,7 @@ namespace Bettr.Editor
         {
             // // Copy across the background texture
             // string sourceTexturePath =  $"Assets/Bettr/Editor/textures/{machineName}/{machineVariant}/Background.jpg";
-            // string destinationTexturePath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset/Textures/Background.jpg";
+            // string destinationTexturePath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset/Textures/Background.jpg";
             // File.Copy(sourceTexturePath, destinationTexturePath, overwrite: true);
             // AssetDatabase.Refresh();
 
@@ -644,11 +644,11 @@ namespace Bettr.Editor
             BuildMachine(machineName, machineVariant, experimentVariant);
         }
         
-        private static void CreateOrReplaceMaterial(string machineName, string machineVariant)
+        private static void CreateOrReplaceMaterial(string machineName, string machineVariant, string experimentVariant)
         {
             string materialName = $"{machineName}__{machineVariant}__LobbyCard";
-            string materialPath = $"Assets/Bettr/Runtime/Plugin/LobbyCard/variants/v0_1_0/Runtime/Asset/{machineName}/LobbyCard/Materials/{materialName}.mat";
-            string texturePath = $"Assets/Bettr/Runtime/Plugin/LobbyCard/variants/v0_1_0/Runtime/Asset/{machineName}/LobbyCard/Materials/{materialName}.jpg";
+            string materialPath = $"Assets/Bettr/Runtime/Plugin/LobbyCard/variants/v0_1_0/Runtime/Asset/{machineName}/{experimentVariant}/LobbyCard/Materials/{materialName}.mat";
+            string texturePath = $"Assets/Bettr/Runtime/Plugin/LobbyCard/variants/v0_1_0/Runtime/Asset/{machineName}/{experimentVariant}/LobbyCard/Materials/{materialName}.jpg";
     
             // Load or create the material
             Material material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
@@ -681,130 +681,130 @@ namespace Bettr.Editor
         public static void BuildMaterials()
         {
             // Game001 Variants
-            CreateOrReplaceMaterial("Game001", "AncientAdventures");
-            CreateOrReplaceMaterial("Game001", "AtlantisTreasures");
-            CreateOrReplaceMaterial("Game001", "ClockworkChronicles");
-            CreateOrReplaceMaterial("Game001", "DragonsHoard");
-            CreateOrReplaceMaterial("Game001", "EnchantedForest");
-            CreateOrReplaceMaterial("Game001", "GalacticQuest");
-            CreateOrReplaceMaterial("Game001", "GuardiansOfOlympus");
-            CreateOrReplaceMaterial("Game001", "LostCityOfGold");
-            CreateOrReplaceMaterial("Game001", "MysticalLegends");
-            CreateOrReplaceMaterial("Game001", "PharosFortune");
-            CreateOrReplaceMaterial("Game001", "PiratesPlunder");
-            CreateOrReplaceMaterial("Game001", "SamuraisFortune");
+            CreateOrReplaceMaterial("Game001", "AncientAdventures", "control");
+            CreateOrReplaceMaterial("Game001", "AtlantisTreasures", "control");
+            CreateOrReplaceMaterial("Game001", "ClockworkChronicles", "control");
+            CreateOrReplaceMaterial("Game001", "DragonsHoard", "control");
+            CreateOrReplaceMaterial("Game001", "EnchantedForest", "control");
+            CreateOrReplaceMaterial("Game001", "GalacticQuest", "control");
+            CreateOrReplaceMaterial("Game001", "GuardiansOfOlympus", "control");
+            CreateOrReplaceMaterial("Game001", "LostCityOfGold", "control");
+            CreateOrReplaceMaterial("Game001", "MysticalLegends", "control");
+            CreateOrReplaceMaterial("Game001", "PharosFortune", "control");
+            CreateOrReplaceMaterial("Game001", "PiratesPlunder", "control");
+            CreateOrReplaceMaterial("Game001", "SamuraisFortune", "control");
 
             // Game002 Variants
-            CreateOrReplaceMaterial("Game002", "BuffaloAdventureQuest");
-            CreateOrReplaceMaterial("Game002", "BuffaloCanyonRiches");
-            CreateOrReplaceMaterial("Game002", "BuffaloFrontierFortune");
-            CreateOrReplaceMaterial("Game002", "BuffaloJackpotMadness");
-            CreateOrReplaceMaterial("Game002", "BuffaloMagicSpins");
-            CreateOrReplaceMaterial("Game002", "BuffaloMoonlitMagic");
-            CreateOrReplaceMaterial("Game002", "BuffaloSafariExpedition");
-            CreateOrReplaceMaterial("Game002", "BuffaloSpiritQuest");
-            CreateOrReplaceMaterial("Game002", "BuffaloThunderstorm");
-            CreateOrReplaceMaterial("Game002", "BuffaloTreasureHunter");
-            CreateOrReplaceMaterial("Game002", "BuffaloWheelOfRiches");
-            CreateOrReplaceMaterial("Game002", "BuffaloWildPicks");
+            CreateOrReplaceMaterial("Game002", "BuffaloAdventureQuest", "control");
+            CreateOrReplaceMaterial("Game002", "BuffaloCanyonRiches", "control");
+            CreateOrReplaceMaterial("Game002", "BuffaloFrontierFortune", "control");
+            CreateOrReplaceMaterial("Game002", "BuffaloJackpotMadness", "control");
+            CreateOrReplaceMaterial("Game002", "BuffaloMagicSpins", "control");
+            CreateOrReplaceMaterial("Game002", "BuffaloMoonlitMagic", "control");
+            CreateOrReplaceMaterial("Game002", "BuffaloSafariExpedition", "control");
+            CreateOrReplaceMaterial("Game002", "BuffaloSpiritQuest", "control");
+            CreateOrReplaceMaterial("Game002", "BuffaloThunderstorm", "control");
+            CreateOrReplaceMaterial("Game002", "BuffaloTreasureHunter", "control");
+            CreateOrReplaceMaterial("Game002", "BuffaloWheelOfRiches", "control");
+            CreateOrReplaceMaterial("Game002", "BuffaloWildPicks", "control");
 
             // Game003 Variants
-            CreateOrReplaceMaterial("Game003", "HighStakesAlpineAdventure");
-            CreateOrReplaceMaterial("Game003", "HighStakesCascadingCash");
-            CreateOrReplaceMaterial("Game003", "HighStakesHotLinks");
-            CreateOrReplaceMaterial("Game003", "HighStakesJungleQuest");
-            CreateOrReplaceMaterial("Game003", "HighStakesMegaMultipliers");
-            CreateOrReplaceMaterial("Game003", "HighStakesMonacoThrills");
-            CreateOrReplaceMaterial("Game003", "HighStakesSafariAdventure");
-            CreateOrReplaceMaterial("Game003", "HighStakesSpaceOdyssey");
-            CreateOrReplaceMaterial("Game003", "HighStakesStackedSpins");
-            CreateOrReplaceMaterial("Game003", "HighStakesUnderwaterAdventure");
-            CreateOrReplaceMaterial("Game003", "HighStakesWildSpins");
-            CreateOrReplaceMaterial("Game003", "HighStakesWonderWays");
+            CreateOrReplaceMaterial("Game003", "HighStakesAlpineAdventure", "control");
+            CreateOrReplaceMaterial("Game003", "HighStakesCascadingCash", "control");
+            CreateOrReplaceMaterial("Game003", "HighStakesHotLinks", "control");
+            CreateOrReplaceMaterial("Game003", "HighStakesJungleQuest", "control");
+            CreateOrReplaceMaterial("Game003", "HighStakesMegaMultipliers", "control");
+            CreateOrReplaceMaterial("Game003", "HighStakesMonacoThrills", "control");
+            CreateOrReplaceMaterial("Game003", "HighStakesSafariAdventure", "control");
+            CreateOrReplaceMaterial("Game003", "HighStakesSpaceOdyssey", "control");
+            CreateOrReplaceMaterial("Game003", "HighStakesStackedSpins", "control");
+            CreateOrReplaceMaterial("Game003", "HighStakesUnderwaterAdventure", "control");
+            CreateOrReplaceMaterial("Game003", "HighStakesWildSpins", "control");
+            CreateOrReplaceMaterial("Game003", "HighStakesWonderWays", "control");
 
             // Game004 Variants
-            CreateOrReplaceMaterial("Game004", "RichesBeverlyHillMansions");
-            CreateOrReplaceMaterial("Game004", "RichesBillionaireBets");
-            CreateOrReplaceMaterial("Game004", "RichesDiamondDash");
-            CreateOrReplaceMaterial("Game004", "RichesGalacticGoldRush");
-            CreateOrReplaceMaterial("Game004", "RichesJetsetJackpot");
-            CreateOrReplaceMaterial("Game004", "RichesMysticForest");
-            CreateOrReplaceMaterial("Game004", "RichesPharaohsRiches");
-            CreateOrReplaceMaterial("Game004", "RichesPiratesBounty");
-            CreateOrReplaceMaterial("Game004", "RichesRaceToRiches");
-            CreateOrReplaceMaterial("Game004", "RichesRoyalHeist");
-            CreateOrReplaceMaterial("Game004", "RichesRubyRush");
-            CreateOrReplaceMaterial("Game004", "RichesSapphireSprint");
+            CreateOrReplaceMaterial("Game004", "RichesBeverlyHillMansions", "control");
+            CreateOrReplaceMaterial("Game004", "RichesBillionaireBets", "control");
+            CreateOrReplaceMaterial("Game004", "RichesDiamondDash", "control");
+            CreateOrReplaceMaterial("Game004", "RichesGalacticGoldRush", "control");
+            CreateOrReplaceMaterial("Game004", "RichesJetsetJackpot", "control");
+            CreateOrReplaceMaterial("Game004", "RichesMysticForest", "control");
+            CreateOrReplaceMaterial("Game004", "RichesPharaohsRiches", "control");
+            CreateOrReplaceMaterial("Game004", "RichesPiratesBounty", "control");
+            CreateOrReplaceMaterial("Game004", "RichesRaceToRiches", "control");
+            CreateOrReplaceMaterial("Game004", "RichesRoyalHeist", "control");
+            CreateOrReplaceMaterial("Game004", "RichesRubyRush", "control");
+            CreateOrReplaceMaterial("Game004", "RichesSapphireSprint", "control");
 
             // Game005 Variants
-            CreateOrReplaceMaterial("Game005", "FortunesCelestialFortune");
-            CreateOrReplaceMaterial("Game005", "FortunesFortuneTeller");
-            CreateOrReplaceMaterial("Game005", "FortunesFourLeafClover");
-            CreateOrReplaceMaterial("Game005", "FortunesJadeOfFortune");
-            CreateOrReplaceMaterial("Game005", "FortunesLuckyBamboo");
-            CreateOrReplaceMaterial("Game005", "FortunesLuckyCharms");
-            CreateOrReplaceMaterial("Game005", "FortunesManekiNeko");
-            CreateOrReplaceMaterial("Game005", "FortunesMysticForest");
-            CreateOrReplaceMaterial("Game005", "FortunesNorseAcorns");
-            CreateOrReplaceMaterial("Game005", "FortunesPharaohsRiches");
-            CreateOrReplaceMaterial("Game005", "FortunesShootingStars");
-            CreateOrReplaceMaterial("Game005", "FortunesVikingVoyage");
+            CreateOrReplaceMaterial("Game005", "FortunesCelestialFortune", "control");
+            CreateOrReplaceMaterial("Game005", "FortunesFortuneTeller", "control");
+            CreateOrReplaceMaterial("Game005", "FortunesFourLeafClover", "control");
+            CreateOrReplaceMaterial("Game005", "FortunesJadeOfFortune", "control");
+            CreateOrReplaceMaterial("Game005", "FortunesLuckyBamboo", "control");
+            CreateOrReplaceMaterial("Game005", "FortunesLuckyCharms", "control");
+            CreateOrReplaceMaterial("Game005", "FortunesManekiNeko", "control");
+            CreateOrReplaceMaterial("Game005", "FortunesMysticForest", "control");
+            CreateOrReplaceMaterial("Game005", "FortunesNorseAcorns", "control");
+            CreateOrReplaceMaterial("Game005", "FortunesPharaohsRiches", "control");
+            CreateOrReplaceMaterial("Game005", "FortunesShootingStars", "control");
+            CreateOrReplaceMaterial("Game005", "FortunesVikingVoyage", "control");
 
             // Game006 Variants
-            CreateOrReplaceMaterial("Game006", "WheelsAncientKingdom");
-            CreateOrReplaceMaterial("Game006", "WheelsCapitalCityTycoon");
-            CreateOrReplaceMaterial("Game006", "WheelsEmpireBuilder");
-            CreateOrReplaceMaterial("Game006", "WheelsFantasyKingdom");
-            CreateOrReplaceMaterial("Game006", "WheelsGlobalInvestor");
-            CreateOrReplaceMaterial("Game006", "WheelsIndustrialRevolution");
-            CreateOrReplaceMaterial("Game006", "WheelsJurassicJungle");
-            CreateOrReplaceMaterial("Game006", "WheelsMythicalRealm");
-            CreateOrReplaceMaterial("Game006", "WheelsRealEstateMoghul");
-            CreateOrReplaceMaterial("Game006", "WheelsSpaceColonization");
-            CreateOrReplaceMaterial("Game006", "WheelsTreasuresIslandTycoon");
-            CreateOrReplaceMaterial("Game006", "WheelsUnderwaterEmpire");
+            CreateOrReplaceMaterial("Game006", "WheelsAncientKingdom", "control");
+            CreateOrReplaceMaterial("Game006", "WheelsCapitalCityTycoon", "control");
+            CreateOrReplaceMaterial("Game006", "WheelsEmpireBuilder", "control");
+            CreateOrReplaceMaterial("Game006", "WheelsFantasyKingdom", "control");
+            CreateOrReplaceMaterial("Game006", "WheelsGlobalInvestor", "control");
+            CreateOrReplaceMaterial("Game006", "WheelsIndustrialRevolution", "control");
+            CreateOrReplaceMaterial("Game006", "WheelsJurassicJungle", "control");
+            CreateOrReplaceMaterial("Game006", "WheelsMythicalRealm", "control");
+            CreateOrReplaceMaterial("Game006", "WheelsRealEstateMoghul", "control");
+            CreateOrReplaceMaterial("Game006", "WheelsSpaceColonization", "control");
+            CreateOrReplaceMaterial("Game006", "WheelsTreasuresIslandTycoon", "control");
+            CreateOrReplaceMaterial("Game006", "WheelsUnderwaterEmpire", "control");
 
             // Game007 Variants
-            CreateOrReplaceMaterial("Game007", "TrueVegasDiamondDazzle");
-            CreateOrReplaceMaterial("Game007", "TrueVegasGoldRush");
-            CreateOrReplaceMaterial("Game007", "TrueVegasInfiniteSpins");
-            CreateOrReplaceMaterial("Game007", "TrueVegasLucky7s");
-            CreateOrReplaceMaterial("Game007", "TrueVegasLuckyCharms");
-            CreateOrReplaceMaterial("Game007", "TrueVegasMegaJackpot");
-            CreateOrReplaceMaterial("Game007", "TrueVegasMegaWheels");
-            CreateOrReplaceMaterial("Game007", "TrueVegasRubyRiches");
-            CreateOrReplaceMaterial("Game007", "TrueVegasSuper7s");
-            CreateOrReplaceMaterial("Game007", "TrueVegasTripleSpins");
-            CreateOrReplaceMaterial("Game007", "TrueVegasWheelBonanza");
-            CreateOrReplaceMaterial("Game007", "TrueVegasWildCherries");
+            CreateOrReplaceMaterial("Game007", "TrueVegasDiamondDazzle", "control");
+            CreateOrReplaceMaterial("Game007", "TrueVegasGoldRush", "control");
+            CreateOrReplaceMaterial("Game007", "TrueVegasInfiniteSpins", "control");
+            CreateOrReplaceMaterial("Game007", "TrueVegasLucky7s", "control");
+            CreateOrReplaceMaterial("Game007", "TrueVegasLuckyCharms", "control");
+            CreateOrReplaceMaterial("Game007", "TrueVegasMegaJackpot", "control");
+            CreateOrReplaceMaterial("Game007", "TrueVegasMegaWheels", "control");
+            CreateOrReplaceMaterial("Game007", "TrueVegasRubyRiches", "control");
+            CreateOrReplaceMaterial("Game007", "TrueVegasSuper7s", "control");
+            CreateOrReplaceMaterial("Game007", "TrueVegasTripleSpins", "control");
+            CreateOrReplaceMaterial("Game007", "TrueVegasWheelBonanza", "control");
+            CreateOrReplaceMaterial("Game007", "TrueVegasWildCherries", "control");
 
             // Game008 Variants
-            CreateOrReplaceMaterial("Game008", "GodsAncientEgyptian");
-            CreateOrReplaceMaterial("Game008", "GodsCelestialBeasts");
-            CreateOrReplaceMaterial("Game008", "GodsCelestialGuardians");
-            CreateOrReplaceMaterial("Game008", "GodsDivineRiches");
-            CreateOrReplaceMaterial("Game008", "GodsElementalMasters");
-            CreateOrReplaceMaterial("Game008", "GodsEternalDivinity");
-            CreateOrReplaceMaterial("Game008", "GodsHeavenlyMonarchs");
-            CreateOrReplaceMaterial("Game008", "GodsMysticPantheon");
-            CreateOrReplaceMaterial("Game008", "GodsMythicDeities");
-            CreateOrReplaceMaterial("Game008", "GodsNorseLegends");
-            CreateOrReplaceMaterial("Game008", "GodsSacredLegends");
-            CreateOrReplaceMaterial("Game008", "GodsTitansOfWealth");
+            CreateOrReplaceMaterial("Game008", "GodsAncientEgyptian", "control");
+            CreateOrReplaceMaterial("Game008", "GodsCelestialBeasts", "control");
+            CreateOrReplaceMaterial("Game008", "GodsCelestialGuardians", "control");
+            CreateOrReplaceMaterial("Game008", "GodsDivineRiches", "control");
+            CreateOrReplaceMaterial("Game008", "GodsElementalMasters", "control");
+            CreateOrReplaceMaterial("Game008", "GodsEternalDivinity", "control");
+            CreateOrReplaceMaterial("Game008", "GodsHeavenlyMonarchs", "control");
+            CreateOrReplaceMaterial("Game008", "GodsMysticPantheon", "control");
+            CreateOrReplaceMaterial("Game008", "GodsMythicDeities", "control");
+            CreateOrReplaceMaterial("Game008", "GodsNorseLegends", "control");
+            CreateOrReplaceMaterial("Game008", "GodsSacredLegends", "control");
+            CreateOrReplaceMaterial("Game008", "GodsTitansOfWealth", "control");
 
             // Game009 Variants
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersApolloAdventures");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersAsteroidMiners");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersBlackHoleExplorers");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersCosmicRaiders");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersGalacticPioneers");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersInterstellarTreasureHunters");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersNebulaNavigators");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersQuantumExplorers");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersRaidersOfPlanetMooney");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersStarshipSalvagers");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersStellarExpedition");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersVoyagersOfTheCosmos");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersApolloAdventures", "control");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersAsteroidMiners", "control");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersBlackHoleExplorers", "control");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersCosmicRaiders", "control");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersGalacticPioneers", "control");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersInterstellarTreasureHunters", "control");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersNebulaNavigators", "control");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersQuantumExplorers", "control");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersRaidersOfPlanetMooney", "control");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersStarshipSalvagers", "control");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersStellarExpedition", "control");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersVoyagersOfTheCosmos", "control");
             
             Debug.Log($"LobbyCard materials updated successfully.");
         }
@@ -1457,7 +1457,7 @@ namespace Bettr.Editor
         {
             string machineModelName = Path.GetFileNameWithoutExtension(machineModel);
 
-            string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset";
+            string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
             EnsureDirectory(runtimeAssetPath);
 
             string[] subDirectories = { "Animators", "Materials", "Models", "FBX", "Prefabs", "Scenes", "Scripts", "Textures" };
@@ -1480,7 +1480,7 @@ namespace Bettr.Editor
             DynValue dynValue = TileController.LuaScript.LoadString(machineModelScript, codeFriendlyName: machineModelName);
             TileController.LuaScript.Call(dynValue);
             
-            ProcessScripts(machineName, machineVariant, runtimeAssetPath);
+            ProcessScripts(machineName, machineVariant, experimentVariant, runtimeAssetPath);
         }
 
         private static void BuildMachine(string machineName, string machineVariant, string experimentVariant)
@@ -1512,12 +1512,15 @@ namespace Bettr.Editor
             }
         }
 
-        private static void CopyScripts(string scriptsPath, string[] filePaths, string machineName, string machineVariant, string runtimeAssetPath)
+        private static void CopyScripts(string scriptsPath, string[] filePaths, string machineName, string machineVariant, string experimentVariant, string runtimeAssetPath)
         {
             var mechanicsTable = BettrMenu.GetTable($"{machineName}Mechanics");
             var baseGameMechanics = BettrMenu.GetTableArray<string>(mechanicsTable, "BaseGame", "Mechanic");
             // convert baseGameMechanics array to PascalCase using ConvertCamelToPascalCase
             baseGameMechanics = new List<string>(baseGameMechanics.Select(ConvertCamelToPascalCase).ToArray());
+            
+            var bundleName = $"{machineName}{machineVariant}".ToLower();
+            var bundleVersion = $"{experimentVariant}".ToLower();
             
             foreach (string filePath in filePaths)
             {
@@ -1527,6 +1530,9 @@ namespace Bettr.Editor
                 {
                     { "machineName", machineName },
                     { "machineVariant", machineVariant },
+                    { "experimentVariant", experimentVariant },
+                    { "bundleName", bundleName },
+                    { "bundleVersion", bundleVersion },
                     { "machines", new string[]
                         {
                             "BaseGame",
@@ -1544,14 +1550,14 @@ namespace Bettr.Editor
             }
         }
 
-        private static void ProcessScripts(string machineName, string machineVariant, string runtimeAssetPath)
+        private static void ProcessScripts(string machineName, string machineVariant, string experimentVariant, string runtimeAssetPath)
         {
             AssetDatabase.Refresh();
             
             string dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "templates", "scripts");
             string[] filePaths = Directory.GetFiles(dirPath, "*.cscript.txt.template");
             string scriptsPath = $"scripts";
-            CopyScripts(scriptsPath, filePaths, machineName, machineVariant, runtimeAssetPath);
+            CopyScripts(scriptsPath, filePaths, machineName, machineVariant, experimentVariant, runtimeAssetPath);
             
             // Process Mechanics scripts
             var mechanicsTable = GetTable($"{machineName}Mechanics");
@@ -1564,7 +1570,7 @@ namespace Bettr.Editor
                     dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "templates", "mechanics", mechanic, "scripts");
                     filePaths = Directory.GetFiles(dirPath, "*.cscript.txt.template");
                     scriptsPath = $"mechanics/{mechanic}/scripts";
-                    CopyScripts(scriptsPath, filePaths, machineName, machineVariant, runtimeAssetPath);
+                    CopyScripts(scriptsPath, filePaths, machineName, machineVariant, experimentVariant, runtimeAssetPath);
                 }
             }
 

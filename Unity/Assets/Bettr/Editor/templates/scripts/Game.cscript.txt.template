@@ -3,8 +3,8 @@ require "Core"
 
 {{machineName}} = {
     Manifest = {        
-        BundleName = "{{machineName | string.downcase}}",
-        BundleVersion = "{{machineVariant | string.downcase}}",
+        BundleName = "{{bundleName}}",
+        BundleVersion = "{{bundleVersion}}",
         {{- for machine in machines }}
         {{ machine}}BackgroundPrefabName = "{{machineName}}{{machine}}Background",
         {{ machine}}MachinePrefabName = "{{machineName}}{{machine}}Machine",
