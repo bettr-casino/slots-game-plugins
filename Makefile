@@ -38,6 +38,9 @@ AWS_DEFAULT_PROFILE := ${AWS_DEFAULT_PROFILE}
 
 MODELS_DIR := $(PWD)/../../bettr-infrastructure/bettr-infrastructure/tools/publish-data/published_models
 
+GENERATED_LOBBY_IMAGES_DIR := $(PWD)/../../bettr-infrastructure/bettr-infrastructure/tools/pipelines/game-gpt/pipelines/gpt-generated-files/lobby-images
+LOBBY_CARD_IMAGES_DIR := $(PWD)/Unity/Assets/Bettr/Runtime/Plugin/LobbyCard/variants/v0_1_0/control/Runtime/Asset/Game001/LobbyCard
+
 S3_BUCKET := bettr-casino-assets
 S3_ASSETS_LATEST_OBJECT_KEY := "assets/latest"
 
@@ -171,6 +174,35 @@ deploy-assets-android: build-assets-android publish-assets-android
 
 deploy-assets-webgl: build-assets-webgl publish-assets-webgl
 	@echo "Deploying WebGL asset bundles..."
+
+# =============================================================================
+#
+# BUILD LOBBY IMAGES
+#
+# =============================================================================
+
+sync-lobby-images: prepare-project
+	@echo "Running sync-lobby-images..."
+	@echo "Running caffeinate to keep the drives awake..."
+	# keep the drives awake
+	caffeinate -i -m -u &
+	@GENERATED_LOBBY_IMAGES_DIR="${GENERATED_LOBBY_IMAGES_DIR}"; \
+	for GENERATED_LOBBY_IMAGE_DIR in "$${GENERATED_LOBBY_IMAGES_DIR}/"*/; do \
+		GENERATED_LOBBY_IMAGE=$$(basename "$${GENERATED_LOBBY_IMAGE_DIR}"); \
+		if [[ "$${GENERATED_LOBBY_IMAGE}" =~ ^Game[0-9]{3}$$ ]]; then \
+			echo "Processing GENERATED_LOBBY_IMAGE: $${GENERATED_LOBBY_IMAGE}"; \
+			# split the GENERATED_LOBBY_IMAGE which is of the form Game<NNN><VARIANT>.png into "Game<NNN>__<VARIANT>__LobbyCard.png"
+			LOBBY_CARD_IMAGE=$$(echo "$${GENERATED_LOBBY_IMAGE}" | sed -E 's/(Game[0-9]{3})([A-Za-z]+).*/\1__\2__LobbyCard.png/'); \
+			# copy the LOBBY_CARD_IMAGE to the LOBBY_CARD_IMAGES_DIR directory under Game<NNN>
+			cp "$${GENERATED_LOBBY_IMAGE_DIR}/$${GENERATED_LOBBY_IMAGE}" "$${LOBBY_CARD_IMAGES_DIR}/$${LOBBY_CARD_IMAGE}"; \
+		else \
+			echo "Skipping directory: $${MACHINE_NAME} (does not match Game<NNN> pattern)"; \
+		fi; \
+	done
+	# Kill the caffeinate process
+	@echo "Killing caffeinate..."
+	killall caffeinate
+
 
 # =============================================================================
 #
