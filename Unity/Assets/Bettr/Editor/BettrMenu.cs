@@ -526,7 +526,7 @@ namespace Bettr.Editor
             BuildLocalOutcomes();
         }
 
-        [MenuItem("Bettr/Build/Game001 - Epic Wins")]
+        // [MenuItem("Bettr/Build/Game001 - Epic Wins")]
         public static void BuildGame001()
         {
             BuildMachines("Game001", "EpicAncientAdventures");
@@ -544,49 +544,49 @@ namespace Bettr.Editor
             // BuildMachines("Game001", "EpicSamuraisFortune");
         }
         
-        [MenuItem("Bettr/Build/Game002 - Buffalo")]
+        // [MenuItem("Bettr/Build/Game002 - Buffalo")]
         public static void BuildGame002()
         {
             BuildMachines("Game002", "BuffaloTreasureHunter");
         }
 
-        [MenuItem("Bettr/Build/Game003 - HighStakes")]
+        // [MenuItem("Bettr/Build/Game003 - HighStakes")]
         public static void BuildGame003()
         {
             BuildMachines("Game003", "HighStakesAlpineAdventure");
         }
 
-        [MenuItem("Bettr/Build/Game004 - CleopatraRiches")]
+        // [MenuItem("Bettr/Build/Game004 - CleopatraRiches")]
         public static void BuildGame004()
         {
             BuildMachines("Game004", "CleopatraRiches");
         }
 
-        [MenuItem("Bettr/Build/Game005 - 88FortunesDancingDrums")]
+        // [MenuItem("Bettr/Build/Game005 - 88FortunesDancingDrums")]
         public static void BuildGame005()
         {
             BuildMachines("Game005", "88FortunesDancingDrums");
         }
 
-        [MenuItem("Bettr/Build/Game006 - WheelOfFortuneTripleExtremeSpin")]
+        // [MenuItem("Bettr/Build/Game006 - WheelOfFortuneTripleExtremeSpin")]
         public static void BuildGame006()
         {
             BuildMachines("Game006", "WheelOfFortuneTripleExtremeSpin");
         }
 
-        [MenuItem("Bettr/Build/Game007 - TrueVegas")]
+        // [MenuItem("Bettr/Build/Game007 - TrueVegas")]
         public static void BuildGame007()
         {
             BuildMachines("Game007", "TrueVegasInfiniteSpins");
         }
 
-        [MenuItem("Bettr/Build/Game008 - GodsOfOlympusZeus")]
+        // [MenuItem("Bettr/Build/Game008 - GodsOfOlympusZeus")]
         public static void BuildGame008()
         {
             BuildMachines("Game008", "GodsOfOlympusZeus");
         }
 
-        [MenuItem("Bettr/Build/Game009 - PlanetMooneyMooCash")]
+        // [MenuItem("Bettr/Build/Game009 - PlanetMooneyMooCash")]
         public static void BuildGame009()
         {
             BuildMachines("Game009", "PlanetMooneyMooCash");
