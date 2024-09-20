@@ -23,6 +23,7 @@ using DirectoryInfo = System.IO.DirectoryInfo;
 using Scriban;
 using Scriban.Runtime;
 using Exception = System.Exception;
+using Object = UnityEngine.Object;
 
 namespace Bettr.Editor
 {
@@ -524,6 +525,169 @@ namespace Bettr.Editor
             BuildAssetBundles();
             BuildLocalServer();
             BuildLocalOutcomes();
+        }
+
+        public static void BuildAssetLabels()
+        {
+            string[] args = System.Environment.GetCommandLineArgs();
+
+            // Default values for assetLabel and assetSubLabel
+            string assetLabel = "";
+            string assetSubLabel = "";
+
+            // Find the labels passed via command line
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i] == "-assetLabel" && i + 1 < args.Length)
+                {
+                    assetLabel = args[i + 1];
+                }
+                if (args[i] == "-assetSubLabel" && i + 1 < args.Length)
+                {
+                    assetSubLabel = args[i + 1];
+                }
+            }
+            
+            // throw an error if assetLabel is empty or assetSubLabel is empty or null
+            if (string.IsNullOrEmpty(assetLabel) || string.IsNullOrEmpty(assetSubLabel))
+            {
+                Debug.LogError($"Asset Label or Asset Sub Label is empty or null. assetLabel={assetLabel} assetSubLabel={assetSubLabel}");
+                return;
+            }
+            
+            var assetBundleName = $"{assetLabel}.{assetSubLabel}";
+            Debug.Log($"Building asset bundle: assetBundleName={assetBundleName}");
+
+            // Find assets that contain both assetLabel and assetSubLabel
+            var selectedAssets = AssetDatabase.FindAssets("")
+                .Select(AssetDatabase.GUIDToAssetPath)
+                .Where(path => {
+                    var importer = AssetImporter.GetAtPath(path);
+
+                    if (importer != null)
+                    {
+                        // Get asset bundle name and variant
+                        string bundleName = importer.assetBundleName;
+                        string bundleVariant = importer.assetBundleVariant;
+
+                        // Compare assetLabel with assetBundleName and assetSubLabel with assetBundleVariant
+                        bool hasCorrectName = bundleName == assetLabel;
+                        bool hasCorrectVariant = bundleVariant == assetSubLabel;
+
+                        return hasCorrectName && hasCorrectVariant;
+                    }
+
+                    return false; // If no importer is found, return false
+                })
+                .ToArray();
+
+
+            if (selectedAssets.Length == 0)
+            {
+                Debug.LogError($"No assets found with the specified labels assetLabel={assetLabel} assetSubLabel={assetSubLabel}");
+                return;
+            }
+
+            AssetBundleBuild[] buildMap = new AssetBundleBuild[1];
+            buildMap[0].assetBundleName = assetBundleName;
+            buildMap[0].assetNames = selectedAssets;
+            
+            EnsurePluginAssetsHaveLabels(PluginRootDirectory);
+            
+            Debug.Log($"...refreshing database before building asset bundle assetBundleName={assetBundleName}...");
+            AssetDatabase.Refresh();
+
+            var sharedAssetBundleOptions = BuildAssetBundleOptions.ForceRebuildAssetBundle |
+                                           BuildAssetBundleOptions.ChunkBasedCompression;
+
+#if UNITY_IOS
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesIOSDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesIOSDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.iOS);
+            AssetDatabase.Refresh();
+            
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesOSXDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesOSXDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.StandaloneOSX);
+            AssetDatabase.Refresh();
+#endif
+#if UNITY_ANDROID
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesAndroidDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesAndroidDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.Android);
+#endif
+#if UNITY_WEBGL
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesWebglDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesWebglDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.WebGL);
+#endif
+#if UNITY_OSX
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesOSXDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesOSXDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.StandaloneOSX);
+#endif
+#if UNITY_WIN
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesWindowsDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesWindowsDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.StandaloneWindows64);
+#endif
+#if UNITY_LINUX   
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesLinuxDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesLinuxDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.StandaloneLinux64);
+#endif
+            
+            Debug.Log("...refreshing database after building asset bundles..");
+            AssetDatabase.Refresh();
+            
+            Debug.Log("Modifying asset bundles manifest files...");
+            ModifyAssetBundleManifestFiles();
+            Debug.Log("...done modifying asset bundles manifest files.");
+            
+            Debug.Log("...refreshing database after modifying asset bundles..");
+            AssetDatabase.Refresh();
+            
+            Debug.Log("...done building asset bundles.");
+            
+#if UNITY_IOS
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.iOS, BuildTarget.iOS);
+#endif
+#if UNITY_ANDROID
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
+#endif
+#if UNITY_WEBGL
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.WebGL, BuildTarget.WebGL);
+#endif
+#if UNITY_OSX
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneOSX);
+#endif
+#if UNITY_WIN
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64);
+#endif
+#if UNITY_LINUX   
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneLinux64);
+#endif            
         }
 
         // [MenuItem("Bettr/Build/Game001 - Epic Wins")]
