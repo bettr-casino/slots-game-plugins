@@ -152,28 +152,28 @@ build-assets-webgl: prepare-project clean-assets-webgl
 
 publish-assets-all: publish-assets-ios publish-assets-android publish-assets-webgl
 
-publish-assets-ios: build-assets-ios
+publish-assets-ios:
 	@echo "Publishing iOS asset bundles..."
 	aws s3 sync $(ASSET_BUNDLES_BASE_DIRECTORY)/iOS s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY)/iOS --delete --profile $(AWS_DEFAULT_PROFILE)
 
-publish-assets-android: build-assets-android
+publish-assets-android:
 	@echo "Publishing Android asset bundles..."
 	aws s3 sync $(ASSET_BUNDLES_BASE_DIRECTORY)/Android s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY)/Android --delete --profile $(AWS_DEFAULT_PROFILE)
 
-publish-assets-webgl: build-assets-webgl
+publish-assets-webgl:
 	@echo "Publishing WebGL asset bundles..."
 	aws s3 sync $(ASSET_BUNDLES_BASE_DIRECTORY)/WebGL s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY)/WebGL --delete --profile $(AWS_DEFAULT_PROFILE)
 
-deploy-assets-all: build-assets-all publish-assets-all
+deploy-assets-all: publish-assets-all
 	@echo "Deploying asset bundles..."
 
-deploy-assets-ios: build-assets-ios publish-assets-ios
+deploy-assets-ios: publish-assets-ios
 	@echo "Deploying iOS asset bundles..."
 
-deploy-assets-android: build-assets-android publish-assets-android
+deploy-assets-android: publish-assets-android
 	@echo "Deploying Android asset bundles..."
 
-deploy-assets-webgl: build-assets-webgl publish-assets-webgl
+deploy-assets-webgl: publish-assets-webgl
 	@echo "Deploying WebGL asset bundles..."
 
 # =============================================================================
@@ -337,7 +337,7 @@ build-target-webgl: prepare-project
 	@$(UNITY_APP) -quit -batchmode -logFile $(LOGS_WEBGL)/logfile.log -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(BUILD_METHOD_WEBGL) -buildOutput $(BUILD_WEBGL) -buildTarget WebGL -development -scriptDebugging
 	@echo "Build completed."
 
-publish-target-webgl: build-target-webgl
+publish-target-webgl:
 	@echo "Publishing WebGL project to S3..."
 	# Sync all files except .gz files and disable caching
 	@aws s3 sync $(BUILD_WEBGL)/BettrSlots s3://$(S3_WEBGL_BUCKET)/$(S3_WEBGL_OBJECT_KEY) --profile $(AWS_DEFAULT_PROFILE) --exclude "*.gz" --cache-control "no-cache, no-store, must-revalidate"
@@ -353,6 +353,8 @@ invalidate-target_webgl: publish-target-webgl
 deploy-target-webgl: publish-target-webgl invalidate-target_webgl
 	@echo "Deploying WebGL project..."
 	@echo "Deployment completed."
+
+build-webgl:  build-assets-webgl build-target-webgl
 
 deploy-webgl:  deploy-assets-webgl deploy-target-webgl
 
