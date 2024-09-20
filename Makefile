@@ -184,24 +184,26 @@ deploy-assets-webgl: build-assets-webgl publish-assets-webgl
 sync-lobby-images: prepare-project
 	@echo "Running sync-lobby-images..."
 	@echo "Running caffeinate to keep the drives awake..."
-	# keep the drives awake
+	# Keep the drives awake
 	caffeinate -i -m -u &
+	Caffeinate_PID=$$! # Capture the PID of the caffeinate process
 	@GENERATED_LOBBY_IMAGES_DIR="${GENERATED_LOBBY_IMAGES_DIR}"; \
 	for GENERATED_LOBBY_IMAGE_DIR in "$${GENERATED_LOBBY_IMAGES_DIR}/"*/; do \
 		GENERATED_LOBBY_IMAGE=$$(basename "$${GENERATED_LOBBY_IMAGE_DIR}"); \
-		if [[ "$${GENERATED_LOBBY_IMAGE}" =~ ^Game[0-9]{3}$$ ]]; then \
+		if [[ "$${GENERATED_LOBBY_IMAGE}" =~ ^Game[0-9]{3}.*\.png$$ ]]; then \
 			echo "Processing GENERATED_LOBBY_IMAGE: $${GENERATED_LOBBY_IMAGE}"; \
-			# split the GENERATED_LOBBY_IMAGE which is of the form Game<NNN><VARIANT>.png into "Game<NNN>__<VARIANT>__LobbyCard.png"
-			LOBBY_CARD_IMAGE=$$(echo "$${GENERATED_LOBBY_IMAGE}" | sed -E 's/(Game[0-9]{3})([A-Za-z]+).*/\1__\2__LobbyCard.png/'); \
-			# copy the LOBBY_CARD_IMAGE to the LOBBY_CARD_IMAGES_DIR directory under Game<NNN>
+			# Split the GENERATED_LOBBY_IMAGE which is of the form Game<NNN><VARIANT>.png into "Game<NNN>__<VARIANT>__LobbyCard.png"
+			LOBBY_CARD_IMAGE=$$(echo "$${GENERATED_LOBBY_IMAGE}" | sed -E 's/(Game[0-9]{3})([A-Za-z]+)\.png/\1__\2__LobbyCard.png/'); \
+			# Copy the LOBBY_CARD_IMAGE to the LOBBY_CARD_IMAGES_DIR directory under Game<NNN>
 			cp "$${GENERATED_LOBBY_IMAGE_DIR}/$${GENERATED_LOBBY_IMAGE}" "$${LOBBY_CARD_IMAGES_DIR}/$${LOBBY_CARD_IMAGE}"; \
 		else \
-			echo "Skipping directory: $${MACHINE_NAME} (does not match Game<NNN> pattern)"; \
+			echo "Skipping directory: $${GENERATED_LOBBY_IMAGE} (does not match Game<NNN> pattern)"; \
 		fi; \
 	done
 	# Kill the caffeinate process
 	@echo "Killing caffeinate..."
-	killall caffeinate
+	kill -9 $$Caffeinate_PID || true
+
 
 
 # =============================================================================
@@ -215,6 +217,7 @@ sync-machines: prepare-project
 	@echo "Running caffeinate to keep the drives awake..."
 	# keep the drives awake
 	caffeinate -i -m -u &
+	Caffeinate_PID=$$! # Capture the PID of the caffeinate process
 	@MODELS_DIR="${MODELS_DIR}"; \
 	for MACHINE_NAME_DIR in "$${MODELS_DIR}/"*/; do \
 		MACHINE_NAME=$$(basename "$${MACHINE_NAME_DIR}"); \
@@ -240,7 +243,7 @@ sync-machines: prepare-project
 	done
 	# Kill the caffeinate process
 	@echo "Killing caffeinate..."
-	killall caffeinate
+	kill -9 $$Caffeinate_PID || true
 
 
 # Define the arrays for MACHINE_NAME and MACHINE_VARIANT
@@ -251,6 +254,7 @@ sync-machines-specific: prepare-project
 	@echo "Running caffeinate to keep the drives awake..."
 	# Keep the drives awake
 	caffeinate -i -m -u &
+	Caffeinate_PID=$$! # Capture the PID of the caffeinate process
 	@MODELS_DIR="${MODELS_DIR}"; \
 	for MACHINE_NAME in $(MACHINE_NAME_ARRAY); do \
 		echo "Processing MACHINE_NAME: $${MACHINE_NAME}"; \
@@ -270,7 +274,7 @@ sync-machines-specific: prepare-project
 	done
 	# Kill the caffeinate process
 	@echo "Killing caffeinate..."
-	killall caffeinate
+	kill -9 $$Caffeinate_PID || true
 
 
 
