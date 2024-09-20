@@ -42,6 +42,9 @@ GENERATED_LOBBY_IMAGES_DIR := $(PWD)/../../bettr-infrastructure/bettr-infrastruc
 # the subpath is control/Runtime/Asset/Game001/LobbyCard
 LOBBY_CARD_IMAGES_DIR := $(PWD)/Unity/Assets/Bettr/Runtime/Plugin/LobbyCard/variants/v0_1_0/
 
+# using splash images for both the background, the lobby card image is the resized splash image 
+GENERATED_BACKGROUND_IMAGES_DIR := $(PWD)/../../bettr-infrastructure/bettr-infrastructure/tools/pipelines/game-gpt/pipelines/gpt-generated-files/splash-images
+
 S3_BUCKET := bettr-casino-assets
 S3_ASSETS_LATEST_OBJECT_KEY := "assets/latest"
 
@@ -186,7 +189,7 @@ build-lobby-assets-webgl: prepare-project
 
 # =============================================================================
 #
-# BUILD LOBBY IMAGES
+# BUILD IMAGES
 #
 # =============================================================================
 
@@ -209,6 +212,23 @@ sync-lobby-images: prepare-project
 			else \
 				echo "Skipping directory: $${GENERATED_LOBBY_IMAGE} (does not match Game<NNN> pattern)"; \
 			fi; \
+		done; \
+	done;
+
+
+sync-background-images: prepare-project
+	@echo "Running sync-background-images..."
+	GENERATED_BACKGROUND_IMAGES_DIR="${GENERATED_BACKGROUND_IMAGES_DIR}"; \
+	for VARIANT_DIR in "$${GENERATED_BACKGROUND_IMAGES_DIR}/"*/; do \
+		VARIANT=$$(basename "$${VARIANT_DIR}"); \
+		for GAME_NAME_DIR in "$${VARIANT_DIR}/"*/; do \
+			GAME_NAME=$$(basename "$${GAME_NAME_DIR}"); \
+			echo "Processing GAME_NAME: $${GAME_NAME}"; \
+			MACHINE_NAME=$$(echo "$${GAME_NAME}" | sed -E 's/(Game[0-9]{3}).*/\1/'); \
+			MACHINE_VARIANT=$$(echo "$${GAME_NAME}" | sed -E 's/Game[0-9]{3}(.*)/\1/'); \
+			echo "Processing MACHINE_NAME: $${MACHINE_NAME} MACHINE_VARIANT: $${MACHINE_VARIANT}"; \
+			BACKGROUND_IMAGES_DIR="${UNITY_PROJECT_PATH}/Assets/Bettr/Runtime/Plugin/$${MACHINE_NAME}/variants/$${MACHINE_VARIANT}/$${VARIANT}/Runtime/Asset/Textures"; \
+			cp "$${GAME_NAME_DIR}/splash.png" "$${BACKGROUND_IMAGES_DIR}/Background.png"; \
 		done; \
 	done;
 	
