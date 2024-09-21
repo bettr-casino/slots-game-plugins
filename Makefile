@@ -58,6 +58,7 @@ BUILDS_HOME := ${BETTR_CASINO_BUILDS_HOME}/UnityBuilds
 LOGS_HOME := ${BETTR_CASINO_LOGS_HOME}/UnityBuilds
 
 SYNC_MACHINE_METHOD := "Bettr.Editor.BettrMenu.BuildMachinesFromCommandLine"
+SYNC_BACKGROUND_TEXTURES_METHOD := "Bettr.Editor.BettrMenu.SyncBackgroundTexturesFromCommandLine"
 
 BUILD_IOS := ${BUILDS_HOME}/iOS
 BUILD_IOS_ARCHIVE := ${BETTR_CASINO_BUILDS_HOME}/iOSArchives
@@ -303,6 +304,46 @@ sync-machines-specific: prepare-project
 	@echo "Killing caffeinate..."
 	killall caffeinate
 
+
+sync-background-textures:
+	@echo "Running sync-background-textures..."
+	@echo "Running caffeinate to keep the drives awake..."
+	# keep the drives awake
+	caffeinate -i -m -u &
+	@MODELS_DIR="${MODELS_DIR}"; \
+	for MACHINE_NAME_DIR in "$${MODELS_DIR}/"*/; do \
+		MACHINE_NAME=$$(basename "$${MACHINE_NAME_DIR}"); \
+		if [[ "$${MACHINE_NAME}" =~ ^Game[0-9]{3}$$ ]]; then \
+			for MACHINE_VARIANT_DIR in "$${MACHINE_NAME_DIR}/"*/; do \
+				MACHINE_VARIANT=$$(basename "$${MACHINE_VARIANT_DIR}"); \
+				EXPERIMENT_VARIANT="control"; \
+				echo "Processing MACHINE_NAME: $${MACHINE_NAME} MACHINE_VARIANT: $${MACHINE_VARIANT} EXPERIMENT_VARIANT: $${EXPERIMENT_VARIANT}"; \
+				UNITY_OUTPUT=$$(${UNITY_APP} -batchmode -logFile "${ASSET_DATA_LOG_FILE_PATH}" -quit -projectPath "${UNITY_PROJECT_PATH}" -executeMethod "${SYNC_BACKGROUND_TEXTURES_METHOD}" -machineName "$${MACHINE_NAME}" -machineVariant "$${MACHINE_VARIANT}" -experimentVariant "$${EXPERIMENT_VARIANT}" 2>&1); \
+				UNITY_EXIT_STATUS=$$?; \
+				if [ "$$UNITY_EXIT_STATUS" -ne 0 ]; then \
+					echo "Error executing Unity for MACHINE_NAME=$${MACHINE_NAME}, MACHINE_VARIANT=$${MACHINE_VARIANT} EXPERIMENT_VARIANT=$${EXPERIMENT_VARIANT}, ASSET_DATA_LOG_FILE_PATH=${ASSET_DATA_LOG_FILE_PATH}"; \
+					echo "Unity Output: $$UNITY_OUTPUT"; \
+					exit $$UNITY_EXIT_STATUS; \
+				fi; \
+				echo "Executed for MACHINE_NAME=$${MACHINE_NAME}, MACHINE_VARIANT=$${MACHINE_VARIANT}, EXPERIMENT_VARIANT=$${EXPERIMENT_VARIANT}, ASSET_DATA_LOG_FILE_PATH=${ASSET_DATA_LOG_FILE_PATH}"; \
+				EXPERIMENT_VARIANT="variant1"; \
+				echo "Processing MACHINE_NAME: $${MACHINE_NAME} MACHINE_VARIANT: $${MACHINE_VARIANT} EXPERIMENT_VARIANT: $${EXPERIMENT_VARIANT}"; \
+				UNITY_OUTPUT=$$(${UNITY_APP} -batchmode -logFile "${ASSET_DATA_LOG_FILE_PATH}" -quit -projectPath "${UNITY_PROJECT_PATH}" -executeMethod "${SYNC_BACKGROUND_TEXTURES_METHOD}" -machineName "$${MACHINE_NAME}" -machineVariant "$${MACHINE_VARIANT}" -experimentVariant "$${EXPERIMENT_VARIANT}" 2>&1); \
+				UNITY_EXIT_STATUS=$$?; \
+				if [ "$$UNITY_EXIT_STATUS" -ne 0 ]; then \
+					echo "Error executing Unity for MACHINE_NAME=$${MACHINE_NAME}, MACHINE_VARIANT=$${MACHINE_VARIANT} EXPERIMENT_VARIANT=$${EXPERIMENT_VARIANT}, ASSET_DATA_LOG_FILE_PATH=${ASSET_DATA_LOG_FILE_PATH}"; \
+					echo "Unity Output: $$UNITY_OUTPUT"; \
+					exit $$UNITY_EXIT_STATUS; \
+				fi; \
+				echo "Executed for MACHINE_NAME=$${MACHINE_NAME}, MACHINE_VARIANT=$${MACHINE_VARIANT}, EXPERIMENT_VARIANT=$${EXPERIMENT_VARIANT}, ASSET_DATA_LOG_FILE_PATH=${ASSET_DATA_LOG_FILE_PATH}"; \
+			done; \
+		else \
+			echo "Skipping directory: $${MACHINE_NAME} (does not match Game<NNN> pattern)"; \
+		fi; \
+	done
+	# Kill all caffeinate processes
+	@echo "Killing caffeinate..."
+	killall caffeinate
 
 
 

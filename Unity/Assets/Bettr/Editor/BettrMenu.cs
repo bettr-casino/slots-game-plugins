@@ -693,6 +693,82 @@ namespace Bettr.Editor
 #endif            
         }
 
+        [MenuItem("Bettr/Build/BackgroundTextures")]
+        public static void SyncBackgroundTextures()
+        {
+            // Walk the entire directory tree under the plugin root directory
+            var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+            for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
+            {
+                var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
+                var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
+                if (variantsDir == null)
+                {
+                    continue;
+                }
+                var machineVariantsDirs = variantsDir?.GetDirectories();
+                // loop over machineVariantsDir
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir?.GetDirectories();
+                    if (experimentVariantDirs == null)
+                    {
+                        continue;
+                    }
+                    // loop over experimentVariantDirs
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        // now extract the machineName from machineNameDir, machineVariant from machineVariantsDir, and experimentVariant from experimentVariantDir
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir?.Name;
+                        string experimentVariant = experimentVariantDir?.Name;
+                
+                        Environment.SetEnvironmentVariable("machineName", machineName);
+                        Environment.SetEnvironmentVariable("machineVariant", machineVariant);
+                        Environment.SetEnvironmentVariable("experimentVariant", experimentVariant);
+                
+                        SyncBackgroundTexturesFromCommandLine();
+                    }
+                }
+            }
+        }
+
+        public static void SyncBackgroundTexturesFromCommandLine()
+        {
+            // assign texture "Background.png" to the FBX "BackgroundFBX.fbx"s material in the same directory
+            
+            string machineName = GetArgument("-machineName");
+            string machineVariant = GetArgument("-machineVariant");
+            string experimentVariant = GetArgument("-experimentVariant");
+
+            string pathPrefix = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset/";
+            string texturesPathPrefix = $"{pathPrefix}/Textures/";
+            string fbxPathPrefix = $"{pathPrefix}/Prefabs/";
+            string texturePath = $"{texturesPathPrefix}/Background.png";
+            string fbxPath = $"{fbxPathPrefix}/BackgroundFBX.prefab";
+            // ensure both exist
+            if (!File.Exists(texturePath))
+            {
+                Debug.Log($"Texture not found at path: {texturePath} continuing...");
+                return;
+            }
+            if (!File.Exists(fbxPath))
+            {
+                Debug.Log($"FBX not found at path: {fbxPath} continuing...");
+                return;
+            }
+            Debug.Log($"Processing machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant} texture={texturePath} fbx={fbxPath}");
+            // load the texture
+            Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(texturePath);
+            // load the fbx
+            GameObject fbx = AssetDatabase.LoadAssetAtPath<GameObject>(fbxPath);
+            // get the material
+            Material material = fbx.GetComponentInChildren<MeshRenderer>().sharedMaterial;
+            // assign the texture to the material
+            material.mainTexture = texture;
+
+        }
+
         // [MenuItem("Bettr/Build/Game001 - Epic Wins")]
         public static void BuildGame001()
         {
