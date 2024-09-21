@@ -181,12 +181,26 @@ deploy-assets-webgl: publish-assets-webgl
 	@echo "Deploying WebGL asset bundles..."
 
 
+#
 # Build specific asset bundles
+#
+
 build-lobby-assets-webgl: prepare-project
 	@echo "Building WebGL lobby asset bundles..."
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "lobbycardv0_1_0" -assetSubLabel "control" -buildTarget WebGL; \
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "mainlobbyv0_1_0" -assetSubLabel "control" -buildTarget WebGL; \
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "mainlobbyv0_1_0_scenes" -assetSubLabel "control" -buildTarget WebGL
+
+build-main-assets-webgl: prepare-project
+	@echo "Building WebGL main asset bundles..."
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "mainv0_1_0" -assetSubLabel "control" -buildTarget WebGL;
+
+build-game001-assets-webgl: prepare-project
+	@echo "Building WebGL game001 variants asset bundles..."
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game001epicancientadventures" -assetSubLabel "control" -buildTarget WebGL; \
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game001epicancientadventures_scenes" -assetSubLabel "control" -buildTarget WebGL; \
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game001epicancientadventures" -assetSubLabel "variant1" -buildTarget WebGL; \
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game001epicancientadventures_scenes" -assetSubLabel "variant1" -buildTarget WebGL;
 
 
 
