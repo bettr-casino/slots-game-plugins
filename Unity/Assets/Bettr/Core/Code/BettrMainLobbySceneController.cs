@@ -23,10 +23,14 @@ namespace Bettr.Core
     {
         public BettrMainLobbySceneControllerState State = new BettrMainLobbySceneControllerState();
         
-        public BettrMainLobbySceneController()
+        public BettrExperimentController BettrExperimentController { get; private set; }
+        
+        public BettrMainLobbySceneController(BettrExperimentController bettrExperimentController)
         {
             TileController.RegisterType<BettrMainLobbySceneController>("BettrMainLobbySceneController");
             TileController.AddToGlobals("BettrMainLobbySceneController", this);
+            
+            BettrExperimentController = bettrExperimentController;
         }
         
         public IEnumerator LoadLobbyCardMachine(string lobbyCardName)
@@ -34,20 +38,21 @@ namespace Bettr.Core
             var bettrUser = BettrUserController.Instance.BettrUserConfig;
             // lobbyCardName example Game001__LobbyCard001
             var lobbyCardIndex = bettrUser.FindLobbyCardIndexById(lobbyCardName.Split("__")[1]);
+            bettrUser.LobbyCardIndex = lobbyCardIndex;
             var lobbyCard = bettrUser.LobbyCards[lobbyCardIndex];
-            bettrUser.LobbyCardIndex = 1;
-            yield return BettrAssetController.Instance.LoadScene(lobbyCard.MachineBundleName,
-                lobbyCard.MachineBundleVariant, lobbyCard.MachineSceneName);
+            var (machineName, machineVariant) = GetLobbyCardExperiment(lobbyCard);
+            yield return BettrAssetController.Instance.LoadScene(machineName, machineVariant, lobbyCard.MachineSceneName);
         }
 
         public IEnumerator LoadMachine()
         {
             // TODO: this should be from the user preferences
             var bettrUser = BettrUserController.Instance.BettrUserConfig;
-            var lobbyCard = bettrUser.LobbyCards[1];
             bettrUser.LobbyCardIndex = 1;
-            yield return BettrAssetController.Instance.LoadScene(lobbyCard.MachineBundleName,
-                lobbyCard.MachineBundleVariant, lobbyCard.MachineSceneName);
+            var lobbyCard = bettrUser.LobbyCards[1];
+            var (machineName, machineVariant) = GetLobbyCardExperiment(lobbyCard);
+            yield return BettrAssetController.Instance.LoadScene(machineName,
+                machineVariant, lobbyCard.MachineSceneName);
         }
         
         public IEnumerator LoadPreviousMachine()
@@ -56,10 +61,10 @@ namespace Bettr.Core
             var bettrUserLobbyCardIndex = bettrUser.LobbyCardIndex;
             // Wrap around
             var previousIndex = (bettrUserLobbyCardIndex - 1 + bettrUser.LobbyCards.Count) % bettrUser.LobbyCards.Count;
-            var lobbyCard = bettrUser.LobbyCards[previousIndex];
             bettrUser.LobbyCardIndex = previousIndex;
-            yield return BettrAssetController.Instance.LoadScene(lobbyCard.MachineBundleName,
-                lobbyCard.MachineBundleVariant, lobbyCard.MachineSceneName);
+            var lobbyCard = bettrUser.LobbyCards[previousIndex];
+            var (machineName, machineVariant) = GetLobbyCardExperiment(lobbyCard);
+            yield return BettrAssetController.Instance.LoadScene(machineName, machineVariant, lobbyCard.MachineSceneName);
         }
         
         public IEnumerator LoadNextMachine()
@@ -68,17 +73,18 @@ namespace Bettr.Core
             var bettrUserLobbyCardIndex = bettrUser.LobbyCardIndex;
             // Wrap around
             var nextIndex = (bettrUserLobbyCardIndex + 1) % bettrUser.LobbyCards.Count;
-            var lobbyCard = bettrUser.LobbyCards[nextIndex];
             bettrUser.LobbyCardIndex = nextIndex;
-            yield return BettrAssetController.Instance.LoadScene(lobbyCard.MachineBundleName,
-                lobbyCard.MachineBundleVariant, lobbyCard.MachineSceneName);
+            var lobbyCard = bettrUser.LobbyCards[nextIndex];
+            var (machineName, machineVariant) = GetLobbyCardExperiment(lobbyCard);
+            yield return BettrAssetController.Instance.LoadScene(machineName, machineVariant, lobbyCard.MachineSceneName);
         }
         
         public IEnumerator LoadMainLobby()
         {
             var bettrUser = BettrUserController.Instance.BettrUserConfig;
-            yield return BettrAssetController.Instance.LoadScene(bettrUser.LobbyScene.BundleName,
-                bettrUser.LobbyScene.BundleVersion, "MainLobbyScene");
+            var lobbyScene = bettrUser.LobbyScene;
+            var (bundleName, bundleVersion) = GetLobbyExperiment(lobbyScene);
+            yield return BettrAssetController.Instance.LoadScene(bundleName, bundleVersion, "MainLobbyScene");
         }
         
         // Convert the method from Lua to C#
@@ -156,5 +162,17 @@ namespace Bettr.Core
                 }
             }
         }
+        
+        public Tuple<string, string> GetLobbyCardExperiment(BettrLobbyCardConfig lobbyCard)
+        {
+            var experimentVariant = BettrExperimentController.GetMachineExperimentVariant(lobbyCard.MachineBundleName, lobbyCard.MachineBundleVariant);
+            return new Tuple<string, string>(lobbyCard.MachineBundleName, experimentVariant);
+        } 
+        
+        public Tuple<string, string> GetLobbyExperiment(BettrBundleConfig lobby)
+        {
+            var experimentVariant = BettrExperimentController.GetMachineExperimentVariant(lobby.BundleName, lobby.BundleVersion);
+            return new Tuple<string, string>(lobby.BundleName, experimentVariant);
+        } 
     }
 }

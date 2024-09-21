@@ -32,10 +32,20 @@ namespace Bettr.Core
             });
         }
         
-        public string GetMachineExperimentVariant(string machineName, string defaultExperiment = "control")
+        public string GetMachineExperimentVariant(string machineName, string defaultExperiment)
         {
-            var experiment = BettrUserExperimentsList.Find(e => e.ExperimentName == machineName);
-            return experiment?.Treatment ?? defaultExperiment;
+            var experiment = BettrUserExperimentsList.Find(e => e.ExperimentName?.ToLower() == machineName?.ToLower());
+            var treatment = experiment?.Treatment ?? defaultExperiment;
+            // treatment has to be one of "control", "variant1", if not default to "control"
+            return treatment is "control" or "variant1" ? treatment : "control";
+        }
+        
+        public string GetLobbyExperimentVariant(string lobbyName, string defaultExperiment)
+        {
+            var experiment = BettrUserExperimentsList.Find(e => e.ExperimentName?.ToLower() == lobbyName?.ToLower());
+            var treatment = experiment?.Treatment ?? defaultExperiment;
+            // treatment has to be one of "control", "variant1", if not default to "control"
+            return treatment is "control" or "variant1" ? treatment : "control";
         }
     }
 }

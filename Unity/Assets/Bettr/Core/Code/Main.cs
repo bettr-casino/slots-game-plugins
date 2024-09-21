@@ -145,9 +145,7 @@ namespace Bettr.Core
             
             BettrModel.Init();
 
-            _bettrMainLobbySceneController = new BettrMainLobbySceneController
-            {
-            };
+            _bettrMainLobbySceneController = new BettrMainLobbySceneController(_bettrExperimentController);
 
             _bettrAssetController = new BettrAssetController
             {
