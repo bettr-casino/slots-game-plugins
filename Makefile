@@ -183,7 +183,8 @@ deploy-assets-webgl: publish-assets-webgl
 # Build specific asset bundles
 build-lobby-assets-webgl: prepare-project
 	@echo "Building WebGL lobby asset bundles..."
-	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "mainlobbyv0_1_0" -assetSubLabel "control" -buildTarget WebGL 
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "mainlobbyv0_1_0" -assetSubLabel "control" -buildTarget WebGL; \
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "mainlobbyv0_1_0_scenes" -assetSubLabel "control" -buildTarget WebGL
 
 
 

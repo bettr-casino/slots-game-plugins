@@ -1,12 +1,9 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
-using Bettr.Core;
 using Bettr.Editor.generators;
 using Bettr.Editor.generators.mechanics;
 using CrayonScript.Code;
@@ -557,6 +554,10 @@ namespace Bettr.Editor
             
             var assetBundleName = $"{assetLabel}.{assetSubLabel}";
             Debug.Log($"Building asset bundle: assetBundleName={assetBundleName}");
+            
+            EnsurePluginAssetsHaveLabels(PluginRootDirectory);
+            
+            AssetDatabase.Refresh();
 
             // Find assets that contain both assetLabel and assetSubLabel
             var selectedAssets = AssetDatabase.FindAssets("")
@@ -587,12 +588,14 @@ namespace Bettr.Editor
                 Debug.LogError($"No assets found with the specified labels assetLabel={assetLabel} assetSubLabel={assetSubLabel}");
                 return;
             }
+            
+            // here are the selected assets
+            Debug.Log($"Selected assets: {selectedAssets.Length}");
+            Debug.Log(string.Join(",", selectedAssets));
 
             AssetBundleBuild[] buildMap = new AssetBundleBuild[1];
             buildMap[0].assetBundleName = assetBundleName;
             buildMap[0].assetNames = selectedAssets;
-            
-            EnsurePluginAssetsHaveLabels(PluginRootDirectory);
             
             Debug.Log($"...refreshing database before building asset bundle assetBundleName={assetBundleName}...");
             AssetDatabase.Refresh();
@@ -1140,9 +1143,9 @@ namespace Bettr.Editor
             {
                 if (assetType != null && assetType != typeof(MonoScript))
                 {
-                    importer.assetBundleName = GetAssetBundleName(assetLabel, assetSubLabel, assetType);
-                    importer.assetBundleVariant = GetAssetBundleVariant(assetVariantLabel);
-                    Debug.Log($"setting asset labels for assetBundleName={importer.assetBundleName} assetBundleVariant={importer.assetBundleVariant} assetPath={directoryPath}");
+                    importer.assetBundleName = "";
+                    importer.assetBundleVariant = "";
+                    Debug.Log($"clearing importer assetBundleName and assetBundleVariant for assetPath={directoryPath}");
                 }
             }
             
@@ -1271,10 +1274,6 @@ namespace Bettr.Editor
                                     Debug.LogWarning("The 'Assets' key does not contain a list.");
                                 }
                             }
-
-                            // Process the YAML object as needed
-                            // For example, you can modify the YAML content or just log it
-                            Debug.Log(yamlObject);
                         }
                         catch (Exception ex)
                         {
