@@ -93,4 +93,20 @@ namespace Bettr.Core
         public bool Acked { get; set; }
         public string Value { get; set; }
     }
+    
+    [Serializable]
+    public class BettrUserExperiment
+    {
+        public string UserId { get; set; }
+        public string ExperimentName { get; set; }
+        public string ExcludedFor { get; set; }
+        public bool AudienceEvaluated { get; set; }
+        public bool InAudience { get; set; }
+        public bool InRamp { get; set; }
+        public int RampRoll { get; set; }
+        public string AssignedVariant { get; set; }
+        public string Treatment { get; set; }
+        public string State { get; set; }
+        public bool IsOverride { get; set; }
+    }
 }

@@ -18,6 +18,8 @@ namespace Bettr.Core
     
     public delegate void PutUserCallback(string requestURL, AuthResponse response, bool success, string error);
     
+    public delegate void GetUserExperimentsCallback(string requestURL, UserExperimentsResponse userExperimentsResponse, bool success, string error);
+    
     [Serializable]
     public class StorageRequest
     {
@@ -96,6 +98,13 @@ namespace Bettr.Core
         public string error;
         public bool isLocal;
         public bool isError;
+    }
+    
+    [Serializable]
+    public class UserExperimentsResponse
+    {
+        [JsonProperty("user_experiments")]
+        public List<BettrUserExperiment> UserExperiments { get; set; }
     }
     
     public class IgnoreZeroValueContractResolver : DefaultContractResolver
@@ -404,6 +413,41 @@ namespace Bettr.Core
                 var authResponse = JsonConvert.DeserializeObject<AuthResponse>(Encoding.UTF8.GetString(bytesData));
                 userCallback(requestUri, authResponse, true, null);
             }
+        }
+        
+        public IEnumerator GetUserExperiments(GetUserExperimentsCallback userExperimentsCallback)
+        {
+            string userId = AuthResponse.User.Id;
+            var requestUri = $"/experiments/users/{userId}?include_inactive_experiments=true";
+            var requestURL = $"{configData.ServerBaseURL}{requestUri}";
+            if (useLocalServer)
+            {
+                var localUserExperiments = new UserExperimentsResponse()
+                {
+                    UserExperiments = new List<BettrUserExperiment>(),
+                };
+                userExperimentsCallback(requestURL, localUserExperiments, true, null);
+                yield break;
+            }
+            var headers = new KeyValuePair<string, string>[]
+            {
+                ApplicationJsonHeader,
+                SessionTokenHeader,
+            };
+            var www = UnityWebRequest.Get(requestURL);
+            UpdateHeaders(www, headers);
+            yield return www.SendWebRequest();
+            
+            if (www.result != UnityWebRequest.Result.Success) {
+                Debug.Log(www.error);
+                userExperimentsCallback(requestURL, null, false, www.error);
+                yield break;
+            }
+            // update the cas value
+            byte[] bytesData = www.downloadHandler.data;
+            var userExperimentsList = JsonConvert.DeserializeObject<UserExperimentsResponse>(Encoding.UTF8.GetString(bytesData));
+            // no cas for this response
+            userExperimentsCallback(requestURL, userExperimentsList, true, null);
         }
 
         private void UpdateHeaders(UnityWebRequest www, params KeyValuePair<string, string>[] headers)

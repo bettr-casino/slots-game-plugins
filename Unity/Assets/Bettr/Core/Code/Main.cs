@@ -27,6 +27,7 @@ namespace Bettr.Core
         [NonSerialized] private BettrAssetController _bettrAssetController;
         [NonSerialized] private BettrAssetScriptsController _bettrAssetScriptsController;
         [NonSerialized] private BettrUserController _bettrUserController;
+        [NonSerialized] private BettrExperimentController _bettrExperimentController;
         // ReSharper disable once NotAccessedField.Local
         [NonSerialized] private BettrVisualsController _bettrVisualsController;
         // ReSharper disable once NotAccessedField.Local
@@ -128,6 +129,12 @@ namespace Bettr.Core
                 configData = _configData,
             };
             
+            _bettrExperimentController = new BettrExperimentController()
+            {
+                bettrServer = _bettrServer,
+                configData = _configData,
+            };
+            
             var userId = _bettrUserController.GetUserId();
             
             var assetVersion = "latest";
@@ -170,6 +177,8 @@ namespace Bettr.Core
             yield return LoginUser();
 
             var bettrUser = BettrUserController.Instance.BettrUserConfig;
+            
+            yield return _bettrExperimentController.GetUserExperiments();
             
             yield return _bettrAssetController.LoadPackage(bettrUser.Main.BundleName, bettrUser.Main.BundleVersion, false);
             
