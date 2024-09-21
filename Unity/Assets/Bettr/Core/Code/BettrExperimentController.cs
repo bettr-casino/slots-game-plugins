@@ -31,5 +31,11 @@ namespace Bettr.Core
                 BettrUserExperimentsList = payload.UserExperiments;
             });
         }
+        
+        public string GetMachineExperimentVariant(string machineName, string defaultExperiment = "control")
+        {
+            var experiment = BettrUserExperimentsList.Find(e => e.ExperimentName == machineName);
+            return experiment?.Treatment ?? defaultExperiment;
+        }
     }
 }
