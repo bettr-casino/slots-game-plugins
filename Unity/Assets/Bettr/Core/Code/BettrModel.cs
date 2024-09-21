@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using CrayonScript.Code;
+using Newtonsoft.Json;
 
 // ReSharper disable once CheckNamespace
 namespace Bettr.Core
@@ -97,16 +98,27 @@ namespace Bettr.Core
     [Serializable]
     public class BettrUserExperiment
     {
+        [JsonProperty("user_id")]
         public string UserId { get; set; }
+        [JsonProperty("experiment_name")]
         public string ExperimentName { get; set; }
+        [JsonProperty("excluded_for")]
         public string ExcludedFor { get; set; }
+        [JsonProperty("audience_evaluated")]
         public bool AudienceEvaluated { get; set; }
+        [JsonProperty("in_audience")]
         public bool InAudience { get; set; }
+        [JsonProperty("in_ramp")]
         public bool InRamp { get; set; }
+        [JsonProperty("ramp_roll")]
         public int RampRoll { get; set; }
+        [JsonProperty("assigned_variant")]
         public string AssignedVariant { get; set; }
+        [JsonProperty("treatment")]
         public string Treatment { get; set; }
+        [JsonProperty("state")]
         public string State { get; set; }
+        [JsonProperty("is_override")]
         public bool IsOverride { get; set; }
     }
 }

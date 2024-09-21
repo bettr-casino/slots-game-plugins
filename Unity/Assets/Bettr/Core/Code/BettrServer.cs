@@ -418,7 +418,7 @@ namespace Bettr.Core
         public IEnumerator GetUserExperiments(GetUserExperimentsCallback userExperimentsCallback)
         {
             string userId = AuthResponse.User.Id;
-            var requestUri = $"/experiments/users/{userId}?include_inactive_experiments=true";
+            var requestUri = $"/experiments/users/{userId}?include_inactive_experiments={UnityWebRequest.EscapeURL("true")}";
             var requestURL = $"{configData.ServerBaseURL}{requestUri}";
             if (useLocalServer)
             {
@@ -445,9 +445,9 @@ namespace Bettr.Core
             }
             // update the cas value
             byte[] bytesData = www.downloadHandler.data;
-            var userExperimentsList = JsonConvert.DeserializeObject<UserExperimentsResponse>(Encoding.UTF8.GetString(bytesData));
+            var userExperimentsResponse = JsonConvert.DeserializeObject<UserExperimentsResponse>(Encoding.UTF8.GetString(bytesData));
             // no cas for this response
-            userExperimentsCallback(requestURL, userExperimentsList, true, null);
+            userExperimentsCallback(requestURL, userExperimentsResponse, true, null);
         }
 
         private void UpdateHeaders(UnityWebRequest www, params KeyValuePair<string, string>[] headers)
