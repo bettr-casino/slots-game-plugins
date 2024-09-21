@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
+using UnityEngine;
 
 // ReSharper disable once CheckNamespace
 namespace Bettr.Core
@@ -115,29 +116,43 @@ namespace Bettr.Core
                 var machineGroupProperty = (TilePropertyGameObjectGroup) self[group];
                 for (var cardIndex = 1; cardIndex <= 12; cardIndex++)
                 {
+                    GameObject quadGameObject = null;
                     var lobbyCardIndex = 1 + (groupIndex - 1) * 12 + cardIndex - 1;
                     var lobbyCardId = $"LobbyCard{lobbyCardIndex:D3}";
-                    lobbyCard = bettrUser.LobbyCards[lobbyCardIndex];
-                    var machineCardProperty = machineGroupProperty[lobbyCardId];
-
-                    if (machineCardProperty == null)
+                    
+                    Debug.Log($"LoadLobbyCards group={group} lobbyCardIndex={lobbyCardIndex} lobbyCardId={lobbyCardId} groupIndex={groupIndex} cardIndex={cardIndex}");
+                    
+                    try
                     {
-                        Console.WriteLine($"LoadApp machineCardProperty is nil lobbyCard={lobbyCard} lobbyCard.MachineName={lobbyCard.MachineName} lobbyCard.MaterialName={lobbyCard.MaterialName} card={lobbyCard.Card}");
+                        lobbyCard = bettrUser.LobbyCards[lobbyCardIndex];
+                        var machineCardProperty = machineGroupProperty[lobbyCardId];
+
+                        if (machineCardProperty == null)
+                        {
+                            Debug.LogWarning($"LoadApp machineCardProperty is nil lobbyCard={lobbyCard} lobbyCard.MachineName={lobbyCard.MachineName} lobbyCard.MaterialName={lobbyCard.MaterialName} card={lobbyCard.Card}");
+                        }
+                        else
+                        {
+                            var lobbyCardGameObject = machineCardProperty.GameObject;
+                            if (lobbyCardGameObject == null) continue;
+                            string lobbyCardKey = group + "__" + lobbyCard.Card;
+                            
+                            Debug.Log($"LoadApp lobbyCardGameObject={lobbyCardGameObject.name} renaming to lobbyCardKey={lobbyCardKey}");
+
+                            lobbyCardGameObject.name = lobbyCardKey;
+
+                            quadGameObject = lobbyCardGameObject.transform.GetChild(0).GetChild(0).gameObject;
+
+                            State.LobbyCardMap[lobbyCardKey] = lobbyCard;
+                        }
                     }
-                    else
+                    catch (Exception e)
                     {
-                        var lobbyCardGameObject = machineCardProperty.GameObject;
-                        if (lobbyCardGameObject == null) continue;
-                        Console.WriteLine($"LoadApp lobbyCardGameObject={lobbyCardGameObject.name}");
-
-                        string lobbyCardKey = group + "__" + lobbyCard.Card;
-                        lobbyCardGameObject.name = lobbyCardKey;
-
-                        var quadGameObject = lobbyCardGameObject.transform.GetChild(0).GetChild(0).gameObject;
-                        yield return BettrAssetController.Instance.LoadMaterial(lobbyCard.BundleName, lobbyCard.BundleVersion, lobbyCard.MaterialName, quadGameObject);
-
-                        State.LobbyCardMap[lobbyCardKey] = lobbyCard;
+                        Debug.LogError(e);
+                        throw;
                     }
+                    
+                    yield return BettrAssetController.Instance.LoadMaterial(lobbyCard.BundleName, lobbyCard.BundleVersion, lobbyCard.MaterialName, quadGameObject);
                 }
             }
         }
