@@ -482,6 +482,8 @@ namespace Bettr.Editor
 
             // Switch to iOS build target
             EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.WebGL, BuildTarget.WebGL);
+            
+            BuildLocalServer();
 
             // Path to your specific scene. Adjust the path as necessary.
             const string scenePath = "Assets/Bettr/Core/Scenes/MainScene.unity";
@@ -708,6 +710,12 @@ namespace Bettr.Editor
                 
                 // if prefabPath does not end with BackgroundFBX.prefab, skip
                 if (!prefabPath.EndsWith("BackgroundFBX.prefab"))
+                {
+                    continue;
+                }
+                
+                // skip if this is a variant1
+                if (prefabPath.Contains("variant1"))
                 {
                     continue;
                 }
