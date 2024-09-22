@@ -692,6 +692,68 @@ namespace Bettr.Editor
             EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneLinux64);
 #endif            
         }
+        
+        [MenuItem("Bettr/Tools/Check Prefabs for Background.jpg")]
+        private static void CheckMaterialsForBackgroundTexture()
+        {
+            // Get all prefab assets in the project
+            string[] prefabGUIDs = AssetDatabase.FindAssets("t:Prefab");
+
+            bool textureFound = false;
+
+            foreach (string guid in prefabGUIDs)
+            {
+                // Get the path of the prefab
+                string prefabPath = AssetDatabase.GUIDToAssetPath(guid);
+                
+                // if prefabPath does not end with BackgroundFBX.prefab, skip
+                if (!prefabPath.EndsWith("BackgroundFBX.prefab"))
+                {
+                    continue;
+                }
+                
+                // Load the prefab asset
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+
+                if (prefab != null)
+                {
+                    // Get all renderers in the prefab to access materials
+                    Renderer[] renderers = prefab.GetComponentsInChildren<Renderer>();
+
+                    foreach (Renderer renderer in renderers)
+                    {
+                        // Check each material of the renderer
+                        foreach (Material material in renderer.sharedMaterials)
+                        {
+                            if (material != null)
+                            {
+                                // Check if the material has a texture named "Background.jpg"
+                                foreach (string propertyName in material.GetTexturePropertyNames())
+                                {
+                                    Texture texture = material.GetTexture(propertyName);
+
+                                    if (texture != null && texture.name == "Background")
+                                    {
+                                        string texturePath = AssetDatabase.GetAssetPath(texture);
+
+                                        if (texturePath.EndsWith("Background.jpg"))
+                                        {
+                                            Debug.Log($"Prefab '{prefab.name}' uses Material '{material.name}' with 'Background.jpg' at path: {prefabPath}");
+                                            textureFound = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if (!textureFound)
+            {
+                Debug.Log("No prefabs are using 'Background.jpg'.");
+            }
+        }
 
         [MenuItem("Bettr/Build/BackgroundTextures")]
         public static void SyncBackgroundTextures()
