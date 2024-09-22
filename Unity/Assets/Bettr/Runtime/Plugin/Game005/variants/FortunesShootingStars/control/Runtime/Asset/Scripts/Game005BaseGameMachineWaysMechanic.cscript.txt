@@ -19,6 +19,8 @@ function Game005BaseGameMachineWaysMechanic:Initialize(machine)
     Game005BaseGameMachine.BaseGameStateDispatchTable.WaitingForPayToComplete = function()
         self:WaitingForPayToComplete(machine)
     end
+    -- turn off all audio
+    BettrAudioController.StopAudio("rollupwins")
 end
 
 function Game005BaseGameMachineWaysMechanic:BaseGamePaying(machine)
@@ -109,7 +111,10 @@ function Game005BaseGameMachineWaysMechanic:DisplayWays(machine)
                         winSymbols.SetCurrentActive(waySymbol)
                         parallel
                             do
+                                -- stop previous audio
+                                BettrAudioController.PlayAudioLoop("rollupwins")
                                 self:RollUpWaysWin(machine, way, waysState, waysSummary, duration)
+                                BettrAudioController.StopAudio("rollupwins")
                             end
                             do
                                 -- display ways
