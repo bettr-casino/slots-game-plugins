@@ -28,6 +28,10 @@ namespace Bettr.Core
         
         [JsonProperty("hashKey")]
         public string HashKey { get; set; }
+        
+        [JsonProperty("useGeneratedOutcomes")]
+        public bool UseGeneratedOutcomes { get; set; }
+        
     }
     
     [Serializable]
@@ -65,14 +69,17 @@ namespace Bettr.Core
         public BettrAssetScriptsController BettrAssetScriptsController { get; private set; }
         
         public BettrUserController BettrUserController { get; private set; }
+        
+        public BettrExperimentController BettrExperimentController { get; private set; }
 
-        public BettrOutcomeController(BettrAssetScriptsController bettrAssetScriptsController, BettrUserController bettrUserController, string hashKey)
+        public BettrOutcomeController(BettrAssetScriptsController bettrAssetScriptsController, BettrUserController bettrUserController, BettrExperimentController experimentController, string hashKey)
         {
             TileController.RegisterType<BettrOutcomeController>("BettrOutcomeController");
             TileController.AddToGlobals("BettrOutcomeController", this);
 
             this.BettrAssetScriptsController = bettrAssetScriptsController;
             this.BettrUserController = bettrUserController;
+            this.BettrExperimentController = experimentController;
             this.HashKey = hashKey;
         }
         
@@ -92,12 +99,16 @@ namespace Bettr.Core
         // TODO: FIXME: Include the variant 
         IEnumerator LoadWebOutcome(string gameId, string gameVariantId)
         {
+            // check the experiment "Outcomes"
+            var useGeneratedOutcomes = BettrExperimentController.UseGeneratedOutcomes();
+            
             var bettrOutcomeRequestPayload = new BettrOutcomeRequestPayload()
             {
                 GameId = gameId,
                 GameVariantId = gameVariantId,
                 UserId = BettrUserController.BettrUserConfig.UserId,
                 HashKey = HashKey,
+                UseGeneratedOutcomes = useGeneratedOutcomes
             };
 
             var requestPayload = JsonConvert.SerializeObject(bettrOutcomeRequestPayload);

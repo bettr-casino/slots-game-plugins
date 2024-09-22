@@ -36,6 +36,7 @@ namespace Bettr.Runtime.Plugin.Main.Tests
         [NonSerialized] private BettrAssetController _bettrAssetController;
         [NonSerialized] private BettrAssetScriptsController _bettrAssetScriptsController;
         [NonSerialized] private BettrUserController _bettrUserController;
+        [NonSerialized] private BettrExperimentController _bettrExperimentController;
         // ReSharper disable once NotAccessedField.Local
         [NonSerialized] private BettrVisualsController _bettrVisualsController;
         // ReSharper disable once NotAccessedField.Local
@@ -112,11 +113,17 @@ namespace Bettr.Runtime.Plugin.Main.Tests
                 useFileSystemAssetBundles = _configData.UseFileSystemAssetBundles,
             };
             
+            _bettrExperimentController = new BettrExperimentController()
+            {
+                bettrServer = _bettrServer,
+                configData = _configData,
+            };
+            
             _bettrVisualsController = new BettrVisualsController();
             
             _bettrAssetScriptsController = _bettrAssetController.BettrAssetScriptsController;
             
-            _bettrOutcomeController = new BettrOutcomeController(_bettrAssetScriptsController, _bettrUserController, _configData.AssetsVersion)
+            _bettrOutcomeController = new BettrOutcomeController(_bettrAssetScriptsController, _bettrUserController, _bettrExperimentController, _configData.AssetsVersion)
                 {
                     WebOutcomesBaseURL = _configData.WebOutcomesBaseURL,
                     UseFileSystemOutcomes = _configData.UseFileSystemOutcomes,

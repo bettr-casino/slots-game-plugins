@@ -47,5 +47,14 @@ namespace Bettr.Core
             // treatment has to be one of "control", "variant1", if not default to "control"
             return treatment is "control" or "variant1" ? treatment : "control";
         }
+        
+        public bool UseGeneratedOutcomes()
+        {
+            var experiment = BettrUserExperimentsList.Find(e => e.ExperimentName?.ToLower() == "outcomes");
+            var treatment = experiment?.Treatment ?? "test";
+            // treatment has to be one of "control", "variant1", if not default to "control"
+            treatment = treatment is "test" or "generated" ? treatment : "test";
+            return treatment == "generated";
+        }
     }
 }

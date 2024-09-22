@@ -157,7 +157,7 @@ namespace Bettr.Core
             
             _bettrAssetScriptsController = _bettrAssetController.BettrAssetScriptsController;
             
-            _bettrOutcomeController = new BettrOutcomeController(_bettrAssetScriptsController, _bettrUserController, _configData.AssetsVersion)
+            _bettrOutcomeController = new BettrOutcomeController(_bettrAssetScriptsController, _bettrUserController, _bettrExperimentController, _configData.AssetsVersion)
                 {
                     WebOutcomesBaseURL = _configData.WebOutcomesBaseURL,
                     UseFileSystemOutcomes = _configData.UseFileSystemOutcomes,

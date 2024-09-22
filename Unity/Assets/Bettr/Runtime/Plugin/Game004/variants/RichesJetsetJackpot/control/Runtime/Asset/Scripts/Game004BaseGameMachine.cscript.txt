@@ -264,6 +264,10 @@ end
 
 function Game004BaseGameMachine:OnPointerClick1Param(param)
 	System.Print("Game004BaseGameMachine OnPointerClick1Param param={0} tile id={1}", param, self.id)
+    if Game004BaseGameState.SpinState.First.State ~= "Waiting" then
+        System.Print("Game004BaseGameMachine OnPointerClick1Param param={0} ignoring click when not in Waiting state", param)
+        return
+    end	
 	if param == "Prev" then
         BettrMainLobbySceneController.LoadPreviousMachine()
     elseif param == "Next" then

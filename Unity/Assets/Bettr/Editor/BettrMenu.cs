@@ -762,6 +762,152 @@ namespace Bettr.Editor
                 Debug.Log("No prefabs are using 'Background.jpg'.");
             }
         }
+        
+        [MenuItem("Bettr/Tools/Sync Game Scripts")]
+        public static void SyncGameScripts()
+        {
+            // Walk the entire directory tree under the plugin root directory
+            var processCount = 0;
+            var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+            for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
+            {
+                var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
+                // Check that the MachineName starts with "Game" and is not "Game001Alpha"
+                if (!machineNameDir.Name.StartsWith("Game") || machineNameDir.Name == "Game001Alpha")
+                {
+                    continue;
+                }
+                var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
+                if (variantsDir == null)
+                {
+                    continue;
+                }
+                var machineVariantsDirs = variantsDir?.GetDirectories();
+                // loop over machineVariantsDir
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir?.GetDirectories();
+                    if (experimentVariantDirs == null)
+                    {
+                        continue;
+                    }
+                    // loop over experimentVariantDirs
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        // now extract the machineName from machineNameDir, machineVariant from machineVariantsDir, and experimentVariant from experimentVariantDir
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir?.Name;
+                        string experimentVariant = experimentVariantDir?.Name;
+                        
+                        string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
+                        if (!Directory.Exists(runtimeAssetPath))
+                        {
+                            Debug.LogError($"Directory not found: {runtimeAssetPath}");
+                            continue;
+                        }
+                        
+                        var machineModelName =$"{machineName}Models";
+                        
+                        string modelDestinationPath = Path.Combine(runtimeAssetPath, "Models",  $"{machineModelName}.cscript.txt");
+                        
+                        // Load and run the Model file
+                        var modelTextAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(modelDestinationPath);
+                        var machineModelScript = modelTextAsset.text;
+                        TileController.StaticInit();
+                        DynValue dynValue = TileController.LuaScript.LoadString(machineModelScript, codeFriendlyName: machineModelName);
+                        TileController.LuaScript.Call(dynValue);
+                        
+                        Debug.Log($"Processing Scripts for machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant}");
+                
+                        ProcessScripts(machineName, machineVariant, experimentVariant, runtimeAssetPath);
+                        
+                        processCount++;
+                    }
+                }
+            }
+            
+            Debug.Log($"Processed {processCount} machine variants.");
+        }
+        
+        [MenuItem("Bettr/Tools/Sync Symbol Textures")]
+        public static void SyncSymbolTextures()
+        {
+            // Walk the entire directory tree under the plugin root directory
+            var processCount = 0;
+            var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+            for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
+            {
+                var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
+                // Check that the MachineName starts with "Game" and is not "Game001Alpha"
+                if (!machineNameDir.Name.StartsWith("Game") || machineNameDir.Name == "Game001Alpha")
+                {
+                    continue;
+                }
+                var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
+                if (variantsDir == null)
+                {
+                    continue;
+                }
+                var machineVariantsDirs = variantsDir?.GetDirectories();
+                // loop over machineVariantsDir
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir?.GetDirectories();
+                    if (experimentVariantDirs == null)
+                    {
+                        continue;
+                    }
+                    // loop over experimentVariantDirs
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        // now extract the machineName from machineNameDir, machineVariant from machineVariantsDir, and experimentVariant from experimentVariantDir
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir?.Name;
+                        string experimentVariant = experimentVariantDir?.Name;
+                        
+                        string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
+                        if (!Directory.Exists(runtimeAssetPath))
+                        {
+                            Debug.LogError($"Directory not found: {runtimeAssetPath}");
+                            continue;
+                        }
+                        
+                        var machineModelName =$"{machineName}Models";
+                        
+                        string modelDestinationPath = Path.Combine(runtimeAssetPath, "Models",  $"{machineModelName}.cscript.txt");
+                        
+                        // Load and run the Model file
+                        var modelTextAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(modelDestinationPath);
+                        var machineModelScript = modelTextAsset.text;
+                        TileController.StaticInit();
+                        DynValue dynValue = TileController.LuaScript.LoadString(machineModelScript, codeFriendlyName: machineModelName);
+                        TileController.LuaScript.Call(dynValue);
+                        
+                        var symbolTable = GetTable($"{machineName}BaseGameSymbolTable");
+                        var pkArray = GetTablePkArray(symbolTable);
+                        
+                        string textureDestinationPath = Path.Combine(runtimeAssetPath, "Textures");
+                        string textureSourcePath = $"Assets/Bettr/Editor/textures/{machineName}/{machineVariant}";
+                        
+                        // walk the pkArray
+                        foreach (var pk in pkArray)
+                        {
+                            var jpgName = $"{pk}.jpg";
+                            // copy from source path to destination path
+                            var sourcePath = Path.Combine(textureSourcePath, jpgName);
+                            var destinationPath = Path.Combine(textureDestinationPath, jpgName);
+                            File.Copy(sourcePath, destinationPath, true);
+                        }
+                        
+                        
+                        processCount++;
+                    }
+                }
+            }
+            
+            Debug.Log($"Processed {processCount} symbol textures.");
+        }
+        
 
         [MenuItem("Bettr/Build/BackgroundTextures")]
         public static void SyncBackgroundTextures()
