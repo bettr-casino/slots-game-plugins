@@ -41,6 +41,8 @@ namespace Bettr.Core
             bettrUser.LobbyCardIndex = lobbyCardIndex;
             var lobbyCard = bettrUser.LobbyCards[lobbyCardIndex];
             var (machineName, machineVariant) = GetLobbyCardExperiment(lobbyCard);
+            // unload any cached version
+            yield return BettrAssetController.Instance.UnloadCachedAssetBundle(machineName, machineVariant);
             yield return BettrAssetController.Instance.LoadScene(machineName, machineVariant, lobbyCard.MachineSceneName);
         }
 
@@ -51,6 +53,8 @@ namespace Bettr.Core
             bettrUser.LobbyCardIndex = 0;
             var lobbyCard = bettrUser.LobbyCards[0];
             var (machineName, machineVariant) = GetLobbyCardExperiment(lobbyCard);
+            // unload any cached version
+            yield return BettrAssetController.Instance.UnloadCachedAssetBundle(machineName, machineVariant);
             yield return BettrAssetController.Instance.LoadScene(machineName,
                 machineVariant, lobbyCard.MachineSceneName);
         }
@@ -64,6 +68,8 @@ namespace Bettr.Core
             bettrUser.LobbyCardIndex = previousIndex;
             var lobbyCard = bettrUser.LobbyCards[previousIndex];
             var (machineName, machineVariant) = GetLobbyCardExperiment(lobbyCard);
+            // unload any cached version
+            yield return BettrAssetController.Instance.UnloadCachedAssetBundle(machineName, machineVariant);
             yield return BettrAssetController.Instance.LoadScene(machineName, machineVariant, lobbyCard.MachineSceneName);
         }
         
@@ -76,6 +82,8 @@ namespace Bettr.Core
             bettrUser.LobbyCardIndex = nextIndex;
             var lobbyCard = bettrUser.LobbyCards[nextIndex];
             var (machineName, machineVariant) = GetLobbyCardExperiment(lobbyCard);
+            // unload any cached version
+            yield return BettrAssetController.Instance.UnloadCachedAssetBundle(machineName, machineVariant);
             yield return BettrAssetController.Instance.LoadScene(machineName, machineVariant, lobbyCard.MachineSceneName);
         }
         
@@ -84,6 +92,8 @@ namespace Bettr.Core
             var bettrUser = BettrUserController.Instance.BettrUserConfig;
             var lobbyScene = bettrUser.LobbyScene;
             var (bundleName, bundleVersion) = GetLobbyExperiment(lobbyScene);
+            // unload any cached version
+            yield return BettrAssetController.Instance.UnloadCachedAssetBundle(bundleName, bundleVersion);
             yield return BettrAssetController.Instance.LoadScene(bundleName, bundleVersion, "MainLobbyScene");
         }
         
@@ -123,8 +133,8 @@ namespace Bettr.Core
                 for (var cardIndex = 1; cardIndex <= 12; cardIndex++)
                 {
                     GameObject quadGameObject = null;
-                    var lobbyCardIndex = 1 + (groupIndex - 1) * 12 + cardIndex - 1;
-                    var lobbyCardId = $"LobbyCard{lobbyCardIndex:D3}";
+                    var lobbyCardIndex = (groupIndex - 1) * 12 + cardIndex - 1;
+                    var lobbyCardId = $"LobbyCard{lobbyCardIndex+1:D3}";
                     
                     Debug.Log($"LoadLobbyCards group={group} lobbyCardIndex={lobbyCardIndex} lobbyCardId={lobbyCardId} groupIndex={groupIndex} cardIndex={cardIndex}");
                     
