@@ -988,6 +988,91 @@ namespace Bettr.Editor
             Debug.Log($"Processed {processCount} machine variants.");
         }
         
+        [MenuItem("Bettr/Tools/Fix Audio Source")]
+        public static void FixAudioSource()
+        {
+            // Walk the entire directory tree under the plugin root directory
+            var processCount = 0;
+            var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+            for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
+            {
+                var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
+                // Check that the MachineName starts with "Game" and is not "Game001Alpha"
+                if (!machineNameDir.Name.StartsWith("Game") || machineNameDir.Name == "Game001Alpha")
+                {
+                    continue;
+                }
+                var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
+                if (variantsDir == null)
+                {
+                    continue;
+                }
+                var machineVariantsDirs = variantsDir?.GetDirectories();
+                // loop over machineVariantsDir
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir?.GetDirectories();
+                    if (experimentVariantDirs == null)
+                    {
+                        continue;
+                    }
+                    // loop over experimentVariantDirs
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        // now extract the machineName from machineNameDir, machineVariant from machineVariantsDir, and experimentVariant from experimentVariantDir
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir?.Name;
+                        string experimentVariant = experimentVariantDir?.Name;
+                        
+                        string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
+                        if (!Directory.Exists(runtimeAssetPath))
+                        {
+                            Debug.LogError($"Directory not found: {runtimeAssetPath}");
+                            continue;
+                        }
+                        
+                        // get the prefabs directory
+                        string prefabsDirectory = Path.Combine(runtimeAssetPath, "Prefabs");
+                        // get the Game<NNN>BaseGameMachine.prefab
+                        string machinePrefabPath = Directory.GetFiles(prefabsDirectory, $"{machineName}BaseGameMachine.prefab", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                        if (string.IsNullOrEmpty(machinePrefabPath))
+                        {
+                            Debug.LogError($"Machine prefab not found: {machineName}BaseGameMachine.prefab");
+                            continue;
+                        }
+                        
+                        // load the Prefab asset
+                        GameObject machinePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(machinePrefabPath);
+                        if (machinePrefab == null)
+                        {
+                            Debug.LogError($"Failed to load prefab: {machineName}BaseGameMachine.prefab");
+                            continue;
+                        }
+                        
+                        // remove any audio source from the top level game object of the machine prefab
+                        AudioSource[] audioSources = machinePrefab.GetComponents<AudioSource>();
+                        foreach (var audioSource in audioSources)
+                        {
+                            Object.DestroyImmediate(audioSource);
+                        }
+                        
+                        string audioDirectory = Path.Combine(runtimeAssetPath, "Audio");
+                        // get the audio files
+                        
+                        
+                        
+                        Debug.Log($"Syncing Audio for machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant}");
+                
+                        ProcessAudio(machineName, machineVariant, experimentVariant, runtimeAssetPath);
+                        
+                        processCount++;
+                    }
+                }
+            }
+            
+            Debug.Log($"Processed {processCount} machine variants.");
+        }
+        
         [MenuItem("Bettr/Tools/Sync Symbol Textures")]
         public static void SyncSymbolTextures()
         {
@@ -2196,14 +2281,19 @@ namespace Bettr.Editor
             
             string dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "audio");
             string[] filePaths = Directory.GetFiles(dirPath, "*.wav");
+            string audioDirPath = Path.Combine(runtimeAssetPath, "Audio");
+            EnsureDirectory(audioDirPath);
+            // clear out the existing audio files
+            foreach (string file in Directory.GetFiles(audioDirPath))
+            {
+                File.Delete(file);
+            }
             
             foreach (string filePath in filePaths)
             {
                 // Get the base name of the file
                 string fileName = Path.GetFileName(filePath);
-                var destinationPath = Path.Combine(runtimeAssetPath, "Audio", $"{fileName}");
-                // ensure the destination directory exists
-                EnsureDirectory(Path.GetDirectoryName(destinationPath));
+                var destinationPath = Path.Combine(audioDirPath, $"{fileName}");
                 
                 // copy the file to the destination path
                 File.Copy(filePath, destinationPath, overwrite: true);
