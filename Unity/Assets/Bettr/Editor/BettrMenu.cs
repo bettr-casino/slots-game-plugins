@@ -1057,20 +1057,44 @@ namespace Bettr.Editor
                         }
                         
                         string audioDirectory = Path.Combine(runtimeAssetPath, "Audio");
-                        // get the audio files
+                        // get the audio files under the audio directory
+                        string[] audioFiles = Directory.GetFiles(audioDirectory, "*.wav", SearchOption.AllDirectories);
+                        // loop over the audio files
+                        foreach (var audioFile in audioFiles)
+                        {
+                            // load the audio clip
+                            AudioClip audioClip = AssetDatabase.LoadAssetAtPath<AudioClip>(audioFile);
+                            if (audioClip == null)
+                            {
+                                Debug.LogError($"Failed to load audio clip: {audioFile}");
+                                continue;
+                            }
+                            
+                            // add an audio source to the top level game object of the machine prefab
+                            AudioSource audioSource = machinePrefab.AddComponent<AudioSource>();
+                            audioSource.clip = audioClip;
+                            audioSource.playOnAwake = false;
+                            audioSource.loop = true;
+                            audioSource.pitch = 1;
+                            audioSource.priority = 128;
+                            audioSource.spatialBlend = 0; // 0 = 2D
+                            audioSource.volume = 1; // can turn off using Key "V"
+                            audioSource.panStereo = 0; // -1 = left, 1 = right
+                        }
                         
+                        // save the prefab
+                        PrefabUtility.SaveAsPrefabAsset(machinePrefab, machinePrefabPath);
                         
-                        
-                        Debug.Log($"Syncing Audio for machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant}");
+                        Debug.Log($"Fixing Audio Source for machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant}");
                 
-                        ProcessAudio(machineName, machineVariant, experimentVariant, runtimeAssetPath);
-                        
                         processCount++;
                     }
                 }
             }
             
-            Debug.Log($"Processed {processCount} machine variants.");
+            AssetDatabase.Refresh();
+            
+            Debug.Log($"Processed Fix Audio Source {processCount} machine variants.");
         }
         
         [MenuItem("Bettr/Tools/Sync Symbol Textures")]

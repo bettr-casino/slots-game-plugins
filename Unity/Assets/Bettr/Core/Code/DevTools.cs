@@ -90,7 +90,8 @@ namespace Bettr.Core
                 if (
                     Input.GetKeyDown(KeyCode.L) 
                     || Input.GetKeyDown(KeyCode.P)
-                    || Input.GetKeyDown(KeyCode.N))
+                    || Input.GetKeyDown(KeyCode.N)
+                    || Input.GetKeyDown(KeyCode.V))
                 {
                     OnKeyPressed.Invoke();
                     ResetState();

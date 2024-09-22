@@ -67,6 +67,11 @@ namespace Bettr.Core
                     StartCoroutine(LoadMainLobby());
                     return;
                 }
+                if (Input.GetKeyDown(KeyCode.V))
+                {
+                    TurnOffVolume();
+                    return;
+                }
                 // Find the SpinImage GameObject
                 var spinImage = GameObject.Find("SpinImage");
                 if (spinImage != null)
@@ -237,6 +242,11 @@ namespace Bettr.Core
             ScriptRunner.Release(scriptRunner);
 
             // yield return UpdateCommitHash();
+        }
+
+        private void TurnOffVolume()
+        {
+            _bettrAudioController.IsVolumeMuted = !_bettrAudioController.IsVolumeMuted;
         }
         
         private IEnumerator UpdateCommitHash()
