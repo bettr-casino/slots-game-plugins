@@ -29,7 +29,7 @@ namespace Bettr.Core
             AudioSources = audioSources;
         }
 
-        public void PlayAudioOnce(GameObject gameObjectWithAudioSource, string audioClipName)
+        public void PlayAudioOnce(string audioClipName)
         {
             // find the audio source with the audio clip "spinbutton"
             foreach (var audioSource in AudioSources)

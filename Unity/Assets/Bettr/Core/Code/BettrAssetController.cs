@@ -236,6 +236,7 @@ namespace Bettr.Core
                     textMeshPro.fontMaterial.shader = bettrShader;
                 }
             }
+            
             Object.Instantiate(prefab, parent == null ? null : parent.transform);
         }
     }

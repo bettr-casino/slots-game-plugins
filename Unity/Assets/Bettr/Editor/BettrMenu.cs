@@ -923,69 +923,92 @@ namespace Bettr.Editor
         [MenuItem("Bettr/Tools/Sync Audio Files")]
         public static void SyncAudioFiles()
         {
-            // Walk the entire directory tree under the plugin root directory
             var processCount = 0;
             var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+
             for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
             {
                 var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
-                // Check that the MachineName starts with "Game" and is not "Game001Alpha"
                 if (!machineNameDir.Name.StartsWith("Game") || machineNameDir.Name == "Game001Alpha")
                 {
                     continue;
                 }
+
                 var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
                 if (variantsDir == null)
                 {
                     continue;
                 }
-                var machineVariantsDirs = variantsDir?.GetDirectories();
-                // loop over machineVariantsDir
+
+                var machineVariantsDirs = variantsDir.GetDirectories();
+
                 foreach (var machineVariantsDir in machineVariantsDirs)
                 {
-                    var experimentVariantDirs = machineVariantsDir?.GetDirectories();
-                    if (experimentVariantDirs == null)
-                    {
-                        continue;
-                    }
-                    // loop over experimentVariantDirs
+                    var experimentVariantDirs = machineVariantsDir.GetDirectories();
+
                     foreach (var experimentVariantDir in experimentVariantDirs)
                     {
-                        // now extract the machineName from machineNameDir, machineVariant from machineVariantsDir, and experimentVariant from experimentVariantDir
                         string machineName = machineNameDir.Name;
-                        string machineVariant = machineVariantsDir?.Name;
-                        string experimentVariant = experimentVariantDir?.Name;
-                        
+                        string machineVariant = machineVariantsDir.Name;
+                        string experimentVariant = experimentVariantDir.Name;
+
                         string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
                         if (!Directory.Exists(runtimeAssetPath))
                         {
                             Debug.LogError($"Directory not found: {runtimeAssetPath}");
                             continue;
                         }
-                        
-                        var machineModelName =$"{machineName}Models";
-                        
-                        string modelDestinationPath = Path.Combine(runtimeAssetPath, "Models",  $"{machineModelName}.cscript.txt");
-                        
-                        // Load and run the Model file
-                        var modelTextAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(modelDestinationPath);
-                        var machineModelScript = modelTextAsset.text;
-                        TileController.StaticInit();
-                        DynValue dynValue = TileController.LuaScript.LoadString(machineModelScript, codeFriendlyName: machineModelName);
-                        TileController.LuaScript.Call(dynValue);
-                        
-                        // TODO: get audio files from the model
-                        
-                        Debug.Log($"Syncing Audio for machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant}");
-                
+
+                        // Copy and process audio files properly
                         ProcessAudio(machineName, machineVariant, experimentVariant, runtimeAssetPath);
-                        
+
                         processCount++;
                     }
                 }
             }
             
+            AssetDatabase.Refresh();
+
             Debug.Log($"Processed {processCount} machine variants.");
+        }
+
+        private static void ProcessAudio(string machineName, string machineVariant, string experimentVariant, string runtimeAssetPath)
+        {
+            string audioSourcePath = "Assets/Bettr/Editor/audio";
+            
+            string destinationPath = Path.Combine(runtimeAssetPath, "Audio");
+
+            if (!Directory.Exists(audioSourcePath))
+            {
+                Debug.LogWarning($"No audio found at: {audioSourcePath}");
+                return;
+            }
+
+            if (!Directory.Exists(destinationPath))
+            {
+                Directory.CreateDirectory(destinationPath);
+            }
+
+            var audioFiles = Directory.GetFiles(audioSourcePath, "*.wav");  // Assuming audio files are .wav
+
+            foreach (var audioFile in audioFiles)
+            {
+                string fileName = Path.GetFileName(audioFile);
+                string assetSourcePath = $"{audioSourcePath}/{fileName}";
+                string assetDestinationPath = $"{destinationPath}/{fileName}";
+
+                // Use AssetDatabase to copy assets with settings intact
+                if (!AssetDatabase.CopyAsset(assetSourcePath, assetDestinationPath))
+                {
+                    Debug.LogError($"Failed to copy asset from {assetSourcePath} to {assetDestinationPath}");
+                    continue;
+                }
+
+                // Import the asset at the new location to retain settings
+                AssetDatabase.ImportAsset(assetDestinationPath, ImportAssetOptions.ForceUpdate);
+
+                Debug.Log($"Copied and imported audio asset: {assetDestinationPath}");
+            }
         }
         
         [MenuItem("Bettr/Tools/Fix Audio Source")]
@@ -1053,7 +1076,7 @@ namespace Bettr.Editor
                         AudioSource[] audioSources = machinePrefab.GetComponents<AudioSource>();
                         foreach (var audioSource in audioSources)
                         {
-                            Object.DestroyImmediate(audioSource);
+                            Object.DestroyImmediate(audioSource, true);
                         }
                         
                         string audioDirectory = Path.Combine(runtimeAssetPath, "Audio");
@@ -1804,17 +1827,21 @@ namespace Bettr.Editor
                                             // Sort shaders first
                                             if (assetStr.EndsWith(".shader", StringComparison.OrdinalIgnoreCase))
                                                 return 0;
+                                            
+                                            // Sort wav files second
+                                            if (assetStr.EndsWith(".wav", StringComparison.OrdinalIgnoreCase))
+                                                return 1;
 
                                             // Sort scripts second
                                             if (assetStr.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) || assetStr.EndsWith(".js", StringComparison.OrdinalIgnoreCase))
-                                                return 1;
+                                                return 2;
 
                                             // Sort materials third
                                             if (assetStr.EndsWith(".mat", StringComparison.OrdinalIgnoreCase))
-                                                return 2;
+                                                return 3;
 
                                             // Everything else last
-                                            return 3;
+                                            return 4;
                                         })
                                         .ThenBy(asset => asset.ToString()) // Secondary alphabetical sort
                                         .ToList();
@@ -2299,32 +2326,6 @@ namespace Bettr.Editor
 
         }
         
-        private static void ProcessAudio(string machineName, string machineVariant, string experimentVariant, string runtimeAssetPath)
-        {
-            AssetDatabase.Refresh();
-            
-            string dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "audio");
-            string[] filePaths = Directory.GetFiles(dirPath, "*.wav");
-            string audioDirPath = Path.Combine(runtimeAssetPath, "Audio");
-            EnsureDirectory(audioDirPath);
-            // clear out the existing audio files
-            foreach (string file in Directory.GetFiles(audioDirPath))
-            {
-                File.Delete(file);
-            }
-            
-            foreach (string filePath in filePaths)
-            {
-                // Get the base name of the file
-                string fileName = Path.GetFileName(filePath);
-                var destinationPath = Path.Combine(audioDirPath, $"{fileName}");
-                
-                // copy the file to the destination path
-                File.Copy(filePath, destinationPath, overwrite: true);
-            }
-
-        }
-
         private static GameObject ProcessBaseGameSymbols(string machineName, string machineVariant, string runtimeAssetPath)
         {
             var templateName = "BaseGameSymbolGroup";
