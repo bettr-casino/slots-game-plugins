@@ -48,8 +48,8 @@ namespace Bettr.Core
         {
             // TODO: this should be from the user preferences
             var bettrUser = BettrUserController.Instance.BettrUserConfig;
-            bettrUser.LobbyCardIndex = 1;
-            var lobbyCard = bettrUser.LobbyCards[1];
+            bettrUser.LobbyCardIndex = 0;
+            var lobbyCard = bettrUser.LobbyCards[0];
             var (machineName, machineVariant) = GetLobbyCardExperiment(lobbyCard);
             yield return BettrAssetController.Instance.LoadScene(machineName,
                 machineVariant, lobbyCard.MachineSceneName);
