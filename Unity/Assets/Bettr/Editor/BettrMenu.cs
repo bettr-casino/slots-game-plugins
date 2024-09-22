@@ -762,6 +762,97 @@ namespace Bettr.Editor
                 Debug.Log("No prefabs are using 'Background.jpg'.");
             }
         }
+
+        [MenuItem("Bettr/Tools/Fix Symbols Material Alpha")]
+        public static void FixSymbolsMaterialsAlpha()
+        {
+            int processCount = 0;
+            
+            Dictionary<string, string> loadedMachineModels = new Dictionary<string, string>();
+            TileController.StaticInit();
+            
+            // Step 1: Get all prefabs in the new directory
+            string[] prefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { PluginRootDirectory });
+
+            foreach (string prefabGuid in prefabGuids)
+            {
+                string prefabPath = AssetDatabase.GUIDToAssetPath(prefabGuid);
+                // skip if it does not contain "/control/" 
+                if (!prefabPath.Contains("/control/"))
+                {
+                    continue;
+                }
+                // get the prefab file name
+                string prefabFileName = Path.GetFileName(prefabPath);
+                // skip if it doesn't start with Game<NNN>BaseGameSymbol<SymbolName>
+                // use regex to filter out the prefabs that are not symbols
+                var regex = new Regex(@"(Game\d{3})BaseGameSymbol(\w+)");
+                if (!regex.IsMatch(prefabFileName))
+                {
+                    continue;
+                }
+                // extract the machine name, and symbol name from the matched groups
+                var match = regex.Match(prefabFileName);
+                var machineName = match.Groups[1].Value;
+                var symbolName = match.Groups[2].Value;
+                
+                // Assets/Bettr/Runtime/Plugin/Game006/variants/WheelsIndustrialRevolution/control/Runtime/Asset/Prefabs/Game006BaseGameReel5.prefab
+                string runtimeAssetPath = Path.GetDirectoryName(Path.GetDirectoryName((prefabPath)));
+                var machineModelName =$"{machineName}Models";
+
+                if (!loadedMachineModels.ContainsKey(machineModelName))
+                {
+                    string modelDestinationPath = Path.Combine(runtimeAssetPath, "Models",  $"{machineModelName}.cscript.txt");
+                    var modelTextAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(modelDestinationPath);
+                    var machineModelScript = modelTextAsset.text;
+                    loadedMachineModels.Add(machineModelName, machineModelScript);
+                }
+                
+                var loadedMachineModelScript = loadedMachineModels[machineModelName];
+                DynValue dynValue = TileController.LuaScript.LoadString(loadedMachineModelScript, codeFriendlyName: machineModelName);
+                TileController.LuaScript.Call(dynValue);
+                
+                var symbolTable = GetTable($"{machineName}BaseGameSymbolTable");
+                var symbols = GetTablePkArray(symbolTable);
+                
+                // if symbolName not in symbols skip
+                if (!symbols.Contains(symbolName))
+                {
+                    continue;
+                }
+                
+                // Load the control prefab asset
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                // get the "Quad"  game object - below Pivot
+                var quadTransform = prefab.transform.Find("Pivot").Find("Quad");
+                if (quadTransform == null)
+                {
+                    Debug.LogWarning($"Quad not found in prefab: {prefabFileName}");
+                    continue;
+                }
+                GameObject quad = quadTransform.gameObject;
+                // get the material for the quad
+                Material material = quad.GetComponent<Renderer>().sharedMaterial;
+                // fix the alpha of the material color to 1
+                Color color = material.color;
+                color.a = 1;
+                material.color = color;
+                
+                // bump the process count
+                processCount++;
+                
+                Debug.Log($"processed prefab: {prefabFileName}");
+                
+                // save the changes and ensure refresh
+                EditorUtility.SetDirty(material);
+                AssetDatabase.SaveAssets();
+            }
+            
+            AssetDatabase.Refresh();
+            
+            // log the process count
+            Debug.Log($"Processed {processCount} prefabs.");
+        }
         
         [MenuItem("Bettr/Tools/Sync Game Scripts")]
         public static void SyncGameScripts()
