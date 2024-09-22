@@ -920,6 +920,74 @@ namespace Bettr.Editor
             Debug.Log($"Processed {processCount} machine variants.");
         }
         
+        [MenuItem("Bettr/Tools/Sync Audio Files")]
+        public static void SyncAudioFiles()
+        {
+            // Walk the entire directory tree under the plugin root directory
+            var processCount = 0;
+            var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+            for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
+            {
+                var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
+                // Check that the MachineName starts with "Game" and is not "Game001Alpha"
+                if (!machineNameDir.Name.StartsWith("Game") || machineNameDir.Name == "Game001Alpha")
+                {
+                    continue;
+                }
+                var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
+                if (variantsDir == null)
+                {
+                    continue;
+                }
+                var machineVariantsDirs = variantsDir?.GetDirectories();
+                // loop over machineVariantsDir
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir?.GetDirectories();
+                    if (experimentVariantDirs == null)
+                    {
+                        continue;
+                    }
+                    // loop over experimentVariantDirs
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        // now extract the machineName from machineNameDir, machineVariant from machineVariantsDir, and experimentVariant from experimentVariantDir
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir?.Name;
+                        string experimentVariant = experimentVariantDir?.Name;
+                        
+                        string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
+                        if (!Directory.Exists(runtimeAssetPath))
+                        {
+                            Debug.LogError($"Directory not found: {runtimeAssetPath}");
+                            continue;
+                        }
+                        
+                        var machineModelName =$"{machineName}Models";
+                        
+                        string modelDestinationPath = Path.Combine(runtimeAssetPath, "Models",  $"{machineModelName}.cscript.txt");
+                        
+                        // Load and run the Model file
+                        var modelTextAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(modelDestinationPath);
+                        var machineModelScript = modelTextAsset.text;
+                        TileController.StaticInit();
+                        DynValue dynValue = TileController.LuaScript.LoadString(machineModelScript, codeFriendlyName: machineModelName);
+                        TileController.LuaScript.Call(dynValue);
+                        
+                        // TODO: get audio files from the model
+                        
+                        Debug.Log($"Syncing Audio for machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant}");
+                
+                        ProcessAudio(machineName, machineVariant, experimentVariant, runtimeAssetPath);
+                        
+                        processCount++;
+                    }
+                }
+            }
+            
+            Debug.Log($"Processed {processCount} machine variants.");
+        }
+        
         [MenuItem("Bettr/Tools/Sync Symbol Textures")]
         public static void SyncSymbolTextures()
         {
@@ -2118,6 +2186,27 @@ namespace Bettr.Editor
                     scriptsPath = $"mechanics/{mechanic}/scripts";
                     CopyScripts(scriptsPath, filePaths, machineName, machineVariant, experimentVariant, runtimeAssetPath);
                 }
+            }
+
+        }
+        
+        private static void ProcessAudio(string machineName, string machineVariant, string experimentVariant, string runtimeAssetPath)
+        {
+            AssetDatabase.Refresh();
+            
+            string dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "audio");
+            string[] filePaths = Directory.GetFiles(dirPath, "*.wav");
+            
+            foreach (string filePath in filePaths)
+            {
+                // Get the base name of the file
+                string fileName = Path.GetFileName(filePath);
+                var destinationPath = Path.Combine(runtimeAssetPath, "Audio", $"{fileName}");
+                // ensure the destination directory exists
+                EnsureDirectory(Path.GetDirectoryName(destinationPath));
+                
+                // copy the file to the destination path
+                File.Copy(filePath, destinationPath, overwrite: true);
             }
 
         }
