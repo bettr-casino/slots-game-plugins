@@ -24,6 +24,7 @@ end
 
 function Game005BaseGameMachine:Awake()
 	System.Print("Game005BaseGameMachine Awake tile id={0}", self.id)
+	BettrAudioController.Initialize(self.gameObject)
 	self.Mechanics = Game005BaseGameMachineMechanics:new()
 	self.Mechanics:Initialize(self)
 end
