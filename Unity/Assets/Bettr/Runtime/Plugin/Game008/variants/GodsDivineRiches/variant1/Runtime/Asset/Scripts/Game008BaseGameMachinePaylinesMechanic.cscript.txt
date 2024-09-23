@@ -23,6 +23,13 @@ end
 
 function Game008BaseGameMachinePaylinesMechanic:BaseGamePaying(machine)
     Game008BaseGameState.SpinState.First.State = "WaitingForPayToComplete"
+    local summary = Game008BaseGamePaylinesSummary.Paylines.First
+    local count = summary.PaylinesCount
+    if count == 0 then
+        machine:OnPayingCompleted()
+        return
+    end
+    BettrAudioController.PlayAudioLoop("rollupwins")    
     System.StartCoroutine(machine, "BaseGamePayout")
 end
 
@@ -101,9 +108,7 @@ function Game008BaseGameMachinePaylinesMechanic:DisplayPaylines(machine)
                         winSymbols.SetCurrentActive(symbol)
                         parallel
                             do
-                                BettrAudioController.PlayAudioLoop("rollupwins")
                                 self:RollUpPaylinesWin(machine, payline, state, summary, duration)
-                                BettrAudioController.StopAudio()
                             end
                             do
                                 -- display paylines

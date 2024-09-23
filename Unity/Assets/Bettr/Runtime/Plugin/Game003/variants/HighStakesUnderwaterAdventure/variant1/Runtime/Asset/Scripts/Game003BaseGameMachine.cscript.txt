@@ -45,7 +45,6 @@ function Game003BaseGameMachine:OnSpinButtonClicked()
         do
             BettrAudioController.StopAudio()
             BettrAudioController.PlayAudioOnce("spinbutton")
-            BettrAudioController.PlayAudioLoop("spinning")
             self.Mechanics:OnSpinButtonClicked(self)
             self:SpinEngines()
             self:WaitForApplyOutcomeDelay()
@@ -219,7 +218,6 @@ function Game003BaseGameMachine:UpdateBaseGameReelsSpinState(state)
 end
 
 function Game003BaseGameMachine:TryPaying()
-    BettrAudioController.StopAudio()
     Game003BaseGameState.SpinState.First.State = "Paying"
 end
 
@@ -228,6 +226,7 @@ function Game003BaseGameMachine:CurrentSpinState()
 end
 
 function Game003BaseGameMachine:OnPayingCompleted()
+    BettrAudioController.StopAudio()
     self:OnBaseGameSpinCompleted()
 end
 

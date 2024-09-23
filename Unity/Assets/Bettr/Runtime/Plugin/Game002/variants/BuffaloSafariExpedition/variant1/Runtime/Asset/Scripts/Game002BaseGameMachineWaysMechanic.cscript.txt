@@ -25,6 +25,13 @@ end
 
 function Game002BaseGameMachineWaysMechanic:BaseGamePaying(machine)
     Game002BaseGameState.SpinState.First.State = "WaitingForPayToComplete"
+    local waysSummary = Game002BaseGameWaysSummary.Ways.First
+    local count = waysSummary.WaysCount
+    if count == 0 then
+        machine:OnPayingCompleted()
+        return
+    end
+    BettrAudioController.PlayAudioLoop("rollupwins")
     System.StartCoroutine(machine, "BaseGamePayout")
 end
 
@@ -111,10 +118,7 @@ function Game002BaseGameMachineWaysMechanic:DisplayWays(machine)
                         winSymbols.SetCurrentActive(waySymbol)
                         parallel
                             do
-                                -- stop previous audio
-                                BettrAudioController.PlayAudioLoop("rollupwins")
                                 self:RollUpWaysWin(machine, way, waysState, waysSummary, duration)
-                                BettrAudioController.StopAudio()
                             end
                             do
                                 -- display ways

@@ -147,6 +147,9 @@ namespace Bettr.Core
             Debug.Log($"userId={userId} AssetsVersion={_configData.AssetsVersion} AssetsBaseURL={_configData.AssetsServerBaseURL} WebAssetsBaseURL={_configData.WebAssetsBaseURL} WebOutcomesBaseURL={_configData.WebOutcomesBaseURL}");
             
             BettrModel.Init();
+            
+            TileController.RegisterType<BettrAudioController>("BettrAudioController");
+            TileController.AddToGlobals("BettrAudioController", BettrAudioController.Instance);
 
             _bettrMainLobbySceneController = new BettrMainLobbySceneController(_bettrExperimentController);
 
@@ -242,7 +245,7 @@ namespace Bettr.Core
 
         private void TurnOffVolume()
         {
-            BettrAudioBehaviour.Instance.IsVolumeMuted = !BettrAudioBehaviour.Instance.IsVolumeMuted;
+            BettrAudioController.Instance.IsVolumeMuted = !BettrAudioController.Instance.IsVolumeMuted;
         }
         
         private IEnumerator UpdateCommitHash()

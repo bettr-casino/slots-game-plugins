@@ -7,7 +7,7 @@ namespace Bettr.Core
 {
     [RequireComponent(typeof(AudioSource))]
     [Serializable]
-    public class BettrAudioBehaviour : MonoBehaviour
+    public class BettrAudioController : MonoBehaviour
     {
         public bool IsVolumeMuted { get; set; }
         
@@ -16,17 +16,14 @@ namespace Bettr.Core
         // ReSharper disable once InconsistentNaming
        [SerializeField] private AudioClip[] AudioClips;
         
-        public static BettrAudioBehaviour Instance { get; private set; }
+        public static BettrAudioController Instance { get; private set; }
         
         public void Awake()
         {
-            TileController.RegisterType<BettrAudioBehaviour>("BettrAudioController");
-            TileController.AddToGlobals("BettrAudioController", this);
-            
-            Instance = this;
-            
             var audioSource = gameObject.GetComponent<AudioSource>();
             AudioSource = audioSource;
+
+            Instance = this;
         }
 
         public void PlayAudioOnce(string audioClipName)
