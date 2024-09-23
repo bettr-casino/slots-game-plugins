@@ -922,13 +922,13 @@ namespace Bettr.Editor
             Debug.Log($"SyncGameScripts: Processed {processCount} machine variants.");
         }
 
-        [MenuItem("Bettr/Tools/Fix Audio WebGL Settings")]
+        [MenuItem("Bettr/Tools/Archived/Fix Audio WebGL Settings")]
         public static void FixAudioWebGLSettings()
         {
             EnforceWebGLAudioOverride();
         }
         
-        [MenuItem("Bettr/Tools/Sync Audio Files")]
+        [MenuItem("Bettr/Tools/Archived/Sync Audio Files")]
         public static void SyncAudioFiles()
         {
             var processCount = 0;
@@ -1006,7 +1006,7 @@ namespace Bettr.Editor
             Debug.Log($"SyncAudioFiles: Processed {processCount} machine variants.");
         }
         
-        [MenuItem("Bettr/Tools/Cleanup Runtime Audio Files")]
+        [MenuItem("Bettr/Tools/Archived/Cleanup Runtime Audio Files")]
         public static void CleanupAudioFiles()
         {
             var processCount = 0;
