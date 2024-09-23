@@ -176,7 +176,7 @@ function Game007BaseGameMachine:SpinEngines()
     local newCoins = BettrUser.Coins - baseWager
     System.Print("Game007BaseGameMachine:SpinEngines applying wager oldCoins={0} newCoins={1} wager={2}", oldCoins, newCoins, baseWager)
     BettrUser.Coins = newCoins
-    BettrVisualsController.RollUpCounter(self.CreditsText, oldCoins, newCoins, 0.2)
+    BettrVisualsController.RollUpCounter(self.CreditsText, oldCoins, newCoins, 0.05)
     Game007BaseGameState.SpinState.First.State = "Spinning"
     statusTexts.SetCurrentActive("GoodLuckText")
     self:ResetSettings()
