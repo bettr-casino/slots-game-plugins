@@ -78,6 +78,8 @@ namespace Bettr.Editor
         private const string OutcomesServerBaseURL = "https://bettr-casino-outcomes.s3.us-west-2.amazonaws.com";
         private const string GatewayUrl = "https://3wcgnl14qb.execute-api.us-west-2.amazonaws.com/gateway";
         
+        private const string AUDIO_FORMAT = ".wav";
+        
         [MenuItem("Bettr/Tools/Check Material Shader")]
         public static void CheckMaterialShaderFromMenu()
         {
@@ -917,7 +919,7 @@ namespace Bettr.Editor
                 }
             }
             
-            Debug.Log($"Processed {processCount} machine variants.");
+            Debug.Log($"SyncGameScripts: Processed {processCount} machine variants.");
         }
 
         [MenuItem("Bettr/Tools/Fix Audio WebGL Settings")]
@@ -1001,7 +1003,58 @@ namespace Bettr.Editor
             
             AssetDatabase.Refresh();
 
-            Debug.Log($"Processed {processCount} machine variants.");
+            Debug.Log($"SyncAudioFiles: Processed {processCount} machine variants.");
+        }
+        
+        [MenuItem("Bettr/Tools/Cleanup Runtime Audio Files")]
+        public static void CleanupAudioFiles()
+        {
+            var processCount = 0;
+            var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+
+            for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
+            {
+                var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
+                if (!machineNameDir.Name.StartsWith("Game") || machineNameDir.Name == "Game001Alpha")
+                {
+                    continue;
+                }
+
+                var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
+                if (variantsDir == null)
+                {
+                    continue;
+                }
+
+                var machineVariantsDirs = variantsDir.GetDirectories();
+
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir.GetDirectories();
+
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir.Name;
+                        string experimentVariant = experimentVariantDir.Name;
+
+                        string runtimeAssetPath =
+                            $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
+                        if (!Directory.Exists(runtimeAssetPath))
+                        {
+                            Debug.LogError($"Directory not found: {runtimeAssetPath}");
+                            continue;
+                        }
+                        
+                        // Delete audio files properly
+                        DeleteAudio(machineName, machineVariant, experimentVariant, runtimeAssetPath);
+                    }
+                }
+            }
+            
+            AssetDatabase.Refresh();
+
+            Debug.Log($"CleanupAudioFiles: Processed {processCount} machine variants.");
         }
 
         private static void EnforceWebGLAudioOverride()
@@ -1017,7 +1070,7 @@ namespace Bettr.Editor
             foreach (var audioSourceFile in audioSourceFiles)
             {
                 // check if audioSourceFile is a .ogg file
-                if (!audioSourceFile.EndsWith(".ogg"))
+                if (!audioSourceFile.EndsWith(AUDIO_FORMAT))
                 {
                     continue;
                 }
@@ -1077,6 +1130,14 @@ namespace Bettr.Editor
                     File.Delete(assetDestinationPath);
                 }
             }
+            
+            // if the directory is now empty delete it
+            if (Directory.GetFiles(destinationPath).Length == 0)
+            {
+                Directory.Delete(destinationPath);
+                // delete the meta file as well
+                File.Delete($"{destinationPath}.meta");
+            }
         }
 
         private static void ProcessAudio(string machineName, string machineVariant, string experimentVariant, string runtimeAssetPath)
@@ -1129,6 +1190,7 @@ namespace Bettr.Editor
             // Walk the entire directory tree under the plugin root directory
             var processCount = 0;
             var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+            string coreAssetPath = $"Assets/Bettr/Core";
             for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
             {
                 var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
@@ -1191,12 +1253,9 @@ namespace Bettr.Editor
                             Object.DestroyImmediate(audioSource, true);
                         }
                         
-                        string audioDirectory = Path.Combine(runtimeAssetPath, "Audio");
+                        string audioDirectory = Path.Combine(coreAssetPath, "Audio");
                         // get the audio files under the audio directory
-                        string[] audioFilesOgg = Directory.GetFiles(audioDirectory, "*.ogg", SearchOption.AllDirectories);
-                        
-                        // combine into single audioFiles array
-                        string[] audioFiles = audioFilesOgg;
+                        string[] audioFiles = Directory.GetFiles(audioDirectory, $"*{AUDIO_FORMAT}", SearchOption.AllDirectories);
                         
                         // loop over the audio files
                         foreach (var audioFile in audioFiles)

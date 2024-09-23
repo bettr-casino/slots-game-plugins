@@ -19,8 +19,6 @@ function Game004BaseGameMachinePaylinesMechanic:Initialize(machine)
     Game004BaseGameMachine.BaseGameStateDispatchTable.WaitingForPayToComplete = function()
         self:WaitingForPayToComplete(machine)
     end
-    -- turn off all audio
-    BettrAudioController.StopAudio("rollupwins")
 end
 
 function Game004BaseGameMachinePaylinesMechanic:BaseGamePaying(machine)
@@ -105,7 +103,7 @@ function Game004BaseGameMachinePaylinesMechanic:DisplayPaylines(machine)
                             do
                                 BettrAudioController.PlayAudioLoop("rollupwins")
                                 self:RollUpPaylinesWin(machine, payline, state, summary, duration)
-                                BettrAudioController.StopAudio("rollupwins")
+                                BettrAudioController.StopAudio()
                             end
                             do
                                 -- display paylines

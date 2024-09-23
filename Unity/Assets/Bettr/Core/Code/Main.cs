@@ -32,8 +32,6 @@ namespace Bettr.Core
         [NonSerialized] private BettrVisualsController _bettrVisualsController;
         // ReSharper disable once NotAccessedField.Local
         [NonSerialized] private BettrOutcomeController _bettrOutcomeController;
-        // ReSharper disable once NotAccessedField.Local
-        [NonSerialized] private BettrAudioController _bettrAudioController;
 
         private bool _oneTimeSetUpComplete;
 
@@ -168,8 +166,6 @@ namespace Bettr.Core
                     UseFileSystemOutcomes = _configData.UseFileSystemOutcomes,
                 };
 
-            _bettrAudioController = new BettrAudioController();
-            
             // Register the specialized performance controllers
             TileController.RegisterType<BettrReelController>("BettrReelController");
 
@@ -246,7 +242,7 @@ namespace Bettr.Core
 
         private void TurnOffVolume()
         {
-            _bettrAudioController.IsVolumeMuted = !_bettrAudioController.IsVolumeMuted;
+            BettrAudioBehaviour.Instance.IsVolumeMuted = !BettrAudioBehaviour.Instance.IsVolumeMuted;
         }
         
         private IEnumerator UpdateCommitHash()

@@ -41,8 +41,6 @@ namespace Bettr.Runtime.Plugin.Main.Tests
         [NonSerialized] private BettrVisualsController _bettrVisualsController;
         // ReSharper disable once NotAccessedField.Local
         [NonSerialized] private BettrOutcomeController _bettrOutcomeController;
-        // ReSharper disable once NotAccessedField.Local
-        [NonSerialized] private BettrAudioController _bettrAudioController;
         
         private Tile _tile;
 
@@ -128,8 +126,6 @@ namespace Bettr.Runtime.Plugin.Main.Tests
                     WebOutcomesBaseURL = _configData.WebOutcomesBaseURL,
                     UseFileSystemOutcomes = _configData.UseFileSystemOutcomes,
                 };
-
-            _bettrAudioController = new BettrAudioController();
 
             BettrVisualsController.SwitchOrientationToPortrait();
             

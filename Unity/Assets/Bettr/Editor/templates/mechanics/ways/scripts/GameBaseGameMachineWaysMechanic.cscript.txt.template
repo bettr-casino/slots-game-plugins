@@ -20,7 +20,7 @@ function {{machineName}}BaseGameMachineWaysMechanic:Initialize(machine)
         self:WaitingForPayToComplete(machine)
     end
     -- turn off all audio
-    BettrAudioController.StopAudio("rollupwins")
+    BettrAudioController.StopAudio()
 end
 
 function {{machineName}}BaseGameMachineWaysMechanic:BaseGamePaying(machine)
@@ -114,7 +114,7 @@ function {{machineName}}BaseGameMachineWaysMechanic:DisplayWays(machine)
                                 -- stop previous audio
                                 BettrAudioController.PlayAudioLoop("rollupwins")
                                 self:RollUpWaysWin(machine, way, waysState, waysSummary, duration)
-                                BettrAudioController.StopAudio("rollupwins")
+                                BettrAudioController.StopAudio()
                             end
                             do
                                 -- display ways

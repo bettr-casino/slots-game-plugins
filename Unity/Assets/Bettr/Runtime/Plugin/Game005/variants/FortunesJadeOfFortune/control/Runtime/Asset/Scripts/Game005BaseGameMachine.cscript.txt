@@ -24,7 +24,6 @@ end
 
 function Game005BaseGameMachine:Awake()
 	System.Print("Game005BaseGameMachine Awake tile id={0}", self.id)
-	BettrAudioController.Initialize(self.gameObject)
 	self.Mechanics = Game005BaseGameMachineMechanics:new()
 	self.Mechanics:Initialize(self)
 end
@@ -32,9 +31,7 @@ end
 function Game005BaseGameMachine:Start()
     series
         do
-            -- ensure all audio is off
-            BettrAudioController.StopAudio("spinning")
-            BettrAudioController.StopAudio("spinbutton")                        
+            BettrAudioController.StopAudio()
 	        self:ConfigureSettings()
 	        self:ShowSettings()
 	        self:PlayStartAnimations()
@@ -46,9 +43,8 @@ end
 function Game005BaseGameMachine:OnSpinButtonClicked()
     series
         do
-            BettrAudioController.StopAudio("spinbutton")
+            BettrAudioController.StopAudio()
             BettrAudioController.PlayAudioOnce("spinbutton")
-            BettrAudioController.StopAudio("spinning")
             BettrAudioController.PlayAudioLoop("spinning")
             self.Mechanics:OnSpinButtonClicked(self)
             self:SpinEngines()
@@ -223,7 +219,7 @@ function Game005BaseGameMachine:UpdateBaseGameReelsSpinState(state)
 end
 
 function Game005BaseGameMachine:TryPaying()
-    BettrAudioController.StopAudio("spinning")
+    BettrAudioController.StopAudio()
     Game005BaseGameState.SpinState.First.State = "Paying"
 end
 
