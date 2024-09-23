@@ -172,11 +172,21 @@ function Game004BaseGameMachine:WaitForApplyOutcomeDelay()
 end
 
 function Game004BaseGameMachine:SpinEngines()
-    Game004BaseGameState.SpinState.First.State = "Spinning"
-    local statusTexts = self.StatusTexts
-    statusTexts.SetCurrentActive("GoodLuckText")
     local winSymbols = self.WinSymbols
+    local statusTexts = self.StatusTexts
     winSymbols.SetAllInactive()
+    local baseWager = Game004BaseGameProperties.BaseWager.First.Value
+    if BettrUser.Coins < baseWager then
+        System.Print("Game004BaseGameMachine:SpinEngines Reset user coins to 1000 coins since currentCoins={0} less than wager={1}", currentCoins, baseWager)
+        BettrUser.Coins = 1000
+    end
+    local oldCoins = BettrUser.Coins
+    local newCoins = BettrUser.Coins - baseWager
+    System.Print("Game004BaseGameMachine:SpinEngines applying wager oldCoins={0} newCoins={1} wager={2}", oldCoins, newCoins, baseWager)
+    BettrUser.Coins = newCoins
+    BettrVisualsController.RollUpCounter(self.CreditsText, oldCoins, newCoins, 0.2)
+    Game004BaseGameState.SpinState.First.State = "Spinning"
+    statusTexts.SetCurrentActive("GoodLuckText")
     self:ResetSettings()
     parallel
         
@@ -232,6 +242,7 @@ end
 
 function Game004BaseGameMachine:OnSpinReelsStopped()
     self:UpdateBaseGameReelsSpinState("Waiting")
+    self.StatusTexts.SetAllInactive()
     self:TryPaying()
 end
 
