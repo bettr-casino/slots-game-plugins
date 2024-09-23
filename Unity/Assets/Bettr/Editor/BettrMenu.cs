@@ -952,6 +952,32 @@ namespace Bettr.Editor
                         string machineVariant = machineVariantsDir.Name;
                         string experimentVariant = experimentVariantDir.Name;
 
+                        string runtimeAssetPath =
+                            $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
+                        if (!Directory.Exists(runtimeAssetPath))
+                        {
+                            Debug.LogError($"Directory not found: {runtimeAssetPath}");
+                            continue;
+                        }
+                        
+                        // Delete audio files properly
+                        DeleteAudio(machineName, machineVariant, experimentVariant, runtimeAssetPath);
+                    }
+                }
+                
+                // refresh database
+                AssetDatabase.Refresh();
+
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir.GetDirectories();
+
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir.Name;
+                        string experimentVariant = experimentVariantDir.Name;
+
                         string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
                         if (!Directory.Exists(runtimeAssetPath))
                         {
@@ -972,6 +998,39 @@ namespace Bettr.Editor
             Debug.Log($"Processed {processCount} machine variants.");
         }
 
+
+        private static void DeleteAudio(string machineName, string machineVariant, string experimentVariant,
+            string runtimeAssetPath)
+        {
+            string audioSourcePath = "Assets/Bettr/Editor/audio";
+
+            string destinationPath = Path.Combine(runtimeAssetPath, "Audio");
+
+            if (!Directory.Exists(audioSourcePath))
+            {
+                Debug.LogWarning($"No audio found at: {audioSourcePath}");
+                return;
+            }
+
+            if (!Directory.Exists(destinationPath))
+            {
+                Directory.CreateDirectory(destinationPath);
+            }
+
+            // get the existing files
+            string[] existingAudioFiles = Directory.GetFiles(destinationPath);
+            foreach (var existingAudioFile in existingAudioFiles)
+            {
+                string fileName = Path.GetFileName(existingAudioFile);
+                string assetDestinationPath = $"{destinationPath}/{fileName}";
+
+                if (File.Exists(assetDestinationPath))
+                {
+                    File.Delete(assetDestinationPath);
+                }
+            }
+        }
+
         private static void ProcessAudio(string machineName, string machineVariant, string experimentVariant, string runtimeAssetPath)
         {
             string audioSourcePath = "Assets/Bettr/Editor/audio";
@@ -989,7 +1048,12 @@ namespace Bettr.Editor
                 Directory.CreateDirectory(destinationPath);
             }
 
-            var audioFiles = Directory.GetFiles(audioSourcePath, "*.wav");  // Assuming audio files are .wav
+            string[] audioFilesWav = Directory.GetFiles(audioSourcePath, "*.wav");
+            string[] audioFilesMp3 = Directory.GetFiles(audioSourcePath, "*.mp3");
+            string[] audioFilesOgg = Directory.GetFiles(audioSourcePath, "*.ogg");
+                        
+            // combine into single audioFiles array
+            string[] audioFiles = audioFilesWav.Concat(audioFilesMp3).Concat(audioFilesOgg).ToArray();            
 
             foreach (var audioFile in audioFiles)
             {
@@ -1081,7 +1145,11 @@ namespace Bettr.Editor
                         
                         string audioDirectory = Path.Combine(runtimeAssetPath, "Audio");
                         // get the audio files under the audio directory
-                        string[] audioFiles = Directory.GetFiles(audioDirectory, "*.wav", SearchOption.AllDirectories);
+                        string[] audioFilesOgg = Directory.GetFiles(audioDirectory, "*.ogg", SearchOption.AllDirectories);
+                        
+                        // combine into single audioFiles array
+                        string[] audioFiles = audioFilesOgg;
+                        
                         // loop over the audio files
                         foreach (var audioFile in audioFiles)
                         {
@@ -1829,7 +1897,9 @@ namespace Bettr.Editor
                                                 return 0;
                                             
                                             // Sort wav files second
-                                            if (assetStr.EndsWith(".wav", StringComparison.OrdinalIgnoreCase))
+                                            if (assetStr.EndsWith(".wav", StringComparison.OrdinalIgnoreCase)
+                                                || assetStr.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase)
+                                                    || assetStr.EndsWith(".ogg", StringComparison.OrdinalIgnoreCase))
                                                 return 1;
 
                                             // Sort scripts second
