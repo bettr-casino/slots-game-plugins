@@ -919,6 +919,12 @@ namespace Bettr.Editor
             
             Debug.Log($"Processed {processCount} machine variants.");
         }
+
+        [MenuItem("Bettr/Tools/Fix Audio WebGL Settings")]
+        public static void FixAudioWebGLSettings()
+        {
+            EnforceWebGLAudioOverride();
+        }
         
         [MenuItem("Bettr/Tools/Sync Audio Files")]
         public static void SyncAudioFiles()
@@ -996,6 +1002,48 @@ namespace Bettr.Editor
             AssetDatabase.Refresh();
 
             Debug.Log($"Processed {processCount} machine variants.");
+        }
+
+        private static void EnforceWebGLAudioOverride()
+        {
+            string audioSourcePath = "Assets/Bettr/Editor/audio";
+            if (!Directory.Exists(audioSourcePath))
+            {
+                Debug.LogWarning($"No audio found at: {audioSourcePath}");
+                return;
+            }
+            // get the existing files
+            string[] audioSourceFiles = Directory.GetFiles(audioSourcePath);
+            foreach (var audioSourceFile in audioSourceFiles)
+            {
+                // check if audioSourceFile is a .ogg file
+                if (!audioSourceFile.EndsWith(".ogg"))
+                {
+                    continue;
+                }
+                
+                AudioImporter audioImporter = (AudioImporter)AssetImporter.GetAtPath(audioSourceFile);
+                if (audioImporter == null)
+                {
+                    Debug.LogError($"Failed to get AudioImporter for {audioSourceFile}");
+                    continue;
+                }
+                AudioImporterSampleSettings webGLSettings = audioImporter.GetOverrideSampleSettings("WebGL");
+
+                // Change the compression format to Vorbis
+                webGLSettings.compressionFormat = AudioCompressionFormat.Vorbis;
+                webGLSettings.loadType = AudioClipLoadType.CompressedInMemory;
+
+                // Set the override for WebGL
+                audioImporter.SetOverrideSampleSettings("WebGL", webGLSettings);
+                
+                // save changes
+                audioImporter.SaveAndReimport();
+
+                // Reimport the audio clip to apply changes
+                AssetDatabase.ImportAsset(audioSourceFile);
+                Debug.Log("Updated compression format for: " + audioSourceFile);
+            }
         }
 
 
