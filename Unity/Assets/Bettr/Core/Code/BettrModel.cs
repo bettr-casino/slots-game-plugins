@@ -50,7 +50,25 @@ namespace Bettr.Core
     public class BettrUserConfig
     {
         public string UserId { get; set; }
-        public long Coins { get; set; }
+        private long _coins = 0;
+
+        public long Coins
+        {
+            get
+            {
+                // ReSharper disable once ArrangeAccessorOwnerBody
+                return _coins;
+            }
+            set
+            {
+                _coins = value;
+                if (_coins < 0)
+                {
+                    _coins = 0;
+                }
+            }
+        }
+
         // ReSharper disable once InconsistentNaming
         public long XP { get; set; }
         public long Level { get; set; }

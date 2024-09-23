@@ -166,7 +166,9 @@ function Game006BaseGameMachineWaysMechanic:RollUpWaysWin(machine, way, waysStat
             local creditsTextProperty = machine.CreditsText   
             local oldCoins = waysState.PaysRollup
             local newCoins = oldCoins + pays            
-            waysState.PaysRollup = newCoins  
+            waysState.PaysRollup = newCoins
+            
+            BettrUser.Coins = newCoins  
                       
             BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 1)
         end

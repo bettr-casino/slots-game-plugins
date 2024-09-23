@@ -156,7 +156,9 @@ function Game004BaseGameMachinePaylinesMechanic:RollUpPaylinesWin(machine, payli
             local creditsTextProperty = machine.CreditsText   
             local oldCoins = paylinesState.PaysRollup
             local newCoins = oldCoins + pays            
-            paylinesState.PaysRollup = newCoins  
+            paylinesState.PaysRollup = newCoins 
+            
+            BettrUser.Coins = newCoins
                       
             BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 1)
         end
