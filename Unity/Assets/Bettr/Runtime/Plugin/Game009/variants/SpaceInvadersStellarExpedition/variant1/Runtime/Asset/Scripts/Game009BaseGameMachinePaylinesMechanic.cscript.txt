@@ -128,7 +128,7 @@ function Game009BaseGameMachinePaylinesMechanic:DisplayPaylines(machine)
             paylinesIndex = state.PaylinesIndex
             state.PaylinesIndex = paylinesIndex + 1
             System.WaitForSeconds(endDelay)
-            if paylinesIndex >= 1 then
+            if paylinesIndex >= 0 then
                 machine:OnPayingCompleted()
                 return
             end
