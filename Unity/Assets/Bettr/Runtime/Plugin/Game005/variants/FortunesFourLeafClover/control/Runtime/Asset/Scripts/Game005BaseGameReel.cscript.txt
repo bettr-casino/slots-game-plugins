@@ -76,6 +76,7 @@ function Game005BaseGameReel:SpinReelSpinEndingRollForward()
 end
 
 function Game005BaseGameReel:SpinReelReachedOutcomeStopIndex()
+    BettrAudioController.PlayAudioOnce("reelstop")
     local reelSpinState = Game005BaseGameReelSpinState[self.ReelID].First
     reelSpinState.ReelSpinState = "SpinEndingRollForward"
 end
