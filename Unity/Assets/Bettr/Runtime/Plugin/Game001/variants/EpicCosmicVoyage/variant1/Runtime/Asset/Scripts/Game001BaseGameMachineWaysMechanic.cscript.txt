@@ -94,7 +94,7 @@ function Game001BaseGameMachineWaysMechanic:DisplayWays(machine)
             local endDelay = waysSummary.DisplayLoopEndDelay            
             local waysIndex = waysState.WaysIndex
             if waysIndex == 0 then
-                System.WaitForSeconds(startDelay)
+                System.WaitForSeconds(startDelay*2 + endDelay*2)
             end
             for waysCounterIndex = 1, waysCount do
                 series
@@ -137,7 +137,6 @@ function Game001BaseGameMachineWaysMechanic:DisplayWays(machine)
             end
             waysIndex = waysState.WaysIndex
             waysState.WaysIndex = waysIndex + 1
-            System.WaitForSeconds(endDelay)
             if waysIndex >= 0 then
                 machine:OnPayingCompleted()
                 return

@@ -838,7 +838,7 @@ namespace Bettr.Editor
                 Material material = quad.GetComponent<Renderer>().sharedMaterial;
                 // fix the alpha of the material color to 1
                 Color color = material.color;
-                color.a = 1;
+                color.a = 0.6f;
                 material.color = color;
                 
                 // bump the process count

@@ -84,7 +84,7 @@ function Game004BaseGameMachinePaylinesMechanic:DisplayPaylines(machine)
             local endDelay = summary.DisplayLoopEndDelay
             local paylinesIndex = state.PaylinesIndex            
             if paylinesIndex == 0 then
-                System.WaitForSeconds(startDelay)
+                System.WaitForSeconds(startDelay*2 + endDelay*2)
             end
             for counterIndex = 1, count do
                 series
@@ -127,7 +127,6 @@ function Game004BaseGameMachinePaylinesMechanic:DisplayPaylines(machine)
             end
             paylinesIndex = state.PaylinesIndex
             state.PaylinesIndex = paylinesIndex + 1
-            System.WaitForSeconds(endDelay)
             if paylinesIndex >= 0 then
                 machine:OnPayingCompleted()
                 return
