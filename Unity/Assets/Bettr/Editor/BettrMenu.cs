@@ -19,6 +19,7 @@ using DirectoryInfo = System.IO.DirectoryInfo;
 
 using Scriban;
 using Scriban.Runtime;
+using TMPro;
 using Exception = System.Exception;
 using Object = UnityEngine.Object;
 
@@ -1182,6 +1183,131 @@ namespace Bettr.Editor
 
                 Debug.Log($"Copied and imported audio asset: {assetDestinationPath}");
             }
+        }
+        
+        private static GameObject FindGameObjectInPrefab(GameObject prefab, string gameObjectName)
+        {
+            Transform[] allTransforms = prefab.GetComponentsInChildren<Transform>(true);
+            foreach (Transform transform in allTransforms)
+            {
+                if (transform.gameObject.name == gameObjectName)
+                {
+                    return transform.gameObject;
+                }
+            }
+
+            return null;
+        }
+        
+        private static void SetLayerRecursively(GameObject gameObject, int layer)
+        {
+            gameObject.layer = layer;
+            foreach (Transform child in gameObject.transform)
+            {
+                SetLayerRecursively(child.gameObject, layer);
+            }
+        }
+        
+        [MenuItem("Bettr/Tools/Fix Status Texts")]
+        public static void FixStatusTexts()
+        {
+            // Walk the entire directory tree under the plugin root directory
+            var processCount = 0;
+            var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+            string coreAssetPath = $"Assets/Bettr/Core";
+            for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
+            {
+                var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
+                // Check that the MachineName starts with "Game" and is not "Game001Alpha"
+                if (!machineNameDir.Name.StartsWith("Game") || machineNameDir.Name == "Game001Alpha")
+                {
+                    continue;
+                }
+                var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
+                if (variantsDir == null)
+                {
+                    continue;
+                }
+                var machineVariantsDirs = variantsDir?.GetDirectories();
+                // loop over machineVariantsDir
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir?.GetDirectories();
+                    if (experimentVariantDirs == null)
+                    {
+                        continue;
+                    }
+                    // loop over experimentVariantDirs
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        // now extract the machineName from machineNameDir, machineVariant from machineVariantsDir, and experimentVariant from experimentVariantDir
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir?.Name;
+                        string experimentVariant = experimentVariantDir?.Name;
+                        
+                        string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
+                        if (!Directory.Exists(runtimeAssetPath))
+                        {
+                            Debug.LogError($"Directory not found: {runtimeAssetPath}");
+                            continue;
+                        }
+                        
+                        // get the prefabs directory
+                        string prefabsDirectory = Path.Combine(runtimeAssetPath, "Prefabs");
+                        // get the Game<NNN>BaseGameMachine.prefab
+                        string machinePrefabPath = Directory.GetFiles(prefabsDirectory, $"{machineName}BaseGameMachine.prefab", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                        if (string.IsNullOrEmpty(machinePrefabPath))
+                        {
+                            Debug.LogError($"Machine prefab not found: {machineName}BaseGameMachine.prefab");
+                            continue;
+                        }
+                        
+                        // load the Prefab asset
+                        GameObject machinePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(machinePrefabPath);
+                        if (machinePrefab == null)
+                        {
+                            Debug.LogError($"Failed to load prefab: {machineName}BaseGameMachine.prefab");
+                            continue;
+                        }
+                        
+                        // Get the WinSymbols GameObject
+                        GameObject winSymbols = FindGameObjectInPrefab(machinePrefab, "WinSymbols");
+                        winSymbols.transform.localPosition = new Vector3(-6.34f, -4.55f, -20);
+                        winSymbols.transform.localScale = new Vector3(1, 1, 1);
+                        // Switch to SLOT_OVERLAY Layer
+                        SetLayerRecursively(winSymbols, LayerMask.NameToLayer("SLOT_OVERLAY"));
+                        
+                        // Get the GoodLuckTexts and PaysText Game Objects which are descendants of the machine prefab
+                        GameObject goodLuckText = FindGameObjectInPrefab(machinePrefab, "GoodLuckText");
+                        GameObject paysText = FindGameObjectInPrefab(machinePrefab, "PaysText");
+                        // Fix the scale of the paysText component to match the goodLuckText component
+                        paysText.transform.localScale = goodLuckText.transform.localScale;
+                        // Get the RectTransform height of the goodLuckText component
+                        RectTransform goodLuckTextRectTransform = goodLuckText.GetComponent<RectTransform>();
+                        // Get the RectTransform height of the paysText component
+                        RectTransform paysTextRectTransform = paysText.GetComponent<RectTransform>();
+                        // Set the height of the paysText component to match the goodLuckText component
+                        paysTextRectTransform.sizeDelta = new Vector2(paysTextRectTransform.sizeDelta.x, goodLuckTextRectTransform.sizeDelta.y);
+                        // Set the PosY of the paysText component to match the goodLuckText component
+                        paysTextRectTransform.anchoredPosition = new Vector2(paysTextRectTransform.anchoredPosition.x, goodLuckTextRectTransform.anchoredPosition.y);
+                        // Set the Transform X to -2.25
+                        paysText.transform.localPosition = new Vector3(-3.6f, paysText.transform.localPosition.y, paysText.transform.localPosition.z);
+                        // change the paysText 
+                        paysText.GetComponent<TextMeshPro>().text = "x {0} = {1,3} x {2} = {3,3}";
+                        
+                        // save the prefab
+                        PrefabUtility.SaveAsPrefabAsset(machinePrefab, machinePrefabPath);
+                        
+                        Debug.Log($"Fixing Status Text for machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant}");
+                
+                        processCount++;
+                    }
+                }
+            }
+            
+            AssetDatabase.Refresh();
+            
+            Debug.Log($"Processed Fix Status Texts {processCount} machine variants.");
         }
         
         [MenuItem("Bettr/Tools/Fix Audio Source")]
