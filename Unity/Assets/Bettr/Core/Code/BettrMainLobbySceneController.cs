@@ -37,7 +37,17 @@ namespace Bettr.Core
         {
             var bettrUser = BettrUserController.Instance.BettrUserConfig;
             // lobbyCardName example Game001__LobbyCard001
+            if (!lobbyCardName.Contains("__"))
+            {
+                Debug.LogError($"LoadLobbyCardMachine invalid lobbyCardName={lobbyCardName}");
+                yield break;
+            }
             var lobbyCardIndex = bettrUser.FindLobbyCardIndexById(lobbyCardName.Split("__")[1]);
+            if (lobbyCardIndex == -1)
+            {
+                Debug.LogError($"LoadLobbyCardMachine invalid lobbyCardIndex={lobbyCardIndex} lobbyCardName={lobbyCardName}");
+                yield break;
+            }
             bettrUser.LobbyCardIndex = lobbyCardIndex;
             var lobbyCard = bettrUser.LobbyCards[lobbyCardIndex];
             var (machineName, machineVariant) = GetLobbyCardExperiment(lobbyCard);
