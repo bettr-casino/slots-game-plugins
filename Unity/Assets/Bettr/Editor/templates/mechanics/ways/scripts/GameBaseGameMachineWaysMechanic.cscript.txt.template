@@ -31,7 +31,6 @@ function {{machineName}}BaseGameMachineWaysMechanic:BaseGamePaying(machine)
         machine:OnPayingCompleted()
         return
     end
-    BettrAudioController.PlayAudioLoop("rollupwins")
     System.StartCoroutine(machine, "BaseGamePayout")
 end
 
@@ -93,9 +92,9 @@ function {{machineName}}BaseGameMachineWaysMechanic:DisplayWays(machine)
             local duration = waysSummary.DisplayLoopDuration
             local endDelay = waysSummary.DisplayLoopEndDelay            
             local waysIndex = waysState.WaysIndex
-            if waysIndex == 0 then
-                System.WaitForSeconds(startDelay*2 + endDelay*2)
-            end
+            -- TODO: FIXME outcomes are not storing the ways state
+            System.WaitForSeconds(startDelay*2 + endDelay*2)
+            BettrAudioController.PlayAudioLoop("rollupwins")                
             for waysCounterIndex = 1, waysCount do
                 series
                     do

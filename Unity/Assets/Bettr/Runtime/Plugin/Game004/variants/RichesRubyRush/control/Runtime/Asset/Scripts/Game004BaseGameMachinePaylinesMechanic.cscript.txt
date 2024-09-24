@@ -29,7 +29,6 @@ function Game004BaseGameMachinePaylinesMechanic:BaseGamePaying(machine)
         machine:OnPayingCompleted()
         return
     end
-    BettrAudioController.PlayAudioLoop("rollupwins")    
     System.StartCoroutine(machine, "BaseGamePayout")
 end
 
@@ -83,9 +82,9 @@ function Game004BaseGameMachinePaylinesMechanic:DisplayPaylines(machine)
             local duration = summary.DisplayLoopDuration
             local endDelay = summary.DisplayLoopEndDelay
             local paylinesIndex = state.PaylinesIndex            
-            if paylinesIndex == 0 then
-                System.WaitForSeconds(startDelay*2 + endDelay*2)
-            end
+            -- TODO: FIXME outcomes are not storing the paylines state
+            System.WaitForSeconds(startDelay*2 + endDelay*2)
+            BettrAudioController.PlayAudioLoop("rollupwins")               
             for counterIndex = 1, count do
                 series
                     do
