@@ -193,7 +193,8 @@ build-lobby-assets-webgl: prepare-project
 
 build-main-assets-webgl: prepare-project
 	@echo "Building WebGL main asset bundles..."
-	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "mainv0_1_0" -assetSubLabel "control" -buildTarget WebGL;
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "mainv0_1_0" -assetSubLabel "control" -buildTarget WebGL; \
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "mainv0_1_0_scenes" -assetSubLabel "control" -buildTarget WebGL
 
 build-game001-assets-webgl: prepare-project
 	@echo "Building WebGL game001 variants asset bundles..."

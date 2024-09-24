@@ -95,6 +95,8 @@ namespace Bettr.Core
             
             Debug.Log("OneTimeSetup started");
             
+            DontDestroyOnLoad(gameObject);
+            
             TileController.StaticInit();
             TileController.RegisterModule("Bettr.dll");
             TileController.RegisterModule("casino.bettr.plugin.Core.dll");
@@ -182,6 +184,8 @@ namespace Bettr.Core
             
             yield return _bettrExperimentController.GetUserExperiments();
             
+            yield return _bettrAssetController.LoadScene(bettrUser.Main.BundleName, bettrUser.Main.BundleVersion, "Main"); 
+            
             yield return _bettrAssetController.LoadPackage(bettrUser.Main.BundleName, bettrUser.Main.BundleVersion, false);
             
             ScriptRunner.Initialize();
@@ -190,8 +194,6 @@ namespace Bettr.Core
             var scriptRunner = ScriptRunner.Acquire(mainTable);
             yield return scriptRunner.CallAsyncAction("Init");
             ScriptRunner.Release(scriptRunner);
-            
-            DontDestroyOnLoad(gameObject);
             
             Debug.Log("OneTimeSetup ended");
             

@@ -39,13 +39,13 @@ namespace Bettr.Core
             // lobbyCardName example Game001__LobbyCard001
             if (!lobbyCardName.Contains("__"))
             {
-                Debug.LogError($"LoadLobbyCardMachine invalid lobbyCardName={lobbyCardName}");
+                Debug.Log($"LoadLobbyCardMachine invalid lobbyCardName={lobbyCardName}");
                 yield break;
             }
             var lobbyCardIndex = bettrUser.FindLobbyCardIndexById(lobbyCardName.Split("__")[1]);
             if (lobbyCardIndex == -1)
             {
-                Debug.LogError($"LoadLobbyCardMachine invalid lobbyCardIndex={lobbyCardIndex} lobbyCardName={lobbyCardName}");
+                Debug.Log($"LoadLobbyCardMachine invalid lobbyCardIndex={lobbyCardIndex} lobbyCardName={lobbyCardName}");
                 yield break;
             }
             bettrUser.LobbyCardIndex = lobbyCardIndex;
