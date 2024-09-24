@@ -22,17 +22,21 @@ function Game009BaseGameReelPaylinesMechanic:DisplayPaylines(reel, paylineSymbol
            local rowIndex = paylineMatrix[i].RowIndex
            local luaRowIndex = rowIndex + 1
            local animatorGroupProperty = reel["SymbolPaylinesWinAnimatorGroup" .. luaRowIndex]
-           local symbolGroupProperty = reel["SymbolGroup" .. luaRowIndex]
-           local currentKey = symbolGroupProperty.CurrentKey
-           local animatorProperty = animatorGroupProperty[currentKey]
-           if animatorProperty == nil then
-                System.Print("animatorProperty is nil reelID={0} rowIndex={1} luaRowIndex={2} currentKey={3}", reelID, rowIndex, luaRowIndex, currentKey)
-           else
-               animatorProperty.overrideAnimationDuration = true
-               animatorProperty.animationDuration = duration
-               BettrVisualsController.PlayAnimatorProperty(animatorProperty)
-               -- Core.Animator:PlayAnimatorProperty(currentKey, animatorProperty)
-           end
+           if animatorGroupProperty == nil then
+              System.Print("animatorGroupProperty is nil paylineReelID={0} rowIndex={1} luaRowIndex={2}", reelID, rowIndex, luaRowIndex)
+          else
+               local symbolGroupProperty = reel["SymbolGroup" .. luaRowIndex]
+               local currentKey = symbolGroupProperty.CurrentKey
+               local animatorProperty = animatorGroupProperty[currentKey]
+               if animatorProperty == nil then
+                    System.Print("animatorProperty is nil reelID={0} rowIndex={1} luaRowIndex={2} currentKey={3}", reelID, rowIndex, luaRowIndex, currentKey)
+               else
+                   animatorProperty.overrideAnimationDuration = true
+                   animatorProperty.animationDuration = duration
+                   BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+                   -- Core.Animator:PlayAnimatorProperty(currentKey, animatorProperty)
+               end
+          end
        end
     end    
 end

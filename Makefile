@@ -203,6 +203,13 @@ build-game001-assets-webgl: prepare-project
 	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game001epicancientadventures_scenes" -assetSubLabel "variant1" -buildTarget WebGL;
 
 
+build-game006-assets-webgl: prepare-project
+	@echo "Building WebGL game001 variants asset bundles..."
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game006wheelsempirebuilder" -assetSubLabel "control" -buildTarget WebGL; \
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game006wheelsempirebuilder_scenes" -assetSubLabel "control" -buildTarget WebGL; \
+	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game006wheelsempirebuilder" -assetSubLabel "variant1" -buildTarget WebGL; \
+	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game006wheelsempirebuilder_scenes" -assetSubLabel "variant1" -buildTarget WebGL;
+
 
 # =============================================================================
 #
@@ -442,6 +449,10 @@ deploy-target-webgl: publish-target-webgl invalidate-target_webgl
 build-webgl:  build-assets-webgl build-target-webgl
 
 deploy-webgl:  deploy-assets-webgl deploy-target-webgl
+
+deploy-webgl-all: build-webgl deploy-webgl build-assets-webgl deploy-assets-webgl
+	@echo "Deploying WebGL project..."
+	@echo "Deployment completed."
 
 # =============================================================================
 #

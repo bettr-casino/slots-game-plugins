@@ -21,16 +21,20 @@ function Game001BaseGameReelWaysMechanic:DisplayWays(reel, waySymbol, wayMatrix,
            local rowIndex = wayMatrix[i].RowIndex
            local luaRowIndex = rowIndex + 1
            local animatorGroupProperty = reel["SymbolWaysWinAnimatorGroup" .. luaRowIndex]
-           local symbolGroupProperty = reel["SymbolGroup" .. luaRowIndex]
-           local currentKey = symbolGroupProperty.CurrentKey
-           local animatorProperty = animatorGroupProperty[currentKey]
-           if animatorProperty == nil then
-               System.Print("animatorProperty is nil wayReelID={0} rowIndex={1} luaRowIndex={2} currentKey={3}", wayReelID, rowIndex, luaRowIndex, currentKey)
+           if animatorGroupProperty == nil then
+               System.Print("animatorGroupProperty is nil wayReelID={0} rowIndex={1} luaRowIndex={2}", wayReelID, rowIndex, luaRowIndex)
            else
-               animatorProperty.overrideAnimationDuration = true
-               animatorProperty.animationDuration = duration
-               BettrVisualsController.PlayAnimatorProperty(animatorProperty)
-               -- Core.Animator:PlayAnimatorProperty(currentKey, animatorProperty)
+               local symbolGroupProperty = reel["SymbolGroup" .. luaRowIndex]
+               local currentKey = symbolGroupProperty.CurrentKey
+               local animatorProperty = animatorGroupProperty[currentKey]
+               if animatorProperty == nil then
+                   System.Print("animatorProperty is nil wayReelID={0} rowIndex={1} luaRowIndex={2} currentKey={3}", wayReelID, rowIndex, luaRowIndex, currentKey)
+               else
+                   animatorProperty.overrideAnimationDuration = true
+                   animatorProperty.animationDuration = duration
+                   BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+                   -- Core.Animator:PlayAnimatorProperty(currentKey, animatorProperty)
+               end
            end
        end
     end
