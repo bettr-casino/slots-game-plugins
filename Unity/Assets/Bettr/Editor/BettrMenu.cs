@@ -838,7 +838,7 @@ namespace Bettr.Editor
                 Material material = quad.GetComponent<Renderer>().sharedMaterial;
                 // fix the alpha of the material color to 1
                 Color color = material.color;
-                color.a = 0.6f;
+                color.a = 0.80f;
                 material.color = color;
                 
                 // bump the process count
@@ -1308,6 +1308,87 @@ namespace Bettr.Editor
             AssetDatabase.Refresh();
             
             Debug.Log($"Processed Fix Status Texts {processCount} machine variants.");
+        }
+        
+        [MenuItem("Bettr/Tools/Fix Background")]
+        public static void FixBackground()
+        {
+            // Walk the entire directory tree under the plugin root directory
+            var processCount = 0;
+            var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+            string coreAssetPath = $"Assets/Bettr/Core";
+            for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
+            {
+                var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
+                // Check that the MachineName starts with "Game" and is not "Game001Alpha"
+                if (!machineNameDir.Name.StartsWith("Game") || machineNameDir.Name == "Game001Alpha")
+                {
+                    continue;
+                }
+                var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
+                if (variantsDir == null)
+                {
+                    continue;
+                }
+                var machineVariantsDirs = variantsDir?.GetDirectories();
+                // loop over machineVariantsDir
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir?.GetDirectories();
+                    if (experimentVariantDirs == null)
+                    {
+                        continue;
+                    }
+                    // loop over experimentVariantDirs
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        // now extract the machineName from machineNameDir, machineVariant from machineVariantsDir, and experimentVariant from experimentVariantDir
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir?.Name;
+                        string experimentVariant = experimentVariantDir?.Name;
+                        
+                        string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
+                        if (!Directory.Exists(runtimeAssetPath))
+                        {
+                            Debug.LogError($"Directory not found: {runtimeAssetPath}");
+                            continue;
+                        }
+                        
+                        // get the prefabs directory
+                        string prefabsDirectory = Path.Combine(runtimeAssetPath, "Prefabs");
+                        string materialsDirectory = Path.Combine(runtimeAssetPath, "Materials");
+                        string texturesDirectory = Path.Combine(runtimeAssetPath, "Textures");
+                        
+                        // The {machineName}BaseGameBackground.prefab uses the BackgroundFBX.prefab which uses the Material_with_Texture material in the Materials
+                        // I want to switch it to use the Standard shader
+                        
+                        // get the Material_with_Texture material
+                        string materialPath = Directory.GetFiles(materialsDirectory, "Material_with_Texture.mat", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                        // load the Material_with_Texture material
+                        Material material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+                        // get the Standard shader
+                        Shader standardShader = Shader.Find("Standard");
+                        // set the shader of the material to the Standard shader
+                        material.shader = standardShader;
+                        
+                        // Enable the Emission property
+                        material.EnableKeyword("_EMISSION");
+                        // Create the emission texture from the Background.jpg which is in the "Textures" directory
+                        string texturePath = Directory.GetFiles(texturesDirectory, "Background.jpg", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                        // load the Background.jpg texture
+                        Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(texturePath);
+                        
+                        
+                        Debug.Log($"Fixing Background for machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant}");
+                
+                        processCount++;
+                    }
+                }
+            }
+            
+            AssetDatabase.Refresh();
+            
+            Debug.Log($"Processed Fix Background {processCount} machine variants.");
         }
         
         [MenuItem("Bettr/Tools/Fix Audio Source")]
