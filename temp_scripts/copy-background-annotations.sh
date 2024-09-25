@@ -29,5 +29,5 @@ delete_files "Game001" "EpicAtlantisTreasures"
 delete_files "Game001" "EpicClockworkChronicles"
 
 copy_files "Game001" "EpicAncientAdventures"
-copy_files "Game001" "EpicAtlantisTreasures"
-copy_files "Game001" "EpicClockworkChronicles"
+# copy_files "Game001" "EpicAtlantisTreasures"
+# copy_files "Game001" "EpicClockworkChronicles"
