@@ -1,0 +1,143 @@
+require "math"
+require "Core"
+
+{{machineName}}BaseGameMachineLinkedReelsMechanic = {
+}
+
+function {{machineName}}BaseGameMachineLinkedReelsMechanic:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function {{machineName}}BaseGameMachineLinkedReelsMechanic:Initialize(machine)
+    -- Appending new entries to the table
+    {{machineName}}BaseGameMachine.BaseGameStateDispatchTable.Paying = function()
+        self:BaseGamePaying(machine)
+    end
+    {{machineName}}BaseGameMachine.BaseGameStateDispatchTable.WaitingForPayToComplete = function()
+        self:WaitingForPayToComplete(machine)
+    end
+end
+
+function {{machineName}}BaseGameMachineLinkedReelsMechanic:BaseGamePaying(machine)
+    {{machineName}}BaseGameState.SpinState.First.State = "WaitingForPayToComplete"
+    System.StartCoroutine(machine, "BaseGamePayout")
+end
+
+function {{machineName}}BaseGameMachineLinkedReelsMechanic:CancelPaylinesAnimation()
+    {{machineName}}BaseGameState.DisplayState.First.State = "CancelRequested"
+end
+
+function {{machineName}}BaseGameMachineLinkedReelsMechanic:WaitingForPayToComplete(machine)    
+end
+
+function {{machineName}}BaseGameMachineLinkedReelsMechanic:WaitForPayToComplete()
+    series
+        do
+            {{machineName}}BaseGameState.DisplayState.First.State = "Idle"            
+        end
+    end
+end
+
+function {{machineName}}BaseGameMachineLinkedReelsMechanic:DisplayPaylines(machine)
+    series
+        do
+            local summary = {{machineName}}BaseGamePaylinesSummary.Paylines.First
+            local count = summary.PaylinesCount
+            if count == 0 then
+                machine:OnPayingCompleted()
+                return
+            end
+            local state = {{machineName}}BaseGamePaylinesState.Paylines.First
+            local paylines = {{machineName}}BaseGamePaylines.Paylines.Array
+            local matrix = {{machineName}}BaseGamePaylinesMatrix                        
+            state.PaysRollup = BettrUser.Coins 
+            count = summary.PaylinesCount
+            local startDelay = summary.DisplayLoopStartDelay
+            local duration = summary.DisplayLoopDuration
+            local endDelay = summary.DisplayLoopEndDelay
+            local paylinesIndex = state.PaylinesIndex            
+            if paylinesIndex == 0 then
+                System.WaitForSeconds(startDelay)
+            end
+            for counterIndex = 1, count do
+                series
+                    do
+                        if {{machineName}}BaseGameState.DisplayState.First.State == "CancelRequested" then
+                            break
+                        end
+                        local payline = paylines[counterIndex]
+                        local symbol = payline.Symbol
+                        local reelCount = payline.ReelCount
+                        local multiplier = payline.Multiplier
+                        local paylineId = payline.PaylineId
+                        local pay = payline.Pay
+                        local totalPay = payline.Pays
+                        local matrix = matrix[symbol].Array
+                        -- update status text 
+                        local statusTexts = machine.StatusTexts
+                        -- {0}        Pays  {1} x {2} ways = {3} CREDITS!!
+                        statusTexts.FormatAndSetCurrentActive("PaysText", reelCount, pay, multiplier, totalPay)
+                        local winSymbols = machine.WinSymbols
+                        winSymbols.SetCurrentActive(symbol)
+                        parallel
+                            do
+                                self:RollUpPaylinesWin(machine, payline, state, summary, duration)
+                            end
+                            do
+                                -- display paylines
+                                for i=1,reelCount parallel do
+                                    local reel = _G["{{machineName}}BaseGameReel" .. i]
+                                    if reel != nil then
+                                        reel.Mechanics.CascadingReelsMechanic:DisplayPaylines(reel, symbol, paylineId, matrix, reelCount, duration)
+                                        System.WaitForSeconds(duration)
+                                        reel.Mechanics.CascadingReelsMechanic:HidePaylines(reel, symbol, paylineId, matrix, reelCount)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end                            
+            end
+            paylinesIndex = state.PaylinesIndex
+            state.PaylinesIndex = paylinesIndex + 1
+            System.WaitForSeconds(endDelay)
+            if paylinesIndex >= 1 then
+                machine:OnPayingCompleted()
+                return
+            end
+            if {{machineName}}BaseGameState.DisplayState.First.State == "CancelRequested" then
+                machine:OnPayingCompleted()
+                return
+            end
+            System.StartCoroutine(machine, "BaseGamePayout")
+        end
+    end
+end
+
+function {{machineName}}BaseGameMachineCascadingReelsMechanic:RollUpPaylinesWin(machine, payline, paylinesState, paylinesSummary, duration)
+    series
+        do
+            -- rollup ways win once
+            local startDelay = paylinesSummary.DisplayLoopStartDelay
+            local duration = paylinesSummary.DisplayLoopDuration
+            local pays = payline.Pays
+            System.WaitForSeconds(startDelay)
+            local winTextProperty = machine.WinText
+            
+            BettrVisualsController.RollUpCounter(winTextProperty, 0, pays, 1)
+            
+            local creditsTextProperty = machine.CreditsText   
+            local oldCoins = paylinesState.PaysRollup
+            local newCoins = oldCoins + pays            
+            paylinesState.PaysRollup = newCoins
+            
+            BettrUser.Coins = newCoins
+                      
+            BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 1)
+        end
+    end    
+end
+
