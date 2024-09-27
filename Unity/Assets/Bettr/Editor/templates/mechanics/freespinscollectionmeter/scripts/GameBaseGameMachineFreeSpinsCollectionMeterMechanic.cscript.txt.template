@@ -1,0 +1,33 @@
+require "math"
+require "Core"
+
+{{machineName}}BaseGameMachineFreeSpinsCollectionMeterMechanic = {
+}
+
+function {{machineName}}BaseGameMachineFreeSpinsCollectionMeterMechanic:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function {{machineName}}BaseGameMachineFreeSpinsCollectionMeterMechanic:Initialize(machine)
+    System.Print("{{machineName}}BaseGameMachineFreeSpinsCollectionMeterMechanic:Initialize")
+end
+
+function {{machineName}}BaseGameMachineFreeSpinsCollectionMeterMechanic:BaseGamePayout(machine)
+    series
+        do
+            System.Print("{{machineName}}BaseGameMachineFreeSpinsCollectionMeterMechanic:BaseGamePayout")
+        end
+    end
+end
+
+function {{machineName}}BaseGameMachineFreeSpinsCollectionMeterMechanic:OnSpinButtonClicked(machine)
+    series
+        do
+            System.Print("{{machineName}}BaseGameMachineFreeSpinsCollectionMeterMechanic:OnSpinButtonClicked")
+        end
+    end
+end
+
