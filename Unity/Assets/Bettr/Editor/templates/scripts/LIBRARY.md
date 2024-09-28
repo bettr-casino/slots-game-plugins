@@ -27,6 +27,8 @@
 | `ResetToIdleState()`          | None                | Resets the game to the idle state after all processes are complete.          | TODO   |
 | `ActivateLinkedReels(reels)`  | reels (array)       | Highlights linked reels and applies a special animation to show they are synchronized. | TODO   |
 | `ExpandLinkedReels(reels)`    | reels (array)       | Adds more reels to the linked reels group during a bonus round.             | TODO   |
+| `TriggerLinkedReelsByWilds(reels)` | reels (array)    | Detects when two or more adjacent Wilds trigger the Linked Reels mechanic.  | TODO   |
+| `PayoutForTriggeringSpin()`   | None                | Calculates and displays the payout for the spin that triggered the Linked Reels feature. | TODO   |
 
 ---
 
