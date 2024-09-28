@@ -1,77 +1,50 @@
-# ORCHESTRATION_EXAMPLE.md
+# Orchestration for Nudging Reels Mechanic in a 5x3 Grid
 
-## Orchestration Example for Nudging Reels Mechanic
+This document describes an example scenario for a **5x3 grid slot machine** where the **Nudging Reels** mechanic is triggered:
 
-This section provides an orchestration example, showing how different events are managed and triggered during a typical slot game utilizing the **Nudging Reels** mechanic.
+- A near-win occurs where one symbol on Reel 3 is just out of position to complete a winning combination.
+- The Nudging Reels mechanic adjusts the reel position to form a winning combination.
 
-### Step-by-Step Orchestration
+---
 
-### 1. **Initial Spin**
+## Scenario:
+- **Grid Configuration**: 5 reels, each with 3 rows.
+- **Near-Win Condition**: 
+  - A combination on **Reels 1 and 2** is one symbol away from completing a high-value win on **Reel 3**.
 
-- **Event**: Player presses the "Spin" button.
-- **Action**: The reels start spinning normally as part of the base game.
-- **Outcome**: After spinning, the reels come to a stop and display symbols on the paylines.
-  
-  **Example**: The first two reels display matching symbols, but the third reel stops just one position away from a complete winning combination.
+---
 
-### 2. **Check for Near-Win Condition**
+## Orchestration for 5x3 Grid with Nudging Reels
 
-- **Event**: The game engine checks for any near-win scenarios on the reels.
-- **Action**: The engine identifies that a high-value combination is one symbol away from being completed.
-- **Outcome**: The game triggers the **Nudge Triggered** event based on the near-win condition.
+| Step | Event                         | Description                                                                                                                                                                                                                                      | Animation Orchestration                                                                                                                                                                                        | New Function |
+|------|-------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------|
+| 1    | **Spin Initiated**             | The reels spin as usual, with the player pressing the spin button.                                                                                                                                                                               | **Start the spinning animation** for all reels, with standard sound effects and visual effects.                                                                                                                 | `SpinEngines()` |
+| 2    | **Reels Stopped**              | Reels come to a stop, displaying symbols. Reel 3 stops one position away from completing a high-value combination.                                                                                                                                | **Highlight** the near-win combination with a **pulsing effect** to signal the potential for a nudge.                                                                                                           | `DetectNearWinCondition(reels)` |
+| 3    | **Nudge Triggered**            | The game detects the near-win on Reel 3 and triggers the **Nudge Reels** event.                                                                                                                                                                   | A **nudge animation** on Reel 3 nudges the reel down by one position, accompanied by a sound effect indicating the reel is moving.                                                                              | `TriggerNudge(reels)` |
+| 4    | **Winning Symbols Animation**  | The nudge completes the winning combination, forming a line across Reels 1, 2, and 3.                                                                                                                                                            | **Winning symbols** are highlighted with an **enlarging, glowing, or shaking animation**. Sound effects play to signal the win.                                                                                 | `AnimateWinningSymbols(row, reels)` |
+| 5    | **Nudge Completed**            | The nudge process finishes, and the game recalculates the new winning combinations.                                                                                                                                                              | Play a **settling animation** for the nudged reel, ensuring the reel has locked into place.                                                                                                                      | `CompleteNudgeProcess(reels)` |
+| 6    | **Payout Calculation**         | The game calculates the payout based on the winning combination after the nudge.                                                                                                                                                                 | **Display the win** on-screen with celebratory animations such as **coin showers** or **flashing lights**. Accompany this with celebratory sound effects.                                                       | `CalculateAndDisplayPayout()` |
+| 7    | **Return to Idle**             | The game resets to its idle state, waiting for the player to spin again.                                                                                                                                                                          | **Idle animations** (e.g., button highlights, background effects) are displayed as the game prepares for the next spin.                                                                                         | `ResetToIdleState()` |
 
-  **Example**: The third reel is one position away from landing a wild symbol, which would complete the winning combination.
+---
 
-### 3. **Nudge Triggered**
+## Function Headers for New Functions
 
-- **Event**: **Nudge Triggered** event is activated.
-- **Action**: The game nudges the third reel down by one position.
-- **Outcome**: The nudge moves the wild symbol into place, completing the winning combination.
+- `DetectNearWinCondition(reels)`: Detects near-win conditions across the reels and prepares for the nudge.
+- `TriggerNudge(reels)`: Activates the nudge mechanic, moving the reel(s) slightly to complete or enhance winning combinations.
+- `CompleteNudgeProcess(reels)`: Marks the nudge as complete and triggers any further recalculations or animations.
+- `AnimateWinningSymbols(row, reels)`: Plays the winning animation for the symbols in the given `row` across the specified `reels`.
+- `CalculateAndDisplayPayout()`: Calculates the final payout for the nudge win and triggers a celebratory display.
+- `ResetToIdleState()`: Resets the game to the idle state after all processes are complete.
 
-  **Example**: The wild symbol is now aligned with the other two matching symbols on the paylines, forming a high-paying combination.
+---
 
-### 4. **Nudge Completed**
+## Summary of Nudging Reels Orchestration
 
-- **Event**: **Nudge Completed** event is triggered after the reel has finished nudging.
-- **Action**: The game recalculates the new symbol positions and checks for any winning combinations.
-- **Outcome**: A winning combination is confirmed, and the game moves on to calculating the payout.
+- **Reels Stop**: After spinning, the game checks for any near-win conditions on the reels.
+- **Nudge Triggered**: If a near-win is detected, the nudge mechanic activates to shift the reel into place.
+- **Winning Symbols Animation**: Once the reel is nudged, the winning symbols play a celebratory animation.
+- **Payout Calculation**: The game calculates the payout based on the newly formed winning combination.
+- **Return to Idle**: After payout, the game returns to its idle state, awaiting the next spin.
 
-  **Example**: The player now has three matching symbols on the payline, with the wild completing the combination.
-
-### 5. **Payout Calculation**
-
-- **Event**: The game calculates the payout for the winning combination.
-- **Action**: The win is displayed on the screen, and the corresponding credit is added to the player's balance.
-- **Outcome**: The player receives their payout based on the game’s paytable.
-
-  **Example**: The player is awarded a payout for landing three high-value symbols, with the wild contributing to the win.
-
-### 6. **Bonus Feature Triggered (Optional)**
-
-- **Event**: During this spin, the player has also landed scatter symbols that could trigger a bonus round.
-- **Action**: The game checks for scatter symbols as part of the **Nudge Scatter Symbol** event. If scatters have nudged into position, the bonus feature is triggered.
-- **Outcome**: The player enters the free spins round or another bonus feature.
-
-  **Example**: The scatter symbol is nudged into place, triggering a free spins bonus round for the player.
-
-### Orchestration Overview
-
-The orchestration of the **Nudging Reels** mechanic involves several interconnected events:
-
-1. **Initial Spin**: The reels spin and come to a stop, showing symbols on the screen.
-2. **Nudge Triggered**: If a near-win scenario is identified, a nudge is triggered to improve the result.
-3. **Nudge Completed**: After the nudge, the game checks if a winning combination is formed.
-4. **Payout Calculation**: The player is awarded for the winning combination.
-5. **Bonus Feature Triggered**: Optional nudge of scatter symbols may trigger a bonus round.
-
-### Example Timeline
-
-1. Spin -> Reels Stop -> Check for Near-Win
-2. Near-Win Detected -> Nudge Triggered -> Reel Nudges
-3. Nudge Completed -> Winning Combination Formed
-4. Payout Calculated -> Credits Added to Player’s Balance
-5. (Optional) Scatter Nudge -> Bonus Feature Triggered
-
-### Conclusion
-
-This example illustrates how the different events within the **Nudging Reels** mechanic work together in a seamless flow. From detecting near-wins and triggering nudges to calculating payouts and triggering bonus features, the orchestration ensures that the mechanic adds excitement and anticipation to the game.
+This orchestration ensures a clear and exciting flow for the **Nudging Reels** mechanic, allowing players to experience heightened anticipation as the reels are nudged into winning combinations.
