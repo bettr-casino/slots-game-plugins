@@ -1,6 +1,27 @@
 # EVENTS for Cascading Reels Mechanic
 
-This document lists the key events that occur during the execution of the Cascading Reels Mechanic in a slot machine game, focusing on cascade-specific events. The common **Base Game** and **Reel** events are excluded.
+This document lists the key events that occur during the execution of the Cascading Reels Mechanic in a slot machine game, focusing on cascade-specific events. The common **BaseGame** and **Reel** events are also included along with their state lists.
+
+---
+
+## BaseGame States
+
+1. **Waiting**: The game is in an idle state, waiting for player input.
+2. **Spinning**: The game has entered the spinning state, and the reels are actively spinning.
+3. **Completed**: The game has finished all spins, cascades, and evaluations, and payouts are being calculated.
+
+---
+
+## Reel States
+
+1. **Waiting**: The reel is idle, waiting to be triggered for a spin.
+2. **Spinning**: The reel is actively spinning after being triggered by the base game.
+3. **Stopped**: The reel has stopped spinning and awaits evaluation.
+4. **ReachedOutcomeStopIndex**: The reel has stopped at a specific pre-determined outcome.
+5. **SpinStartedRollBack**: The reel performs a backward animation roll, often for visual effects during or after a spin.
+6. **SpinStartedRollForward**: The reel performs a forward animation roll, often used for smooth transitions during or after a spin.
+7. **SpinEndingRollBack**: A final backward roll effect when the reel is ending its spin.
+8. **SpinEndingRollForward**: A final forward roll effect when the reel is ending its spin.
 
 ---
 
@@ -10,45 +31,61 @@ This document lists the key events that occur during the execution of the Cascad
 - **Event**: After the reels stop spinning and a winning combination is formed, the game enters the cascading phase.
 - **State**: `Spinning`
 - **Trigger**: Winning combination detected on the reels.
+- **Applies To**: **BaseGame**
 
 ### 2. **Symbol Removal**
 - **Event**: Winning symbols are removed from the reels to make space for new symbols to cascade down.
 - **State**: `ReachedOutcomeStopIndex`
 - **Trigger**: Winning combination detected.
+- **Applies To**: **Symbols**, **Reels**
 
 ### 3. **Symbol Cascade**
 - **Event**: Symbols cascade down to fill empty spaces created by the removal of winning symbols.
 - **State**: `SpinStartedRollForward` or `SpinStartedRollBack`
 - **Trigger**: Space created on the reel after symbol removal.
+- **Applies To**: **Symbols**, **Reels**
 
 ### 4. **End of Cascade**
 - **Event**: No further cascades occur, and the reels return to a stopped state.
 - **State**: `Stopped`
 - **Trigger**: No new winning combinations are formed.
+- **Applies To**: **BaseGame**, **Reels**
 
 ### 5. **Cascade Completed**
 - **Event**: No further winning combinations are formed after a series of cascading reels.
 - **State**: `Completed`
 - **Trigger**: No new wins detected.
+- **Applies To**: **BaseGame**
 
 ---
 
 ## Event Flow Example
 
-1. **Player Presses Spin**: 
-   - Base Game enters `Spinning`, Reels enter `Spinning` and use animation states like `SpinStartedRollForward`.
+1. **Player Presses Spin**
+   - **State**: `Spinning`
+   - **Trigger**: Spin button pressed.
+   - **Applies To**: **BaseGame**, **Reels**
 
-2. **Reel Stops**:
-   - Reels move to `Stopped` and then `ReachedOutcomeStopIndex` for symbol evaluation.
+2. **Reel Stops**
+   - **State**: `Stopped`
+   - **Trigger**: Reel reaches stop position and outcome is determined.
+   - **Applies To**: **Reels**
 
-3. **Cascade Initiates**:
-   - Winning symbols are removed, reels cascade with new symbols using `SpinStartedRollBack` or `SpinStartedRollForward`.
+3. **Cascade Initiates**
+   - **Event**: Winning symbols are removed, and symbols cascade with new symbols replacing them.
+   - **State**: `SpinStartedRollBack` or `SpinStartedRollForward`
+   - **Trigger**: Space created after symbol removal.
+   - **Applies To**: **Symbols**, **Reels**
 
-4. **End of Cascade**:
-   - Reels enter `Stopped`, Base Game enters `Completed` after all cascades are finished.
+4. **End of Cascade**
+   - **State**: `Stopped`
+   - **Trigger**: No more winning combinations.
+   - **Applies To**: **BaseGame**, **Reels**
 
-5. **Payout**:
-   - Payouts are calculated, and the Base Game returns to `Waiting`.
+5. **Payout**
+   - **Event**: Payouts are calculated after the cascade ends, and the game resets to idle.
+   - **State**: `Completed`
+   - **Applies To**: **BaseGame**
 
 ---
 
@@ -62,4 +99,4 @@ This document lists the key events that occur during the execution of the Cascad
 
 ---
 
-This **EVENTS.md** file focuses on the events and state transitions that are specific to the Cascading Reels Mechanic in the slot machine game, excluding common base game and reel spin mechanics.
+This **EVENTS.md** file now includes both the state lists for **BaseGame** and **Reels** as well as the specific events for the Cascading Reels Mechanic.
