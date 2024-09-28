@@ -42,6 +42,8 @@
 | `CheckForNewWinsAfterCascade(reels)`     | reels (array)                         | Checks for any new winning combinations after a symbol cascade across the specified reels. | TODO   |
 | `ActivateMirrorReels(reels)`             | reels (array)                         | Highlights the reels that will mirror and applies visual effects to synchronize their symbols. | Done   |
 | `DisplayMirroredSymbols(reels)`          | reels (array)                         | Displays identical symbols on the mirrored reels when they stop spinning.   | Done   |
+| `ActivateMysteryReels(reels)`            | reels (array)                         | Covers the designated reels with mystery symbols and applies visual effects to indicate the transformation. | Done   |
+| `RevealMysterySymbols(reels)`            | reels (array)                         | Reveals the mystery symbols on the designated reels and displays the matching symbol. | Done   |
 
 ---
 

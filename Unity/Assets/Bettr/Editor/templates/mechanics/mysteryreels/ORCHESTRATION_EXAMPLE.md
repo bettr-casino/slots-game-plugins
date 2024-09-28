@@ -4,6 +4,8 @@
 
 The **Mystery Reels** feature is a thrilling slot machine mechanic where one or more reels are covered with "mystery symbols" during a spin. These mystery symbols are placeholders that reveal the same random symbol once the reels stop spinning, offering the potential for big wins. The orchestration of visual and audio effects plays a significant role in creating anticipation and excitement around this feature.
 
+---
+
 ### Visual Animation Orchestration
 
 The **Mystery Reels** feature is often accompanied by intricate visual effects and sound design that heighten player engagement. Here’s a breakdown of how the orchestration typically works:
@@ -52,6 +54,8 @@ If the revealed symbols contribute to a winning combination, additional visual a
 - **Victory Music and Sound**:
     - A triumphant musical score or celebratory sound effect, such as the **sound of coins dropping** or **fanfare**, punctuates the moment of victory. The intensity of the sound effects can scale with the size of the win, making big wins feel even more rewarding.
 
+---
+
 ### Example of Full Orchestration in a Game
 
 Here’s how the full orchestration of the **Mystery Reels** feature might play out in a slot game:
@@ -67,6 +71,19 @@ Here’s how the full orchestration of the **Mystery Reels** feature might play 
 3. **Post-Reveal Celebration**:
     - The Diamond symbols contribute to multiple winning paylines, triggering a **coin explosion** effect and a **burst of fireworks** across the screen.
     - A **triumphant fanfare** plays, and **coins fly out** from the reels in a 3D effect, making the win feel significant and rewarding.
+
+---
+
+### Function Headers for Orchestration Elements
+
+- `PreActivateMysteryReels(reels)`: Handles the pre-activation phase by highlighting the reels that will feature mystery symbols and triggering the placement animation.
+- `DisplayMysterySymbols(reels)`: Places the mystery symbols across the selected reels and manages the shimmering or glowing effects.
+- `RevealMysterySymbols(reels)`: Triggers the transformation of mystery symbols into their final form with visual effects like flips or bursts of light.
+- `PlayMysterySymbolRevealSound()`: Plays the sound effect synchronized with the symbol reveal, adding audio excitement to the event.
+- `PostRevealWinCelebration(winningReels)`: Handles the post-reveal celebration, applying win animations, sound effects, and coin showers for the winning combinations.
+- `PlayVictoryMusic(winAmount)`: Plays a celebratory musical score or fanfare that scales with the win amount to enhance the player's sense of reward.
+
+---
 
 ### Conclusion
 
