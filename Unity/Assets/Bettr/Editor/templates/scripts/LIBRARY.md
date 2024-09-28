@@ -12,7 +12,7 @@
 | `BaseGameSpinning()`          | None                | Handles the actions for when the game is in the spinning state (currently a placeholder). |
 | `BaseGameWaiting()`           | None                | Handles the actions for when the game is in the waiting state (currently a placeholder). |
 | `BaseGameCompleted()`         | None                | Handles the actions for when the base game spin is completed, including showing settings and resetting the spin state to waiting. |
-| `OnBaseGameSpinCompleted()`    | None                | Updates the state to "Completed" after the base game spin is done.           |
+| `OnBaseGameSpinCompleted()`   | None                | Updates the state to "Completed" after the base game spin is done.           |
 | `BaseGamePayout()`            | None                | Triggers the payout process for the base game by calling the mechanics’ payout function. |
 | `UpdateStatusText(text)`      | text (string)       | Updates the status text in the game (currently a placeholder).               |
 | `PlayStartAnimations()`       | None                | Plays the start animations using the visual controller.                     |
@@ -52,6 +52,16 @@
 | `PlaySymbolAnimation(rowIndex, animatorGroupPrefix, waitForAnimationComplete)` | rowIndex (int), animatorGroupPrefix (string), waitForAnimationComplete (bool) | Plays the symbol animation for a specific row index in the reel. |
 | `CloneAndOverlayCurrentSymbol(rowIndex)` | rowIndex (int)                        | Clones the current symbol in a row and overlays it on top for visual effects. |
 | `CloneCurrentSymbol(rowIndex)`           | rowIndex (int)                        | Clones the current symbol at the specified row index.                       |
+| `CalculateSlideDistanceInSymbolUnits()`  | None                                  | Calculates the slide distance in symbol units based on speed and direction. |
+| `SlideReelSymbols(slideDistanceInSymbolUnits)` | slideDistanceInSymbolUnits (float)   | Slides all symbols by the specified distance.                               |
+| `SlideSymbol(symbolIndex, slideDistanceInSymbolUnits)` | symbolIndex (int), slideDistanceInSymbolUnits (float) | Slides a specific symbol by the specified distance.                         |
+| `AdvanceReel()`                          | None                                  | Advances the reel to the next position based on the spin direction.         |
+| `AdvanceSymbols()`                       | None                                  | Advances all symbols in the reel during a spin.                             |
+| `UpdateReelSymbolForSpin(symbolIndex)`   | symbolIndex (int)                     | Updates the reel symbol for a specific position during a spin.              |
+| `UpdateReelStopIndexes()`                | None                                  | Updates the stop indexes for the reel based on the spin state.              |
+| `ApplySpinReelStop()`                    | None                                  | Applies the outcome stop for the reel and checks if splicing is needed.     |
+| `SpliceReel()`                           | None                                  | Splices the reel for a smooth stop based on the outcome.                    |
+| `SkipSpliceReel(spliceDistance, outcomeReelStopIndex, spinDirectionIsDown)` | spliceDistance (int), outcomeReelStopIndex (int), spinDirectionIsDown (bool) | Determines if the reel splicing should be skipped.                         |
 
 ---
 
