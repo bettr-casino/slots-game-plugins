@@ -40,6 +40,8 @@
 | `SpinEngines()`                          | None                                   | Spins the reels by triggering the reel controller.                          | Done   |
 | `DetectWinningCombinationGroupedByReel(reels)` | reels (array)                         | Detects winning combinations across the specified reels grouped by their reel positions. | TODO   |
 | `CheckForNewWinsAfterCascade(reels)`     | reels (array)                         | Checks for any new winning combinations after a symbol cascade across the specified reels. | TODO   |
+| `ActivateMirrorReels(reels)`             | reels (array)                         | Highlights the reels that will mirror and applies visual effects to synchronize their symbols. | Done   |
+| `DisplayMirroredSymbols(reels)`          | reels (array)                         | Displays identical symbols on the mirrored reels when they stop spinning.   | Done   |
 
 ---
 
