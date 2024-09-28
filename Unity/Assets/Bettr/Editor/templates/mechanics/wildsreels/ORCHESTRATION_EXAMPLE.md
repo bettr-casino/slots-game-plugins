@@ -20,6 +20,7 @@ This section provides an example of how the various events in the **Wilds Reels*
 | 3    | **Wild Reels Transformation**     | Reels 3 and 5 are fully transformed into wild reels, substituting all symbols on those reels with wilds.                                                                                                                                          | A burst of lightning or energy sweeps down the reels, transforming them into fully wild reels with glowing, pulsing wild symbols.                                                                                | `TransformReelsToWild(reels)` |
 | 4    | **Payout Calculation**           | The game calculates payouts based on the wild reels and any other winning paylines formed as a result of the wild transformation.                                                                                                                 | Payouts are calculated based on the new winning combinations formed by the wild reels. A celebratory sound or animation highlights the player’s winnings.                                                        | `CalculateAndDisplayPayout()` |
 | 5    | **Bonus Feature Trigger (Optional)** | A bonus feature (e.g., free spins) may be triggered if scatter symbols or other triggers appear during the spin, possibly with guaranteed wild reels in future spins.                                                                               | If a bonus round is triggered, a special animation or transition effect highlights the move to the bonus round, which may feature guaranteed wild reels on every spin.                                            | `BonusRoundTriggered()` (if applicable) |
+| 6    | **Reset to Idle**                | After the payout is completed or bonus round triggered, the game resets to an idle state, ready for the next spin.                                                                                                                                | The screen transitions back to its initial state, waiting for the player to spin again.                                                                                                                           | `ResetToIdleState()` |
 
 ---
 
@@ -32,6 +33,7 @@ This section provides an example of how the various events in the **Wilds Reels*
 - `TransformReelsToWild(reels)`: Transforms the designated reels into wild reels, replacing all symbols on those reels with wild symbols.
 - `CalculateAndDisplayPayout()`: Calculates the final payout based on the new winning combinations and displays the result with celebratory animations.
 - `BonusRoundTriggered()`: Handles transitions to a bonus round (if triggered), such as free spins, with possible guaranteed wild reels.
+- `ResetToIdleState()`: Resets the game to the idle state after the payout or bonus round is completed, ready for the next spin.
 
 ---
 
@@ -40,10 +42,11 @@ This section provides an example of how the various events in the **Wilds Reels*
 The orchestration of the **Wilds Reels** mechanic involves several interconnected events:
 
 1. **Initial Spin**: The player initiates the spin, and all reels begin spinning.
-2. **Trigger Condition Activation**: A specific condition (e.g., stacked wilds or a specific symbol) triggers the Wilds Reels feature.
+2. **Trigger Condition Activation**: A specific condition (e.g., stacked wilds or a specific symbol) triggers the Wild Reels feature.
 3. **Wild Reels Transformation**: The selected reels are transformed into fully wild reels, enhancing the chances of forming winning combinations.
 4. **Payout Calculation**: The game calculates the payouts based on the new wild reels and any other winning combinations.
 5. **Bonus Feature Trigger (Optional)**: A bonus feature may be triggered, leading to additional spins with guaranteed wild reels.
+6. **Reset to Idle**: After the payout or bonus feature is completed, the game returns to its initial idle state, ready for the next spin.
 
 ---
 
@@ -54,9 +57,11 @@ The orchestration of the **Wilds Reels** mechanic involves several interconnecte
 3. **Reels Stop -> Reels 3 and 5 Turn Wild**
 4. **Payout Calculation -> Winning Combinations Evaluated**
 5. **(Optional) Bonus Feature Triggered -> Free Spins with Wild Reels**
+6. **Reset to Idle -> Game Waits for Next Spin**
 
 ---
 
 ### Conclusion
 
 This example illustrates the orchestration of the **Wilds Reels** mechanic in a slot game, showing how wild reels are activated by a trigger condition and how they transform to increase the player’s chances of landing winning combinations. The potential for triggering bonus features adds further excitement and engagement to the gameplay.
+

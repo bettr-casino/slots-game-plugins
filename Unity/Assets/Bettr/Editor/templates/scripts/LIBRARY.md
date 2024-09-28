@@ -89,4 +89,3 @@
 |------------------------------------------|----------------------------------------|-----------------------------------------------------------------------------|--------|
 | `SlideReelSymbols(float)`                | float                                  | Slides all symbols on the reel by a given distance.                         | Done   |
 | `SlideSymbol(int, float)`                | int (symbol index), float (distance)   | Slides a single symbol by the specified distance.                           | Done   |
-
