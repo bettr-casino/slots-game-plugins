@@ -25,10 +25,10 @@
 | `OnBecameVisible()`           | None                | Logs when the game machine becomes visible in the game window.              | Done   |
 | `CalculateAndDisplayPayout()` | None                | Calculates the final payout and triggers a celebratory display for the player. | TODO   |
 | `ResetToIdleState()`          | None                | Resets the game to the idle state after all processes are complete.          | TODO   |
-| `ActivateLinkedReels(reels)`  | reels (array)       | Highlights linked reels and applies a special animation to show they are synchronized. | TODO   |
-| `ExpandLinkedReels(reels)`    | reels (array)       | Adds more reels to the linked reels group during a bonus round.             | TODO   |
-| `TriggerLinkedReelsByWilds(reels)` | reels (array)    | Detects when two or more adjacent Wilds trigger the Linked Reels mechanic.  | TODO   |
-| `PayoutForTriggeringSpin()`   | None                | Calculates and displays the payout for the spin that triggered the Linked Reels feature. | TODO   |
+| `ActivateLockedReels(reels)`  | reels (array)       | Highlights locked reels and applies a special animation to indicate synchronization. | TODO   |
+| `TriggerLockedReelsBySpecialSymbol(reels)` | reels (array) | Detects when a special symbol lands on Reel 1, triggering the Locked Reels mechanic. | TODO   |
+| `PayoutForTriggeringSpin()`   | None                | Calculates and displays the payout for the spin that triggered the Locked Reels feature. | TODO   |
+| `DeactivateLockedReels()`     | None                | Deactivates the locked reels and returns them to normal spinning behavior.  | TODO   |
 
 ---
 
@@ -40,7 +40,6 @@
 | `SpinEngines()`                          | None                                   | Spins the reels by triggering the reel controller.                          | Done   |
 | `DetectWinningCombinationGroupedByReel(reels)` | reels (array)                         | Detects winning combinations across the specified reels grouped by their reel positions. | TODO   |
 | `CheckForNewWinsAfterCascade(reels)`     | reels (array)                         | Checks for any new winning combinations after a symbol cascade across the specified reels. | TODO   |
-| `SpinLinkedReels(reels)`                 | reels (array)                         | Spins the linked reels together, displaying identical symbols.              | Use `SpinEngines()` in combination with `ActivateLinkedReels(reels)` |
 
 ---
 
@@ -52,6 +51,7 @@
 | `PlaySpinReelSpinEndingRollBackAnimation()` | None                                  | Plays the ending rollback animation for all reels.                          | Done   |
 | `CascadeSymbols(fromRow, toRow, reels)`  | fromRow (int), toRow (int), reels (array) | Cascades symbols from one row to another across the specified reels.        | TODO   |
 | `DisplayLinkedSymbols(reels)`            | reels (array)                         | Displays identical symbols on the linked reels when they stop spinning.     | TODO   |
+| `ActivateLockedReels(reels)`             | reels (array)                         | Applies the locked reel animation for synchronized spinning.                | TODO   |
 
 ---
 
