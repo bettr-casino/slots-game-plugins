@@ -44,6 +44,8 @@
 | `DisplayMirroredSymbols(reels)`          | reels (array)                         | Displays identical symbols on the mirrored reels when they stop spinning.   | Done   |
 | `ActivateMysteryReels(reels)`            | reels (array)                         | Covers the designated reels with mystery symbols and applies visual effects to indicate the transformation. | Done   |
 | `RevealMysterySymbols(reels)`            | reels (array)                         | Reveals the mystery symbols on the designated reels and displays the matching symbol. | Done   |
+| `ActivateReelSwap(reels)`                | reels (array)                         | Highlights the reels that will swap positions and applies visual effects to indicate their movement. | Done   |
+| `SwapReelsPositions(reels)`              | reels (array)                         | Swaps the positions of the specified reels and updates the visual alignment of symbols. | Done   |
 
 ---
 
@@ -70,26 +72,4 @@
 | `SpinReelReachedOutcomeStopIndex()`      | None                                   | Handles actions when the reel reaches the outcome stop index, including playing reel stop audio and transitioning to the next state. | Done   |
 | `SpinReelStopped()`                      | None                                   | Marks the reel as stopped and triggers game-wide events if all reels have stopped. | Done   |
 | `SpinReelWaiting()`                      | None                                   | Handles the reel's waiting state (currently a placeholder).                 | Done   |
-| `SpinReelSpinning()`                     | None                                   | Manages the spinning action for the reel.                                   | Done   |
-| `RemoveWinningSymbols(row, reels)`       | row (int), reels (array)               | Removes winning symbols from the specified row and reels with a visual effect. | TODO   |
-| `EndCascadeProcess()`                    | None                                   | Ends the cascading process and prepares for payout.                         | TODO   |
-
----
-
-# Functions Operating on Symbol Groups (Multiple Symbols)
-
-| Function Name                            | Arguments                              | Description                                                                 | Status |
-|------------------------------------------|----------------------------------------|-----------------------------------------------------------------------------|--------|
-| `AnimateWinningSymbols(row, reels)`      | row (int), reels (array)               | Plays a winning animation for the symbols in the given row across the specified reels. | TODO   |
-| `PlaySymbolAnimation(rowIndex, animatorGroupPrefix, waitForAnimationComplete)` | rowIndex (int), animatorGroupPrefix (string), waitForAnimationComplete (bool) | Plays the symbol animation for a specific row index in the reel. | Done   |
-| `CloneAndOverlayCurrentSymbol(rowIndex)` | rowIndex (int)                         | Clones the current symbol in a row and overlays it on top for visual effects. | Done   |
-| `CloneCurrentSymbol(rowIndex)`           | rowIndex (int)                         | Clones the current symbol at the specified row index.                       | Done   |
-
----
-
-# Functions Operating on Single Symbols
-
-| Function Name                            | Arguments                              | Description                                                                 | Status |
-|------------------------------------------|----------------------------------------|-----------------------------------------------------------------------------|--------|
-| `SlideReelSymbols(float)`                | float                                  | Slides all symbols on the reel by a given distance.                         | Done   |
-| `SlideSymbol(int, float)`                | int (symbol index), float (distance)   | Slides a single symbol by the specified distance.                           | Done   |
+| `SpinReelSpinning()`                     |

@@ -75,6 +75,18 @@ Here’s how the full orchestration of the **Reel Swap** mechanic might play out
     - A winning combination is formed as a result of the reel swap, triggering a **coin explosion** across the screen.
     - **Fireworks burst**, and a **victorious fanfare** plays while **coins rain down** from the top of the screen, celebrating the player’s win.
 
+---
+
+## Function Headers for New Functions
+
+- `ActivateReelSwap(reels)`: Triggers the visual and sound effects to initiate the reel swap between specified reels.
+- `SwapReelsAnimation(reels)`: Manages the animation and sound effects that handle the reel swap motion, such as sliding or rotating the reels.
+- `ReevaluateSymbolsAfterSwap()`: Reevaluates the symbols after the swap to check for new winning combinations and triggers the payout process if applicable.
+- `HighlightWinningCombinations()` : Highlights the symbols and paylines that form winning combinations after the reel swap, using visual and sound effects.
+- `CelebrateReelSwapWin()` : Handles the celebration effects such as fireworks, coin showers, and triumphant sound effects if the reel swap results in a win.
+
+---
+
 ### Conclusion
 
 The **Reel Swap** mechanic adds an exciting layer of unpredictability to slot gameplay by rearranging the reels to create new winning possibilities. Through detailed orchestration of visual effects, animations, and sound design, the reel swap feature becomes a dynamic and engaging moment for the player. This orchestration heightens anticipation, emphasizes the movement and change, and creates a sense of reward when the reel swap leads to a big win.
