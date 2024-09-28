@@ -1,0 +1,174 @@
+require "math"
+require "Core"
+
+Game005BaseGameMachineWaysMechanic = {
+}
+
+function Game005BaseGameMachineWaysMechanic:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game005BaseGameMachineWaysMechanic:Initialize(machine)
+    -- Appending new entries to the table
+    Game005BaseGameMachine.BaseGameStateDispatchTable.Paying = function()
+        self:BaseGamePaying(machine)
+    end
+    Game005BaseGameMachine.BaseGameStateDispatchTable.WaitingForPayToComplete = function()
+        self:WaitingForPayToComplete(machine)
+    end
+    -- turn off all audio
+    BettrAudioController.StopAudio()
+end
+
+function Game005BaseGameMachineWaysMechanic:BaseGamePaying(machine)
+    Game005BaseGameState.SpinState.First.State = "WaitingForPayToComplete"
+    local waysSummary = Game005BaseGameWaysSummary.Ways.First
+    local count = waysSummary.WaysCount
+    if count == 0 then
+        machine:OnPayingCompleted()
+        return
+    end
+    System.StartCoroutine(machine, "BaseGamePayout")
+end
+
+function Game005BaseGameMachineWaysMechanic:WaitingForPayToComplete(machine)    
+end
+
+function Game005BaseGameMachineWaysMechanic:OnSpinButtonClicked()
+    series
+        do
+            self:CancelWaysAnimation()
+            self:WaitForPayToComplete()
+        end
+    end
+end
+
+function Game005BaseGameMachineWaysMechanic:CancelWaysAnimation()
+    Game005BaseGameState.DisplayState.First.State = "CancelRequested"
+end
+
+function Game005BaseGameMachineWaysMechanic:WaitForPayToComplete()
+    series
+        do
+            if Game005BaseGameState.SpinState.First.State == "WaitingForPayToComplete" then
+                local waysSummary = Game005BaseGameWaysSummary.Ways.First
+                local delay = waysSummary.DisplayLoopEndDelay
+                while Game005BaseGameState.SpinState.First.State == "WaitingForPayToComplete" do
+                    Game005BaseGameState.DisplayState.First.State = "CancelRequested"
+                    System.WaitForSeconds(delay)
+                end
+            end
+            Game005BaseGameState.DisplayState.First.State = "Idle"            
+        end
+    end
+end
+
+function Game005BaseGameMachineWaysMechanic:BaseGamePayout(machine)
+    series
+        do
+            self:DisplayWays(machine)
+        end
+    end        
+end
+
+function Game005BaseGameMachineWaysMechanic:DisplayWays(machine)
+    series
+        do
+            local waysSummary = Game005BaseGameWaysSummary.Ways.First
+            local waysCount = waysSummary.WaysCount
+            if waysCount == 0 then
+                machine:OnPayingCompleted()
+                return
+            end
+            local waysState = Game005BaseGameWaysState.Ways.First
+            local ways = Game005BaseGameWays.Ways.Array
+            local waysMatrix = Game005BaseGameWaysMatrix                        
+            waysState.PaysRollup = BettrUser.Coins 
+            local waysCount = waysSummary.WaysCount 
+            local startDelay = waysSummary.DisplayLoopStartDelay
+            local duration = waysSummary.DisplayLoopDuration
+            local endDelay = waysSummary.DisplayLoopEndDelay            
+            local waysIndex = waysState.WaysIndex
+            -- TODO: FIXME outcomes are not storing the ways state
+            System.WaitForSeconds(startDelay*2 + endDelay*2)
+            BettrAudioController.PlayAudioLoop("rollupwins")                
+            for waysCounterIndex = 1, waysCount do
+                series
+                    do
+                        if Game005BaseGameState.DisplayState.First.State == "CancelRequested" then
+                            break
+                        end
+                        local way = ways[waysCounterIndex]
+                        local waySymbol = way.Symbol
+                        local wayReelCount = way.ReelCount
+                        local waySymbolCount = way.SymbolCount
+                        local wayMultiplier = way.Multiplier
+                        local wayPay = way.Pay
+                        local wayTotalPay = way.Pays
+                        local wayMatrix = waysMatrix[waySymbol].Array
+                        -- update status text 
+                        local statusTexts = machine.StatusTexts
+                        -- {0}        Pays  {1} x {2} ways = {3} CREDITS!!
+                        statusTexts.FormatAndSetCurrentActive("PaysText", wayReelCount, wayPay, wayMultiplier, wayTotalPay)
+                        local winSymbols = machine.WinSymbols
+                        winSymbols.SetCurrentActive(waySymbol)
+                        parallel
+                            do
+                                self:RollUpWaysWin(machine, way, waysState, waysSummary, duration)
+                            end
+                            do
+                                -- display ways
+                                for i=1,wayReelCount parallel do
+                                    local reel = _G["Game005BaseGameReel" .. i]
+                                    if reel != nil then
+                                        reel.Mechanics.WaysMechanic:DisplayWays(reel, waySymbol, wayMatrix, waySymbolCount, duration)
+                                        System.WaitForSeconds(duration)
+                                        reel.Mechanics.WaysMechanic:HideWays(reel, waySymbol, wayMatrix, waySymbolCount)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end                            
+            end
+            waysIndex = waysState.WaysIndex
+            waysState.WaysIndex = waysIndex + 1
+            if waysIndex >= 0 then
+                machine:OnPayingCompleted()
+                return
+            end
+            if Game005BaseGameState.DisplayState.First.State == "CancelRequested" then
+                machine:OnPayingCompleted()
+                return
+            end
+            System.StartCoroutine(machine, "BaseGamePayout")
+        end
+    end
+end
+
+function Game005BaseGameMachineWaysMechanic:RollUpWaysWin(machine, way, waysState, waysSummary, duration)
+    series
+        do
+            -- rollup ways win once
+            local startDelay = waysSummary.DisplayLoopStartDelay
+            local duration = waysSummary.DisplayLoopDuration
+            local pays = way.Pays
+            System.WaitForSeconds(startDelay)
+            local winTextProperty = machine.WinText
+            
+            BettrVisualsController.RollUpCounter(winTextProperty, 0, pays, 1)
+            
+            local creditsTextProperty = machine.CreditsText   
+            local oldCoins = waysState.PaysRollup
+            local newCoins = oldCoins + pays            
+            waysState.PaysRollup = newCoins
+            
+            BettrUser.Coins = newCoins  
+                      
+            BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 1)
+        end
+    end    
+end

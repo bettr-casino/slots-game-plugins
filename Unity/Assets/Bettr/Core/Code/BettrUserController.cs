@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Text;
 using CrayonScript.Code;
 using Newtonsoft.Json;
@@ -19,6 +18,8 @@ namespace Bettr.Core
         
         public BettrUserConfig BettrUserConfig { get; private set; }
         
+        public static BettrUserController Instance { get; private set; }
+        
         public bool UserIsLoggedIn { get; private set; }
         
         const string ErrorBlobDoesNotExist = "HTTP/1.1 404 Not Found";
@@ -29,34 +30,41 @@ namespace Bettr.Core
             TileController.AddToGlobals("BettrUserController", this);
             
             TileController.RegisterType<BettrUserConfig>("BettrUserConfig");
+            TileController.RegisterType<BettrMechanicConfig>("BettrMechanicConfig");
+            
+            Instance = this;
         }
         
         public string GetUserId()
         {
             var deviceId = SystemInfo.deviceUniqueIdentifier;
+            deviceId = "EE0DE516-5053-5142-80AC-2D878E91215C"; // TODO: remove hardcoded user after testing id: "b19e240f-79d5-4ab1-a844-48c97bc1d154"
             var uniqueId = $"{deviceId}";
             return uniqueId;            
         }
 
         public IEnumerator Login()
         {
+            bool replaceBlob = true;
             Debug.Log($"Starting User Login");
             
             BettrUserConfig = null;
             UserIsLoggedIn = false;
-            
-            var userId = GetUserId();
-            yield return bettrServer.Login(userId);
 
+            var userId = GetUserId();
+            
+            yield return bettrServer.Login(userId);
+            
             UserIsLoggedIn = !bettrServer.AuthResponse.isError;
-            if (UserIsLoggedIn)
+            
+             if (UserIsLoggedIn)
             {
-                var userDoesNotExist = false;
+                // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                 yield return bettrServer.LoadUserBlob(storageCallback: (_, payload, success, error) =>
                 {
                     if (error == ErrorBlobDoesNotExist)
                     {
-                        userDoesNotExist = true;
+                        replaceBlob = true;
                         return;
                     }
                     if (!success)
@@ -67,8 +75,9 @@ namespace Bettr.Core
                     var userBlob = JsonConvert.DeserializeObject<BettrUserConfig>(payload.value);
                     BettrUserConfig = userBlob;
                 });
-
-                if (userDoesNotExist)
+            
+                // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+                if (replaceBlob)
                 {
                     yield return LoadUserJsonFromWebAssets((_, payload, success, error) =>
                     {
@@ -78,6 +87,7 @@ namespace Bettr.Core
                             return;
                         }
                         var user = JsonConvert.DeserializeObject<BettrUserConfig>(payload.value);
+                        user.UserId = userId; // device id
                         BettrUserConfig = user;
                     });
                     

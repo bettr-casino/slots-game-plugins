@@ -13,24 +13,33 @@ end
 
 function {{machineName}}BaseGameReelPaylinesMechanic:Initialize(reel)
 end
-
-function {{machineName}}BaseGameReelPaylinesMechanic:DisplayPaylines(reel, paylineSymbol, paylineMatrix, paylineSymbolCount, duration)
+                                                                     
+function {{machineName}}BaseGameReelPaylinesMechanic:DisplayPaylines(reel, paylineSymbol, paylineId, paylineMatrix, paylineSymbolCount, duration)
     for i=1,paylineSymbolCount parallel do
         local reelID = paylineMatrix[i].ReelID
-        if reelID == reel.ReelID then
+        local matrixPaylineId = paylineMatrix[i].PaylineId
+        if reelID == reel.ReelID and matrixPaylineId == paylineId then
            local rowIndex = paylineMatrix[i].RowIndex
            local luaRowIndex = rowIndex + 1
            local animatorGroupProperty = reel["SymbolPaylinesWinAnimatorGroup" .. luaRowIndex]
-           local symbolGroupProperty = reel["SymbolGroup" .. luaRowIndex]
-           local currentKey = symbolGroupProperty.CurrentKey
-           local animatorProperty = animatorGroupProperty[currentKey]
-           animatorProperty.overrideAnimationDuration = true
-           animatorProperty.animationDuration = duration
-           BettrVisualsController.PlayAnimatorProperty(animatorProperty)
-           -- Core.Animator:PlayAnimatorProperty(currentKey, animatorProperty)
+           if animatorGroupProperty == nil then
+              System.Print("animatorGroupProperty is nil paylineReelID={0} rowIndex={1} luaRowIndex={2}", reelID, rowIndex, luaRowIndex)
+          else
+               local symbolGroupProperty = reel["SymbolGroup" .. luaRowIndex]
+               local currentKey = symbolGroupProperty.CurrentKey
+               local animatorProperty = animatorGroupProperty[currentKey]
+               if animatorProperty == nil then
+                    System.Print("animatorProperty is nil reelID={0} rowIndex={1} luaRowIndex={2} currentKey={3}", reelID, rowIndex, luaRowIndex, currentKey)
+               else
+                   animatorProperty.overrideAnimationDuration = true
+                   animatorProperty.animationDuration = duration
+                   BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+                   -- Core.Animator:PlayAnimatorProperty(currentKey, animatorProperty)
+               end
+          end
        end
     end    
 end
 
-function {{machineName}}BaseGameReelPaylinesMechanic:HidePaylines(reel, paylineSymbol, paylineMatrix, paylineSymbolCount, duration)    
+function {{machineName}}BaseGameReelPaylinesMechanic:HidePaylines(reel, paylineSymbol, paylineId, paylineMatrix, paylineSymbolCount, duration)    
 end

@@ -11,7 +11,7 @@ namespace Bettr.Editor.generators
         
         public static string MachineVariant;
         
-        public static Material CreateOrLoadMaterial(string materialName, string shaderName, string textureName, string hexColor, float alpha, string runtimeAssetPath)
+        public static Material CreateOrLoadMaterial(string materialName, string shaderName, string runtimeAssetPath)
         {
             AssetDatabase.Refresh();
             
@@ -23,7 +23,35 @@ namespace Bettr.Editor.generators
                 Debug.Log($"Creating material for {materialName} at {materialFilepath}");
                 try
                 {
-                    var shader = LoadShader(shaderName, runtimeAssetPath);
+                    material = new Material(Shader.Find(shaderName));
+                    AssetDatabase.CreateAsset(material, materialFilepath);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e);
+                }
+            }
+            
+            AssetDatabase.Refresh();
+            
+            material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
+
+            return material;
+        }
+        
+        public static Material CreateOrLoadMaterial(string materialName, string shaderName, string textureName, string hexColor, float alpha, string runtimeAssetPath)
+        {
+            AssetDatabase.Refresh();
+            
+            var shader = LoadShader(shaderName, runtimeAssetPath);
+            var materialFilename = $"{materialName}.mat";
+            var materialFilepath = $"{runtimeAssetPath}/Materials/{materialFilename}";
+            var material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
+            if (material == null)
+            {
+                Debug.Log($"Creating material for {materialName} at {materialFilepath}");
+                try
+                {
                     material = new Material(shader);
                     AssetDatabase.CreateAsset(material, materialFilepath);
                 }
@@ -37,6 +65,7 @@ namespace Bettr.Editor.generators
             AssetDatabase.Refresh();
             
             material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
+            material.shader = shader;
 
             if (!string.IsNullOrEmpty(textureName))
             {
@@ -105,17 +134,7 @@ namespace Bettr.Editor.generators
         
         public static Shader LoadShader(string shaderName, string runtimeAssetPath)
         {
-            Shader shader = null;
-            if (shaderName.StartsWith("Bettr/"))
-            {
-                shaderName = shaderName.Substring(6);
-                var shaderFilepath = $"{runtimeAssetPath}/Shaders/{shaderName}.shader";
-                shader = AssetDatabase.LoadAssetAtPath<Shader>(shaderFilepath);
-            }
-            else
-            {
-                shader = Shader.Find(shaderName);
-            }
+            Shader shader = Shader.Find(shaderName);
             return shader;
         }
 

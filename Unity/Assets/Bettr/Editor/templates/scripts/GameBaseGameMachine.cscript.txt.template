@@ -31,6 +31,7 @@ end
 function {{machineName}}BaseGameMachine:Start()
     series
         do
+            BettrAudioController.StopAudio()
 	        self:ConfigureSettings()
 	        self:ShowSettings()
 	        self:PlayStartAnimations()
@@ -42,6 +43,8 @@ end
 function {{machineName}}BaseGameMachine:OnSpinButtonClicked()
     series
         do
+            BettrAudioController.StopAudio()
+            BettrAudioController.PlayAudioOnce("spinbutton")
             self.Mechanics:OnSpinButtonClicked(self)
             self:SpinEngines()
             self:WaitForApplyOutcomeDelay()
@@ -126,9 +129,9 @@ end
 function {{machineName}}BaseGameMachine:StartEngines()
     parallel
     {{ for reelIndex in 1..reelCount }}
-        do
-            {{machineName}}BaseGameReel{{ reelIndex }}:StartEngines()
-        end
+    do
+        {{machineName}}BaseGameReel{{ reelIndex }}:StartEngines()
+    end
     {{ end }}
     end
 end
@@ -136,7 +139,7 @@ end
 function {{machineName}}BaseGameMachine:LoadServerOutcome()
     series
         do
-            BettrOutcomeController.LoadServerOutcome("{{machineName}}")
+            BettrOutcomeController.LoadServerOutcome("{{machineName}}", "{{machineVariant}}")
         end
     end
 end
@@ -153,11 +156,21 @@ function {{machineName}}BaseGameMachine:WaitForApplyOutcomeDelay()
 end
 
 function {{machineName}}BaseGameMachine:SpinEngines()
-    {{machineName}}BaseGameState.SpinState.First.State = "Spinning"
-    local statusTexts = self.StatusTexts
-    statusTexts.SetCurrentActive("GoodLuckText")
     local winSymbols = self.WinSymbols
+    local statusTexts = self.StatusTexts
     winSymbols.SetAllInactive()
+    local baseWager = {{machineName}}BaseGameProperties.BaseWager.First.Value
+    if BettrUser.Coins < baseWager then
+        System.Print("{{machineName}}BaseGameMachine:SpinEngines Reset user coins to 1000 coins since currentCoins={0} less than wager={1}", currentCoins, baseWager)
+        BettrUser.Coins = 1000
+    end
+    local oldCoins = BettrUser.Coins
+    local newCoins = BettrUser.Coins - baseWager
+    System.Print("{{machineName}}BaseGameMachine:SpinEngines applying wager oldCoins={0} newCoins={1} wager={2}", oldCoins, newCoins, baseWager)
+    BettrUser.Coins = newCoins
+    BettrVisualsController.RollUpCounter(self.CreditsText, oldCoins, newCoins, 0.05)
+    {{machineName}}BaseGameState.SpinState.First.State = "Spinning"
+    statusTexts.SetCurrentActive("GoodLuckText")
     self:ResetSettings()
     parallel
         {{ for reelIndex in 1..reelCount }}
@@ -183,11 +196,13 @@ function {{machineName}}BaseGameMachine:CurrentSpinState()
 end
 
 function {{machineName}}BaseGameMachine:OnPayingCompleted()
+    BettrAudioController.StopAudio()
     self:OnBaseGameSpinCompleted()
 end
 
 function {{machineName}}BaseGameMachine:OnSpinReelsStopped()
     self:UpdateBaseGameReelsSpinState("Waiting")
+    self.StatusTexts.SetAllInactive()
     self:TryPaying()
 end
 
@@ -204,6 +219,21 @@ end
 function {{machineName}}BaseGameMachine:OnPointerClick()
     System.Print("{{machineName}}BaseGameMachine OnPointerClick tile id={0}", self.id)
     System.StartCoroutine(self, "OnSpinButtonClicked")
+end
+
+function {{machineName}}BaseGameMachine:OnPointerClick1Param(param)
+	System.Print("{{machineName}}BaseGameMachine OnPointerClick1Param param={0} tile id={1}", param, self.id)
+    if {{machineName}}BaseGameState.SpinState.First.State ~= "Waiting" then
+        System.Print("{{machineName}}BaseGameMachine OnPointerClick1Param param={0} ignoring click when not in Waiting state", param)
+        return
+    end	
+	if param == "Prev" then
+        BettrMainLobbySceneController.LoadPreviousMachine()
+    elseif param == "Next" then
+        BettrMainLobbySceneController.LoadNextMachine()
+    elseif param == "Lobby" then
+        BettrMainLobbySceneController.LoadMainLobby()
+    end
 end
 
 function {{machineName}}BaseGameMachine:OnBecameVisible()

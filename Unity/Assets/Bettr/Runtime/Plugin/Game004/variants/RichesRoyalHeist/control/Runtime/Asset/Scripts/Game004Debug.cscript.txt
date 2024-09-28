@@ -1,0 +1,51 @@
+require "math"
+require "Core"
+
+Game004Debug = {
+    param = nil,
+}
+
+function Game004Debug:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game004Debug:destroy()
+	System.Print("Game004Debug destroy tile id={0}", self.id)
+end
+
+function Game004Debug:OnError(callStack)
+	System.Error("Game004Debug Error CallStack: {0}", callStack)
+end
+
+function Game004Debug:OnPointerClick1Param(param)
+    self.param = param
+end
+
+function Game004Debug:Update()
+    if self.param ~= nil then
+        self:Debug()
+        self.param = nil
+    end
+end
+
+function Game004Debug:Debug()
+    local s, e, l, v;
+    s, e = self.param.find(self.param, "=")
+    k = string.sub(self.param, 1, e-1)
+    l = string.len(self.param)
+    v = string.sub(self.param, e+1, l)
+    System.Print("Game004Debug:Update() s={0} e={1} v={2} l={3} k={4}", s, e, v, l, k)
+    if k == "timeScale" then
+        local newTimeScale = tonumber(v)
+        if Time.timeScale <= 1.0 then
+            Time.timeScale = newTimeScale
+        else
+            Time.timeScale = 1.0
+        end
+    end
+end
+
+return Game004Debug:new()

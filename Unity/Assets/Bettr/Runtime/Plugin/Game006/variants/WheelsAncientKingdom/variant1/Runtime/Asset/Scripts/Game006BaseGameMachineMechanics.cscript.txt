@@ -1,0 +1,49 @@
+require "math"
+require "Core"
+
+require "Game006BaseGameMachineWaysMechanic"
+
+
+Game006BaseGameMachineMechanics = {
+
+    WaysMechanic = nil,
+
+}
+
+function Game006BaseGameMachineMechanics:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game006BaseGameMachineMechanics:Initialize(machine)
+
+    self.WaysMechanic = Game006BaseGameMachineWaysMechanic:new()
+    self.WaysMechanic:Initialize(machine)
+
+end
+
+function Game006BaseGameMachineMechanics:BaseGamePayout(machine)
+    -- this is hardcoded
+    -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
+    if self.CascadingReelsMechanic ~= nil then
+       self.CascadingReelsMechanic:BaseGamePayout(machine)
+    elseif self.WaysMechanic ~= nil then
+       self.WaysMechanic:BaseGamePayout(machine)
+    elseif self.PaylinesMechanic ~= nil then
+       self.PaylinesMechanic:BaseGamePayout(machine)
+    end
+end
+
+function Game006BaseGameMachineMechanics:OnSpinButtonClicked(machine)
+    -- this is hardcoded
+    -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
+    if self.CascadingReelsMechanic ~= nil then
+       self.CascadingReelsMechanic:OnSpinButtonClicked(machine)
+    elseif self.WaysMechanic ~= nil then
+       self.WaysMechanic:OnSpinButtonClicked(machine)
+    elseif self.PaylinesMechanic ~= nil then
+       self.PaylinesMechanic:OnSpinButtonClicked(machine)
+    end
+end

@@ -1,0 +1,187 @@
+require "math"
+require "Core"
+require "Utils"
+require "Game008BaseGameReelMechanics"
+
+Game008BaseGameReel = {
+    Mechanics = nil,
+}
+
+function Game008BaseGameReel:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game008BaseGameReel:destroy()
+	System.Print("Game008BaseGameReel destroy tile id={0}", self.id)
+end
+
+function Game008BaseGameReel:OnError(callStack)
+	System.Error("Game008BaseGameReel Error CallStack: {0}", callStack)
+end
+
+function Game008BaseGameReel:Awake()
+	System.Print("Game008BaseGameReel Awake tile id={0}", self.id)
+	self.Mechanics = Game008BaseGameReelMechanics:new()
+	self.Mechanics:Initialize(self)
+end
+
+function Game008BaseGameReel:StartEngines()
+    series
+        do
+            self.BettrReelController.StartEngines()                          
+        end
+    end
+end
+
+function Game008BaseGameReel:OnOutcomeReceived()
+    series
+        do
+            self.BettrReelController.OnOutcomeReceived()
+        end
+    end
+end
+
+function Game008BaseGameReel:SpinEngines()
+    self.BettrReelController.SpinEngines()
+end
+
+function Game008BaseGameReel:Update()
+    local reelState = Game008BaseGameReelState[self.ReelID].First
+    local reelIsLocked = reelState.ReelIsLocked
+    if reelIsLocked then
+        return
+    end
+    local reelSpinState = Game008BaseGameReelSpinState[self.ReelID].First
+    local spinState = reelSpinState.ReelSpinState
+    self.ReelSpinStateDispatchTable[spinState](self)    
+end
+
+function Game008BaseGameReel:SpinReelSpinStartedRollBack()
+    self.BettrReelController.SpinReelSpinStartedRollBack()    
+end
+
+function Game008BaseGameReel:SpinReelSpinStartedRollForward()
+    self.BettrReelController.SpinReelSpinStartedRollForward()    
+end
+
+function Game008BaseGameReel:SpinReelSpinEndingRollBack()    
+    self.BettrReelController.SpinReelSpinEndingRollBack()    
+end
+
+function Game008BaseGameReel:SpinReelSpinEndingRollForward()
+    self.BettrReelController.SpinReelSpinEndingRollForward()    
+end
+
+function Game008BaseGameReel:SpinReelReachedOutcomeStopIndex()
+    BettrAudioController.PlayAudioOnce("reelstop")
+    local reelSpinState = Game008BaseGameReelSpinState[self.ReelID].First
+    reelSpinState.ReelSpinState = "SpinEndingRollForward"
+end
+
+function Game008BaseGameReel:SpinReelStopped()
+    local reelCount = Game008BaseGameLayout.ReelCount.First.Value
+    local lastReeID = "Reel" .. reelCount
+    if self.ReelID == lastReeID then
+        Game008BaseGameMachine:OnSpinReelsStopped()
+    end 
+end
+
+function Game008BaseGameReel:SpinReelWaiting()
+end
+
+function Game008BaseGameReel:SpinReelSpinning()
+    return self.BettrReelController.SpinReelSpinning()    
+end
+
+function Game008BaseGameReel:PlaySpinReelSpinEndingRollBackAnimation()
+    series
+        do        
+            local spinEndingRollbackAnimation = Game008BaseGameSpinEndingRollBackAnimation[self.ReelID]
+            
+            if spinEndingRollbackAnimation == nil then
+                return
+            end
+                      
+            if spinEndingRollbackAnimation.First.Counter > 0 then
+                return                
+            end               
+            
+            spinEndingRollbackAnimation.First.Counter = 1 
+                                                       
+            local reelState = Game008BaseGameReelState[self.ReelID].First
+            local reelSpinState = Game008BaseGameReelSpinState[self.ReelID].First
+            local reelSymbolsState = Game008BaseGameReelSymbolsState[self.ReelID].Array
+                        
+            local rollbackAnimationArray = spinEndingRollbackAnimation.Array            
+            
+            local animatorGroupPrefix = "SymbolLandWinAnimatorGroup"
+            
+            for i=1,#rollbackAnimationArray do
+                local rowIndex = rollbackAnimationArray[i].RowIndex
+                self:PlaySymbolAnimation(rowIndex, animatorGroupPrefix, false)
+            end
+        end
+    end
+end
+
+function Game008BaseGameReel:PlaySymbolAnimation(rowIndex, animatorGroupPrefix, waitForAnimationComplete)
+    local animationDuration = 0.0
+    series
+        do                    
+            if rowIndex >= 0 then
+                local luaIndex = rowIndex + 1       
+                local animatorGroupProperty = self[animatorGroupPrefix .. luaIndex]
+                local symbolGroupProperty = self["SymbolGroup" .. luaIndex]
+                local currentKey = symbolGroupProperty.CurrentKey
+                local animatorProperty = animatorGroupProperty[currentKey]
+                animatorProperty.waitForAnimationComplete = waitForAnimationComplete
+                -- animationDuration = Core.Animator:PlayAnimatorProperty(currentKey, animatorProperty)
+                animationDuration = BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+            end
+        end
+    end
+    return animationDuration
+end
+
+function Game008BaseGameReel:CloneAndOverlayCurrentSymbol(rowIndex)
+    local overlaySymbol = nil
+    series
+        do                    
+            overlaySymbol = self:CloneCurrentSymbol(rowIndex)
+            if overlaySymbol ~= nil then
+                BettrVisualsController.SetLayerRecursively(overlaySymbol, Core.Layers.SLOT_REELS_OVERLAY)
+            end
+        end
+    end
+    return overlaySymbol
+end
+
+function Game008BaseGameReel:CloneCurrentSymbol(rowIndex)
+    local clonedSymbol = nil
+    series
+        do                    
+            if rowIndex >= 0 then
+                local luaIndex = rowIndex + 1       
+                local symbolGroupProperty = self["SymbolGroup" .. luaIndex] 
+                clonedSymbol = symbolGroupProperty.CloneCurrent                               
+            end
+        end
+    end
+    return clonedSymbol
+end
+
+Game008BaseGameReel.ReelSpinStateDispatchTable = {
+    Waiting = Game008BaseGameReel.SpinReelWaiting,
+    Spinning = Game008BaseGameReel.SpinReelSpinning,
+    Stopped = Game008BaseGameReel.SpinReelStopped,
+    ReachedOutcomeStopIndex = Game008BaseGameReel.SpinReelReachedOutcomeStopIndex,
+    SpinStartedRollBack = Game008BaseGameReel.SpinReelSpinStartedRollBack,
+    SpinStartedRollForward = Game008BaseGameReel.SpinReelSpinStartedRollForward,
+    SpinEndingRollForward = Game008BaseGameReel.SpinReelSpinEndingRollForward,
+    SpinEndingRollBack = Game008BaseGameReel.SpinReelSpinEndingRollBack
+}
+
+return Game008BaseGameReel:new()

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using CrayonScript.Code;
+using Newtonsoft.Json;
 
 // ReSharper disable once CheckNamespace
 namespace Bettr.Core
@@ -9,7 +10,7 @@ namespace Bettr.Core
     {
         public static void Init()
         {
-            TileController.RegisterType<BettrSceneConfig>("BettrSceneConfig");
+            TileController.RegisterType<BettrBundleConfig>("BettrSceneConfig");
             TileController.RegisterType<BettrLobbyCardConfig>("BettrLobbyCardConfig");
             TileController.RegisterType<BettrLobbyCardGroupConfig>("BettrLobbyCardGroupConfig");
             TileController.RegisterType<BettrUserConfig>("BettrUserConfig");
@@ -17,7 +18,7 @@ namespace Bettr.Core
     }
     
     [Serializable]
-    public class BettrSceneConfig
+    public class BettrBundleConfig
     {
         public string BundleName { get; set; }
         public string BundleVersion { get; set; }
@@ -49,13 +50,52 @@ namespace Bettr.Core
     public class BettrUserConfig
     {
         public string UserId { get; set; }
-        public long Coins { get; set; }
+        private long _coins = 0;
+
+        public long Coins
+        {
+            get
+            {
+                // ReSharper disable once ArrangeAccessorOwnerBody
+                return _coins;
+            }
+            set
+            {
+                _coins = value;
+                if (_coins < 0)
+                {
+                    _coins = 0;
+                }
+            }
+        }
+
         // ReSharper disable once InconsistentNaming
         public long XP { get; set; }
         public long Level { get; set; }
-        public BettrSceneConfig LobbyScene { get; set; }
+        public BettrBundleConfig Main { get; set; }
+        public BettrBundleConfig LobbyScene { get; set; }
         public List<BettrLobbyCardGroupConfig> LobbyCardGroups { get; set; }
         public List<BettrLobbyCardConfig> LobbyCards { get; set; }
+        public int LobbyCardIndex { get; set; } = -1;
+
+        public int FindLobbyCardIndexById(string lobbyCardId)
+        {
+            for (var index = 0; index < LobbyCards.Count; index++)
+            {
+                var t = LobbyCards[index];
+                if (t.Card == lobbyCardId)
+                {
+                    return index;
+                }
+            }
+            return -1;
+        }
+    }
+    
+    [Serializable]
+    public class BettrMechanicConfig
+    {
+        public string MechanicName { get; set; }
     }
 
     [Serializable]
@@ -71,5 +111,32 @@ namespace Bettr.Core
         public bool Persistent { get; set; }
         public bool Acked { get; set; }
         public string Value { get; set; }
+    }
+    
+    [Serializable]
+    public class BettrUserExperiment
+    {
+        [JsonProperty("user_id")]
+        public string UserId { get; set; }
+        [JsonProperty("experiment_name")]
+        public string ExperimentName { get; set; }
+        [JsonProperty("excluded_for")]
+        public string ExcludedFor { get; set; }
+        [JsonProperty("audience_evaluated")]
+        public bool AudienceEvaluated { get; set; }
+        [JsonProperty("in_audience")]
+        public bool InAudience { get; set; }
+        [JsonProperty("in_ramp")]
+        public bool InRamp { get; set; }
+        [JsonProperty("ramp_roll")]
+        public int RampRoll { get; set; }
+        [JsonProperty("assigned_variant")]
+        public string AssignedVariant { get; set; }
+        [JsonProperty("treatment")]
+        public string Treatment { get; set; }
+        [JsonProperty("state")]
+        public string State { get; set; }
+        [JsonProperty("is_override")]
+        public bool IsOverride { get; set; }
     }
 }

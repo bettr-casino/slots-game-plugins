@@ -1,0 +1,40 @@
+require "math"
+require "Main"
+
+DefaultLobbyCard = {
+}
+
+function DefaultLobbyCard:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function DefaultLobbyCard:destroy()
+end
+
+function DefaultLobbyCard:OnError(callStack)
+	System.Error("DefaultLobbyCard Error CallStack: {0}", callStack)
+end
+
+function DefaultLobbyCard:Awake()
+end
+
+function DefaultLobbyCard:Start()
+end
+
+function DefaultLobbyCard:OnPointerClick()
+    System.Print("DefaultLobbyCard OnPointerClick tile id={0}", self.id)
+    self:LoadMachineScene()
+end
+
+function DefaultLobbyCard:LoadMachineScene()
+    series
+        do
+            BettrMainLobbySceneController.LoadLobbyCardMachine(self.gameObject.name)
+        end
+    end
+end
+
+return DefaultLobbyCard:new()

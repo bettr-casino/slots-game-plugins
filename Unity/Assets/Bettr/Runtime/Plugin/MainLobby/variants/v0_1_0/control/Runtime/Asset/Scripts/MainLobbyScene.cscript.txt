@@ -1,0 +1,60 @@
+require "math"
+require "Core"
+require "Main"
+
+MainLobbyScene = {
+    State = {
+        ScrollSpeed = 0.003,
+        PreviousMousePosition = Vector3.zero,
+    }
+}
+
+function MainLobbyScene:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function MainLobbyScene:destroy()
+	System.Print("MainLobbyScene destroy tile id={0}", self.id)
+end
+
+function MainLobbyScene:OnError(callStack)
+	System.Error("MainLobbyScene Error CallStack: {0}", callStack)
+end
+
+function MainLobbyScene:Start()
+    series
+        do
+            System.Print("MainLobbyScene Starting...")
+            self:InitUserConfig()
+            self:LoadLobbyCards()
+        end
+    end
+end
+
+function MainLobbyScene:InitUserConfig()
+    series
+        do
+            self.LevelText.SetText(BettrUser.Level)                    
+            self.XPText.SetText(BettrUser.XP)
+            self.UserCoinsText.SetText(BettrUser.Coins)            
+        end
+    end
+end
+
+function MainLobbyScene:LoadLobbyCards()
+    System.Print("LoadLobbyCards invoked")          
+    series
+        do
+            BettrMainLobbySceneController.LoadLobbyCards(self)           
+        end
+    end
+end
+
+function MainLobbyScene:SetCommitHash(commitHash)
+    self.CommitHashText.SetText(commitHash)
+end
+
+return MainLobbyScene:new()

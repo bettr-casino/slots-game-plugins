@@ -23,7 +23,30 @@ end
 
 function {{machineName}}BaseGameMachinePaylinesMechanic:BaseGamePaying(machine)
     {{machineName}}BaseGameState.SpinState.First.State = "WaitingForPayToComplete"
+    local summary = {{machineName}}BaseGamePaylinesSummary.Paylines.First
+    local count = summary.PaylinesCount
+    if count == 0 then
+        machine:OnPayingCompleted()
+        return
+    end
     System.StartCoroutine(machine, "BaseGamePayout")
+end
+
+function {{machineName}}BaseGameMachinePaylinesMechanic:BaseGamePayout(machine)
+    series
+        do
+            self:DisplayPaylines(machine)
+        end
+    end
+end
+
+function {{machineName}}BaseGameMachinePaylinesMechanic:OnSpinButtonClicked(machine)
+    series
+        do
+            self:CancelPaylinesAnimation()
+            self:WaitForPayToComplete()
+        end
+    end
 end
 
 function {{machineName}}BaseGameMachinePaylinesMechanic:CancelPaylinesAnimation()
@@ -52,16 +75,16 @@ function {{machineName}}BaseGameMachinePaylinesMechanic:DisplayPaylines(machine)
             end
             local state = {{machineName}}BaseGamePaylinesState.Paylines.First
             local paylines = {{machineName}}BaseGamePaylines.Paylines.Array
-            local matrix = {{machineName}}BaseGamePaylinesMatrix                        
+            local paylinesMatrix = {{machineName}}BaseGamePaylinesMatrix                        
             state.PaysRollup = BettrUser.Coins 
             count = summary.PaylinesCount
             local startDelay = summary.DisplayLoopStartDelay
             local duration = summary.DisplayLoopDuration
             local endDelay = summary.DisplayLoopEndDelay
             local paylinesIndex = state.PaylinesIndex            
-            if paylinesIndex == 0 then
-                System.WaitForSeconds(startDelay)
-            end
+            -- TODO: FIXME outcomes are not storing the paylines state
+            System.WaitForSeconds(startDelay*2 + endDelay*2)
+            BettrAudioController.PlayAudioLoop("rollupwins")               
             for counterIndex = 1, count do
                 series
                     do
@@ -72,9 +95,10 @@ function {{machineName}}BaseGameMachinePaylinesMechanic:DisplayPaylines(machine)
                         local symbol = payline.Symbol
                         local reelCount = payline.ReelCount
                         local multiplier = payline.Multiplier
+                        local paylineId = payline.PaylineId
                         local pay = payline.Pay
                         local totalPay = payline.Pays
-                        local matrix = matrix[symbol].Array
+                        local matrix = paylinesMatrix[symbol].Array
                         -- update status text 
                         local statusTexts = machine.StatusTexts
                         -- {0}        Pays  {1} x {2} ways = {3} CREDITS!!
@@ -90,9 +114,9 @@ function {{machineName}}BaseGameMachinePaylinesMechanic:DisplayPaylines(machine)
                                 for i=1,reelCount parallel do
                                     local reel = _G["{{machineName}}BaseGameReel" .. i]
                                     if reel != nil then
-                                        reel.Mechanics.PaylinesMechanic:DisplayPaylines(reel, symbol, matrix, reelCount, duration)
+                                        reel.Mechanics.PaylinesMechanic:DisplayPaylines(reel, symbol, paylineId, matrix, reelCount, duration)
                                         System.WaitForSeconds(duration)
-                                        reel.Mechanics.PaylinesMechanic:HidePaylines(reel, symbol, matrix, reelCount)
+                                        reel.Mechanics.PaylinesMechanic:HidePaylines(reel, symbol, paylineId, matrix, reelCount)
                                     end
                                 end
                             end
@@ -102,8 +126,7 @@ function {{machineName}}BaseGameMachinePaylinesMechanic:DisplayPaylines(machine)
             end
             paylinesIndex = state.PaylinesIndex
             state.PaylinesIndex = paylinesIndex + 1
-            System.WaitForSeconds(endDelay)
-            if paylinesIndex >= 1 then
+            if paylinesIndex >= 0 then
                 machine:OnPayingCompleted()
                 return
             end
@@ -131,7 +154,9 @@ function {{machineName}}BaseGameMachinePaylinesMechanic:RollUpPaylinesWin(machin
             local creditsTextProperty = machine.CreditsText   
             local oldCoins = paylinesState.PaysRollup
             local newCoins = oldCoins + pays            
-            paylinesState.PaysRollup = newCoins  
+            paylinesState.PaysRollup = newCoins 
+            
+            BettrUser.Coins = newCoins
                       
             BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 1)
         end

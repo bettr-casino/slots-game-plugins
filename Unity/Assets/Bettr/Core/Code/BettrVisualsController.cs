@@ -405,7 +405,9 @@ namespace Bettr.Core
 
         public static void SwitchOrientationToPortrait()
         {
+#if !UNITY_WEBGL
             Screen.orientation = ScreenOrientation.Portrait;
+#endif
 #if UNITY_EDITOR
             UpdateEditorGameViewSize(720, 1280, "1280x720 Portrait");
 #endif
@@ -413,7 +415,10 @@ namespace Bettr.Core
         
         public static void SwitchOrientationToLandscape()
         {
+            // Disable Screen.Orientation for WebGL
+#if !UNITY_WEBGL
             Screen.orientation = ScreenOrientation.LandscapeLeft;
+#endif
 #if UNITY_EDITOR
             UpdateEditorGameViewSize(1280, 720, "1280x720 Landscape");
 #endif

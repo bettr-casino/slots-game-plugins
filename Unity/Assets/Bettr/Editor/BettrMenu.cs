@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using Bettr.Editor.generators;
+using Bettr.Editor.generators.mechanics;
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
 using UnityEditor;
@@ -18,11 +18,10 @@ using UnityEngine.SceneManagement;
 using DirectoryInfo = System.IO.DirectoryInfo;
 
 using Scriban;
-using Scriban.Parsing;
 using Scriban.Runtime;
 using TMPro;
-using UnityEngine.Rendering;
 using Exception = System.Exception;
+using Object = UnityEngine.Object;
 
 namespace Bettr.Editor
 {
@@ -33,6 +32,26 @@ namespace Bettr.Editor
         internal readonly List<DirectoryNode> Children = new List<DirectoryNode>();
         // ReSharper disable once CollectionNeverQueried.Global
         internal readonly List<string> Files = new List<string>();
+    }
+    
+    [Serializable]
+    public class GameConfigsWrapper
+    {
+        // Dictionary to hold game configurations
+        public Dictionary<string, GameDetails> GameConfigs { get; set; }
+    }
+
+    [Serializable]
+    public class GameDetails
+    {
+        public int OutcomeCount { get; set; }
+        public Dictionary<string, GameVariantDetails> GameVariantConfigs { get; set; }
+    }
+    
+    [Serializable]
+    public class GameVariantDetails
+    {
+        public int OutcomeCount { get; set; }
     }
     
     public static class BettrMenu
@@ -55,9 +74,277 @@ namespace Bettr.Editor
         private const string OutcomesDirectory = "Assets/Bettr/LocalStore/Outcomes";
         // ReSharper disable once UnusedMember.Local
         private const string LocalServerDirectory = "Assets/Bettr/LocalStore/LocalServer";
+        private const string LocalOutcomesDirectory = "Assets/Bettr/LocalStore/LocalOutcomes";
         private const string AssetsServerBaseURL = "https://bettr-casino-assets.s3.us-west-2.amazonaws.com";
+        private const string OutcomesServerBaseURL = "https://bettr-casino-outcomes.s3.us-west-2.amazonaws.com";
         private const string GatewayUrl = "https://3wcgnl14qb.execute-api.us-west-2.amazonaws.com/gateway";
         
+        private const string AUDIO_FORMAT = ".wav";
+        
+        [MenuItem("Bettr/Tools/Check Material Shader")]
+        public static void CheckMaterialShaderFromMenu()
+        {
+            // Get the asset bundle path and material name using file panels
+            string assetBundlePath =
+                "Assets/Bettr/LocalStore/AssetBundles/WebGL/game001epicancientadventures.epicancientadventures";
+
+            // Input dialog for the material name
+            string materialName = "F5.mat";
+
+            if (string.IsNullOrEmpty(materialName))
+            {
+                Debug.LogError("Material name is invalid.");
+                return;
+            }
+
+            // Call the method to check the material shader
+            CheckMaterialShader(assetBundlePath, materialName);
+        }
+
+        public static void CheckMaterialShader(string assetBundlePath, string materialName)
+        {
+            // Load the asset bundle
+            AssetBundle bundle = AssetBundle.LoadFromFile(assetBundlePath);
+            if (bundle == null)
+            {
+                Debug.LogError("Failed to load AssetBundle!");
+                return;
+            }
+
+            // Load the material
+            Material material = bundle.LoadAsset<Material>(materialName);
+            if (material == null)
+            {
+                Debug.LogError($"Material {materialName} not found in the AssetBundle.");
+                bundle.Unload(false);
+                return;
+            }
+
+            // Check the shader being used by the material
+            Shader shader = material.shader;
+            if (shader == null)
+            {
+                Debug.LogError($"Material {materialName} does not have a valid shader assigned.");
+            }
+            else
+            {
+                Debug.Log($"Material {materialName} is using shader: {shader.name}");
+
+                // Compare if the shader matches the expected shader in the main build
+                Shader expectedShader = Shader.Find("Bettr/Symbol"); // Replace with your actual shader path
+                if (shader == expectedShader)
+                {
+                    Debug.Log("The material is using the correct shader.");
+                }
+                else
+                {
+                    Debug.LogError("The material is not using the expected shader.");
+                }
+            }
+
+            // Always unload the bundle after use
+            bundle.Unload(false);
+        }
+        
+        [MenuItem("Bettr/Tools/Check Asset Bundle Load")]
+        public static void CheckAssetBundleLoad()
+        {
+            string mainPath = "Assets/Bettr/LocalStore/AssetBundles/WebGL/main.v0_1_0";
+            AssetBundle mainBundle = AssetBundle.LoadFromFile(mainPath);
+
+            string bundle1Path = "Assets/Bettr/LocalStore/AssetBundles/WebGL/game001epicancientadventures.epicancientadventures";
+            AssetBundle bundle1 = AssetBundle.LoadFromFile(bundle1Path);
+            if (bundle1 == null)
+            {
+                Debug.LogError($"Bundle 1 AssetBundle at {bundle1Path} failed to load.");
+                return;
+            }
+            {
+                Debug.Log("Bundle 1 loaded successfully.");
+            }
+            string bundle2Path = "Assets/Bettr/LocalStore/AssetBundles/WebGL/game001epicatlantistreasures.epicatlantistreasures";
+            AssetBundle bundle2 = AssetBundle.LoadFromFile(bundle2Path);
+            if (bundle2 == null)
+            {
+                Debug.LogError($"Bundle 2 AssetBundle at {bundle2Path} failed to load.");
+                return;
+            }
+            {
+                Debug.Log("Bundle 2 loaded successfully.");
+            }
+            string bundle3Path = "Assets/Bettr/LocalStore/AssetBundles/WebGL/game001epicancientadventures_scenes.epicancientadventures";
+            AssetBundle bundle3 = AssetBundle.LoadFromFile(bundle3Path);
+            if (bundle3 == null)
+            {
+                Debug.LogError($"Bundle 3 AssetBundle at {bundle3Path} failed to load.");
+                return;
+            }
+            {
+                Debug.Log("Bundle 3 loaded successfully.");
+            }
+            string bundle4Path = "Assets/Bettr/LocalStore/AssetBundles/WebGL/game001epicatlantistreasures_scenes.epicatlantistreasures";
+            AssetBundle bundle4 = AssetBundle.LoadFromFile(bundle4Path);
+            if (bundle4 == null)
+            {
+                Debug.LogError($"Bundle 4 AssetBundle at {bundle4Path} failed to load.");
+                return;
+            }
+            {
+                Debug.Log("Bundle 4 loaded successfully.");
+            }
+            mainBundle.Unload(false);
+            if (bundle1 != null) bundle1.Unload(false);
+            if (bundle2 != null) bundle2.Unload(false);
+            if (bundle3 != null) bundle3.Unload(false);
+            if (bundle4 != null) bundle4.Unload(false);
+        }
+
+        [MenuItem("Bettr/Tools/Compare Asset Bundles")]
+        public static void CompareAssetBundles()
+        {
+            string bundle1Path = EditorUtility.OpenFilePanel("Select first AssetBundle", "", "");
+            if (string.IsNullOrEmpty(bundle1Path))
+            {
+                Debug.LogError($"AssetBundle path {bundle1Path} is not valid.");
+                return;
+            }
+            string bundle1Name = Path.GetFileNameWithoutExtension(bundle1Path);
+            AssetBundle bundle1 = AssetBundle.LoadFromFile(bundle1Path);
+            if (bundle1 == null)
+            {
+                Debug.LogError($"AssetBundle at {bundle1Path} failed to load.");
+                return;
+            }
+            List<string> bundle1Assets = new List<string>(bundle1.GetAllAssetNames());
+            bundle1.Unload(false);
+
+            string bundle2Path = EditorUtility.OpenFilePanel("Select second AssetBundle", "", "");
+            if (string.IsNullOrEmpty(bundle2Path))
+            {
+                Debug.LogError($"AssetBundle path {bundle2Path} is not valid.");
+                return;
+            }
+            string bundle2Name = Path.GetFileNameWithoutExtension(bundle2Path);
+            AssetBundle bundle2 = AssetBundle.LoadFromFile(bundle2Path);
+            if (bundle2 == null)
+            {
+                Debug.LogError($"AssetBundle at {bundle2Path} failed to load.");
+                return;
+            }
+            List<string> bundle2Assets = new List<string>(bundle2.GetAllAssetNames());
+            bundle2.Unload(false);
+
+            CompareAssetNames(bundle1Path, bundle2Path, bundle1Assets, bundle2Assets);
+            
+            string manifest1Path = $"{bundle1Path}.manifest";
+            string manifest2Path = $"{bundle2Path}.manifest";
+            
+            CompareAssetBundleDependencies(manifest1Path, manifest2Path);
+        }
+
+        private static void CompareAssetNames(string bundle1Path, string bundle2Path, List<string> bundle1Assets, List<string> bundle2Assets)
+        {
+            // Compare asset names
+            List<string> common1Assets = new List<string>(bundle1Assets);
+            common1Assets = common1Assets.Intersect(bundle2Assets).ToList();
+
+            if (common1Assets.Count > 0)
+            {
+                Debug.Log($"{bundle1Path} has {bundle1Assets.Count} Assets, {common1Assets.Count} Common assets found in {bundle1Path} that are also in {bundle2Path} :");
+            }
+            else
+            {
+                Debug.Log("No common asset names found comparing bundle1 with bundle2");
+            }
+
+            List<string> common2Assets = new List<string>(bundle2Assets);
+            common2Assets = common2Assets.Intersect(bundle1Assets).ToList();
+
+            if (common2Assets.Count > 0)
+            {
+                Debug.Log($"{bundle2Path} has {bundle2Assets.Count} Assets, {common2Assets.Count} Common assets found in {bundle2Path} that are also in {bundle1Path} :");
+            }
+            else
+            {
+                Debug.Log("No common asset names found comparing bundle2 with bundle1");
+            }
+
+            if (common1Assets.Count > 0)
+            {
+                Debug.Log($"List of {common1Assets.Count} Common assets found in {bundle1Path} that are also in {bundle2Path} :");
+                foreach (string asset in common1Assets)
+                {
+                    Debug.Log(asset);
+                }
+            }
+
+            if (common2Assets.Count > 0)
+            {
+                Debug.Log($"List of {common2Assets.Count}  Common assets found in {bundle2Path} that are also in {bundle1Path} :");
+                foreach (string asset in common2Assets)
+                {
+                    Debug.Log(asset);
+                }
+            }
+        }
+
+        public static void CompareAssetBundleDependencies(string manifest1Path, string manifest2Path)
+        {
+            // Helper function to read dependencies from the .manifest file
+            List<string> LoadManifestDependencies(string manifestFilePath)
+            {
+                List<string> dependencies = new List<string>();
+
+                // Read the manifest file as a text file
+                string[] lines = File.ReadAllLines(manifestFilePath);
+
+                // Find the "Dependencies:" section and capture the dependencies listed under it
+                bool dependenciesSection = false;
+                foreach (var line in lines)
+                {
+                    if (line.Contains("Dependencies:"))
+                    {
+                        dependenciesSection = true;
+                        continue;
+                    }
+
+                    if (dependenciesSection)
+                    {
+                        if (string.IsNullOrWhiteSpace(line)) // End of the dependencies section
+                            break;
+
+                        dependencies.Add(line.Trim());
+                    }
+                }
+
+                return dependencies;
+            }
+
+            // Load the dependencies for both manifest files
+            List<string> dependencies1 = LoadManifestDependencies(manifest1Path);
+            List<string> dependencies2 = LoadManifestDependencies(manifest2Path);
+
+            // Compare the dependencies
+            var commonDependencies = dependencies1.Intersect(dependencies2).ToList();
+
+            // Output the results
+            if (commonDependencies.Count > 0)
+            {
+                Debug.Log($"Found {commonDependencies.Count} common dependencies between {Path.GetFileName(manifest1Path)} and {Path.GetFileName(manifest2Path)}:");
+                var index = 0;
+                foreach (var dependency in commonDependencies)
+                {
+                    Debug.Log($"Common Dependency {index+1}: {dependency}");
+                    index += 1;
+                }
+            }
+            else
+            {
+                Debug.Log($"No common dependencies found between {Path.GetFileName(manifest1Path)} and {Path.GetFileName(manifest2Path)}.");
+            }
+        }
+
+
         public static void ExportPackage()
         {
             // Base directory to prepend
@@ -160,8 +447,8 @@ namespace Bettr.Editor
             EditorUtility.DisplayDialog("Success", "Verify Successful.", "OK");
         }
         
-        [MenuItem("Bettr/PlayMode/Start")] 
-        public static void Start()
+        [MenuItem("Bettr/PlayMode/Start/Rebuild Assets + WebGL")] 
+        public static void StartRebuildAssetsWebGL()
         {
             // Ensure you are not in play mode when making these changes
             if (EditorApplication.isPlaying)
@@ -172,6 +459,54 @@ namespace Bettr.Editor
 
             CleanupTestScenes();
             BuildAssets();
+
+            // Switch to iOS build target
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.WebGL, BuildTarget.WebGL);
+
+            // Path to your specific scene. Adjust the path as necessary.
+            const string scenePath = "Assets/Bettr/Core/Scenes/MainScene.unity";
+
+            // Open the specified scene
+            EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+
+            // Enter play mode
+            EditorApplication.EnterPlaymode();
+        }
+        
+        [MenuItem("Bettr/PlayMode/Start/WebGL")] 
+        public static void StartWebGL()
+        {
+            // Ensure you are not in play mode when making these changes
+            if (EditorApplication.isPlaying)
+            {
+                Debug.LogWarning("Exiting play mode before executing this command.");
+                EditorApplication.isPlaying = false;
+            }
+
+            // Switch to iOS build target
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.WebGL, BuildTarget.WebGL);
+            
+            BuildLocalServer();
+
+            // Path to your specific scene. Adjust the path as necessary.
+            const string scenePath = "Assets/Bettr/Core/Scenes/MainScene.unity";
+
+            // Open the specified scene
+            EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+
+            // Enter play mode
+            EditorApplication.EnterPlaymode();
+        }
+
+        [MenuItem("Bettr/PlayMode/Start/iOS")] 
+        public static void StartiOS()
+        {
+            // Ensure you are not in play mode when making these changes
+            if (EditorApplication.isPlaying)
+            {
+                Debug.LogWarning("Exiting play mode before executing this command.");
+                EditorApplication.isPlaying = false;
+            }
 
             // Switch to iOS build target
             EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.iOS, BuildTarget.iOS);
@@ -191,85 +526,1215 @@ namespace Bettr.Editor
         {
             BuildAssetBundles();
             BuildLocalServer();
+            BuildLocalOutcomes();
         }
 
-        [MenuItem("Bettr/Build/Game001 - Epic Wins")]
-        public static void BuildGame001()
+        public static void BuildAssetLabels()
         {
-            BuildMachines("Game001", "AncientAdventures");
-            // BuildMachines("Game001", "AtlantisTreasures");
-            // BuildMachines("Game001", "ClockworkChronicles");
-            // BuildMachines("Game001", "CosmicVoyage");
-            // BuildMachines("Game001", "DragonsHoard");
-            // BuildMachines("Game001", "EnchantedForest");
-            // BuildMachines("Game001", "GalacticQuest");
-            // BuildMachines("Game001", "GuardiansOfOlympus");
-            // BuildMachines("Game001", "LostCityOfGold");
-            // BuildMachines("Game001", "MysticalLegends");
-            // BuildMachines("Game001", "PharosFortune");
-            // BuildMachines("Game001", "PiratesPlunder");
-            // BuildMachines("Game001", "SamuraisFortune");
+            string[] args = System.Environment.GetCommandLineArgs();
+
+            // Default values for assetLabel and assetSubLabel
+            string assetLabel = "";
+            string assetSubLabel = "";
+
+            // Find the labels passed via command line
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i] == "-assetLabel" && i + 1 < args.Length)
+                {
+                    assetLabel = args[i + 1];
+                }
+                if (args[i] == "-assetSubLabel" && i + 1 < args.Length)
+                {
+                    assetSubLabel = args[i + 1];
+                }
+            }
+            
+            // throw an error if assetLabel is empty or assetSubLabel is empty or null
+            if (string.IsNullOrEmpty(assetLabel) || string.IsNullOrEmpty(assetSubLabel))
+            {
+                Debug.LogError($"Asset Label or Asset Sub Label is empty or null. assetLabel={assetLabel} assetSubLabel={assetSubLabel}");
+                return;
+            }
+            
+            var assetBundleName = $"{assetLabel}.{assetSubLabel}";
+            Debug.Log($"Building asset bundle: assetBundleName={assetBundleName}");
+            
+            EnsurePluginAssetsHaveLabels(PluginRootDirectory);
+            
+            AssetDatabase.Refresh();
+
+            // Find assets that contain both assetLabel and assetSubLabel
+            var selectedAssets = AssetDatabase.FindAssets("")
+                .Select(AssetDatabase.GUIDToAssetPath)
+                .Where(path => {
+                    var importer = AssetImporter.GetAtPath(path);
+
+                    if (importer != null)
+                    {
+                        // Get asset bundle name and variant
+                        string bundleName = importer.assetBundleName;
+                        string bundleVariant = importer.assetBundleVariant;
+
+                        // Compare assetLabel with assetBundleName and assetSubLabel with assetBundleVariant
+                        bool hasCorrectName = bundleName == assetLabel;
+                        bool hasCorrectVariant = bundleVariant == assetSubLabel;
+
+                        return hasCorrectName && hasCorrectVariant;
+                    }
+
+                    return false; // If no importer is found, return false
+                })
+                .ToArray();
+
+
+            if (selectedAssets.Length == 0)
+            {
+                Debug.LogError($"No assets found with the specified labels assetLabel={assetLabel} assetSubLabel={assetSubLabel}");
+                return;
+            }
+            
+            // here are the selected assets
+            Debug.Log($"Selected assets: {selectedAssets.Length}");
+            Debug.Log(string.Join(",", selectedAssets));
+
+            AssetBundleBuild[] buildMap = new AssetBundleBuild[1];
+            buildMap[0].assetBundleName = assetBundleName;
+            buildMap[0].assetNames = selectedAssets;
+            
+            Debug.Log($"...refreshing database before building asset bundle assetBundleName={assetBundleName}...");
+            AssetDatabase.Refresh();
+
+            var sharedAssetBundleOptions = BuildAssetBundleOptions.ForceRebuildAssetBundle |
+                                           BuildAssetBundleOptions.ChunkBasedCompression;
+
+#if UNITY_IOS
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesIOSDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesIOSDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.iOS);
+            AssetDatabase.Refresh();
+            
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesOSXDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesOSXDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.StandaloneOSX);
+            AssetDatabase.Refresh();
+#endif
+#if UNITY_ANDROID
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesAndroidDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesAndroidDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.Android);
+#endif
+#if UNITY_WEBGL
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesWebglDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesWebglDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.WebGL);
+#endif
+#if UNITY_OSX
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesOSXDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesOSXDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.StandaloneOSX);
+#endif
+#if UNITY_WIN
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesWindowsDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesWindowsDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.StandaloneWindows64);
+#endif
+#if UNITY_LINUX   
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesLinuxDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesLinuxDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.StandaloneLinux64);
+#endif
+            
+            Debug.Log("...refreshing database after building asset bundles..");
+            AssetDatabase.Refresh();
+            
+            Debug.Log("Modifying asset bundles manifest files...");
+            ModifyAssetBundleManifestFiles();
+            Debug.Log("...done modifying asset bundles manifest files.");
+            
+            Debug.Log("...refreshing database after modifying asset bundles..");
+            AssetDatabase.Refresh();
+            
+            Debug.Log("...done building asset bundles.");
+            
+#if UNITY_IOS
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.iOS, BuildTarget.iOS);
+#endif
+#if UNITY_ANDROID
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
+#endif
+#if UNITY_WEBGL
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.WebGL, BuildTarget.WebGL);
+#endif
+#if UNITY_OSX
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneOSX);
+#endif
+#if UNITY_WIN
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64);
+#endif
+#if UNITY_LINUX   
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneLinux64);
+#endif            
         }
         
-        [MenuItem("Bettr/Build/Game002 - Buffalo")]
+        [MenuItem("Bettr/Tools/Check Prefabs for Background.jpg")]
+        private static void CheckMaterialsForBackgroundTexture()
+        {
+            // Get all prefab assets in the project
+            string[] prefabGUIDs = AssetDatabase.FindAssets("t:Prefab");
+
+            bool textureFound = false;
+
+            foreach (string guid in prefabGUIDs)
+            {
+                // Get the path of the prefab
+                string prefabPath = AssetDatabase.GUIDToAssetPath(guid);
+                
+                // if prefabPath does not end with BackgroundFBX.prefab, skip
+                if (!prefabPath.EndsWith("BackgroundFBX.prefab"))
+                {
+                    continue;
+                }
+                
+                // skip if this is a variant1
+                if (prefabPath.Contains("variant1"))
+                {
+                    continue;
+                }
+                
+                // Load the prefab asset
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+
+                if (prefab != null)
+                {
+                    // Get all renderers in the prefab to access materials
+                    Renderer[] renderers = prefab.GetComponentsInChildren<Renderer>();
+
+                    foreach (Renderer renderer in renderers)
+                    {
+                        // Check each material of the renderer
+                        foreach (Material material in renderer.sharedMaterials)
+                        {
+                            if (material != null)
+                            {
+                                // Check if the material has a texture named "Background.jpg"
+                                foreach (string propertyName in material.GetTexturePropertyNames())
+                                {
+                                    Texture texture = material.GetTexture(propertyName);
+
+                                    if (texture != null && texture.name == "Background")
+                                    {
+                                        string texturePath = AssetDatabase.GetAssetPath(texture);
+
+                                        if (texturePath.EndsWith("Background.jpg"))
+                                        {
+                                            Debug.Log($"Prefab '{prefab.name}' uses Material '{material.name}' with 'Background.jpg' at path: {prefabPath}");
+                                            textureFound = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if (!textureFound)
+            {
+                Debug.Log("No prefabs are using 'Background.jpg'.");
+            }
+        }
+
+        [MenuItem("Bettr/Tools/Fix Symbols Material Alpha")]
+        public static void FixSymbolsMaterialsAlpha()
+        {
+            int processCount = 0;
+            
+            Dictionary<string, string> loadedMachineModels = new Dictionary<string, string>();
+            TileController.StaticInit();
+            
+            // Step 1: Get all prefabs in the new directory
+            string[] prefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { PluginRootDirectory });
+
+            foreach (string prefabGuid in prefabGuids)
+            {
+                string prefabPath = AssetDatabase.GUIDToAssetPath(prefabGuid);
+                // skip if it does not contain "/control/" 
+                if (!prefabPath.Contains("/control/"))
+                {
+                    continue;
+                }
+                // get the prefab file name
+                string prefabFileName = Path.GetFileName(prefabPath);
+                // skip if it doesn't start with Game<NNN>BaseGameSymbol<SymbolName>
+                // use regex to filter out the prefabs that are not symbols
+                var regex = new Regex(@"(Game\d{3})BaseGameSymbol(\w+)");
+                if (!regex.IsMatch(prefabFileName))
+                {
+                    continue;
+                }
+                // extract the machine name, and symbol name from the matched groups
+                var match = regex.Match(prefabFileName);
+                var machineName = match.Groups[1].Value;
+                var symbolName = match.Groups[2].Value;
+                
+                // Assets/Bettr/Runtime/Plugin/Game006/variants/WheelsIndustrialRevolution/control/Runtime/Asset/Prefabs/Game006BaseGameReel5.prefab
+                string runtimeAssetPath = Path.GetDirectoryName(Path.GetDirectoryName((prefabPath)));
+                var machineModelName =$"{machineName}Models";
+
+                if (!loadedMachineModels.ContainsKey(machineModelName))
+                {
+                    string modelDestinationPath = Path.Combine(runtimeAssetPath, "Models",  $"{machineModelName}.cscript.txt");
+                    var modelTextAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(modelDestinationPath);
+                    var machineModelScript = modelTextAsset.text;
+                    loadedMachineModels.Add(machineModelName, machineModelScript);
+                }
+                
+                var loadedMachineModelScript = loadedMachineModels[machineModelName];
+                DynValue dynValue = TileController.LuaScript.LoadString(loadedMachineModelScript, codeFriendlyName: machineModelName);
+                TileController.LuaScript.Call(dynValue);
+                
+                var symbolTable = GetTable($"{machineName}BaseGameSymbolTable");
+                var symbols = GetTablePkArray(symbolTable);
+                
+                // if symbolName not in symbols skip
+                if (!symbols.Contains(symbolName))
+                {
+                    continue;
+                }
+                
+                // Load the control prefab asset
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                // get the "Quad"  game object - below Pivot
+                var quadTransform = prefab.transform.Find("Pivot").Find("Quad");
+                if (quadTransform == null)
+                {
+                    Debug.LogWarning($"Quad not found in prefab: {prefabFileName}");
+                    continue;
+                }
+                GameObject quad = quadTransform.gameObject;
+                // get the material for the quad
+                Material material = quad.GetComponent<Renderer>().sharedMaterial;
+                // fix the alpha of the material color to 1
+                Color color = material.color;
+                color.a = 0.80f;
+                material.color = color;
+                
+                // bump the process count
+                processCount++;
+                
+                Debug.Log($"processed prefab: {prefabFileName}");
+                
+                // save the changes and ensure refresh
+                EditorUtility.SetDirty(material);
+                AssetDatabase.SaveAssets();
+            }
+            
+            AssetDatabase.Refresh();
+            
+            // log the process count
+            Debug.Log($"Processed {processCount} prefabs.");
+        }
+        
+        [MenuItem("Bettr/Tools/Sync Game Scripts")]
+        public static void SyncGameScripts()
+        {
+            // Walk the entire directory tree under the plugin root directory
+            var processCount = 0;
+            var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+            for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
+            {
+                var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
+                // Check that the MachineName starts with "Game" and is not "Game001Alpha"
+                if (!machineNameDir.Name.StartsWith("Game") || machineNameDir.Name == "Game001Alpha")
+                {
+                    continue;
+                }
+                var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
+                if (variantsDir == null)
+                {
+                    continue;
+                }
+                var machineVariantsDirs = variantsDir?.GetDirectories();
+                // loop over machineVariantsDir
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir?.GetDirectories();
+                    if (experimentVariantDirs == null)
+                    {
+                        continue;
+                    }
+                    // loop over experimentVariantDirs
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        // now extract the machineName from machineNameDir, machineVariant from machineVariantsDir, and experimentVariant from experimentVariantDir
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir?.Name;
+                        string experimentVariant = experimentVariantDir?.Name;
+                        
+                        string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
+                        if (!Directory.Exists(runtimeAssetPath))
+                        {
+                            Debug.LogError($"Directory not found: {runtimeAssetPath}");
+                            continue;
+                        }
+                        
+                        var machineModelName =$"{machineName}Models";
+                        
+                        string modelDestinationPath = Path.Combine(runtimeAssetPath, "Models",  $"{machineModelName}.cscript.txt");
+                        
+                        // Load and run the Model file
+                        var modelTextAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(modelDestinationPath);
+                        var machineModelScript = modelTextAsset.text;
+                        TileController.StaticInit();
+                        DynValue dynValue = TileController.LuaScript.LoadString(machineModelScript, codeFriendlyName: machineModelName);
+                        TileController.LuaScript.Call(dynValue);
+                        
+                        Debug.Log($"Processing Scripts for machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant}");
+                
+                        ProcessScripts(machineName, machineVariant, experimentVariant, runtimeAssetPath);
+                        
+                        processCount++;
+                    }
+                }
+            }
+            
+            Debug.Log($"SyncGameScripts: Processed {processCount} machine variants.");
+        }
+
+        [MenuItem("Bettr/Tools/Archived/Fix Audio WebGL Settings")]
+        public static void FixAudioWebGLSettings()
+        {
+            EnforceWebGLAudioOverride();
+        }
+        
+        [MenuItem("Bettr/Tools/Archived/Sync Audio Files")]
+        public static void SyncAudioFiles()
+        {
+            var processCount = 0;
+            var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+
+            for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
+            {
+                var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
+                if (!machineNameDir.Name.StartsWith("Game") || machineNameDir.Name == "Game001Alpha")
+                {
+                    continue;
+                }
+
+                var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
+                if (variantsDir == null)
+                {
+                    continue;
+                }
+
+                var machineVariantsDirs = variantsDir.GetDirectories();
+
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir.GetDirectories();
+
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir.Name;
+                        string experimentVariant = experimentVariantDir.Name;
+
+                        string runtimeAssetPath =
+                            $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
+                        if (!Directory.Exists(runtimeAssetPath))
+                        {
+                            Debug.LogError($"Directory not found: {runtimeAssetPath}");
+                            continue;
+                        }
+                        
+                        // Delete audio files properly
+                        DeleteAudio(machineName, machineVariant, experimentVariant, runtimeAssetPath);
+                    }
+                }
+                
+                // refresh database
+                AssetDatabase.Refresh();
+
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir.GetDirectories();
+
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir.Name;
+                        string experimentVariant = experimentVariantDir.Name;
+
+                        string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
+                        if (!Directory.Exists(runtimeAssetPath))
+                        {
+                            Debug.LogError($"Directory not found: {runtimeAssetPath}");
+                            continue;
+                        }
+
+                        // Copy and process audio files properly
+                        ProcessAudio(machineName, machineVariant, experimentVariant, runtimeAssetPath);
+
+                        processCount++;
+                    }
+                }
+            }
+            
+            AssetDatabase.Refresh();
+
+            Debug.Log($"SyncAudioFiles: Processed {processCount} machine variants.");
+        }
+        
+        [MenuItem("Bettr/Tools/Archived/Cleanup Runtime Audio Files")]
+        public static void CleanupAudioFiles()
+        {
+            var processCount = 0;
+            var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+
+            for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
+            {
+                var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
+                if (!machineNameDir.Name.StartsWith("Game") || machineNameDir.Name == "Game001Alpha")
+                {
+                    continue;
+                }
+
+                var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
+                if (variantsDir == null)
+                {
+                    continue;
+                }
+
+                var machineVariantsDirs = variantsDir.GetDirectories();
+
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir.GetDirectories();
+
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir.Name;
+                        string experimentVariant = experimentVariantDir.Name;
+
+                        string runtimeAssetPath =
+                            $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
+                        if (!Directory.Exists(runtimeAssetPath))
+                        {
+                            Debug.LogError($"Directory not found: {runtimeAssetPath}");
+                            continue;
+                        }
+                        
+                        // Delete audio files properly
+                        DeleteAudio(machineName, machineVariant, experimentVariant, runtimeAssetPath);
+                    }
+                }
+            }
+            
+            AssetDatabase.Refresh();
+
+            Debug.Log($"CleanupAudioFiles: Processed {processCount} machine variants.");
+        }
+
+        private static void EnforceWebGLAudioOverride()
+        {
+            string audioSourcePath = "Assets/Bettr/Editor/audio";
+            if (!Directory.Exists(audioSourcePath))
+            {
+                Debug.LogWarning($"No audio found at: {audioSourcePath}");
+                return;
+            }
+            // get the existing files
+            string[] audioSourceFiles = Directory.GetFiles(audioSourcePath);
+            foreach (var audioSourceFile in audioSourceFiles)
+            {
+                // check if audioSourceFile is a .ogg file
+                if (!audioSourceFile.EndsWith(AUDIO_FORMAT))
+                {
+                    continue;
+                }
+                
+                AudioImporter audioImporter = (AudioImporter)AssetImporter.GetAtPath(audioSourceFile);
+                if (audioImporter == null)
+                {
+                    Debug.LogError($"Failed to get AudioImporter for {audioSourceFile}");
+                    continue;
+                }
+                AudioImporterSampleSettings webGLSettings = audioImporter.GetOverrideSampleSettings("WebGL");
+
+                // Change the compression format to Vorbis
+                webGLSettings.compressionFormat = AudioCompressionFormat.Vorbis;
+                webGLSettings.loadType = AudioClipLoadType.CompressedInMemory;
+
+                // Set the override for WebGL
+                audioImporter.SetOverrideSampleSettings("WebGL", webGLSettings);
+                
+                // save changes
+                audioImporter.SaveAndReimport();
+
+                // Reimport the audio clip to apply changes
+                AssetDatabase.ImportAsset(audioSourceFile);
+                Debug.Log("Updated compression format for: " + audioSourceFile);
+            }
+        }
+
+
+        private static void DeleteAudio(string machineName, string machineVariant, string experimentVariant,
+            string runtimeAssetPath)
+        {
+            string audioSourcePath = "Assets/Bettr/Editor/audio";
+
+            string destinationPath = Path.Combine(runtimeAssetPath, "Audio");
+
+            if (!Directory.Exists(audioSourcePath))
+            {
+                Debug.LogWarning($"No audio found at: {audioSourcePath}");
+                return;
+            }
+
+            if (!Directory.Exists(destinationPath))
+            {
+                Directory.CreateDirectory(destinationPath);
+            }
+
+            // get the existing files
+            string[] existingAudioFiles = Directory.GetFiles(destinationPath);
+            foreach (var existingAudioFile in existingAudioFiles)
+            {
+                string fileName = Path.GetFileName(existingAudioFile);
+                string assetDestinationPath = $"{destinationPath}/{fileName}";
+
+                if (File.Exists(assetDestinationPath))
+                {
+                    File.Delete(assetDestinationPath);
+                }
+            }
+            
+            // if the directory is now empty delete it
+            if (Directory.GetFiles(destinationPath).Length == 0)
+            {
+                Directory.Delete(destinationPath);
+                // delete the meta file as well
+                File.Delete($"{destinationPath}.meta");
+            }
+        }
+
+        private static void ProcessAudio(string machineName, string machineVariant, string experimentVariant, string runtimeAssetPath)
+        {
+            string audioSourcePath = "Assets/Bettr/Editor/audio";
+            
+            string destinationPath = Path.Combine(runtimeAssetPath, "Audio");
+
+            if (!Directory.Exists(audioSourcePath))
+            {
+                Debug.LogWarning($"No audio found at: {audioSourcePath}");
+                return;
+            }
+
+            if (!Directory.Exists(destinationPath))
+            {
+                Directory.CreateDirectory(destinationPath);
+            }
+
+            string[] audioFilesWav = Directory.GetFiles(audioSourcePath, "*.wav");
+            string[] audioFilesMp3 = Directory.GetFiles(audioSourcePath, "*.mp3");
+            string[] audioFilesOgg = Directory.GetFiles(audioSourcePath, "*.ogg");
+                        
+            // combine into single audioFiles array
+            string[] audioFiles = audioFilesWav.Concat(audioFilesMp3).Concat(audioFilesOgg).ToArray();            
+
+            foreach (var audioFile in audioFiles)
+            {
+                string fileName = Path.GetFileName(audioFile);
+                string assetSourcePath = $"{audioSourcePath}/{fileName}";
+                string assetDestinationPath = $"{destinationPath}/{fileName}";
+
+                // Use AssetDatabase to copy assets with settings intact
+                if (!AssetDatabase.CopyAsset(assetSourcePath, assetDestinationPath))
+                {
+                    Debug.LogError($"Failed to copy asset from {assetSourcePath} to {assetDestinationPath}");
+                    continue;
+                }
+
+                // Import the asset at the new location to retain settings
+                AssetDatabase.ImportAsset(assetDestinationPath, ImportAssetOptions.ForceUpdate);
+
+                Debug.Log($"Copied and imported audio asset: {assetDestinationPath}");
+            }
+        }
+        
+        private static GameObject FindGameObjectInPrefab(GameObject prefab, string gameObjectName)
+        {
+            Transform[] allTransforms = prefab.GetComponentsInChildren<Transform>(true);
+            foreach (Transform transform in allTransforms)
+            {
+                if (transform.gameObject.name == gameObjectName)
+                {
+                    return transform.gameObject;
+                }
+            }
+
+            return null;
+        }
+        
+        private static void SetLayerRecursively(GameObject gameObject, int layer)
+        {
+            gameObject.layer = layer;
+            foreach (Transform child in gameObject.transform)
+            {
+                SetLayerRecursively(child.gameObject, layer);
+            }
+        }
+        
+        [MenuItem("Bettr/Tools/Fix Status Texts")]
+        public static void FixStatusTexts()
+        {
+            // Walk the entire directory tree under the plugin root directory
+            var processCount = 0;
+            var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+            string coreAssetPath = $"Assets/Bettr/Core";
+            for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
+            {
+                var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
+                // Check that the MachineName starts with "Game" and is not "Game001Alpha"
+                if (!machineNameDir.Name.StartsWith("Game") || machineNameDir.Name == "Game001Alpha")
+                {
+                    continue;
+                }
+                var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
+                if (variantsDir == null)
+                {
+                    continue;
+                }
+                var machineVariantsDirs = variantsDir?.GetDirectories();
+                // loop over machineVariantsDir
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir?.GetDirectories();
+                    if (experimentVariantDirs == null)
+                    {
+                        continue;
+                    }
+                    // loop over experimentVariantDirs
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        // now extract the machineName from machineNameDir, machineVariant from machineVariantsDir, and experimentVariant from experimentVariantDir
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir?.Name;
+                        string experimentVariant = experimentVariantDir?.Name;
+                        
+                        string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
+                        if (!Directory.Exists(runtimeAssetPath))
+                        {
+                            Debug.LogError($"Directory not found: {runtimeAssetPath}");
+                            continue;
+                        }
+                        
+                        // get the prefabs directory
+                        string prefabsDirectory = Path.Combine(runtimeAssetPath, "Prefabs");
+                        // get the Game<NNN>BaseGameMachine.prefab
+                        string machinePrefabPath = Directory.GetFiles(prefabsDirectory, $"{machineName}BaseGameMachine.prefab", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                        if (string.IsNullOrEmpty(machinePrefabPath))
+                        {
+                            Debug.LogError($"Machine prefab not found: {machineName}BaseGameMachine.prefab");
+                            continue;
+                        }
+                        
+                        // load the Prefab asset
+                        GameObject machinePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(machinePrefabPath);
+                        if (machinePrefab == null)
+                        {
+                            Debug.LogError($"Failed to load prefab: {machineName}BaseGameMachine.prefab");
+                            continue;
+                        }
+                        
+                        // Get the WinSymbols GameObject
+                        GameObject winSymbols = FindGameObjectInPrefab(machinePrefab, "WinSymbols");
+                        winSymbols.transform.localPosition = new Vector3(-6.34f, -4.55f, -20);
+                        winSymbols.transform.localScale = new Vector3(1, 1, 1);
+                        // Switch to SLOT_OVERLAY Layer
+                        SetLayerRecursively(winSymbols, LayerMask.NameToLayer("SLOT_OVERLAY"));
+                        
+                        // Get the GoodLuckTexts and PaysText Game Objects which are descendants of the machine prefab
+                        GameObject goodLuckText = FindGameObjectInPrefab(machinePrefab, "GoodLuckText");
+                        GameObject paysText = FindGameObjectInPrefab(machinePrefab, "PaysText");
+                        // Fix the scale of the paysText component to match the goodLuckText component
+                        paysText.transform.localScale = goodLuckText.transform.localScale;
+                        // Get the RectTransform height of the goodLuckText component
+                        RectTransform goodLuckTextRectTransform = goodLuckText.GetComponent<RectTransform>();
+                        // Get the RectTransform height of the paysText component
+                        RectTransform paysTextRectTransform = paysText.GetComponent<RectTransform>();
+                        // Set the height of the paysText component to match the goodLuckText component
+                        paysTextRectTransform.sizeDelta = new Vector2(paysTextRectTransform.sizeDelta.x, goodLuckTextRectTransform.sizeDelta.y);
+                        // Set the PosY of the paysText component to match the goodLuckText component
+                        paysTextRectTransform.anchoredPosition = new Vector2(paysTextRectTransform.anchoredPosition.x, goodLuckTextRectTransform.anchoredPosition.y);
+                        // Set the Transform X to -2.25
+                        paysText.transform.localPosition = new Vector3(-3.6f, paysText.transform.localPosition.y, paysText.transform.localPosition.z);
+                        // change the paysText 
+                        paysText.GetComponent<TextMeshPro>().text = "x {0} = {1,3} x {2} = {3,3}";
+                        
+                        // save the prefab
+                        PrefabUtility.SaveAsPrefabAsset(machinePrefab, machinePrefabPath);
+                        
+                        Debug.Log($"Fixing Status Text for machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant}");
+                
+                        processCount++;
+                    }
+                }
+            }
+            
+            AssetDatabase.Refresh();
+            
+            Debug.Log($"Processed Fix Status Texts {processCount} machine variants.");
+        }
+        
+        [MenuItem("Bettr/Tools/Fix Background")]
+        public static void FixBackground()
+        {
+            // Walk the entire directory tree under the plugin root directory
+            var processCount = 0;
+            var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+            string coreAssetPath = $"Assets/Bettr/Core";
+            for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
+            {
+                var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
+                // Check that the MachineName starts with "Game" and is not "Game001Alpha"
+                if (!machineNameDir.Name.StartsWith("Game") || machineNameDir.Name == "Game001Alpha")
+                {
+                    continue;
+                }
+                var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
+                if (variantsDir == null)
+                {
+                    continue;
+                }
+                var machineVariantsDirs = variantsDir?.GetDirectories();
+                // loop over machineVariantsDir
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir?.GetDirectories();
+                    if (experimentVariantDirs == null)
+                    {
+                        continue;
+                    }
+                    // loop over experimentVariantDirs
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        // now extract the machineName from machineNameDir, machineVariant from machineVariantsDir, and experimentVariant from experimentVariantDir
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir?.Name;
+                        string experimentVariant = experimentVariantDir?.Name;
+                        
+                        string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
+                        if (!Directory.Exists(runtimeAssetPath))
+                        {
+                            Debug.LogError($"Directory not found: {runtimeAssetPath}");
+                            continue;
+                        }
+                        
+                        // get the prefabs directory
+                        string prefabsDirectory = Path.Combine(runtimeAssetPath, "Prefabs");
+                        string materialsDirectory = Path.Combine(runtimeAssetPath, "Materials");
+                        string texturesDirectory = Path.Combine(runtimeAssetPath, "Textures");
+                        
+                        // The {machineName}BaseGameBackground.prefab uses the BackgroundFBX.prefab which uses the Material_with_Texture material in the Materials
+                        // I want to switch it to use the Standard shader
+                        
+                        // get the Material_with_Texture material
+                        string materialPath = Directory.GetFiles(materialsDirectory, "Material_with_Texture.mat", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                        // load the Material_with_Texture material
+                        Material material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+                        // get the Standard shader
+                        Shader standardShader = Shader.Find("Standard");
+                        // set the shader of the material to the Standard shader
+                        material.shader = standardShader;
+                        
+                        // Enable the Emission property
+                        material.EnableKeyword("_EMISSION");
+                        // Create the emission texture from the Background.jpg which is in the "Textures" directory
+                        string texturePath = Directory.GetFiles(texturesDirectory, "Background.jpg", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                        // load the Background.jpg texture
+                        Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(texturePath);
+                        
+                        
+                        Debug.Log($"Fixing Background for machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant}");
+                
+                        processCount++;
+                    }
+                }
+            }
+            
+            AssetDatabase.Refresh();
+            
+            Debug.Log($"Processed Fix Background {processCount} machine variants.");
+        }
+        
+        [MenuItem("Bettr/Tools/Fix Audio Source")]
+        public static void FixAudioSource()
+        {
+            // Walk the entire directory tree under the plugin root directory
+            var processCount = 0;
+            var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+            string coreAssetPath = $"Assets/Bettr/Core";
+            for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
+            {
+                var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
+                // Check that the MachineName starts with "Game" and is not "Game001Alpha"
+                if (!machineNameDir.Name.StartsWith("Game") || machineNameDir.Name == "Game001Alpha")
+                {
+                    continue;
+                }
+                var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
+                if (variantsDir == null)
+                {
+                    continue;
+                }
+                var machineVariantsDirs = variantsDir?.GetDirectories();
+                // loop over machineVariantsDir
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir?.GetDirectories();
+                    if (experimentVariantDirs == null)
+                    {
+                        continue;
+                    }
+                    // loop over experimentVariantDirs
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        // now extract the machineName from machineNameDir, machineVariant from machineVariantsDir, and experimentVariant from experimentVariantDir
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir?.Name;
+                        string experimentVariant = experimentVariantDir?.Name;
+                        
+                        string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
+                        if (!Directory.Exists(runtimeAssetPath))
+                        {
+                            Debug.LogError($"Directory not found: {runtimeAssetPath}");
+                            continue;
+                        }
+                        
+                        // get the prefabs directory
+                        string prefabsDirectory = Path.Combine(runtimeAssetPath, "Prefabs");
+                        // get the Game<NNN>BaseGameMachine.prefab
+                        string machinePrefabPath = Directory.GetFiles(prefabsDirectory, $"{machineName}BaseGameMachine.prefab", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                        if (string.IsNullOrEmpty(machinePrefabPath))
+                        {
+                            Debug.LogError($"Machine prefab not found: {machineName}BaseGameMachine.prefab");
+                            continue;
+                        }
+                        
+                        // load the Prefab asset
+                        GameObject machinePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(machinePrefabPath);
+                        if (machinePrefab == null)
+                        {
+                            Debug.LogError($"Failed to load prefab: {machineName}BaseGameMachine.prefab");
+                            continue;
+                        }
+                        
+                        // remove any audio source from the top level game object of the machine prefab
+                        AudioSource[] audioSources = machinePrefab.GetComponents<AudioSource>();
+                        foreach (var audioSource in audioSources)
+                        {
+                            Object.DestroyImmediate(audioSource, true);
+                        }
+                        
+                        string audioDirectory = Path.Combine(coreAssetPath, "Audio");
+                        // get the audio files under the audio directory
+                        string[] audioFiles = Directory.GetFiles(audioDirectory, $"*{AUDIO_FORMAT}", SearchOption.AllDirectories);
+                        
+                        // loop over the audio files
+                        foreach (var audioFile in audioFiles)
+                        {
+                            // load the audio clip
+                            AudioClip audioClip = AssetDatabase.LoadAssetAtPath<AudioClip>(audioFile);
+                            if (audioClip == null)
+                            {
+                                Debug.LogError($"Failed to load audio clip: {audioFile}");
+                                continue;
+                            }
+                            
+                            // add an audio source to the top level game object of the machine prefab
+                            AudioSource audioSource = machinePrefab.AddComponent<AudioSource>();
+                            audioSource.clip = audioClip;
+                            audioSource.playOnAwake = false;
+                            audioSource.loop = true;
+                            audioSource.pitch = 1;
+                            audioSource.priority = 128;
+                            audioSource.spatialBlend = 0; // 0 = 2D
+                            audioSource.volume = 1; // can turn off using Key "V"
+                            audioSource.panStereo = 0; // -1 = left, 1 = right
+                        }
+                        
+                        // save the prefab
+                        PrefabUtility.SaveAsPrefabAsset(machinePrefab, machinePrefabPath);
+                        
+                        Debug.Log($"Fixing Audio Source for machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant}");
+                
+                        processCount++;
+                    }
+                }
+            }
+            
+            AssetDatabase.Refresh();
+            
+            Debug.Log($"Processed Fix Audio Source {processCount} machine variants.");
+        }
+        
+        [MenuItem("Bettr/Tools/Sync Symbol Textures")]
+        public static void SyncSymbolTextures()
+        {
+            // Walk the entire directory tree under the plugin root directory
+            var processCount = 0;
+            var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+            for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
+            {
+                var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
+                // Check that the MachineName starts with "Game" and is not "Game001Alpha"
+                if (!machineNameDir.Name.StartsWith("Game") || machineNameDir.Name == "Game001Alpha")
+                {
+                    continue;
+                }
+                var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
+                if (variantsDir == null)
+                {
+                    continue;
+                }
+                var machineVariantsDirs = variantsDir?.GetDirectories();
+                // loop over machineVariantsDir
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir?.GetDirectories();
+                    if (experimentVariantDirs == null)
+                    {
+                        continue;
+                    }
+                    // loop over experimentVariantDirs
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        // now extract the machineName from machineNameDir, machineVariant from machineVariantsDir, and experimentVariant from experimentVariantDir
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir?.Name;
+                        string experimentVariant = experimentVariantDir?.Name;
+                        
+                        string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
+                        if (!Directory.Exists(runtimeAssetPath))
+                        {
+                            Debug.LogError($"Directory not found: {runtimeAssetPath}");
+                            continue;
+                        }
+                        
+                        var machineModelName =$"{machineName}Models";
+                        
+                        string modelDestinationPath = Path.Combine(runtimeAssetPath, "Models",  $"{machineModelName}.cscript.txt");
+                        
+                        // Load and run the Model file
+                        var modelTextAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(modelDestinationPath);
+                        var machineModelScript = modelTextAsset.text;
+                        TileController.StaticInit();
+                        DynValue dynValue = TileController.LuaScript.LoadString(machineModelScript, codeFriendlyName: machineModelName);
+                        TileController.LuaScript.Call(dynValue);
+                        
+                        var symbolTable = GetTable($"{machineName}BaseGameSymbolTable");
+                        var pkArray = GetTablePkArray(symbolTable);
+                        
+                        string textureDestinationPath = Path.Combine(runtimeAssetPath, "Textures");
+                        string textureSourcePath = $"Assets/Bettr/Editor/textures/{machineName}/{machineVariant}";
+                        
+                        // walk the pkArray
+                        foreach (var pk in pkArray)
+                        {
+                            var jpgName = $"{pk}.jpg";
+                            // copy from source path to destination path
+                            var sourcePath = Path.Combine(textureSourcePath, jpgName);
+                            var destinationPath = Path.Combine(textureDestinationPath, jpgName);
+                            File.Copy(sourcePath, destinationPath, true);
+                        }
+                        
+                        
+                        processCount++;
+                    }
+                }
+            }
+            
+            Debug.Log($"Processed {processCount} symbol textures.");
+        }
+        
+
+        [MenuItem("Bettr/Build/BackgroundTextures")]
+        public static void SyncBackgroundTextures()
+        {
+            // Walk the entire directory tree under the plugin root directory
+            var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+            for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
+            {
+                var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
+                var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
+                if (variantsDir == null)
+                {
+                    continue;
+                }
+                var machineVariantsDirs = variantsDir?.GetDirectories();
+                // loop over machineVariantsDir
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir?.GetDirectories();
+                    if (experimentVariantDirs == null)
+                    {
+                        continue;
+                    }
+                    // loop over experimentVariantDirs
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        // now extract the machineName from machineNameDir, machineVariant from machineVariantsDir, and experimentVariant from experimentVariantDir
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir?.Name;
+                        string experimentVariant = experimentVariantDir?.Name;
+                
+                        Environment.SetEnvironmentVariable("machineName", machineName);
+                        Environment.SetEnvironmentVariable("machineVariant", machineVariant);
+                        Environment.SetEnvironmentVariable("experimentVariant", experimentVariant);
+                
+                        SyncBackgroundTexturesFromCommandLine();
+                    }
+                }
+            }
+        }
+
+        public static void SyncBackgroundTexturesFromCommandLine()
+        {
+            // assign texture "Background.png" to the FBX "BackgroundFBX.fbx"s material in the same directory
+            
+            string machineName = GetArgument("-machineName");
+            string machineVariant = GetArgument("-machineVariant");
+            string experimentVariant = GetArgument("-experimentVariant");
+
+            string pathPrefix = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset/";
+            string texturesPathPrefix = $"{pathPrefix}/Textures/";
+            string fbxPathPrefix = $"{pathPrefix}/Prefabs/";
+            string texturePath = $"{texturesPathPrefix}/Background.png";
+            string fbxPath = $"{fbxPathPrefix}/BackgroundFBX.prefab";
+            // ensure both exist
+            if (!File.Exists(texturePath))
+            {
+                Debug.Log($"Texture not found at path: {texturePath} continuing...");
+                return;
+            }
+            if (!File.Exists(fbxPath))
+            {
+                Debug.Log($"FBX not found at path: {fbxPath} continuing...");
+                return;
+            }
+            Debug.Log($"Processing machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant} texture={texturePath} fbx={fbxPath}");
+            // load the texture
+            Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(texturePath);
+            // load the fbx
+            GameObject fbx = AssetDatabase.LoadAssetAtPath<GameObject>(fbxPath);
+            // get the material
+            Material material = fbx.GetComponentInChildren<MeshRenderer>().sharedMaterial;
+            // assign the texture to the material
+            material.mainTexture = texture;
+
+        }
+
+        // [MenuItem("Bettr/Build/Game001 - Epic Wins")]
+        public static void BuildGame001()
+        {
+            BuildMachines("Game001", "EpicAncientAdventures");
+            // BuildMachines("Game001", "EpicAtlantisTreasures");
+            // BuildMachines("Game001", "EpicClockworkChronicles");
+            // BuildMachines("Game001", "EpicCosmicVoyage");
+            // BuildMachines("Game001", "EpicDragonsHoard");
+            // BuildMachines("Game001", "EpicEnchantedForest");
+            // BuildMachines("Game001", "EpicGalacticQuest");
+            // BuildMachines("Game001", "EpicGuardiansOfOlympus");
+            // BuildMachines("Game001", "EpicLostCityOfGold");
+            // BuildMachines("Game001", "EpicMysticalLegends");
+            // BuildMachines("Game001", "EpicPharosFortune");
+            // BuildMachines("Game001", "EpicPiratesPlunder");
+            // BuildMachines("Game001", "EpicSamuraisFortune");
+        }
+        
+        // [MenuItem("Bettr/Build/Game002 - Buffalo")]
         public static void BuildGame002()
         {
             BuildMachines("Game002", "BuffaloTreasureHunter");
         }
 
-        [MenuItem("Bettr/Build/Game003 - HighStakes")]
+        // [MenuItem("Bettr/Build/Game003 - HighStakes")]
         public static void BuildGame003()
         {
             BuildMachines("Game003", "HighStakesAlpineAdventure");
         }
 
-        [MenuItem("Bettr/Build/Game004 - CleopatraRiches")]
+        // [MenuItem("Bettr/Build/Game004 - CleopatraRiches")]
         public static void BuildGame004()
         {
             BuildMachines("Game004", "CleopatraRiches");
         }
 
-        [MenuItem("Bettr/Build/Game005 - 88FortunesDancingDrums")]
+        // [MenuItem("Bettr/Build/Game005 - 88FortunesDancingDrums")]
         public static void BuildGame005()
         {
             BuildMachines("Game005", "88FortunesDancingDrums");
         }
 
-        [MenuItem("Bettr/Build/Game006 - WheelOfFortuneTripleExtremeSpin")]
+        // [MenuItem("Bettr/Build/Game006 - WheelOfFortuneTripleExtremeSpin")]
         public static void BuildGame006()
         {
             BuildMachines("Game006", "WheelOfFortuneTripleExtremeSpin");
         }
 
-        [MenuItem("Bettr/Build/Game007 - TrueVegas")]
+        // [MenuItem("Bettr/Build/Game007 - TrueVegas")]
         public static void BuildGame007()
         {
             BuildMachines("Game007", "TrueVegasInfiniteSpins");
         }
 
-        [MenuItem("Bettr/Build/Game008 - GodsOfOlympusZeus")]
+        // [MenuItem("Bettr/Build/Game008 - GodsOfOlympusZeus")]
         public static void BuildGame008()
         {
             BuildMachines("Game008", "GodsOfOlympusZeus");
         }
 
-        [MenuItem("Bettr/Build/Game009 - PlanetMooneyMooCash")]
+        // [MenuItem("Bettr/Build/Game009 - PlanetMooneyMooCash")]
         public static void BuildGame009()
         {
             BuildMachines("Game009", "PlanetMooneyMooCash");
         }
         
-        private static void ImportFBX(string machineName, string machineVariant)
+        private static void ImportFBX(string machineName, string machineVariant, string experimentVariant)
         {
             // // Copy across the background texture
             // string sourceTexturePath =  $"Assets/Bettr/Editor/textures/{machineName}/{machineVariant}/Background.jpg";
-            // string destinationTexturePath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset/Textures/Background.jpg";
+            // string destinationTexturePath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset/Textures/Background.jpg";
             // File.Copy(sourceTexturePath, destinationTexturePath, overwrite: true);
             // AssetDatabase.Refresh();
 
             
             string sourcePath =  $"Assets/Bettr/Editor/fbx/{machineName}/{machineVariant}/";
-            string destinationPathPrefix = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset/";
+            string destinationPathPrefix = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset/";
             string fbxFilename = $"Background_fbx_common_textured.fbx";
             string targetFbxFilename = $"BackgroundFBX.fbx";
 
@@ -283,7 +1748,7 @@ namespace Bettr.Editor
             
             Environment.SetEnvironmentVariable("machineName", machineName);
             Environment.SetEnvironmentVariable("machineVariant", machineVariant);
-            Environment.SetEnvironmentVariable("machineModel", $"{modelsDir}/{machineName}/{machineName}Models.lua");
+            Environment.SetEnvironmentVariable("machineModel", $"{modelsDir}/{machineName}/{machineVariant}/{machineName}Models.lua");
 
             BuildMachinesFromCommandLine();
         }
@@ -291,21 +1756,31 @@ namespace Bettr.Editor
         // ReSharper disable once MemberCanBePrivate.Global
         public static void BuildMachinesFromCommandLine()
         {
+            SetupCoreAssetPath();
             string machineName = GetArgument("-machineName");
             string machineVariant = GetArgument("-machineVariant");
             string machineModel = GetArgument("-machineModel");
             
-            ClearRuntimeAssetPath(machineName, machineVariant);
-            SetupMachine(machineName, machineVariant, machineModel);
-            ImportFBX(machineName, machineVariant);
-            BuildMachine(machineName, machineVariant);
+            string experimentVariant = "control";
+            
+            ClearRuntimeAssetPath(machineName, machineVariant, experimentVariant);
+            SetupMachine(machineName, machineVariant, experimentVariant, machineModel);
+            ImportFBX(machineName, machineVariant, experimentVariant);
+            BuildMachine(machineName, machineVariant, experimentVariant);
+            
+            experimentVariant = "variant1";
+            
+            ClearRuntimeAssetPath(machineName, machineVariant, experimentVariant);
+            SetupMachine(machineName, machineVariant, experimentVariant, machineModel);
+            ImportFBX(machineName, machineVariant, experimentVariant);
+            BuildMachine(machineName, machineVariant, experimentVariant);
         }
         
-        private static void CreateOrReplaceMaterial(string machineName, string machineVariant)
+        private static void CreateOrReplaceMaterial(string machineName, string machineVariant, string experimentVariant)
         {
             string materialName = $"{machineName}__{machineVariant}__LobbyCard";
-            string materialPath = $"Assets/Bettr/Runtime/Plugin/LobbyCard/variants/v0_1_0/Runtime/Asset/{machineName}/LobbyCard/Materials/{materialName}.mat";
-            string texturePath = $"Assets/Bettr/Runtime/Plugin/LobbyCard/variants/v0_1_0/Runtime/Asset/{machineName}/LobbyCard/Materials/{materialName}.jpg";
+            string materialPath = $"Assets/Bettr/Runtime/Plugin/LobbyCard/variants/v0_1_0/Runtime/Asset/{machineName}/{experimentVariant}/LobbyCard/Materials/{materialName}.mat";
+            string texturePath = $"Assets/Bettr/Runtime/Plugin/LobbyCard/variants/v0_1_0/Runtime/Asset/{machineName}/{experimentVariant}/LobbyCard/Materials/{materialName}.jpg";
     
             // Load or create the material
             Material material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
@@ -338,130 +1813,130 @@ namespace Bettr.Editor
         public static void BuildMaterials()
         {
             // Game001 Variants
-            CreateOrReplaceMaterial("Game001", "AncientAdventures");
-            CreateOrReplaceMaterial("Game001", "AtlantisTreasures");
-            CreateOrReplaceMaterial("Game001", "ClockworkChronicles");
-            CreateOrReplaceMaterial("Game001", "DragonsHoard");
-            CreateOrReplaceMaterial("Game001", "EnchantedForest");
-            CreateOrReplaceMaterial("Game001", "GalacticQuest");
-            CreateOrReplaceMaterial("Game001", "GuardiansOfOlympus");
-            CreateOrReplaceMaterial("Game001", "LostCityOfGold");
-            CreateOrReplaceMaterial("Game001", "MysticalLegends");
-            CreateOrReplaceMaterial("Game001", "PharosFortune");
-            CreateOrReplaceMaterial("Game001", "PiratesPlunder");
-            CreateOrReplaceMaterial("Game001", "SamuraisFortune");
+            CreateOrReplaceMaterial("Game001", "AncientAdventures", "control");
+            CreateOrReplaceMaterial("Game001", "AtlantisTreasures", "control");
+            CreateOrReplaceMaterial("Game001", "ClockworkChronicles", "control");
+            CreateOrReplaceMaterial("Game001", "DragonsHoard", "control");
+            CreateOrReplaceMaterial("Game001", "EnchantedForest", "control");
+            CreateOrReplaceMaterial("Game001", "GalacticQuest", "control");
+            CreateOrReplaceMaterial("Game001", "GuardiansOfOlympus", "control");
+            CreateOrReplaceMaterial("Game001", "LostCityOfGold", "control");
+            CreateOrReplaceMaterial("Game001", "MysticalLegends", "control");
+            CreateOrReplaceMaterial("Game001", "PharosFortune", "control");
+            CreateOrReplaceMaterial("Game001", "PiratesPlunder", "control");
+            CreateOrReplaceMaterial("Game001", "SamuraisFortune", "control");
 
             // Game002 Variants
-            CreateOrReplaceMaterial("Game002", "BuffaloAdventureQuest");
-            CreateOrReplaceMaterial("Game002", "BuffaloCanyonRiches");
-            CreateOrReplaceMaterial("Game002", "BuffaloFrontierFortune");
-            CreateOrReplaceMaterial("Game002", "BuffaloJackpotMadness");
-            CreateOrReplaceMaterial("Game002", "BuffaloMagicSpins");
-            CreateOrReplaceMaterial("Game002", "BuffaloMoonlitMagic");
-            CreateOrReplaceMaterial("Game002", "BuffaloSafariExpedition");
-            CreateOrReplaceMaterial("Game002", "BuffaloSpiritQuest");
-            CreateOrReplaceMaterial("Game002", "BuffaloThunderstorm");
-            CreateOrReplaceMaterial("Game002", "BuffaloTreasureHunter");
-            CreateOrReplaceMaterial("Game002", "BuffaloWheelOfRiches");
-            CreateOrReplaceMaterial("Game002", "BuffaloWildPicks");
+            CreateOrReplaceMaterial("Game002", "BuffaloAdventureQuest", "control");
+            CreateOrReplaceMaterial("Game002", "BuffaloCanyonRiches", "control");
+            CreateOrReplaceMaterial("Game002", "BuffaloFrontierFortune", "control");
+            CreateOrReplaceMaterial("Game002", "BuffaloJackpotMadness", "control");
+            CreateOrReplaceMaterial("Game002", "BuffaloMagicSpins", "control");
+            CreateOrReplaceMaterial("Game002", "BuffaloMoonlitMagic", "control");
+            CreateOrReplaceMaterial("Game002", "BuffaloSafariExpedition", "control");
+            CreateOrReplaceMaterial("Game002", "BuffaloSpiritQuest", "control");
+            CreateOrReplaceMaterial("Game002", "BuffaloThunderstorm", "control");
+            CreateOrReplaceMaterial("Game002", "BuffaloTreasureHunter", "control");
+            CreateOrReplaceMaterial("Game002", "BuffaloWheelOfRiches", "control");
+            CreateOrReplaceMaterial("Game002", "BuffaloWildPicks", "control");
 
             // Game003 Variants
-            CreateOrReplaceMaterial("Game003", "HighStakesAlpineAdventure");
-            CreateOrReplaceMaterial("Game003", "HighStakesCascadingCash");
-            CreateOrReplaceMaterial("Game003", "HighStakesHotLinks");
-            CreateOrReplaceMaterial("Game003", "HighStakesJungleQuest");
-            CreateOrReplaceMaterial("Game003", "HighStakesMegaMultipliers");
-            CreateOrReplaceMaterial("Game003", "HighStakesMonacoThrills");
-            CreateOrReplaceMaterial("Game003", "HighStakesSafariAdventure");
-            CreateOrReplaceMaterial("Game003", "HighStakesSpaceOdyssey");
-            CreateOrReplaceMaterial("Game003", "HighStakesStackedSpins");
-            CreateOrReplaceMaterial("Game003", "HighStakesUnderwaterAdventure");
-            CreateOrReplaceMaterial("Game003", "HighStakesWildSpins");
-            CreateOrReplaceMaterial("Game003", "HighStakesWonderWays");
+            CreateOrReplaceMaterial("Game003", "HighStakesAlpineAdventure", "control");
+            CreateOrReplaceMaterial("Game003", "HighStakesCascadingCash", "control");
+            CreateOrReplaceMaterial("Game003", "HighStakesHotLinks", "control");
+            CreateOrReplaceMaterial("Game003", "HighStakesJungleQuest", "control");
+            CreateOrReplaceMaterial("Game003", "HighStakesMegaMultipliers", "control");
+            CreateOrReplaceMaterial("Game003", "HighStakesMonacoThrills", "control");
+            CreateOrReplaceMaterial("Game003", "HighStakesSafariAdventure", "control");
+            CreateOrReplaceMaterial("Game003", "HighStakesSpaceOdyssey", "control");
+            CreateOrReplaceMaterial("Game003", "HighStakesStackedSpins", "control");
+            CreateOrReplaceMaterial("Game003", "HighStakesUnderwaterAdventure", "control");
+            CreateOrReplaceMaterial("Game003", "HighStakesWildSpins", "control");
+            CreateOrReplaceMaterial("Game003", "HighStakesWonderWays", "control");
 
             // Game004 Variants
-            CreateOrReplaceMaterial("Game004", "RichesBeverlyHillMansions");
-            CreateOrReplaceMaterial("Game004", "RichesBillionaireBets");
-            CreateOrReplaceMaterial("Game004", "RichesDiamondDash");
-            CreateOrReplaceMaterial("Game004", "RichesGalacticGoldRush");
-            CreateOrReplaceMaterial("Game004", "RichesJetsetJackpot");
-            CreateOrReplaceMaterial("Game004", "RichesMysticForest");
-            CreateOrReplaceMaterial("Game004", "RichesPharaohsRiches");
-            CreateOrReplaceMaterial("Game004", "RichesPiratesBounty");
-            CreateOrReplaceMaterial("Game004", "RichesRaceToRiches");
-            CreateOrReplaceMaterial("Game004", "RichesRoyalHeist");
-            CreateOrReplaceMaterial("Game004", "RichesRubyRush");
-            CreateOrReplaceMaterial("Game004", "RichesSapphireSprint");
+            CreateOrReplaceMaterial("Game004", "RichesBeverlyHillMansions", "control");
+            CreateOrReplaceMaterial("Game004", "RichesBillionaireBets", "control");
+            CreateOrReplaceMaterial("Game004", "RichesDiamondDash", "control");
+            CreateOrReplaceMaterial("Game004", "RichesGalacticGoldRush", "control");
+            CreateOrReplaceMaterial("Game004", "RichesJetsetJackpot", "control");
+            CreateOrReplaceMaterial("Game004", "RichesMysticForest", "control");
+            CreateOrReplaceMaterial("Game004", "RichesPharaohsRiches", "control");
+            CreateOrReplaceMaterial("Game004", "RichesPiratesBounty", "control");
+            CreateOrReplaceMaterial("Game004", "RichesRaceToRiches", "control");
+            CreateOrReplaceMaterial("Game004", "RichesRoyalHeist", "control");
+            CreateOrReplaceMaterial("Game004", "RichesRubyRush", "control");
+            CreateOrReplaceMaterial("Game004", "RichesSapphireSprint", "control");
 
             // Game005 Variants
-            CreateOrReplaceMaterial("Game005", "FortunesCelestialFortune");
-            CreateOrReplaceMaterial("Game005", "FortunesFortuneTeller");
-            CreateOrReplaceMaterial("Game005", "FortunesFourLeafClover");
-            CreateOrReplaceMaterial("Game005", "FortunesJadeOfFortune");
-            CreateOrReplaceMaterial("Game005", "FortunesLuckyBamboo");
-            CreateOrReplaceMaterial("Game005", "FortunesLuckyCharms");
-            CreateOrReplaceMaterial("Game005", "FortunesManekiNeko");
-            CreateOrReplaceMaterial("Game005", "FortunesMysticForest");
-            CreateOrReplaceMaterial("Game005", "FortunesNorseAcorns");
-            CreateOrReplaceMaterial("Game005", "FortunesPharaohsRiches");
-            CreateOrReplaceMaterial("Game005", "FortunesShootingStars");
-            CreateOrReplaceMaterial("Game005", "FortunesVikingVoyage");
+            CreateOrReplaceMaterial("Game005", "FortunesCelestialFortune", "control");
+            CreateOrReplaceMaterial("Game005", "FortunesFortuneTeller", "control");
+            CreateOrReplaceMaterial("Game005", "FortunesFourLeafClover", "control");
+            CreateOrReplaceMaterial("Game005", "FortunesJadeOfFortune", "control");
+            CreateOrReplaceMaterial("Game005", "FortunesLuckyBamboo", "control");
+            CreateOrReplaceMaterial("Game005", "FortunesLuckyCharms", "control");
+            CreateOrReplaceMaterial("Game005", "FortunesManekiNeko", "control");
+            CreateOrReplaceMaterial("Game005", "FortunesMysticForest", "control");
+            CreateOrReplaceMaterial("Game005", "FortunesNorseAcorns", "control");
+            CreateOrReplaceMaterial("Game005", "FortunesPharaohsRiches", "control");
+            CreateOrReplaceMaterial("Game005", "FortunesShootingStars", "control");
+            CreateOrReplaceMaterial("Game005", "FortunesVikingVoyage", "control");
 
             // Game006 Variants
-            CreateOrReplaceMaterial("Game006", "WheelsAncientKingdom");
-            CreateOrReplaceMaterial("Game006", "WheelsCapitalCityTycoon");
-            CreateOrReplaceMaterial("Game006", "WheelsEmpireBuilder");
-            CreateOrReplaceMaterial("Game006", "WheelsFantasyKingdom");
-            CreateOrReplaceMaterial("Game006", "WheelsGlobalInvestor");
-            CreateOrReplaceMaterial("Game006", "WheelsIndustrialRevolution");
-            CreateOrReplaceMaterial("Game006", "WheelsJurassicJungle");
-            CreateOrReplaceMaterial("Game006", "WheelsMythicalRealm");
-            CreateOrReplaceMaterial("Game006", "WheelsRealEstateMoghul");
-            CreateOrReplaceMaterial("Game006", "WheelsSpaceColonization");
-            CreateOrReplaceMaterial("Game006", "WheelsTreasuresIslandTycoon");
-            CreateOrReplaceMaterial("Game006", "WheelsUnderwaterEmpire");
+            CreateOrReplaceMaterial("Game006", "WheelsAncientKingdom", "control");
+            CreateOrReplaceMaterial("Game006", "WheelsCapitalCityTycoon", "control");
+            CreateOrReplaceMaterial("Game006", "WheelsEmpireBuilder", "control");
+            CreateOrReplaceMaterial("Game006", "WheelsFantasyKingdom", "control");
+            CreateOrReplaceMaterial("Game006", "WheelsGlobalInvestor", "control");
+            CreateOrReplaceMaterial("Game006", "WheelsIndustrialRevolution", "control");
+            CreateOrReplaceMaterial("Game006", "WheelsJurassicJungle", "control");
+            CreateOrReplaceMaterial("Game006", "WheelsMythicalRealm", "control");
+            CreateOrReplaceMaterial("Game006", "WheelsRealEstateMoghul", "control");
+            CreateOrReplaceMaterial("Game006", "WheelsSpaceColonization", "control");
+            CreateOrReplaceMaterial("Game006", "WheelsTreasuresIslandTycoon", "control");
+            CreateOrReplaceMaterial("Game006", "WheelsUnderwaterEmpire", "control");
 
             // Game007 Variants
-            CreateOrReplaceMaterial("Game007", "TrueVegasDiamondDazzle");
-            CreateOrReplaceMaterial("Game007", "TrueVegasGoldRush");
-            CreateOrReplaceMaterial("Game007", "TrueVegasInfiniteSpins");
-            CreateOrReplaceMaterial("Game007", "TrueVegasLucky7s");
-            CreateOrReplaceMaterial("Game007", "TrueVegasLuckyCharms");
-            CreateOrReplaceMaterial("Game007", "TrueVegasMegaJackpot");
-            CreateOrReplaceMaterial("Game007", "TrueVegasMegaWheels");
-            CreateOrReplaceMaterial("Game007", "TrueVegasRubyRiches");
-            CreateOrReplaceMaterial("Game007", "TrueVegasSuper7s");
-            CreateOrReplaceMaterial("Game007", "TrueVegasTripleSpins");
-            CreateOrReplaceMaterial("Game007", "TrueVegasWheelBonanza");
-            CreateOrReplaceMaterial("Game007", "TrueVegasWildCherries");
+            CreateOrReplaceMaterial("Game007", "TrueVegasDiamondDazzle", "control");
+            CreateOrReplaceMaterial("Game007", "TrueVegasGoldRush", "control");
+            CreateOrReplaceMaterial("Game007", "TrueVegasInfiniteSpins", "control");
+            CreateOrReplaceMaterial("Game007", "TrueVegasLucky7s", "control");
+            CreateOrReplaceMaterial("Game007", "TrueVegasLuckyCharms", "control");
+            CreateOrReplaceMaterial("Game007", "TrueVegasMegaJackpot", "control");
+            CreateOrReplaceMaterial("Game007", "TrueVegasMegaWheels", "control");
+            CreateOrReplaceMaterial("Game007", "TrueVegasRubyRiches", "control");
+            CreateOrReplaceMaterial("Game007", "TrueVegasSuper7s", "control");
+            CreateOrReplaceMaterial("Game007", "TrueVegasTripleSpins", "control");
+            CreateOrReplaceMaterial("Game007", "TrueVegasWheelBonanza", "control");
+            CreateOrReplaceMaterial("Game007", "TrueVegasWildCherries", "control");
 
             // Game008 Variants
-            CreateOrReplaceMaterial("Game008", "GodsAncientEgyptian");
-            CreateOrReplaceMaterial("Game008", "GodsCelestialBeasts");
-            CreateOrReplaceMaterial("Game008", "GodsCelestialGuardians");
-            CreateOrReplaceMaterial("Game008", "GodsDivineRiches");
-            CreateOrReplaceMaterial("Game008", "GodsElementalMasters");
-            CreateOrReplaceMaterial("Game008", "GodsEternalDivinity");
-            CreateOrReplaceMaterial("Game008", "GodsHeavenlyMonarchs");
-            CreateOrReplaceMaterial("Game008", "GodsMysticPantheon");
-            CreateOrReplaceMaterial("Game008", "GodsMythicDeities");
-            CreateOrReplaceMaterial("Game008", "GodsNorseLegends");
-            CreateOrReplaceMaterial("Game008", "GodsSacredLegends");
-            CreateOrReplaceMaterial("Game008", "GodsTitansOfWealth");
+            CreateOrReplaceMaterial("Game008", "GodsAncientEgyptian", "control");
+            CreateOrReplaceMaterial("Game008", "GodsCelestialBeasts", "control");
+            CreateOrReplaceMaterial("Game008", "GodsCelestialGuardians", "control");
+            CreateOrReplaceMaterial("Game008", "GodsDivineRiches", "control");
+            CreateOrReplaceMaterial("Game008", "GodsElementalMasters", "control");
+            CreateOrReplaceMaterial("Game008", "GodsEternalDivinity", "control");
+            CreateOrReplaceMaterial("Game008", "GodsHeavenlyMonarchs", "control");
+            CreateOrReplaceMaterial("Game008", "GodsMysticPantheon", "control");
+            CreateOrReplaceMaterial("Game008", "GodsMythicDeities", "control");
+            CreateOrReplaceMaterial("Game008", "GodsNorseLegends", "control");
+            CreateOrReplaceMaterial("Game008", "GodsSacredLegends", "control");
+            CreateOrReplaceMaterial("Game008", "GodsTitansOfWealth", "control");
 
             // Game009 Variants
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersApolloAdventures");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersAsteroidMiners");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersBlackHoleExplorers");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersCosmicRaiders");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersGalacticPioneers");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersInterstellarTreasureHunters");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersNebulaNavigators");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersQuantumExplorers");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersRaidersOfPlanetMooney");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersStarshipSalvagers");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersStellarExpedition");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersVoyagersOfTheCosmos");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersApolloAdventures", "control");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersAsteroidMiners", "control");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersBlackHoleExplorers", "control");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersCosmicRaiders", "control");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersGalacticPioneers", "control");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersInterstellarTreasureHunters", "control");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersNebulaNavigators", "control");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersQuantumExplorers", "control");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersRaidersOfPlanetMooney", "control");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersStarshipSalvagers", "control");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersStellarExpedition", "control");
+            CreateOrReplaceMaterial("Game009", "SpaceInvadersVoyagersOfTheCosmos", "control");
             
             Debug.Log($"LobbyCard materials updated successfully.");
         }
@@ -482,7 +1957,7 @@ namespace Bettr.Editor
             Debug.Log("...refreshing database before building asset bundles..");
             AssetDatabase.Refresh();
 
-            var sharedAssetBundleOptions = BuildAssetBundleOptions.StrictMode |
+            var sharedAssetBundleOptions = BuildAssetBundleOptions.ForceRebuildAssetBundle |
                                            BuildAssetBundleOptions.ChunkBasedCompression;
 
 #if UNITY_IOS
@@ -502,35 +1977,35 @@ namespace Bettr.Editor
             
 #endif
 #if UNITY_ANDROID
-            EmptyDirectory(new DirectoryInfo(AssetBundlesAndroidDirectory));
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesAndroidDirectory));
             AssetDatabase.Refresh();
             BuildPipeline.BuildAssetBundles(AssetBundlesAndroidDirectory, 
                 sharedAssetBundleOptions,
                 BuildTarget.Android);
 #endif
 #if UNITY_WEBGL
-            EmptyDirectory(new DirectoryInfo(AssetBundlesWebglDirectory));
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesWebglDirectory));
             AssetDatabase.Refresh();
             BuildPipeline.BuildAssetBundles(AssetBundlesWebglDirectory, 
                 sharedAssetBundleOptions,
                 BuildTarget.WebGL);
 #endif
 #if UNITY_OSX
-            EmptyDirectory(new DirectoryInfo(AssetBundlesOSXDirectory));
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesOSXDirectory));
             AssetDatabase.Refresh();
             BuildPipeline.BuildAssetBundles(AssetBundlesOSXDirectory, 
                 sharedAssetBundleOptions,
                 BuildTarget.StandaloneOSX);
 #endif
 #if UNITY_WIN
-            EmptyDirectory(new DirectoryInfo(AssetBundlesWindowsDirectory));
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesWindowsDirectory));
             AssetDatabase.Refresh();
             BuildPipeline.BuildAssetBundles(AssetBundlesWindowsDirectory, 
                 sharedAssetBundleOptions,
                 BuildTarget.StandaloneWindows64);
 #endif
 #if UNITY_LINUX   
-            EmptyDirectory(new DirectoryInfo(AssetBundlesLinuxDirectory));
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesLinuxDirectory));
             AssetDatabase.Refresh();
             BuildPipeline.BuildAssetBundles(AssetBundlesLinuxDirectory, 
                 sharedAssetBundleOptions,
@@ -576,21 +2051,28 @@ namespace Bettr.Editor
             {
                 return;
             }
-            
-            var pluginDirectories = Directory.GetDirectories(pluginRootDirectory);
-            
-            foreach (var pluginDirectory in pluginDirectories)
+            var pluginMachineGroupDirectories = Directory.GetDirectories(pluginRootDirectory);
+            foreach (var pluginMachineGroupDirectory in pluginMachineGroupDirectories)
             {
-                var assetLabel = ReadAssetLabel(pluginDirectory);
+                var assetLabel = ReadAssetLabel(pluginMachineGroupDirectory);
+                if (assetLabel.Contains('.')) throw new Exception("Asset sub label cannot contain a period.");
                 if (!string.IsNullOrEmpty(assetLabel))
                 {
-                    var variantsRootDirectory = Path.Combine(pluginDirectory, "variants");
-                    var variantsDirectories = Directory.GetDirectories(variantsRootDirectory);
-                    foreach (var variantDirectory in variantsDirectories)
+                    var rootDirectory = Path.Combine(pluginMachineGroupDirectory, "variants");
+                    var pluginMachineDirectories = Directory.GetDirectories(rootDirectory);
+                    foreach (var pluginMachineDirectory in pluginMachineDirectories)
                     {
-                        var assetSubLabel = ReadAssetSubLabel(variantDirectory);
-                        var pluginRuntimeDirectory = Path.Combine(variantDirectory, "Runtime");
-                        WalkDirectoryRecursive(pluginRuntimeDirectory, assetLabel, assetSubLabel);
+                        // all the Experiment variants are under this directory
+                        var assetSubLabel = ReadAssetSubLabel(pluginMachineDirectory);
+                        if (assetSubLabel.Contains('.')) throw new Exception("Asset sub label cannot contain a period.");
+                        var experimentVariantsDirectory = Directory.GetDirectories(pluginMachineDirectory);
+                        foreach (var experimentVariantDirectory in experimentVariantsDirectory)
+                        {
+                            var assetVariantLabel = ReadAssetVariantLabel(experimentVariantDirectory);
+                            if (assetVariantLabel.Contains('.')) throw new Exception("Asset variant label cannot contain a period.");
+                            var pluginRuntimeDirectory = Path.Combine(experimentVariantDirectory, "Runtime");
+                            WalkDirectoryRecursive(pluginRuntimeDirectory, assetLabel, assetSubLabel, assetVariantLabel);
+                        }
                     }
                 }
             }
@@ -610,18 +2092,25 @@ namespace Bettr.Editor
             return baseName;
         }
         
-        private static void WalkDirectoryRecursive(string directoryPath, string assetLabel, string assetSubLabel)
+        private static string ReadAssetVariantLabel(string directoryPath)
+        {
+            var di = new DirectoryInfo(directoryPath);
+            var baseName = di.Name.ToLower();
+            return baseName;
+        }
+        
+        private static void WalkDirectoryRecursive(string directoryPath, string assetLabel, string assetSubLabel, string assetVariantLabel)
         {
             if (Path.GetFileNameWithoutExtension(directoryPath).Equals("Editor")) return; // skip special Editor folder
-            if (assetSubLabel.Contains('.')) throw new Exception("Asset sub label cannot contain a period.");
             var importer = AssetImporter.GetAtPath(directoryPath);
             var assetType = AssetDatabase.GetMainAssetTypeAtPath(directoryPath);
             if (importer != null)
             {
                 if (assetType != null && assetType != typeof(MonoScript))
                 {
-                    importer.assetBundleName = GetAssetBundleName(assetLabel, assetType);
-                    importer.assetBundleVariant = GetAssetBundleVariant(assetSubLabel);
+                    importer.assetBundleName = "";
+                    importer.assetBundleVariant = "";
+                    Debug.Log($"clearing importer assetBundleName and assetBundleVariant for assetPath={directoryPath}");
                 }
             }
             
@@ -637,8 +2126,9 @@ namespace Bettr.Editor
                 {
                     if (assetType != null && assetType != typeof(MonoScript))
                     {
-                        importer.assetBundleName = GetAssetBundleName(assetLabel, assetType);
-                        importer.assetBundleVariant = GetAssetBundleVariant(assetSubLabel);
+                        importer.assetBundleName = GetAssetBundleName(assetLabel, assetSubLabel, assetType);
+                        importer.assetBundleVariant = GetAssetBundleVariant(assetVariantLabel);
+                        Debug.Log($"setting asset labels for assetBundleName={importer.assetBundleName} assetBundleVariant={importer.assetBundleVariant} assetPath={assetPath}");
                     }
                 }
             }
@@ -646,7 +2136,7 @@ namespace Bettr.Editor
             var subDirectories = Directory.GetDirectories(directoryPath);
             foreach (var subDirectory in subDirectories)
             {
-                WalkDirectoryRecursive(subDirectory, assetLabel, assetSubLabel);
+                WalkDirectoryRecursive(subDirectory, assetLabel, assetSubLabel, assetVariantLabel);
             }
         }
 
@@ -664,65 +2154,102 @@ namespace Bettr.Editor
             }
         }
 
-        private static string GetAssetBundleName(string assetLabel, Type assetType)
+        private static string GetAssetBundleName(string assetLabel, string assetSubLabel, Type assetType)
         {
             var isScene = assetType.Name == "SceneAsset";
             var suffix = isScene ? "_scenes" :"";
-            var assetBundleName = $"{assetLabel}{suffix}";
+            var assetBundleName = $"{assetLabel}{assetSubLabel}{suffix}";
             return assetBundleName;
         }
         
-        private static string GetAssetBundleVariant(string assetSubLabel)
+        private static string GetAssetBundleVariant(string label)
         {
-            return assetSubLabel;
+            return label;
         }
         
         private static void ModifyAssetBundleManifestFiles()
         {
-            var files = Directory.GetFiles(AssetBundlesDirectory);
-            foreach (var file in files)
+            var directories = Directory.GetDirectories(AssetBundlesDirectory);
+            // get the current build target
+            var buildTarget = EditorUserBuildSettings.activeBuildTarget;
+            foreach (var directory in directories)
             {
-                if (file.EndsWith(".manifest"))
+                // get the base name of the directory
+                var subDirectory = Path.GetFileName(directory);
+                if (subDirectory == "iOS" && buildTarget != BuildTarget.iOS) continue;
+                if (subDirectory == "OSX" && buildTarget != BuildTarget.StandaloneOSX) continue;
+                if (subDirectory == "Android" && buildTarget != BuildTarget.Android) continue;
+                if (subDirectory == "WebGL" && buildTarget != BuildTarget.WebGL) continue;
+                if (subDirectory == "Windows" && buildTarget != BuildTarget.StandaloneWindows64) continue;
+                if (subDirectory == "Linux" && buildTarget != BuildTarget.StandaloneLinux64) continue;
+                
+                var files = Directory.GetFiles(directory);
+                foreach (var file in files)
                 {
-                    try
+                    if (file.EndsWith(".manifest"))
                     {
-                        var yamlContent = File.ReadAllText(file);
-                        var deserializer = new DeserializerBuilder()
-                            .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                            .Build();
-                        var yamlObject = deserializer.Deserialize<Dictionary<string, object>>(yamlContent);
-                        
-                        if (yamlObject.TryGetValue("Assets", out var assets))
+                        try
                         {
-                            if (assets is List<object> assetList)
+                            var yamlContent = File.ReadAllText(file);
+                            var deserializer = new DeserializerBuilder()
+                                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                                .Build();
+                            var yamlObject = deserializer.Deserialize<Dictionary<string, object>>(yamlContent);
+                            
+                            if (yamlObject.TryGetValue("Assets", out var assets))
                             {
-                                // Sort assetList so that all files ending in .cscript.txt are first
-                                var sortedAssetList = assetList
-                                    .OrderByDescending(asset => asset.ToString().EndsWith(".cscript.txt"))
-                                    .ToList();
+                                if (assets is List<object> assetList)
+                                {
+                                    // Sort assets in the desired order: Shaders, Scripts, Materials, and then others
+                                    var sortedAssetList = assetList
+                                        .OrderBy(asset =>
+                                        {
+                                            string assetStr = asset.ToString();
 
-                                yamlObject["Assets"] = sortedAssetList;
+                                            // Sort shaders first
+                                            if (assetStr.EndsWith(".shader", StringComparison.OrdinalIgnoreCase))
+                                                return 0;
+                                            
+                                            // Sort wav files second
+                                            if (assetStr.EndsWith(".wav", StringComparison.OrdinalIgnoreCase)
+                                                || assetStr.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase)
+                                                    || assetStr.EndsWith(".ogg", StringComparison.OrdinalIgnoreCase))
+                                                return 1;
 
-                                // Serialize the updated yamlObject and save it
-                                var serializer = new SerializerBuilder()
-                                    .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                                    .Build();
-                                var updatedYamlContent = serializer.Serialize(yamlObject);
-                                File.WriteAllText(file, updatedYamlContent);
-                            }
-                            else
-                            {
-                                Debug.LogWarning("The 'Assets' key does not contain a list.");
+                                            // Sort scripts second
+                                            if (assetStr.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) || assetStr.EndsWith(".js", StringComparison.OrdinalIgnoreCase))
+                                                return 2;
+
+                                            // Sort materials third
+                                            if (assetStr.EndsWith(".mat", StringComparison.OrdinalIgnoreCase))
+                                                return 3;
+
+                                            // Everything else last
+                                            return 4;
+                                        })
+                                        .ThenBy(asset => asset.ToString()) // Secondary alphabetical sort
+                                        .ToList();
+
+
+                                    yamlObject["Assets"] = sortedAssetList;
+
+                                    // Serialize the updated yamlObject and save it
+                                    var serializer = new SerializerBuilder()
+                                        .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                                        .Build();
+                                    var updatedYamlContent = serializer.Serialize(yamlObject);
+                                    File.WriteAllText(file, updatedYamlContent);
+                                }
+                                else
+                                {
+                                    Debug.LogWarning("The 'Assets' key does not contain a list.");
+                                }
                             }
                         }
-
-                        // Process the YAML object as needed
-                        // For example, you can modify the YAML content or just log it
-                        Debug.Log(yamlObject);
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.LogError($"Error processing manifest file '{file}': {ex.Message}");
+                        catch (Exception ex)
+                        {
+                            Debug.LogError($"Error processing manifest file '{file}': {ex.Message}");
+                        }
                     }
                 }
             }
@@ -779,6 +2306,46 @@ namespace Bettr.Editor
             }
 
             Debug.Log("Refreshing database after building local server.");
+            AssetDatabase.Refresh();
+        }
+        
+        private static void BuildLocalOutcomes()
+        {
+            Debug.Log("Refreshing database before building local outcomes.");
+            
+            BuildDirectory(new DirectoryInfo(LocalOutcomesDirectory));
+
+            var allGameOutcomes = LoadOutcomesFromWeb();
+            foreach (var gameOutcomes in allGameOutcomes)
+            {
+                var localGameOutcomesDirectory = $"{LocalOutcomesDirectory}/{gameOutcomes.Key}";
+                BuildDirectory(new DirectoryInfo(localGameOutcomesDirectory));
+
+                foreach (var gameOutcome in gameOutcomes.Value)
+                {
+                    var localGameOutcomeDirectory = $"{localGameOutcomesDirectory}/{gameOutcome.Key}";
+                    File.WriteAllText(localGameOutcomeDirectory, gameOutcome.Value);
+
+                }
+            }
+            
+            var allGameVariantOutcomes = LoadGameVariantOutcomesFromWeb();
+            foreach (var gameOutcomes in allGameVariantOutcomes)
+            {
+                foreach (var gameVariantOutcomes in gameOutcomes.Value)
+                {
+                    var localGameVariantOutcomesDirectory = $"{LocalOutcomesDirectory}/{gameOutcomes.Key}/{gameVariantOutcomes.Key}";
+                    BuildDirectory(new DirectoryInfo(localGameVariantOutcomesDirectory));
+                    foreach (var gameVariantOutcome in gameVariantOutcomes.Value)
+                    {
+                        var localGameVariantOutcomeFile = $"{localGameVariantOutcomesDirectory}/{gameVariantOutcome.Key}";
+                        File.WriteAllText(localGameVariantOutcomeFile, gameVariantOutcome.Value);
+                    }
+                }
+            }
+
+            Debug.Log("Refreshing database after building local outcomes.");
+            
             AssetDatabase.Refresh();
         }
         
@@ -881,9 +2448,120 @@ namespace Bettr.Editor
             }
         }
 
-        private static void ClearRuntimeAssetPath(string machineName, string machineVariant)
+        private static Dictionary<string, Dictionary<string, string>> LoadOutcomesFromWeb()
         {
-            string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset";
+            var allOutcomes = new Dictionary<string, Dictionary<string, string>>();
+            var gameConfigs = DownloadGameConfigs();
+            foreach (var gameConfig in gameConfigs.GameConfigs)
+            {
+                var gameId = gameConfig.Key;
+                var gameDetails = gameConfig.Value;
+                var outcomes = DownloadOutcomes(gameId, gameDetails.OutcomeCount);
+                allOutcomes[gameId] = outcomes;
+            }
+            return allOutcomes;
+        }
+        
+        private static Dictionary<string, Dictionary<string, Dictionary<string, string>>> LoadGameVariantOutcomesFromWeb()
+        {
+            var allOutcomes = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
+            var gameConfigs = DownloadGameConfigs();
+            foreach (var gameConfig in gameConfigs.GameConfigs)
+            {
+                var gameId = gameConfig.Key;
+                var gameDetails = gameConfig.Value;
+                if (gameDetails.GameVariantConfigs != null)
+                {
+                    allOutcomes[gameId] = new Dictionary<string, Dictionary<string, string>>();
+                    foreach (var gameVariantConfig in gameDetails.GameVariantConfigs)
+                    {
+                        var gameVariantId = gameVariantConfig.Key;
+                        var gameVariantDetails = gameVariantConfig.Value;
+                        var outcomes = DownloadGameVariantOutcomes(gameId, gameVariantId, gameVariantDetails.OutcomeCount);
+                        allOutcomes[gameId][gameVariantId] = outcomes;
+                    }
+                }
+            }
+            return allOutcomes;
+        }
+
+        public static GameConfigsWrapper DownloadGameConfigs()
+        {
+            var configAssetName = "latest/Configs/GameConfigs.yaml";
+            var configAssetURL = $"{OutcomesServerBaseURL}/{configAssetName}";
+            using var webClient = new WebClient();
+            var yamlContent = webClient.DownloadString(configAssetURL);
+
+            var deserializer = new DeserializerBuilder()
+                .Build();
+            
+            // Deserialize the YAML content to the GameConfig object
+            var gameConfigs = deserializer.Deserialize<GameConfigsWrapper>(yamlContent);
+
+            return gameConfigs;
+        }
+        
+        static Dictionary<string, string> DownloadOutcomes(string gameId, int outcomeCount)
+        {
+            var outcomes = new Dictionary<string, string>();
+            using var webClient = new WebClient();
+            for (var i = 0; i < outcomeCount; i++)
+            {
+                var outcomeId = (i+1).ToString("D9"); // Format as a 9-digit number with leading zeros
+                var fileName = $"{gameId}Outcome{outcomeId}.cscript.txt";
+                var fileUrl = $"{OutcomesServerBaseURL}/latest/Outcomes/{fileName}";
+
+                try
+                {
+                    var fileContents = webClient.DownloadString(fileUrl);
+                    outcomes[fileName] = fileContents;
+
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"Failed to download {fileUrl}: {ex.Message}");
+                }
+            }
+
+            return outcomes;
+        }
+        
+        static Dictionary<string, string> DownloadGameVariantOutcomes(string gameId, string gameVariantId, int outcomeCount)
+        {
+            var outcomes = new Dictionary<string, string>();
+            using var webClient = new WebClient();
+            for (var i = 0; i < outcomeCount; i++)
+            {
+                var outcomeId = (i+1).ToString("D9"); // Format as a 9-digit number with leading zeros
+                var fileName = $"{gameId}Outcome{outcomeId}.cscript.txt";
+                var fileUrl = $"{OutcomesServerBaseURL}/latest/Outcomes/{gameId}/{gameVariantId}/{fileName}";
+
+                try
+                {
+                    var fileContents = webClient.DownloadString(fileUrl);
+                    outcomes[fileName] = fileContents;
+
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"Failed to download {fileUrl}: {ex.Message}");
+                }
+            }
+
+            return outcomes;
+        }
+
+        private static void SetupCoreAssetPath()
+        {
+            string corePath = $"Assets/Bettr/Core";
+            EnsureDirectory(corePath);
+            
+            InstanceComponent.CorePath = corePath;
+        }
+
+        private static void ClearRuntimeAssetPath(string machineName, string machineVariant, string experimentVariant)
+        {
+            string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
             
             if (Directory.Exists(runtimeAssetPath))
             {
@@ -909,41 +2587,18 @@ namespace Bettr.Editor
             AssetDatabase.Refresh();
         }
         
-        private static void SetupMachine(string machineName, string machineVariant, string machineModel)
+        private static void SetupMachine(string machineName, string machineVariant, string experimentVariant, string machineModel)
         {
             string machineModelName = Path.GetFileNameWithoutExtension(machineModel);
 
-            string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset";
+            string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
             EnsureDirectory(runtimeAssetPath);
 
-            string[] subDirectories = { "Animators", "Materials", "Models", "FBX", "Prefabs", "Scenes", "Scripts", "Shaders", "Textures" };
+            string[] subDirectories = { "Animators", "Materials", "Models", "FBX", "Prefabs", "Scenes", "Scripts", "Textures" };
             foreach (string subDir in subDirectories)
             {
                 EnsureDirectory(Path.Combine(runtimeAssetPath, subDir));
             }
-            
-            // Copy the shader files
-            string shaderSourcePath = Path.Combine("Assets", "Bettr", "Editor", "Shaders");
-            string shaderDestinationPath = Path.Combine(runtimeAssetPath, "Shaders");
-            Debug.Log($"Copying shaders from: {machineModel} to: {shaderDestinationPath}");
-            // Ensure the destination directory exists
-            if (!Directory.Exists(shaderDestinationPath))
-            {
-                Directory.CreateDirectory(shaderDestinationPath);
-            }
-
-            // Get all shader files in the source directory
-            string[] shaderFiles = Directory.GetFiles(shaderSourcePath, "*.shader");
-
-            // Copy each shader file to the destination directory
-            foreach (string file in shaderFiles)
-            {
-                string fileName = Path.GetFileName(file);
-                string destFile = Path.Combine(shaderDestinationPath, fileName);
-                AssetDatabase.CopyAsset(file, destFile);
-            }
-
-            Debug.Log("Shader files copied successfully.");
             
             // Copy the machine model file and rename its extension
             string modelDestinationPath = Path.Combine(runtimeAssetPath, "Models",  $"{machineModelName}.cscript.txt");
@@ -959,14 +2614,14 @@ namespace Bettr.Editor
             DynValue dynValue = TileController.LuaScript.LoadString(machineModelScript, codeFriendlyName: machineModelName);
             TileController.LuaScript.Call(dynValue);
             
-            ProcessScripts(machineName, machineVariant, runtimeAssetPath);
+            ProcessScripts(machineName, machineVariant, experimentVariant, runtimeAssetPath);
         }
 
-        private static void BuildMachine(string machineName, string machineVariant)
+        private static void BuildMachine(string machineName, string machineVariant, string experimentVariant)
         {
-            string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/Runtime/Asset";
+            string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
             EnsureDirectory(runtimeAssetPath);
-
+            
             var machines = GetTable($"{machineName}Machines");
             for (var index = 1; index <= machines.Length; index++)
             {
@@ -991,8 +2646,16 @@ namespace Bettr.Editor
             }
         }
 
-        private static void CopyScripts(string scriptsPath, string[] filePaths, string machineName, string machineVariant, string runtimeAssetPath)
+        private static void CopyScripts(string scriptsPath, string[] filePaths, string machineName, string machineVariant, string experimentVariant, string runtimeAssetPath)
         {
+            var mechanicsTable = BettrMenu.GetTable($"{machineName}Mechanics");
+            var baseGameMechanics = BettrMenu.GetTableArray<string>(mechanicsTable, "BaseGame", "Mechanic");
+            // convert baseGameMechanics array to PascalCase using ConvertCamelToPascalCase
+            baseGameMechanics = new List<string>(baseGameMechanics.Select(ConvertCamelToPascalCase).ToArray());
+            
+            var bundleName = $"{machineName}{machineVariant}".ToLower();
+            var bundleVersion = $"{experimentVariant}".ToLower();
+            
             foreach (string filePath in filePaths)
             {
                 var reelCount = BettrMenu.GetReelCount(machineName);
@@ -1001,12 +2664,16 @@ namespace Bettr.Editor
                 {
                     { "machineName", machineName },
                     { "machineVariant", machineVariant },
+                    { "experimentVariant", experimentVariant },
+                    { "bundleName", bundleName },
+                    { "bundleVersion", bundleVersion },
                     { "machines", new string[]
                         {
                             "BaseGame",
                         } 
                     },
                     { "reelCount", reelCount },
+                    { "baseGameMechanics", baseGameMechanics},
                 };
                 var scriptText = scribanTemplate.Render(model);
                 var scriptName = Path.GetFileNameWithoutExtension(filePath); // remove the .template
@@ -1017,20 +2684,14 @@ namespace Bettr.Editor
             }
         }
 
-        private static void ProcessScripts(string machineName, string machineVariant, string runtimeAssetPath)
+        private static void ProcessScripts(string machineName, string machineVariant, string experimentVariant, string runtimeAssetPath)
         {
             AssetDatabase.Refresh();
             
             string dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "templates", "scripts");
             string[] filePaths = Directory.GetFiles(dirPath, "*.cscript.txt.template");
             string scriptsPath = $"scripts";
-            CopyScripts(scriptsPath, filePaths, machineName, machineVariant, runtimeAssetPath);
-            
-            // Process variant scripts
-            dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "templates", "integration", machineName, machineVariant);
-            filePaths = Directory.GetFiles(dirPath, "*.cscript.txt.template");
-            scriptsPath = $"integration/{machineName}/{machineVariant}";
-            CopyScripts(scriptsPath, filePaths, machineName, machineVariant, runtimeAssetPath);
+            CopyScripts(scriptsPath, filePaths, machineName, machineVariant, experimentVariant, runtimeAssetPath);
             
             // Process Mechanics scripts
             var mechanicsTable = GetTable($"{machineName}Mechanics");
@@ -1043,12 +2704,12 @@ namespace Bettr.Editor
                     dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "templates", "mechanics", mechanic, "scripts");
                     filePaths = Directory.GetFiles(dirPath, "*.cscript.txt.template");
                     scriptsPath = $"mechanics/{mechanic}/scripts";
-                    CopyScripts(scriptsPath, filePaths, machineName, machineVariant, runtimeAssetPath);
+                    CopyScripts(scriptsPath, filePaths, machineName, machineVariant, experimentVariant, runtimeAssetPath);
                 }
             }
 
         }
-
+        
         private static GameObject ProcessBaseGameSymbols(string machineName, string machineVariant, string runtimeAssetPath)
         {
             var templateName = "BaseGameSymbolGroup";
@@ -1086,7 +2747,7 @@ namespace Bettr.Editor
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
 
             var scriptGroupName = $"{machineName}BaseGameSymbolGroup"; 
-            var symbolGroup = ProcessPrefab(scriptGroupName, 
+            var symbolGroup = BettrPrefabController.ProcessPrefab(scriptGroupName, 
                 hierarchyInstance, 
                 runtimeAssetPath);
             
@@ -1116,7 +2777,7 @@ namespace Bettr.Editor
             
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
 
-            var settingsPrefab = ProcessPrefab(symbolPrefabName, 
+            var settingsPrefab = BettrPrefabController.ProcessPrefab(symbolPrefabName, 
                 hierarchyInstance, 
                 runtimeAssetPath);
 
@@ -1151,6 +2812,9 @@ namespace Bettr.Editor
             
             var reelMaskScaleX = BettrMenu.GetReelMaskScaleX(machineName);
             var reelMaskScaleY = BettrMenu.GetReelMaskScaleY(machineName);
+
+            var scaleX = 0.90;
+            var scaleY = 0.90;
             
             var templateName = "BaseGameMachine";
             var scribanTemplate = ParseScribanTemplate($"common", templateName);
@@ -1179,6 +2843,8 @@ namespace Bettr.Editor
                 { "reelBackgroundScaleX", reelBackgroundScaleX},
                 { "reelBackgroundScaleY", reelBackgroundScaleY},
                 { "offsetY", maxOffsetY },
+                { "scaleX", scaleX },
+                { "scaleY", scaleY },
                 { "reelCount", reelCount },
                 { "horizontalReelPositions", horizontalReelPositions },
             };
@@ -1194,7 +2860,7 @@ namespace Bettr.Editor
             
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
             
-            var baseGameMachinePrefab = ProcessPrefab($"{baseGameMachine}", 
+            var baseGameMachinePrefab = BettrPrefabController.ProcessPrefab($"{baseGameMachine}", 
                 hierarchyInstance, 
                 runtimeAssetPath);
         }
@@ -1251,6 +2917,7 @@ namespace Bettr.Editor
             var model = new Dictionary<string, object>
             {
                 { "machineName", machineName },
+                { "machineVariant", machineVariant },
                 { "reelIndex", reelIndex },
                 { "symbolKeys", symbolKeys },
                 { "yPositions", yPositions },
@@ -1272,14 +2939,14 @@ namespace Bettr.Editor
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
             hierarchyInstance.SetParent((GameObject) null);
 
-            var reelPrefab = ProcessPrefab(reelName, 
+            var reelPrefab = BettrPrefabController.ProcessPrefab(reelName, 
                 hierarchyInstance, 
                 runtimeAssetPath);
         }
         
         private static void ProcessUICamera(string cameraName, bool includeAudioListener, string runtimeAssetPath)
         {
-            ProcessPrefab(cameraName, new List<IComponent>
+            BettrPrefabController.ProcessPrefab(cameraName, new List<IComponent>
                 {
                     new UICameraComponent(includeAudioListener),
                 }, 
@@ -1316,201 +2983,7 @@ namespace Bettr.Editor
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
             hierarchyInstance.SetParent((GameObject) null);
 
-            ProcessPrefab(backgroundName, 
-                hierarchyInstance, 
-                runtimeAssetPath);
-        }
-        
-        private static void ProcessFreeSpinsMachine(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            string baseGameMachine = $"{machineName}FreeSpinsMachine";
-            
-            string baseGameSettings = $"{machineName}FreeSpinsSettings";
-            
-            var baseGameSymbolTable = GetTable($"{machineName}FreeSpinsSymbolTable");
-            
-            var scriptName = $"{machineName}FreeSpinsReel";   
-            BettrScriptGenerator.CreateOrLoadScript(scriptName, runtimeAssetPath);
-            
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-            
-            var reelStates = GetTable($"{machineName}BaseGameReelState");
-            var reelCount = BettrMenu.GetReelCount(machineName);
-            
-            var reelHPositions = new List<float>();
-            var reelMaskUpperYs = new List<float>();
-            var reelMaskLowerYs = new List<float>();
-            var reelMaskScaleYs = new List<float>();
-            var reelBackgroundYs = new List<float>();
-            var reelBackgroundScaleYs = new List<float>();
-            
-            float maxOffsetY = 0.0f;
-            
-            for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
-            {
-                var topSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "TopSymbolCount");
-                var visibleSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "VisibleSymbolCount");
-                var bottomSymbolCount = GetTableValue<int>(reelStates, $"Reel{reelIndex}", "BottomSymbolCount");
-                var symbolVerticalSpacing = GetTableValue<float>(reelStates, $"Reel{reelIndex}", "SymbolVerticalSpacing");
-                var zeroVisibleSymbolIndex = visibleSymbolCount % 2 == 0 ? visibleSymbolCount / 2 + 1 : (visibleSymbolCount - 1) / 2 + 1;
-                var reelMaskUpperY = visibleSymbolCount % 2 == 0? (zeroVisibleSymbolIndex) * symbolVerticalSpacing : (zeroVisibleSymbolIndex + 1) * symbolVerticalSpacing;
-                var reelMaskLowerY = -(zeroVisibleSymbolIndex + 1) * symbolVerticalSpacing;
-                var reelMaskScaleY = (topSymbolCount + 1) * symbolVerticalSpacing;
-                var reelBackgroundY = visibleSymbolCount % 2 == 0 ? -symbolVerticalSpacing/2 : 0;
-                var reelBackgroundScaleY = (visibleSymbolCount) * symbolVerticalSpacing;
-                reelMaskUpperYs.Add(reelMaskUpperY);
-                reelMaskLowerYs.Add(reelMaskLowerY);
-                reelMaskScaleYs.Add(reelMaskScaleY);
-                reelBackgroundYs.Add(reelBackgroundY);
-                reelBackgroundScaleYs.Add(reelBackgroundScaleY);
-
-                var offsetY = (visibleSymbolCount % 3) * symbolVerticalSpacing; 
-                maxOffsetY = Mathf.Max(maxOffsetY, offsetY);
-            }
-            
-            var templateName = "BaseGameMachine";
-            var scribanTemplate = ParseScribanTemplate($"common", templateName);
-            
-            var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
-            
-            var model = new Dictionary<string, object>
-            {
-                { "machineName", machineName },
-                { "machineVariant", machineVariant },
-                { "baseGameMachine", baseGameMachine },
-                { "baseGameSettings", baseGameSettings },
-                { "symbolKeys", symbolKeys},
-                { "reelMaskUpperY", reelMaskUpperYs[0]},
-                { "reelMaskLowerY", reelMaskLowerYs[0]},
-                { "reelMaskScaleY", reelMaskScaleYs[0]},
-                { "reelBackgroundY", reelBackgroundYs[0]},
-                { "reelBackgroundScaleY", reelBackgroundScaleYs[0]},
-                { "offsetY", maxOffsetY },
-            };
-            
-            var json = scribanTemplate.Render(model);
-            Debug.Log($"BaseGameMachine: {json}");
-            
-            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-            InstanceGameObject.IdGameObjects.Clear();
-            
-            BettrMaterialGenerator.MachineName = machineName;
-            BettrMaterialGenerator.MachineVariant = machineVariant;
-            
-            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
-            
-            var baseGameMachinePrefab = ProcessPrefab($"{baseGameMachine}", 
-                hierarchyInstance, 
-                runtimeAssetPath);
-        }
-        
-        private static void ProcessFreeSpinsBackground(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            string backgroundName = $"{machineName}FreeSpinsBackground";
-            
-            var backgroundScriptName = $"{machineName}FreeSpinsBackground";   
-            BettrScriptGenerator.CreateOrLoadScript(backgroundScriptName, runtimeAssetPath);
-            
-            string templateName = "FreeSpinsBackground";
-            var scribanTemplate = ParseScribanTemplate($"common", templateName);
-
-            if (scribanTemplate.HasErrors)
-            {
-                Debug.LogError($"Scriban template has errors: {scribanTemplate.Messages} template: {templateName}");
-                throw new Exception($"Scriban template has errors: {scribanTemplate.Messages} template: {{templateName}}");
-            }
-            
-            var model = new Dictionary<string, object>
-            {
-                { "machineName", machineName },
-                { "machineVariant", machineVariant },
-                { "backgroundName", backgroundName },
-            };
-            
-            var json = scribanTemplate.Render(model);
-            Console.WriteLine(json);
-            
-            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-            InstanceGameObject.IdGameObjects.Clear();
-            
-            BettrMaterialGenerator.MachineName = machineName;
-            BettrMaterialGenerator.MachineVariant = machineVariant;
-            
-            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
-            hierarchyInstance.SetParent((GameObject) null);
-
-            var settingsPrefab = ProcessPrefab(backgroundName, 
-                hierarchyInstance, 
-                runtimeAssetPath);
-        }
-        
-        private static void ProcessWheelGameMachine(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            string wheelGameMachine = $"{machineName}WheelGameMachine";
-            
-            var scriptName = $"{machineName}WheelGameReel";   
-            BettrScriptGenerator.CreateOrLoadScript(scriptName, runtimeAssetPath);
-            
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-            
-            var templateName = "WheelGameMachine";
-            var scribanTemplate = ParseScribanTemplate($"common", templateName);
-            
-            var model = new Dictionary<string, object>
-            {
-                { "machineName", machineName },
-                { "machineVariant", machineVariant },
-                { "wheelGameMachine", wheelGameMachine },
-            };
-            
-            var json = scribanTemplate.Render(model);
-            Debug.Log($"WheelGameMachine: {json}");
-            
-            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-            InstanceGameObject.IdGameObjects.Clear();
-            
-            BettrMaterialGenerator.MachineName = machineName;
-            BettrMaterialGenerator.MachineVariant = machineVariant;
-            
-            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
-            
-            var baseGameMachinePrefab = ProcessPrefab($"{wheelGameMachine}", 
-                hierarchyInstance, 
-                runtimeAssetPath);
-        }
-        
-        private static void ProcessWheelGameBackground(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            string backgroundName = $"{machineName}WheelGameBackground";
-            
-            var backgroundScriptName = $"{machineName}WheelGameBackground";   
-            BettrScriptGenerator.CreateOrLoadScript(backgroundScriptName, runtimeAssetPath);
-            
-            string templateName = "WheelGameBackground";
-            var scribanTemplate = ParseScribanTemplate($"common", templateName);
-
-            var model = new Dictionary<string, object>
-            {
-                { "machineName", machineName },
-                { "machineVariant", machineVariant },
-                { "backgroundName", backgroundName },
-            };
-            
-            var json = scribanTemplate.Render(model);
-            Console.WriteLine(json);
-            
-            InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-            InstanceGameObject.IdGameObjects.Clear();
-            
-            BettrMaterialGenerator.MachineName = machineName;
-            BettrMaterialGenerator.MachineVariant = machineVariant;
-            
-            InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
-            hierarchyInstance.SetParent((GameObject) null);
-
-            var settingsPrefab = ProcessPrefab(backgroundName, 
+            BettrPrefabController.ProcessPrefab(backgroundName, 
                 hierarchyInstance, 
                 runtimeAssetPath);
         }
@@ -1550,7 +3023,7 @@ namespace Bettr.Editor
             SceneAsset sceneAsset = null;
             Scene scene = default;
             
-            var sceneName = $"{machineName}Scene";
+            var sceneName = $"{machineName}{machineVariant}Scene";
             string scenePath = $"{runtimeAssetPath}/Scenes/{sceneName}.unity";
             
             sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePath);
@@ -1632,14 +3105,37 @@ namespace Bettr.Editor
                         var baseGameMechanics = GetTableArray<string>(mechanicsTable, pk, "Mechanic");
                         foreach (var baseGameMechanic in baseGameMechanics)
                         {
-                            switch (baseGameMechanic)
+                            switch (baseGameMechanic.ToLower())
                             {
                                 case "ways":
                                     BaseGameWaysMechanic.Process(machineName, machineVariant, runtimeAssetPath);
                                     break;
-                                default:
+                                case "paylines":
                                     BaseGamePaylinesMechanic.Process(machineName, machineVariant, runtimeAssetPath);
                                     break;
+                                case "cascadingreels":
+                                    BaseGameCascadingReelsMechanic.Process(machineName, machineVariant, runtimeAssetPath);
+                                    break;
+                                case "chooseaside":
+                                    BaseGameChooseASideMechanic.Process(machineName, machineVariant, runtimeAssetPath);
+                                    break;
+                                case "expandingreels":
+                                    BaseGameExpandingReelsMechanic.Process(machineName, machineVariant, runtimeAssetPath);
+                                    break;
+                                case "horizontalreels":
+                                    BaseGameHorizontalReelsMechanic.Process(machineName, machineVariant, runtimeAssetPath);
+                                    break;
+                                case "horizontalreelsshift":
+                                    BaseGameHorizontalReelsShiftMechanic.Process(machineName, machineVariant, runtimeAssetPath);
+                                    break;
+                                case "wildsmultiplier":
+                                    BaseGameWildsMultiplierMechanic.Process(machineName, machineVariant, runtimeAssetPath);
+                                    break;
+                                case "megaways":
+                                    BaseGameMegawaysMechanic.Process(machineName, machineVariant, runtimeAssetPath);
+                                    break;
+                                default:
+                                    throw new Exception($"BaseGame mechanic not found: {baseGameMechanic}");
                             }
                         }
                         break;
@@ -1656,466 +3152,6 @@ namespace Bettr.Editor
             // {
             //     ProcessBaseGameRandomMultiplierWildsMechanic(machineName, machineVariant, runtimeAssetPath);
             // }
-        }
-        
-        private static void ProcessBaseGameScatterBonusFreeSpinsMechanic(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            AssetDatabase.Refresh();
-            
-            var reelCount = BettrMenu.GetReelCount(machineName);
-            
-            var scatterSymbolIndexesByReel = new Dictionary<string, List<int>>();
-            for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
-            {
-                var topSymbolCount = BettrMenu.GetTopSymbolCount(machineName, reelIndex);
-                var visibleSymbolCount = BettrMenu.GetVisibleSymbolCount(machineName, reelIndex);
-                
-                var scatterSymbolIndexes = new List<int>();
-                for (int symbolIndex = topSymbolCount + 1;
-                     symbolIndex <= topSymbolCount + visibleSymbolCount;
-                     symbolIndex++)
-                {
-                    scatterSymbolIndexes.Add(symbolIndex);
-                }
-                
-                scatterSymbolIndexesByReel.Add($"{reelIndex}", scatterSymbolIndexes);
-            }
-            
-            string templateName = "BaseGameScatterBonusFreeSpinsMechanic";
-            var scribanTemplate = ParseScribanTemplate("mechanics/scatterbonusfreespins", templateName);
-
-            var model = new Dictionary<string, object>
-            {
-                { "machineName", machineName },
-                { "machineVariant", machineVariant },
-                { "reelCount", reelCount },
-                { "scatterSymbolIndexesByReel", scatterSymbolIndexesByReel },
-            };
-            
-            var json = scribanTemplate.Render(model);
-            Debug.Log(json);
-            
-            Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
-            if (mechanic == null)
-            {
-                throw new Exception($"Failed to deserialize mechanic from json: {json}");
-            }
-            
-            foreach (var mechanicAnimation in mechanic.Animations)
-            {
-                BettrAnimatorController.AddAnimationState(mechanicAnimation.Filename, mechanicAnimation.AnimationStates, mechanicAnimation.AnimatorTransitions, runtimeAssetPath);
-            }
-            
-            foreach (var tilePropertyAnimator in mechanic.TilePropertyAnimators)
-            {
-                var prefabPath =
-                    $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{tilePropertyAnimator.PrefabName}.prefab";
-                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                var prefabGameObject = new PrefabGameObject(prefab, tilePropertyAnimator.PrefabName);
-                if (tilePropertyAnimator.PrefabIds != null)
-                {
-                    foreach (var prefabId in tilePropertyAnimator.PrefabIds)
-                    {
-                        var referencedGameObject = prefabGameObject.FindReferencedId(prefabId.Id, prefabId.Index);
-                        InstanceGameObject.IdGameObjects[$"{prefabId.Prefix}{prefabId.Id}"] = new InstanceGameObject(referencedGameObject);
-                    }
-                }
-                if (tilePropertyAnimator.AnimatorsProperty != null)
-                {
-                    var properties = new List<TilePropertyAnimator>();
-                    foreach (var animatorProperty in tilePropertyAnimator.AnimatorsProperty)
-                    {
-                        InstanceGameObject.IdGameObjects.TryGetValue(animatorProperty.Id, out var referenceGameObject);
-                        var tileProperty = new TilePropertyAnimator()
-                        {
-                            key = animatorProperty.Key,
-                            value = new PropertyAnimator()
-                            {
-                                animator = referenceGameObject?.Animator, 
-                                animationStateName = animatorProperty.State,
-                                delayBeforeAnimationStart = animatorProperty.DelayBeforeStart,
-                                waitForAnimationComplete = animatorProperty.WaitForComplete,
-                                overrideAnimationDuration = animatorProperty.OverrideDuration,
-                                animationDuration = animatorProperty.AnimationDuration,
-                            },
-                        };
-                        if (tileProperty.value.animator == null)
-                        {
-                            Debug.LogError($"Failed to find animator with id: {animatorProperty.Id}");
-                        }
-                        properties.Add(tileProperty);                        
-                    }
-                    var groupProperties = new List<TilePropertyAnimatorGroup>();
-                    foreach (var animatorGroupProperty in tilePropertyAnimator.AnimatorsGroupProperty)
-                    {
-                        List<TilePropertyAnimator> animatorProperties = new List<TilePropertyAnimator>();
-                        foreach (var property in animatorGroupProperty.Group)
-                        {
-                            InstanceGameObject.IdGameObjects.TryGetValue(property.Id, out var referenceGameObject);
-                            var tileProperty = new TilePropertyAnimator()
-                            {
-                                key = property.Key,
-                                value = new PropertyAnimator() {
-                                    animator = referenceGameObject?.Animator, 
-                                    animationStateName = property.State,
-                                    delayBeforeAnimationStart = property.DelayBeforeStart,
-                                    waitForAnimationComplete = property.WaitForComplete,
-                                    overrideAnimationDuration = property.OverrideDuration,
-                                    animationDuration = property.AnimationDuration,
-                                },
-                            };
-                            if (tileProperty.value.animator == null)
-                            {
-                                Debug.LogError($"Failed to find animator with id: {property.Id}");
-                            }
-                            animatorProperties.Add(tileProperty);
-                        }
-                        groupProperties.Add(new TilePropertyAnimatorGroup()
-                        {
-                            groupKey = animatorGroupProperty.GroupKey,
-                            tileAnimatorProperties = animatorProperties,
-                        });
-                    }
-                    var component = prefabGameObject.GameObject.GetComponent<TilePropertyAnimators>();
-                    component.tileAnimatorProperties.AddRange(properties);
-                    component.tileAnimatorGroupProperties.AddRange(groupProperties);
-                }
-                
-                PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
-            }
-            
-            // save the changes
-            AssetDatabase.SaveAssets();            
-            
-            // Modified Prefabs
-            foreach (var modifiedPrefab in mechanic.Prefabs)
-            {
-                AssetDatabase.Refresh();
-                
-                var prefabPath =
-                    $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{modifiedPrefab.PrefabName}.prefab";
-                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                var prefabGameObject = new PrefabGameObject(prefab, modifiedPrefab.PrefabName);
-                if (modifiedPrefab.PrefabIds != null)
-                {
-                    foreach (var prefabId in modifiedPrefab.PrefabIds)
-                    {
-                        var referencedGameObject = prefabGameObject.FindReferencedId(prefabId.Id, prefabId.Index);
-                        InstanceGameObject.IdGameObjects[$"{prefabId.Prefix}{prefabId.Id}"] = new InstanceGameObject(referencedGameObject);
-                    }
-                }
-
-                var parentGameObject = InstanceGameObject.IdGameObjects[modifiedPrefab.ParentId];
-                
-                modifiedPrefab.SetParent(parentGameObject.GameObject);
-                
-                modifiedPrefab.OnDeserialized(new StreamingContext());
-                
-                PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
-            }
-            
-            AssetDatabase.Refresh();
-
-            // Anticipation animation
-            foreach (var mechanicParticleSystem in mechanic.ParticleSystems)
-            {
-                var prefabPath =
-                    $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{mechanicParticleSystem.PrefabName}.prefab";
-                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                var prefabGameObject = new PrefabGameObject(prefab, mechanicParticleSystem.PrefabName);
-                if (mechanicParticleSystem.PrefabIds != null)
-                {
-                    foreach (var prefabId in mechanicParticleSystem.PrefabIds)
-                    {
-                        var referencedGameObject = prefabGameObject.FindReferencedId(prefabId.Id, prefabId.Index);
-                        InstanceGameObject.IdGameObjects[$"{prefabId.Prefix}{prefabId.Id}"] = new InstanceGameObject(referencedGameObject);
-                    }
-                }
-                
-                var referenceGameObject = InstanceGameObject.IdGameObjects[mechanicParticleSystem.ReferenceId];
-                
-                // Create the particle system
-                var particleSystem = BettrParticleSystem.AddOrGetParticleSystem(referenceGameObject.GameObject);
-                var mainModule = particleSystem.main;
-                var emissionModule = particleSystem.emission;
-                var shapeModule = particleSystem.shape;
-                var renderer = particleSystem.GetComponent<ParticleSystemRenderer>();
-
-                mainModule.playOnAwake = mechanicParticleSystem.ModuleData.PlayOnAwake;
-                mainModule.startLifetime = mechanicParticleSystem.ModuleData.StartLifetime;
-                mainModule.startSpeed = mechanicParticleSystem.ModuleData.StartSpeed;
-                mainModule.startSize = mechanicParticleSystem.ModuleData.StartSize;
-                mainModule.startColor = new ParticleSystem.MinMaxGradient(mechanicParticleSystem.ModuleData.GetStartColor());
-                mainModule.gravityModifier = mechanicParticleSystem.ModuleData.GravityModifier;
-                if (Enum.TryParse(mechanicParticleSystem.ModuleData.SimulationSpace, out ParticleSystemSimulationSpace simulationSpace))
-                {
-                    mainModule.simulationSpace = simulationSpace;
-                }
-                mainModule.loop = mechanicParticleSystem.ModuleData.Looping;
-                mainModule.duration = mechanicParticleSystem.ModuleData.Duration;
-                mainModule.startRotation = mechanicParticleSystem.ModuleData.StartRotation;
-                mainModule.startDelay = mechanicParticleSystem.ModuleData.StartDelay;
-                mainModule.prewarm = mechanicParticleSystem.ModuleData.Prewarm;
-                mainModule.maxParticles = mechanicParticleSystem.ModuleData.MaxParticles;
-
-                // Emission module settings
-                emissionModule.rateOverTime = mechanicParticleSystem.ModuleData.EmissionRateOverTime;
-                emissionModule.rateOverDistance = mechanicParticleSystem.ModuleData.EmissionRateOverDistance;
-                emissionModule.burstCount = mechanicParticleSystem.ModuleData.Bursts.Count;
-                for (int i = 0; i < mechanicParticleSystem.ModuleData.Bursts.Count; i++)
-                {
-                    var burst = mechanicParticleSystem.ModuleData.Bursts[i];
-                    emissionModule.SetBurst(i, new ParticleSystem.Burst(burst.Time, burst.MinCount, burst.MaxCount, burst.Cycles, burst.Interval) { probability = burst.Probability });
-                }
-
-                // Shape module settings
-                shapeModule.shapeType = (ParticleSystemShapeType)Enum.Parse(typeof(ParticleSystemShapeType), mechanicParticleSystem.ModuleData.Shape);
-                shapeModule.angle = mechanicParticleSystem.ModuleData.ShapeAngle;
-                shapeModule.radius = mechanicParticleSystem.ModuleData.ShapeRadius;
-                shapeModule.radiusThickness = mechanicParticleSystem.ModuleData.ShapeRadiusThickness;
-                shapeModule.arc = mechanicParticleSystem.ModuleData.ShapeArc;
-                
-                // Set shape mode if applicable
-                if (Enum.TryParse(mechanicParticleSystem.ModuleData.ShapeArcMode, out ParticleSystemShapeMultiModeValue shapeMode))
-                {
-                    shapeModule.arcMode = shapeMode;
-                }
-                
-                shapeModule.arcSpread = mechanicParticleSystem.ModuleData.ShapeSpread;
-                shapeModule.arcSpeed = mechanicParticleSystem.ModuleData.ShapeArcSpeed; // Set arc speed
-                shapeModule.position = mechanicParticleSystem.ModuleData.ShapePosition;
-                shapeModule.rotation = mechanicParticleSystem.ModuleData.ShapeRotation;
-                shapeModule.scale = mechanicParticleSystem.ModuleData.ShapeScale;
-
-                // Renderer module settings
-                if (Enum.TryParse(mechanicParticleSystem.ModuleData.RendererSettings.RenderMode, out ParticleSystemRenderMode renderMode))
-                {
-                    renderer.renderMode = renderMode;
-                }
-                renderer.normalDirection = mechanicParticleSystem.ModuleData.RendererSettings.NormalDirection;
-                if (Enum.TryParse(mechanicParticleSystem.ModuleData.RendererSettings.SortMode, out ParticleSystemSortMode sortMode))
-                {
-                    renderer.sortMode = sortMode;
-                }
-                renderer.minParticleSize = mechanicParticleSystem.ModuleData.RendererSettings.MinParticleSize;
-                renderer.maxParticleSize = mechanicParticleSystem.ModuleData.RendererSettings.MaxParticleSize;
-                if (Enum.TryParse(mechanicParticleSystem.ModuleData.RendererSettings.RenderAlignment, out ParticleSystemRenderSpace renderAlignment))
-                {
-                    renderer.alignment = renderAlignment;
-                }
-                renderer.flip = new Vector3(mechanicParticleSystem.ModuleData.RendererSettings.FlipX ? 1 : 0, mechanicParticleSystem.ModuleData.RendererSettings.FlipY ? 1 : 0, 0);
-                renderer.pivot = mechanicParticleSystem.ModuleData.RendererSettings.Pivot;
-                renderer.allowRoll = mechanicParticleSystem.ModuleData.RendererSettings.AllowRoll;
-                renderer.receiveShadows = mechanicParticleSystem.ModuleData.RendererSettings.ReceiveShadows;
-                renderer.shadowCastingMode = mechanicParticleSystem.ModuleData.RendererSettings.CastShadows ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off;
-                if (Enum.TryParse(mechanicParticleSystem.ModuleData.RendererSettings.LightProbes, out LightProbeUsage lightProbeUsage))
-                {
-                    renderer.lightProbeUsage = lightProbeUsage;
-                }
-
-                renderer.sortingOrder = mechanicParticleSystem.ModuleData.RendererSettings.SortingOrder;
-                renderer.sortingLayerName = mechanicParticleSystem.ModuleData.RendererSettings.SortingLayer;
-                
-                // Check if material properties are provided before generating the material
-                Material material = null;
-                if (!string.IsNullOrEmpty(mechanicParticleSystem.ModuleData.RendererSettings.Material) &&
-                    !string.IsNullOrEmpty(mechanicParticleSystem.ModuleData.RendererSettings.Shader))
-                {
-                    material = BettrMaterialGenerator.CreateOrLoadMaterial(
-                        mechanicParticleSystem.ModuleData.RendererSettings.Material,
-                        mechanicParticleSystem.ModuleData.RendererSettings.Shader,
-                        mechanicParticleSystem.ModuleData.RendererSettings.Texture,
-                        mechanicParticleSystem.ModuleData.RendererSettings.Color,
-                        mechanicParticleSystem.ModuleData.RendererSettings.Alpha,
-                        runtimeAssetPath
-                    );
-                }
-
-                // Set the material to the renderer
-                if (material != null)
-                {
-                    renderer.material = material;
-                }
-
-                renderer.sortingOrder = mechanicParticleSystem.ModuleData.RendererSettings.SortingOrder;
-
-                // Save changes to the prefab
-                PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
-            }
-            
-            // save the changes
-            AssetDatabase.SaveAssets();
-            
-            AssetDatabase.Refresh();
-            
-            foreach (var tilePropertyParticleSystem in mechanic.TilePropertyParticleSystems)
-            {
-                var prefabPath =
-                    $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{tilePropertyParticleSystem.PrefabName}.prefab";
-                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                var prefabGameObject = new PrefabGameObject(prefab, tilePropertyParticleSystem.PrefabName);
-                if (tilePropertyParticleSystem.PrefabIds != null)
-                {
-                    foreach (var prefabId in tilePropertyParticleSystem.PrefabIds)
-                    {
-                        var referencedGameObject = prefabGameObject.FindReferencedId(prefabId.Id, prefabId.Index);
-                        InstanceGameObject.IdGameObjects[$"{prefabId.Prefix}{prefabId.Id}"] = new InstanceGameObject(referencedGameObject);
-                    }
-                }
-                if (tilePropertyParticleSystem.ParticleSystemsProperty != null)
-                {
-                    var properties = new List<TilePropertyParticleSystem>();
-                    var groupProperties = new List<TilePropertyParticleSystemGroup>();
-                    foreach (var particleSystemProperty in tilePropertyParticleSystem.ParticleSystemsProperty)
-                    {
-                        InstanceGameObject.IdGameObjects.TryGetValue(particleSystemProperty.Id, out var referenceGameObject);
-                        var tileProperty = new TilePropertyParticleSystem()
-                        {
-                            key = particleSystemProperty.Key,
-                            value = new PropertyParticleSystem()
-                            {
-                                particleSystem = referenceGameObject?.ParticleSystem, 
-                                particleSystemDuration = particleSystemProperty.Duration,
-                                delayBeforeParticleSystemStart = particleSystemProperty.DelayBeforeStart,
-                                waitForParticleSystemComplete = particleSystemProperty.WaitForComplete,
-                            },
-                        };
-                        if (tileProperty.value.particleSystem == null)
-                        {
-                            Debug.LogError($"Failed to find particleSystem with id: {particleSystemProperty.Id}");
-                        }
-                        properties.Add(tileProperty);                        
-                    }
-                    var component = prefabGameObject.GameObject.GetComponent<TilePropertyParticleSystems>();
-                    if (component == null)
-                    {
-                        component = prefabGameObject.GameObject.AddComponent<TilePropertyParticleSystems>();
-                        component.tileParticleSystemProperties = new List<TilePropertyParticleSystem>();
-                        component.tileParticleSystemGroupProperties = new List<TilePropertyParticleSystemGroup>();
-                    }
-                    component.tileParticleSystemProperties.AddRange(properties);
-                    component.tileParticleSystemGroupProperties.AddRange(groupProperties);
-                }
-                
-                PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
-            }
-            
-            // save the changes
-            AssetDatabase.SaveAssets();
-            
-            AssetDatabase.Refresh();
-        }
-        
-        private static void ProcessBaseGameRandomMultiplierWildsMechanic(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            AssetDatabase.Refresh();
-            
-            var reelCount = BettrMenu.GetReelCount(machineName);
-            
-            var symbolIndexesByReel = new Dictionary<string, List<int>>();
-            for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
-            {
-                var topSymbolCount = BettrMenu.GetTopSymbolCount(machineName, reelIndex);
-                var visibleSymbolCount = BettrMenu.GetVisibleSymbolCount(machineName, reelIndex);
-                
-                var scatterSymbolIndexes = new List<int>();
-                for (int symbolIndex = topSymbolCount + 1;
-                     symbolIndex <= topSymbolCount + visibleSymbolCount;
-                     symbolIndex++)
-                {
-                    scatterSymbolIndexes.Add(symbolIndex);
-                }
-                
-                symbolIndexesByReel.Add($"{reelIndex}", scatterSymbolIndexes);
-            }
-
-            string templateName = "BaseGameRandomMultiplierWildsMechanic";
-            var scribanTemplate = ParseScribanTemplate($"common", templateName);
-
-            var model = new Dictionary<string, object>
-            {
-                { "machineName", machineName },
-                { "machineVariant", machineVariant },
-                { "reelCount", reelCount },
-                { "randomMultiplierWildsSymbolIndexesByReel", symbolIndexesByReel },
-            };
-            
-            var json = scribanTemplate.Render(model);
-            Debug.Log(json);
-            
-            Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
-            if (mechanic == null)
-            {
-                throw new Exception($"Failed to deserialize mechanic from json: {json}");
-            }
-            
-            foreach (var mechanicAnimation in mechanic.Animations)
-            {
-                BettrAnimatorController.AddAnimationState(mechanicAnimation.Filename, mechanicAnimation.AnimationStates, mechanicAnimation.AnimatorTransitions, runtimeAssetPath);
-            }
-            
-            foreach (var tilePropertyAnimator in mechanic.TilePropertyAnimators)
-            {
-                var prefabPath =
-                    $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{tilePropertyAnimator.PrefabName}.prefab";
-                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                var prefabGameObject = new PrefabGameObject(prefab, tilePropertyAnimator.PrefabName);
-                if (tilePropertyAnimator.PrefabIds != null)
-                {
-                    foreach (var prefabId in tilePropertyAnimator.PrefabIds)
-                    {
-                        var referencedGameObject = prefabGameObject.FindReferencedId(prefabId.Id, prefabId.Index);
-                        InstanceGameObject.IdGameObjects[$"{prefabId.Prefix}{prefabId.Id}"] = new InstanceGameObject(referencedGameObject);
-                    }
-                }
-                if (tilePropertyAnimator.AnimatorsProperty != null)
-                {
-                    var properties = new List<TilePropertyAnimator>();
-                    var groupProperties = new List<TilePropertyAnimatorGroup>();
-                    foreach (var animatorProperty in tilePropertyAnimator.AnimatorsProperty)
-                    {
-                        InstanceGameObject.IdGameObjects.TryGetValue(animatorProperty.Id, out var referenceGameObject);
-                        var tileProperty = new TilePropertyAnimator()
-                        {
-                            key = animatorProperty.Key,
-                            value = new PropertyAnimator()
-                            {
-                                animator = referenceGameObject?.Animator, 
-                                animationStateName = animatorProperty.State,
-                                delayBeforeAnimationStart = animatorProperty.DelayBeforeStart,
-                                waitForAnimationComplete = animatorProperty.WaitForComplete,
-                                overrideAnimationDuration = animatorProperty.OverrideDuration,
-                                animationDuration = animatorProperty.AnimationDuration,
-                            },
-                        };
-                        if (tileProperty.value.animator == null)
-                        {
-                            Debug.LogError($"Failed to find animator with id: {animatorProperty.Id}");
-                        }
-                        properties.Add(tileProperty);                        
-                    }
-                    var component = prefabGameObject.GameObject.GetComponent<TilePropertyAnimators>();
-                    component.tileAnimatorProperties.AddRange(properties);
-                    component.tileAnimatorGroupProperties.AddRange(groupProperties);
-                }
-                
-                PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
-            }
-            
-            // save the changes
-            AssetDatabase.SaveAssets();
-        }
-        
-        private static string ReadJson(string fileName)
-        {
-            string path = Path.Combine(Application.dataPath, "Bettr", "Editor", "json", $"{fileName}.json");
-            if (!File.Exists(path))
-            {
-                Debug.LogError($"JSON file not found at path: {path}");
-                return null;
-            }
-
-            return File.ReadAllText(path);
         }
         
         public static Template ParseScribanTemplate(string prefixPath, string templateName)
@@ -2185,85 +3221,6 @@ namespace Bettr.Editor
             }
 
             return false;
-        }
-        
-        public static GameObject ProcessPrefab(string prefabName, IGameObject rootGameObject, string runtimeAssetPath)
-        {
-            AssetDatabase.Refresh();
-            
-            var prefabPath = $"{runtimeAssetPath}/Prefabs/{prefabName}.prefab";
-            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-
-            if (prefab == null)
-            {
-                prefab = rootGameObject.GameObject;
-                PrefabUtility.SaveAsPrefabAsset(prefab, prefabPath);
-            }
-            
-            AssetDatabase.Refresh();
-            
-            prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-            
-            return prefab;
-        }
-        
-        private static GameObject ProcessPrefab(string prefabName, List<IComponent> components, List<IGameObject> gameObjects, string runtimeAssetPath)
-        {
-            AssetDatabase.Refresh();
-            
-            var prefabPath = $"{runtimeAssetPath}/Prefabs/{prefabName}.prefab";
-            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-
-            if (prefab == null)
-            {
-                prefab = new GameObject(prefabName);
-                foreach (var component in components)
-                {
-                    component.AddComponent(prefab);
-                }
-                
-                foreach (var go in gameObjects)
-                {
-                    go.SetParent(prefab);
-                }
-            
-                PrefabUtility.SaveAsPrefabAsset(prefab, prefabPath);
-            }
-            
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-            
-            prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-            
-            return prefab;
-        }
-
-        private static Material CreateOrLoadMaterial(string materialName, string shaderName, string runtimeAssetPath)
-        {
-            AssetDatabase.Refresh();
-            
-            var materialFilename = $"{materialName}.mat";
-            var materialFilepath = $"{runtimeAssetPath}/Materials/{materialFilename}";
-            var material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
-            if (material == null)
-            {
-                Debug.Log($"Creating material for {materialName} at {materialFilepath}");
-                try
-                {
-                    material = new Material(Shader.Find(shaderName));
-                    AssetDatabase.CreateAsset(material, materialFilepath);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError(e);
-                }
-            }
-            
-            AssetDatabase.Refresh();
-            
-            material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
-
-            return material;
         }
         
         private static Dictionary<string, List<Dictionary<string, T>>> GetTablePkDict<T>(Table table)
@@ -2612,6 +3569,16 @@ namespace Bettr.Editor
             var symbolVerticalSpacing = BettrMenu.GetTableValue<float>(reelStates, $"Reel{reelIndex}", "SymbolScaleY", 1);
             return symbolVerticalSpacing;
         }
+        
+        public static string ConvertCamelToPascalCase(string camelCaseString)
+        {
+            if (string.IsNullOrEmpty(camelCaseString) || char.IsUpper(camelCaseString[0]))
+            {
+                return camelCaseString;
+            }
+
+            return char.ToUpper(camelCaseString[0]) + camelCaseString.Substring(1);
+        }
     }
     
     public class SimpleStringInterpolator
@@ -2636,315 +3603,5 @@ namespace Bettr.Editor
                 return _variables.TryGetValue(key, out string value) ? value : match.Value;
             });
         }
-    }
-
-    public static class BaseGameWaysMechanic
-    {
-        public static void Process(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            ProcessBaseGameSymbolModifications(machineName, machineVariant, runtimeAssetPath);
-            ProcessBaseGameMachineModifications(machineName, machineVariant, runtimeAssetPath);
-            ProcessBaseGameReelModifications(machineName, machineVariant, runtimeAssetPath);
-        }
-
-        private static void ProcessBaseGameSymbolModifications(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            for (int i = 1; i <= 2; i++)
-            {
-                string templateName = $"BaseGameWaysSymbolModifications{i}";
-                var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/ways", templateName);
-                
-                var baseGameSymbolTable = BettrMenu.GetTable($"{machineName}BaseGameSymbolTable");
-                var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
-                var symbolPrefabNames = baseGameSymbolTable.Pairs.Select(pair => $"{machineName}BaseGameSymbol{pair.Key.String}").ToList();
-                
-                InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-                InstanceGameObject.IdGameObjects.Clear();
-                
-                BettrMaterialGenerator.MachineName = machineName;
-                BettrMaterialGenerator.MachineVariant = machineVariant;
-                    
-                var model = new Dictionary<string, object>
-                {
-                    { "machineName", machineName },
-                    { "machineVariant", machineVariant },
-                    { "symbolKeys", symbolKeys},
-                    { "symbolPrefabNames", symbolPrefabNames},
-                };
-                
-                var json = scribanTemplate.Render(model);
-                Debug.Log(json);
-                
-                Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
-                if (mechanic == null)
-                {
-                    throw new Exception($"Failed to deserialize mechanic from json: {json}");
-                }
-                
-                // Modified Animator Controllers
-                if (mechanic.AnimatorControllers != null)
-                {
-                    foreach (var instanceComponent in mechanic.AnimatorControllers)
-                    {
-                        AssetDatabase.Refresh();
-
-                        BettrAnimatorController.AddAnimationState(instanceComponent.Filename,
-                            instanceComponent.AnimationStates, instanceComponent.AnimatorTransitions, runtimeAssetPath);
-                    }
-                }
-                else
-                {
-                    mechanic.Process();
-                }
-                
-                AssetDatabase.Refresh();
-            }
-        }
-        
-        private static void ProcessBaseGameMachineModifications(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            for (int i = 1; i <= 3; i++)
-            {
-                string templateName = $"BaseGameWaysMachineModifications{i}";
-                var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/ways", templateName);
-            
-                var symbolKeys = BettrMenu.GetSymbolKeys(machineName);
-            
-                var model = new Dictionary<string, object>
-                {
-                    { "machineName", machineName },
-                    { "machineVariant", machineVariant },
-                    { "symbolKeys", symbolKeys},
-                };
-                
-                var json = scribanTemplate.Render(model);
-                Debug.Log(json);
-                
-                Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
-                if (mechanic == null)
-                {
-                    throw new Exception($"Failed to deserialize mechanic from json: {json}");
-                }
-
-                mechanic.Process();
-            
-                AssetDatabase.Refresh();
-            }
-        }
-        
-        private static void ProcessBaseGameReelModifications(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            string templateName = "BaseGameWaysReelModifications";
-            var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/ways", templateName);
-            
-            var symbolKeys = BettrMenu.GetSymbolKeys(machineName);
-            var reelCount = BettrMenu.GetReelCount(machineName);
-            
-            for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
-            {
-                var topSymbolCount = BettrMenu.GetTopSymbolCount(machineName, reelIndex);
-                var visibleSymbolCount = BettrMenu.GetVisibleSymbolCount(machineName, reelIndex);
-                var waysSymbolIndexes = Enumerable.Range(topSymbolCount+1, visibleSymbolCount).ToList();
-                
-                var symbolPositions = BettrMenu.GetSymbolPositions(machineName, reelIndex);
-                var symbolVerticalSpacing = BettrMenu.GetSymbolVerticalSpacing(machineName, reelIndex);
-                var yPositions = symbolPositions.Select(pos => pos * symbolVerticalSpacing).ToList();
-
-                yPositions.Insert(0, 0);
-                
-                var symbolScaleX = BettrMenu.GetSymbolScaleX(machineName, reelIndex);
-                var symbolScaleY = BettrMenu.GetSymbolScaleY(machineName, reelIndex);
-                
-                var symbolOffsetY = BettrMenu.GetSymbolOffsetY(machineName, reelIndex);
-                
-                InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-                InstanceGameObject.IdGameObjects.Clear();
-                
-                BettrMaterialGenerator.MachineName = machineName;
-                BettrMaterialGenerator.MachineVariant = machineVariant;
-                
-                var model = new Dictionary<string, object>
-                {
-                    { "machineName", machineName },
-                    { "machineVariant", machineVariant },
-                    { "reelIndex", reelIndex },
-                    { "yPositions", yPositions },
-                    { "waysSymbolIndexes", waysSymbolIndexes },
-                    { "symbolKeys", symbolKeys},
-                    { "symbolScaleX", symbolScaleX},
-                    { "symbolScaleY", symbolScaleY},
-                    { "symbolOffsetY", symbolOffsetY},
-                };
-                
-                var json = scribanTemplate.Render(model);
-                Debug.Log(json);
-                
-                Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
-                if (mechanic == null)
-                {
-                    throw new Exception($"Failed to deserialize mechanic from json: {json}");
-                }
-
-                mechanic.Process();
-
-            }
-            
-            AssetDatabase.Refresh();
-        }
-    }
-
-    public static class BaseGamePaylinesMechanic
-    {
-        public static void Process(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            ProcessBaseGameSymbolModifications(machineName, machineVariant, runtimeAssetPath);
-            ProcessBaseGameMachineModifications(machineName, machineVariant, runtimeAssetPath);
-            ProcessBaseGameReelModifications(machineName, machineVariant, runtimeAssetPath);
-        }
-        
-        private static void ProcessBaseGameMachineModifications(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            for (int i = 1; i <= 3; i++)
-            {
-                string templateName = $"BaseGameWaysMachineModifications{i}";
-                var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/ways", templateName);
-            
-                var symbolKeys = BettrMenu.GetSymbolKeys(machineName);
-            
-                var model = new Dictionary<string, object>
-                {
-                    { "machineName", machineName },
-                    { "machineVariant", machineVariant },
-                    { "symbolKeys", symbolKeys},
-                };
-                
-                var json = scribanTemplate.Render(model);
-                Debug.Log(json);
-                
-                Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
-                if (mechanic == null)
-                {
-                    throw new Exception($"Failed to deserialize mechanic from json: {json}");
-                }
-
-                mechanic.Process();
-            
-                AssetDatabase.Refresh();
-            }
-        }
-        
-        private static void ProcessBaseGameReelModifications(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            string templateName = $"BaseGamePaylinesReelModifications";
-            var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/paylines", templateName);
-            
-            var baseGameSymbolTable = BettrMenu.GetTable($"{machineName}BaseGameSymbolTable");
-            var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
-            
-            var reelStates = BettrMenu.GetTable($"{machineName}BaseGameReelState");
-            var reelCount = BettrMenu.GetReelCount(machineName);
-            
-            for (var reelIndex = 1; reelIndex <= reelCount; reelIndex++)
-            {
-                var topSymbolCount = BettrMenu.GetTopSymbolCount(machineName, reelIndex);
-                var visibleSymbolCount = BettrMenu.GetVisibleSymbolCount(machineName, reelIndex);
-                var paylinesSymbolIndexes = Enumerable.Range(topSymbolCount+1, visibleSymbolCount).ToList();
-                
-                var symbolPositions = BettrMenu.GetSymbolPositions(machineName, reelIndex);
-                var symbolVerticalSpacing = BettrMenu.GetSymbolVerticalSpacing(machineName, reelIndex);
-                var yPositions = symbolPositions.Select(pos => pos * symbolVerticalSpacing).ToList();
-
-                yPositions.Insert(0, 0);
-                
-                var symbolOffsetY = BettrMenu.GetSymbolOffsetY(machineName, reelIndex);
-                
-                InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-                InstanceGameObject.IdGameObjects.Clear();
-                
-                BettrMaterialGenerator.MachineName = machineName;
-                BettrMaterialGenerator.MachineVariant = machineVariant;
-                
-                var model = new Dictionary<string, object>
-                {
-                    { "machineName", machineName },
-                    { "machineVariant", machineVariant },
-                    { "reelIndex", reelIndex },
-                    { "yPositions", yPositions },
-                    { "topSymbolCount", topSymbolCount },
-                    { "visibleSymbolCount", visibleSymbolCount },
-                    { "paylinesSymbolIndexes", paylinesSymbolIndexes },
-                    { "symbolKeys", symbolKeys},
-                    { "symbolOffsetY", symbolOffsetY},
-                };
-                
-                var json = scribanTemplate.Render(model);
-                Debug.Log(json);
-                
-                Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
-                if (mechanic == null)
-                {
-                    throw new Exception($"Failed to deserialize mechanic from json: {json}");
-                }
-
-                mechanic.Process();
-            }
-            
-            AssetDatabase.Refresh();
-        }
-        
-        private static void ProcessBaseGameSymbolModifications(string machineName, string machineVariant, string runtimeAssetPath)
-        {
-            for (int i = 1; i <= 2; i++)
-            {
-                string templateName = $"BaseGamePaylinesSymbolModifications{i}";
-                var scribanTemplate = BettrMenu.ParseScribanTemplate("mechanics/paylines", templateName);
-                
-                var baseGameSymbolTable = BettrMenu.GetTable($"{machineName}BaseGameSymbolTable");
-                var symbolKeys = baseGameSymbolTable.Pairs.Select(pair => pair.Key.String).ToList();
-                var symbolPrefabNames = baseGameSymbolTable.Pairs.Select(pair => $"{machineName}BaseGameSymbol{pair.Key.String}").ToList();
-                
-                InstanceComponent.RuntimeAssetPath = runtimeAssetPath;
-                InstanceGameObject.IdGameObjects.Clear();
-                
-                BettrMaterialGenerator.MachineName = machineName;
-                BettrMaterialGenerator.MachineVariant = machineVariant;
-                    
-                var model = new Dictionary<string, object>
-                {
-                    { "machineName", machineName },
-                    { "machineVariant", machineVariant },
-                    { "symbolKeys", symbolKeys},
-                    { "symbolPrefabNames", symbolPrefabNames},
-                };
-                
-                var json = scribanTemplate.Render(model);
-                Debug.Log(json);
-                
-                Mechanic mechanic = JsonConvert.DeserializeObject<Mechanic>(json);
-                if (mechanic == null)
-                {
-                    throw new Exception($"Failed to deserialize mechanic from json: templateName: {templateName}");
-                }
-                
-                // Modified Animator Controllers
-                if (mechanic.AnimatorControllers != null)
-                {
-                    foreach (var instanceComponent in mechanic.AnimatorControllers)
-                    {
-                        AssetDatabase.Refresh();
-
-                        BettrAnimatorController.AddAnimationState(instanceComponent.Filename,
-                            instanceComponent.AnimationStates, instanceComponent.AnimatorTransitions, runtimeAssetPath);
-                    }
-                }
-                else
-                {
-                    mechanic.Process();
-                }
-                
-                AssetDatabase.Refresh();
-            }
-        }
-        
     }
 }

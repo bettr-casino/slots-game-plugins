@@ -14,9 +14,6 @@ namespace Bettr.Core
         
         public string AssetsVersion { get; set; }
         
-        public string MainBundleName { get; set; }
-        public string MainBundleVariant { get; set; }
-        
         public string AssetsServerBaseURL { get; set; }
         public string OutcomesServerBaseURL { get; set; }
         
@@ -31,9 +28,7 @@ namespace Bettr.Core
         public string TaskCode => PlayerPrefs.GetString(TaskCodeKey, DefaultTaskCode);
         
 #if UNITY_IOS
-        public string WebAssetsBaseURL => TaskCode.Equals(DefaultTaskCode) ? 
-            $"{AssetsServerBaseURL}/assets/{AssetsVersion}/iOS" : 
-            $"{AssetsServerBaseURL}/developers/{TaskCode}/assets/iOS";
+        public string WebAssetsBaseURL => $"{AssetsServerBaseURL}/assets/{AssetsVersion}/iOS";
 #endif
 #if UNITY_ANDROID
         public string WebAssetsBaseURL => $"{AssetsServerBaseURL}/assets/{AssetsVersion}/Android";

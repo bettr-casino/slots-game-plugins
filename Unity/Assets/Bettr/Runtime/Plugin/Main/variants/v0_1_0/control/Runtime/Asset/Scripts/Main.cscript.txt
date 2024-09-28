@@ -1,0 +1,72 @@
+require "math"
+
+Main = {
+    State = {}
+}
+
+function Main:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Main:destroy()
+	System.Print("Main destroy tile id={0}", self.id)
+end
+
+function Main:OnError(callStack)
+	System.Error("Main Error CallStack: {0}", callStack)
+end
+
+function Main:Init()
+    series
+        do
+            System.SetTargetFrameRate(30)
+            -- TODO: disable fog for WebGL
+            --- RenderSettings.fog = false
+            -- TODO: disable skybox for WebGL 
+            --- RenderSettings.skybox = null
+            -- TODO: disable sun for WebGL
+            --- RenderSettings.sun = null
+        end
+    end
+end
+
+function Main:LoadMachine()
+    series
+        do
+            System.Print("LoadMachine starting...")
+            BettrMainLobbySceneController.LoadMachine()
+        end
+    end
+end
+
+function Main:LoadPreviousMachine()
+    series
+        do
+            System.Print("LoadPreviousMachine starting...")
+            BettrMainLobbySceneController.LoadPreviousMachine()
+        end
+    end
+end
+
+function Main:LoadNextMachine()
+    series
+        do
+            System.Print("LoadNextMachine starting...")
+            BettrMainLobbySceneController.LoadNextMachine()
+        end
+    end
+end
+
+function Main:LoadMainLobby()
+    series
+        do
+            System.Print("LoadMainLobby starting...")
+            BettrMainLobbySceneController.LoadMainLobby()
+        end
+    end
+end
+
+return Main:new()

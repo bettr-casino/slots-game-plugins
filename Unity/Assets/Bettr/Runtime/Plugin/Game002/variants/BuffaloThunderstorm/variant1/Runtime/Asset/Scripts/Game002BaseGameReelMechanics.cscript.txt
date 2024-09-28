@@ -1,0 +1,26 @@
+require "math"
+require "Core"
+
+require "Game002BaseGameReelWaysMechanic"
+
+
+Game002BaseGameReelMechanics = {
+
+    WaysMechanic = nil,
+
+}
+
+function Game002BaseGameReelMechanics:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game002BaseGameReelMechanics:Initialize(reel)
+
+    self.WaysMechanic = Game002BaseGameReelWaysMechanic:new()
+    self.WaysMechanic:Initialize(reel)
+
+end
+

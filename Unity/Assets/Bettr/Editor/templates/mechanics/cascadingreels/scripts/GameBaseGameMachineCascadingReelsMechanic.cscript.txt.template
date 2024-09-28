@@ -1,0 +1,33 @@
+require "math"
+require "Core"
+
+{{machineName}}BaseGameMachineCascadingReelsMechanic = {
+}
+
+function {{machineName}}BaseGameMachineCascadingReelsMechanic:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function {{machineName}}BaseGameMachineCascadingReelsMechanic:Initialize(machine)
+    System.Print("{{machineName}}BaseGameMachineCascadingReelsMechanic:Initialize")
+end
+
+function {{machineName}}BaseGameMachineCascadingReelsMechanic:BaseGamePayout(machine)
+    series
+        do
+            System.Print("{{machineName}}BaseGameMachineCascadingReelsMechanic:BaseGamePayout")
+        end
+    end
+end
+
+function {{machineName}}BaseGameMachineCascadingReelsMechanic:OnSpinButtonClicked(machine)
+    series
+        do
+            System.Print("{{machineName}}BaseGameMachineCascadingReelsMechanic:OnSpinButtonClicked")
+        end
+    end
+end
+

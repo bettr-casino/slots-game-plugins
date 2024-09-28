@@ -19,14 +19,31 @@ function {{machineName}}BaseGameMachineWaysMechanic:Initialize(machine)
     {{machineName}}BaseGameMachine.BaseGameStateDispatchTable.WaitingForPayToComplete = function()
         self:WaitingForPayToComplete(machine)
     end
+    -- turn off all audio
+    BettrAudioController.StopAudio()
 end
 
 function {{machineName}}BaseGameMachineWaysMechanic:BaseGamePaying(machine)
     {{machineName}}BaseGameState.SpinState.First.State = "WaitingForPayToComplete"
+    local waysSummary = {{machineName}}BaseGameWaysSummary.Ways.First
+    local count = waysSummary.WaysCount
+    if count == 0 then
+        machine:OnPayingCompleted()
+        return
+    end
     System.StartCoroutine(machine, "BaseGamePayout")
 end
 
 function {{machineName}}BaseGameMachineWaysMechanic:WaitingForPayToComplete(machine)    
+end
+
+function {{machineName}}BaseGameMachineWaysMechanic:OnSpinButtonClicked()
+    series
+        do
+            self:CancelWaysAnimation()
+            self:WaitForPayToComplete()
+        end
+    end
 end
 
 function {{machineName}}BaseGameMachineWaysMechanic:CancelWaysAnimation()
@@ -49,6 +66,14 @@ function {{machineName}}BaseGameMachineWaysMechanic:WaitForPayToComplete()
     end
 end
 
+function {{machineName}}BaseGameMachineWaysMechanic:BaseGamePayout(machine)
+    series
+        do
+            self:DisplayWays(machine)
+        end
+    end        
+end
+
 function {{machineName}}BaseGameMachineWaysMechanic:DisplayWays(machine)
     series
         do
@@ -67,9 +92,9 @@ function {{machineName}}BaseGameMachineWaysMechanic:DisplayWays(machine)
             local duration = waysSummary.DisplayLoopDuration
             local endDelay = waysSummary.DisplayLoopEndDelay            
             local waysIndex = waysState.WaysIndex
-            if waysIndex == 0 then
-                System.WaitForSeconds(startDelay)
-            end
+            -- TODO: FIXME outcomes are not storing the ways state
+            System.WaitForSeconds(startDelay*2 + endDelay*2)
+            BettrAudioController.PlayAudioLoop("rollupwins")                
             for waysCounterIndex = 1, waysCount do
                 series
                     do
@@ -111,8 +136,7 @@ function {{machineName}}BaseGameMachineWaysMechanic:DisplayWays(machine)
             end
             waysIndex = waysState.WaysIndex
             waysState.WaysIndex = waysIndex + 1
-            System.WaitForSeconds(endDelay)
-            if waysIndex >= 1 then
+            if waysIndex >= 0 then
                 machine:OnPayingCompleted()
                 return
             end
@@ -140,7 +164,9 @@ function {{machineName}}BaseGameMachineWaysMechanic:RollUpWaysWin(machine, way, 
             local creditsTextProperty = machine.CreditsText   
             local oldCoins = waysState.PaysRollup
             local newCoins = oldCoins + pays            
-            waysState.PaysRollup = newCoins  
+            waysState.PaysRollup = newCoins
+            
+            BettrUser.Coins = newCoins  
                       
             BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 1)
         end

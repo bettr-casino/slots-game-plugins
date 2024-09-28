@@ -18,6 +18,8 @@ namespace Bettr.Core
     
     public delegate void PutUserCallback(string requestURL, AuthResponse response, bool success, string error);
     
+    public delegate void GetUserExperimentsCallback(string requestURL, UserExperimentsResponse userExperimentsResponse, bool success, string error);
+    
     [Serializable]
     public class StorageRequest
     {
@@ -96,6 +98,13 @@ namespace Bettr.Core
         public string error;
         public bool isLocal;
         public bool isError;
+    }
+    
+    [Serializable]
+    public class UserExperimentsResponse
+    {
+        [JsonProperty("user_experiments")]
+        public List<BettrUserExperiment> UserExperiments { get; set; }
     }
     
     public class IgnoreZeroValueContractResolver : DefaultContractResolver
@@ -250,6 +259,46 @@ namespace Bettr.Core
             yield return PutStorage(requestUri, bodyData, 0, true, storageCallback, SessionTokenHeader, ApplicationJsonHeader);
         }
         
+        public IEnumerator LoadMechanicBlob(string mechanicName, GetStorageCallback storageCallback)
+        {
+            Debug.Log($"Starting LoadGameBlob");
+            if (useLocalServer)
+            {
+                string localFilePath = Path.Combine(fileSystemLocalStorageBaseURL, "users", $"default.json");
+                if (File.Exists(localFilePath))
+                {
+                    string json = File.ReadAllText(localFilePath);
+                    StorageResponse storageResponse = new StorageResponse()
+                    {
+                        value = json,
+                        cas = "local",
+                    };
+                    storageCallback(localFilePath, storageResponse, true, null);
+                }
+                else
+                {
+                    var error = $"Local mechanic blob file not found at path: {localFilePath}";
+                    Debug.LogError(error);
+                    storageCallback(localFilePath, null, false, error);
+                }
+                yield break;
+            }
+            var requestUri = $"/storage/owner/{AuthResponse.User.Id}/protected/blobs/mechanic__{mechanicName}";
+            yield return GetStorage(requestUri, storageCallback, SessionTokenHeader, ApplicationJsonHeader);
+        }
+        
+        public IEnumerator PutMechanicBlob(BettrMechanicConfig mechanicConfig, PutStorageCallback storageCallback)
+        {
+            Debug.Log($"Starting PutMechanicBlob");
+            if (useLocalServer)
+            {
+                yield break;
+            }
+            string bodyData = JsonConvert.SerializeObject(mechanicConfig);
+            string requestUri = $"/storage/owner/{AuthResponse.User.Id}/protected/blobs/mechanic__{mechanicConfig.MechanicName}";
+            yield return PutStorage(requestUri, bodyData, 0, true, storageCallback, SessionTokenHeader, ApplicationJsonHeader);
+        }
+        
         public IEnumerator LoadEvents(GetStorageCallback storageCallback)
         {
             Debug.Log($"Starting PutEvent");
@@ -365,6 +414,41 @@ namespace Bettr.Core
                 userCallback(requestUri, authResponse, true, null);
             }
         }
+        
+        public IEnumerator GetUserExperiments(GetUserExperimentsCallback userExperimentsCallback)
+        {
+            string userId = AuthResponse.User.Id;
+            var requestUri = $"/experiments/users/{userId}?include_inactive_experiments={UnityWebRequest.EscapeURL("true")}";
+            var requestURL = $"{configData.ServerBaseURL}{requestUri}";
+            if (useLocalServer)
+            {
+                var localUserExperiments = new UserExperimentsResponse()
+                {
+                    UserExperiments = new List<BettrUserExperiment>(),
+                };
+                userExperimentsCallback(requestURL, localUserExperiments, true, null);
+                yield break;
+            }
+            var headers = new KeyValuePair<string, string>[]
+            {
+                ApplicationJsonHeader,
+                SessionTokenHeader,
+            };
+            var www = UnityWebRequest.Get(requestURL);
+            UpdateHeaders(www, headers);
+            yield return www.SendWebRequest();
+            
+            if (www.result != UnityWebRequest.Result.Success) {
+                Debug.Log(www.error);
+                userExperimentsCallback(requestURL, null, false, www.error);
+                yield break;
+            }
+            // update the cas value
+            byte[] bytesData = www.downloadHandler.data;
+            var userExperimentsResponse = JsonConvert.DeserializeObject<UserExperimentsResponse>(Encoding.UTF8.GetString(bytesData));
+            // no cas for this response
+            userExperimentsCallback(requestURL, userExperimentsResponse, true, null);
+        }
 
         private void UpdateHeaders(UnityWebRequest www, params KeyValuePair<string, string>[] headers)
         {
@@ -373,6 +457,7 @@ namespace Bettr.Core
                 foreach (var kvPair in headers)
                 {
                     www.SetRequestHeader(kvPair.Key, kvPair.Value);
+                    Debug.Log("Header: " + kvPair.Key + " = " + kvPair.Value);
                 }              
             }
         }

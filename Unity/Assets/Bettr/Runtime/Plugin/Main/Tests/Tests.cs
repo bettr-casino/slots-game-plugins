@@ -17,15 +17,13 @@ namespace Bettr.Runtime.Plugin.Main.Tests
 {
     public class Tests
     {
-        private const string MAIN_BUNDLE_NAME = "main";
-        private const string MAIN_BUNDLE_VARIANT = "v0_1_0";
+        private const string MAIN_BUNDLE_NAME = "mainv0_1_0";
+        private const string MAIN_BUNDLE_VARIANT = "control";
         private const string SERVER_BASE_URL = "https://bettr-casino-assets.s3.us-west-2.amazonaws.com";
 
         private ConfigData _configData = new ConfigData()
         {
             AssetsVersion = "v0_1_0",
-            MainBundleName = "main",
-            MainBundleVariant = "v0_1_0",
             AssetsServerBaseURL = "https://bettr-casino-assets.s3.us-west-2.amazonaws.com",
             OutcomesServerBaseURL = "https://bettr-casino-outcomes.s3.us-west-2.amazonaws.com",
             ServerBaseURL = "https://bettr-casino-assets.s3.us-west-2.amazonaws.com",
@@ -38,12 +36,11 @@ namespace Bettr.Runtime.Plugin.Main.Tests
         [NonSerialized] private BettrAssetController _bettrAssetController;
         [NonSerialized] private BettrAssetScriptsController _bettrAssetScriptsController;
         [NonSerialized] private BettrUserController _bettrUserController;
+        [NonSerialized] private BettrExperimentController _bettrExperimentController;
         // ReSharper disable once NotAccessedField.Local
         [NonSerialized] private BettrVisualsController _bettrVisualsController;
         // ReSharper disable once NotAccessedField.Local
         [NonSerialized] private BettrOutcomeController _bettrOutcomeController;
-        // ReSharper disable once NotAccessedField.Local
-        [NonSerialized] private BettrAudioController _bettrAudioController;
         
         private Tile _tile;
 
@@ -104,7 +101,7 @@ namespace Bettr.Runtime.Plugin.Main.Tests
 
             _configData.AssetsVersion = assetVersion;
             
-            Debug.Log($"userId={userId} AssetsVersion={_configData.AssetsVersion} AssetsBaseURL={_configData.AssetsServerBaseURL} WebAssetsBaseURL={_configData.WebAssetsBaseURL} WebOutcomesBaseURL={_configData.WebOutcomesBaseURL} MainBundleName={_configData.MainBundleName} MainBundleVariant={_configData.MainBundleVariant}");
+            Debug.Log($"userId={userId} AssetsVersion={_configData.AssetsVersion} AssetsBaseURL={_configData.AssetsServerBaseURL} WebAssetsBaseURL={_configData.WebAssetsBaseURL} WebOutcomesBaseURL={_configData.WebOutcomesBaseURL}");
             
             BettrModel.Init();
 
@@ -114,21 +111,25 @@ namespace Bettr.Runtime.Plugin.Main.Tests
                 useFileSystemAssetBundles = _configData.UseFileSystemAssetBundles,
             };
             
+            _bettrExperimentController = new BettrExperimentController()
+            {
+                bettrServer = _bettrServer,
+                configData = _configData,
+            };
+            
             _bettrVisualsController = new BettrVisualsController();
             
             _bettrAssetScriptsController = _bettrAssetController.BettrAssetScriptsController;
             
-            _bettrOutcomeController = new BettrOutcomeController(_bettrAssetScriptsController, _bettrUserController, _configData.AssetsVersion)
+            _bettrOutcomeController = new BettrOutcomeController(_bettrAssetScriptsController, _bettrUserController, _bettrExperimentController, _configData.AssetsVersion)
                 {
                     WebOutcomesBaseURL = _configData.WebOutcomesBaseURL,
                     UseFileSystemOutcomes = _configData.UseFileSystemOutcomes,
                 };
 
-            _bettrAudioController = new BettrAudioController();
-
             BettrVisualsController.SwitchOrientationToPortrait();
             
-            yield return _bettrAssetController.LoadPackage(_configData.MainBundleName, _configData.MainBundleVariant, false);
+            yield return _bettrAssetController.LoadPackage(MAIN_BUNDLE_NAME, MAIN_BUNDLE_VARIANT, false);
             
             var mainTable = _bettrAssetScriptsController.GetScript("Main");
             var scriptRunner = ScriptRunner.Acquire(mainTable);

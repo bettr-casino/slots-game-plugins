@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -18,12 +19,19 @@ namespace Bettr.Core
     {
         [JsonProperty("gameId")]
         public string GameId { get; set; }
+
+        [JsonProperty("gameVariantId")]
+        public string GameVariantId { get; set; }
         
         [JsonProperty("userId")]
         public string UserId { get; set; }
         
         [JsonProperty("hashKey")]
         public string HashKey { get; set; }
+        
+        [JsonProperty("useGeneratedOutcomes")]
+        public bool UseGeneratedOutcomes { get; set; }
+        
     }
     
     [Serializable]
@@ -47,10 +55,12 @@ namespace Bettr.Core
     {
         [NonSerialized]  public bool UseFileSystemOutcomes = true;
         
-        [NonSerialized]  public string FileSystemOutcomesBaseURL = "Assets/Bettr/LocalStore/Outcomes";
+        [NonSerialized]  public string FileSystemOutcomesBaseURL = "Assets/Bettr/LocalStore/LocalOutcomes";
         
         // ReSharper disable once UnassignedField.Global
         [NonSerialized]  public string WebOutcomesBaseURL;
+
+        [NonSerialized] public Dictionary<string, int> OutcomeCounts = new Dictionary<string, int>();
         
         public int OutcomeNumber { get; set; }
         
@@ -59,37 +69,46 @@ namespace Bettr.Core
         public BettrAssetScriptsController BettrAssetScriptsController { get; private set; }
         
         public BettrUserController BettrUserController { get; private set; }
+        
+        public BettrExperimentController BettrExperimentController { get; private set; }
 
-        public BettrOutcomeController(BettrAssetScriptsController bettrAssetScriptsController, BettrUserController bettrUserController, string hashKey)
+        public BettrOutcomeController(BettrAssetScriptsController bettrAssetScriptsController, BettrUserController bettrUserController, BettrExperimentController experimentController, string hashKey)
         {
             TileController.RegisterType<BettrOutcomeController>("BettrOutcomeController");
             TileController.AddToGlobals("BettrOutcomeController", this);
 
             this.BettrAssetScriptsController = bettrAssetScriptsController;
             this.BettrUserController = bettrUserController;
+            this.BettrExperimentController = experimentController;
             this.HashKey = hashKey;
         }
         
-        public IEnumerator LoadServerOutcome(string gameId)
+        public IEnumerator LoadServerOutcome(string gameId, string gameVariantId)
         {
             // Load the Outcomes
             if (UseFileSystemOutcomes)
             {
-                yield return LoadFileSystemOutcome(gameId);
+                yield return LoadFileSystemOutcome(gameId, gameVariantId);
             }
             else
             {
-                yield return LoadWebOutcome(gameId);
+                yield return LoadWebOutcome(gameId, gameVariantId);
             }
         }
         
-        IEnumerator LoadWebOutcome(string gameId)
+        // TODO: FIXME: Include the variant 
+        IEnumerator LoadWebOutcome(string gameId, string gameVariantId)
         {
+            // check the experiment "Outcomes"
+            var useGeneratedOutcomes = BettrExperimentController.UseGeneratedOutcomes();
+            
             var bettrOutcomeRequestPayload = new BettrOutcomeRequestPayload()
             {
                 GameId = gameId,
+                GameVariantId = gameVariantId,
                 UserId = BettrUserController.BettrUserConfig.UserId,
                 HashKey = HashKey,
+                UseGeneratedOutcomes = useGeneratedOutcomes
             };
 
             var requestPayload = JsonConvert.SerializeObject(bettrOutcomeRequestPayload);
@@ -124,11 +143,13 @@ namespace Bettr.Core
             }
         }
 
-        IEnumerator LoadFileSystemOutcome(string gameId)
+        IEnumerator LoadFileSystemOutcome(string gameId, string gameVariantId)
         {
-            var outcomeNumber = (OutcomeNumber > 0) ? OutcomeNumber : GetRandomOutcomeNumber(gameId);
+            var outcomeNumber = (OutcomeNumber > 0) ? OutcomeNumber : GetRandomOutcomeNumber(gameId, gameVariantId);
             var className = $"{gameId}Outcome{outcomeNumber:D9}";
-            var assetBundleManifestURL = $"{FileSystemOutcomesBaseURL}/{className}.cscript.txt";
+            var fileName = $"{className}.cscript.txt";
+            var filePath = Path.Combine(FileSystemOutcomesBaseURL, gameId, gameVariantId, fileName);
+            var assetBundleManifestURL = filePath;
             var assetBundleManifestBytes = File.ReadAllBytes(assetBundleManifestURL);
 
             var script = Encoding.ASCII.GetString(assetBundleManifestBytes);
@@ -138,12 +159,24 @@ namespace Bettr.Core
             yield break;
         }
 
-        private int GetRandomOutcomeNumber(string gameId)
+        private int GetRandomOutcomeNumber(string gameId, string gameVariantId)
         {
+            if (OutcomeCounts.TryGetValue(gameId, out var count))
+            {
+                if (count > 0)
+                {
+                    return Random.Range(1, count + 1);
+                }
+            }
+            
             var regex = new Regex($@"^{gameId}Outcome\d{{9}}\.cscript.txt$");
-            var files = Directory.GetFiles($"{FileSystemOutcomesBaseURL}");
+            var directoryPath = Path.Combine(FileSystemOutcomesBaseURL, gameId, gameVariantId);
+            var files = Directory.GetFiles(directoryPath);
             var filteredFiles = files.Where(file => regex.IsMatch(Path.GetFileName(file))).ToArray();
             var outcomeCount = filteredFiles.Length;
+            
+            OutcomeCounts[gameId] = outcomeCount;
+            
             return outcomeCount > 0 ? Random.Range(1, outcomeCount + 1) : 0;
         }
     }

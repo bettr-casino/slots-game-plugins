@@ -1,56 +1,82 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using CrayonScript.Code;
-using CrayonScript.Interpreter;
 using UnityEngine;
-using UnityEngine.Networking;
-using UnityEngine.SceneManagement;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
-using Object = UnityEngine.Object;
 
 // ReSharper disable once CheckNamespace
 namespace Bettr.Core
 {
+    [RequireComponent(typeof(AudioSource))]
     [Serializable]
-    public class BettrAudioController
+    public class BettrAudioController : MonoBehaviour
     {
-        private List<AudioSource> _audioSources = new List<AudioSource>();
+        public bool IsVolumeMuted { get; set; }
+        
+        public AudioSource AudioSource { get; private set; }
 
-        public BettrAudioController()
-        {
-            TileController.RegisterType<BettrAudioController>("BettrAudioController");
-            TileController.AddToGlobals("BettrAudioController", this);
-        }
+        // ReSharper disable once InconsistentNaming
+       [SerializeField] private AudioClip[] AudioClips;
         
-        public void AddAudioSource(AudioSource audioSource)
-        {
-            _audioSources.Add(audioSource);
-        }
+        public static BettrAudioController Instance { get; private set; }
         
-        public void RemoveAudioSource(AudioSource audioSource)
+        public void Awake()
         {
-            _audioSources.Remove(audioSource);
+            var audioSource = gameObject.GetComponent<AudioSource>();
+            AudioSource = audioSource;
+
+            Instance = this;
         }
-        
-        public void SetVolume(float volume)
+
+        public void PlayAudioOnce(string audioClipName)
         {
-            foreach (var audioSource in _audioSources)
+            AudioClip clip = GetAudioClipByName(audioClipName);
+            if (clip == null) return;
+
+            if (AudioSource.isPlaying)
             {
-                audioSource.volume = volume;
+                AudioSource.Stop();
             }
+
+            if (IsVolumeMuted) return;
+
+            AudioSource.clip = clip;
+            AudioSource.loop = false;
+            AudioSource.Play();
         }
         
-        public void ToggleMusic(bool isMusicOff)
+        public void PlayAudioLoop(string audioClipName)
         {
-            foreach (var source in _audioSources)
+            AudioClip clip = GetAudioClipByName(audioClipName);
+            if (clip == null) return;
+
+            if (AudioSource.isPlaying)
             {
-                source.mute = isMusicOff;
+                AudioSource.Stop();
             }
+
+            if (IsVolumeMuted) return;
+
+            AudioSource.clip = clip;
+            AudioSource.loop = true;
+            AudioSource.Play();
+        }
+        
+        public void StopAudio()
+        {
+            AudioSource.Stop();
+        }
+        
+        private AudioClip GetAudioClipByName(string audioClipName)
+        {
+            foreach (var audioClip in AudioClips)
+            {
+                if (audioClip.name == audioClipName)
+                {
+                    return audioClip;
+                }
+            }
+
+            Debug.LogWarning($"Audio clip '{audioClipName}' not found in BettrAudioBehaviour.");
+            return null;
         }
     }
 }
