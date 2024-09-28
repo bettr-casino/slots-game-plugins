@@ -25,10 +25,10 @@
 | `OnBecameVisible()`           | None                | Logs when the game machine becomes visible in the game window.              | Done   |
 | `CalculateAndDisplayPayout()` | None                | Calculates the final payout and triggers a celebratory display for the player. | TODO   |
 | `ResetToIdleState()`          | None                | Resets the game to the idle state after all processes are complete.          | TODO   |
-| `ActivateSyncedReels(reels)`  | reels (array)       | Highlights synced reels during the spin, applies special visual effects, and synchronizes reel strips. | Done   |
-| `TriggerSyncedReelsRandomly()`| reels (array)       | Randomly selects reels during the spin to activate the Synced Reels feature. | Done   |
-| `PayoutForSyncedReels()`      | None                | Calculates and displays the payout for the spin that triggered the Synced Reels feature. | TODO   |
-| `DeactivateSyncedReels()`     | None                | Deactivates the synced reels and returns them to normal spinning behavior.  | Done   |
+| `ActivateWildReels(reels)`    | reels (array)       | Highlights the reels that will turn wild, applying special visual effects and turning all symbols on those reels into wilds. | Done   |
+| `CheckTriggerCondition()`     | None                | Evaluates the condition to trigger the Wild Reels feature during a spin.    | Done   |
+| `TransformReelsToWild(reels)` | reels (array)       | Transforms the selected reels into wild reels with special visual effects and sound cues. | Done   |
+| `BonusRoundTriggered()`       | None                | Handles the transition to a bonus round if triggered by a scatter or bonus symbol. | Done   |
 
 ---
 
@@ -89,3 +89,4 @@
 |------------------------------------------|----------------------------------------|-----------------------------------------------------------------------------|--------|
 | `SlideReelSymbols(float)`                | float                                  | Slides all symbols on the reel by a given distance.                         | Done   |
 | `SlideSymbol(int, float)`                | int (symbol index), float (distance)   | Slides a single symbol by the specified distance.                           | Done   |
+
