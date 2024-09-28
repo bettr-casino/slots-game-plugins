@@ -25,6 +25,8 @@
 | `OnBecameVisible()`           | None                | Logs when the game machine becomes visible in the game window.              | Done   |
 | `CalculateAndDisplayPayout()` | None                | Calculates the final payout and triggers a celebratory display for the player. | TODO   |
 | `ResetToIdleState()`          | None                | Resets the game to the idle state after all processes are complete.          | TODO   |
+| `ActivateLinkedReels(reels)`  | reels (array)       | Highlights linked reels and applies a special animation to show they are synchronized. | TODO   |
+| `ExpandLinkedReels(reels)`    | reels (array)       | Adds more reels to the linked reels group during a bonus round.             | TODO   |
 
 ---
 
@@ -36,6 +38,7 @@
 | `SpinEngines()`                          | None                                   | Spins the reels by triggering the reel controller.                          | Done   |
 | `DetectWinningCombinationGroupedByReel(reels)` | reels (array)                         | Detects winning combinations across the specified reels grouped by their reel positions. | TODO   |
 | `CheckForNewWinsAfterCascade(reels)`     | reels (array)                         | Checks for any new winning combinations after a symbol cascade across the specified reels. | TODO   |
+| `SpinLinkedReels(reels)`                 | reels (array)                         | Spins the linked reels together, displaying identical symbols.              | Use `SpinEngines()` in combination with `ActivateLinkedReels(reels)` |
 
 ---
 
@@ -46,6 +49,7 @@
 | `OnOutcomeReceived()`                    | None                                   | Processes the outcome for all reels after a spin.                           | Done   |
 | `PlaySpinReelSpinEndingRollBackAnimation()` | None                                  | Plays the ending rollback animation for all reels.                          | Done   |
 | `CascadeSymbols(fromRow, toRow, reels)`  | fromRow (int), toRow (int), reels (array) | Cascades symbols from one row to another across the specified reels.        | TODO   |
+| `DisplayLinkedSymbols(reels)`            | reels (array)                         | Displays identical symbols on the linked reels when they stop spinning.     | TODO   |
 
 ---
 
