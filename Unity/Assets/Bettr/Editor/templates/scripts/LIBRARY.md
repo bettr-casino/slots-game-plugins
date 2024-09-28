@@ -25,10 +25,10 @@
 | `OnBecameVisible()`           | None                | Logs when the game machine becomes visible in the game window.              | Done   |
 | `CalculateAndDisplayPayout()` | None                | Calculates the final payout and triggers a celebratory display for the player. | TODO   |
 | `ResetToIdleState()`          | None                | Resets the game to the idle state after all processes are complete.          | TODO   |
-| `ActivateLockedReels(reels)`  | reels (array)       | Highlights locked reels and applies a special animation to indicate synchronization. | TODO   |
-| `TriggerLockedReelsBySpecialSymbol(reels)` | reels (array) | Detects when a special symbol lands on Reel 1, triggering the Locked Reels mechanic. | TODO   |
-| `PayoutForTriggeringSpin()`   | None                | Calculates and displays the payout for the spin that triggered the Locked Reels feature. | TODO   |
-| `DeactivateLockedReels()`     | None                | Deactivates the locked reels and returns them to normal spinning behavior.  | TODO   |
+| `ActivateSyncedReels(reels)`  | reels (array)       | Highlights synced reels during the spin, applies special visual effects, and synchronizes reel strips. | Done   |
+| `TriggerSyncedReelsRandomly()`| reels (array)       | Randomly selects reels during the spin to activate the Synced Reels feature. | Done   |
+| `PayoutForSyncedReels()`      | None                | Calculates and displays the payout for the spin that triggered the Synced Reels feature. | TODO   |
+| `DeactivateSyncedReels()`     | None                | Deactivates the synced reels and returns them to normal spinning behavior.  | Done   |
 
 ---
 
@@ -50,8 +50,8 @@
 | `OnOutcomeReceived()`                    | None                                   | Processes the outcome for all reels after a spin.                           | Done   |
 | `PlaySpinReelSpinEndingRollBackAnimation()` | None                                  | Plays the ending rollback animation for all reels.                          | Done   |
 | `CascadeSymbols(fromRow, toRow, reels)`  | fromRow (int), toRow (int), reels (array) | Cascades symbols from one row to another across the specified reels.        | TODO   |
-| `DisplayLinkedSymbols(reels)`            | reels (array)                         | Displays identical symbols on the linked reels when they stop spinning.     | TODO   |
-| `ActivateLockedReels(reels)`             | reels (array)                         | Applies the locked reel animation for synchronized spinning.                | TODO   |
+| `DisplaySyncedSymbols(reels)`            | reels (array)                         | Displays identical symbols on the synced reels when they stop spinning, based on identical reel strips. | Done   |
+| `ActivateSyncedReels(reels)`             | reels (array)                         | Applies the synced reel animation and ensures identical symbols across reels. | Done   |
 
 ---
 
