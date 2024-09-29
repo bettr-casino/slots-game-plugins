@@ -1310,8 +1310,166 @@ namespace Bettr.Editor
             Debug.Log($"Processed Fix Status Texts {processCount} machine variants.");
         }
         
-        [MenuItem("Bettr/Tools/Fix Background")]
-        public static void FixBackground()
+        private static void ConfigureDefaultLightingSettings(LightingSettings lightingSettings)
+        {
+            // Enable Auto Generate
+            lightingSettings.autoGenerate = true;
+
+            // Realtime Lighting Settings
+            lightingSettings.bakedGI = true;
+            lightingSettings.realtimeGI = false;
+            lightingSettings.mixedBakeMode = MixedLightingMode.Shadowmask;
+
+            // Lightmapping Settings
+            lightingSettings.lightmapper = LightingSettings.Lightmapper.ProgressiveGPU;
+            lightingSettings.environmentImportanceSampling = true;
+            lightingSettings.directSampleCount = 32;
+            lightingSettings.indirectSampleCount = 512;
+            lightingSettings.environmentSampleCount = 256;
+            lightingSettings.lightProbeSampleCountMultiplier = 4;
+            lightingSettings.maxBounces = 2;
+            lightingSettings.filteringMode = LightingSettings.FilterMode.Auto;
+            lightingSettings.lightmapResolution = 40f;
+            lightingSettings.lightmapCompression = LightmapCompression.HighQuality;
+            lightingSettings.lightmapPadding = 2;
+            lightingSettings.albedoBoost = 1f;
+
+            Debug.Log("Updated default lighting settings based on user configuration.");
+        }
+        
+        [MenuItem("Bettr/Tools/Fix Base Game Directional Light")]
+        public static void FixBaseGameDirectionalLight()
+        {
+            // Walk the entire directory tree under the plugin root directory
+            var processCount = 0;
+            var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+            string coreAssetPath = $"Assets/Bettr/Core";
+            for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
+            {
+                var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
+                // Check that the MachineName starts with "Game" and is not "Game001Alpha"
+                if (!machineNameDir.Name.StartsWith("Game") || machineNameDir.Name == "Game001Alpha")
+                {
+                    continue;
+                }
+                var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
+                if (variantsDir == null)
+                {
+                    continue;
+                }
+                var machineVariantsDirs = variantsDir?.GetDirectories();
+                // loop over machineVariantsDir
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir?.GetDirectories();
+                    if (experimentVariantDirs == null)
+                    {
+                        continue;
+                    }
+                    // loop over experimentVariantDirs
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        // now extract the machineName from machineNameDir, machineVariant from machineVariantsDir, and experimentVariant from experimentVariantDir
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir?.Name;
+                        string experimentVariant = experimentVariantDir?.Name;
+                        
+                        string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
+                        if (!Directory.Exists(runtimeAssetPath))
+                        {
+                            Debug.LogError($"Directory not found: {runtimeAssetPath}");
+                            continue;
+                        }
+                        
+                        // get the Scenes directory
+                        string scenesDirectory = Path.Combine(runtimeAssetPath, "Scenes");
+                        // get the {machineName}{machineVariant}Scene.unity scene
+                        string scenePath = Directory.GetFiles(scenesDirectory, $"{machineName}{machineVariant}Scene.unity", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                        if (string.IsNullOrEmpty(scenePath))
+                        {
+                            Debug.LogError($"Scene not found: {machineName}{machineVariant}Scene.unity");
+                            continue;
+                        }
+                        
+                        // add a Directional Light to the scene - inline the code below
+                        // Load the scene
+                        Scene scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+                        
+                        // check if the scene has a Directional Light
+                        var hasDirectionalLight = false;
+                        GameObject[] gameObjects = scene.GetRootGameObjects();
+                        foreach (GameObject gameObject in gameObjects)
+                        {
+                            if (gameObject.GetComponent<Light>() != null)
+                            {
+                                Debug.Log($"Directional Light already exists in scene: {scenePath}");
+                                hasDirectionalLight = true;
+                            }
+                        }
+                        
+                        if (hasDirectionalLight)
+                        {
+                            continue;
+                        }
+                        
+                        // Create a new GameObject
+                        GameObject directionalLight = new GameObject("Directional Light");
+                        // Add a Light component to the GameObject
+                        Light light = directionalLight.AddComponent<Light>();
+                        // Set the Light Type to Directional
+                        light.type = LightType.Directional;
+                        // Set the Light Color to white
+                        light.color = Color.white;
+                        // Set the Light Intensity to 1
+                        light.intensity = 1;
+                        // Set the Light Rotation to 45, 45, 0
+                        directionalLight.transform.rotation = Quaternion.Euler(50, -30, 0);
+                        // Set the Light Position to 0, 0, 0
+                        directionalLight.transform.position = new Vector3(0, 0, 0);
+                        // no shadows
+                        light.shadows = LightShadows.None;
+                        // Save the scene
+                        EditorSceneManager.MarkSceneDirty(scene);
+                        EditorSceneManager.SaveScene(scene);
+                        
+                        string lightingSettingsPath = $"{scenesDirectory}/{machineName}{machineVariant}LightingSettings.asset";
+                        // check if the LightingSettings asset exists
+                        if (File.Exists(lightingSettingsPath))
+                        {
+                            Debug.Log($"LightingSettings asset already exists: {lightingSettingsPath}");
+                            continue;
+                        }
+                        
+                        // load the scene
+                        scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+                        // set the scene to the sceneAsset
+                        LightingSettings lightingSettings = new LightingSettings();
+
+                        // Save the new Lighting Settings asset to the project folder
+                        AssetDatabase.CreateAsset(lightingSettings, lightingSettingsPath);
+                        AssetDatabase.SaveAssets();
+                        
+                        // load the asset
+                        lightingSettings = AssetDatabase.LoadAssetAtPath<LightingSettings>(lightingSettingsPath);
+                        
+                        Lightmapping.lightingSettings = lightingSettings;
+                        EditorSceneManager.MarkSceneDirty(scene);
+                        EditorSceneManager.SaveScene(scene);
+                        
+                        Debug.Log($"Fix Base Game Directional Light for machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant}");
+                
+                        processCount++;
+                    }
+                }
+            }
+            
+            AssetDatabase.Refresh();
+            
+            Debug.Log($"Processed Fix Background {processCount} machine variants.");
+        }
+        
+        [MenuItem("Bettr/Tools/Fix Background Shader")]
+        public static void FixBackgroundShader()
         {
             // Walk the entire directory tree under the plugin root directory
             var processCount = 0;
@@ -1370,14 +1528,6 @@ namespace Bettr.Editor
                         Shader standardShader = Shader.Find("Standard");
                         // set the shader of the material to the Standard shader
                         material.shader = standardShader;
-                        
-                        // Enable the Emission property
-                        material.EnableKeyword("_EMISSION");
-                        // Create the emission texture from the Background.jpg which is in the "Textures" directory
-                        string texturePath = Directory.GetFiles(texturesDirectory, "Background.jpg", SearchOption.TopDirectoryOnly).FirstOrDefault();
-                        // load the Background.jpg texture
-                        Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(texturePath);
-                        
                         
                         Debug.Log($"Fixing Background for machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant}");
                 
