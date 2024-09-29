@@ -45,47 +45,50 @@ namespace Bettr.Core
         {
             yield return OneTimeSetup();
 
-            DevTools.Instance.Enable();
-            
-            DevTools.Instance.OnKeyPressed.AddListener(() =>
+            if (BettrUserController.Instance.UserInDevMode)
             {
-                // Check for Backspace or Delete key press
-                if (Input.GetKeyDown(KeyCode.P))
-                {
-                    StartCoroutine(LoadPreviousMachine());
-                    return;
-                }
-                if (Input.GetKeyDown(KeyCode.N))
-                {
-                    StartCoroutine(LoadNextMachine());
-                    return;
-                }
-                if (Input.GetKeyDown(KeyCode.L))
-                {
-                    StartCoroutine(LoadMainLobby());
-                    return;
-                }
-                if (Input.GetKeyDown(KeyCode.V))
-                {
-                    TurnOffVolume();
-                    return;
-                }
-                // Find the SpinImage GameObject
-                var spinImage = GameObject.Find("SpinImage");
-                if (spinImage != null)
-                {
-                    _bettrOutcomeController.OutcomeNumber = DevTools.Instance.ValidCombination;
-                    
-                    // Use Unity's EventSystem to simulate a click event
-                    var eventData = new PointerEventData(EventSystem.current);
-                    ExecuteEvents.Execute(spinImage, eventData, ExecuteEvents.pointerClickHandler);
-                }
-                else
-                {
-                    Debug.LogWarning("SpinImage GameObject not found.");
-                }
-            });
+                DevTools.Instance.Enable();
             
+                DevTools.Instance.OnKeyPressed.AddListener(() =>
+                {
+                    // Check for Backspace or Delete key press
+                    if (Input.GetKeyDown(KeyCode.P))
+                    {
+                        StartCoroutine(LoadPreviousMachine());
+                        return;
+                    }
+                    if (Input.GetKeyDown(KeyCode.N))
+                    {
+                        StartCoroutine(LoadNextMachine());
+                        return;
+                    }
+                    if (Input.GetKeyDown(KeyCode.L))
+                    {
+                        StartCoroutine(LoadMainLobby());
+                        return;
+                    }
+                    if (Input.GetKeyDown(KeyCode.V))
+                    {
+                        TurnOffVolume();
+                        return;
+                    }
+                    // Find the SpinImage GameObject
+                    var spinImage = GameObject.Find("SpinImage");
+                    if (spinImage != null)
+                    {
+                        _bettrOutcomeController.OutcomeNumber = DevTools.Instance.ValidCombination;
+                    
+                        // Use Unity's EventSystem to simulate a click event
+                        var eventData = new PointerEventData(EventSystem.current);
+                        ExecuteEvents.Execute(spinImage, eventData, ExecuteEvents.pointerClickHandler);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("SpinImage GameObject not found.");
+                    }
+                });
+            }
+
             yield return LoadMachine();
         }
 
@@ -141,6 +144,10 @@ namespace Bettr.Core
             };
             
             var userId = _bettrUserController.GetUserId();
+
+            yield return _bettrUserController.SetUserDevMode();
+            
+            // check if the user is running in dev mode
             
             var assetVersion = "latest";
 

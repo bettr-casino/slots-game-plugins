@@ -22,6 +22,8 @@ namespace Bettr.Core
         
         public bool UserIsLoggedIn { get; private set; }
         
+        public bool UserInDevMode { get; private set; }
+        
         const string ErrorBlobDoesNotExist = "HTTP/1.1 404 Not Found";
 
         public BettrUserController()
@@ -41,6 +43,33 @@ namespace Bettr.Core
             deviceId = "EE0DE516-5053-5142-80AC-2D878E91215C"; // TODO: remove hardcoded user after testing id: "b19e240f-79d5-4ab1-a844-48c97bc1d154"
             var uniqueId = $"{deviceId}";
             return uniqueId;            
+        }
+
+        public IEnumerator SetUserDevMode()
+        {
+            UserInDevMode = false;
+            
+            var userId = GetUserId();
+            
+            string webAssetName = $"users/default/devs/{userId}.json";
+            string assetURL = $"{configData.AssetsServerBaseURL}/{webAssetName}";
+            using UnityWebRequest www = UnityWebRequest.Get(assetURL);
+            yield return www.SendWebRequest();
+
+            if (www.result == UnityWebRequest.Result.Success)
+            {
+                byte[] jsonBytes = www.downloadHandler.data;
+                if (jsonBytes != null && jsonBytes.Length > 0)
+                {
+                    UserInDevMode = true;
+                }
+            }
+            else
+            {
+                var error = $"Error loading user JSON from server: {www.error}";
+                Debug.LogError(error);
+            }
+            Debug.Log($"UserId={userId} UserInDevMode={UserInDevMode}");
         }
 
         public IEnumerator Login()

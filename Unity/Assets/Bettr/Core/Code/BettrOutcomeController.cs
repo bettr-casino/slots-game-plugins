@@ -56,6 +56,9 @@ namespace Bettr.Core
         [NonSerialized]  public bool UseFileSystemOutcomes = true;
         
         [NonSerialized]  public string FileSystemOutcomesBaseURL = "Assets/Bettr/LocalStore/LocalOutcomes";
+
+        [NonSerialized] public string GeneratedOutcomesServerBaseURL =
+            "https://bettr-casino-generated-outcomes.s3.us-west-2.amazonaws.com";
         
         // ReSharper disable once UnassignedField.Global
         [NonSerialized]  public string WebOutcomesBaseURL;
@@ -101,6 +104,34 @@ namespace Bettr.Core
         {
             // check the experiment "Outcomes"
             var useGeneratedOutcomes = BettrExperimentController.UseGeneratedOutcomes();
+
+            if (OutcomeNumber > 0)
+            {
+                if (BettrUserController.UserInDevMode)
+                {
+                    var devOutcomeClassName = $"{gameId}Outcome{OutcomeNumber:000000000}.cscript.txt";
+                    
+                    string outcomeURL = $"{GeneratedOutcomesServerBaseURL}/latest/Outcomes/{gameId}/{gameVariantId}/{devOutcomeClassName}";
+                    using UnityWebRequest wwws3 = UnityWebRequest.Get(outcomeURL);
+                    yield return wwws3.SendWebRequest();
+
+                    if (wwws3.result == UnityWebRequest.Result.Success)
+                    {
+                        var script = wwws3.downloadHandler.text;
+                
+                        BettrAssetScriptsController.AddScript(devOutcomeClassName, script);
+                    }
+                    else
+                    {
+                        var error = $"Error loading user JSON from server: {wwws3.error}";
+                        Debug.LogError(error);
+                    }
+
+                    OutcomeNumber = 0;
+                        
+                    yield break;
+                }
+            }
             
             var bettrOutcomeRequestPayload = new BettrOutcomeRequestPayload()
             {
