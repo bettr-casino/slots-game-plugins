@@ -123,7 +123,7 @@ namespace Bettr.Core
                     }
                     else
                     {
-                        var error = $"Error loading user JSON from server: {wwws3.error}";
+                        var error = $"Error loading Outcome={devOutcomeClassName} from server: {wwws3.error}";
                         Debug.LogError(error);
                     }
 
