@@ -56,10 +56,21 @@ function MainLobbyScene:LoadLobbyCards()
         do
             self.Lobby.SetActive(true)
         end
+        do
+            self.LobbyCardSelector.SetActive(true)
+        end
     end
 end
 
-function HideSideBar()
+function MainLobbyScene:SetSelector(gameLobbyCard)
+    series
+        do
+            self.LobbyCardSelector.GameObject.transform.position = gameLobbyCard.transform.position
+        end
+    end
+end
+
+function MainLobbyScene:HideSideBar()
 end
 
 function MainLobbyScene:SetCommitHash(commitHash)
