@@ -48,9 +48,18 @@ function MainLobbyScene:LoadLobbyCards()
     System.Print("LoadLobbyCards invoked")          
     series
         do
-            BettrMainLobbySceneController.LoadLobbyCards(self)           
+            BettrMainLobbySceneController.LoadLobbyCards(self)
+        end
+        do
+            self.Loading.SetActive(false)
+        end
+        do
+            self.Lobby.SetActive(true)
         end
     end
+end
+
+function HideSideBar()
 end
 
 function MainLobbyScene:SetCommitHash(commitHash)
