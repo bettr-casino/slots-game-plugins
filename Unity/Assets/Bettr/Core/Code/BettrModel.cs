@@ -77,6 +77,7 @@ namespace Bettr.Core
         public List<BettrLobbyCardGroupConfig> LobbyCardGroups { get; set; }
         public List<BettrLobbyCardConfig> LobbyCards { get; set; }
         public int LobbyCardIndex { get; set; } = -1;
+        public string LobbyCardName { get; set; }
 
         public int FindLobbyCardIndexById(string lobbyCardId)
         {

@@ -57,17 +57,13 @@ function MainLobbyScene:LoadLobbyCards()
             self.Lobby.SetActive(true)
         end
         do
-            self.LobbyCardSelector.SetActive(true)
+            BettrMainLobbySceneController.SetSelector(self, nil)
         end
     end
 end
 
 function MainLobbyScene:SetSelector(gameLobbyCard)
-    series
-        do
-            self.LobbyCardSelector.GameObject.transform.position = gameLobbyCard.transform.position
-        end
-    end
+    BettrMainLobbySceneController.SetSelector(self, gameLobbyCard)
 end
 
 function MainLobbyScene:HideSideBar()
