@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 // ReSharper disable once CheckNamespace
 namespace Bettr.Core
@@ -240,10 +241,19 @@ namespace Bettr.Core
                     {
                         if (quadGameObject != null)
                         {
-                            // load the material from the cache
-                            if (LobbyCardMaterialMap.TryGetValue(lobbyCardId, out var material))
+                            // Get the MeshRenderer component
+                            var renderer = quadGameObject.GetComponent<MeshRenderer>();
+    
+                            // Destroy the old material if it exists
+                            if (renderer.material != null)
                             {
-                                quadGameObject.GetComponent<MeshRenderer>().material = material;
+                                Object.Destroy(renderer.material);
+                            }
+    
+                            // Load the material from the cache and assign it
+                            if (LobbyCardMaterialMap.TryGetValue(lobbyCardId, out var newMaterial))
+                            {
+                                renderer.material = newMaterial;
                             }
                         }
                     }
