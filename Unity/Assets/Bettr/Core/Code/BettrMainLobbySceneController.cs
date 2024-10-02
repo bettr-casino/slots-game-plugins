@@ -25,12 +25,20 @@ namespace Bettr.Core
         
         public BettrExperimentController BettrExperimentController { get; private set; }
         
+        public bool IsMainLobbyCardsAlreadyLoaded { get; private set; }
+        
+        public Dictionary<string, Material> LobbyCardMaterialMap { get; private set; }
+        
         public BettrMainLobbySceneController(BettrExperimentController bettrExperimentController)
         {
             TileController.RegisterType<BettrMainLobbySceneController>("BettrMainLobbySceneController");
             TileController.AddToGlobals("BettrMainLobbySceneController", this);
             
             BettrExperimentController = bettrExperimentController;
+
+            IsMainLobbyCardsAlreadyLoaded = false;
+            
+            LobbyCardMaterialMap = new Dictionary<string, Material>();
         }
 
         public void SetSelector(Table mainLobbyTable, GameObject gameObject)
@@ -150,6 +158,16 @@ namespace Bettr.Core
         public IEnumerator LoadLobbyCards(Table self)
         {
             Console.WriteLine("LoadLobbyCards invoked");
+
+            if (IsMainLobbyCardsAlreadyLoaded)
+            {
+                // turn off the loading screen
+                var loadingProperty = (PropertyGameObject) self["Loading"];
+                if (loadingProperty != null)
+                {
+                    loadingProperty.SetActive(false);
+                }
+            }
             
             var bettrUser = BettrUserController.Instance.BettrUserConfig;
 
@@ -213,13 +231,33 @@ namespace Bettr.Core
                     }
                     catch (Exception e)
                     {
+                        Debug.LogError($"error cardIndex={cardIndex} lobbyCardIndex={lobbyCardIndex} groupIndex={groupIndex} lobbyCardId={lobbyCardId}");
                         Debug.LogError(e);
-                        throw;
+                        // throw; // continue with invalid cards
                     }
+
+                    if (IsMainLobbyCardsAlreadyLoaded)
+                    {
+                        if (quadGameObject != null)
+                        {
+                            // load the material from the cache
+                            if (LobbyCardMaterialMap.TryGetValue(lobbyCardId, out var material))
+                            {
+                                quadGameObject.GetComponent<MeshRenderer>().material = material;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        yield return BettrAssetController.Instance.LoadMaterial(lobbyCard.BundleName, lobbyCard.BundleVersion, lobbyCard.MaterialName, quadGameObject);
                     
-                    yield return BettrAssetController.Instance.LoadMaterial(lobbyCard.BundleName, lobbyCard.BundleVersion, lobbyCard.MaterialName, quadGameObject);
+                        // save the material to BettrMainLobbySceneController for later
+                        LobbyCardMaterialMap[lobbyCardId] = quadGameObject?.GetComponent<MeshRenderer>().material;
+                    }
                 }
             }
+            
+            IsMainLobbyCardsAlreadyLoaded = true;
         }
         
         public Tuple<string, string> GetLobbyCardExperiment(BettrLobbyCardConfig lobbyCard)
