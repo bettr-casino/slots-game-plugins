@@ -1406,22 +1406,27 @@ namespace Bettr.Editor
                                 hasDirectionalLight = true;
                             }
                         }
+
+                        GameObject directionalLight = null;
+                        Light light = null;
                         
                         if (hasDirectionalLight)
                         {
-                            continue;
+                            directionalLight = GameObject.Find("Directional Light");
+                            light = directionalLight.GetComponent<Light>();
+                        }
+                        else
+                        {
+                            directionalLight = new GameObject("Directional Light");
+                            light = directionalLight.AddComponent<Light>();
                         }
                         
-                        // Create a new GameObject
-                        GameObject directionalLight = new GameObject("Directional Light");
-                        // Add a Light component to the GameObject
-                        Light light = directionalLight.AddComponent<Light>();
                         // Set the Light Type to Directional
                         light.type = LightType.Directional;
                         // Set the Light Color to white
                         light.color = Color.white;
                         // Set the Light Intensity to 1
-                        light.intensity = 1;
+                        light.intensity = 2;
                         // Set the Light Rotation to 45, 45, 0
                         directionalLight.transform.rotation = Quaternion.Euler(50, -30, 0);
                         // Set the Light Position to 0, 0, 0
