@@ -6,6 +6,7 @@ MainLobbyScene = {
     State = {
         ScrollSpeed = 0.003,
         PreviousMousePosition = Vector3.zero,
+        SelectedLobbyCardName = nil,
     }
 }
 
@@ -64,6 +65,32 @@ end
 
 function MainLobbyScene:SetSelector(gameLobbyCard)
     BettrMainLobbySceneController.SetSelector(self, gameLobbyCard)
+end
+
+function MainLobbyScene:LoadMachineScene(lobbyCardName)
+    self.SelectedLobbyCardName = lobbyCardName
+    BettrMainLobbySceneController.LoadLobbySideBar(self, self.SelectedLobbyCardName)           
+end
+
+function MainLobbyScene:OnPointerClick1Param(param)
+	System.Print("MainLobbyScene OnPointerClick1Param param={0} tile id={1}", param, self.id)
+	if param == "PreviewPlay" then
+        System.Print("MainLobbyScene OnPointerClick1Param PreviewPlay")
+        System.StartCoroutine(self, "LoadLobbyCardMachine")
+    elseif param == "PreviewPreview" then
+        System.Print("MainLobbyScene OnPointerClick1Param PreviewPreview")
+    elseif param == "PreviewClose" then
+        System.Print("MainLobbyScene OnPointerClick1Param PreviewClose")
+        self.SideBar["GameDetails"].SetActive(false)   
+    end
+end
+
+function MainLobbyScene:LoadLobbyCardMachine()
+    series
+        do
+            BettrMainLobbySceneController.LoadLobbyCardMachine(self.SelectedLobbyCardName)
+        end
+    end
 end
 
 function MainLobbyScene:HideSideBar()

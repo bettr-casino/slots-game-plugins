@@ -49,6 +49,7 @@ namespace Bettr.Core
                 "Bettr/LobbyMask",
                 "Bettr/ReelMask",
                 "Bettr/Symbol",
+                "Bettr/UIImage",
                 "Unlit/Texture",
                 "Unlit/Color",
             };
@@ -539,7 +540,7 @@ namespace Bettr.Core
             Instance = this;
         }
         
-        private string GetAssetBundleName(string bundleName, string bundleVariant, bool isScene)
+        public string GetAssetBundleName(string bundleName, string bundleVariant, bool isScene)
         {
             return isScene ? $"{bundleName}_scenes.{bundleVariant}" : $"{bundleName}.{bundleVariant}";
         }

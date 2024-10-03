@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
 using UnityEngine;
+using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 // ReSharper disable once CheckNamespace
@@ -22,6 +23,8 @@ namespace Bettr.Core
     
     public class BettrMainLobbySceneController
     {
+        private static readonly int EmissionColor = Shader.PropertyToID("_EmissionColor");
+        private static readonly int MainTex = Shader.PropertyToID("_MainTex");
         public BettrMainLobbySceneControllerState State = new BettrMainLobbySceneControllerState();
         
         public BettrExperimentController BettrExperimentController { get; private set; }
@@ -76,17 +79,121 @@ namespace Bettr.Core
             }
             bettrCardSelectorProperty.SetActive(true);
         }
+        
+        GameObject FindChildRecursive(GameObject parentGO, string childName)
+        {
+            var parent = parentGO.transform;
+            foreach (Transform child in parent)
+            {
+                if (child.name == childName)
+                {
+                    return child.gameObject;
+                }
+                // Recursively search through each child's children
+                GameObject foundChild = FindChildRecursive(child.gameObject, childName);
+                if (foundChild != null)
+                {
+                    return foundChild;
+                }
+            }
+            return null; // Return null if the child is not found
+        }
 
-        public IEnumerator LoadLobbyCardMachine(string lobbyCardName)
+        public void LoadLobbySideBar(Table self, string lobbyCardName)
+        {
+            var sideBar = (TilePropertyGameObjectGroup) self["SideBar"];
+            if (sideBar == null)
+            {
+                Debug.LogError("LoadLobbySideBar sideBar is null");
+                return;
+            }
+
+            var gameDetails = (PropertyGameObject) sideBar["GameDetails"];
+            var bettrUser = BettrUserController.Instance.BettrUserConfig;
+            if (bettrUser == null)
+            {
+                Debug.Log($"LoadLobbyCardMachine invalid BettrUserConfig");
+                return;
+            }
+            var lobbyCardIndex = FindLobbyCardIndex(lobbyCardName);
+            if (lobbyCardIndex == -1)
+            {
+                Debug.Log($"LoadLobbyCardMachine invalid lobbyCardIndex={lobbyCardIndex} lobbyCardName={lobbyCardName}");
+                return;
+            }
+            var lobbyCard = bettrUser.LobbyCards[lobbyCardIndex];
+            var cachedAssetBundle = BettrAssetController.Instance.GetCachedAssetBundle(lobbyCard.BundleName, lobbyCard.BundleVersion, false);
+            if (cachedAssetBundle == null)
+            {
+                Debug.Log($"Lobby cachedAssetBundle is null assetBundleName={lobbyCard.BundleName}assetBundleVersion={lobbyCard.BundleVersion} isScene=false");
+                return;
+            }
+            var textureName = lobbyCard.MaterialName;
+            var texture = cachedAssetBundle.LoadAsset<Texture2D>(textureName);
+            if (texture == null)
+            {
+                Debug.LogError("LoadLobbySideBar texture is null");
+                return;
+            }
+            var imageGameObject = FindChildRecursive(gameDetails.GameObject, "Image");
+            if (imageGameObject == null)
+            {
+                Debug.LogError("LoadLobbySideBar imageGameObject is null");
+                return;
+            }
+            var imageComponent = imageGameObject.GetComponent<Image>();
+            if (imageComponent == null)
+            {
+                Debug.LogError("LoadLobbySideBar imageComponent is null");
+                return;
+            }
+            imageComponent.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+            imageComponent.color = new Color(2f, 2f, 2f, 1f);
+            
+            // load the preview text asset
+            // split the textureName which is of the form Game<NNN>__<Variant>__LobbyCard into Game<NNN><Variant>
+            var textAssetName = textureName.Replace("__LobbyCard", "").Replace("__", "");
+            var textAsset = cachedAssetBundle.LoadAsset<TextAsset>(textAssetName);
+            // get the Details GameObject which has the TextMeshPro input field which is read only
+            var detailsGameObject = FindChildRecursive(gameDetails.GameObject, "Details");
+            if (detailsGameObject == null)
+            {
+                Debug.LogError("LoadLobbySideBar detailsGameObject is null");
+                return;
+            }
+            // set the text of the TextMeshPro input field
+            var textMeshPro = detailsGameObject.GetComponent<TMPro.TMP_InputField>();
+            if (textMeshPro == null)
+            {
+                Debug.LogError("LoadLobbySideBar textMeshPro is null");
+                return;
+            }
+            // set the rich text to true
+            textMeshPro.richText = true;
+            // set the text to the textAsset text
+            textMeshPro.text = textAsset.text;
+            
+            gameDetails.SetActive(true);
+        }
+
+        // ReSharper disable once MemberCanBePrivate.Global
+        public int FindLobbyCardIndex(string lobbyCardName)
         {
             var bettrUser = BettrUserController.Instance.BettrUserConfig;
             // lobbyCardName example Game001__LobbyCard001
             if (!lobbyCardName.Contains("__"))
             {
-                Debug.Log($"LoadLobbyCardMachine invalid lobbyCardName={lobbyCardName}");
-                yield break;
+                Debug.Log($"FindLobbyCard invalid lobbyCardName={lobbyCardName}");
+                return -1;
             }
             var lobbyCardIndex = bettrUser.FindLobbyCardIndexById(lobbyCardName.Split("__")[1]);
+            return lobbyCardIndex;
+        }
+
+        public IEnumerator LoadLobbyCardMachine(string lobbyCardName)
+        {
+            var bettrUser = BettrUserController.Instance.BettrUserConfig;
+            var lobbyCardIndex = FindLobbyCardIndex(lobbyCardName);
             if (lobbyCardIndex == -1)
             {
                 Debug.Log($"LoadLobbyCardMachine invalid lobbyCardIndex={lobbyCardIndex} lobbyCardName={lobbyCardName}");

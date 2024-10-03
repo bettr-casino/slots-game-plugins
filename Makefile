@@ -45,6 +45,9 @@ LOBBY_CARD_IMAGES_DIR := $(PWD)/Unity/Assets/Bettr/Runtime/Plugin/LobbyCard/vari
 # using splash images for both the background, the lobby card image is the resized splash image 
 GENERATED_BACKGROUND_IMAGES_DIR := $(PWD)/../../bettr-infrastructure/bettr-infrastructure/tools/pipelines/game-gpt/pipelines/gpt-generated-files/splash-images
 
+GENERATED_LOBBY_PREVIEW_DIR := $(PWD)/../../bettr-infrastructure/bettr-infrastructure/tools/pipelines/game-gpt/pipelines/gpt-generated-files/preview
+LOBBY_CARD_PREVIEW_DIR := $(PWD)/Unity/Assets/Bettr/Runtime/Plugin/LobbyCard/variants/v0_1_0/
+
 S3_BUCKET := bettr-casino-assets
 S3_ASSETS_LATEST_OBJECT_KEY := "assets/latest"
 
@@ -214,7 +217,7 @@ build-game006-assets-webgl: prepare-project
 
 # =============================================================================
 #
-# BUILD IMAGES
+# SYNC LOBBY
 #
 # =============================================================================
 
@@ -239,6 +242,36 @@ sync-lobby-images: prepare-project
 			fi; \
 		done; \
 	done;
+
+sync-lobby-preview: prepare-project
+	@echo "Running sync-lobby-preview..."
+	GENERATED_LOBBY_PREVIEW_DIR="${GENERATED_LOBBY_PREVIEW_DIR}"; \
+	LOBBY_CARD_PREVIEW_DIR="${LOBBY_CARD_PREVIEW_DIR}"; \
+	echo "Copying files from GENERATED_LOBBY_PREVIEW_DIR=$${GENERATED_LOBBY_PREVIEW_DIR} to LOBBY_CARD_PREVIEW_DIR=$${LOBBY_CARD_PREVIEW_DIR}"; \
+	for VARIANT_DIR in "$${GENERATED_LOBBY_PREVIEW_DIR}/"*/; do \
+		VARIANT=$$(basename "$${VARIANT_DIR}"); \
+		LOBBY_CARD_PREVIEW_VARIANT_DIR="$${LOBBY_CARD_PREVIEW_DIR}/$${VARIANT}/Runtime/Asset/"; \
+		echo "Processing VARIANT: $${VARIANT} VARIANT_DIR: $${VARIANT_DIR} LOBBY_CARD_PREVIEW_DIR: $${LOBBY_CARD_PREVIEW_DIR}"; \
+		for VARIANT_PREVIEW in "$${VARIANT_DIR}"*; do \
+			GENERATED_LOBBY_PREVIEW=$$(basename "$${VARIANT_PREVIEW}"); \
+			if [[ "$${GENERATED_LOBBY_PREVIEW}" =~ ^Game[0-9]{3}.*\.txt$$ ]]; then \
+				echo "Processing GENERATED_LOBBY_PREVIEW: $${GENERATED_LOBBY_PREVIEW} VARIANT_PREVIEW: $${VARIANT_PREVIEW}"; \
+				LOBBY_CARD_PREVIEW=$$(echo "$${GENERATED_LOBBY_PREVIEW}" | sed -E 's/(Game[0-9]{3})([A-Za-z]+)\.png/\1__\2__Preview.txt/'); \
+				MACHINE_NAME=$$(echo "$${LOBBY_CARD_PREVIEW}" | sed -E 's/(Game[0-9]{3}).*/\1/'); \
+				mkdir -p "$${LOBBY_CARD_PREVIEW_VARIANT_DIR}/$${MACHINE_NAME}/LobbyCard/Text"; \
+				cp "$${VARIANT_PREVIEW}" "$${LOBBY_CARD_PREVIEW_VARIANT_DIR}/$${MACHINE_NAME}/LobbyCard/Text/$${LOBBY_CARD_PREVIEW}"; \
+			else \
+				echo "Skipping directory: $${GENERATED_LOBBY_PREVIEW} (does not match Game<NNN> pattern)"; \
+			fi; \
+		done; \
+	done;
+
+
+# =============================================================================
+#
+# SYNC MACHINE BACKGROUND IMAGES
+#
+# =============================================================================
 
 
 sync-background-images: prepare-project
