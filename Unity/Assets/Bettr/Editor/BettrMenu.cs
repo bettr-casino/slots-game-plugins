@@ -81,6 +81,9 @@ namespace Bettr.Editor
         
         private const string AUDIO_FORMAT = ".wav";
         
+        private static HashSet<string> AssetLabelsCache = new HashSet<string>();
+        private static HashSet<string> AssetVariantsCache = new HashSet<string>();
+        
         [MenuItem("Bettr/Tools/Check Material Shader")]
         public static void CheckMaterialShaderFromMenu()
         {
@@ -527,6 +530,149 @@ namespace Bettr.Editor
             BuildAssetBundles();
             BuildLocalServer();
             BuildLocalOutcomes();
+        }
+        
+        public static HashSet<string> GetAllAssetLabels()
+        {
+            return AssetLabelsCache;
+        }
+        
+        public static void BuildGameAssets()
+        {
+            Debug.Log("Building asset bundles...");
+            
+            EnsurePluginAssetsHaveLabels(PluginRootDirectory);
+            
+            Debug.Log("...refreshing database before building asset bundles..");
+            AssetDatabase.Refresh();
+            
+            // Build a custom set of asset bundles
+            // extract the -game from the command line arguments
+            string game = GetArgument("-game");
+            Debug.Log($"Building asset bundles for game: {game}");
+            // get all the asset labels
+            var assetLabels = GetAllAssetLabels();
+            // now filter the asset labels to get the ones that start with the game
+            // ensure game is lowercase
+            game = game.ToLower();
+            var gameAssetLabels = assetLabels.Where(label => label.StartsWith(game)).ToArray();
+            Debug.Log($"Found {gameAssetLabels.Length} asset labels for game: {game}");
+            Debug.Log(string.Join(",", gameAssetLabels));
+            // now generate a build map for the gameAssetLabels
+            List<AssetBundleBuild> buildMapList = new List<AssetBundleBuild>();
+            // loop over the AssetLabelsCache  
+            foreach (var assetLabel in AssetLabelsCache)
+            {
+                foreach (var assetVariant in AssetVariantsCache)
+                {
+                    // if the assetLabel starts with the game
+                    if (assetLabel.StartsWith(game))
+                    {
+                        // create a new AssetBundleBuild
+                        AssetBundleBuild assetBundleBuild = new AssetBundleBuild();
+                        assetBundleBuild.assetBundleName = $"{assetLabel}.{assetVariant}";
+                        assetBundleBuild.assetNames = AssetDatabase.GetAssetPathsFromAssetBundle(assetBundleBuild.assetBundleName);
+                        buildMapList.Add(assetBundleBuild);
+                    }
+                }
+            }
+            
+            // convert buildMap to an array
+            var buildMap = buildMapList.ToArray();
+
+            var sharedAssetBundleOptions = BuildAssetBundleOptions.ForceRebuildAssetBundle |
+                                           BuildAssetBundleOptions.ChunkBasedCompression;
+
+#if UNITY_IOS
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesIOSDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesIOSDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.iOS);
+            AssetDatabase.Refresh();
+            
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesOSXDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesOSXDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.StandaloneOSX);
+            AssetDatabase.Refresh();
+            
+#endif
+#if UNITY_ANDROID
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesAndroidDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesAndroidDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.Android);
+#endif
+#if UNITY_WEBGL
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesWebglDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesWebglDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.WebGL);
+#endif
+#if UNITY_OSX
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesOSXDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesOSXDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.StandaloneOSX);
+#endif
+#if UNITY_WIN
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesWindowsDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesWindowsDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.StandaloneWindows64);
+#endif
+#if UNITY_LINUX   
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesLinuxDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesLinuxDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.StandaloneLinux64);
+#endif
+            
+            Debug.Log("...refreshing database after building asset bundles..");
+            AssetDatabase.Refresh();
+            
+            Debug.Log("Modifying asset bundles manifest files...");
+            ModifyAssetBundleManifestFiles();
+            Debug.Log("...done modifying asset bundles manifest files.");
+            
+            Debug.Log("...refreshing database after modifying asset bundles..");
+            AssetDatabase.Refresh();
+            
+            Debug.Log("...done building asset bundles.");
+            
+#if UNITY_IOS
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.iOS, BuildTarget.iOS);
+#endif
+#if UNITY_ANDROID
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
+#endif
+#if UNITY_WEBGL
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.WebGL, BuildTarget.WebGL);
+#endif
+#if UNITY_OSX
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneOSX);
+#endif
+#if UNITY_WIN
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64);
+#endif
+#if UNITY_LINUX   
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneLinux64);
+#endif            
+            
         }
 
         public static void BuildAssetLabels()
@@ -1279,18 +1425,25 @@ namespace Bettr.Editor
                         
                         // Get the GoodLuckTexts and PaysText Game Objects which are descendants of the machine prefab
                         GameObject goodLuckText = FindGameObjectInPrefab(machinePrefab, "GoodLuckText");
-                        GameObject paysText = FindGameObjectInPrefab(machinePrefab, "PaysText");
+                        GameObject paysText = FindGameObjectInPrefab(machinePrefab, "PaysText");                                               
                         // Fix the scale of the paysText component to match the goodLuckText component
                         paysText.transform.localScale = goodLuckText.transform.localScale;
                         // Get the RectTransform height of the goodLuckText component
                         RectTransform goodLuckTextRectTransform = goodLuckText.GetComponent<RectTransform>();
+                        if (machineName == "Game007")
+                        {
+                            var vector2 = goodLuckTextRectTransform.anchoredPosition;
+                            vector2.y = -3.2f;
+                            goodLuckTextRectTransform.anchoredPosition = vector2;
+                        }
+                        
                         // Get the RectTransform height of the paysText component
                         RectTransform paysTextRectTransform = paysText.GetComponent<RectTransform>();
                         // Set the height of the paysText component to match the goodLuckText component
                         paysTextRectTransform.sizeDelta = new Vector2(paysTextRectTransform.sizeDelta.x, goodLuckTextRectTransform.sizeDelta.y);
                         // Set the PosY of the paysText component to match the goodLuckText component
                         paysTextRectTransform.anchoredPosition = new Vector2(paysTextRectTransform.anchoredPosition.x, goodLuckTextRectTransform.anchoredPosition.y);
-                        // Set the Transform X to -2.25
+                        // Set the Transform X
                         paysText.transform.localPosition = new Vector3(-3.6f, paysText.transform.localPosition.y, paysText.transform.localPosition.z);
                         // change the paysText 
                         paysText.GetComponent<TextMeshPro>().text = "x {0} = {1,3} x {2} = {3,3}";
@@ -2206,6 +2359,9 @@ namespace Bettr.Editor
             {
                 return;
             }
+
+            AssetLabelsCache = new HashSet<string>();
+            AssetVariantsCache = new HashSet<string>();
             var pluginMachineGroupDirectories = Directory.GetDirectories(pluginRootDirectory);
             foreach (var pluginMachineGroupDirectory in pluginMachineGroupDirectories)
             {
@@ -2283,6 +2439,9 @@ namespace Bettr.Editor
                     {
                         importer.assetBundleName = GetAssetBundleName(assetLabel, assetSubLabel, assetType);
                         importer.assetBundleVariant = GetAssetBundleVariant(assetVariantLabel);
+                        // add these to the cache
+                        AssetLabelsCache.Add(importer.assetBundleName);
+                        AssetVariantsCache.Add(importer.assetBundleVariant);
                         Debug.Log($"setting asset labels for assetBundleName={importer.assetBundleName} assetBundleVariant={importer.assetBundleVariant} assetPath={assetPath}");
                     }
                 }
