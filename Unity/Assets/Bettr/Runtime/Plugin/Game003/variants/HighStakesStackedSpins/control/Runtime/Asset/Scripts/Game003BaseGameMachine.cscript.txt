@@ -5,12 +5,15 @@ require "Game003BaseGameMachineMechanics"
 
 Game003BaseGameMachine = {
     Mechanics = nil,
+    InPreviewMode = false,
+    PreviewSpinsRemaining = 0,
 }
 
 function Game003BaseGameMachine:new(o)
 	o = o or {}
 	setmetatable(o, self)
 	self.__index = self
+	
 	return o
 end
 
@@ -32,6 +35,7 @@ function Game003BaseGameMachine:Start()
     series
         do
             BettrAudioController.StopAudio()
+            self:ConfigurePreviewMode()
 	        self:ConfigureSettings()
 	        self:ShowSettings()
 	        self:PlayStartAnimations()
@@ -51,6 +55,18 @@ function Game003BaseGameMachine:OnSpinButtonClicked()
             self:LoadServerOutcome()
             self:OnOutcomeReceived()
         end
+    end
+end
+
+function Game003BaseGameMachine:ConfigurePreviewMode()
+    local userInPreviewMode = BettrUserController.UserInPreviewMode
+    self.InPreviewMode = userInPreviewMode
+    if userInPreviewMode then
+        self.PreviewSpinsRemaining = BettrUserController.UserPreviewModeSpins
+        local statusTexts = self.StatusTexts
+        local goodLuckText = statusTexts["GoodLuckText"]
+        goodLuckText.SetText("PREVIEW MODE Spins Remaining " .. self.PreviewSpinsRemaining)
+        statusTexts.SetCurrentActive("GoodLuckText")    
     end
 end
 
@@ -172,9 +188,21 @@ function Game003BaseGameMachine:WaitForApplyOutcomeDelay()
 end
 
 function Game003BaseGameMachine:SpinEngines()
+    local inPreviewMode = self.InPreviewMode
     local winSymbols = self.WinSymbols
     local statusTexts = self.StatusTexts
     winSymbols.SetAllInactive()
+    local goodLuckText = statusTexts["GoodLuckText"]
+    statusTexts.SetCurrentActive("GoodLuckText")
+    if inPreviewMode then 
+        if self.PreviewSpinsRemaining <= 0 then
+            self.PreviewSpinsRemaining = 0
+            System.Print("Game003BaseGameMachine:SpinEngines PreviewSpinsRemaining reached 0")
+            return
+        end
+        self.PreviewSpinsRemaining = self.PreviewSpinsRemaining - 1
+        goodLuckText.SetText("PREVIEW MODE Spins Remaining " .. self.PreviewSpinsRemaining)
+    end
     local baseWager = Game003BaseGameProperties.BaseWager.First.Value
     if BettrUser.Coins < baseWager then
         System.Print("Game003BaseGameMachine:SpinEngines Reset user coins to 1000 coins since currentCoins={0} less than wager={1}", currentCoins, baseWager)
@@ -186,7 +214,6 @@ function Game003BaseGameMachine:SpinEngines()
     BettrUser.Coins = newCoins
     BettrVisualsController.RollUpCounter(self.CreditsText, oldCoins, newCoins, 0.05)
     Game003BaseGameState.SpinState.First.State = "Spinning"
-    statusTexts.SetCurrentActive("GoodLuckText")
     self:ResetSettings()
     parallel
         

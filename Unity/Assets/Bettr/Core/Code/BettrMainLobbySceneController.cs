@@ -104,7 +104,7 @@ namespace Bettr.Core
             var sideBar = (TilePropertyGameObjectGroup) self["SideBar"];
             if (sideBar == null)
             {
-                Debug.LogError("LoadLobbySideBar sideBar is null");
+                Debug.LogError($"LoadLobbySideBar sideBar is null lobbyCardName={lobbyCardName}");
                 return;
             }
 
@@ -125,26 +125,26 @@ namespace Bettr.Core
             var cachedAssetBundle = BettrAssetController.Instance.GetCachedAssetBundle(lobbyCard.BundleName, lobbyCard.BundleVersion, false);
             if (cachedAssetBundle == null)
             {
-                Debug.Log($"Lobby cachedAssetBundle is null assetBundleName={lobbyCard.BundleName}assetBundleVersion={lobbyCard.BundleVersion} isScene=false");
+                Debug.Log($"Lobby cachedAssetBundle is null assetBundleName={lobbyCard.BundleName} assetBundleVersion={lobbyCard.BundleVersion} isScene=false");
                 return;
             }
             var textureName = lobbyCard.MaterialName;
             var texture = cachedAssetBundle.LoadAsset<Texture2D>(textureName);
             if (texture == null)
             {
-                Debug.LogError("LoadLobbySideBar texture is null");
+                Debug.LogError($"LoadLobbySideBar texture is null textureName={textureName} lobbyCardName={lobbyCardName}");
                 return;
             }
             var imageGameObject = FindChildRecursive(gameDetails.GameObject, "Image");
             if (imageGameObject == null)
             {
-                Debug.LogError("LoadLobbySideBar imageGameObject is null");
+                Debug.LogError($"LoadLobbySideBar imageGameObject is null lobbyCardName={lobbyCardName}");
                 return;
             }
             var imageComponent = imageGameObject.GetComponent<Image>();
             if (imageComponent == null)
             {
-                Debug.LogError("LoadLobbySideBar imageComponent is null");
+                Debug.LogError($"LoadLobbySideBar imageComponent is null lobbyCardName={lobbyCardName}");
                 return;
             }
             imageComponent.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
@@ -158,14 +158,14 @@ namespace Bettr.Core
             var detailsGameObject = FindChildRecursive(gameDetails.GameObject, "Details");
             if (detailsGameObject == null)
             {
-                Debug.LogError("LoadLobbySideBar detailsGameObject is null");
+                Debug.LogError($"LoadLobbySideBar detailsGameObject is null textAssetName={textAssetName} lobbyCardName={lobbyCardName}");
                 return;
             }
             // set the text of the TextMeshPro input field
             var textMeshPro = detailsGameObject.GetComponent<TMPro.TMP_InputField>();
             if (textMeshPro == null)
             {
-                Debug.LogError("LoadLobbySideBar textMeshPro is null");
+                Debug.LogError("LoadLobbySideBar detailsGameObject textMeshPro is null lobbyCardName={lobbyCardName}");
                 return;
             }
             // set the rich text to true
@@ -199,6 +199,26 @@ namespace Bettr.Core
                 Debug.Log($"LoadLobbyCardMachine invalid lobbyCardIndex={lobbyCardIndex} lobbyCardName={lobbyCardName}");
                 yield break;
             }
+            BettrUserController.Instance.DisableUserPreviewMode();
+            bettrUser.LobbyCardIndex = lobbyCardIndex;
+            var lobbyCard = bettrUser.LobbyCards[lobbyCardIndex];
+            bettrUser.LobbyCardName = lobbyCard.Card;
+            var (machineName, machineVariant) = GetLobbyCardExperiment(lobbyCard);
+            // unload any cached version
+            yield return BettrAssetController.Instance.UnloadCachedAssetBundle(machineName, machineVariant);
+            yield return BettrAssetController.Instance.LoadScene(machineName, machineVariant, lobbyCard.MachineSceneName);
+        }
+        
+        public IEnumerator LoadLobbyCardMachinePreview(string lobbyCardName)
+        {
+            var bettrUser = BettrUserController.Instance.BettrUserConfig;
+            var lobbyCardIndex = FindLobbyCardIndex(lobbyCardName);
+            if (lobbyCardIndex == -1)
+            {
+                Debug.Log($"LoadLobbyCardMachinePreview invalid lobbyCardIndex={lobbyCardIndex} lobbyCardName={lobbyCardName}");
+                yield break;
+            }
+            BettrUserController.Instance.EnableUserPreviewMode();
             bettrUser.LobbyCardIndex = lobbyCardIndex;
             var lobbyCard = bettrUser.LobbyCards[lobbyCardIndex];
             bettrUser.LobbyCardName = lobbyCard.Card;

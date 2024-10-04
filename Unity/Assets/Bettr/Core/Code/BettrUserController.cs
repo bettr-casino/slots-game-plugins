@@ -18,12 +18,18 @@ namespace Bettr.Core
         
         public BettrUserConfig BettrUserConfig { get; private set; }
         
+        public BettrUserConfig BettrPreviewUserConfig { get; private set; }
+        
         public static BettrUserController Instance { get; private set; }
         
         public bool UserIsLoggedIn { get; private set; }
         
         public bool UserInDevMode { get; private set; }
+
+        public bool UserInPreviewMode { get; private set; }
         
+        public int UserPreviewModeSpins { get; private set; }
+
         const string ErrorBlobDoesNotExist = "HTTP/1.1 404 Not Found";
 
         public BettrUserController()
@@ -44,7 +50,24 @@ namespace Bettr.Core
             var uniqueId = $"{deviceId}";
             return uniqueId;            
         }
+        
+        public void DisableUserPreviewMode()
+        {
+            UserInPreviewMode = false;
+            UserPreviewModeSpins = 0;
+            TileController.AddToGlobals("BettrUser", BettrUserConfig);
+            BettrPreviewUserConfig.Coins = 0;
+        }
 
+        public void EnableUserPreviewMode()
+        {
+            UserInPreviewMode = true;
+            UserPreviewModeSpins = 5; // TODO: FIXME: hardcoded spins for preview mode
+            TileController.AddToGlobals("BettrUser", BettrPreviewUserConfig);
+            // reset the BettrPreviewUserConfig Coins to 1000000
+            BettrPreviewUserConfig.Coins = 1000000; // TODO: FIXME: hardcoded coins for preview mode
+        }
+        
         public IEnumerator SetUserDevMode()
         {
             UserInDevMode = false;
@@ -78,6 +101,7 @@ namespace Bettr.Core
             Debug.Log($"Starting User Login");
             
             BettrUserConfig = null;
+            BettrPreviewUserConfig = null;
             UserIsLoggedIn = false;
 
             var userId = GetUserId();
@@ -130,6 +154,14 @@ namespace Bettr.Core
                     });
                 }
             }
+             // Create the BettrPreviewUserConfig
+             this.BettrPreviewUserConfig = new BettrUserConfig()
+             {
+                 UserId = "PreviewUser",
+                 Coins = 0,
+                 // TODO: FIXME adjust Level and XP as needed
+             };
+             
             TileController.AddToGlobals("BettrUser", BettrUserConfig);
         }
         

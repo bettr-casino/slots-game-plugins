@@ -79,6 +79,7 @@ function MainLobbyScene:OnPointerClick1Param(param)
         System.StartCoroutine(self, "LoadLobbyCardMachine")
     elseif param == "PreviewPreview" then
         System.Print("MainLobbyScene OnPointerClick1Param PreviewPreview")
+        System.StartCoroutine(self, "LoadLobbyCardMachinePreview")
     elseif param == "PreviewClose" then
         System.Print("MainLobbyScene OnPointerClick1Param PreviewClose")
         self.SideBar["GameDetails"].SetActive(false)   
@@ -89,6 +90,14 @@ function MainLobbyScene:LoadLobbyCardMachine()
     series
         do
             BettrMainLobbySceneController.LoadLobbyCardMachine(self.SelectedLobbyCardName)
+        end
+    end
+end
+
+function MainLobbyScene:LoadLobbyCardMachinePreview()
+    series
+        do
+            BettrMainLobbySceneController.LoadLobbyCardMachinePreview(self.SelectedLobbyCardName)
         end
     end
 end

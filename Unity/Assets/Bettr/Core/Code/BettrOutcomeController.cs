@@ -85,7 +85,7 @@ namespace Bettr.Core
             this.BettrExperimentController = experimentController;
             this.HashKey = hashKey;
         }
-        
+
         public IEnumerator LoadServerOutcome(string gameId, string gameVariantId)
         {
             // Load the Outcomes
@@ -102,8 +102,7 @@ namespace Bettr.Core
         // TODO: FIXME: Include the variant 
         IEnumerator LoadWebOutcome(string gameId, string gameVariantId)
         {
-            // check the experiment "Outcomes"
-            var useGeneratedOutcomes = BettrExperimentController.UseGeneratedOutcomes();
+            var useGeneratedOutcomes = !BettrUserController.Instance.UserInPreviewMode;
 
             if (OutcomeNumber > 0)
             {
