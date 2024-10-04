@@ -200,7 +200,7 @@ build-main-assets-webgl: prepare-project
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "mainv0_1_0_scenes" -assetSubLabel "control" -buildTarget WebGL
 
 build-game001-assets-webgl: prepare-project
-	@echo "Building WebGL game001 variants asset bundles..."
+	@echo "Building WebGL game001 variant game001epicancientadventures asset bundles..."
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game001epicancientadventures" -assetSubLabel "control" -buildTarget WebGL; \
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game001epicancientadventures_scenes" -assetSubLabel "control" -buildTarget WebGL; \
 	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game001epicancientadventures" -assetSubLabel "variant1" -buildTarget WebGL; \
@@ -208,11 +208,19 @@ build-game001-assets-webgl: prepare-project
 
 
 build-game006-assets-webgl: prepare-project
-	@echo "Building WebGL game006 variants asset bundles..."
+	@echo "Building WebGL game006 variant game006wheelsempirebuilder asset bundles..."
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game006wheelsempirebuilder" -assetSubLabel "control" -buildTarget WebGL; \
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game006wheelsempirebuilder_scenes" -assetSubLabel "control" -buildTarget WebGL; \
 	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game006wheelsempirebuilder" -assetSubLabel "variant1" -buildTarget WebGL; \
 	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game006wheelsempirebuilder_scenes" -assetSubLabel "variant1" -buildTarget WebGL;
+
+
+build-game007-assets-webgl: prepare-project
+	@echo "Building WebGL game007 variant game007truevegasdiamonddazzle asset bundles..."
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game007truevegasdiamonddazzle" -assetSubLabel "control" -buildTarget WebGL; \
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game007truevegasdiamonddazzle_scenes" -assetSubLabel "control" -buildTarget WebGL; \
+	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game007truevegasdiamonddazzle" -assetSubLabel "variant1" -buildTarget WebGL; \
+	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game007truevegasdiamonddazzle_scenes" -assetSubLabel "variant1" -buildTarget WebGL;
 
 
 build-game007-all-assets-webgl: prepare-project
