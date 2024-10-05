@@ -1050,6 +1050,8 @@ namespace Bettr.Editor
                         
                         string modelDestinationPath = Path.Combine(runtimeAssetPath, "Models",  $"{machineModelName}.cscript.txt");
                         
+                        Debug.Log($"Processing Loading Model file for machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant}");
+                        
                         // Load and run the Model file
                         var modelTextAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(modelDestinationPath);
                         var machineModelScript = modelTextAsset.text;
@@ -2594,7 +2596,8 @@ namespace Bettr.Editor
             AssetDatabase.Refresh();
         }
         
-        private static void BuildLocalServer()
+        [MenuItem("Bettr/Build/Local Server")] 
+        public static void BuildLocalServer()
         {
             Debug.Log("Refreshing database before building local server.");
             
@@ -2623,7 +2626,8 @@ namespace Bettr.Editor
             AssetDatabase.Refresh();
         }
         
-        private static void BuildLocalOutcomes()
+        [MenuItem("Bettr/Build/Local Outcomes")] 
+        public static void BuildLocalOutcomes()
         {
             Debug.Log("Refreshing database before building local outcomes.");
             
