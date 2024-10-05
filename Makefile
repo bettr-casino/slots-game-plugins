@@ -309,6 +309,32 @@ sync-background-images: prepare-project
 #
 # =============================================================================
 
+
+sync-machine-models: prepare-project
+	@echo "Running sync-machine-models..."
+	@MODELS_DIR="${MODELS_DIR}"; \
+	for MACHINE_NAME_DIR in "$${MODELS_DIR}/"*/; do \
+		MACHINE_NAME=$$(basename "$${MACHINE_NAME_DIR}"); \
+		if [[ "$${MACHINE_NAME}" =~ ^Game[0-9]{3}$$ ]]; then \
+			echo "Processing MACHINE_NAME: $${MACHINE_NAME}"; \
+			for MACHINE_VARIANT_DIR in "$${MACHINE_NAME_DIR}/"*/; do \
+				MACHINE_VARIANT=$$(basename "$${MACHINE_VARIANT_DIR}"); \
+				echo "Processing MACHINE_VARIANT: $${MACHINE_VARIANT}"; \
+				MACHINE_MODEL="$${MODELS_DIR}/$${MACHINE_NAME}/$${MACHINE_VARIANT}/$${MACHINE_NAME}Models.lua"; \
+				MACHINE_VARIANT_DIR="${UNITY_PROJECT_PATH}/Assets/Bettr/Runtime/Plugin/$${MACHINE_NAME}/variants/$${MACHINE_VARIANT}"; \
+				for VARIANT_DIR in "$${MACHINE_VARIANT_DIR}/"*/; do \
+					VARIANT=$$(basename "$${VARIANT_DIR}"); \
+					echo "Processing VARIANT: $${VARIANT}"; \
+					MACHINE_MODEL_DIR="$${MACHINE_VARIANT_DIR}/$${VARIANT}/Runtime/Asset/Models"; \
+					cp "$${MACHINE_MODEL}" "$${MACHINE_MODEL_DIR}/$${MACHINE_NAME}Models.cscript.txt"; \
+				done; \
+			done; \
+		else \
+			echo "Skipping directory: $${MACHINE_NAME} (does not match Game<NNN> pattern)"; \
+		fi; \
+	done;
+
+
 sync-machines: prepare-project
 	@echo "Running sync-machines..."
 	@echo "Running caffeinate to keep the drives awake..."
