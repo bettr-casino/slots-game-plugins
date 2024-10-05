@@ -343,8 +343,8 @@ sync-machines: prepare-project
 
 
 # Define the arrays for MACHINE_NAME and MACHINE_VARIANT
-MACHINE_NAME_ARRAY := Game001
-MACHINE_VARIANT_ARRAY := EpicAncientAdventures
+MACHINE_NAME_ARRAY := Game007
+MACHINE_VARIANT_ARRAY := TrueVegasDiamondDazzle TrueVegasGoldRush TrueVegasInfiniteSpins TrueVegasLucky7s TrueVegasLuckyCharms TrueVegasMegaJackpot TrueVegasMegaWheels TrueVegasRubyRiches TrueVegasSuper7s TrueVegasTripleSpins TrueVegasWheelBonanza TrueVegasWildCherries
 sync-machines-specific: prepare-project
 	@echo "Running sync-machines-specific..."
 	@echo "Running caffeinate to keep the drives awake..."
