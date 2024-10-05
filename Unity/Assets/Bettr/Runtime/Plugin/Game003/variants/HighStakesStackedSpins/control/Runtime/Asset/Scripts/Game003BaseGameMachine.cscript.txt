@@ -50,10 +50,12 @@ function Game003BaseGameMachine:OnSpinButtonClicked()
             BettrAudioController.StopAudio()
             BettrAudioController.PlayAudioOnce("spinbutton")
             self.Mechanics:OnSpinButtonClicked(self)
-            self:SpinEngines()
-            self:WaitForApplyOutcomeDelay()
-            self:LoadServerOutcome()
-            self:OnOutcomeReceived()
+            if self:CanSpinEngines() then            
+                self:SpinEngines()
+                self:WaitForApplyOutcomeDelay()
+                self:LoadServerOutcome()
+                self:OnOutcomeReceived()
+            end
         end
     end
 end
@@ -185,6 +187,22 @@ function Game003BaseGameMachine:WaitForApplyOutcomeDelay()
             end
         end
     end
+end
+
+function Game003BaseGameMachine:CanSpinEngines()
+    local canSpin = true
+    local inPreviewMode = self.InPreviewMode
+    if inPreviewMode then 
+        if self.PreviewSpinsRemaining <= 0 then
+            System.Print("Game003BaseGameMachine:SpinEngines PreviewSpinsRemaining reached 0")
+            canSpin = false
+        end
+    end
+    local baseWager = Game003BaseGameProperties.BaseWager.First.Value
+    if BettrUser.Coins < baseWager then
+        -- TODO: add a dialog to ask user to buy more coins
+    end
+    return canSpin
 end
 
 function Game003BaseGameMachine:SpinEngines()
