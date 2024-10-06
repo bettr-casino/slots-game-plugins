@@ -1432,7 +1432,7 @@ namespace Bettr.Editor
                         paysText.transform.localScale = goodLuckText.transform.localScale;
                         // Get the RectTransform height of the goodLuckText component
                         RectTransform goodLuckTextRectTransform = goodLuckText.GetComponent<RectTransform>();
-                        if (machineName == "Game007")
+                        if (machineName is "Game004" or "Game007")
                         {
                             var vector2 = goodLuckTextRectTransform.anchoredPosition;
                             vector2.y = -3.2f;

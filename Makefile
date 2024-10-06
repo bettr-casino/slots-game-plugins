@@ -207,6 +207,11 @@ build-game001-assets-webgl: prepare-project
 	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game001epicancientadventures_scenes" -assetSubLabel "variant1" -buildTarget WebGL;
 
 
+build-game004-all-assets-webgl: prepare-project
+	@echo "Building WebGL game007 all variants asset bundles..."
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildGameAssets -buildTarget WebGL -game "game004"
+
+
 build-game006-assets-webgl: prepare-project
 	@echo "Building WebGL game006 variant game006wheelsempirebuilder asset bundles..."
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game006wheelsempirebuilder" -assetSubLabel "control" -buildTarget WebGL; \
