@@ -32,6 +32,10 @@ namespace Bettr.Core
         public bool IsMainLobbyCardsAlreadyLoaded { get; private set; }
         
         public Dictionary<string, Material> LobbyCardMaterialMap { get; private set; }
+
+        [NonSerialized] private int LoadedLobbyCardCount = 0;
+        
+        [NonSerialized] private int TotalLobbyCardCount = 0;
         
         public BettrMainLobbySceneController(BettrExperimentController bettrExperimentController)
         {
@@ -281,11 +285,34 @@ namespace Bettr.Core
             yield return BettrAssetController.Instance.UnloadCachedAssetBundle(bundleName, bundleVersion);
             yield return BettrAssetController.Instance.LoadScene(bundleName, bundleVersion, "MainLobbyScene");
         }
+
+        public IEnumerator UpdateLoadingText(Table self)
+        {
+            while (!IsMainLobbyCardsAlreadyLoaded)
+            {
+                var loadingTextProperty = (PropertyTextMeshPro) self["LoadingText"];
+                if (loadingTextProperty != null)
+                {
+                    if (LoadedLobbyCardCount > 0)
+                    {
+                        loadingTextProperty.SetText($"Adding Game {LoadedLobbyCardCount} of {TotalLobbyCardCount} ...");
+                    }
+                }
+                yield return null;
+            }
+        }
         
         // Convert the method from Lua to C#
         public IEnumerator LoadLobbyCards(Table self)
         {
             Console.WriteLine("LoadLobbyCards invoked");
+
+            LoadedLobbyCardCount = 0;
+            
+            var bettrUser = BettrUserController.Instance.BettrUserConfig;
+
+            var totalLobbyCardCount = bettrUser.LobbyCards.Count;
+            TotalLobbyCardCount = totalLobbyCardCount;
 
             if (IsMainLobbyCardsAlreadyLoaded)
             {
@@ -297,8 +324,8 @@ namespace Bettr.Core
                 }
             }
             
-            var bettrUser = BettrUserController.Instance.BettrUserConfig;
-
+            BettrRoutineRunner.Instance.StartCoroutine(UpdateLoadingText(self));
+            
             // Get the group count
             int groupCount = bettrUser.LobbyCardGroups.Count;  // Assuming LobbyCardGroups is a list or similar collection
 
@@ -366,6 +393,8 @@ namespace Bettr.Core
 
                     if (IsMainLobbyCardsAlreadyLoaded)
                     {
+                        LoadedLobbyCardCount++;
+                        
                         if (quadGameObject != null)
                         {
                             // Get the MeshRenderer component
@@ -390,6 +419,8 @@ namespace Bettr.Core
                     
                         // save the material to BettrMainLobbySceneController for later
                         LobbyCardMaterialMap[lobbyCardId] = quadGameObject?.GetComponent<MeshRenderer>().material;
+                        
+                        LoadedLobbyCardCount++;
                     }
                 }
             }
