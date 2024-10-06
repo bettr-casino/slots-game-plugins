@@ -1437,6 +1437,7 @@ namespace Bettr.Editor
                             var vector2 = goodLuckTextRectTransform.anchoredPosition;
                             vector2.y = -3.2f;
                             goodLuckTextRectTransform.anchoredPosition = vector2;
+                            winSymbols.transform.localPosition = new Vector3(-6.34f, -3.9f, -20);
                         }
                         
                         // Get the RectTransform height of the paysText component
