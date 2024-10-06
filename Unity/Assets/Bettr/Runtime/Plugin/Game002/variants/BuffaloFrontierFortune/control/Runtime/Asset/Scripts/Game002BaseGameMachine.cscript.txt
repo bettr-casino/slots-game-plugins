@@ -83,8 +83,13 @@ function Game002BaseGameMachine:ConfigurePreviewMode()
 end
 
 function Game002BaseGameMachine:ConfigureSpinCoins()
-    -- apply any left over spin coins from previous spin
-    BettrUser.ApplySpinCoins()
+    local newCoins = BettrUser.SpinCoins
+    local oldCoins = BettrUser.Coins
+    if newCoins > 0 then
+        BettrUser.ApplySpinCoins()
+        local creditsTextProperty = self.CreditsText   
+        BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 0.3)
+    end
     BettrUser.InitSpinCoins()
 end
 
@@ -175,9 +180,11 @@ function Game002BaseGameMachine:OnRollupCredits(oldCoins, newCoins, pays)
         do
             local creditsTextProperty = self.CreditsText   
             if pays ~= 0 then
-                BettrAudioController.PlayAudioLoop("rollupwins")            
-                BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 0.3)
-                System.WaitForSeconds(0.3)
+                if pays > 0 then
+                    BettrAudioController.PlayAudioLoop("rollupcoins")            
+                end
+                BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 1)
+                System.WaitForSeconds(1)
                 BettrAudioController.StopAudio()
             end
         end

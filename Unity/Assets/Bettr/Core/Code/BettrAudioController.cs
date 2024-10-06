@@ -7,6 +7,7 @@ namespace Bettr.Core
 {
     [RequireComponent(typeof(AudioSource))]
     [Serializable]
+    // attached to Core MainScene
     public class BettrAudioController : MonoBehaviour
     {
         public bool IsVolumeMuted { get; set; }
@@ -75,7 +76,7 @@ namespace Bettr.Core
                 }
             }
 
-            Debug.LogWarning($"Audio clip '{audioClipName}' not found in BettrAudioBehaviour.");
+            Debug.LogWarning($"Audio clip '{audioClipName}' not found in BettrAudioController.");
             return null;
         }
     }
