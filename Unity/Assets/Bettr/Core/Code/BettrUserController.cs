@@ -28,6 +28,8 @@ namespace Bettr.Core
 
         public bool UserInPreviewMode { get; private set; }
         
+        public bool UserInSlamStopMode { get; private set; }
+        
         public int UserPreviewModeSpins { get; private set; }
 
         const string ErrorBlobDoesNotExist = "HTTP/1.1 404 Not Found";
@@ -66,6 +68,21 @@ namespace Bettr.Core
             TileController.AddToGlobals("BettrUser", BettrPreviewUserConfig);
             // reset the BettrPreviewUserConfig Coins to 1000000
             BettrPreviewUserConfig.Coins = 1000000; // TODO: FIXME: hardcoded coins for preview mode
+        }
+        
+        public void InitUserInSlamStopMode()
+        {
+            UserInSlamStopMode = false;
+        }
+        
+        public void EnableUserInSlamStopMode()
+        {
+            UserInSlamStopMode = true;
+        }
+        
+        public void DisableUserInSlamStopMode()
+        {
+            UserInSlamStopMode = false;
         }
         
         public IEnumerator SetUserDevMode()

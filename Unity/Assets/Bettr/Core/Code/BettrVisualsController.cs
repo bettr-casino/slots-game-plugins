@@ -17,7 +17,10 @@ namespace Bettr.Core
     
     public class BettrVisualsController
     {
-        public BettrVisualsController()
+        
+        public BettrUserController BettrUserController { get; private set; }
+        
+        public BettrVisualsController(BettrUserController bettrUserController)
         {
             TileController.RegisterType<BettrVisualsController>("BettrVisualsController");
             TileController.AddToGlobals("BettrVisualsController", this);
@@ -37,6 +40,8 @@ namespace Bettr.Core
 
             TileController.RegisterType<iTween>("iTween");
             TileController.RegisterType<iTween.EaseType>("iTween.EaseType");
+            
+            BettrUserController = bettrUserController;
         }
         
         public void RollUpCounter(PropertyTextMeshPro counterTextProperty, long start, long end, float duration)
@@ -77,6 +82,12 @@ namespace Bettr.Core
             // While the elapsed time is less than the intended duration
             while (elapsed < duration)
             {
+                var isSlamStopped = BettrUserController.UserInSlamStopMode;
+                if (isSlamStopped)
+                {
+                    break;
+                }
+                
                 elapsed += Time.deltaTime;
 
                 // Update the current value
@@ -296,10 +307,27 @@ namespace Bettr.Core
                 yield break;
             }
             
+            var isSlamStopped = BettrUserController.UserInSlamStopMode;
+            if (isSlamStopped)
+            {
+                yield break;
+            }
+            
             var delayBeforeAnimationStart = animatorProperty.delayBeforeAnimationStart;
             if (delayBeforeAnimationStart > 0)
             {
-                yield return new WaitForSeconds(delayBeforeAnimationStart);
+                // use yield null so that slam stop can be detected
+                var timeElapsedInMilliseconds = 0.0f;
+                while (timeElapsedInMilliseconds < delayBeforeAnimationStart)
+                {
+                    timeElapsedInMilliseconds += Time.deltaTime;
+                    isSlamStopped = BettrUserController.UserInSlamStopMode;
+                    if (isSlamStopped)
+                    {
+                        yield break;
+                    }
+                    yield return null;
+                }
             }
             var animator = animatorProperty.animator;
             var normalizedTime = 0.0f;
@@ -327,7 +355,18 @@ namespace Bettr.Core
             var waitForAnimationComplete = animatorProperty.waitForAnimationComplete;
             if (waitForAnimationComplete)
             {
-                yield return new WaitForSeconds(animationDuration);
+                var timeElapsedInMilliseconds = 0.0f;
+                while (timeElapsedInMilliseconds < animationDuration)
+                {
+                    timeElapsedInMilliseconds += Time.deltaTime;
+                    isSlamStopped = BettrUserController.UserInSlamStopMode;
+                    if (isSlamStopped)
+                    {
+                        animator.Play(animationStateName, -1, 0f);
+                        yield break;
+                    }
+                    yield return null;
+                }
             }
             context.FloatResult = animationDuration;
         }

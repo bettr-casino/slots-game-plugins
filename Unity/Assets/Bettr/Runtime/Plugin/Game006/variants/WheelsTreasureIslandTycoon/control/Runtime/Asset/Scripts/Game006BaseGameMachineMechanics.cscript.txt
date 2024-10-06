@@ -36,14 +36,14 @@ function Game006BaseGameMachineMechanics:BaseGamePayout(machine)
     end
 end
 
-function Game006BaseGameMachineMechanics:OnSpinButtonClicked(machine)
+function Game006BaseGameMachineMechanics:TryPaying(machine)
     -- this is hardcoded
     -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
     if self.CascadingReelsMechanic ~= nil then
-       self.CascadingReelsMechanic:OnSpinButtonClicked(machine)
+       self.CascadingReelsMechanic:TryPaying(machine)
     elseif self.WaysMechanic ~= nil then
-       self.WaysMechanic:OnSpinButtonClicked(machine)
+       self.WaysMechanic:TryPaying(machine)
     elseif self.PaylinesMechanic ~= nil then
-       self.PaylinesMechanic:OnSpinButtonClicked(machine)
+       self.PaylinesMechanic:TryPaying(machine)
     end
 end

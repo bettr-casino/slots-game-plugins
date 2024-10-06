@@ -117,7 +117,7 @@ namespace Bettr.Runtime.Plugin.Main.Tests
                 configData = _configData,
             };
             
-            _bettrVisualsController = new BettrVisualsController();
+            _bettrVisualsController = new BettrVisualsController(_bettrUserController);
             
             _bettrAssetScriptsController = _bettrAssetController.BettrAssetScriptsController;
             

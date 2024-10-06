@@ -69,6 +69,34 @@ namespace Bettr.Core
             }
         }
 
+        private long _spinCoins = 0;
+        public long SpinCoins
+        {
+            get
+            {
+                // ReSharper disable once ArrangeAccessorOwnerBody
+                return _spinCoins;
+            }
+            set
+            {
+                _spinCoins = value;
+                if (_spinCoins < 0)
+                {
+                    _spinCoins = 0;
+                }
+            }
+        }
+
+        public void InitSpinCoins()
+        {
+            SpinCoins = Coins;
+        }
+        
+        public void ApplySpinCoins()
+        {
+            Coins = SpinCoins;
+        }
+        
         // ReSharper disable once InconsistentNaming
         public long XP { get; set; }
         public long Level { get; set; }

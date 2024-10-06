@@ -36,6 +36,8 @@ function Game009BaseGameMachine:Start()
         do
             BettrAudioController.StopAudio()
             self:ConfigurePreviewMode()
+            self:ConfigureSpinCoins()
+            self:ConfigureSlamStopped()
 	        self:ConfigureSettings()
 	        self:ShowSettings()
 	        self:PlayStartAnimations()
@@ -47,9 +49,17 @@ end
 function Game009BaseGameMachine:OnSpinButtonClicked()
     series
         do
+            local isSlamStopped = BettrUserController.UserInSlamStopMode
+            if isSlamStopped then
+                System.Print("Game009BaseGameMachine:OnSpinButtonClicked ignoring click since IsSlamStopped is true")
+                return
+            end
+            if self.IsSpinning() then
+                BettrUserController.EnableUserInSlamStopMode()
+                return
+            end
             BettrAudioController.StopAudio()
             BettrAudioController.PlayAudioOnce("spinbutton")
-            self.Mechanics:OnSpinButtonClicked(self)
             if self:CanSpinEngines() then            
                 self:SpinEngines()
                 self:WaitForApplyOutcomeDelay()
@@ -70,6 +80,16 @@ function Game009BaseGameMachine:ConfigurePreviewMode()
         goodLuckText.SetText("PREVIEW MODE Spins Remaining " .. self.PreviewSpinsRemaining)
         statusTexts.SetCurrentActive("GoodLuckText")    
     end
+end
+
+function Game009BaseGameMachine:ConfigureSpinCoins()
+    -- apply any left over spin coins from previous spin
+    BettrUser.ApplySpinCoins()
+    BettrUser.InitSpinCoins()
+end
+
+function Game009BaseGameMachine:ConfigureSlamStopped()
+    BettrUserController.InitUserInSlamStopMode()
 end
 
 function Game009BaseGameMachine:ConfigureSettings()
@@ -120,6 +140,7 @@ function Game009BaseGameMachine:OnBaseGameSpinCompleted()
     series
         do
             Game009BaseGameState.SpinState.First.State = "Completed"
+            Game009BaseGameState.DisplayState.First.State = "Idle" 
         end
     end
 end
@@ -130,6 +151,37 @@ function Game009BaseGameMachine:BaseGamePayout()
             self.Mechanics:BaseGamePayout(self)
         end
     end      
+end
+
+function Game009BaseGameMachine:RollupCredits()
+    local oldCoins = BettrUser.Coins
+    local newCoins = BettrUser.SpinCoins
+    BettrUser.ApplySpinCoins()
+    local pays = newCoins - oldCoins
+    System.StartCoroutine(self, "OnRollupCredits", oldCoins, newCoins, pays)
+end
+
+function Game009BaseGameMachine:OnRollupCredits(oldCoins, newCoins, pays)
+    series
+        do
+            local winTextProperty = self.WinText            
+            if pays > 0 then
+                BettrAudioController.PlayAudioLoop("rollupwins")            
+                BettrVisualsController.RollUpCounter(winTextProperty, 0, pays, 0.3)
+                System.WaitForSeconds(0.3)
+                BettrAudioController.StopAudio()
+            end
+        end
+        do
+            local creditsTextProperty = self.CreditsText   
+            if pays ~= 0 then
+                BettrAudioController.PlayAudioLoop("rollupwins")            
+                BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 0.3)
+                System.WaitForSeconds(0.3)
+                BettrAudioController.StopAudio()
+            end
+        end
+    end
 end
 
 function Game009BaseGameMachine:UpdateStatusText(text)
@@ -182,11 +234,13 @@ function Game009BaseGameMachine:WaitForApplyOutcomeDelay()
     series
         do
             local outcomeDelayInMs = Game009BaseGameSpinProperties.ApplyOutcomeDelay.First.Value
-            if outcomeDelayInMs > 0 then
-                System.WaitForSeconds(outcomeDelayInMs / 1000)
-            end
+            BettrOutcomeController.WaitForApplyOutcomeDelay(outcomeDelayInMs)
         end
     end
+end
+
+function Game009BaseGameMachine:IsSpinning()
+    return Game009BaseGameState.SpinState.First.State == "Spinning"
 end
 
 function Game009BaseGameMachine:CanSpinEngines()
@@ -194,8 +248,12 @@ function Game009BaseGameMachine:CanSpinEngines()
     local inPreviewMode = self.InPreviewMode
     if inPreviewMode then 
         if self.PreviewSpinsRemaining <= 0 then
-            System.Print("Game009BaseGameMachine:SpinEngines PreviewSpinsRemaining reached 0")
             canSpin = false
+            local statusTexts = self.StatusTexts
+            local goodLuckText = statusTexts["GoodLuckText"]
+            statusTexts.SetCurrentActive("GoodLuckText")
+            goodLuckText.SetText("PREVIEW MODE Spins Remaining " .. self.PreviewSpinsRemaining)
+            System.Print("Game009BaseGameMachine:SpinEngines PreviewSpinsRemaining reached 0")
         end
     end
     local baseWager = Game009BaseGameProperties.BaseWager.First.Value
@@ -222,14 +280,15 @@ function Game009BaseGameMachine:SpinEngines()
         goodLuckText.SetText("PREVIEW MODE Spins Remaining " .. self.PreviewSpinsRemaining)
     end
     local baseWager = Game009BaseGameProperties.BaseWager.First.Value
-    if BettrUser.Coins < baseWager then
+    if BettrUser.SpinCoins < baseWager then
         System.Print("Game009BaseGameMachine:SpinEngines Reset user coins to 1000 coins since currentCoins={0} less than wager={1}", currentCoins, baseWager)
-        BettrUser.Coins = 1000
+        BettrUser.SpinCoins = 1000
     end
-    local oldCoins = BettrUser.Coins
-    local newCoins = BettrUser.Coins - baseWager
+    local oldCoins = BettrUser.SpinCoins
+    local newCoins = BettrUser.SpinCoins - baseWager
     System.Print("Game009BaseGameMachine:SpinEngines applying wager oldCoins={0} newCoins={1} wager={2}", oldCoins, newCoins, baseWager)
-    BettrUser.Coins = newCoins
+    BettrUser.SpinCoins = newCoins
+    BettrUser.ApplySpinCoins()
     BettrVisualsController.RollUpCounter(self.CreditsText, oldCoins, newCoins, 0.05)
     Game009BaseGameState.SpinState.First.State = "Spinning"
     self:ResetSettings()
@@ -273,6 +332,7 @@ function Game009BaseGameMachine:UpdateBaseGameReelsSpinState(state)
 end
 
 function Game009BaseGameMachine:TryPaying()
+    self.Mechanics:TryPaying(self)
     Game009BaseGameState.SpinState.First.State = "Paying"
 end
 
@@ -282,6 +342,8 @@ end
 
 function Game009BaseGameMachine:OnPayingCompleted()
     BettrAudioController.StopAudio()
+    BettrUserController.DisableUserInSlamStopMode()
+    self:RollupCredits()
     self:OnBaseGameSpinCompleted()
 end
 

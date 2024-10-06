@@ -24,11 +24,14 @@ namespace Bettr.Core
         [NonSerialized] private Table ReelSymbolsTable;
         
         // TODO: FIXME move this to ReelStateTable
-        [NonSerialized] private bool ShouldSpliceReel; 
+        [NonSerialized] private bool ShouldSpliceReel;
+        
+        [NonSerialized] private BettrUserController BettrUserController;
         
         private void Awake()
         {
             ReelTile = GetComponent<TileWithUpdate>();
+            BettrUserController = BettrUserController.Instance;
         }
         
         private IEnumerator Start()
@@ -106,12 +109,15 @@ namespace Bettr.Core
             }
             yield break;
         }
-        
+
         public IEnumerator OnOutcomeReceived()
         {
             this.SpinOutcomeTable = GetTableFirst("BaseGameReelSpinOutcome", this.MachineID, this.ReelID);
             float delayInSeconds = (float) (double) this.ReelStateTable["ReelStopDelayInSeconds"];
-            yield return new WaitForSeconds(delayInSeconds);
+            if (!BettrUserController.UserInSlamStopMode)
+            {
+                yield return new WaitForSeconds(delayInSeconds);
+            }
             this.ShouldSpliceReel = true;
             this.ReelStateTable["OutcomeReceived"] = true;
         }
@@ -125,7 +131,8 @@ namespace Bettr.Core
         
         public void SpinReelSpinStartedRollBack()
         {
-            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = this.ReelStateTable["SpinStartedRollBackSpeedInSymbolUnitsPerSecond"];
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 1;
+            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = (double) this.ReelStateTable["SpinStartedRollBackSpeedInSymbolUnitsPerSecond"] * speed;
             var reelSpinDirection = (string) this.ReelSpinStateTable["ReelSpinDirection"];
             var spinDirectionIsDown = reelSpinDirection == "Down";
             var slideDistanceThresholdInSymbolUnits = (float) (double) this.ReelStateTable["SpinStartedRollBackDistanceInSymbolUnits"];
@@ -158,7 +165,8 @@ namespace Bettr.Core
         
         public void SpinReelSpinStartedRollForward()
         {
-            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = this.ReelStateTable["SpinStartedRollForwardSpeedInSymbolUnitsPerSecond"];
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 1;
+            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = (double) this.ReelStateTable["SpinStartedRollForwardSpeedInSymbolUnitsPerSecond"] * speed;
             var reelSpinDirection = (string) this.ReelSpinStateTable["ReelSpinDirection"];
             var spinDirectionIsDown = reelSpinDirection == "Down";
             var slideDistanceInSymbolUnits = CalculateSlideDistanceInSymbolUnits();
@@ -194,7 +202,8 @@ namespace Bettr.Core
             StartCoroutine(this.ReelTile.CallAction("PlaySpinReelSpinEndingRollBackAnimation"));
             
             var reelStopIndex = (int) (double) this.ReelSpinStateTable["ReelStopIndex"];
-            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = this.ReelStateTable["SpinEndingRollBackSpeedInSymbolUnitsPerSecond"];
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 1;
+            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = (double) this.ReelStateTable["SpinEndingRollBackSpeedInSymbolUnitsPerSecond"] * speed;
             var reelSpinDirection = (string) this.ReelSpinStateTable["ReelSpinDirection"];
             var spinDirectionIsDown = reelSpinDirection == "Down";
             var slideDistanceInSymbolUnits = CalculateSlideDistanceInSymbolUnits();
@@ -226,7 +235,8 @@ namespace Bettr.Core
         
         public void SpinReelSpinEndingRollForward()
         {
-            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = this.ReelStateTable["SpinEndingRollForwardSpeedInSymbolUnitsPerSecond"];
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 1;
+            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = (double) this.ReelStateTable["SpinEndingRollForwardSpeedInSymbolUnitsPerSecond"] * speed;
             var reelSpinDirection = (string) this.ReelSpinStateTable["ReelSpinDirection"];
             var spinDirectionIsDown = reelSpinDirection == "Down";
             var slideDistanceThresholdInSymbolUnits = (float) (double) this.ReelStateTable["SpinEndingRollForwardDistanceInSymbolUnits"];
@@ -259,7 +269,8 @@ namespace Bettr.Core
         
         public bool SpinReelSpinning()
         {
-            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = (double) this.ReelStateTable["SpinSpeedInSymbolUnitsPerSecond"] * 2;
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 2;
+            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = (double) this.ReelStateTable["SpinSpeedInSymbolUnitsPerSecond"] * speed;
             float slideDistanceInSymbolUnits = AdvanceReel();
             SlideReelSymbols(slideDistanceInSymbolUnits);
             return true;

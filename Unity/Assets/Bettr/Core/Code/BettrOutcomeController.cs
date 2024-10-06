@@ -74,7 +74,7 @@ namespace Bettr.Core
         public BettrUserController BettrUserController { get; private set; }
         
         public BettrExperimentController BettrExperimentController { get; private set; }
-
+        
         public BettrOutcomeController(BettrAssetScriptsController bettrAssetScriptsController, BettrUserController bettrUserController, BettrExperimentController experimentController, string hashKey)
         {
             TileController.RegisterType<BettrOutcomeController>("BettrOutcomeController");
@@ -84,6 +84,21 @@ namespace Bettr.Core
             this.BettrUserController = bettrUserController;
             this.BettrExperimentController = experimentController;
             this.HashKey = hashKey;
+        }
+
+        public IEnumerator WaitForApplyOutcomeDelay(double outcomeDelayInMs)
+        {
+            var timeElapsedInMs = 0.0;
+            while (timeElapsedInMs < outcomeDelayInMs)
+            {
+                timeElapsedInMs += Time.deltaTime * 1000;
+                // check if user has Slam Stopped the button
+                if (BettrUserController.UserInSlamStopMode)
+                {
+                    yield break;
+                }
+                yield return null;
+            }
         }
 
         public IEnumerator LoadServerOutcome(string gameId, string gameVariantId)

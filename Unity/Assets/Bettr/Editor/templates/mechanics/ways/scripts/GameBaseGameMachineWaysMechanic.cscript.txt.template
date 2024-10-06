@@ -23,6 +23,22 @@ function {{machineName}}BaseGameMachineWaysMechanic:Initialize(machine)
     BettrAudioController.StopAudio()
 end
 
+function {{machineName}}BaseGameMachineWaysMechanic:TryPaying(machine)
+    local summary = {{machineName}}BaseGameWaysSummary.Ways.First
+    local count = summary.WaysCount
+    if count == 0 then
+        return
+    end    
+    local spinCoins = BettrUser.SpinCoins
+    local ways = {{machineName}}BaseGameWays.Ways.Array
+    for counterIndex = 1, count do
+        local way = ways[counterIndex]
+        local totalPay = way.Pays
+        spinCoins = spinCoins + totalPay
+    end
+    BettrUser.SpinCoins = spinCoins
+end
+
 function {{machineName}}BaseGameMachineWaysMechanic:BaseGamePaying(machine)
     {{machineName}}BaseGameState.SpinState.First.State = "WaitingForPayToComplete"
     local waysSummary = {{machineName}}BaseGameWaysSummary.Ways.First
@@ -37,39 +53,15 @@ end
 function {{machineName}}BaseGameMachineWaysMechanic:WaitingForPayToComplete(machine)    
 end
 
-function {{machineName}}BaseGameMachineWaysMechanic:OnSpinButtonClicked()
-    series
-        do
-            self:CancelWaysAnimation()
-            self:WaitForPayToComplete()
-        end
-    end
-end
-
-function {{machineName}}BaseGameMachineWaysMechanic:CancelWaysAnimation()
-    {{machineName}}BaseGameState.DisplayState.First.State = "CancelRequested"
-end
-
-function {{machineName}}BaseGameMachineWaysMechanic:WaitForPayToComplete()
-    series
-        do
-            if {{machineName}}BaseGameState.SpinState.First.State == "WaitingForPayToComplete" then
-                local waysSummary = {{machineName}}BaseGameWaysSummary.Ways.First
-                local delay = waysSummary.DisplayLoopEndDelay
-                while {{machineName}}BaseGameState.SpinState.First.State == "WaitingForPayToComplete" do
-                    {{machineName}}BaseGameState.DisplayState.First.State = "CancelRequested"
-                    System.WaitForSeconds(delay)
-                end
-            end
-            {{machineName}}BaseGameState.DisplayState.First.State = "Idle"            
-        end
-    end
-end
-
 function {{machineName}}BaseGameMachineWaysMechanic:BaseGamePayout(machine)
     series
         do
-            self:DisplayWays(machine)
+            local isSlamStopped = BettrUserController.UserInSlamStopMode
+            if isSlamStopped then
+                machine:OnPayingCompleted()
+            else
+                self:DisplayWays(machine)
+            end
         end
     end        
 end
@@ -84,9 +76,9 @@ function {{machineName}}BaseGameMachineWaysMechanic:DisplayWays(machine)
                 return
             end
             local waysState = {{machineName}}BaseGameWaysState.Ways.First
+            waysState.PaysRollup = 0
             local ways = {{machineName}}BaseGameWays.Ways.Array
-            local waysMatrix = {{machineName}}BaseGameWaysMatrix                        
-            waysState.PaysRollup = BettrUser.Coins 
+            local waysMatrix = {{machineName}}BaseGameWaysMatrix
             local waysCount = waysSummary.WaysCount 
             local startDelay = waysSummary.DisplayLoopStartDelay
             local duration = waysSummary.DisplayLoopDuration
@@ -98,7 +90,8 @@ function {{machineName}}BaseGameMachineWaysMechanic:DisplayWays(machine)
             for waysCounterIndex = 1, waysCount do
                 series
                     do
-                        if {{machineName}}BaseGameState.DisplayState.First.State == "CancelRequested" then
+                        local isSlamStopped = BettrUserController.UserInSlamStopMode
+                        if isSlamStopped then
                             break
                         end
                         local way = ways[waysCounterIndex]
@@ -140,7 +133,8 @@ function {{machineName}}BaseGameMachineWaysMechanic:DisplayWays(machine)
                 machine:OnPayingCompleted()
                 return
             end
-            if {{machineName}}BaseGameState.DisplayState.First.State == "CancelRequested" then
+            local isSlamStopped = BettrUserController.UserInSlamStopMode
+            if isSlamStopped then
                 machine:OnPayingCompleted()
                 return
             end
@@ -155,20 +149,13 @@ function {{machineName}}BaseGameMachineWaysMechanic:RollUpWaysWin(machine, way, 
             -- rollup ways win once
             local startDelay = waysSummary.DisplayLoopStartDelay
             local duration = waysSummary.DisplayLoopDuration
-            local pays = way.Pays
-            System.WaitForSeconds(startDelay)
-            local winTextProperty = machine.WinText
-            
-            BettrVisualsController.RollUpCounter(winTextProperty, 0, pays, 1)
-            
-            local creditsTextProperty = machine.CreditsText   
             local oldCoins = waysState.PaysRollup
+            local pays = way.Pays
             local newCoins = oldCoins + pays            
             waysState.PaysRollup = newCoins
-            
-            BettrUser.Coins = newCoins  
-                      
-            BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 1)
+            System.WaitForSeconds(startDelay)
+            local winTextProperty = machine.WinText            
+            BettrVisualsController.RollUpCounter(winTextProperty, oldCoins, newCoins, duration)
         end
     end    
 end

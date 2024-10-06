@@ -21,6 +21,22 @@ function {{machineName}}BaseGameMachinePaylinesMechanic:Initialize(machine)
     end
 end
 
+function {{machineName}}BaseGameMachinePaylinesMechanic:TryPaying(machine)
+    local summary = {{machineName}}BaseGamePaylinesSummary.Paylines.First
+    local count = summary.PaylinesCount
+    if count == 0 then
+        return
+    end    
+    local spinCoins = BettrUser.SpinCoins
+    local paylines = {{machineName}}BaseGamePaylines.Paylines.Array
+    for counterIndex = 1, count do
+        local payline = paylines[counterIndex]
+        local totalPay = payline.Pays
+        spinCoins = spinCoins + totalPay
+    end
+    BettrUser.SpinCoins = spinCoins
+end
+
 function {{machineName}}BaseGameMachinePaylinesMechanic:BaseGamePaying(machine)
     {{machineName}}BaseGameState.SpinState.First.State = "WaitingForPayToComplete"
     local summary = {{machineName}}BaseGamePaylinesSummary.Paylines.First
@@ -35,33 +51,17 @@ end
 function {{machineName}}BaseGameMachinePaylinesMechanic:BaseGamePayout(machine)
     series
         do
-            self:DisplayPaylines(machine)
+            local isSlamStopped = BettrUserController.UserInSlamStopMode
+            if isSlamStopped then
+                machine:OnPayingCompleted()
+            else
+                self:DisplayPaylines(machine)
+            end
         end
-    end
-end
-
-function {{machineName}}BaseGameMachinePaylinesMechanic:OnSpinButtonClicked(machine)
-    series
-        do
-            self:CancelPaylinesAnimation()
-            self:WaitForPayToComplete()
-        end
-    end
-end
-
-function {{machineName}}BaseGameMachinePaylinesMechanic:CancelPaylinesAnimation()
-    {{machineName}}BaseGameState.DisplayState.First.State = "CancelRequested"
+    end    
 end
 
 function {{machineName}}BaseGameMachinePaylinesMechanic:WaitingForPayToComplete(machine)    
-end
-
-function {{machineName}}BaseGameMachinePaylinesMechanic:WaitForPayToComplete()
-    series
-        do
-            {{machineName}}BaseGameState.DisplayState.First.State = "Idle"            
-        end
-    end
 end
 
 function {{machineName}}BaseGameMachinePaylinesMechanic:DisplayPaylines(machine)
@@ -74,9 +74,9 @@ function {{machineName}}BaseGameMachinePaylinesMechanic:DisplayPaylines(machine)
                 return
             end
             local state = {{machineName}}BaseGamePaylinesState.Paylines.First
+            state.PaysRollup = 0
             local paylines = {{machineName}}BaseGamePaylines.Paylines.Array
-            local paylinesMatrix = {{machineName}}BaseGamePaylinesMatrix                        
-            state.PaysRollup = BettrUser.Coins 
+            local paylinesMatrix = {{machineName}}BaseGamePaylinesMatrix
             count = summary.PaylinesCount
             local startDelay = summary.DisplayLoopStartDelay
             local duration = summary.DisplayLoopDuration
@@ -88,7 +88,8 @@ function {{machineName}}BaseGameMachinePaylinesMechanic:DisplayPaylines(machine)
             for counterIndex = 1, count do
                 series
                     do
-                        if {{machineName}}BaseGameState.DisplayState.First.State == "CancelRequested" then
+                        local isSlamStopped = BettrUserController.UserInSlamStopMode                        
+                        if isSlamStopped then
                             break
                         end
                         local payline = paylines[counterIndex]
@@ -101,7 +102,7 @@ function {{machineName}}BaseGameMachinePaylinesMechanic:DisplayPaylines(machine)
                         local matrix = paylinesMatrix[symbol].Array
                         -- update status text 
                         local statusTexts = machine.StatusTexts
-                        -- {0}        Pays  {1} x {2} ways = {3} CREDITS!!
+                        -- {0}        Pays  {1} x {2} = {3} CREDITS!!
                         statusTexts.FormatAndSetCurrentActive("PaysText", reelCount, pay, multiplier, totalPay)
                         local winSymbols = machine.WinSymbols
                         winSymbols.SetCurrentActive(symbol)
@@ -130,7 +131,8 @@ function {{machineName}}BaseGameMachinePaylinesMechanic:DisplayPaylines(machine)
                 machine:OnPayingCompleted()
                 return
             end
-            if {{machineName}}BaseGameState.DisplayState.First.State == "CancelRequested" then
+            local isSlamStopped = BettrUserController.UserInSlamStopMode
+            if isSlamStopped then
                 machine:OnPayingCompleted()
                 return
             end
@@ -142,23 +144,16 @@ end
 function {{machineName}}BaseGameMachinePaylinesMechanic:RollUpPaylinesWin(machine, payline, paylinesState, paylinesSummary, duration)
     series
         do
-            -- rollup ways win once
+            -- rollup paylines win once
             local startDelay = paylinesSummary.DisplayLoopStartDelay
             local duration = paylinesSummary.DisplayLoopDuration
-            local pays = payline.Pays
-            System.WaitForSeconds(startDelay)
-            local winTextProperty = machine.WinText
-            
-            BettrVisualsController.RollUpCounter(winTextProperty, 0, pays, 1)
-            
-            local creditsTextProperty = machine.CreditsText   
             local oldCoins = paylinesState.PaysRollup
+            local pays = payline.Pays
             local newCoins = oldCoins + pays            
-            paylinesState.PaysRollup = newCoins 
-            
-            BettrUser.Coins = newCoins
-                      
-            BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 1)
+            paylinesState.PaysRollup = newCoins
+            System.WaitForSeconds(startDelay)
+            local winTextProperty = machine.WinText            
+            BettrVisualsController.RollUpCounter(winTextProperty, oldCoins, newCoins, duration)
         end
     end    
 end
