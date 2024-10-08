@@ -254,7 +254,7 @@ namespace Bettr.Core
 
         private void TurnOffVolume()
         {
-            BettrAudioController.Instance.IsVolumeMuted = !BettrAudioController.Instance.IsVolumeMuted;
+            BettrAudioController.Instance.ToggleVolume();
         }
         
         private IEnumerator UpdateCommitHash()

@@ -10,13 +10,6 @@ namespace Bettr.Core
     // attached to Core MainScene
     public class BettrAudioController : MonoBehaviour
     {
-        public bool IsVolumeMuted
-        {
-            get => AudioSource.volume == 0;
-            // ReSharper disable once ValueParameterNotUsed
-            set => AudioSource.volume = IsVolumeMuted ? 1 : 0;
-        }
-
         public AudioSource AudioSource { get; private set; }
 
         // ReSharper disable once InconsistentNaming
@@ -30,6 +23,11 @@ namespace Bettr.Core
             AudioSource = audioSource;
 
             Instance = this;
+        }
+
+        public void ToggleVolume()
+        {
+            AudioSource.volume = AudioSource.volume == 0 ? 1 : 0;
         }
 
         public void PlayAudioOnce(string audioClipName)

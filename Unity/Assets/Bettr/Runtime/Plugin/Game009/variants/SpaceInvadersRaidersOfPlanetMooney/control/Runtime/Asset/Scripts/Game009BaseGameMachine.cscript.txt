@@ -396,13 +396,17 @@ function Game009BaseGameMachine:OnPointerClick1Param(param)
         System.Print("Game009BaseGameMachine OnPointerClick1Param param={0} ignoring click when not in Waiting state", param)
         return
     end
-    BettrAudioController.StopAudio()
 	if param == "Prev" then
+        BettrAudioController.StopAudio()
         BettrMainLobbySceneController.LoadPreviousMachine()
     elseif param == "Next" then
+        BettrAudioController.StopAudio()
         BettrMainLobbySceneController.LoadNextMachine()
     elseif param == "Lobby" then
+        BettrAudioController.StopAudio()
         BettrMainLobbySceneController.LoadMainLobby()
+    elseif param == "Volume" then
+        BettrAudioController.ToggleVolume()
     end
 end
 
