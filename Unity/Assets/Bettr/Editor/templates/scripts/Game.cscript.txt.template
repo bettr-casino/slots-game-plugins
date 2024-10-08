@@ -37,6 +37,9 @@ function {{machineName}}:Start()
             BettrVisualsController.SwitchOrientationToLandscape()
         end
         do
+            BettrAudioController.PlayGameAudioLoop("{{machineName}}{{machineVariant}}", "{{experimentVariant}}", "{{machineName}}{{machineVariant}}BackgroundMusic")       
+        end
+        do
             System.Print("{{machineName}}:Start tile id={0}", self.id)
             {{- for machine in machines }}
             self:Load{{machine}}BackgroundPrefab()

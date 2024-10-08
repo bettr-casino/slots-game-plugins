@@ -10,8 +10,13 @@ namespace Bettr.Core
     // attached to Core MainScene
     public class BettrAudioController : MonoBehaviour
     {
-        public bool IsVolumeMuted { get; set; }
-        
+        public bool IsVolumeMuted
+        {
+            get => AudioSource.volume == 0;
+            // ReSharper disable once ValueParameterNotUsed
+            set => AudioSource.volume = IsVolumeMuted ? 1 : 0;
+        }
+
         public AudioSource AudioSource { get; private set; }
 
         // ReSharper disable once InconsistentNaming
@@ -37,8 +42,6 @@ namespace Bettr.Core
                 AudioSource.Stop();
             }
 
-            if (IsVolumeMuted) return;
-
             AudioSource.clip = clip;
             AudioSource.loop = false;
             AudioSource.Play();
@@ -54,11 +57,14 @@ namespace Bettr.Core
                 AudioSource.Stop();
             }
 
-            if (IsVolumeMuted) return;
-
             AudioSource.clip = clip;
             AudioSource.loop = true;
             AudioSource.Play();
+        }
+        
+        public void PlayGameAudioLoop(string bundleName, string bundleVariant, string audioClipName)
+        {
+            PlayAudioLoop(audioClipName);
         }
         
         public void StopAudio()

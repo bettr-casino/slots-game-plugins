@@ -34,7 +34,6 @@ end
 function {{machineName}}BaseGameMachine:Start()
     series
         do
-            BettrAudioController.StopAudio()
             self:ConfigurePreviewMode()
             self:ConfigureSpinCoins()
             self:ConfigureSlamStopped()
@@ -340,7 +339,8 @@ function {{machineName}}BaseGameMachine:OnPointerClick1Param(param)
     if {{machineName}}BaseGameState.SpinState.First.State ~= "Waiting" then
         System.Print("{{machineName}}BaseGameMachine OnPointerClick1Param param={0} ignoring click when not in Waiting state", param)
         return
-    end	
+    end
+    BettrAudioController.StopAudio()
 	if param == "Prev" then
         BettrMainLobbySceneController.LoadPreviousMachine()
     elseif param == "Next" then
