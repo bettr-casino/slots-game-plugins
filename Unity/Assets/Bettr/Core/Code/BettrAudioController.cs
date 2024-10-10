@@ -62,7 +62,32 @@ namespace Bettr.Core
         
         public void PlayGameAudioLoop(string bundleName, string bundleVariant, string audioClipName)
         {
-            PlayAudioLoop(audioClipName);
+            bundleName = bundleName.ToLower();
+            
+            var genres = new[]
+            {
+                "Game001Epic", 
+                "Game002Buffalo", 
+                "Game003HighStakes", 
+                "Game004Riches", 
+                "Game005Fortunes", 
+                "Game006Wheels", 
+                "Game007TrueVegas", 
+                "Game008Gods", 
+                "Game009SpaceInvaders"
+            };
+
+            foreach (var genre in genres)
+            {
+                if (bundleName.StartsWith(genre, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    // remove the Game<NNN> from the genre but keep for example the "Epic"
+                    var clipName = genre.Substring("Game001".Length);
+                    PlayAudioOnce(clipName);
+                    break;
+                }
+            }
+            
         }
         
         public void StopAudio()
