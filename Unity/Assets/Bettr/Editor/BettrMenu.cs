@@ -528,7 +528,7 @@ namespace Bettr.Editor
             EditorApplication.EnterPlaymode();
         }
 
-        [MenuItem("Bettr/Build/Assets")] 
+        [MenuItem("Bettr/Build/Assets/Dangerous/All")] 
         public static void BuildAssets()
         {
             BuildAssetBundles();
@@ -539,6 +539,134 @@ namespace Bettr.Editor
         public static HashSet<string> GetAllAssetLabels()
         {
             return AssetLabelsCache;
+        }
+        
+        [MenuItem("Bettr/Build/Assets/SingleGame")]
+        public static void BuildSingleGameAssets()
+        {
+            Debug.Log("Building asset bundles...");
+            
+            EnsurePluginAssetsHaveLabels(PluginRootDirectory);
+            
+            Debug.Log("...refreshing database before building asset bundles..");
+            AssetDatabase.Refresh();
+            
+            var buildAssetLabel = "game001epicancientadventures";
+            var assetLabels = GetAllAssetLabels();
+
+            List<AssetBundleBuild> buildMapList = new List<AssetBundleBuild>();
+            // loop over the AssetLabelsCache  
+            foreach (var assetLabel in AssetLabelsCache)
+            {
+                foreach (var assetVariant in AssetVariantsCache)
+                {
+                    if (assetLabel.StartsWith(buildAssetLabel))
+                    {
+                        // create a new AssetBundleBuild
+                        AssetBundleBuild assetBundleBuild = new AssetBundleBuild();
+                        assetBundleBuild.assetBundleName = $"{assetLabel}.{assetVariant}";
+                        assetBundleBuild.assetNames = AssetDatabase.GetAssetPathsFromAssetBundle(assetBundleBuild.assetBundleName);
+                        buildMapList.Add(assetBundleBuild);
+                    }
+                }
+            }
+            
+            // convert buildMap to an array
+            var buildMap = buildMapList.ToArray();
+
+            var sharedAssetBundleOptions = BuildAssetBundleOptions.ForceRebuildAssetBundle |
+                                           BuildAssetBundleOptions.ChunkBasedCompression;
+
+#if UNITY_IOS
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesIOSDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesIOSDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.iOS);
+            AssetDatabase.Refresh();
+            
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesOSXDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesOSXDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.StandaloneOSX);
+            AssetDatabase.Refresh();
+            
+#endif
+#if UNITY_ANDROID
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesAndroidDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesAndroidDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.Android);
+#endif
+#if UNITY_WEBGL
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesWebglDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesWebglDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.WebGL);
+#endif
+#if UNITY_OSX
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesOSXDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesOSXDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.StandaloneOSX);
+#endif
+#if UNITY_WIN
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesWindowsDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesWindowsDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.StandaloneWindows64);
+#endif
+#if UNITY_LINUX   
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesLinuxDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesLinuxDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.StandaloneLinux64);
+#endif
+            
+            Debug.Log("...refreshing database after building asset bundles..");
+            AssetDatabase.Refresh();
+            
+            Debug.Log("Modifying asset bundles manifest files...");
+            ModifyAssetBundleManifestFiles();
+            Debug.Log("...done modifying asset bundles manifest files.");
+            
+            Debug.Log("...refreshing database after modifying asset bundles..");
+            AssetDatabase.Refresh();
+            
+            Debug.Log("...done building asset bundles.");
+            
+#if UNITY_IOS
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.iOS, BuildTarget.iOS);
+#endif
+#if UNITY_ANDROID
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
+#endif
+#if UNITY_WEBGL
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.WebGL, BuildTarget.WebGL);
+#endif
+#if UNITY_OSX
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneOSX);
+#endif
+#if UNITY_WIN
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64);
+#endif
+#if UNITY_LINUX   
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneLinux64);
+#endif            
+            
         }
         
         public static void BuildGameAssets()
@@ -2625,7 +2753,8 @@ namespace Bettr.Editor
         private static string GetAssetBundleName(string assetLabel, string assetSubLabel, Type assetType)
         {
             var isScene = assetType.Name == "SceneAsset";
-            var suffix = isScene ? "_scenes" :"";
+            var isAudio = assetType.Name == "AudioClip";
+            var suffix = isScene ? "_scenes" :  isAudio ? "_audio" : "";
             var assetBundleName = $"{assetLabel}{assetSubLabel}{suffix}";
             return assetBundleName;
         }
