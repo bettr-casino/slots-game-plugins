@@ -587,7 +587,7 @@ namespace Bettr.Core
             var loadedBundles = AssetBundle.GetAllLoadedAssetBundles();
             foreach (var bundle in loadedBundles)
             {
-                if (bundle.name == cachedAssetBundleName)
+                if (string.Equals(bundle.name, cachedAssetBundleName, StringComparison.OrdinalIgnoreCase))
                 {
                     return bundle;
                 }
