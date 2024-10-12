@@ -1,9 +1,8 @@
 using System;
 using System.Collections;
 using System.IO;
-using CrayonScript.Code;
-using UnityEditor;
 using UnityEngine;
+using UnityEngine.Networking;
 
 // ReSharper disable once CheckNamespace
 namespace Bettr.Core
@@ -13,6 +12,8 @@ namespace Bettr.Core
     // attached to Core MainScene
     public class BettrAudioController : MonoBehaviour
     {
+        public static bool UseFileSystemOutcomes = true;
+        
         public AudioSource AudioSource { get; private set; }
 
         // ReSharper disable once InconsistentNaming
@@ -20,7 +21,7 @@ namespace Bettr.Core
 
         public static BettrAudioController Instance { get; private set; }
         
-        public string FileSystemAudioBaseURL => "Assets/Bettr/LocalStore/LocalAudio";
+        public string FileSystemAudioBaseURL => "Bettr/LocalStore/LocalAudio";
         
         public void Awake()
         {
@@ -30,11 +31,67 @@ namespace Bettr.Core
             Instance = this;
         }
 
-        public AudioClip LoadAudioClip(string audioClip)
+        private bool ClipExists(string clipName)
         {
-            var assetPath = Path.Combine(FileSystemAudioBaseURL, $"{audioClip}.mp3");
-            AudioClip clip = AssetDatabase.LoadAssetAtPath<AudioClip>(assetPath);
-            return clip;
+            if (AudioClips != null)
+            {
+                foreach (var audioClip in AudioClips)
+                {
+                    if (string.Equals(audioClip.name, clipName, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private void AddToClips(AudioClip clip)
+        {
+            if (AudioClips == null)
+            {
+                AudioClips = Array.Empty<AudioClip>();
+            }
+            var audioClips = new AudioClip[AudioClips.Length + 1];
+            AudioClips.CopyTo(audioClips, 0);
+            audioClips[AudioClips.Length] = clip;
+            AudioClips = audioClips;
+        }
+
+        public IEnumerator LoadBackgroundAudio(string bundleName)
+        {
+            if (UseFileSystemOutcomes)
+            {
+                yield return LoadFileSystemBackgroundAudio(bundleName);
+            }
+        }
+
+        public IEnumerator LoadFileSystemBackgroundAudio(string bundleName)
+        {
+            var backgroundAudioClipName = $"{bundleName}BackgroundMusic";
+            var assetPath = Path.Combine(FileSystemAudioBaseURL, $"{backgroundAudioClipName}.mp3");
+            var absolutePath = Path.Combine(Application.dataPath, assetPath);
+            var absoluteFileUrl = $"file://{absolutePath}";
+            AudioClip clip = null;
+            using UnityWebRequest request = UnityWebRequestMultimedia.GetAudioClip(absoluteFileUrl, AudioType.MPEG);
+            yield return request.SendWebRequest();
+            if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+            {
+                Debug.LogError($"Error loading audio clip from {absoluteFileUrl}: {request.error}");
+                yield break;
+            }
+            clip = DownloadHandlerAudioClip.GetContent(request);
+            clip.name = backgroundAudioClipName;
+            if (clip != null)
+            {
+                AddToClips(clip);
+                Debug.Log("Audio clip successfully loaded from file system.");
+            }
+            else
+            {
+                Debug.Log($"Failed to load audio clip from {absoluteFileUrl}");
+            }
         }
 
         public void ToggleVolume()
@@ -74,17 +131,9 @@ namespace Bettr.Core
         
         public void PlayGameAudioLoop(string bundleName, string bundleVariant, string audioClipName)
         {
-            var clip = LoadAudioClip(audioClipName);
-            if (clip != null)
+            if (ClipExists(audioClipName))
             {
-                if (AudioSource.isPlaying)
-                {
-                    AudioSource.Stop();
-                }
-
-                AudioSource.clip = clip;
-                AudioSource.loop = false;
-                AudioSource.Play();
+                PlayAudioLoop(audioClipName);
                 return;
             }
             

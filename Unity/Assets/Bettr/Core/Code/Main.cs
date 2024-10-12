@@ -157,6 +157,8 @@ namespace Bettr.Core
             
             BettrModel.Init();
             
+            BettrAudioController.UseFileSystemOutcomes = _configData.UseFileSystemOutcomes;
+            
             TileController.RegisterType<BettrAudioController>("BettrAudioController");
             TileController.AddToGlobals("BettrAudioController", BettrAudioController.Instance);
 
@@ -177,7 +179,7 @@ namespace Bettr.Core
                     WebOutcomesBaseURL = _configData.WebOutcomesBaseURL,
                     UseFileSystemOutcomes = _configData.UseFileSystemOutcomes,
                 };
-
+            
             // Register the specialized performance controllers
             TileController.RegisterType<BettrReelController>("BettrReelController");
 
