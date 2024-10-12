@@ -15,11 +15,19 @@ namespace Bettr.Core
         public string AssetsVersion { get; set; }
         
         public string AssetsServerBaseURL { get; set; }
+        
+        public string AudioServerBaseURL { get; set; }
+        
+        public string VideoServerBaseURL { get; set; }
         public string OutcomesServerBaseURL { get; set; }
         
         public string ServerBaseURL { get; set; }
         
         public bool UseFileSystemAssetBundles { get; set; }
+        
+        public bool UseFileSystemAudio { get; set; }
+        
+        public bool UseFileSystemVideo { get; set; }
         
         public bool UseFileSystemOutcomes { get; set; }
         

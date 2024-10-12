@@ -12,7 +12,9 @@ namespace Bettr.Core
     // attached to Core MainScene
     public class BettrAudioController : MonoBehaviour
     {
-        public static bool UseFileSystemOutcomes = true;
+        public static bool UseFileSystemAudio = true;
+        public static string FileSystemAudioBaseURL => "Bettr/LocalStore/LocalAudio";
+        public static string AudioServerBaseURL;
         
         public AudioSource AudioSource { get; private set; }
 
@@ -20,8 +22,6 @@ namespace Bettr.Core
        [SerializeField] private AudioClip[] AudioClips;
 
         public static BettrAudioController Instance { get; private set; }
-        
-        public string FileSystemAudioBaseURL => "Bettr/LocalStore/LocalAudio";
         
         public void Awake()
         {
@@ -61,9 +61,13 @@ namespace Bettr.Core
 
         public IEnumerator LoadBackgroundAudio(string bundleName)
         {
-            if (UseFileSystemOutcomes)
+            if (UseFileSystemAudio)
             {
                 yield return LoadFileSystemBackgroundAudio(bundleName);
+            }
+            else
+            {
+                yield return LoadS3SystemBackgroundAudio(bundleName);
             }
         }
 
@@ -82,15 +86,48 @@ namespace Bettr.Core
                 yield break;
             }
             clip = DownloadHandlerAudioClip.GetContent(request);
-            clip.name = backgroundAudioClipName;
             if (clip != null)
             {
+                clip.name = backgroundAudioClipName;
                 AddToClips(clip);
                 Debug.Log("Audio clip successfully loaded from file system.");
             }
             else
             {
                 Debug.Log($"Failed to load audio clip from {absoluteFileUrl}");
+            }
+        }
+        
+        public IEnumerator LoadS3SystemBackgroundAudio(string bundleName)
+        {
+            // Create the URL for the background music
+            var backgroundAudioClipName = $"{bundleName}BackgroundMusic";
+            var assetUrl = $"{AudioServerBaseURL}/audio/latest/{backgroundAudioClipName}.mp3";
+
+            // Use UnityWebRequest to load the AudioClip from S3
+            using (UnityWebRequest request = UnityWebRequestMultimedia.GetAudioClip(assetUrl, AudioType.MPEG))
+            {
+                // Send the request
+                yield return request.SendWebRequest();
+
+                // Check for errors
+                if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+                {
+                    Debug.Log($"Error loading audio clip from {assetUrl}: {request.error}");
+                    yield break;
+                }
+                // Get the AudioClip from the request
+                AudioClip clip = DownloadHandlerAudioClip.GetContent(request);
+                if (clip != null)
+                {
+                    clip.name = backgroundAudioClipName;
+                    AddToClips(clip);
+                    Debug.Log($"Audio clip successfully loaded from s3 {assetUrl}");
+                }
+                else
+                {
+                    Debug.Log($"Failed to load audio clip from {assetUrl}");
+                }
             }
         }
 

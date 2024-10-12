@@ -157,11 +157,16 @@ namespace Bettr.Core
             
             BettrModel.Init();
             
-            BettrAudioController.UseFileSystemOutcomes = _configData.UseFileSystemOutcomes;
-            
+            BettrAudioController.UseFileSystemAudio = _configData.UseFileSystemAudio;
+            BettrAudioController.AudioServerBaseURL = _configData.AudioServerBaseURL;
             TileController.RegisterType<BettrAudioController>("BettrAudioController");
             TileController.AddToGlobals("BettrAudioController", BettrAudioController.Instance);
 
+            BettrVideoController.UseFileSystemVideo = _configData.UseFileSystemAudio;
+            BettrVideoController.VideoServerBaseURL = _configData.VideoServerBaseURL;
+            TileController.RegisterType<BettrVideoController>("BettrVideoController");
+            TileController.AddToGlobals("BettrVideoController", BettrVideoController.Instance);
+            
             _bettrMainLobbySceneController = new BettrMainLobbySceneController(_bettrExperimentController);
 
             _bettrAssetController = new BettrAssetController
