@@ -54,6 +54,7 @@ S3_ASSETS_LATEST_OBJECT_KEY := "assets/latest"
 S3_OBJECT_KEY := tasks
 
 ASSET_BUNDLES_BASE_DIRECTORY="$(PWD)/Unity/Assets/Bettr/LocalStore/AssetBundles"
+ASSET_AUDIO_BASE_DIRECTORY="$(PWD)/Unity/Assets/Bettr/LocalStore/LocalAudio"
 
 BETTR_CASINO_HOME := ${BETTR_CASINO_HOME}
 
@@ -170,6 +171,8 @@ publish-assets-android:
 publish-assets-webgl:
 	@echo "Publishing WebGL asset bundles..."
 	aws s3 sync $(ASSET_BUNDLES_BASE_DIRECTORY)/WebGL s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY)/WebGL --delete --profile $(AWS_DEFAULT_PROFILE)
+	@echo "Publishing WebGL audio bundles..."
+	aws s3 sync $(ASSET_BUNDLES_BASE_DIRECTORY)/WebGL s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY)/WebGL --delete --profile $(AWS_DEFAULT_PROFILE)
 
 deploy-assets-all: publish-assets-all
 	@echo "Deploying asset bundles..."
@@ -190,35 +193,35 @@ deploy-assets-webgl: publish-assets-webgl
 
 build-lobby-assets-webgl: prepare-project
 	@echo "Building WebGL lobby asset bundles..."
-	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "lobbycardv0_1_0" -assetSubLabel "control" -buildTarget WebGL; \
-	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "mainlobbyv0_1_0" -assetSubLabel "control" -buildTarget WebGL; \
-	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "mainlobbyv0_1_0_scenes" -assetSubLabel "control" -buildTarget WebGL
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsAndAudioCommandLine -assetLabel "lobbycardv0_1_0" -assetSubLabel "control" -buildTarget WebGL; \
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsAndAudioCommandLine -assetLabel "mainlobbyv0_1_0" -assetSubLabel "control" -buildTarget WebGL; \
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsAndAudioCommandLine -assetLabel "mainlobbyv0_1_0_scenes" -assetSubLabel "control" -buildTarget WebGL
 
 build-main-assets-webgl: prepare-project
 	@echo "Building WebGL main asset bundles..."
-	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "mainv0_1_0" -assetSubLabel "control" -buildTarget WebGL; \
-	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "mainv0_1_0_scenes" -assetSubLabel "control" -buildTarget WebGL
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsAndAudioCommandLine -assetLabel "mainv0_1_0" -assetSubLabel "control" -buildTarget WebGL; \
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsAndAudioCommandLine -assetLabel "mainv0_1_0_scenes" -assetSubLabel "control" -buildTarget WebGL
 
 build-game001-assets-webgl: prepare-project
 	@echo "Building WebGL game001 variant game001epicancientadventures asset bundles..."
-	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game001epicancientadventures" -assetSubLabel "control" -buildTarget WebGL; \
-	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game001epicancientadventures_scenes" -assetSubLabel "control" -buildTarget WebGL; \
-	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game001epicancientadventures" -assetSubLabel "variant1" -buildTarget WebGL; \
-	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game001epicancientadventures_scenes" -assetSubLabel "variant1" -buildTarget WebGL;
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsAndAudioCommandLine -assetLabel "game001epicancientadventures" -assetSubLabel "control" -buildTarget WebGL; \
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsAndAudioCommandLine -assetLabel "game001epicancientadventures_scenes" -assetSubLabel "control" -buildTarget WebGL; \
+	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsAndAudioCommandLine -assetLabel "game001epicancientadventures" -assetSubLabel "variant1" -buildTarget WebGL; \
+	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsAndAudioCommandLine -assetLabel "game001epicancientadventures_scenes" -assetSubLabel "variant1" -buildTarget WebGL;
 
 build-game001-2-assets-webgl: prepare-project
 	@echo "Building WebGL game001 variant game001epicatlantistreasures asset bundles..."
-	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game001epicatlantistreasures" -assetSubLabel "control" -buildTarget WebGL; \
-	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game001epicatlantistreasures_scenes" -assetSubLabel "control" -buildTarget WebGL; \
-	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game001epicatlantistreasures" -assetSubLabel "variant1" -buildTarget WebGL; \
-	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game001epicatlantistreasures_scenes" -assetSubLabel "variant1" -buildTarget WebGL;
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsAndAudioCommandLine -assetLabel "game001epicatlantistreasures" -assetSubLabel "control" -buildTarget WebGL; \
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsAndAudioCommandLine -assetLabel "game001epicatlantistreasures_scenes" -assetSubLabel "control" -buildTarget WebGL; \
+	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsAndAudioCommandLine -assetLabel "game001epicatlantistreasures" -assetSubLabel "variant1" -buildTarget WebGL; \
+	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsAndAudioCommandLine -assetLabel "game001epicatlantistreasures_scenes" -assetSubLabel "variant1" -buildTarget WebGL;
 
 build-game001-3-assets-webgl: prepare-project
 	@echo "Building WebGL game001 variant game001epicclockworkchronicles asset bundles..."
-	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game001epicclockworkchronicles" -assetSubLabel "control" -buildTarget WebGL; \
-	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game001epicclockworkchronicles_scenes" -assetSubLabel "control" -buildTarget WebGL; \
-	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game001epicclockworkchronicles" -assetSubLabel "variant1" -buildTarget WebGL; \
-	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game001epicclockworkchronicles_scenes" -assetSubLabel "variant1" -buildTarget WebGL;
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsAndAudioCommandLine -assetLabel "game001epicclockworkchronicles" -assetSubLabel "control" -buildTarget WebGL; \
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsAndAudioCommandLine -assetLabel "game001epicclockworkchronicles_scenes" -assetSubLabel "control" -buildTarget WebGL; \
+	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsAndAudioCommandLine -assetLabel "game001epicclockworkchronicles" -assetSubLabel "variant1" -buildTarget WebGL; \
+	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsAndAudioCommandLine -assetLabel "game001epicclockworkchronicles_scenes" -assetSubLabel "variant1" -buildTarget WebGL;
 
 build-game004-all-assets-webgl: prepare-project
 	@echo "Building WebGL game007 all variants asset bundles..."
@@ -227,18 +230,18 @@ build-game004-all-assets-webgl: prepare-project
 
 build-game006-assets-webgl: prepare-project
 	@echo "Building WebGL game006 variant game006wheelsempirebuilder asset bundles..."
-	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game006wheelsempirebuilder" -assetSubLabel "control" -buildTarget WebGL; \
-	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game006wheelsempirebuilder_scenes" -assetSubLabel "control" -buildTarget WebGL; \
-	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game006wheelsempirebuilder" -assetSubLabel "variant1" -buildTarget WebGL; \
-	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game006wheelsempirebuilder_scenes" -assetSubLabel "variant1" -buildTarget WebGL;
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsAndAudioCommandLine -assetLabel "game006wheelsempirebuilder" -assetSubLabel "control" -buildTarget WebGL; \
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsAndAudioCommandLine -assetLabel "game006wheelsempirebuilder_scenes" -assetSubLabel "control" -buildTarget WebGL; \
+	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsAndAudioCommandLine -assetLabel "game006wheelsempirebuilder" -assetSubLabel "variant1" -buildTarget WebGL; \
+	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsAndAudioCommandLine -assetLabel "game006wheelsempirebuilder_scenes" -assetSubLabel "variant1" -buildTarget WebGL;
 
 
 build-game007-assets-webgl: prepare-project
 	@echo "Building WebGL game007 variant game007truevegasdiamonddazzle asset bundles..."
-	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game007truevegasdiamonddazzle" -assetSubLabel "control" -buildTarget WebGL; \
-	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game007truevegasdiamonddazzle_scenes" -assetSubLabel "control" -buildTarget WebGL; \
-	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game007truevegasdiamonddazzle" -assetSubLabel "variant1" -buildTarget WebGL; \
-	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetLabels -assetLabel "game007truevegasdiamonddazzle_scenes" -assetSubLabel "variant1" -buildTarget WebGL;
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsAndAudioCommandLine -assetLabel "game007truevegasdiamonddazzle" -assetSubLabel "control" -buildTarget WebGL; \
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsAndAudioCommandLine -assetLabel "game007truevegasdiamonddazzle_scenes" -assetSubLabel "control" -buildTarget WebGL; \
+	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsAndAudioCommandLine -assetLabel "game007truevegasdiamonddazzle" -assetSubLabel "variant1" -buildTarget WebGL; \
+	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsAndAudioCommandLine -assetLabel "game007truevegasdiamonddazzle_scenes" -assetSubLabel "variant1" -buildTarget WebGL;
 
 
 build-game007-all-assets-webgl: prepare-project

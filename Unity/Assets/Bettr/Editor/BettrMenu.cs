@@ -79,6 +79,7 @@ namespace Bettr.Editor
         // ReSharper disable once UnusedMember.Local
         private const string LocalServerDirectory = "Assets/Bettr/LocalStore/LocalServer";
         private const string LocalOutcomesDirectory = "Assets/Bettr/LocalStore/LocalOutcomes";
+        private const string LocalAudioDirectory = "Assets/Bettr/LocalStore/LocalAudio";
         private const string AssetsServerBaseURL = "https://bettr-casino-assets.s3.us-west-2.amazonaws.com";
         private const string OutcomesServerBaseURL = "https://bettr-casino-outcomes.s3.us-west-2.amazonaws.com";
         private const string GatewayUrl = "https://3wcgnl14qb.execute-api.us-west-2.amazonaws.com/gateway";
@@ -531,7 +532,7 @@ namespace Bettr.Editor
         [MenuItem("Bettr/Build/Assets/Dangerous/All")] 
         public static void BuildAssets()
         {
-            BuildAssetBundles();
+            BuildAssetBundlesAndAudio();
             BuildLocalServer();
             BuildLocalOutcomes();
         }
@@ -667,6 +668,7 @@ namespace Bettr.Editor
             EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneLinux64);
 #endif            
             
+            BuildLocalAudio();
         }
         
         public static void BuildGameAssets()
@@ -804,10 +806,12 @@ namespace Bettr.Editor
 #if UNITY_LINUX   
             EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneLinux64);
 #endif            
+
+            BuildLocalAudio();
             
         }
 
-        public static void BuildAssetLabels()
+        public static void BuildAssetsAndAudioCommandLine()
         {
             string[] args = Environment.GetCommandLineArgs();
 
@@ -974,6 +978,9 @@ namespace Bettr.Editor
 #if UNITY_LINUX   
             EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneLinux64);
 #endif            
+
+            BuildLocalAudio();
+
         }
         
         [MenuItem("Bettr/Tools/Check Prefabs for Background.jpg")]
@@ -2538,7 +2545,7 @@ namespace Bettr.Editor
             RemoveTestScenes(new DirectoryInfo("Assets/"));
         }
 
-        private static void BuildAssetBundles()
+        private static void BuildAssetBundlesAndAudio()
         {
             Debug.Log("Building asset bundles...");
             
@@ -2632,6 +2639,8 @@ namespace Bettr.Editor
 #if UNITY_LINUX   
             EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneLinux64);
 #endif            
+
+            BuildLocalAudio();
             
         }
         
@@ -2752,9 +2761,11 @@ namespace Bettr.Editor
 
         private static string GetAssetBundleName(string assetLabel, string assetSubLabel, Type assetType)
         {
-            var isScene = assetType.Name == "SceneAsset";
             var isAudio = assetType.Name == "AudioClip";
-            var suffix = isScene ? "_scenes" :  isAudio ? "_audio" : "";
+            // audio clips will be loaded outside the AssetBundle
+            if (isAudio)  { return ""; }
+            var isScene = assetType.Name == "SceneAsset";
+            var suffix = isScene ? "_scenes" : "";
             var assetBundleName = $"{assetLabel}{assetSubLabel}{suffix}";
             return assetBundleName;
         }
@@ -2945,6 +2956,80 @@ namespace Bettr.Editor
 
             Debug.Log("Refreshing database after building local outcomes.");
             
+            AssetDatabase.Refresh();
+        }
+        
+        [MenuItem("Bettr/Build/Audio")] 
+        public static void BuildLocalAudio()
+        {
+            Debug.Log("Refreshing database before building audio.");
+            
+            BuildDirectory(new DirectoryInfo(LocalAudioDirectory));
+
+            // walk the directory
+            var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+            for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
+            {
+                var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
+                // Check that the MachineName starts with "Game" and is not "Game001Alpha"
+                if (!machineNameDir.Name.StartsWith("Game") || machineNameDir.Name == "Game001Alpha")
+                {
+                    continue;
+                }
+                var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
+                if (variantsDir == null)
+                {
+                    continue;
+                }
+                var machineVariantsDirs = variantsDir?.GetDirectories();
+                // loop over machineVariantsDir
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir?.GetDirectories();
+                    if (experimentVariantDirs == null)
+                    {
+                        continue;
+                    }
+                    // loop over experimentVariantDirs
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        // now extract the machineName from machineNameDir, machineVariant from machineVariantsDir, and experimentVariant from experimentVariantDir
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir?.Name;
+                        string experimentVariant = experimentVariantDir?.Name;
+                        
+                        string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
+                        if (!Directory.Exists(runtimeAssetPath))
+                        {
+                            Debug.LogError($"Directory not found: {runtimeAssetPath}");
+                            continue;
+                        }
+                        
+                        // get the audio directory
+                        string audioDirectory = Path.Combine(runtimeAssetPath, "Audio");
+                        // check if the audioDirectory exists and if not continue
+                        if (!Directory.Exists(audioDirectory))
+                        {
+                            Debug.Log($"Directory not found: {audioDirectory}");
+                            continue;
+                        }
+                        
+                        // get the audio files under this directory.
+                        var audioFiles = Directory.GetFiles(audioDirectory);
+                        // filter out files that are not mp3 or wav or ogg
+                        var audioFilesToCopy = audioFiles.Where(file => file.EndsWith(".mp3") || file.EndsWith(".wav") || file.EndsWith(".ogg")).ToList();
+                        // copy the audio files to the local audio directory
+                        foreach (var audioFile in audioFilesToCopy)
+                        {
+                            string audioFileName = Path.GetFileName(audioFile);
+                            string destinationPath = Path.Combine(LocalAudioDirectory, audioFileName);
+                            File.Copy(audioFile, destinationPath, true);
+                        }
+                    }
+                }
+            }
+            
+            Debug.Log("Refreshing database after building local audio.");                
             AssetDatabase.Refresh();
         }
         

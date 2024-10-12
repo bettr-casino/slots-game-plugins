@@ -578,6 +578,12 @@ namespace Bettr.Core
             yield return BettrAssetMaterialsController.LoadMaterial(bettrAssetBundleName, bettrAssetBundleVersion, materialName, targetGameObject);
         }
 
+        // TODO: FIXME loading individual audio files for now
+        public IEnumerator LoadAudio(string audioClipName)
+        {
+            yield break;
+        }
+
         public AssetBundle GetCachedAssetBundle(string bettrAssetBundleName, string bettrAssetBundleVersion, bool isScene = false)
         {
             var assetBundleName = GetAssetBundleName(bettrAssetBundleName, bettrAssetBundleVersion, isScene);

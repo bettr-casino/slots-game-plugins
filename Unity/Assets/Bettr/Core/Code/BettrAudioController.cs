@@ -1,5 +1,8 @@
 using System;
+using System.Collections;
+using System.IO;
 using CrayonScript.Code;
+using UnityEditor;
 using UnityEngine;
 
 // ReSharper disable once CheckNamespace
@@ -14,8 +17,10 @@ namespace Bettr.Core
 
         // ReSharper disable once InconsistentNaming
        [SerializeField] private AudioClip[] AudioClips;
-        
+
         public static BettrAudioController Instance { get; private set; }
+        
+        public string FileSystemAudioBaseURL => "Assets/Bettr/LocalStore/LocalAudio";
         
         public void Awake()
         {
@@ -23,6 +28,13 @@ namespace Bettr.Core
             AudioSource = audioSource;
 
             Instance = this;
+        }
+
+        public AudioClip LoadAudioClip(string audioClip)
+        {
+            var assetPath = Path.Combine(FileSystemAudioBaseURL, $"{audioClip}.mp3");
+            AudioClip clip = AssetDatabase.LoadAssetAtPath<AudioClip>(assetPath);
+            return clip;
         }
 
         public void ToggleVolume()
@@ -62,6 +74,20 @@ namespace Bettr.Core
         
         public void PlayGameAudioLoop(string bundleName, string bundleVariant, string audioClipName)
         {
+            var clip = LoadAudioClip(audioClipName);
+            if (clip != null)
+            {
+                if (AudioSource.isPlaying)
+                {
+                    AudioSource.Stop();
+                }
+
+                AudioSource.clip = clip;
+                AudioSource.loop = false;
+                AudioSource.Play();
+                return;
+            }
+            
             bundleName = bundleName.ToLower();
             
             var genres = new[]
