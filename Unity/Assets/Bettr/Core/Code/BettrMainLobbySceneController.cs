@@ -103,13 +103,13 @@ namespace Bettr.Core
             return null; // Return null if the child is not found
         }
 
-        public void LoadLobbySideBar(Table self, string lobbyCardName)
+        public IEnumerator LoadLobbySideBar(Table self, string lobbyCardName)
         {
             var sideBar = (TilePropertyGameObjectGroup) self["SideBar"];
             if (sideBar == null)
             {
                 Debug.LogError($"LoadLobbySideBar sideBar is null lobbyCardName={lobbyCardName}");
-                return;
+                yield break;
             }
 
             var gameDetails = (PropertyGameObject) sideBar["GameDetails"];
@@ -117,39 +117,39 @@ namespace Bettr.Core
             if (bettrUser == null)
             {
                 Debug.Log($"LoadLobbyCardMachine invalid BettrUserConfig");
-                return;
+                yield break;
             }
             var lobbyCardIndex = FindLobbyCardIndex(lobbyCardName);
             if (lobbyCardIndex == -1)
             {
                 Debug.Log($"LoadLobbyCardMachine invalid lobbyCardIndex={lobbyCardIndex} lobbyCardName={lobbyCardName}");
-                return;
+                yield break;
             }
             var lobbyCard = bettrUser.LobbyCards[lobbyCardIndex];
             var cachedAssetBundle = BettrAssetController.Instance.GetCachedAssetBundle(lobbyCard.BundleName, lobbyCard.BundleVersion, false);
             if (cachedAssetBundle == null)
             {
                 Debug.Log($"Lobby cachedAssetBundle is null assetBundleName={lobbyCard.BundleName} assetBundleVersion={lobbyCard.BundleVersion} isScene=false");
-                return;
+                yield break;
             }
             var textureName = lobbyCard.MaterialName;
             var texture = cachedAssetBundle.LoadAsset<Texture2D>(textureName);
             if (texture == null)
             {
                 Debug.LogError($"LoadLobbySideBar texture is null textureName={textureName} lobbyCardName={lobbyCardName}");
-                return;
+                yield break;
             }
             var imageGameObject = FindChildRecursive(gameDetails.GameObject, "Image");
             if (imageGameObject == null)
             {
                 Debug.LogError($"LoadLobbySideBar imageGameObject is null lobbyCardName={lobbyCardName}");
-                return;
+                yield break;
             }
             var imageComponent = imageGameObject.GetComponent<Image>();
             if (imageComponent == null)
             {
                 Debug.LogError($"LoadLobbySideBar imageComponent is null lobbyCardName={lobbyCardName}");
-                return;
+                yield break;
             }
             imageComponent.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
             imageComponent.color = new Color(2f, 2f, 2f, 1f);
@@ -163,14 +163,14 @@ namespace Bettr.Core
             if (detailsGameObject == null)
             {
                 Debug.LogError($"LoadLobbySideBar detailsGameObject is null textAssetName={textAssetName} lobbyCardName={lobbyCardName}");
-                return;
+                yield break;
             }
             // set the text of the TextMeshPro input field
             var textMeshPro = detailsGameObject.GetComponent<TMPro.TMP_InputField>();
             if (textMeshPro == null)
             {
                 Debug.LogError("LoadLobbySideBar detailsGameObject textMeshPro is null lobbyCardName={lobbyCardName}");
-                return;
+                yield break;
             }
             // set the rich text to true
             textMeshPro.richText = true;
@@ -178,6 +178,38 @@ namespace Bettr.Core
             textMeshPro.text = textAsset.text;
             
             gameDetails.SetActive(true);
+
+            var (machineBundleName, machineBundleVariant) = GetMachineBundleDetails(lobbyCardName);
+
+            yield return StartBackgroundMusic(machineBundleName, machineBundleVariant);
+
+        }
+
+        public Tuple<string, string> GetMachineBundleDetails(string lobbyCardName)
+        {
+            var bettrUser = BettrUserController.Instance.BettrUserConfig;
+            var lobbyCardIndex = FindLobbyCardIndex(lobbyCardName);
+            if (lobbyCardIndex == -1)
+            {
+                Debug.Log($"GetMachineDetails invalid lobbyCardIndex={lobbyCardIndex} lobbyCardName={lobbyCardName}");
+                return null;
+            }
+            BettrUserController.Instance.DisableUserPreviewMode();
+            bettrUser.LobbyCardIndex = lobbyCardIndex;
+            var lobbyCard = bettrUser.LobbyCards[lobbyCardIndex];
+            // TODO: FIXME fix hacky way to get the machine name and the machine variant
+            var materialName = lobbyCard.MaterialName;
+            // Material Name is of the form Game<NNN>__<Variant>__LobbyCard
+            var machineBundleName = materialName.Split("__")[0];
+            var machineBundleVariant = materialName.Split("__")[1];
+            return new Tuple<string, string>(machineBundleName, machineBundleVariant);
+        }
+        
+        private IEnumerator StartBackgroundMusic(string machineBundleName, string machineBundleVariant)
+        {
+            yield return BettrAudioController.Instance.LoadBackgroundAudio($"{machineBundleName}{machineBundleVariant}");
+            BettrAudioController.Instance.PlayGameAudioLoop(machineBundleName, machineBundleVariant,
+                $"{machineBundleName}{machineBundleVariant}BackgroundMusic");
         }
 
         // ReSharper disable once MemberCanBePrivate.Global

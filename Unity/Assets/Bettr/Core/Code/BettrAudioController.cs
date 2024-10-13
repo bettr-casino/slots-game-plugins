@@ -163,6 +163,9 @@ namespace Bettr.Core
 
             if (AudioSource.isPlaying)
             {
+                // check if its playing the same clip, else stop
+                if (AudioSource.clip == clip) return;
+                
                 AudioSource.Stop();
             }
 

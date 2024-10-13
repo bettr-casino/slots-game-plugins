@@ -76,18 +76,29 @@ end
 
 function MainLobbyScene:LoadMachineScene(lobbyCardName)
     self.SelectedLobbyCardName = lobbyCardName
-    BettrMainLobbySceneController.LoadLobbySideBar(self, self.SelectedLobbyCardName)           
+    System.StartCoroutine(self, "LoadLobbySideBar")           
+end
+
+function MainLobbyScene:LoadLobbySideBar()
+    series
+        do
+            BettrMainLobbySceneController.LoadLobbySideBar(self, self.SelectedLobbyCardName)
+        end
+    end
 end
 
 function MainLobbyScene:OnPointerClick1Param(param)
 	System.Print("MainLobbyScene OnPointerClick1Param param={0} tile id={1}", param, self.id)
 	if param == "PreviewPlay" then
+	    BettrAudioController.StopAudio()
         System.Print("MainLobbyScene OnPointerClick1Param PreviewPlay")
         System.StartCoroutine(self, "LoadLobbyCardMachine")
     elseif param == "PreviewPreview" then
+        BettrAudioController.StopAudio()
         System.Print("MainLobbyScene OnPointerClick1Param PreviewPreview")
         System.StartCoroutine(self, "LoadLobbyCardMachinePreview")
     elseif param == "PreviewClose" then
+        BettrAudioController.StopAudio()
         System.Print("MainLobbyScene OnPointerClick1Param PreviewClose")
         self.SideBar["GameDetails"].SetActive(false)   
     elseif param == "Volume" then

@@ -221,6 +221,8 @@ namespace Bettr.Core
 
         private IEnumerator EnterMainLobby()
         {
+            while (!_oneTimeSetUpComplete) { yield return null; }
+            
             var bettrUser = BettrUserController.Instance.BettrUserConfig;
             
             yield return _bettrAssetController.LoadScene(bettrUser.Main.BundleName, bettrUser.Main.BundleVersion, "Main"); 
