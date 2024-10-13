@@ -184,7 +184,7 @@ publish-assets-webgl:
 	@echo "Publishing WebGL asset bundles..."
 	@num_files=$$(find $(ASSET_BUNDLES_BASE_DIRECTORY)/WebGL -type f | wc -l); \
 	echo "Number of files to publish: $$num_files"; \
-	if [ $$num_files -lt 1000 ]; then \
+	if [ $$num_files -lt 1792 ]; then \
 		echo "Error: Unexpected number of files found in $(ASSET_BUNDLES_BASE_DIRECTORY)/WebGL. Aborting sync."; \
 		exit 1; \
 	fi
