@@ -2,17 +2,21 @@ Shader "Bettr/Shimmer" {
     Properties {
         _MainTex ("Texture", 2D) = "white" {}
         _ShimmerColor ("Shimmer Color", Color) = (1, 1, 1, 1)
-        _Speed ("Shimmer Speed", Float) = 0.5   // Reduced speed
-        _Intensity ("Shimmer Intensity", Float) = 0.3  // Lowered intensity
+        _Speed ("Shimmer Speed", Float) = 0.5
+        _Intensity ("Shimmer Intensity", Float) = 0.5
     }
     SubShader {
-        Tags { "RenderType"="Opaque" }
+        Tags { "RenderType" = "Transparent" }
         LOD 100
 
         Pass {
+            ZWrite Off  // Disable depth writing for transparency
+            Blend SrcAlpha OneMinusSrcAlpha  // Enable alpha blending
+
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma target 3.0
 
             sampler2D _MainTex;
             float4 _ShimmerColor;
@@ -29,24 +33,25 @@ Shader "Bettr/Shimmer" {
                 float4 vertex : SV_POSITION;
             };
 
-            v2f vert (appdata v) {
+            v2f vert(appdata v) {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = v.uv;
                 return o;
             }
 
-            float4 frag (v2f i) : SV_Target {
-                // Use the Y-axis for vertical shimmer effect
+            float4 frag(v2f i) : SV_Target {
+                // Shimmer from top to bottom
                 float shimmer = sin(_Time.y * _Speed + i.uv.y * 10.0) * 0.5 + 0.5;
 
-                // Sample the main texture color
+                // Sample the texture
                 float4 texColor = tex2D(_MainTex, i.uv);
 
-                // Apply shimmer with reduced intensity
+                // Apply shimmer effect with transparency
                 float4 shimmerEffect = _ShimmerColor * shimmer * _Intensity;
 
-                return texColor + shimmerEffect;
+                // Combine texture and shimmer, preserving transparency
+                return float4(texColor.rgb + shimmerEffect.rgb, texColor.a);
             }
             ENDCG
         }
