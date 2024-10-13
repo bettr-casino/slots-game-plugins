@@ -10,8 +10,48 @@
     <link rel="stylesheet" href="<<<TemplateData/diagnostics.css>>>">
     <script src="<<<TemplateData/diagnostics.js>>>"></script>
 #endif
+
+    <script>
+      // Age Verification Start
+      function checkAgeVerification() {
+        return localStorage.getItem('ageVerified') === 'true';
+      }
+      function verifyAge() {
+        const userAge = parseInt(document.getElementById("age-input").value);
+        if (isNaN(userAge) || userAge < 18) {
+          alert("You must be at least 18 years old to access this content.");
+        } else {
+          localStorage.setItem('ageVerified', 'true');  // Cache the verification
+          document.getElementById("age-verification").style.display = "none";
+          document.getElementById("unity-container").style.display = "block";
+        }
+      }
+      window.onload = function() {
+        if (checkAgeVerification()) {
+          document.getElementById("age-verification").style.display = "none";
+          document.getElementById("unity-container").style.display = "block";
+        } else {
+          document.getElementById("unity-container").style.display = "none";
+        }
+      };
+      // Age Verification End
+    </script>
+
   </head>
   <body>
+    <!-- Age Verification Modal Start -->
+    <div id="age-verification" style="
+        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        background-color: rgba(0, 0, 0, 0.9); color: white; text-align: center;
+        padding: 20px; border-radius: 10px;">
+      <h2>Age Verification</h2>
+      <p>You must be 18 years or older to enter this game.</p>
+      <input type="number" id="age-input" placeholder="Enter your age" min="0" style="padding: 10px;">
+      <button onclick="verifyAge()" style="padding: 10px 20px; margin-top: 10px;">Enter</button>
+      <p style="margin-top: 20px;">By entering, you confirm that you are at least 18 years old and agree to our terms of service.</p>
+    </div>
+    <!-- Age Verification Modal End -->
+
     <div id="unity-container" class="unity-desktop">
       <canvas id="unity-canvas" width={{{ WIDTH }}} height={{{ HEIGHT }}} tabindex="-1"></canvas>
       <div id="unity-loading-bar">
@@ -159,6 +199,8 @@
         color: black; font-size: 12px; background-color: rgba(255, 255, 255, 0.8); 
         z-index: 9999; padding: 5px;">
       © 2024 Bettr Casino. All Rights Reserved. | For entertainment purposes only. No real money gambling.
+      <br>
+      <strong>COPPA Notice:</strong> This game is not intended for children under 13 years old.
     </div>
   </body>
 </html>
