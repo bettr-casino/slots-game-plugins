@@ -275,6 +275,17 @@ namespace Bettr.Core
             yield return BettrAssetController.Instance.UnloadCachedAssetBundle(machineName, machineVariant);
             yield return BettrAssetController.Instance.LoadScene(machineName, machineVariant, lobbyCard.MachineSceneName);
         }
+
+        public void ToggleVolume(Table mainLobbyTable)
+        {
+            BettrAudioController.Instance.ToggleVolume();
+            // get the game object
+            var volumeButton = (PropertyGameObject) mainLobbyTable["VolumeButton"];
+            // get the Image Component
+            var imageComponent = volumeButton.GameObject.GetComponent<Image>();
+            // if volume is on set the color to 54,233,12,255 else set it to 233,54,12,255
+            imageComponent.color = BettrAudioController.Instance.IsVolumeOn() ? new Color(54f / 255f, 233f / 255f, 12f / 255f, 1f) : new Color(233f / 255f, 54f / 255f, 12f / 255f, 1f);
+        }
         
         public IEnumerator WaitUntilMainLobbyLoaded()
         {

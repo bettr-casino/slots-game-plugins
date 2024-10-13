@@ -135,6 +135,11 @@ namespace Bettr.Core
         {
             AudioSource.volume = AudioSource.volume == 0 ? 1 : 0;
         }
+        
+        public bool IsVolumeOn()
+        {
+            return AudioSource.volume > 0;
+        }
 
         public void PlayAudioOnce(string audioClipName)
         {

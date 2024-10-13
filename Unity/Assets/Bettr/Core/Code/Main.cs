@@ -88,8 +88,6 @@ namespace Bettr.Core
                     }
                 });
             }
-
-            yield return LoadMachine();
         }
 
         private IEnumerator OneTimeSetup()
@@ -194,20 +192,7 @@ namespace Bettr.Core
             
             yield return LoginUser();
 
-            var bettrUser = BettrUserController.Instance.BettrUserConfig;
-            
             yield return _bettrExperimentController.GetUserExperiments();
-            
-            yield return _bettrAssetController.LoadScene(bettrUser.Main.BundleName, bettrUser.Main.BundleVersion, "Main"); 
-            
-            yield return _bettrAssetController.LoadPackage(bettrUser.Main.BundleName, bettrUser.Main.BundleVersion, false);
-            
-            ScriptRunner.Initialize();
-            
-            var mainTable = _bettrAssetScriptsController.GetScript("Main");
-            var scriptRunner = ScriptRunner.Acquire(mainTable);
-            yield return scriptRunner.CallAsyncAction("Init");
-            ScriptRunner.Release(scriptRunner);
             
             Debug.Log("OneTimeSetup ended");
             
@@ -227,6 +212,26 @@ namespace Bettr.Core
             ScriptRunner.Release(scriptRunner);
 
             // yield return UpdateCommitHash();
+        }
+
+        public void OnEnterMainLobby()
+        {
+            StartCoroutine(EnterMainLobby());
+        }
+
+        private IEnumerator EnterMainLobby()
+        {
+            var bettrUser = BettrUserController.Instance.BettrUserConfig;
+            
+            yield return _bettrAssetController.LoadScene(bettrUser.Main.BundleName, bettrUser.Main.BundleVersion, "Main"); 
+            yield return _bettrAssetController.LoadPackage(bettrUser.Main.BundleName, bettrUser.Main.BundleVersion, false);
+            ScriptRunner.Initialize();
+            var mainTable = _bettrAssetScriptsController.GetScript("Main");
+            var scriptRunner = ScriptRunner.Acquire(mainTable);
+            yield return scriptRunner.CallAsyncAction("Init");
+            ScriptRunner.Release(scriptRunner);
+
+            yield return LoadMainLobby();
         }
         
         private IEnumerator LoadNextMachine()

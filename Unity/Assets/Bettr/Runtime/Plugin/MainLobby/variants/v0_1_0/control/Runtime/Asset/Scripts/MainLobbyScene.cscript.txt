@@ -90,6 +90,9 @@ function MainLobbyScene:OnPointerClick1Param(param)
     elseif param == "PreviewClose" then
         System.Print("MainLobbyScene OnPointerClick1Param PreviewClose")
         self.SideBar["GameDetails"].SetActive(false)   
+    elseif param == "Volume" then
+        System.Print("MainLobbyScene OnPointerClick1Param Volume")
+        BettrMainLobbySceneController.ToggleVolume(self)
     end
 end
 
