@@ -10,6 +10,7 @@ using CrayonScript.Interpreter.Execution.VM;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using Object = UnityEngine.Object;
@@ -49,6 +50,7 @@ namespace Bettr.Core
                 "Bettr/LobbyMask",
                 "Bettr/ReelMask",
                 "Bettr/Symbol",
+                "Bettr/Shimmer",
                 "Bettr/UIImage",
                 "Unlit/Texture",
                 "Unlit/Color",
@@ -238,6 +240,19 @@ namespace Bettr.Core
                 }
             }
             
+            // Update shaders for all Image components that are using a Material which could be null
+            var images = prefab.GetComponentsInChildren<Image>(true);
+            foreach (var image in images)
+            {
+                if (image.material != null)
+                {
+                    if (ShaderCaches.ShaderCache.TryGetValue(image.material.shader.name, out Shader bettrShader))
+                    {
+                        image.material.shader = bettrShader;
+                    }
+                }
+            }
+            
             Object.Instantiate(prefab, parent == null ? null : parent.transform);
         }
     }
@@ -358,6 +373,19 @@ namespace Bettr.Core
                 if (ShaderCaches.TmProShaderCache.TryGetValue(textMeshPro.fontMaterial.shader.name, out Shader bettrShader))
                 {
                     textMeshPro.fontMaterial.shader = bettrShader;
+                }
+            }
+            
+            // Update shaders for all Image components that are using a Material which could be null
+            var images = Object.FindObjectsOfType<Image>(true);
+            foreach (var image in images)
+            {
+                if (image.material != null)
+                {
+                    if (ShaderCaches.ShaderCache.TryGetValue(image.material.shader.name, out Shader bettrShader))
+                    {
+                        image.material.shader = bettrShader;
+                    }
                 }
             }
         }
