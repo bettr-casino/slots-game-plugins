@@ -35,18 +35,19 @@ function Game003:Start()
             BettrVisualsController.SwitchOrientationToLandscape()
         end
         do
+            Game003BaseGameBackground:StartBackground()
+        end
+        do
             BettrAudioController.LoadBackgroundAudio("Game003HighStakesHotLinks")
         end
         do
             BettrAudioController.PlayGameAudioLoop("Game003HighStakesHotLinks", "variant1", "Game003HighStakesHotLinksBackgroundMusic")       
         end
         do
-            System.Print("Game003:Start tile id={0}", self.id)
-            self:LoadBaseGameBackgroundPrefab()
+            System.Print("Game003:Start Load Machine Prefabs tile id={0}", self.id)
             self:LoadBaseGamePrefab()
         end
         do
-            Game003BaseGameBackground:StartBackground()
             self:SetBaseGameActive(true)
         end
     end

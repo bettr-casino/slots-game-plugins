@@ -35,18 +35,19 @@ function Game007:Start()
             BettrVisualsController.SwitchOrientationToLandscape()
         end
         do
+            Game007BaseGameBackground:StartBackground()
+        end
+        do
             BettrAudioController.LoadBackgroundAudio("Game007TrueVegasLucky7s")
         end
         do
             BettrAudioController.PlayGameAudioLoop("Game007TrueVegasLucky7s", "control", "Game007TrueVegasLucky7sBackgroundMusic")       
         end
         do
-            System.Print("Game007:Start tile id={0}", self.id)
-            self:LoadBaseGameBackgroundPrefab()
+            System.Print("Game007:Start Load Machine Prefabs tile id={0}", self.id)
             self:LoadBaseGamePrefab()
         end
         do
-            Game007BaseGameBackground:StartBackground()
             self:SetBaseGameActive(true)
         end
     end

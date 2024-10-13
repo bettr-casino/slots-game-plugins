@@ -29,7 +29,7 @@ namespace Bettr.Core
         
         public BettrExperimentController BettrExperimentController { get; private set; }
         
-        public bool IsMainLobbyCardsAlreadyLoaded { get; private set; }
+        public bool IsMainLobbyLoaded { get; private set; }
         
         public Dictionary<string, Material> LobbyCardMaterialMap { get; private set; }
 
@@ -44,7 +44,7 @@ namespace Bettr.Core
             
             BettrExperimentController = bettrExperimentController;
 
-            IsMainLobbyCardsAlreadyLoaded = false;
+            IsMainLobbyLoaded = false;
             
             LobbyCardMaterialMap = new Dictionary<string, Material>();
         }
@@ -276,6 +276,14 @@ namespace Bettr.Core
             yield return BettrAssetController.Instance.LoadScene(machineName, machineVariant, lobbyCard.MachineSceneName);
         }
         
+        public IEnumerator WaitUntilMainLobbyLoaded()
+        {
+            while (!IsMainLobbyLoaded)
+            {
+                yield return null;
+            }
+        }
+        
         public IEnumerator LoadMainLobby()
         {
             var bettrUser = BettrUserController.Instance.BettrUserConfig;
@@ -288,7 +296,7 @@ namespace Bettr.Core
 
         public IEnumerator UpdateLoadingText(Table self)
         {
-            while (!IsMainLobbyCardsAlreadyLoaded)
+            while (!IsMainLobbyLoaded)
             {
                 var loadingTextProperty = (PropertyTextMeshPro) self["LoadingText"];
                 if (loadingTextProperty != null)
@@ -314,7 +322,7 @@ namespace Bettr.Core
             var totalLobbyCardCount = bettrUser.LobbyCards.Count;
             TotalLobbyCardCount = totalLobbyCardCount;
 
-            if (IsMainLobbyCardsAlreadyLoaded)
+            if (IsMainLobbyLoaded)
             {
                 // turn off the loading screen
                 var loadingProperty = (PropertyGameObject) self["Loading"];
@@ -391,7 +399,7 @@ namespace Bettr.Core
                         // throw; // continue with invalid cards
                     }
 
-                    if (IsMainLobbyCardsAlreadyLoaded)
+                    if (IsMainLobbyLoaded)
                     {
                         LoadedLobbyCardCount++;
                         
@@ -425,7 +433,7 @@ namespace Bettr.Core
                 }
             }
             
-            IsMainLobbyCardsAlreadyLoaded = true;
+            IsMainLobbyLoaded = true;
         }
         
         public Tuple<string, string> GetLobbyCardExperiment(BettrLobbyCardConfig lobbyCard)

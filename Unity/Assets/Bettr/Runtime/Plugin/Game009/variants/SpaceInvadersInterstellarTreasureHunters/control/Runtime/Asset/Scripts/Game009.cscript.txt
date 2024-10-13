@@ -35,18 +35,19 @@ function Game009:Start()
             BettrVisualsController.SwitchOrientationToLandscape()
         end
         do
+            Game009BaseGameBackground:StartBackground()
+        end
+        do
             BettrAudioController.LoadBackgroundAudio("Game009SpaceInvadersInterstellarTreasureHunters")
         end
         do
             BettrAudioController.PlayGameAudioLoop("Game009SpaceInvadersInterstellarTreasureHunters", "control", "Game009SpaceInvadersInterstellarTreasureHuntersBackgroundMusic")       
         end
         do
-            System.Print("Game009:Start tile id={0}", self.id)
-            self:LoadBaseGameBackgroundPrefab()
+            System.Print("Game009:Start Load Machine Prefabs tile id={0}", self.id)
             self:LoadBaseGamePrefab()
         end
         do
-            Game009BaseGameBackground:StartBackground()
             self:SetBaseGameActive(true)
         end
     end

@@ -1768,6 +1768,126 @@ namespace Bettr.Editor
             Debug.Log($"Processed Fix Background {processCount} machine variants.");
         }
         
+        [MenuItem("Bettr/Tools/Fix Game Scene")]
+        public static void FixGameScene()
+        {
+            // Walk the entire directory tree under the plugin root directory
+            var processCount = 0;
+            var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+            string coreAssetPath = $"Assets/Bettr/Core";
+            for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
+            {
+                var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
+                // Check that the MachineName starts with "Game" and is not "Game001Alpha"
+                if (!machineNameDir.Name.StartsWith("Game") || machineNameDir.Name == "Game001Alpha")
+                {
+                    continue;
+                }
+                var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
+                if (variantsDir == null)
+                {
+                    continue;
+                }
+                var machineVariantsDirs = variantsDir?.GetDirectories();
+                // loop over machineVariantsDir
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir?.GetDirectories();
+                    if (experimentVariantDirs == null)
+                    {
+                        continue;
+                    }
+                    // loop over experimentVariantDirs
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        // now extract the machineName from machineNameDir, machineVariant from machineVariantsDir, and experimentVariant from experimentVariantDir
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir?.Name;
+                        string experimentVariant = experimentVariantDir?.Name;
+                        
+                        string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
+                        if (!Directory.Exists(runtimeAssetPath))
+                        {
+                            Debug.LogError($"Directory not found: {runtimeAssetPath}");
+                            continue;
+                        }
+                        
+                        // Load the {{machine}}{{machineVariant}}BaseGameBackground prefab under the runtime assets "prefabs" directory
+                        string prefabsDirectory = Path.Combine(runtimeAssetPath, "Prefabs");
+                        string backgroundPrefabPath = Directory.GetFiles(prefabsDirectory, $"{machineName}BaseGameBackground.prefab", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                        if (string.IsNullOrEmpty(backgroundPrefabPath))
+                        {
+                            Debug.LogError($"Background prefab not found: {machineName}BaseGameBackground.prefab");
+                            continue;
+                        }
+                        // load the prefab
+                        GameObject backgroundPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(backgroundPrefabPath);
+                        if (backgroundPrefab == null)
+                        {
+                            Debug.LogError($"Failed to load prefab: {machineName}BaseGameBackground.prefab");
+                            continue;
+                        }
+                        
+                        // load the GameScene of the form {{machineName}}{{machineVariant}}Scene.unity in Editor
+                        string scenesDirectory = Path.Combine(runtimeAssetPath, "Scenes");
+                        string scenePath = Directory.GetFiles(scenesDirectory, $"{machineName}{machineVariant}Scene.unity", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                        if (string.IsNullOrEmpty(scenePath))
+                        {
+                            Debug.LogError($"Scene not found: {machineName}{machineVariant}Scene.unity");
+                            continue;
+                        }
+                        // load the scene in this editor script
+                        Scene scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+                        
+                        // find the game object called "BaseGameBackgroundParent" in the open scene and attach this backgroundPrefab to it
+                        GameObject baseGameBackgroundParent = GameObject.Find("BaseGameBackgroundParent");
+                        if (baseGameBackgroundParent == null)
+                        {
+                            Debug.LogError($"BaseGameBackgroundParent not found in scene: {machineName}{machineVariant}Scene.unity");
+                            continue;
+                        }
+                        // get the "Pivot" child of baseGameBackgroundParent
+                        Transform pivot = baseGameBackgroundParent.transform.Find("Pivot");
+                        if (pivot == null)
+                        {
+                            Debug.LogError($"Pivot not found in BaseGameBackgroundParent");
+                            continue;
+                        }
+                        
+                        // remove any existing child of "Pivot"
+                        foreach (Transform child in pivot)
+                        {
+                            Object.DestroyImmediate(child.gameObject);
+                        }
+                        
+                        // instantiate the backgroundPrefab
+                        GameObject background = PrefabUtility.InstantiatePrefab(backgroundPrefab) as GameObject;
+                        // null check background
+                        if (background == null)
+                        {
+                            Debug.LogError($"Failed to instantiate background prefab: {machineName}{machineVariant}BaseGameBackgroundPrefab.prefab");
+                            continue;
+                        }
+                        
+                        // set the parent of the background to the baseGameBackgroundParent
+                        background.transform.SetParent(pivot);
+                        
+                        // Save the changes to the scene
+                        EditorSceneManager.MarkSceneDirty(scene);
+                        EditorSceneManager.SaveScene(scene);
+                        
+                        Debug.Log($"Fixing Background for machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant}");
+                
+                        processCount++;
+                    }
+                }
+            }
+            
+            AssetDatabase.Refresh();
+            
+            Debug.Log($"Processed Fix Game Scene {processCount} machine variants.");
+        }
+        
         [MenuItem("Bettr/Tools/Fix Background Shader")]
         public static void FixBackgroundShader()
         {
