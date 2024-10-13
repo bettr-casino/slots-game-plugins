@@ -17,9 +17,12 @@
         return localStorage.getItem('ageVerified') === 'true';
       }
       function verifyAge() {
-        const userAge = parseInt(document.getElementById("age-input").value);
+        const ageInput = document.getElementById("age-input");
+        const userAge = parseInt(ageInput.value, 10);
         if (isNaN(userAge) || userAge < 18) {
           alert("You must be at least 18 years old to access this content.");
+          ageInput.value = '';
+          ageInput.focus();
         } else {
           localStorage.setItem('ageVerified', 'true');  // Cache the verification
           document.getElementById("age-verification").style.display = "none";
