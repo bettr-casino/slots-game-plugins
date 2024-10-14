@@ -98,9 +98,6 @@ namespace Bettr.Core
             
             DontDestroyOnLoad(gameObject);
             
-            // Warm up all shaders
-            Shader.WarmupAllShaders();
-            
             TileController.StaticInit();
             TileController.RegisterModule("Bettr.dll");
             TileController.RegisterModule("casino.bettr.plugin.Core.dll");
