@@ -160,7 +160,6 @@ namespace Bettr.Core
             TileController.RegisterType<BettrAudioController>("BettrAudioController");
             TileController.AddToGlobals("BettrAudioController", BettrAudioController.Instance);
 
-            BettrVideoController.UseFileSystemVideo = _configData.UseFileSystemAudio;
             BettrVideoController.VideoServerBaseURL = _configData.VideoServerBaseURL;
             TileController.RegisterType<BettrVideoController>("BettrVideoController");
             TileController.AddToGlobals("BettrVideoController", BettrVideoController.Instance);

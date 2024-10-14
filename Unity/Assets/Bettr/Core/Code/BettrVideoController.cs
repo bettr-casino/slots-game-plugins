@@ -12,8 +12,6 @@ namespace Bettr.Core
     // attached to Core MainScene
     public class BettrVideoController : MonoBehaviour
     {
-        public static bool UseFileSystemVideo = true;
-        public static string FileSystemVideoBaseURL => "Bettr/LocalStore/LocalVideo";
         public static string VideoServerBaseURL;
         
         public static BettrVideoController Instance { get; private set; }
@@ -23,42 +21,9 @@ namespace Bettr.Core
             Instance = this;
         }
 
-        public IEnumerator LoadBackgroundAudio(string bundleName)
+        public IEnumerator LoadBackgroundVideo(string bundleName)
         {
-            if (UseFileSystemVideo)
-            {
-                yield return LoadFileSystemBackgroundVideo(bundleName);
-            }
-            else
-            {
-                yield return LoadS3SystemBackgroundVideo(bundleName);
-            }
-        }
-
-        public IEnumerator LoadFileSystemBackgroundVideo(string bundleName)
-        {
-            var backgroundAudioClipName = $"{bundleName}BackgroundMusic";
-            var assetPath = Path.Combine(FileSystemVideoBaseURL, $"{backgroundAudioClipName}.mp3");
-            var absolutePath = Path.Combine(Application.dataPath, assetPath);
-            var absoluteFileUrl = $"file://{absolutePath}";
-            AudioClip clip = null;
-            using UnityWebRequest request = UnityWebRequestMultimedia.GetAudioClip(absoluteFileUrl, AudioType.MPEG);
-            yield return request.SendWebRequest();
-            if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
-            {
-                Debug.LogError($"Error loading audio clip from {absoluteFileUrl}: {request.error}");
-                yield break;
-            }
-            clip = DownloadHandlerAudioClip.GetContent(request);
-            clip.name = backgroundAudioClipName;
-            if (clip != null)
-            {
-                Debug.Log("Audio clip successfully loaded from file system.");
-            }
-            else
-            {
-                Debug.Log($"Failed to load audio clip from {absoluteFileUrl}");
-            }
+            yield return LoadS3SystemBackgroundVideo(bundleName);
         }
         
         public IEnumerator LoadS3SystemBackgroundVideo(string bundleName)

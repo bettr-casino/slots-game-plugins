@@ -27,8 +27,6 @@ namespace Bettr.Core
         
         public bool UseFileSystemAudio { get; set; }
         
-        public bool UseFileSystemVideo { get; set; }
-        
         public bool UseFileSystemOutcomes { get; set; }
         
         public bool UseLocalServer { get; set; }
