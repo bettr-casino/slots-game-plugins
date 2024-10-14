@@ -1,8 +1,11 @@
 using System;
 using System.Collections;
 using System.IO;
+using CrayonScript.Code;
+using CrayonScript.Interpreter;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.Video;
 
 // ReSharper disable once CheckNamespace
 namespace Bettr.Core
@@ -21,49 +24,68 @@ namespace Bettr.Core
             Instance = this;
         }
 
-        public IEnumerator LoadBackgroundVideo(string bundleName)
+        public IEnumerator LoadBackgroundVideo(Table backgroundTable, string machineName, string machineVariant, string experimentVariant)
         {
-            yield return LoadS3SystemBackgroundVideo(bundleName);
-        }
-        
-        public IEnumerator LoadS3SystemBackgroundVideo(string bundleName)
-        {
-            // Create the URL for the background music
-            var backgroundAudioClipName = $"{bundleName}BackgroundMusic";
-            // TODO: fixme
-            var assetUrl = $"{VideoServerBaseURL}/{backgroundAudioClipName}.mp3";
-
-            // Use UnityWebRequest to load the AudioClip from S3
-            using (UnityWebRequest request = UnityWebRequestMultimedia.GetAudioClip(assetUrl, AudioType.MPEG))
+            // Get the BackgroundFBX property from the backgroundTable
+            var backgroundFBX = backgroundTable["BackgroundFBX"] as PropertyGameObject;
+            if (backgroundFBX == null)
             {
-                // Send the request
-                yield return request.SendWebRequest();
-
-                // Check for errors
-                if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
-                {
-                    Debug.LogError($"Error loading audio clip from {assetUrl}: {request.error}");
-                    yield break;
-                }
-
-                // Get the AudioClip from the request
-                AudioClip clip = DownloadHandlerAudioClip.GetContent(request);
-
-                // Now you can use the AudioClip, for example:
-                if (clip != null)
-                {
-                    Debug.Log("Audio clip successfully loaded from S3.");
-
-                    // Example: Set it to an AudioSource and play
-                    AudioSource audioSource = GetComponent<AudioSource>();
-                    audioSource.clip = clip;
-                    audioSource.Play();
-                }
-                else
-                {
-                    Debug.LogError($"Failed to load audio clip from {assetUrl}");
-                }
+                // log info and quietly fail
+                Debug.Log($"Failed to load backgroundFBX from backgroundTable machineName={machineName}, machineVariant={machineVariant}, experimentVariant={experimentVariant}");
+                yield break;
             }
+            
+            // get the VideoPlayer component from the backgroundFBX
+            var videoPlayer = backgroundFBX.gameObject.GetComponent<VideoPlayer>();
+            // if null, log and quietly fail
+            if (videoPlayer == null)
+            {
+                Debug.Log($"Failed to load VideoPlayer from backgroundFBX machineName={machineName}, machineVariant={machineVariant}, experimentVariant={experimentVariant}");
+                yield break;
+            }
+            
+            // get the mesh renderer from the backgroundFBX
+            var meshRenderer = backgroundFBX.gameObject.GetComponent<MeshRenderer>();
+            // if null, log and quietly fail
+            if (meshRenderer == null)
+            {
+                Debug.Log($"Failed to load MeshRenderer from backgroundFBX machineName={machineName}, machineVariant={machineVariant}, experimentVariant={experimentVariant}");
+                yield break;
+            }
+            
+            // Create the URL for the background video
+            var backgroundVideoName = $"{machineName}{machineVariant}BackgroundVideo";
+            var assetUrl = $"{VideoServerBaseURL}/video/latest/{backgroundVideoName}.mp4";
+            
+            // get the cached asset bundle
+            // lowercase everything for safety
+            var bundleName = $"{machineName}{machineVariant}".ToLower();
+            var bundleVersion = $"{experimentVariant}".ToLower();
+            var cachedAssetBundle = BettrAssetController.Instance.GetCachedAssetBundle(bundleName, bundleVersion, false);
+            if (cachedAssetBundle == null)
+            {
+                // fail quietly
+                Debug.Log($"Failed to load cached asset bundle for {bundleName} {bundleVersion}");
+                yield break;
+            }
+            
+            // get the material from the asset bundle. The material name will be called BackgroundVideoMaterial
+            var material = cachedAssetBundle.LoadAsset<Material>("BackgroundVideoMaterial");
+
+            // set the url of the video player to the assetUrl
+            videoPlayer.url = assetUrl;
+            
+            // Prepare the video player
+            videoPlayer.Prepare();
+            // Add a listener for when the video is prepared
+            videoPlayer.prepareCompleted += source =>
+            {
+                // switch the material to the render BackgroundVideoMaterial material
+                meshRenderer.material = material;
+                
+                // Play the video
+                videoPlayer.Play();
+            };
         }
     }
 }

@@ -2039,6 +2039,44 @@ namespace Bettr.Editor
                         // indicate that clip is loaded via url
                         videoPlayer.source = VideoSource.Url;
                         
+                        // now I need to add the following component to the background if it doesnt exist
+                        TilePropertyGameObjects tilePropertyGameObjects = null;
+                        // loop over background components of type TilePropertyGameObjects
+                        var allTilePropertyGameObjects = background.GetComponents<TilePropertyGameObjects>();
+                        if (allTilePropertyGameObjects != null)
+                        {
+                            foreach (var t in allTilePropertyGameObjects)
+                            {
+                                if (t.tileGameObjectProperties.Any(p => p.key == "BackgroundFBX"))
+                                {
+                                    tilePropertyGameObjects = t;
+                                }
+                            }
+                        }
+                        
+                        if (tilePropertyGameObjects == null)
+                        {
+                            tilePropertyGameObjects = background.AddComponent<TilePropertyGameObjects>();
+                            tilePropertyGameObjects.tileGameObjectProperties = new List<TilePropertyGameObject>();
+                        }
+                        
+                        // check if the key BackgroundFBX exists in the tileGameObjectProperties
+                        if (tilePropertyGameObjects.tileGameObjectProperties.Any(p => p.key == "BackgroundFBX"))
+                        {
+                            // remove the key BackgroundFBX from the tileGameObjectProperties
+                            tilePropertyGameObjects.tileGameObjectProperties.RemoveAll(p => p.key == "BackgroundFBX");
+                        }
+                        
+                        // add to the tileGameObjectProperties property of the tilePropertyGameObjects
+                        tilePropertyGameObjects.tileGameObjectProperties.Add(new TilePropertyGameObject()
+                        {
+                            key = "BackgroundFBX",
+                            value = new PropertyGameObject()
+                            {
+                                gameObject = backgroundFBX,
+                            }
+                        });
+                        
                         // Save the Prefab
                         PrefabUtility.SaveAsPrefabAsset(background, backgroundPrefabPath);
                         
