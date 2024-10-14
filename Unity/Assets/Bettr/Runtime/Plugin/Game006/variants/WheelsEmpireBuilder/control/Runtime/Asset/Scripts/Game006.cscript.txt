@@ -41,7 +41,13 @@ function Game006:Start()
             BettrAudioController.LoadBackgroundAudio("Game006WheelsEmpireBuilder")
         end
         do
+            BettrVideoController.LoadBackgroundVideo(Game006BaseGameBackground, "Game006", "WheelsEmpireBuilder", "control")
+        end        
+        do
             BettrAudioController.PlayGameAudioLoop("Game006WheelsEmpireBuilder", "control", "Game006WheelsEmpireBuilderBackgroundMusic")       
+        end
+        do
+            BettrVideoController.PlayBackgroundVideo(Game006BaseGameBackground, "Game006", "WheelsEmpireBuilder", "control")
         end
         do
             System.Print("Game006:Start Load Machine Prefabs tile id={0}", self.id)

@@ -41,7 +41,13 @@ function Game007:Start()
             BettrAudioController.LoadBackgroundAudio("Game007TrueVegasLucky7s")
         end
         do
+            BettrVideoController.LoadBackgroundVideo(Game007BaseGameBackground, "Game007", "TrueVegasLucky7s", "control")
+        end        
+        do
             BettrAudioController.PlayGameAudioLoop("Game007TrueVegasLucky7s", "control", "Game007TrueVegasLucky7sBackgroundMusic")       
+        end
+        do
+            BettrVideoController.PlayBackgroundVideo(Game007BaseGameBackground, "Game007", "TrueVegasLucky7s", "control")
         end
         do
             System.Print("Game007:Start Load Machine Prefabs tile id={0}", self.id)

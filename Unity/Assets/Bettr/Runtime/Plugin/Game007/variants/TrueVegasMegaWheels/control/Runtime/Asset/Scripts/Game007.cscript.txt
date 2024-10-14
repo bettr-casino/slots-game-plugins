@@ -41,7 +41,13 @@ function Game007:Start()
             BettrAudioController.LoadBackgroundAudio("Game007TrueVegasMegaWheels")
         end
         do
+            BettrVideoController.LoadBackgroundVideo(Game007BaseGameBackground, "Game007", "TrueVegasMegaWheels", "control")
+        end        
+        do
             BettrAudioController.PlayGameAudioLoop("Game007TrueVegasMegaWheels", "control", "Game007TrueVegasMegaWheelsBackgroundMusic")       
+        end
+        do
+            BettrVideoController.PlayBackgroundVideo(Game007BaseGameBackground, "Game007", "TrueVegasMegaWheels", "control")
         end
         do
             System.Print("Game007:Start Load Machine Prefabs tile id={0}", self.id)

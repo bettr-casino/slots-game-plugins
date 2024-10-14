@@ -41,7 +41,13 @@ function Game002:Start()
             BettrAudioController.LoadBackgroundAudio("Game002BuffaloWildPicks")
         end
         do
+            BettrVideoController.LoadBackgroundVideo(Game002BaseGameBackground, "Game002", "BuffaloWildPicks", "control")
+        end        
+        do
             BettrAudioController.PlayGameAudioLoop("Game002BuffaloWildPicks", "control", "Game002BuffaloWildPicksBackgroundMusic")       
+        end
+        do
+            BettrVideoController.PlayBackgroundVideo(Game002BaseGameBackground, "Game002", "BuffaloWildPicks", "control")
         end
         do
             System.Print("Game002:Start Load Machine Prefabs tile id={0}", self.id)

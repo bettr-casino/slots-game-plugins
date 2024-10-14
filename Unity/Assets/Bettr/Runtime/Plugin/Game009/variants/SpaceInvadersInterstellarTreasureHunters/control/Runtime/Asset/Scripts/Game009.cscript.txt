@@ -41,7 +41,13 @@ function Game009:Start()
             BettrAudioController.LoadBackgroundAudio("Game009SpaceInvadersInterstellarTreasureHunters")
         end
         do
+            BettrVideoController.LoadBackgroundVideo(Game009BaseGameBackground, "Game009", "SpaceInvadersInterstellarTreasureHunters", "control")
+        end        
+        do
             BettrAudioController.PlayGameAudioLoop("Game009SpaceInvadersInterstellarTreasureHunters", "control", "Game009SpaceInvadersInterstellarTreasureHuntersBackgroundMusic")       
+        end
+        do
+            BettrVideoController.PlayBackgroundVideo(Game009BaseGameBackground, "Game009", "SpaceInvadersInterstellarTreasureHunters", "control")
         end
         do
             System.Print("Game009:Start Load Machine Prefabs tile id={0}", self.id)

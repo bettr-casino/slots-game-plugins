@@ -41,7 +41,13 @@ function Game005:Start()
             BettrAudioController.LoadBackgroundAudio("Game005FortunesNorseAcorns")
         end
         do
+            BettrVideoController.LoadBackgroundVideo(Game005BaseGameBackground, "Game005", "FortunesNorseAcorns", "control")
+        end        
+        do
             BettrAudioController.PlayGameAudioLoop("Game005FortunesNorseAcorns", "control", "Game005FortunesNorseAcornsBackgroundMusic")       
+        end
+        do
+            BettrVideoController.PlayBackgroundVideo(Game005BaseGameBackground, "Game005", "FortunesNorseAcorns", "control")
         end
         do
             System.Print("Game005:Start Load Machine Prefabs tile id={0}", self.id)

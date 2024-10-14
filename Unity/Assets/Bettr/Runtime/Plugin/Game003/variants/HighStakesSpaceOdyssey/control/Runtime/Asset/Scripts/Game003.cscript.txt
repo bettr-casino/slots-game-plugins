@@ -41,7 +41,13 @@ function Game003:Start()
             BettrAudioController.LoadBackgroundAudio("Game003HighStakesSpaceOdyssey")
         end
         do
+            BettrVideoController.LoadBackgroundVideo(Game003BaseGameBackground, "Game003", "HighStakesSpaceOdyssey", "control")
+        end        
+        do
             BettrAudioController.PlayGameAudioLoop("Game003HighStakesSpaceOdyssey", "control", "Game003HighStakesSpaceOdysseyBackgroundMusic")       
+        end
+        do
+            BettrVideoController.PlayBackgroundVideo(Game003BaseGameBackground, "Game003", "HighStakesSpaceOdyssey", "control")
         end
         do
             System.Print("Game003:Start Load Machine Prefabs tile id={0}", self.id)

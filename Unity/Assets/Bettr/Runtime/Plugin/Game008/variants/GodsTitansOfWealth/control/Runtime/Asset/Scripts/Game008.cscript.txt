@@ -41,7 +41,13 @@ function Game008:Start()
             BettrAudioController.LoadBackgroundAudio("Game008GodsTitansOfWealth")
         end
         do
+            BettrVideoController.LoadBackgroundVideo(Game008BaseGameBackground, "Game008", "GodsTitansOfWealth", "control")
+        end        
+        do
             BettrAudioController.PlayGameAudioLoop("Game008GodsTitansOfWealth", "control", "Game008GodsTitansOfWealthBackgroundMusic")       
+        end
+        do
+            BettrVideoController.PlayBackgroundVideo(Game008BaseGameBackground, "Game008", "GodsTitansOfWealth", "control")
         end
         do
             System.Print("Game008:Start Load Machine Prefabs tile id={0}", self.id)

@@ -41,7 +41,13 @@ function Game001:Start()
             BettrAudioController.LoadBackgroundAudio("Game001EpicPharosFortune")
         end
         do
+            BettrVideoController.LoadBackgroundVideo(Game001BaseGameBackground, "Game001", "EpicPharosFortune", "control")
+        end        
+        do
             BettrAudioController.PlayGameAudioLoop("Game001EpicPharosFortune", "control", "Game001EpicPharosFortuneBackgroundMusic")       
+        end
+        do
+            BettrVideoController.PlayBackgroundVideo(Game001BaseGameBackground, "Game001", "EpicPharosFortune", "control")
         end
         do
             System.Print("Game001:Start Load Machine Prefabs tile id={0}", self.id)
