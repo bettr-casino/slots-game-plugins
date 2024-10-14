@@ -21,6 +21,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
+using UnityEngine.Video;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using DirectoryInfo = System.IO.DirectoryInfo;
@@ -1887,6 +1888,175 @@ namespace Bettr.Editor
             AssetDatabase.Refresh();
             
             Debug.Log($"Processed Fix Game Scene {processCount} machine variants.");
+        }
+        
+        [MenuItem("Bettr/Tools/Fix Background Video Player")]
+        public static void FixBaseGameBackgroundVideoPlayerComponent()
+        {
+            // Walk the entire directory tree under the plugin root directory
+            var processCount = 0;
+            var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+            string coreAssetPath = $"Assets/Bettr/Core";
+            for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
+            {
+                var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
+                // Check that the MachineName starts with "Game" and is not "Game001Alpha"
+                if (!machineNameDir.Name.StartsWith("Game") || machineNameDir.Name == "Game001Alpha")
+                {
+                    continue;
+                }
+                var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
+                if (variantsDir == null)
+                {
+                    continue;
+                }
+                var machineVariantsDirs = variantsDir?.GetDirectories();
+                // loop over machineVariantsDir
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir?.GetDirectories();
+                    if (experimentVariantDirs == null)
+                    {
+                        continue;
+                    }
+                    // loop over experimentVariantDirs
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        // now extract the machineName from machineNameDir, machineVariant from machineVariantsDir, and experimentVariant from experimentVariantDir
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir?.Name;
+                        string experimentVariant = experimentVariantDir?.Name;
+                        
+                        string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
+                        if (!Directory.Exists(runtimeAssetPath))
+                        {
+                            Debug.LogError($"Directory not found: {runtimeAssetPath}");
+                            continue;
+                        }
+                        
+                        // check the Textures directory for a BackgroundVideoRenderTexture render texture
+                        string texturesDirectory = Path.Combine(runtimeAssetPath, "Textures");
+                        string backgroundVideoRenderTexturePath = Directory.GetFiles(texturesDirectory, "BackgroundVideoRenderTexture.renderTexture", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                        
+                        // if render texture at path create the render texture
+                        RenderTexture backgroundVideoRenderTexture = null;
+                        if (string.IsNullOrEmpty(backgroundVideoRenderTexturePath))
+                        {
+                            // create the render texture
+                            backgroundVideoRenderTexture = new RenderTexture(960, 600, 24);
+                            // save the render texture
+                            backgroundVideoRenderTexturePath = Path.Combine(texturesDirectory, "BackgroundVideoRenderTexture.renderTexture");
+                            AssetDatabase.CreateAsset(backgroundVideoRenderTexture, backgroundVideoRenderTexturePath);
+                            // save asset
+                            AssetDatabase.SaveAssets();
+                            // refresh the asset database
+                            AssetDatabase.Refresh();
+                        }
+                        backgroundVideoRenderTexture = AssetDatabase.LoadAssetAtPath<RenderTexture>(backgroundVideoRenderTexturePath);
+                        // ensure render texture width and height are 960 and 600
+                        backgroundVideoRenderTexture.width = 960;
+                        backgroundVideoRenderTexture.height = 600;
+                        // ensure anti aliasing is set to none
+                        backgroundVideoRenderTexture.antiAliasing = 1;
+                        // ensure the render texture is not mipmapped
+                        backgroundVideoRenderTexture.useMipMap = false;
+                        // ensure the render texture filter mode to bilinear
+                        backgroundVideoRenderTexture.filterMode = FilterMode.Bilinear;
+                        
+                        // save the changes
+                        AssetDatabase.SaveAssets();
+                        // refresh the asset database
+                        AssetDatabase.Refresh();
+                        
+                        // check the Materials directory for a BackgroundVideoMaterial material
+                        string materialsDirectory = Path.Combine(runtimeAssetPath, "Materials");
+                        string backgroundVideoMaterialPath = Directory.GetFiles(materialsDirectory, "BackgroundVideoMaterial.mat", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                        Material backgroundVideoMaterial = null;
+                        if (string.IsNullOrEmpty(backgroundVideoMaterialPath))
+                        {
+                            // create the material
+                            backgroundVideoMaterial = new Material(Shader.Find("Unlit/Texture"));
+                            // save the material
+                            backgroundVideoMaterialPath = Path.Combine(materialsDirectory, "BackgroundVideoMaterial.mat");
+                            AssetDatabase.CreateAsset(backgroundVideoMaterial, backgroundVideoMaterialPath);
+                            // save asset
+                            AssetDatabase.SaveAssets();
+                            // refresh the asset database
+                            AssetDatabase.Refresh();
+                        }
+                        
+                        // load the material asset
+                        backgroundVideoMaterial = AssetDatabase.LoadAssetAtPath<Material>(backgroundVideoMaterialPath);
+                        // set the main texture of the material to the backgroundVideoRenderTexture
+                        backgroundVideoMaterial.mainTexture = backgroundVideoRenderTexture;
+                        // set the shader to Unlit/Texture
+                        backgroundVideoMaterial.shader = Shader.Find("Unlit/Texture");
+                        
+                        // save the assets
+                        AssetDatabase.SaveAssets();
+                        // refresh the asset database
+                        AssetDatabase.Refresh();
+                        
+                        // Load the {{machine}}{{machineVariant}}BaseGameBackground prefab under the runtime assets "prefabs" directory
+                        string prefabsDirectory = Path.Combine(runtimeAssetPath, "Prefabs");
+                        string backgroundPrefabPath = Directory.GetFiles(prefabsDirectory, $"{machineName}BaseGameBackground.prefab", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                        if (string.IsNullOrEmpty(backgroundPrefabPath))
+                        {
+                            Debug.LogError($"Background prefab not found: {machineName}BaseGameBackground.prefab");
+                            continue;
+                        }
+                        // load the prefab
+                        GameObject backgroundPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(backgroundPrefabPath);
+                        if (backgroundPrefab == null)
+                        {
+                            Debug.LogError($"Failed to load prefab: {machineName}BaseGameBackground.prefab");
+                            continue;
+                        }
+                        
+                        // instantiate the backgroundPrefab
+                        GameObject background = PrefabUtility.InstantiatePrefab(backgroundPrefab) as GameObject;
+                        // null check background
+                        if (background == null)
+                        {
+                            Debug.LogError($"Failed to instantiate background prefab: {machineName}{machineVariant}BaseGameBackgroundPrefab.prefab");
+                            continue;
+                        }
+                        
+                        // find the BackgroundFBX from the background prefab
+                        GameObject backgroundFBX = FindGameObjectInPrefab(background, "BackgroundFBX");
+                        // check if the VideoPlayer component exists on the BackgroundFBX
+                        VideoPlayer videoPlayer = null;
+                        if (backgroundFBX.GetComponent<VideoPlayer>() != null)
+                        {
+                            videoPlayer = backgroundFBX.GetComponent<VideoPlayer>();
+                        }
+                        else
+                        {
+                            videoPlayer = backgroundFBX.AddComponent<VideoPlayer>();
+                        }
+                        // disable play on awake
+                        videoPlayer.playOnAwake = false;
+                        // indicate that clip is loaded via url
+                        videoPlayer.source = VideoSource.Url;
+                        
+                        // Save the Prefab
+                        PrefabUtility.SaveAsPrefabAsset(background, backgroundPrefabPath);
+                        
+                        // Save the assets
+                        AssetDatabase.SaveAssets();
+                        // refresh the asset database
+                        AssetDatabase.Refresh();
+                                                
+                        Debug.Log($"Fixing Background Video Player for machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant}");
+                
+                        processCount++;
+                    }
+                }
+            }
+            
+            AssetDatabase.Refresh();
+            
+            Debug.Log($"Processed Fix Background Video Player {processCount} machine variants.");
         }
         
         [MenuItem("Bettr/Tools/Fix Background Shader")]
