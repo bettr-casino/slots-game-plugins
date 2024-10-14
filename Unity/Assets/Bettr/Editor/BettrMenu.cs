@@ -1721,7 +1721,7 @@ namespace Bettr.Editor
                         // Set the Light Color to white
                         light.color = Color.white;
                         // Set the Light Intensity to 1
-                        light.intensity = 2;
+                        light.intensity = 1;
                         // Set the Light Rotation to 45, 45, 0
                         directionalLight.transform.rotation = Quaternion.Euler(50, -30, 0);
                         // Set the Light Position to 0, 0, 0
@@ -1737,6 +1737,7 @@ namespace Bettr.Editor
                         if (File.Exists(lightingSettingsPath))
                         {
                             Debug.Log($"LightingSettings asset already exists: {lightingSettingsPath}");
+                            processCount++;
                             continue;
                         }
                         
@@ -1765,7 +1766,7 @@ namespace Bettr.Editor
             
             AssetDatabase.Refresh();
             
-            Debug.Log($"Processed Fix Background {processCount} machine variants.");
+            Debug.Log($"Processed Fix Base Game Directional Light {processCount} machine variants.");
         }
         
         [MenuItem("Bettr/Tools/Fix Game Scene")]
