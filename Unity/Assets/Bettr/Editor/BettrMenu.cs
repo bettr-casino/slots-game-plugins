@@ -2042,6 +2042,9 @@ namespace Bettr.Editor
                         // Save the Prefab
                         PrefabUtility.SaveAsPrefabAsset(background, backgroundPrefabPath);
                         
+                        // destroy the background
+                        Object.DestroyImmediate(background);
+                        
                         // Save the assets
                         AssetDatabase.SaveAssets();
                         // refresh the asset database
