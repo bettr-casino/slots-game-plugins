@@ -3249,7 +3249,7 @@ namespace Bettr.Editor
         {
             Debug.Log("Refreshing database before building video.");
             
-            BuildDirectory(new DirectoryInfo(LocalAudioDirectory));
+            BuildDirectory(new DirectoryInfo(LocalVideoDirectory));
 
             // walk the directory
             var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
@@ -3290,25 +3290,25 @@ namespace Bettr.Editor
                             continue;
                         }
                         
-                        // get the audio directory
-                        string audioDirectory = Path.Combine(runtimeAssetPath, "Audio");
-                        // check if the audioDirectory exists and if not continue
-                        if (!Directory.Exists(audioDirectory))
+                        // get the video directory
+                        string videoDirectory = Path.Combine(runtimeAssetPath, "Video");
+                        // check if the videoDirectory exists and if not continue
+                        if (!Directory.Exists(videoDirectory))
                         {
-                            Debug.Log($"Directory not found: {audioDirectory}");
+                            Debug.Log($"Directory not found: {videoDirectory}");
                             continue;
                         }
                         
-                        // get the audio files under this directory.
-                        var audioFiles = Directory.GetFiles(audioDirectory);
-                        // filter out files that are not mp3 or wav or ogg
-                        var audioFilesToCopy = audioFiles.Where(file => file.EndsWith(".mp3") || file.EndsWith(".wav") || file.EndsWith(".ogg")).ToList();
-                        // copy the audio files to the local audio directory
-                        foreach (var audioFile in audioFilesToCopy)
+                        // get the video files under this directory.
+                        var videoFiles = Directory.GetFiles(videoDirectory);
+                        // filter out files that are not mp4
+                        var videoFilesToCopy = videoFiles.Where(file => file.EndsWith(".mp4")).ToList();
+                        // copy the video files to the local video directory
+                        foreach (var videoFile in videoFilesToCopy)
                         {
-                            string audioFileName = Path.GetFileName(audioFile);
-                            string destinationPath = Path.Combine(LocalAudioDirectory, audioFileName);
-                            File.Copy(audioFile, destinationPath, true);
+                            string videoFileName = Path.GetFileName(videoFile);
+                            string destinationPath = Path.Combine(LocalVideoDirectory, videoFileName);
+                            File.Copy(videoFile, destinationPath, true);
                         }
                     }
                 }
