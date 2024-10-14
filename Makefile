@@ -162,11 +162,11 @@ build-assets-webgl: prepare-project clean-assets-webgl
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.CleanupTestScenes
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssets -buildTarget WebGL 
 
-build-audio-webgl: prepare-project clean-assets-webgl
+build-audio-webgl: prepare-project
 	@echo "Building WebGL audio..."
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAudio -buildTarget WebGL 
 
-build-video-webgl: prepare-project clean-assets-webgl
+build-video-webgl: prepare-project
 	@echo "Building WebGL video..."
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildVideo -buildTarget WebGL 
 
