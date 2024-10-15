@@ -177,12 +177,11 @@ namespace Bettr.Core
             // set the text to the textAsset text
             textMeshPro.text = textAsset.text;
             
+            var (machineBundleName, machineBundleVariant) = GetMachineBundleDetails(lobbyCardName);
+
+            yield return StartGamePreviewMusic(machineBundleName, machineBundleVariant);
+            
             gameDetails.SetActive(true);
-
-            // var (machineBundleName, machineBundleVariant) = GetMachineBundleDetails(lobbyCardName);
-
-            // yield return StartGamePreviewMusic(machineBundleName, machineBundleVariant);
-
         }
 
         public Tuple<string, string> GetMachineBundleDetails(string lobbyCardName)
