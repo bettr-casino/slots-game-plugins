@@ -181,7 +181,7 @@ namespace Bettr.Core
 
             var (machineBundleName, machineBundleVariant) = GetMachineBundleDetails(lobbyCardName);
 
-            yield return StartBackgroundMusic(machineBundleName, machineBundleVariant);
+            yield return StartGamePreviewMusic(machineBundleName, machineBundleVariant);
 
         }
 
@@ -205,10 +205,10 @@ namespace Bettr.Core
             return new Tuple<string, string>(machineBundleName, machineBundleVariant);
         }
         
-        private IEnumerator StartBackgroundMusic(string machineBundleName, string machineBundleVariant)
+        private IEnumerator StartGamePreviewMusic(string machineBundleName, string machineBundleVariant)
         {
             yield return BettrAudioController.Instance.LoadBackgroundAudio($"{machineBundleName}{machineBundleVariant}");
-            BettrAudioController.Instance.PlayGameAudioLoop(machineBundleName, machineBundleVariant,
+            BettrAudioController.Instance.PlayGamePreviewAudioLoop(machineBundleName, machineBundleVariant,
                 $"{machineBundleName}{machineBundleVariant}BackgroundMusic");
         }
 

@@ -163,9 +163,6 @@ namespace Bettr.Core
 
             if (AudioSource.isPlaying)
             {
-                // check if its playing the same clip, else stop
-                if (AudioSource.clip == clip) return;
-                
                 AudioSource.Stop();
             }
 
@@ -174,15 +171,9 @@ namespace Bettr.Core
             AudioSource.Play();
         }
         
-        public void PlayGameAudioLoop(string bundleName, string bundleVariant, string audioClipName)
+        public void PlayGamePreviewAudioLoop(string bundleName, string bundleVariant, string audioClipName)
         {
-            if (ClipExists(audioClipName))
-            {
-                PlayAudioLoop(audioClipName);
-                return;
-            }
-            
-            bundleName = bundleName.ToLower();
+            var genreKey = $"{bundleName}{bundleVariant}";
             
             var genres = new[]
             {
@@ -199,7 +190,43 @@ namespace Bettr.Core
 
             foreach (var genre in genres)
             {
-                if (bundleName.StartsWith(genre, StringComparison.InvariantCultureIgnoreCase))
+                if (genreKey.StartsWith(genre, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    // remove the Game<NNN> from the genre but keep for example the "Epic"
+                    var clipName = genre.Substring("Game001".Length);
+                    PlayAudioLoop(clipName);
+                    break;
+                }
+            }
+            
+        }
+        
+        public void PlayGameAudioLoop(string bundleName, string bundleVariant, string audioClipName)
+        {
+            if (ClipExists(audioClipName))
+            {
+                PlayAudioLoop(audioClipName);
+                return;
+            }
+            
+            var genreKey = $"{bundleName}{bundleVariant}";
+            
+            var genres = new[]
+            {
+                "Game001Epic", 
+                "Game002Buffalo", 
+                "Game003HighStakes", 
+                "Game004Riches", 
+                "Game005Fortunes", 
+                "Game006Wheels", 
+                "Game007TrueVegas", 
+                "Game008Gods", 
+                "Game009SpaceInvaders"
+            };
+
+            foreach (var genre in genres)
+            {
+                if (genreKey.StartsWith(genre, StringComparison.InvariantCultureIgnoreCase))
                 {
                     // remove the Game<NNN> from the genre but keep for example the "Epic"
                     var clipName = genre.Substring("Game001".Length);

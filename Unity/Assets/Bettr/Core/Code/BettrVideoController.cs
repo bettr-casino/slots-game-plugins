@@ -122,7 +122,9 @@ namespace Bettr.Core
             {
                 Debug.Log($"Failed to load MeshRenderer from backgroundFBX machineName={machineName}, machineVariant={machineVariant}, experimentVariant={experimentVariant}");
                 yield break;
-            }         
+            }
+            
+            var backgroundFBXMaterial = meshRenderer.material;
             
             // get the cached asset bundle
             // lowercase everything for safety
@@ -137,10 +139,10 @@ namespace Bettr.Core
             }
             
             // get the material from the asset bundle. The material name will be called BackgroundVideoMaterial
-            var material = cachedAssetBundle.LoadAsset<Material>("BackgroundVideoMaterial");
+            var backgroundVideoMaterial = cachedAssetBundle.LoadAsset<Material>("BackgroundVideoMaterial");
             
             // switch the material to the render BackgroundVideoMaterial material
-            meshRenderer.material = material;
+            meshRenderer.material = backgroundVideoMaterial;
             
             VideoLoopPointReached = false;
                 
@@ -150,6 +152,12 @@ namespace Bettr.Core
             // Add a listener for when the video finishes playing
             videoPlayer.loopPointReached += source =>
             {
+                // grab the last frame of the video
+                Texture lastFrame = videoPlayer.texture;
+            
+                // set the material to the last frame
+                backgroundFBXMaterial.mainTexture = lastFrame;
+            
                 VideoLoopPointReached = true;
             };
             
@@ -157,6 +165,18 @@ namespace Bettr.Core
             {
                 yield return null;
             }
+            
+            meshRenderer.material = backgroundFBXMaterial;
+            
+            // TODO: FIXME: check for memory leaks
+            
+            // videoPlayer.Stop();
+            //
+            // // videoPlayer.targetTexture?.Release();
+            // // videoPlayer.targetTexture = null;
+            // //
+            // // videoPlayer.url = null;
+            // // videoPlayer.clip = null;
         }
     }
 }
