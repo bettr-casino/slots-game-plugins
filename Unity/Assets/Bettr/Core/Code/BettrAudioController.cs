@@ -173,6 +173,12 @@ namespace Bettr.Core
         
         public void PlayGamePreviewAudioLoop(string bundleName, string bundleVariant, string audioClipName)
         {
+            if (ClipExists(audioClipName))
+            {
+                PlayAudioLoop(audioClipName);
+                return;
+            }
+            
             var genreKey = $"{bundleName}{bundleVariant}";
             
             var genres = new[]
