@@ -179,9 +179,9 @@ namespace Bettr.Core
             
             gameDetails.SetActive(true);
 
-            var (machineBundleName, machineBundleVariant) = GetMachineBundleDetails(lobbyCardName);
+            // var (machineBundleName, machineBundleVariant) = GetMachineBundleDetails(lobbyCardName);
 
-            yield return StartGamePreviewMusic(machineBundleName, machineBundleVariant);
+            // yield return StartGamePreviewMusic(machineBundleName, machineBundleVariant);
 
         }
 

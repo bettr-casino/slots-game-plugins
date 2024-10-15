@@ -1721,8 +1721,8 @@ namespace Bettr.Editor
                         light.type = LightType.Directional;
                         // Set the Light Color to white
                         light.color = Color.white;
-                        // Set the Light Intensity to 1
-                        light.intensity = 1;
+                        // Set the Light Intensity to 1.5
+                        light.intensity = 1.5f;
                         // Set the Light Rotation to 45, 45, 0
                         directionalLight.transform.rotation = Quaternion.Euler(50, -30, 0);
                         // Set the Light Position to 0, 0, 0
