@@ -124,7 +124,8 @@ namespace Bettr.Core
                 yield break;
             }
             
-            var backgroundFBXMaterial = meshRenderer.material;
+            // TODO: video is now looping, so no need to switch back to the original material
+            // var backgroundFBXMaterial = meshRenderer.material;
             
             // get the cached asset bundle
             // lowercase everything for safety
@@ -149,27 +150,22 @@ namespace Bettr.Core
             // Play the video
             videoPlayer.Play();
             
-            // Add a listener for when the video finishes playing
-            videoPlayer.loopPointReached += source =>
-            {
-                // grab the last frame of the video
-                Texture lastFrame = videoPlayer.texture;
-            
-                // set the material to the last frame
-                backgroundFBXMaterial.mainTexture = lastFrame;
-            
-                VideoLoopPointReached = true;
-            };
-            
-            while (!VideoLoopPointReached)
-            {
-                yield return null;
-            }
-            
-            meshRenderer.material = backgroundFBXMaterial;
+            // Video is now looping, so no need to wait for the loop point
+            // // Add a listener for when the video finishes playing
+            // videoPlayer.loopPointReached += source =>
+            // {
+            //     VideoLoopPointReached = true;
+            // };
+            //
+            // while (!VideoLoopPointReached)
+            // {
+            //     yield return null;
+            // }
+            //
+            // meshRenderer.material = backgroundFBXMaterial;
             
             // TODO: FIXME: check for memory leaks
-            
+            // Do not stop the video player since its looping
             // videoPlayer.Stop();
             //
             // // videoPlayer.targetTexture?.Release();

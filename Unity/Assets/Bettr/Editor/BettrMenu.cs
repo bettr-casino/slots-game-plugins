@@ -2036,6 +2036,7 @@ namespace Bettr.Editor
                         }
                         // disable play on awake
                         videoPlayer.playOnAwake = false;
+                        videoPlayer.isLooping = true;
                         // indicate that clip is loaded via url
                         videoPlayer.source = VideoSource.Url;
                         
