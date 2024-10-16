@@ -150,18 +150,17 @@ namespace Bettr.Core
             // Play the video
             videoPlayer.Play();
             
-            // Video is now looping, so no need to wait for the loop point
-            // // Add a listener for when the video finishes playing
-            // videoPlayer.loopPointReached += source =>
-            // {
-            //     VideoLoopPointReached = true;
-            // };
-            //
-            // while (!VideoLoopPointReached)
-            // {
-            //     yield return null;
-            // }
-            //
+            // Add a listener for when the video finishes playing
+            videoPlayer.loopPointReached += source =>
+            {
+                VideoLoopPointReached = true;
+            };
+            
+            while (!VideoLoopPointReached)
+            {
+                yield return null;
+            }
+            
             // meshRenderer.material = backgroundFBXMaterial;
             
             // TODO: FIXME: check for memory leaks
