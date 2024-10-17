@@ -1721,8 +1721,8 @@ namespace Bettr.Editor
                         light.type = LightType.Directional;
                         // Set the Light Color to white
                         light.color = Color.white;
-                        // Set the Light Intensity to 1.5
-                        light.intensity = 1.5f;
+                        // Set the Light Intensity to 1.0
+                        light.intensity = 1.0f;
                         // Set the Light Rotation to 45, 45, 0
                         directionalLight.transform.rotation = Quaternion.Euler(50, -30, 0);
                         // Set the Light Position to 0, 0, 0
@@ -2173,6 +2173,108 @@ namespace Bettr.Editor
             
             Debug.Log($"Processed Fix Background {processCount} machine variants.");
         }
+        
+        [MenuItem("Bettr/Tools/Fix Background Texture to Video frame")]
+        public static void FixBackgroundTextureToVideoFormat()
+        {
+            var processCount = 0;
+            var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+            string coreAssetPath = $"Assets/Bettr/Core";
+
+            string[] machinesVariantsToFix =
+            {
+                "EpicAtlantisTreasures", 
+                "EpicAncientAdventures", 
+                "EpicClockworkChronicles", 
+                "EpicMysticalLegends", 
+                "BuffaloAdventureQuest", 
+                "HighStakesAlpineAdventure", 
+                "RichesBeverlyHillMansions", 
+                "RichesRoyalHeist", 
+                "FortunesManekiNeko", 
+                "WheelsCapitalCityTycoon", 
+                "TrueVegasInfiniteSpins", 
+                "TrueVegasTripleSpins", 
+                "GodsAncientEgyptian", 
+                "SpaceInvadersRaidersOfPlanetMooney",
+            };
+
+            for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
+            {
+                var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
+                if (!machineNameDir.Name.StartsWith("Game") || machineNameDir.Name == "Game001Alpha")
+                {
+                    continue;
+                }
+                var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
+                if (variantsDir == null)
+                {
+                    continue;
+                }
+                var machineVariantsDirs = variantsDir?.GetDirectories();
+                
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir?.GetDirectories();
+                    if (experimentVariantDirs == null)
+                    {
+                        continue;
+                    }
+                    
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir?.Name;
+                        string experimentVariant = experimentVariantDir?.Name;
+
+                        // Skip if the machineVariant is not in the list
+                        if (!machinesVariantsToFix.Contains(machineVariant))
+                        {
+                            continue;
+                        }
+
+                        // Skip if experimentVariant is not "control"
+                        if (experimentVariant != "control")
+                        {
+                            continue;
+                        }
+                        
+                        string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
+                        if (!Directory.Exists(runtimeAssetPath))
+                        {
+                            Debug.LogError($"Directory not found: {runtimeAssetPath}");
+                            continue;
+                        }
+
+                        string materialsDirectory = Path.Combine(runtimeAssetPath, "Materials");
+                        string texturesDirectory = Path.Combine(runtimeAssetPath, "Textures");
+
+                        // Load the Material_with_Texture material
+                        string materialPath = Directory.GetFiles(materialsDirectory, "Material_with_Texture.mat", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                        Material material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+
+                        // Switch the texture to Background.jpg
+                        string texturePath = Path.Combine(texturesDirectory, "Background.jpg");
+                        Texture backgroundTexture = AssetDatabase.LoadAssetAtPath<Texture>(texturePath);
+                        material.SetTexture("_MainTex", backgroundTexture);
+                        
+                        // Mark the material as dirty to ensure changes are saved
+                        EditorUtility.SetDirty(material);
+
+                        Debug.Log($"Fix Background Texture to Video frame texture for machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant}");
+                        
+                        processCount++;
+                    }
+                }
+            }
+            
+            // Save all dirty assets
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            
+            Debug.Log($"Fix Background Texture to Video frame texture {processCount} machine variants.");
+        }
+
         
         [MenuItem("Bettr/Tools/Fix Audio Source")]
         public static void FixAudioSource()
