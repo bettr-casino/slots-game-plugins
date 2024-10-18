@@ -2391,8 +2391,8 @@ namespace Bettr.Editor
             Debug.Log($"Processed Fix Audio Source {processCount} machine variants.");
         }
         
-        [MenuItem("Bettr/Tools/Fix Settings Volume Button")]
-        public static void FixSettingsVolumeButton()
+        [MenuItem("Bettr/Tools/Fix Settings")]
+        public static void FixSettings()
         {
             var processCount = 0;
             var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
@@ -2455,6 +2455,7 @@ namespace Bettr.Editor
                         }
 
                         GameObject nextGameObject = FindGameObjectInPrefab(prefabInstance, "Next");
+                        GameObject prevGameObject = FindGameObjectInPrefab(prefabInstance, "Prev");
                         GameObject pivotGameObject = nextGameObject.transform.parent.gameObject;
                         GameObject firstChildGameObject = pivotGameObject.transform.GetChild(0).gameObject;
                         GameObject volumeGameObject = null;
@@ -2518,6 +2519,10 @@ namespace Bettr.Editor
                                 Debug.LogError("Could not find method 'OnPointerClick' on the target.");
                             }
                         }
+                        
+                        // Turn off nextGameObject and prevGameObject
+                        nextGameObject.SetActive(false);
+                        prevGameObject.SetActive(false);
 
                         // Apply changes to the prefab
                         PrefabUtility.ApplyPrefabInstance(prefabInstance, InteractionMode.UserAction);
