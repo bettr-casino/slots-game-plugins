@@ -39,27 +39,30 @@ function {{machineName}}:Start()
         do
             {{machineName}}BaseGameBackground:StartBackground()
         end
+-- NOTE: Commented out: UNTIL WE HAVE BETTER AUDIO        
 --        do
 --            BettrAudioController.LoadBackgroundAudio("{{machineName}}{{machineVariant}}")
 --        end
 --        do
 --            BettrAudioController.PlayGameAudioLoop("{{machineName}}{{machineVariant}}", "{{experimentVariant}}", "{{machineName}}{{machineVariant}}BackgroundMusic")
 --        end
-        do
-            BettrVideoController.LoadBackgroundVideo({{machineName}}BaseGameBackground, "{{machineName}}", "{{machineVariant}}", "{{experimentVariant}}")
-        end        
-        do
-            BettrVideoController.PlayBackgroundVideo({{machineName}}BaseGameBackground, "{{machineName}}", "{{machineVariant}}", "{{experimentVariant}}")
-        end
+-- NOTE: Commented out: Will be controlled by the BettrMainLobbySceneController
+--        do
+--            BettrVideoController.LoadBackgroundVideo({{machineName}}BaseGameBackground, "{{machineName}}", "{{machineVariant}}", "{{experimentVariant}}")
+--        end        
+--        do
+--            BettrVideoController.PlayBackgroundVideo({{machineName}}BaseGameBackground, "{{machineName}}", "{{machineVariant}}", "{{experimentVariant}}")
+--        end
         do
             System.Print("{{machineName}}:Start Load Machine Prefabs tile id={0}", self.id)
             {{- for machine in machines }}
             self:Load{{machine}}Prefab()
             {{- end }}
         end
-        do
-            self:SetBaseGameActive(true)
-        end
+-- NOTE: Commented out: Will be controlled by the BettrMainLobbySceneController        
+--        do
+--            self:SetBaseGameActive(true)
+--        end
     end
 end
 

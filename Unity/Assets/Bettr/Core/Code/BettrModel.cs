@@ -44,6 +44,14 @@ namespace Bettr.Core
         public string BundleVersion { get; set; }
         public string MaterialName { get; set; }
         public string Format { get; set; }
+        
+        public string GetMachineVariant()
+        {
+            var partial = MachineSceneName.Substring(MachineName.Length);
+            // remove the "Scene" suffix
+            return partial.Substring(0, partial.Length - 5);
+        }
+
     }
     
     [Serializable]

@@ -2024,6 +2024,10 @@ namespace Bettr.Editor
                         
                         // find the BackgroundFBX from the background prefab
                         GameObject backgroundFBX = FindGameObjectInPrefab(background, "BackgroundFBX");
+                        // change the layer for backgroundFBX to SLOT_VIDEO
+                        // backgroundFBX.layer = LayerMask.NameToLayer("SLOT_VIDEO");
+                        backgroundFBX.layer = LayerMask.NameToLayer("SLOT_BACKGROUND");
+                        
                         // check if the VideoPlayer component exists on the BackgroundFBX
                         VideoPlayer videoPlayer = null;
                         if (backgroundFBX.GetComponent<VideoPlayer>() != null)

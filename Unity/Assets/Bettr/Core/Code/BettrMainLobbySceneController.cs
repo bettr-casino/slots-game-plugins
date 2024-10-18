@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
@@ -238,10 +240,136 @@ namespace Bettr.Core
             bettrUser.LobbyCardIndex = lobbyCardIndex;
             var lobbyCard = bettrUser.LobbyCards[lobbyCardIndex];
             bettrUser.LobbyCardName = lobbyCard.Card;
-            var (machineName, machineVariant) = GetLobbyCardExperiment(lobbyCard);
+            var (machineBundleName, machineBundleVariant) = GetLobbyCardExperiment(lobbyCard);
             // unload any cached version
-            yield return BettrAssetController.Instance.UnloadCachedAssetBundle(machineName, machineVariant);
-            yield return BettrAssetController.Instance.LoadScene(machineName, machineVariant, lobbyCard.MachineSceneName);
+            yield return BettrAssetController.Instance.UnloadCachedAssetBundle(machineBundleName, machineBundleVariant);
+            
+            // get the machineName and machineVariant
+            var machineName = lobbyCard.MachineName;
+            var machineVariant = lobbyCard.GetMachineVariant();
+            var machineSceneName = lobbyCard.MachineSceneName;
+
+            yield return LoadGameSceneAsync(machineSceneName, machineBundleName, machineBundleVariant, machineName, machineVariant);
+        }
+
+        private IEnumerator LoadGameSceneAsync(string machineSceneName, string machineBundleName, string machineBundleVariant, string machineName, string machineVariant)
+        {
+            // TODO: move this into a separate method
+            
+            // get the current scene
+            Scene currentScene = SceneManager.GetActiveScene();
+            string currentSceneName = currentScene.name;
+            
+            // this will be loaded in Additive mode
+            yield return BettrAssetController.Instance.LoadScene(machineBundleName, machineBundleVariant, machineSceneName, loadSingle:false);
+            
+            Scene newScene = SceneManager.GetSceneByName(machineSceneName);
+            // get root game objects in newScene
+            GameObject[] rootGameObjects = newScene.GetRootGameObjects();
+            // Find Pivot from rootGameObjects
+            GameObject pivotGameObject = rootGameObjects.FirstOrDefault(go => go.name == "Pivot");
+            // turn off Machines
+            var machines = FindChildRecursive(pivotGameObject, "Machines");
+            if (machines != null)
+            {
+                machines.SetActive(false);
+            }
+            // Find the Background Camera Camera_Background
+            var backgroundCamera = FindChildRecursive(pivotGameObject, "Camera_Background");
+            // turn it off
+            if (backgroundCamera != null)
+            {
+                backgroundCamera.SetActive(false);
+            }
+            
+            // Find the UI Camera (To fix the > 1 active AudioListeners issue)
+            var uiCamera = FindChildRecursive(pivotGameObject, "UI Camera");
+            // disable it
+            if (uiCamera != null)
+            {
+                uiCamera.SetActive(false);
+            }
+            
+            // Find the BackgroundFBX from the pivotGameObject
+            var backgroundFBX = FindChildRecursive(pivotGameObject, "BackgroundFBX");
+            var backgroundGameObject = backgroundFBX.transform.parent.parent.transform.gameObject;
+            
+            // Find the Game GameObject
+            var gameGameObject = FindChildRecursive(pivotGameObject, "Game");
+            // Get the Game Tile component
+            var gameTile = gameGameObject?.GetComponentInChildren<Tile>();
+            
+            // Get the Background Tile component
+            var backgroundTile = backgroundGameObject?.GetComponentInChildren<Tile>();
+            var backgroundTable = backgroundTile?.Type;
+            
+            // now activate the scene
+            SceneManager.SetActiveScene(newScene);
+            
+            // wait a few frames to ensure Awake and Start are called on the Tile components
+            // ReSharper disable once PossibleNullReferenceException
+            while (!gameTile.IsInitialized)
+            {
+                yield return null;
+            }
+            
+            // wait a few frames to ensure Awake and Start are called on the Tile components
+            // ReSharper disable once PossibleNullReferenceException
+            while (!backgroundTile.IsInitialized)
+            {
+                yield return null;
+            }
+            
+            var machineExperiment = machineBundleVariant; // this is the experiment variant
+            
+            yield return BettrVideoController.Instance.LoadBackgroundVideo(backgroundTable, machineName, machineVariant, machineExperiment);
+            
+            // unload the current scene
+            AsyncOperation asyncUnload = SceneManager.UnloadSceneAsync(currentScene);
+            yield return new WaitUntil(() => asyncUnload.isDone);
+            
+            // Turn on UI Camera (To fix the > 1 active AudioListeners issue)
+            if (uiCamera != null)
+            {
+                uiCamera.SetActive(true);
+            }            
+            
+            // turn on Background Camera
+            if (backgroundCamera != null)
+            {
+                backgroundCamera.SetActive(true);
+            }
+            
+            // check BettrVideoController.Instance.HasBackgroundVideo
+            if (BettrVideoController.Instance.HasBackgroundVideo)
+            {
+                yield return BettrVideoController.Instance.PlayBackgroundVideo(backgroundTable, machineName, machineVariant, machineExperiment);
+                
+                // wait until video preparation is complete
+                yield return new WaitUntil(() => BettrVideoController.Instance.VideoPreparationComplete);
+                
+                if (!BettrVideoController.Instance.VideoPreparationError)
+                {
+                    // wait until VideoStartedPlaying is true
+                    yield return new WaitUntil(() => BettrVideoController.Instance.VideoStartedPlaying);
+                }
+            }
+            
+            // check if VideoPreparationError is true
+            if (!BettrVideoController.Instance.VideoPreparationError)
+            {
+                // wait until VideoLoopPointReached is true
+                yield return new WaitUntil(() => BettrVideoController.Instance.VideoLoopPointReached);
+            }
+            
+            // turn on Machines
+            if (machines != null)
+            {
+                machines.SetActive(true);
+            }
+            
+            // set the base game to active
+            gameTile.Call("SetBaseGameActive", true);
         }
         
         public IEnumerator LoadLobbyCardMachinePreview(string lobbyCardName)
@@ -257,10 +385,16 @@ namespace Bettr.Core
             bettrUser.LobbyCardIndex = lobbyCardIndex;
             var lobbyCard = bettrUser.LobbyCards[lobbyCardIndex];
             bettrUser.LobbyCardName = lobbyCard.Card;
-            var (machineName, machineVariant) = GetLobbyCardExperiment(lobbyCard);
+            var (machineBundleName, machineBundleVariant) = GetLobbyCardExperiment(lobbyCard);
             // unload any cached version
-            yield return BettrAssetController.Instance.UnloadCachedAssetBundle(machineName, machineVariant);
-            yield return BettrAssetController.Instance.LoadScene(machineName, machineVariant, lobbyCard.MachineSceneName);
+            yield return BettrAssetController.Instance.UnloadCachedAssetBundle(machineBundleName, machineBundleVariant);
+            
+            // get the machineName and machineVariant
+            var machineName = lobbyCard.MachineName;
+            var machineVariant = lobbyCard.GetMachineVariant();
+            var machineSceneName = lobbyCard.MachineSceneName;
+
+            yield return LoadGameSceneAsync(machineSceneName, machineBundleName, machineBundleVariant, machineName, machineVariant);
         }
 
         public IEnumerator LoadMachine()
@@ -270,11 +404,16 @@ namespace Bettr.Core
             bettrUser.LobbyCardIndex = 0;
             var lobbyCard = bettrUser.LobbyCards[0];
             bettrUser.LobbyCardName = lobbyCard.Card;
-            var (machineName, machineVariant) = GetLobbyCardExperiment(lobbyCard);
+            var (machineBundleName, machineBundleVariant) = GetLobbyCardExperiment(lobbyCard);
             // unload any cached version
-            yield return BettrAssetController.Instance.UnloadCachedAssetBundle(machineName, machineVariant);
-            yield return BettrAssetController.Instance.LoadScene(machineName,
-                machineVariant, lobbyCard.MachineSceneName);
+            yield return BettrAssetController.Instance.UnloadCachedAssetBundle(machineBundleName, machineBundleVariant);
+            
+            // get the machineName and machineVariant
+            var machineName = lobbyCard.MachineName;
+            var machineVariant = lobbyCard.GetMachineVariant();
+            var machineSceneName = lobbyCard.MachineSceneName;
+
+            yield return LoadGameSceneAsync(machineSceneName, machineBundleName, machineBundleVariant, machineName, machineVariant);
         }
         
         public IEnumerator LoadPreviousMachine()
@@ -286,10 +425,16 @@ namespace Bettr.Core
             bettrUser.LobbyCardIndex = previousIndex;
             var lobbyCard = bettrUser.LobbyCards[previousIndex];
             bettrUser.LobbyCardName = lobbyCard.Card;
-            var (machineName, machineVariant) = GetLobbyCardExperiment(lobbyCard);
+            var (machineBundleName, machineBundleVariant) = GetLobbyCardExperiment(lobbyCard);
             // unload any cached version
-            yield return BettrAssetController.Instance.UnloadCachedAssetBundle(machineName, machineVariant);
-            yield return BettrAssetController.Instance.LoadScene(machineName, machineVariant, lobbyCard.MachineSceneName);
+            yield return BettrAssetController.Instance.UnloadCachedAssetBundle(machineBundleName, machineBundleVariant);
+            
+            // get the machineName and machineVariant
+            var machineName = lobbyCard.MachineName;
+            var machineVariant = lobbyCard.GetMachineVariant();
+            var machineSceneName = lobbyCard.MachineSceneName;
+
+            yield return LoadGameSceneAsync(machineSceneName, machineBundleName, machineBundleVariant, machineName, machineVariant);
         }
         
         public IEnumerator LoadNextMachine()
@@ -301,10 +446,16 @@ namespace Bettr.Core
             bettrUser.LobbyCardIndex = nextIndex;
             var lobbyCard = bettrUser.LobbyCards[nextIndex];
             bettrUser.LobbyCardName = lobbyCard.Card;
-            var (machineName, machineVariant) = GetLobbyCardExperiment(lobbyCard);
+            var (machineBundleName, machineBundleVariant) = GetLobbyCardExperiment(lobbyCard);
             // unload any cached version
-            yield return BettrAssetController.Instance.UnloadCachedAssetBundle(machineName, machineVariant);
-            yield return BettrAssetController.Instance.LoadScene(machineName, machineVariant, lobbyCard.MachineSceneName);
+            yield return BettrAssetController.Instance.UnloadCachedAssetBundle(machineBundleName, machineBundleVariant);
+            
+            // get the machineName and machineVariant
+            var machineName = lobbyCard.MachineName;
+            var machineVariant = lobbyCard.GetMachineVariant();
+            var machineSceneName = lobbyCard.MachineSceneName;
+
+            yield return LoadGameSceneAsync(machineSceneName, machineBundleName, machineBundleVariant, machineName, machineVariant);
         }
 
         public void ToggleVolume(Table mainLobbyTable)

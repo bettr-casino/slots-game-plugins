@@ -323,7 +323,7 @@ namespace Bettr.Core
             _bettrAssetPackageController = bettrAssetPackageController;
         }
 
-        public IEnumerator LoadScene(string bettrAssetBundleName, string bettrAssetBundleVersion, string bettrSceneName)
+        public IEnumerator LoadScene(string bettrAssetBundleName, string bettrAssetBundleVersion, string bettrSceneName, bool loadSingle = true)
         {
             yield return _bettrAssetPackageController.LoadPackage(bettrAssetBundleName, bettrAssetBundleVersion, true);
             
@@ -334,8 +334,13 @@ namespace Bettr.Core
                 ? allScenePaths[0]
                 : allScenePaths.First(s => Path.GetFileNameWithoutExtension(s).Equals(bettrSceneName));
             
-            AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(scenePath, LoadSceneMode.Single);
-    
+            AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(scenePath, loadSingle ? LoadSceneMode.Single : LoadSceneMode.Additive);
+            if (asyncLoad == null)
+            {
+                Debug.Log($"failed to load scene={scenePath} bettrAssetBundleName={bettrAssetBundleName} bettrAssetBundleVersion={bettrAssetBundleVersion} allowSceneActivation={loadSingle}");
+                yield break;
+            }
+            
             // Wait until the scene has fully loaded
             while (!asyncLoad.isDone)
             {
@@ -583,9 +588,9 @@ namespace Bettr.Core
             yield return BettrAssetPackageController.LoadPackage(packageName, packageVersion, loadScenes);
         }
 
-        public IEnumerator LoadScene(string bettrAssetBundleName, string bettrAssetBundleVersion, string bettrSceneName)
+        public IEnumerator LoadScene(string bettrAssetBundleName, string bettrAssetBundleVersion, string bettrSceneName, bool loadSingle = true)
         {
-            yield return BettrAssetScenesController.LoadScene(bettrAssetBundleName, bettrAssetBundleVersion, bettrSceneName);
+            yield return BettrAssetScenesController.LoadScene(bettrAssetBundleName, bettrAssetBundleVersion, bettrSceneName, loadSingle);
         }
         
         public IEnumerator LoadPrefab(CrayonScriptContext context, string bettrAssetBundleName, string bettrAssetBundleVersion, string prefabName,

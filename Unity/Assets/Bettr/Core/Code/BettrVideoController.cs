@@ -19,8 +19,12 @@ namespace Bettr.Core
         
         public static BettrVideoController Instance { get; private set; }
         
+        public bool HasBackgroundVideo { get; private set; }
+        
         public bool VideoPreparationComplete { get; private set; }
         public bool VideoPreparationError { get; private set; }
+        
+        public bool VideoStartedPlaying { get; private set; }
         
         public bool VideoLoopPointReached { get; private set; }
         
@@ -31,6 +35,8 @@ namespace Bettr.Core
 
         public IEnumerator LoadBackgroundVideo(Table backgroundTable, string machineName, string machineVariant, string experimentVariant)
         {
+            HasBackgroundVideo = false;
+            
             // Get the BackgroundFBX property from the backgroundTable
             var backgroundFBX = backgroundTable["BackgroundFBX"] as PropertyGameObject;
             if (backgroundFBX == null)
@@ -48,6 +54,8 @@ namespace Bettr.Core
                 Debug.Log($"Failed to load VideoPlayer from backgroundFBX machineName={machineName}, machineVariant={machineVariant}, experimentVariant={experimentVariant}");
                 yield break;
             }
+            
+            HasBackgroundVideo = true;
             
             // Create the URL for the background video
             var backgroundVideoName = $"{machineName}{machineVariant}BackgroundVideo";
@@ -149,6 +157,8 @@ namespace Bettr.Core
                 
             // Play the video
             videoPlayer.Play();
+            
+            VideoStartedPlaying = true;
             
             // Add a listener for when the video finishes playing
             videoPlayer.loopPointReached += source =>
