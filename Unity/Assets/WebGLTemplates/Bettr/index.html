@@ -71,7 +71,8 @@
       <div id="unity-warning"> </div>
       <div id="unity-footer">
         <!--<div id="unity-webgl-logo"></div>-->
-        <div id="unity-fullscreen-button"></div>
+        <!-- Turn off Full Screen -->
+        <!-- <div id="unity-fullscreen-button"></div> -->
 #if SHOW_DIAGNOSTICS
         <img id="diagnostics-icon" src="TemplateData/webmemd-icon.png">
 #endif
@@ -84,7 +85,7 @@
       var canvas = document.querySelector("#unity-canvas");
       var loadingBar = document.querySelector("#unity-loading-bar");
       var progressBarFull = document.querySelector("#unity-progress-bar-full");
-      var fullscreenButton = document.querySelector("#unity-fullscreen-button");
+      // var fullscreenButton = document.querySelector("#unity-fullscreen-button");
       var warningBanner = document.querySelector("#unity-warning");
 #if SHOW_DIAGNOSTICS
       var diagnostics_icon = document.getElementById("diagnostics-icon");
@@ -191,9 +192,9 @@
                   unityDiagnostics.openDiagnosticsDiv(unityInstance.GetMemoryInfo);
                 };
 #endif
-                fullscreenButton.onclick = () => {
-                  unityInstance.SetFullscreen(1);
-                };
+                // fullscreenButton.onclick = () => {
+                //   unityInstance.SetFullscreen(1);
+                // };
               }).catch((message) => {
                 alert(message);
               });
