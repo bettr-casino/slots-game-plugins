@@ -32,6 +32,20 @@ namespace Bettr.Core
         {
             Instance = this;
         }
+        
+        private IEnumerator CheckVideoUrl(string url)
+        {
+            using UnityWebRequest request = UnityWebRequest.Head(url);
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogWarning($"skipping invalid video URL: {url}");
+                VideoPreparationComplete = true;
+                VideoPreparationError = true;
+                HasBackgroundVideo = false;
+            }
+        }
 
         public IEnumerator LoadBackgroundVideo(Table backgroundTable, string machineName, string machineVariant, string experimentVariant)
         {
@@ -54,18 +68,26 @@ namespace Bettr.Core
                 Debug.Log($"Failed to load VideoPlayer from backgroundFBX machineName={machineName}, machineVariant={machineVariant}, experimentVariant={experimentVariant}");
                 yield break;
             }
-            
-            HasBackgroundVideo = true;
+
+            VideoPreparationComplete = false;
+            VideoPreparationError = false;
+            HasBackgroundVideo = false;
             
             // Create the URL for the background video
             var backgroundVideoName = $"{machineName}{machineVariant}BackgroundVideo";
             var assetUrl = $"{VideoServerBaseURL}/video/latest/{backgroundVideoName}.mp4";
+
+            yield return CheckVideoUrl(assetUrl);
+
+            if (VideoPreparationError)
+            {
+                yield break;
+            }
+            
+            HasBackgroundVideo = true;
             
             // set the url of the video player to the assetUrl
             videoPlayer.url = assetUrl;
-            
-            VideoPreparationComplete = false;
-            VideoPreparationError = false;
             
             // Prepare the video player
             videoPlayer.Prepare();
