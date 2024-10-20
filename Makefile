@@ -253,6 +253,13 @@ build-game001-3-assets-webgl: prepare-project
 	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "game001epicclockworkchronicles" -assetSubLabel "variant1" -buildTarget WebGL; \
 	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "game001epicclockworkchronicles_scenes" -assetSubLabel "variant1" -buildTarget WebGL;
 
+build-game003-2-assets-webgl: prepare-project
+	@echo "Building WebGL game003 variant game003highstakescascadingcash asset bundles..."
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "game003highstakescascadingcash" -assetSubLabel "control" -buildTarget WebGL; \
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "game003highstakescascadingcash_scenes" -assetSubLabel "control" -buildTarget WebGL; \
+	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "game003highstakescascadingcash" -assetSubLabel "variant1" -buildTarget WebGL; \
+	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "game003highstakescascadingcash_scenes" -assetSubLabel "variant1" -buildTarget WebGL;
+
 build-game004-all-assets-webgl: prepare-project
 	@echo "Building WebGL game007 all variants asset bundles..."
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildGameAssets -buildTarget WebGL -game "game004"
