@@ -1,15 +1,144 @@
 using System;
 using System.Collections;
-using System.IO;
+using System.Collections.Generic;
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Networking;
 using UnityEngine.Video;
+using Object = UnityEngine.Object;
 
 // ReSharper disable once CheckNamespace
 namespace Bettr.Core
 {
+    public class BettrVideoPool
+    {
+        private static readonly int UseTransparency = Shader.PropertyToID("_UseTransparency");
+
+        // ReSharper disable once InconsistentNaming
+        private List<VideoPlayer> Pool = new List<VideoPlayer>();
+        private int initialPoolSize;
+        
+        public BettrVideoPool(int initialPoolSize)
+        {
+            this.initialPoolSize = initialPoolSize;
+            InitializePool(initialPoolSize);
+        }
+
+        public VideoPlayer Acquire()
+        {
+            // extract the video player from the pool and return it
+            if (Pool.Count == 0)
+            {
+                Debug.LogError($"Video pool is empty. Possible bug in Acquire/Release or Increase the pool size. poolSize initialized={initialPoolSize} current={Pool.Count}");
+                return null;
+            }
+            var videoPlayer = Pool[0];
+            Pool.RemoveAt(0);
+            return videoPlayer;
+        }
+
+        public void Release(VideoPlayer videoPlayer)
+        {
+            // Stop the video player and reset its properties
+            videoPlayer.Stop();
+            videoPlayer.url = null;
+            videoPlayer.clip = null;
+            videoPlayer.isLooping = false;
+            // disable audio
+            videoPlayer.audioOutputMode = VideoAudioOutputMode.None;
+            // playOnAwake is false
+            videoPlayer.playOnAwake = false;
+            // wait for first frame is true
+            videoPlayer.waitForFirstFrame = true;
+            
+            videoPlayer.time = 0; // Reset the playback time
+            videoPlayer.gameObject.SetActive(false);
+
+            // Do not release the render texture, as it will be reused in the pool
+            // Resetting targetTexture to null will release the reference, which is not needed here
+    
+            // Add the video player back to the pool
+            Pool.Add(videoPlayer);
+        }
+
+        private void InitializePool(int poolSize)
+        {
+            for (var i = 0; i < poolSize; i++)
+            {
+                // Create the game object
+                var videoObject = new GameObject($"BettrVideoPlayer{i}");
+                var videoPlayer = videoObject.AddComponent<VideoPlayer>();
+        
+                // Video player settings
+                videoPlayer.playOnAwake = false;
+                videoPlayer.isLooping = false;
+                videoPlayer.audioOutputMode = VideoAudioOutputMode.None; // Disable audio
+                videoPlayer.clip = null;
+                videoPlayer.url = null;
+                videoPlayer.time = 0; // Reset the playback time
+                // wait for first frame
+                videoPlayer.waitForFirstFrame = true;
+                videoObject.SetActive(false);
+
+                // Add to DontDestroyOnLoad
+                Object.DontDestroyOnLoad(videoObject);
+
+                // Create the render texture
+                var renderTexture = new RenderTexture(960, 600, 16) // WebGL
+                {
+                    antiAliasing = 1, // No anti-aliasing for performance
+                    wrapMode = TextureWrapMode.Clamp,
+                    filterMode = FilterMode.Bilinear,
+                    useMipMap = false,
+                    autoGenerateMips = false,
+                    enableRandomWrite = false,
+                    useDynamicScale = false,
+                    depthStencilFormat = GraphicsFormat.D16_UNorm // Default 16-bit depth
+                };
+                renderTexture.Create();
+
+                // Assign the render texture to the video player
+                videoPlayer.targetTexture = renderTexture;
+
+                // Create a new material using the "Bettr/UnlitTextureWithDepth" shader and assign it to the video player
+                var videoMaterial = new Material(Shader.Find("Bettr/UnlitTextureWithDepth"))
+                {
+                    mainTexture = renderTexture
+                };
+                videoMaterial.SetFloat(UseTransparency, 1); // Use transparency (1 = true, 0 = false)
+
+                // Add MeshRenderer and set the material
+                var meshRenderer = videoObject.AddComponent<MeshRenderer>();
+                meshRenderer.material = videoMaterial;
+
+                // Add the video player to the pool
+                Pool.Add(videoPlayer);
+            }
+        }
+        
+        public void Dispose()
+        {
+            foreach (var videoPlayer in Pool)
+            {
+                if (videoPlayer.targetTexture != null)
+                {
+                    videoPlayer.targetTexture.Release();
+                    Object.Destroy(videoPlayer.targetTexture);
+                }
+                if (videoPlayer.GetComponent<MeshRenderer>().material != null)
+                {
+                    Object.Destroy(videoPlayer.GetComponent<MeshRenderer>().material);
+                }
+                Object.Destroy(videoPlayer.gameObject);
+            }
+            Pool.Clear();
+        }
+
+    }
+
+    
     [RequireComponent(typeof(AudioSource))]
     [Serializable]
     // attached to Core MainScene
@@ -28,9 +157,14 @@ namespace Bettr.Core
         
         public bool VideoLoopPointReached { get; private set; }
         
+        public BettrVideoPool VideoPool { get; private set; }
+        
         public void Awake()
         {
             Instance = this;
+
+            VideoPool = new BettrVideoPool(10);
+
         }
         
         private IEnumerator CheckVideoUrl(string url)
@@ -75,7 +209,8 @@ namespace Bettr.Core
             
             // Create the URL for the background video
             var backgroundVideoName = $"{machineName}{machineVariant}BackgroundVideo";
-            var assetUrl = $"{VideoServerBaseURL}/video/latest/{backgroundVideoName}.mp4";
+            // Use .webm format
+            var assetUrl = $"{VideoServerBaseURL}/video/latest/{backgroundVideoName}.webm";
 
             yield return CheckVideoUrl(assetUrl);
 
