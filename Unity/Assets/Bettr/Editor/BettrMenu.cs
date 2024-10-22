@@ -3626,7 +3626,7 @@ namespace Bettr.Editor
                         // get the video files under this directory.
                         var videoFiles = Directory.GetFiles(videoDirectory);
                         // filter out files that are not mp4 or webm
-                        var videoFilesToCopy = videoFiles.Where(file => file.EndsWith(".mp4") || file.EndsWith(".webm")).ToList();
+                        var videoFilesToCopy = videoFiles.Where(file => file.EndsWith(".mp4") || file.EndsWith(".webm") || file.EndsWith(".mov")).ToList();
                         // copy the video files to the local video directory
                         foreach (var videoFile in videoFilesToCopy)
                         {
