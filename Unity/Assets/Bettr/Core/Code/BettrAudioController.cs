@@ -33,7 +33,7 @@ namespace Bettr.Core
 
         private bool ClipExists(string clipName)
         {
-            if (AudioClips != null)
+            if (clipName != null && AudioClips != null)
             {
                 foreach (var audioClip in AudioClips)
                 {
