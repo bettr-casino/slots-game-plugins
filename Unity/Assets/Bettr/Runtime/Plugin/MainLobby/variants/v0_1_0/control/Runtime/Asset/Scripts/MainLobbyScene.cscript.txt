@@ -29,7 +29,6 @@ function MainLobbyScene:Start()
     series
         do
             System.Print("MainLobbyScene Starting...")
-            self:InitUserConfig()
             self:InitLoading()
             self:LoadLobbyCards()
         end
@@ -40,16 +39,6 @@ function MainLobbyScene:InitLoading()
     self.LoadingText.SetText("Preparing Your Lobby, Please Wait...")
     self.Loading.SetActive(true)
     self.Lobby.SetActive(false)
-end
-
-function MainLobbyScene:InitUserConfig()
-    series
-        do
-            self.LevelText.SetText(BettrUser.Level)                    
-            self.XPText.SetText(BettrUser.XP)
-            self.UserCoinsText.SetText(BettrUser.Coins)            
-        end
-    end
 end
 
 function MainLobbyScene:LoadLobbyCards()
