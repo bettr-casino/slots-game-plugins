@@ -63,8 +63,8 @@ namespace Bettr.Editor
 
         public static void BuildWebGL()
         {
-            Debug.Log("BuildWebGL...");
-                
+            Debug.Log("BuildWebGL started...");
+
             // Get command line arguments
             string[] args = Environment.GetCommandLineArgs();
 
@@ -79,24 +79,35 @@ namespace Bettr.Editor
             string buildDirectory = args[buildOutputIndex];
             string buildPath = Path.Combine(buildDirectory, "BettrSlots");
 
-            if (Directory.Exists(buildPath))
+            try
             {
-                Debug.Log("Removing existing build directory: " + buildPath);
-                Directory.Delete(buildPath, true);  // true for recursive delete
+                // Remove existing build directory
+                if (Directory.Exists(buildPath))
+                {
+                    Debug.Log("Removing existing build directory: " + buildPath);
+                    Directory.Delete(buildPath, true);  // true for recursive delete
+                }
+
+                // Recreate build output directory
+                if (!Directory.Exists(buildDirectory))
+                {
+                    Directory.CreateDirectory(buildDirectory);
+                    Debug.Log("Created build directory: " + buildDirectory);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Error handling build directory: " + e.Message);
+                throw;  // Re-throw the exception to fail the build process
             }
 
-            if (!Directory.Exists(buildDirectory))
-            {
-                Directory.CreateDirectory(buildDirectory);
-            }
-
-            // Set the build settings
+            // Set the build options
             BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions
             {
                 scenes = EditorBuildSettings.scenes.Where(scene => scene.enabled).Select(scene => scene.path).ToArray(),
-                locationPathName = buildPath, // Specify the build name here
+                locationPathName = buildPath,
                 target = BuildTarget.WebGL,
-                options = BuildOptions.Development | BuildOptions.AllowDebugging
+                options = BuildOptions.Development | BuildOptions.AllowDebugging  | BuildOptions.CleanBuildCache
             };
 
             // Perform the build
@@ -112,6 +123,7 @@ namespace Bettr.Editor
                 Debug.LogError("Build failed");
             }
         }
+
     }
 }
 
