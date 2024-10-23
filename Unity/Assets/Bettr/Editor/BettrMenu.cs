@@ -2817,8 +2817,11 @@ namespace Bettr.Editor
             BuildMachine(machineName, machineVariant, experimentVariant);
         }
         
-        private static void CreateOrReplaceMaterialRecursive()
+        private static void CreateOrReplaceLobbyCardMaterialRecursive()
         {
+            Debug.Log("Starting CreateOrReplaceLobbyCardMaterialRecursive");
+
+            int updateCount = 0;
             
             // walk the directory
             var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
@@ -2866,7 +2869,7 @@ namespace Bettr.Editor
                         
                         string materialName = $"{machineName}__{machineVariant}__LobbyCard";
                         string materialPath = $"{runtimeAssetPath}/{machineName}/LobbyCard/Materials/{materialName}.mat";
-                        string texturePath = $"{runtimeAssetPath}/{machineName}/LobbyCard/Materials/{materialName}.jpg";
+                        string texturePath = $"{runtimeAssetPath}/{machineName}/LobbyCard/Textures/jpg/{materialName}.jpg";
     
                         // Load or create the material
                         Material material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
@@ -2879,20 +2882,44 @@ namespace Bettr.Editor
             
                         // Load the texture
                         Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(texturePath);
+                        
                         if (texture != null)
                         {
+                            // get texture importer
+                            TextureImporter textureImporter = AssetImporter.GetAtPath(texturePath) as TextureImporter;
+                            // Set the texture to 2D Sprite
+                            textureImporter.textureType = TextureImporterType.Sprite;
+                            // Set the texture to true color
+                            textureImporter.sRGBTexture = true;
+                            // disable mipmaps
+                            textureImporter.mipmapEnabled = false;
+                            // set npot to none
+                            textureImporter.npotScale = TextureImporterNPOTScale.None;
+                            // set max size to 512
+                            textureImporter.maxTextureSize = 512;
+                            // compression to high quality
+                            textureImporter.textureCompression = TextureImporterCompression.CompressedHQ;
+                            // turn off alpha
+                            textureImporter.alphaIsTransparency = false;
+                            
                             material.mainTexture = texture;
+                            
+                            Debug.Log($"updated texture at {texturePath} ");
                         }
                         else
                         {
                             Debug.LogWarning($"Texture not found at path: {texturePath}");
                         }
+                        
+                        updateCount++;
 
                         // Create or replace the material asset
                         AssetDatabase.SaveAssets();
                     }
                 }
             }
+            
+            Debug.Log($"Completed CreateOrReplaceLobbyCardMaterialRecursive updateCount={updateCount}");
         }
         
         private static void CreateOrReplaceMaterial(string machineName, string machineVariant, string experimentVariant)
@@ -2928,10 +2955,10 @@ namespace Bettr.Editor
             AssetDatabase.SaveAssets();
         }
 
-        [MenuItem("Bettr/Build/LobbyCard/All Game Materials")]
-        public static void BuildMaterialsRecursive()
+        [MenuItem("Bettr/Build/LobbyCard/All Materials")]
+        public static void BuildLobbyCardMaterialsRecursive()
         {
-            CreateOrReplaceMaterialRecursive();
+            CreateOrReplaceLobbyCardMaterialRecursive();
         }
 
         // [MenuItem("Bettr/Build/LobbyCard/Materials")]
