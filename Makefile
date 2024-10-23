@@ -169,6 +169,8 @@ build-audio-webgl: prepare-project
 build-video-webgl: prepare-project
 	@echo "Building WebGL video..."
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildVideo -buildTarget WebGL 
+	@echo "Building BettrVideo ..."
+	@cp Unity/Assets/Bettr/Core/Videos/BettrVideo.webm Unity/Assets/Bettr/LocalStore/LocalVideo/BettrVideo.webm
 
 publish-assets-all: publish-assets-ios publish-assets-android publish-assets-webgl
 
@@ -508,7 +510,7 @@ sync-background-textures:
 
 build-target-ios: prepare-project
 	@echo "Building iOS project..."
-	@$(UNITY_APP) -quit -batchmode -logFile $(LOGS_IOS)/logfile.log -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(BUILD_METHOD_IOS) -buildOutput $(BUILD_IOS) -buildTarget iOS -development -scriptDebugging
+	$(UNITY_APP) -quit -batchmode -logFile $(LOGS_IOS)/logfile.log -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(BUILD_METHOD_IOS) -buildOutput $(BUILD_IOS) -buildTarget iOS -development -scriptDebugging
 	@echo "Build completed."
 
 deploy-target-ios: build-target-ios archive-target-ios
@@ -557,8 +559,10 @@ unity-patch-version-target-ios:
 # =============================================================================
 
 build-target-webgl: prepare-project
+	@echo "Cleaning up BuildCache..."
+	if [ -d "$(UNITY_PROJECT_PATH)/Library/BuildCache" ]; then $(RM) -r $(UNITY_PROJECT_PATH)/Library/BuildCache; fi
 	@echo "Building WebGL project..."
-	@$(UNITY_APP) -quit -batchmode -logFile $(LOGS_WEBGL)/logfile.log -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(BUILD_METHOD_WEBGL) -buildOutput $(BUILD_WEBGL) -buildTarget WebGL -development -scriptDebugging
+	$(UNITY_APP) -quit -batchmode -logFile $(LOGS_WEBGL)/logfile.log -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(BUILD_METHOD_WEBGL) -buildOutput $(BUILD_WEBGL) -buildTarget WebGL -development -scriptDebugging -cleanBuildCache
 	@echo "Build completed."
 
 publish-target-webgl:
