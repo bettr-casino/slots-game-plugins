@@ -2817,6 +2817,84 @@ namespace Bettr.Editor
             BuildMachine(machineName, machineVariant, experimentVariant);
         }
         
+        private static void CreateOrReplaceMaterialRecursive()
+        {
+            
+            // walk the directory
+            var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+            for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
+            {
+                var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
+                // Check that the MachineName starts with "Game" and is not "Game001Alpha"
+                if (!machineNameDir.Name.StartsWith("Game") || machineNameDir.Name == "Game001Alpha")
+                {
+                    continue;
+                }
+                var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
+                if (variantsDir == null)
+                {
+                    continue;
+                }
+                var machineVariantsDirs = variantsDir?.GetDirectories();
+                // loop over machineVariantsDir
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir?.GetDirectories();
+                    if (experimentVariantDirs == null)
+                    {
+                        continue;
+                    }
+                    // loop over experimentVariantDirs
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        // now extract the machineName from machineNameDir, machineVariant from machineVariantsDir, and experimentVariant from experimentVariantDir
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir?.Name;
+                        string experimentVariant = experimentVariantDir?.Name;
+                        
+                        if (experimentVariant != "control")
+                        {
+                            continue;
+                        }
+                        
+                        string runtimeAssetPath = $"{PluginRootDirectory}/LobbyCard/variants/v0_1_0/{experimentVariant}/Runtime/Asset";
+                        if (!Directory.Exists(runtimeAssetPath))
+                        {
+                            Debug.LogError($"Directory not found: {runtimeAssetPath}");
+                            continue;
+                        }
+                        
+                        string materialName = $"{machineName}__{machineVariant}__LobbyCard";
+                        string materialPath = $"{runtimeAssetPath}/{machineName}/LobbyCard/Materials/{materialName}.mat";
+                        string texturePath = $"{runtimeAssetPath}/{machineName}/LobbyCard/Materials/{materialName}.jpg";
+    
+                        // Load or create the material
+                        Material material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+                        if (material == null)
+                        {
+                            material = new Material(Shader.Find("Standard"));
+                            AssetDatabase.CreateAsset(material, materialPath);
+                            AssetDatabase.Refresh();
+                        }
+            
+                        // Load the texture
+                        Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(texturePath);
+                        if (texture != null)
+                        {
+                            material.mainTexture = texture;
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"Texture not found at path: {texturePath}");
+                        }
+
+                        // Create or replace the material asset
+                        AssetDatabase.SaveAssets();
+                    }
+                }
+            }
+        }
+        
         private static void CreateOrReplaceMaterial(string machineName, string machineVariant, string experimentVariant)
         {
             string materialName = $"{machineName}__{machineVariant}__LobbyCard";
@@ -2849,135 +2927,144 @@ namespace Bettr.Editor
             // Create or replace the material asset
             AssetDatabase.SaveAssets();
         }
-        
-        [MenuItem("Bettr/Build/LobbyCard/Materials")]
+
+        [MenuItem("Bettr/Build/LobbyCard/All Game Materials")]
+        public static void BuildMaterialsRecursive()
+        {
+            CreateOrReplaceMaterialRecursive();
+        }
+
+        // [MenuItem("Bettr/Build/LobbyCard/Materials")]
         public static void BuildMaterials()
         {
-            // Game001 Variants
-            CreateOrReplaceMaterial("Game001", "AncientAdventures", "control");
-            CreateOrReplaceMaterial("Game001", "AtlantisTreasures", "control");
-            CreateOrReplaceMaterial("Game001", "ClockworkChronicles", "control");
-            CreateOrReplaceMaterial("Game001", "DragonsHoard", "control");
-            CreateOrReplaceMaterial("Game001", "EnchantedForest", "control");
-            CreateOrReplaceMaterial("Game001", "GalacticQuest", "control");
-            CreateOrReplaceMaterial("Game001", "GuardiansOfOlympus", "control");
-            CreateOrReplaceMaterial("Game001", "LostCityOfGold", "control");
-            CreateOrReplaceMaterial("Game001", "MysticalLegends", "control");
-            CreateOrReplaceMaterial("Game001", "PharosFortune", "control");
-            CreateOrReplaceMaterial("Game001", "PiratesPlunder", "control");
-            CreateOrReplaceMaterial("Game001", "SamuraisFortune", "control");
-
-            // Game002 Variants
-            CreateOrReplaceMaterial("Game002", "BuffaloAdventureQuest", "control");
-            CreateOrReplaceMaterial("Game002", "BuffaloCanyonRiches", "control");
-            CreateOrReplaceMaterial("Game002", "BuffaloFrontierFortune", "control");
-            CreateOrReplaceMaterial("Game002", "BuffaloJackpotMadness", "control");
-            CreateOrReplaceMaterial("Game002", "BuffaloMagicSpins", "control");
-            CreateOrReplaceMaterial("Game002", "BuffaloMoonlitMagic", "control");
-            CreateOrReplaceMaterial("Game002", "BuffaloSafariExpedition", "control");
-            CreateOrReplaceMaterial("Game002", "BuffaloSpiritQuest", "control");
-            CreateOrReplaceMaterial("Game002", "BuffaloThunderstorm", "control");
-            CreateOrReplaceMaterial("Game002", "BuffaloTreasureHunter", "control");
-            CreateOrReplaceMaterial("Game002", "BuffaloWheelOfRiches", "control");
-            CreateOrReplaceMaterial("Game002", "BuffaloWildPicks", "control");
-
-            // Game003 Variants
-            CreateOrReplaceMaterial("Game003", "HighStakesAlpineAdventure", "control");
-            CreateOrReplaceMaterial("Game003", "HighStakesCascadingCash", "control");
-            CreateOrReplaceMaterial("Game003", "HighStakesHotLinks", "control");
-            CreateOrReplaceMaterial("Game003", "HighStakesJungleQuest", "control");
-            CreateOrReplaceMaterial("Game003", "HighStakesMegaMultipliers", "control");
-            CreateOrReplaceMaterial("Game003", "HighStakesMonacoThrills", "control");
-            CreateOrReplaceMaterial("Game003", "HighStakesSafariAdventure", "control");
-            CreateOrReplaceMaterial("Game003", "HighStakesSpaceOdyssey", "control");
-            CreateOrReplaceMaterial("Game003", "HighStakesStackedSpins", "control");
-            CreateOrReplaceMaterial("Game003", "HighStakesUnderwaterAdventure", "control");
-            CreateOrReplaceMaterial("Game003", "HighStakesWildSpins", "control");
-            CreateOrReplaceMaterial("Game003", "HighStakesWonderWays", "control");
-
-            // Game004 Variants
-            CreateOrReplaceMaterial("Game004", "RichesBeverlyHillMansions", "control");
-            CreateOrReplaceMaterial("Game004", "RichesBillionaireBets", "control");
-            CreateOrReplaceMaterial("Game004", "RichesDiamondDash", "control");
-            CreateOrReplaceMaterial("Game004", "RichesGalacticGoldRush", "control");
-            CreateOrReplaceMaterial("Game004", "RichesJetsetJackpot", "control");
-            CreateOrReplaceMaterial("Game004", "RichesMysticForest", "control");
-            CreateOrReplaceMaterial("Game004", "RichesPharaohsRiches", "control");
-            CreateOrReplaceMaterial("Game004", "RichesPiratesBounty", "control");
-            CreateOrReplaceMaterial("Game004", "RichesRaceToRiches", "control");
-            CreateOrReplaceMaterial("Game004", "RichesRoyalHeist", "control");
-            CreateOrReplaceMaterial("Game004", "RichesRubyRush", "control");
-            CreateOrReplaceMaterial("Game004", "RichesSapphireSprint", "control");
-
-            // Game005 Variants
-            CreateOrReplaceMaterial("Game005", "FortunesCelestialFortune", "control");
-            CreateOrReplaceMaterial("Game005", "FortunesFortuneTeller", "control");
-            CreateOrReplaceMaterial("Game005", "FortunesFourLeafClover", "control");
-            CreateOrReplaceMaterial("Game005", "FortunesJadeOfFortune", "control");
-            CreateOrReplaceMaterial("Game005", "FortunesLuckyBamboo", "control");
-            CreateOrReplaceMaterial("Game005", "FortunesLuckyCharms", "control");
-            CreateOrReplaceMaterial("Game005", "FortunesManekiNeko", "control");
-            CreateOrReplaceMaterial("Game005", "FortunesMysticForest", "control");
-            CreateOrReplaceMaterial("Game005", "FortunesNorseAcorns", "control");
-            CreateOrReplaceMaterial("Game005", "FortunesPharaohsRiches", "control");
-            CreateOrReplaceMaterial("Game005", "FortunesShootingStars", "control");
-            CreateOrReplaceMaterial("Game005", "FortunesVikingVoyage", "control");
-
-            // Game006 Variants
-            CreateOrReplaceMaterial("Game006", "WheelsAncientKingdom", "control");
-            CreateOrReplaceMaterial("Game006", "WheelsCapitalCityTycoon", "control");
-            CreateOrReplaceMaterial("Game006", "WheelsEmpireBuilder", "control");
-            CreateOrReplaceMaterial("Game006", "WheelsFantasyKingdom", "control");
-            CreateOrReplaceMaterial("Game006", "WheelsGlobalInvestor", "control");
-            CreateOrReplaceMaterial("Game006", "WheelsIndustrialRevolution", "control");
-            CreateOrReplaceMaterial("Game006", "WheelsJurassicJungle", "control");
-            CreateOrReplaceMaterial("Game006", "WheelsMythicalRealm", "control");
-            CreateOrReplaceMaterial("Game006", "WheelsRealEstateMoghul", "control");
-            CreateOrReplaceMaterial("Game006", "WheelsSpaceColonization", "control");
-            CreateOrReplaceMaterial("Game006", "WheelsTreasuresIslandTycoon", "control");
-            CreateOrReplaceMaterial("Game006", "WheelsUnderwaterEmpire", "control");
-
-            // Game007 Variants
-            CreateOrReplaceMaterial("Game007", "TrueVegasDiamondDazzle", "control");
-            CreateOrReplaceMaterial("Game007", "TrueVegasGoldRush", "control");
-            CreateOrReplaceMaterial("Game007", "TrueVegasInfiniteSpins", "control");
-            CreateOrReplaceMaterial("Game007", "TrueVegasLucky7s", "control");
-            CreateOrReplaceMaterial("Game007", "TrueVegasLuckyCharms", "control");
-            CreateOrReplaceMaterial("Game007", "TrueVegasMegaJackpot", "control");
-            CreateOrReplaceMaterial("Game007", "TrueVegasMegaWheels", "control");
-            CreateOrReplaceMaterial("Game007", "TrueVegasRubyRiches", "control");
-            CreateOrReplaceMaterial("Game007", "TrueVegasSuper7s", "control");
-            CreateOrReplaceMaterial("Game007", "TrueVegasTripleSpins", "control");
-            CreateOrReplaceMaterial("Game007", "TrueVegasWheelBonanza", "control");
-            CreateOrReplaceMaterial("Game007", "TrueVegasWildCherries", "control");
-
-            // Game008 Variants
-            CreateOrReplaceMaterial("Game008", "GodsAncientEgyptian", "control");
-            CreateOrReplaceMaterial("Game008", "GodsCelestialBeasts", "control");
-            CreateOrReplaceMaterial("Game008", "GodsCelestialGuardians", "control");
-            CreateOrReplaceMaterial("Game008", "GodsDivineRiches", "control");
-            CreateOrReplaceMaterial("Game008", "GodsElementalMasters", "control");
-            CreateOrReplaceMaterial("Game008", "GodsEternalDivinity", "control");
-            CreateOrReplaceMaterial("Game008", "GodsHeavenlyMonarchs", "control");
-            CreateOrReplaceMaterial("Game008", "GodsMysticPantheon", "control");
-            CreateOrReplaceMaterial("Game008", "GodsMythicDeities", "control");
-            CreateOrReplaceMaterial("Game008", "GodsNorseLegends", "control");
-            CreateOrReplaceMaterial("Game008", "GodsSacredLegends", "control");
-            CreateOrReplaceMaterial("Game008", "GodsTitansOfWealth", "control");
-
-            // Game009 Variants
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersApolloAdventures", "control");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersAsteroidMiners", "control");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersBlackHoleExplorers", "control");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersCosmicRaiders", "control");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersGalacticPioneers", "control");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersInterstellarTreasureHunters", "control");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersNebulaNavigators", "control");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersQuantumExplorers", "control");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersRaidersOfPlanetMooney", "control");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersStarshipSalvagers", "control");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersStellarExpedition", "control");
-            CreateOrReplaceMaterial("Game009", "SpaceInvadersVoyagersOfTheCosmos", "control");
+            
+            Debug.LogError("BuildMaterials is deprecated. Use BuildMaterialsRecursive instead.");
+            
+            // // Game001 Variants
+            // CreateOrReplaceMaterial("Game001", "AncientAdventures", "control");
+            // CreateOrReplaceMaterial("Game001", "AtlantisTreasures", "control");
+            // CreateOrReplaceMaterial("Game001", "ClockworkChronicles", "control");
+            // CreateOrReplaceMaterial("Game001", "DragonsHoard", "control");
+            // CreateOrReplaceMaterial("Game001", "EnchantedForest", "control");
+            // CreateOrReplaceMaterial("Game001", "GalacticQuest", "control");
+            // CreateOrReplaceMaterial("Game001", "GuardiansOfOlympus", "control");
+            // CreateOrReplaceMaterial("Game001", "LostCityOfGold", "control");
+            // CreateOrReplaceMaterial("Game001", "MysticalLegends", "control");
+            // CreateOrReplaceMaterial("Game001", "PharosFortune", "control");
+            // CreateOrReplaceMaterial("Game001", "PiratesPlunder", "control");
+            // CreateOrReplaceMaterial("Game001", "SamuraisFortune", "control");
+            //
+            // // Game002 Variants
+            // CreateOrReplaceMaterial("Game002", "BuffaloAdventureQuest", "control");
+            // CreateOrReplaceMaterial("Game002", "BuffaloCanyonRiches", "control");
+            // CreateOrReplaceMaterial("Game002", "BuffaloFrontierFortune", "control");
+            // CreateOrReplaceMaterial("Game002", "BuffaloJackpotMadness", "control");
+            // CreateOrReplaceMaterial("Game002", "BuffaloMagicSpins", "control");
+            // CreateOrReplaceMaterial("Game002", "BuffaloMoonlitMagic", "control");
+            // CreateOrReplaceMaterial("Game002", "BuffaloSafariExpedition", "control");
+            // CreateOrReplaceMaterial("Game002", "BuffaloSpiritQuest", "control");
+            // CreateOrReplaceMaterial("Game002", "BuffaloThunderstorm", "control");
+            // CreateOrReplaceMaterial("Game002", "BuffaloTreasureHunter", "control");
+            // CreateOrReplaceMaterial("Game002", "BuffaloWheelOfRiches", "control");
+            // CreateOrReplaceMaterial("Game002", "BuffaloWildPicks", "control");
+            //
+            // // Game003 Variants
+            // CreateOrReplaceMaterial("Game003", "HighStakesAlpineAdventure", "control");
+            // CreateOrReplaceMaterial("Game003", "HighStakesCascadingCash", "control");
+            // CreateOrReplaceMaterial("Game003", "HighStakesHotLinks", "control");
+            // CreateOrReplaceMaterial("Game003", "HighStakesJungleQuest", "control");
+            // CreateOrReplaceMaterial("Game003", "HighStakesMegaMultipliers", "control");
+            // CreateOrReplaceMaterial("Game003", "HighStakesMonacoThrills", "control");
+            // CreateOrReplaceMaterial("Game003", "HighStakesSafariAdventure", "control");
+            // CreateOrReplaceMaterial("Game003", "HighStakesSpaceOdyssey", "control");
+            // CreateOrReplaceMaterial("Game003", "HighStakesStackedSpins", "control");
+            // CreateOrReplaceMaterial("Game003", "HighStakesUnderwaterAdventure", "control");
+            // CreateOrReplaceMaterial("Game003", "HighStakesWildSpins", "control");
+            // CreateOrReplaceMaterial("Game003", "HighStakesWonderWays", "control");
+            //
+            // // Game004 Variants
+            // CreateOrReplaceMaterial("Game004", "RichesBeverlyHillMansions", "control");
+            // CreateOrReplaceMaterial("Game004", "RichesBillionaireBets", "control");
+            // CreateOrReplaceMaterial("Game004", "RichesDiamondDash", "control");
+            // CreateOrReplaceMaterial("Game004", "RichesGalacticGoldRush", "control");
+            // CreateOrReplaceMaterial("Game004", "RichesJetsetJackpot", "control");
+            // CreateOrReplaceMaterial("Game004", "RichesMysticForest", "control");
+            // CreateOrReplaceMaterial("Game004", "RichesPharaohsRiches", "control");
+            // CreateOrReplaceMaterial("Game004", "RichesPiratesBounty", "control");
+            // CreateOrReplaceMaterial("Game004", "RichesRaceToRiches", "control");
+            // CreateOrReplaceMaterial("Game004", "RichesRoyalHeist", "control");
+            // CreateOrReplaceMaterial("Game004", "RichesRubyRush", "control");
+            // CreateOrReplaceMaterial("Game004", "RichesSapphireSprint", "control");
+            //
+            // // Game005 Variants
+            // CreateOrReplaceMaterial("Game005", "FortunesCelestialFortune", "control");
+            // CreateOrReplaceMaterial("Game005", "FortunesFortuneTeller", "control");
+            // CreateOrReplaceMaterial("Game005", "FortunesFourLeafClover", "control");
+            // CreateOrReplaceMaterial("Game005", "FortunesJadeOfFortune", "control");
+            // CreateOrReplaceMaterial("Game005", "FortunesLuckyBamboo", "control");
+            // CreateOrReplaceMaterial("Game005", "FortunesLuckyCharms", "control");
+            // CreateOrReplaceMaterial("Game005", "FortunesManekiNeko", "control");
+            // CreateOrReplaceMaterial("Game005", "FortunesMysticForest", "control");
+            // CreateOrReplaceMaterial("Game005", "FortunesNorseAcorns", "control");
+            // CreateOrReplaceMaterial("Game005", "FortunesPharaohsRiches", "control");
+            // CreateOrReplaceMaterial("Game005", "FortunesShootingStars", "control");
+            // CreateOrReplaceMaterial("Game005", "FortunesVikingVoyage", "control");
+            //
+            // // Game006 Variants
+            // CreateOrReplaceMaterial("Game006", "WheelsAncientKingdom", "control");
+            // CreateOrReplaceMaterial("Game006", "WheelsCapitalCityTycoon", "control");
+            // CreateOrReplaceMaterial("Game006", "WheelsEmpireBuilder", "control");
+            // CreateOrReplaceMaterial("Game006", "WheelsFantasyKingdom", "control");
+            // CreateOrReplaceMaterial("Game006", "WheelsGlobalInvestor", "control");
+            // CreateOrReplaceMaterial("Game006", "WheelsIndustrialRevolution", "control");
+            // CreateOrReplaceMaterial("Game006", "WheelsJurassicJungle", "control");
+            // CreateOrReplaceMaterial("Game006", "WheelsMythicalRealm", "control");
+            // CreateOrReplaceMaterial("Game006", "WheelsRealEstateMoghul", "control");
+            // CreateOrReplaceMaterial("Game006", "WheelsSpaceColonization", "control");
+            // CreateOrReplaceMaterial("Game006", "WheelsTreasuresIslandTycoon", "control");
+            // CreateOrReplaceMaterial("Game006", "WheelsUnderwaterEmpire", "control");
+            //
+            // // Game007 Variants
+            // CreateOrReplaceMaterial("Game007", "TrueVegasDiamondDazzle", "control");
+            // CreateOrReplaceMaterial("Game007", "TrueVegasGoldRush", "control");
+            // CreateOrReplaceMaterial("Game007", "TrueVegasInfiniteSpins", "control");
+            // CreateOrReplaceMaterial("Game007", "TrueVegasLucky7s", "control");
+            // CreateOrReplaceMaterial("Game007", "TrueVegasLuckyCharms", "control");
+            // CreateOrReplaceMaterial("Game007", "TrueVegasMegaJackpot", "control");
+            // CreateOrReplaceMaterial("Game007", "TrueVegasMegaWheels", "control");
+            // CreateOrReplaceMaterial("Game007", "TrueVegasRubyRiches", "control");
+            // CreateOrReplaceMaterial("Game007", "TrueVegasSuper7s", "control");
+            // CreateOrReplaceMaterial("Game007", "TrueVegasTripleSpins", "control");
+            // CreateOrReplaceMaterial("Game007", "TrueVegasWheelBonanza", "control");
+            // CreateOrReplaceMaterial("Game007", "TrueVegasWildCherries", "control");
+            //
+            // // Game008 Variants
+            // CreateOrReplaceMaterial("Game008", "GodsAncientEgyptian", "control");
+            // CreateOrReplaceMaterial("Game008", "GodsCelestialBeasts", "control");
+            // CreateOrReplaceMaterial("Game008", "GodsCelestialGuardians", "control");
+            // CreateOrReplaceMaterial("Game008", "GodsDivineRiches", "control");
+            // CreateOrReplaceMaterial("Game008", "GodsElementalMasters", "control");
+            // CreateOrReplaceMaterial("Game008", "GodsEternalDivinity", "control");
+            // CreateOrReplaceMaterial("Game008", "GodsHeavenlyMonarchs", "control");
+            // CreateOrReplaceMaterial("Game008", "GodsMysticPantheon", "control");
+            // CreateOrReplaceMaterial("Game008", "GodsMythicDeities", "control");
+            // CreateOrReplaceMaterial("Game008", "GodsNorseLegends", "control");
+            // CreateOrReplaceMaterial("Game008", "GodsSacredLegends", "control");
+            // CreateOrReplaceMaterial("Game008", "GodsTitansOfWealth", "control");
+            //
+            // // Game009 Variants
+            // CreateOrReplaceMaterial("Game009", "SpaceInvadersApolloAdventures", "control");
+            // CreateOrReplaceMaterial("Game009", "SpaceInvadersAsteroidMiners", "control");
+            // CreateOrReplaceMaterial("Game009", "SpaceInvadersBlackHoleExplorers", "control");
+            // CreateOrReplaceMaterial("Game009", "SpaceInvadersCosmicRaiders", "control");
+            // CreateOrReplaceMaterial("Game009", "SpaceInvadersGalacticPioneers", "control");
+            // CreateOrReplaceMaterial("Game009", "SpaceInvadersInterstellarTreasureHunters", "control");
+            // CreateOrReplaceMaterial("Game009", "SpaceInvadersNebulaNavigators", "control");
+            // CreateOrReplaceMaterial("Game009", "SpaceInvadersQuantumExplorers", "control");
+            // CreateOrReplaceMaterial("Game009", "SpaceInvadersRaidersOfPlanetMooney", "control");
+            // CreateOrReplaceMaterial("Game009", "SpaceInvadersStarshipSalvagers", "control");
+            // CreateOrReplaceMaterial("Game009", "SpaceInvadersStellarExpedition", "control");
+            // CreateOrReplaceMaterial("Game009", "SpaceInvadersVoyagersOfTheCosmos", "control");
             
             Debug.Log($"LobbyCard materials updated successfully.");
         }
