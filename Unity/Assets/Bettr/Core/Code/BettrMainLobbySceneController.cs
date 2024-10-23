@@ -527,17 +527,6 @@ namespace Bettr.Core
             
             BettrRoutineRunner.Instance.StartCoroutine(UpdateLoadingText(self));
             
-            // Get the group count
-            int groupCount = bettrUser.LobbyCardGroups.Count;  // Assuming LobbyCardGroups is a list or similar collection
-
-            // Iterate over LobbyCardGroups
-            for (int i = 0; i < groupCount; i++)
-            {
-                var lobbyCardGroup = bettrUser.LobbyCardGroups[i];
-                var groupLabelProperty = (PropertyTextMeshPro) self[lobbyCardGroup.Group + "Label"];
-                groupLabelProperty.SetText(lobbyCardGroup.Text);
-            }
-
             // Get the card count
             int cardCount = bettrUser.LobbyCards.Count;  // Assuming LobbyCards is a list or similar collection
             Console.WriteLine($"LoadApp lobbyCard cardCount={cardCount}");
