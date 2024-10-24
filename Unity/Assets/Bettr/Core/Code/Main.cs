@@ -88,6 +88,8 @@ namespace Bettr.Core
                     }
                 });
             }
+
+            yield return EnterMainLobby();
         }
 
         private IEnumerator OneTimeSetup()
@@ -211,11 +213,6 @@ namespace Bettr.Core
             ScriptRunner.Release(scriptRunner);
 
             // yield return UpdateCommitHash();
-        }
-
-        public void OnEnterMainLobby()
-        {
-            StartCoroutine(EnterMainLobby());
         }
 
         private IEnumerator EnterMainLobby()
