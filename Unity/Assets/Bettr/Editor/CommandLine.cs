@@ -64,9 +64,14 @@ namespace Bettr.Editor
         public static void BuildWebGL()
         {
             Debug.Log("BuildWebGL started...");
+            
+            PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Brotli;
 
             // Get command line arguments
             string[] args = Environment.GetCommandLineArgs();
+            
+            bool isDevelopmentBuild = Array.IndexOf(args, "-dev") + 1 > 0;
+            Debug.Log(isDevelopmentBuild ? "Development build started..." : "Production build started...");
 
             // Find the index of the 'buildOutput' argument
             int buildOutputIndex = Array.IndexOf(args, "-buildOutput") + 1;
@@ -107,9 +112,14 @@ namespace Bettr.Editor
                 scenes = EditorBuildSettings.scenes.Where(scene => scene.enabled).Select(scene => scene.path).ToArray(),
                 locationPathName = buildPath,
                 target = BuildTarget.WebGL,
-                options = BuildOptions.Development | BuildOptions.AllowDebugging  | BuildOptions.CleanBuildCache
             };
 
+            buildPlayerOptions.options = BuildOptions.CleanBuildCache | BuildOptions.CompressWithLz4;
+            if (isDevelopmentBuild)
+            {
+                buildPlayerOptions.options |= BuildOptions.Development | BuildOptions.AllowDebugging;
+            }
+                
             // Perform the build
             BuildReport report = BuildPipeline.BuildPlayer(buildPlayerOptions);
             

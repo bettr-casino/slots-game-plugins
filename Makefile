@@ -572,13 +572,44 @@ build-target-webgl: prepare-project
 	$(UNITY_APP) -quit -batchmode -logFile $(LOGS_WEBGL)/logfile.log -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(BUILD_METHOD_WEBGL) -buildOutput $(BUILD_WEBGL) -buildTarget WebGL -cleanBuildCache
 	@echo "Build completed."
 
+
 publish-target-webgl:
 	@echo "Publishing WebGL project to S3..."
-	# Sync all files except .gz files and disable caching
-	@aws s3 sync $(BUILD_WEBGL)/BettrSlots s3://$(S3_WEBGL_BUCKET)/$(S3_WEBGL_OBJECT_KEY) --profile $(AWS_DEFAULT_PROFILE) --exclude "*.gz" --cache-control "no-cache, no-store, must-revalidate"
-	# Sync only .gz files with the Content-Encoding header set to gzip and disable caching
-	@aws s3 sync $(BUILD_WEBGL)/BettrSlots s3://$(S3_WEBGL_BUCKET)/$(S3_WEBGL_OBJECT_KEY) --profile $(AWS_DEFAULT_PROFILE) --include "*.gz" --content-encoding "gzip" --cache-control "no-cache, no-store, must-revalidate"
+	# Sync all files except .gz, .br, .wasm, and .html in all directories, and set proper caching for static assets
+	@aws s3 sync $(BUILD_WEBGL)/BettrSlots s3://$(S3_WEBGL_BUCKET)/$(S3_WEBGL_OBJECT_KEY) \
+		--profile $(AWS_DEFAULT_PROFILE) \
+		--delete \
+		--exclude "*.br" \
+		--exclude "*.wasm" \
+		--exclude "*.wasm.br" \
+		--exclude "*.html" \
+		--cache-control "public, max-age=31536000, immutable"
+	# Sync all .br (Brotli) files with the Content-Encoding header set to br (including subdirectories)
+	@aws s3 sync $(BUILD_WEBGL)/BettrSlots s3://$(S3_WEBGL_BUCKET)/$(S3_WEBGL_OBJECT_KEY) \
+		--profile $(AWS_DEFAULT_PROFILE) \
+		--exclude "*" \
+		--include "*.br" \
+		--content-encoding "br" \
+		--metadata-directive REPLACE \
+		--cache-control "public, max-age=31536000, immutable"
+	# Sync .wasm and .wasm.br files, ensuring they are served correctly (including subdirectories)
+	@aws s3 sync $(BUILD_WEBGL)/BettrSlots s3://$(S3_WEBGL_BUCKET)/$(S3_WEBGL_OBJECT_KEY) \
+		--profile $(AWS_DEFAULT_PROFILE) \
+		--exclude "*" \
+		--include "*.wasm" \
+		--include "*.wasm.br" \
+		--content-type "application/wasm" \
+		--content-encoding "br" \
+		--metadata-directive REPLACE \
+		--cache-control "public, max-age=31536000, immutable"
+	# Sync HTML files with no caching headers
+	@aws s3 sync $(BUILD_WEBGL)/BettrSlots s3://$(S3_WEBGL_BUCKET)/$(S3_WEBGL_OBJECT_KEY) \
+		--profile $(AWS_DEFAULT_PROFILE) \
+		--exclude "*" \
+		--include "*.html" \
+		--cache-control "no-cache, no-store, must-revalidate"
 	@echo "Publish completed."
+
 
 invalidate-target_webgl: publish-target-webgl
 	@echo "Invalidating CloudFront cache..."
