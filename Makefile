@@ -558,11 +558,18 @@ unity-patch-version-target-ios:
 #
 # =============================================================================
 
+build-dev-target-webgl: prepare-project
+	@echo "Cleaning up BuildCache..."
+	if [ -d "$(UNITY_PROJECT_PATH)/Library/BuildCache" ]; then $(RM) -r $(UNITY_PROJECT_PATH)/Library/BuildCache; fi
+	@echo "Building WebGL project..."
+	$(UNITY_APP) -quit -batchmode -logFile $(LOGS_WEBGL)/logfile.log -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(BUILD_METHOD_WEBGL) -buildOutput $(BUILD_WEBGL) -buildTarget WebGL -dev -cleanBuildCache
+	@echo "Build completed."
+
 build-target-webgl: prepare-project
 	@echo "Cleaning up BuildCache..."
 	if [ -d "$(UNITY_PROJECT_PATH)/Library/BuildCache" ]; then $(RM) -r $(UNITY_PROJECT_PATH)/Library/BuildCache; fi
 	@echo "Building WebGL project..."
-	$(UNITY_APP) -quit -batchmode -logFile $(LOGS_WEBGL)/logfile.log -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(BUILD_METHOD_WEBGL) -buildOutput $(BUILD_WEBGL) -buildTarget WebGL -development -scriptDebugging -cleanBuildCache
+	$(UNITY_APP) -quit -batchmode -logFile $(LOGS_WEBGL)/logfile.log -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(BUILD_METHOD_WEBGL) -buildOutput $(BUILD_WEBGL) -buildTarget WebGL -cleanBuildCache
 	@echo "Build completed."
 
 publish-target-webgl:
