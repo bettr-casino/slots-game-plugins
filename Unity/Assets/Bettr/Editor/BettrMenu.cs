@@ -545,6 +545,214 @@ namespace Bettr.Editor
             return AssetLabelsCache;
         }
         
+        private static List<string> FindAssetPathsByAssetBundle(string assetBundleName, string variant)
+        {
+            var assetPaths = new List<string>();
+            string[] allAssetPaths = AssetDatabase.GetAllAssetPaths();
+
+            foreach (string assetPath in allAssetPaths)
+            {
+                AssetImporter importer = AssetImporter.GetAtPath(assetPath);
+                if (importer != null && importer.assetBundleName == assetBundleName)
+                {
+                    if (importer.assetBundleVariant == variant)
+                    {
+                        assetPaths.Add(assetPath);
+                    }
+                }
+            }
+
+            return assetPaths;
+        }
+        
+        
+        [MenuItem("Bettr/Build/Assets/IndividualLobbyCard")]
+        public static void BuildIndividualLobbyCardAssetBundle()
+        {
+            Debug.Log("Building individual lobby card asset bundles...");
+            
+            string[] args = Environment.GetCommandLineArgs();
+            string assetSubLabel = "control";
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i] == "-assetSubLabel" && i + 1 < args.Length)
+                {
+                    assetSubLabel = args[i + 1];
+                }
+            }            
+            List<AssetBundleBuild> buildMapList = new List<AssetBundleBuild>();
+            
+            EnsurePluginAssetsHaveLabels(PluginRootDirectory);
+            
+            AssetDatabase.Refresh();
+            
+            var assetPathsList = FindAssetPathsByAssetBundle("lobbycardv0_1_0", assetSubLabel);
+            var assetVariant = assetSubLabel;
+            
+            var assetLabelsMap = new Dictionary<string, List<string>>();
+            
+            foreach (var assetPath in assetPathsList)
+            {
+                Debug.Log($"Building individual lobby card asset for assetPath={assetPath} assetSubLabel={assetSubLabel}" );
+                // get the base name from the asset path
+                var assetName = Path.GetFileNameWithoutExtension(assetPath);
+                if (!assetName.StartsWith("Game") || assetName.StartsWith("Game001Alpha"))
+                {
+                    continue;
+                }
+                var ext = Path.GetExtension(assetPath);
+                // check if .txt file extension
+                var isTextFile = ext == ".txt";
+                var isMatFile = ext == ".mat";
+                var isPngFile = ext == ".png";
+                var assetLabel = "";
+                if (isTextFile)
+                {
+                    // file is of the form Game<NNN><Variant>.txt
+                    var game = assetName.Substring(0, "Game001".Length);
+                    var variantName = assetName.Substring(game.Length);
+                    assetLabel = $"LobbyCard{game}{variantName}";
+                    assetLabel = assetLabel.ToLower();
+                }
+                else if (isMatFile)
+                {
+                    // split assetName using __
+                    var assetNamePaths = assetName.Split("__");
+                    // construct the assetLabel using [2][0][1]
+                    assetLabel = $"{assetNamePaths[2]}{assetNamePaths[0]}{assetNamePaths[1]}";
+                    // lower case it
+                    assetLabel = assetLabel.ToLower();
+                }
+                else if (isPngFile)
+                {
+                    // split assetName using __
+                    var assetNamePaths = assetName.Split("__");
+                    // construct the assetLabel using [2][0][1]
+                    assetLabel = $"{assetNamePaths[2]}{assetNamePaths[0]}{assetNamePaths[1]}";
+                    // lower case it
+                    assetLabel = assetLabel.ToLower();
+                }
+                else
+                {
+                    Debug.LogWarning($"skipping assetPath={assetPath} assetName={assetName} as it is not a .txt or .mat file");
+                }
+                if (!assetLabelsMap.ContainsKey(assetLabel))
+                {
+                    assetLabelsMap[assetLabel] = new List<string>();
+                }
+                assetLabelsMap[assetLabel].Add(assetPath);
+            }
+            
+            // walk the assetLabelsMap
+            foreach (var kvPair in assetLabelsMap)
+            {
+                AssetBundleBuild assetBundleBuild = new AssetBundleBuild();
+
+                var assetLabel = kvPair.Key;
+                var assetPaths = kvPair.Value;
+                
+                assetBundleBuild.assetBundleName = $"{assetLabel}.{assetVariant}";
+                assetBundleBuild.assetNames = assetPaths.ToArray();
+                buildMapList.Add(assetBundleBuild);
+            }
+            
+            // convert buildMap to an array
+            var buildMap = buildMapList.ToArray();
+
+            var sharedAssetBundleOptions = BuildAssetBundleOptions.ForceRebuildAssetBundle |
+                                           BuildAssetBundleOptions.ChunkBasedCompression;
+
+#if UNITY_IOS
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesIOSDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesIOSDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.iOS);
+            AssetDatabase.Refresh();
+            
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesOSXDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesOSXDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.StandaloneOSX);
+            AssetDatabase.Refresh();
+            
+#endif
+#if UNITY_ANDROID
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesAndroidDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesAndroidDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.Android);
+#endif
+#if UNITY_WEBGL
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesWebglDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesWebglDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.WebGL);
+#endif
+#if UNITY_OSX
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesOSXDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesOSXDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.StandaloneOSX);
+#endif
+#if UNITY_WIN
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesWindowsDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesWindowsDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.StandaloneWindows64);
+#endif
+#if UNITY_LINUX   
+            EnsureEmptyDirectory(new DirectoryInfo(AssetBundlesLinuxDirectory));
+            AssetDatabase.Refresh();
+            BuildPipeline.BuildAssetBundles(AssetBundlesLinuxDirectory, 
+                buildMap,
+                sharedAssetBundleOptions,
+                BuildTarget.StandaloneLinux64);
+#endif
+            
+            Debug.Log("...refreshing database after building asset bundles..");
+            AssetDatabase.Refresh();
+            
+            Debug.Log("Modifying asset bundles manifest files...");
+            ModifyAssetBundleManifestFiles();
+            Debug.Log("...done modifying asset bundles manifest files.");
+            
+            Debug.Log("...refreshing database after modifying asset bundles..");
+            AssetDatabase.Refresh();
+            
+            Debug.Log("...done building asset bundles.");
+            
+#if UNITY_IOS
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.iOS, BuildTarget.iOS);
+#endif
+#if UNITY_ANDROID
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
+#endif
+#if UNITY_WEBGL
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.WebGL, BuildTarget.WebGL);
+#endif
+#if UNITY_OSX
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneOSX);
+#endif
+#if UNITY_WIN
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64);
+#endif
+#if UNITY_LINUX   
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneLinux64);
+#endif            
+        }
+        
         [MenuItem("Bettr/Build/Assets/SingleGame")]
         public static void BuildSingleGameAssetsAndAudio()
         {

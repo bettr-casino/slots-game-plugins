@@ -227,7 +227,10 @@ build-lobby-assets-webgl: prepare-project
 	@echo "Building WebGL lobby asset bundles..."
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "lobbycardv0_1_0" -assetSubLabel "control" -buildTarget WebGL; \
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "mainlobbyv0_1_0" -assetSubLabel "control" -buildTarget WebGL; \
-	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "mainlobbyv0_1_0_scenes" -assetSubLabel "control" -buildTarget WebGL
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "mainlobbyv0_1_0_scenes" -assetSubLabel "control" -buildTarget WebGL; \
+
+build-lobbycard-assets-webgl: prepare-project
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildIndividualLobbyCardAssetBundle -assetSubLabel "control" -buildTarget WebGL
 
 build-main-assets-webgl: prepare-project
 	@echo "Building WebGL main asset bundles..."
