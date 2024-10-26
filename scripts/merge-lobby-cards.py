@@ -10,6 +10,8 @@ def find_files(directory, patterns):
     matched_files = []
     for root, _, files in os.walk(directory):
         for file in files:
+            if file.endswith('.meta'):
+                continue  # Skip .meta files
             if any(re.match(pattern, file) for pattern in patterns):  # Check each pattern
                 matched_files.append(os.path.join(root, file))
     return matched_files
