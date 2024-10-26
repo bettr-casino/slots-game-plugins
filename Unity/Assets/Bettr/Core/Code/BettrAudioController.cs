@@ -27,6 +27,7 @@ namespace Bettr.Core
         {
             var audioSource = gameObject.GetComponent<AudioSource>();
             AudioSource = audioSource;
+            AudioSource.Stop();
 
             Instance = this;
         }
