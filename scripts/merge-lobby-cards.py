@@ -72,15 +72,15 @@ def merge_files(files, output_file):
 def write_manifest(manifest, manifest_file):
     """Write the manifest information to a JSON file."""
     with open(manifest_file, 'w') as mf:
-        json.dump({"manifests": manifest}, mf, indent=4)
+        json.dump({"manifests": manifest}, mf, indent=4, sort_keys=True)
 
-def compress_manifest(manifest_file):
-    """Compress the manifest file using gzip."""
-    gz_manifest_file = f"{manifest_file}.gz"
-    with open(manifest_file, 'rb') as mf:
-        with gzip.open(gz_manifest_file, 'wb') as gz_mf:
+def compress_file(uncompressed_file):
+    """Compress the file using gzip."""
+    gz_file = f"{uncompressed_file}.gz"
+    with open(uncompressed_file, 'rb') as mf:
+        with gzip.open(gz_file, 'wb') as gz_mf:
             gz_mf.writelines(mf)
-    return gz_manifest_file
+    return gz_file
 
 def upload_to_s3(file_path, bucket, prefix, content_type=None, content_encoding=None):
     """Upload a file to an S3 bucket with specified metadata."""
@@ -99,6 +99,8 @@ def upload_to_s3(file_path, bucket, prefix, content_type=None, content_encoding=
         print(f"Uploaded {file_path} to s3://{bucket}/{object_path}")
     except NoCredentialsError:
         print("Credentials not available")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 def main():
     parser = argparse.ArgumentParser(description="Merge files and upload to S3 with manifest creation")
@@ -121,20 +123,22 @@ def main():
 
     if files:
         manifest = merge_files(files, output_file_path)
-        write_manifest(manifest, manifest_file_path)
-        gz_manifest_file_path = compress_manifest(manifest_file_path)
-
-        # Upload gzipped manifest file to S3
-        upload_to_s3(gz_manifest_file_path, args.s3_bucket_name, args.s3_object_prefix, content_type="application/json", content_encoding="gzip")
-
-        # Delete the gzipped manifest file locally
-        os.remove(gz_manifest_file_path)
-
-        # Delete the binary merged file locally
-        os.remove(output_file_path)
-
         print(f'Merging completed. {len(files)} files merged into {args.output_file}.')
+
+        write_manifest(manifest, manifest_file_path)
         print(f'Manifest file created: {args.manifest_file}')
+
+        gz_manifest_file_path = compress_file(manifest_file_path)
+        upload_to_s3(gz_manifest_file_path, args.s3_bucket_name, args.s3_object_prefix, content_type="application/json", content_encoding="gzip")
+        
+        gz_output_file_path = compress_file(output_file_path)
+        upload_to_s3(gz_output_file_path, args.s3_bucket_name, args.s3_object_prefix, content_type="application/octet-stream", content_encoding="gzip")
+        
+        os.remove(gz_manifest_file_path)
+        os.remove(output_file_path)
+        os.remove(gz_output_file_path)
+
+
     else:
         print(f'No files matching patterns {args.patterns} found in {args.directory}.')
 

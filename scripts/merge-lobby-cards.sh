@@ -9,8 +9,8 @@ pip install -r $SCRIPT_DIR/requirements.txt
 asset_directory="/Users/rvergis/Documents/External/Bettr/GitHub/bettr-casino/slots-game-plugins/Unity/Assets/Bettr/LocalStore/AssetBundles/WebGL"
 lobbycard_pattern="lobbycardgame*.control"
 lobbycard_manifest_pattern="lobbycardgame*.control.manifest"
-lobbycard_merged_file="lobbycardgame_merged.bin"
-manifest_file="lobbycardgame_manifest.json"
+lobbycard_merged_file="lobbycardv0_1_0.merged.control.bin"
+manifest_file="lobbycardv0_1_0.merged.control.manifest"
 s3_bucket_name="bettr-casino-assets"
 s3_object_prefix="assets/latest/WebGL"
 
