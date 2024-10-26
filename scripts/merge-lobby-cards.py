@@ -16,33 +16,61 @@ def find_files(directory, patterns):
                 matched_files.append(os.path.join(root, file))
     return matched_files
 
+def extract_game_info(file_name):
+    """Extract game name, variant, and experiment from the file name."""
+    game_match = re.search(r'game(\d{3})', file_name)
+    variant_match = re.search(r'game\d{3}([a-zA-Z]+)', file_name)
+    experiment_match = re.search(r'game\d{3}[a-zA-Z]+\.(\w+)', file_name)
+
+    # get the file extension
+    file_type = file_name.split('.')[-1]
+    is_manifest = file_type == 'manifest'
+
+    game_name = f"game{game_match.group(1)}" if game_match else "unknown"
+    variant = variant_match.group(1) if variant_match else "unknown"
+    experiment = experiment_match.group(1) if experiment_match else "unknown"
+
+    return game_name, variant, experiment, is_manifest
+
 def merge_files(files, output_file):
     """Merge all files into one large file and return manifest info."""
-    manifest = []
+    manifest = {}
     current_position = 0
 
     with open(output_file, 'wb') as merged:
         for file in files:
+            file_name = os.path.basename(file)
+            game_name, variant, experiment, is_manifest = extract_game_info(file_name)
+
+            file_type = 'manifest' if is_manifest else 'bundle'
+
             file_size = os.path.getsize(file)
             # Write file to merged file
             with open(file, 'rb') as f:
                 merged.write(f.read())
-            
-            # Add manifest entry
-            manifest.append({
-                'file_name': os.path.basename(file),
+
+            # Build nested structure
+            if game_name not in manifest:
+                manifest[game_name] = {}
+            if variant not in manifest[game_name]:
+                manifest[game_name][variant] = {}
+            if experiment not in manifest[game_name][variant]:
+                manifest[game_name][variant][experiment] = {}
+
+            # Add the byte start and length info to the structure under the correct type
+            manifest[game_name][variant][experiment][file_type] = {
                 'byte_start': current_position,
                 'byte_length': file_size
-            })
-            
+            }
+
             current_position += file_size
-    
+
     return manifest
 
 def write_manifest(manifest, manifest_file):
     """Write the manifest information to a JSON file."""
     with open(manifest_file, 'w') as mf:
-        json.dump(manifest, mf, indent=4)
+        json.dump({"manifests": manifest}, mf, indent=4)
 
 def upload_to_s3(file_path, bucket, prefix):
     """Upload a file to an S3 bucket."""
