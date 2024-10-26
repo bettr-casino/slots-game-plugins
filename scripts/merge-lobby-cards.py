@@ -1,6 +1,7 @@
 import os
 import json
 import re
+import gzip
 import boto3
 import argparse
 from botocore.exceptions import NoCredentialsError
@@ -60,7 +61,8 @@ def merge_files(files, output_file):
             # Add the byte start and length info to the structure under the correct type
             manifest[game_name][variant][experiment][file_type] = {
                 'byte_start': current_position,
-                'byte_length': file_size
+                'byte_length': file_size,
+                'file_name': file_name
             }
 
             current_position += file_size
@@ -72,13 +74,28 @@ def write_manifest(manifest, manifest_file):
     with open(manifest_file, 'w') as mf:
         json.dump({"manifests": manifest}, mf, indent=4)
 
-def upload_to_s3(file_path, bucket, prefix):
-    """Upload a file to an S3 bucket."""
+def compress_manifest(manifest_file):
+    """Compress the manifest file using gzip."""
+    gz_manifest_file = f"{manifest_file}.gz"
+    with open(manifest_file, 'rb') as mf:
+        with gzip.open(gz_manifest_file, 'wb') as gz_mf:
+            gz_mf.writelines(mf)
+    return gz_manifest_file
+
+def upload_to_s3(file_path, bucket, prefix, content_type=None, content_encoding=None):
+    """Upload a file to an S3 bucket with specified metadata."""
     s3_client = boto3.client('s3')
     try:
         file_name = os.path.basename(file_path)
         object_path = f"{prefix}/{file_name}"
-        s3_client.upload_file(file_path, bucket, object_path)
+        extra_args = {}
+
+        if content_type:
+            extra_args['ContentType'] = content_type
+        if content_encoding:
+            extra_args['ContentEncoding'] = content_encoding
+
+        s3_client.upload_file(file_path, bucket, object_path, ExtraArgs=extra_args)
         print(f"Uploaded {file_path} to s3://{bucket}/{object_path}")
     except NoCredentialsError:
         print("Credentials not available")
@@ -105,8 +122,17 @@ def main():
     if files:
         manifest = merge_files(files, output_file_path)
         write_manifest(manifest, manifest_file_path)
-        upload_to_s3(output_file_path, args.s3_bucket_name, args.s3_object_prefix)
-        upload_to_s3(manifest_file_path, args.s3_bucket_name, args.s3_object_prefix)
+        gz_manifest_file_path = compress_manifest(manifest_file_path)
+
+        # Upload gzipped manifest file to S3
+        upload_to_s3(gz_manifest_file_path, args.s3_bucket_name, args.s3_object_prefix, content_type="application/json", content_encoding="gzip")
+
+        # Delete the gzipped manifest file locally
+        os.remove(gz_manifest_file_path)
+
+        # Delete the binary merged file locally
+        os.remove(output_file_path)
+
         print(f'Merging completed. {len(files)} files merged into {args.output_file}.')
         print(f'Manifest file created: {args.manifest_file}')
     else:
