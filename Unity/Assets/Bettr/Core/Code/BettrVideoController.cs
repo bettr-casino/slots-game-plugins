@@ -139,7 +139,6 @@ namespace Bettr.Core
     }
 
     
-    [RequireComponent(typeof(AudioSource))]
     [Serializable]
     // attached to Core MainScene
     public class BettrVideoController : MonoBehaviour
