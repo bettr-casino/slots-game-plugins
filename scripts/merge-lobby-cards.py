@@ -35,7 +35,7 @@ def extract_game_info(file_name):
 
 def merge_files(files, output_file):
     """Merge all files into one large file and return manifest info."""
-    manifest = {}
+    manifests = []
     current_position = 0
 
     with open(output_file, 'wb') as merged:
@@ -50,24 +50,18 @@ def merge_files(files, output_file):
             with open(file, 'rb') as f:
                 merged.write(f.read())
 
-            # Build nested structure
-            if game_name not in manifest:
-                manifest[game_name] = {}
-            if variant not in manifest[game_name]:
-                manifest[game_name][variant] = {}
-            if experiment not in manifest[game_name][variant]:
-                manifest[game_name][variant][experiment] = {}
-
             # Add the byte start and length info to the structure under the correct type
-            manifest[game_name][variant][experiment][file_type] = {
+            manifests.append({
                 'byte_start': current_position,
                 'byte_length': file_size,
-                'file_name': file_name
-            }
+                'file_name': file_name,
+                'bundle_name': f"{game_name}{variant}",
+                'bundle_version': f"{experiment}"
+            })
 
             current_position += file_size
 
-    return manifest
+    return manifests
 
 def write_manifest(manifest, manifest_file):
     """Write the manifest information to a JSON file."""
@@ -122,22 +116,24 @@ def main():
     manifest_file_path = f"{args.directory}/{args.manifest_file}"
 
     if files:
+        # Merge files into a single output file
         manifest = merge_files(files, output_file_path)
         print(f'Merging completed. {len(files)} files merged into {args.output_file}.')
 
+        # Write manifest to file
         write_manifest(manifest, manifest_file_path)
         print(f'Manifest file created: {args.manifest_file}')
 
+        # Compress manifest file and upload
         gz_manifest_file_path = compress_file(manifest_file_path)
         upload_to_s3(gz_manifest_file_path, args.s3_bucket_name, args.s3_object_prefix, content_type="application/json", content_encoding="gzip")
         
-        gz_output_file_path = compress_file(output_file_path)
-        upload_to_s3(gz_output_file_path, args.s3_bucket_name, args.s3_object_prefix, content_type="application/octet-stream", content_encoding="gzip")
+        # Upload the uncompressed .bin file
+        upload_to_s3(output_file_path, args.s3_bucket_name, args.s3_object_prefix, content_type="application/octet-stream")
         
+        # Delete local files to clean up
         os.remove(gz_manifest_file_path)
         os.remove(output_file_path)
-        os.remove(gz_output_file_path)
-
 
     else:
         print(f'No files matching patterns {args.patterns} found in {args.directory}.')
