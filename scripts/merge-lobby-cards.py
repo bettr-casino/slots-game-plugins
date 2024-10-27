@@ -38,6 +38,8 @@ def merge_files(files, output_file):
     manifests = []
     current_position = 0
 
+    manifest_bundles = {}
+
     with open(output_file, 'wb') as merged:
         for file in files:
             file_name = os.path.basename(file)
@@ -48,16 +50,32 @@ def merge_files(files, output_file):
             file_size = os.path.getsize(file)
             # Write file to merged file
             with open(file, 'rb') as f:
-                merged.write(f.read())
+                merged.write(f.read()) 
 
-            # Add the byte start and length info to the structure under the correct type
-            manifests.append({
+            bundle_name = f"{game_name}{variant}"
+            bundle_version = f"{experiment}"
+
+            # search bundles for the current bundle
+            if bundle_name in manifest_bundles:
+                manifest_bundle = manifest_bundles[bundle_name]
+            else:
+                manifest_bundle = {}
+                manifest_bundles[bundle_name] = manifest_bundle
+                manifests.append(manifest_bundle)
+
+            manifest_payload = {
                 'byte_start': current_position,
                 'byte_length': file_size,
                 'file_name': file_name,
+                'file_type': file_type,
                 'bundle_name': f"{game_name}{variant}",
                 'bundle_version': f"{experiment}"
-            })
+            }
+
+            if is_manifest:
+                manifest_bundle['manifest'] = manifest_payload
+            else:
+                manifest_bundle['bundle'] = manifest_payload
 
             current_position += file_size
 
