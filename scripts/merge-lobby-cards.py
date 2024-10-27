@@ -138,6 +138,9 @@ def main():
         manifest = merge_files(files, output_file_path)
         print(f'Merging completed. {len(files)} files merged into {args.output_file}.')
 
+        # sort the manifest by the bundle name
+        manifest = sorted(manifest, key=lambda x: x['manifest']['bundle_name'])
+
         # Write manifest to file
         write_manifest(manifest, manifest_file_path)
         print(f'Manifest file created: {args.manifest_file}')
