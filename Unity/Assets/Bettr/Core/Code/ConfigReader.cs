@@ -33,6 +33,8 @@ namespace Bettr.Core
         
         public string TaskCode => PlayerPrefs.GetString(TaskCodeKey, DefaultTaskCode);
         
+// Begin WebAssetsBaseURL       
+        
 #if UNITY_IOS
         public string WebAssetsBaseURL => $"{AssetsServerBaseURL}/assets/{AssetsVersion}/iOS";
 #endif
@@ -45,6 +47,9 @@ namespace Bettr.Core
 #if UNITY_STANDALONE_OSX
         public string WebAssetsBaseURL => $"{AssetsServerBaseURL}/assets/{AssetsVersion}/OSX";
 #endif
+        
+// End WebAssetsBaseURL        
+        
         
         public string WebOutcomesBaseURL => $"{OutcomesServerBaseURL}";
     }

@@ -165,8 +165,11 @@ namespace Bettr.Core
             BettrVideoController.VideoServerBaseURL = _configData.VideoServerBaseURL;
             TileController.RegisterType<BettrVideoController>("BettrVideoController");
             TileController.AddToGlobals("BettrVideoController", BettrVideoController.Instance);
-            
-            _bettrMainLobbySceneController = new BettrMainLobbySceneController(_bettrExperimentController);
+
+            _bettrMainLobbySceneController = new BettrMainLobbySceneController(_bettrExperimentController)
+            {
+                webAssetBaseURL = _configData.WebAssetsBaseURL
+            };
 
             _bettrAssetController = new BettrAssetController
             {
@@ -193,6 +196,8 @@ namespace Bettr.Core
             
             yield return LoginUser();
 
+            yield return LoadManifests();
+
             yield return _bettrExperimentController.GetUserExperiments();
             
             Debug.Log("OneTimeSetup ended");
@@ -203,6 +208,11 @@ namespace Bettr.Core
         private IEnumerator LoginUser()
         {
             yield return BettrUserController.Instance.Login();
+        }
+        
+        private IEnumerator LoadManifests()
+        {
+            yield return _bettrMainLobbySceneController.LoadManifests();
         }
 
         private IEnumerator LoadMachine()

@@ -1,10 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
+using Newtonsoft.Json;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
@@ -32,9 +36,15 @@ namespace Bettr.Core
         public BettrExperimentController BettrExperimentController { get; private set; }
         
         public bool IsMainLobbyLoaded { get; private set; }
+
+        public int CurrentPageNumber = 1;
+        
+        public string webAssetBaseURL;
         
         public Dictionary<string, Material> LobbyCardMaterialMap { get; private set; }
 
+        public BettrMainLobbyManifests Manifests { get; private set; }
+        
         [NonSerialized] private int LoadedLobbyCardCount = 0;
         
         [NonSerialized] private int TotalLobbyCardCount = 0;
@@ -49,6 +59,38 @@ namespace Bettr.Core
             IsMainLobbyLoaded = false;
             
             LobbyCardMaterialMap = new Dictionary<string, Material>();
+        }
+
+        public IEnumerator LoadManifests()
+        {
+            Manifests = new BettrMainLobbyManifests();
+            string webAssetName = "lobbycardv0_1_0.merged.control.manifest.gz";
+            string assetURL = $"{webAssetBaseURL}/{webAssetName}";
+
+            using UnityWebRequest webRequest = UnityWebRequest.Get(assetURL);
+            // Add header to accept gzip encoding
+            webRequest.SetRequestHeader("Accept-Encoding", "gzip");
+
+            yield return webRequest.SendWebRequest();
+
+            if (webRequest.result == UnityWebRequest.Result.ConnectionError || webRequest.result == UnityWebRequest.Result.ProtocolError)
+            {
+                Debug.LogError($"Error loading manifest error={webRequest.error} webAssetName={webAssetName}");
+            }
+            else
+            {
+                try
+                {
+                    // Directly use the text from the downloadHandler since Unity might have already decompressed it.
+                    string jsonResponse = webRequest.downloadHandler.text;
+                    Manifests = JsonConvert.DeserializeObject<BettrMainLobbyManifests>(jsonResponse);
+                    Debug.Log($"Manifest loaded successfully webAssetName={webAssetName}");
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"Error parsing manifest error={e.Message} webAssetName={webAssetName}");
+                }
+            }
         }
 
         public void SetSelector(Table mainLobbyTable, GameObject gameObject)
@@ -502,9 +544,84 @@ namespace Bettr.Core
                 yield return null;
             }
         }
+
+        public IEnumerator LoadLobbyPage(Table self, int pageNumber)
+        {
+            var lobbyCardsPerPage = 8;
+            var numLobbyCardsToLoad = pageNumber == 1 ? lobbyCardsPerPage - 1 : lobbyCardsPerPage;
+            
+            var bettrUser = BettrUserController.Instance.BettrUserConfig;
+
+            var totalLobbyCardCount = bettrUser.LobbyCards.Count;
+            TotalLobbyCardCount = totalLobbyCardCount;
+            
+            // calculate the start index for the pageNumber
+            // 1st page number has only 8 cards, rest have 9
+            // pageNumber startIndex
+            // 1 0
+            // 2 8
+            // 3 17
+            // 4 26
+            var startIndex = pageNumber == 1 ? 0 : (pageNumber - 1) * lobbyCardsPerPage - 1;
+            var endIndex = startIndex + numLobbyCardsToLoad;
+
+            if (endIndex >= TotalLobbyCardCount)
+            {
+                yield break;
+            }
+
+            var manifests = new List<BettrAssetMultiByteRange>();
+            
+            //get lobby cards from startIndex to endIndex
+            var lobbyCardConfigs = bettrUser.LobbyCards.GetRange(startIndex, numLobbyCardsToLoad);
+            foreach (var lobbyCardConfig in lobbyCardConfigs)
+            {
+                var machineBundleName = lobbyCardConfig.MachineBundleName;
+                var machineBundleVariant = lobbyCardConfig.MachineBundleVariant;
+                // find the manifest
+                var manifest = Manifests.FindManifest(machineBundleName, machineBundleVariant);
+                if (manifest == null)
+                {
+                    Debug.Log($"LoadLobbyPage manifest is null machineBundleName={machineBundleName} machineBundleVariant={machineBundleVariant} pageNumber={pageNumber}");
+                    continue;
+                }
+                manifests.Add(manifest);
+            }
+
+            var binaryFile = "lobbycardv0_1_0.merged.control.bin";
+
+            BettrAssetController.Instance.LoadMultiByteRangeAssets(binaryFile, manifests,
+                (name, version, bundle, manifest, success, loaded, error) =>
+                {
+                    // gets called once per asset bundle
+                    if (success)
+                    {
+                        Debug.Log($"MultiByteRange asset=${name} version={version} success={true} loaded={loaded}");
+                    }
+                    else
+                    {
+                        Debug.LogError($"MultiByteRange asset=${name} version={version} success={false} loaded={loaded} error={error}");
+                    }
+                });
+        }
         
         // Convert the method from Lua to C#
         public IEnumerator LoadLobbyCards(Table self)
+        {
+            // turn off the loading screen
+            // TODO: remove loading screen
+            var loadingProperty = (PropertyGameObject) self["Loading"];
+            if (loadingProperty != null)
+            {
+                loadingProperty.SetActive(false);
+            }
+            yield return LoadLobbyPage(self, CurrentPageNumber);
+            IsMainLobbyLoaded = true;
+        }
+        
+        // Convert the method from Lua to C#
+        // TODO: deprecated
+        public IEnumerator LoadLobbyCardsOLD(Table self)
         {
             Console.WriteLine("LoadLobbyCards invoked");
 

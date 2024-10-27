@@ -2,11 +2,17 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Tasks;
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
 using CrayonScript.Interpreter.Execution.VM;
+using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
@@ -88,6 +94,254 @@ namespace Bettr.Core
     }
 
     [Serializable]
+    public class BettrAssetMultiByteRange
+    {
+        [JsonProperty("bundle")]
+        public BettrMultiByteRange Bundle { get; set; }
+        
+        [JsonProperty("manifest")]
+        public BettrMultiByteRange Manifest { get; set; }
+    }
+    
+    [Serializable]
+    public class BettrMultiByteRange
+    {
+        [JsonProperty("file_name")]
+        public string FileName { get; set; }
+        
+        [JsonProperty("file_type")]
+        public string FileType { get; set; }
+        
+        [JsonProperty("byte_start")]
+        public int ByteStart { get; set; }
+
+        [JsonProperty("byte_length")]
+        public int ByteLength { get; set; }
+
+        [JsonProperty("bundle_name")]
+        public string BundleName { get; set; }
+        
+        [JsonProperty("bundle_version")]
+        public string BundleVersion { get; set; }
+        
+        [NonSerialized] public byte[] Data = null;
+    }
+
+    public class BettrMainLobbyManifests
+    {
+        [JsonProperty("manifests")]
+        public List<BettrAssetMultiByteRange> Manifests { get; set; }
+
+        public BettrAssetMultiByteRange FindManifest(string machineBundleName, string machineBundleVariant)
+        {
+            return Manifests.Find(m => m.Bundle.BundleName == machineBundleName && m.Bundle.BundleVersion == machineBundleVariant);
+        }
+    }
+
+    [Serializable]
+    public class BettrMultiByteRangeAssetBundleController
+    {
+        private static readonly HttpClient HttpClient = new HttpClient(new HttpClientHandler
+        {
+            AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+            MaxConnectionsPerServer = int.MaxValue,
+        });
+        
+        [NonSerialized] private BettrAssetController _bettrAssetController;
+        
+        public BettrMultiByteRangeAssetBundleController(BettrAssetController bettrAssetController)
+        {
+            _bettrAssetController = bettrAssetController;
+        }
+        
+        private async Task<BettrMultiByteRange> FetchAssetByteRange(string url, BettrMultiByteRange range)
+        {
+            try
+            {
+                // Set up the HttpRequestMessage
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+                request.Headers.Range = new RangeHeaderValue(range.ByteStart, range.ByteStart + range.ByteLength - 1);
+
+                // Send the request and await the response
+                HttpResponseMessage response = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead);
+
+                // Check if the request was successful and the response is a partial content (206)
+                if (response.StatusCode == HttpStatusCode.PartialContent)
+                {
+                    // Since it's a single byte range, just read the content
+                    byte[] content = await response.Content.ReadAsByteArrayAsync();
+
+                    if (content != null && content.Length > 0)
+                    {
+                        // You can process the data here, e.g., save to file or parse
+                        range.Data = content;  // Assuming BettrMultiByteRange has a 'Data' property to hold the content
+                        return range;
+                    }
+                    else
+                    {
+                        Debug.LogError($"The response did not contain any content. url={url}");
+                    }
+                }
+                else if (response.IsSuccessStatusCode)
+                {
+                    Debug.LogWarning($"Request was successful, but not a partial content response (206). url={url}");
+                }
+                else
+                {
+                    Debug.LogError($"Error: {response.StatusCode} url={url}");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Exception during fetch: {e.Message} url={url}");
+            }
+            return null;
+        }
+
+        private void ParseByteRange(byte[] content, string boundary, BettrMultiByteRange bundleByteRange)
+        {
+            string boundaryString = $"--{boundary}";
+
+            // Split the content by the boundary string
+            var contentParts = Encoding.UTF8.GetString(content).Split(new string[] { boundaryString }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var part in contentParts)
+            {
+                if (string.IsNullOrWhiteSpace(part))
+                    continue;
+
+                // Find headers section and data section in the part
+                int headersEndIndex = part.IndexOf("\r\n\r\n");
+                if (headersEndIndex == -1)
+                    continue;
+
+                string headers = part.Substring(0, headersEndIndex);
+                string dataString = part.Substring(headersEndIndex + 4); // Skip "\r\n\r\n"
+
+                // Extract content-range header to determine which byte range this part represents
+                string[] headerLines = headers.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var headerLine in headerLines)
+                {
+                    if (headerLine.StartsWith("Content-Range", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Extract the byte range information
+                        // Example: Content-Range: bytes 0-99/1234
+                        string[] contentRangeParts = headerLine.Split(' ');
+                        if (contentRangeParts.Length > 1)
+                        {
+                            string rangePart = contentRangeParts[1];
+                            string[] rangeBounds = rangePart.Split('-');
+                            if (rangeBounds.Length == 2)
+                            {
+                                bundleByteRange.Data = Encoding.UTF8.GetBytes(dataString);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public IEnumerator LoadMultiByteRangeAsset(Task<BettrMultiByteRange> manifestFetchTask, Task<BettrMultiByteRange> bundleFetchTask,
+            BettrAssetMultiByteRange assetByteRange, AssetLoadCompleteCallback callback)
+        {
+            var bettrAssetBundleName = assetByteRange.Bundle.BundleName;
+            var bettrAssetBundleVersion = assetByteRange.Bundle.BundleVersion;
+            
+            // Wait until the task is completed
+            yield return new WaitUntil(() => manifestFetchTask.IsCompleted);
+            
+            // Handle the result once the task is completed
+            if (manifestFetchTask.Exception != null)
+            {
+                var error = $"Error fetching manifest byte range: {manifestFetchTask.Exception.Message} assetBundleName={bettrAssetBundleName} assetBundleVersion={bettrAssetBundleVersion}";
+                Debug.LogError(error);
+                callback(bettrAssetBundleName, bettrAssetBundleVersion, null, null, false, false, error);
+                yield break;
+            }
+            
+            BettrMultiByteRange manifestDataMap = manifestFetchTask.Result;
+            var manifestData = manifestDataMap.Data;
+            
+            if (manifestData == null)
+            {
+                var error = $"null asset manifest data for assetBundleName={bettrAssetBundleName} assetBundleVersion={bettrAssetBundleVersion}";
+                Debug.LogError(error);
+                callback(bettrAssetBundleName, bettrAssetBundleVersion, null, null, false, false, error);
+                yield break;
+            }
+                
+            var deserializer = new DeserializerBuilder()
+                .WithNamingConvention(PascalCaseNamingConvention.Instance)
+                .Build();
+
+            var assetBundleManifestBytes = manifestData;
+            var assetBundleText = Encoding.ASCII.GetString(assetBundleManifestBytes);
+
+            var assetBundleManifest = deserializer.Deserialize<BettrAssetBundleManifest>(assetBundleText);
+            assetBundleManifest.AssetBundleName = bettrAssetBundleName;
+            assetBundleManifest.AssetBundleVersion = bettrAssetBundleVersion;
+            
+            // Wait until the task is completed
+            yield return new WaitUntil(() => bundleFetchTask.IsCompleted);
+            
+            // Handle the result once the task is completed
+            if (bundleFetchTask.Exception != null)
+            {
+                var error = $"Error fetching bundle byte range: {bundleFetchTask.Exception.Message} assetBundleName={bettrAssetBundleName} assetBundleVersion={bettrAssetBundleVersion}";
+                Debug.LogError(error);
+                callback(bettrAssetBundleName, bettrAssetBundleVersion, null, assetBundleManifest, false, false, error);
+                yield break;
+            }
+            
+            BettrMultiByteRange bundleDataMap = bundleFetchTask.Result;
+            var bundleData = bundleDataMap.Data;
+            
+            AssetBundle downloadedAssetBundle = AssetBundle.LoadFromMemory(bundleData);
+            if (downloadedAssetBundle == null)
+            {
+                var error = $"null downloaded asset bundle for assetBundleName={bettrAssetBundleName} assetBundleVersion={bettrAssetBundleVersion}";
+                Debug.LogError(error);
+                callback(bettrAssetBundleName, bettrAssetBundleVersion,
+                    null,  assetBundleManifest, false, false, error);
+                yield break;
+            }
+                
+            callback(bettrAssetBundleName, bettrAssetBundleVersion,
+                downloadedAssetBundle,  assetBundleManifest, true, false, null);   
+
+        }
+
+        public void LoadMultiByteRangeAssets(string binaryFileName, List<BettrAssetMultiByteRange> assetByteRanges, AssetLoadCompleteCallback callback)
+        {
+            var webAssetBaseURL = _bettrAssetController.webAssetBaseURL;
+            var binaryAssetURL = $"{webAssetBaseURL}/{binaryFileName}";
+
+            foreach (var assetByteRange in assetByteRanges)
+            {
+                var bettrAssetBundleName = assetByteRange.Bundle.BundleName;
+                var bettrAssetBundleVersion = assetByteRange.Bundle.BundleVersion;
+                
+                // check if this asset bundle is already loaded
+                AssetBundle previouslyDownloadedAssetBundle = null;
+                previouslyDownloadedAssetBundle = _bettrAssetController.GetCachedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);
+                if (previouslyDownloadedAssetBundle != null)
+                {
+                    // check if this is a valid bundle
+                    callback(bettrAssetBundleName, bettrAssetBundleVersion,
+                        previouslyDownloadedAssetBundle,  null, true, true, null);
+                    continue;
+                }
+                
+                var manifestByteRange = assetByteRange.Manifest;
+                Task<BettrMultiByteRange> manifestFetchTask = FetchAssetByteRange(binaryAssetURL, manifestByteRange);
+                var bundleByteRange = assetByteRange.Bundle;
+                Task<BettrMultiByteRange> bundleFetchTask = FetchAssetByteRange(binaryAssetURL, bundleByteRange);
+                BettrRoutineRunner.Instance.StartCoroutine(LoadMultiByteRangeAsset(manifestFetchTask, bundleFetchTask, assetByteRange, callback));
+            }
+        }
+    }
+
+    [Serializable]
     public class BettrAssetPackageController
     {
         [NonSerialized] private BettrAssetController _bettrAssetController;
@@ -97,9 +351,6 @@ namespace Bettr.Core
             BettrAssetController bettrAssetController,
             BettrAssetScriptsController bettrAssetScriptsController)
         {
-            // TileController.RegisterType<BettrAssetPackageController>("BettrAssetPackageController");
-            // TileController.AddToGlobals("BettrAssetPackageController", this);
-
             _bettrAssetController = bettrAssetController;
             _bettrAssetScriptsController = bettrAssetScriptsController;
         }
@@ -151,9 +402,6 @@ namespace Bettr.Core
             BettrAssetController bettrAssetController,
             BettrAssetPackageController bettrAssetPackageController)
         {
-            // TileController.RegisterType<BettrAssetPrefabsController>("BettrPrefabsController");
-            // TileController.AddToGlobals("BettrPrefabsController", this);
-
             _bettrAssetController = bettrAssetController;
             _bettrAssetPackageController = bettrAssetPackageController;
         }
@@ -267,9 +515,6 @@ namespace Bettr.Core
             BettrAssetController bettrAssetController,
             BettrAssetPackageController bettrAssetPackageController)
         {
-            // TileController.RegisterType<BettrAssetPrefabsController>("BettrPrefabsController");
-            // TileController.AddToGlobals("BettrPrefabsController", this);
-
             _bettrAssetController = bettrAssetController;
             _bettrAssetPackageController = bettrAssetPackageController;
         }
@@ -316,9 +561,6 @@ namespace Bettr.Core
             BettrAssetController bettrAssetController,
             BettrAssetPackageController bettrAssetPackageController)
         {
-            // TileController.RegisterType<BettrAssetScenesController>("BettrAssetScenesController");
-            // TileController.AddToGlobals("BettrAssetScenesController", this);
-
             _bettrAssetController = bettrAssetController;
             _bettrAssetPackageController = bettrAssetPackageController;
         }
@@ -404,9 +646,6 @@ namespace Bettr.Core
 
         public BettrAssetScriptsController(BettrAssetController bettrAssetController)
         {
-            // TileController.RegisterType<BettrAssetScriptsController>("BettrAssetScriptsController");
-            // TileController.AddToGlobals("BettrAssetScriptsController", this);
-
             _bettrAssetController = bettrAssetController;
 
             ScriptsTables = new Dictionary<string, Table>();
@@ -549,6 +788,8 @@ namespace Bettr.Core
         public BettrAssetScriptsController BettrAssetScriptsController { get; private set; }
         public BettrAssetPrefabsController BettrAssetPrefabsController { get; private set; }
         
+        public BettrMultiByteRangeAssetBundleController BettrMultiByteRangeAssetController { get; private set; }
+        
         public BettrAssetMaterialsController BettrAssetMaterialsController { get; private set; }
         public BettrAssetPackageController BettrAssetPackageController { get; private set; }
         public BettrAssetScenesController BettrAssetScenesController { get; private set; }
@@ -568,6 +809,7 @@ namespace Bettr.Core
             BettrAssetPackageController = new BettrAssetPackageController(this, BettrAssetScriptsController);
             BettrAssetScenesController = new BettrAssetScenesController(this, BettrAssetPackageController);
             BettrAssetPrefabsController = new BettrAssetPrefabsController(this, BettrAssetPackageController);
+            BettrMultiByteRangeAssetController = new BettrMultiByteRangeAssetBundleController(this);
             BettrAssetMaterialsController = new BettrAssetMaterialsController(this, BettrAssetPackageController);
             
             Instance = this;
@@ -581,6 +823,11 @@ namespace Bettr.Core
         private string GetAssetBundleManifestName(string bundleName, string bundleVariant, bool isScene)
         {
             return isScene ? $"{bundleName}_scenes.{bundleVariant}.manifest" : $"{bundleName}.{bundleVariant}.manifest";
+        }
+        
+        public void LoadMultiByteRangeAssets(string binaryFileName, List<BettrAssetMultiByteRange> byteRanges, AssetLoadCompleteCallback callback)
+        {
+            BettrMultiByteRangeAssetController.LoadMultiByteRangeAssets(binaryFileName, byteRanges, callback);
         }
 
         public IEnumerator LoadPackage(string packageName, string packageVersion, bool loadScenes)
