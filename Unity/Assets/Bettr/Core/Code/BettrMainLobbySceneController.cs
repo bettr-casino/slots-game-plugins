@@ -170,7 +170,7 @@ namespace Bettr.Core
                 yield break;
             }
             var lobbyCard = bettrUser.LobbyCards[lobbyCardIndex];
-            var cachedAssetBundle = BettrAssetController.Instance.GetCachedAssetBundle(lobbyCard.BundleName, lobbyCard.BundleVersion, false);
+            var cachedAssetBundle = BettrAssetController.Instance.GetLoadedAssetBundle(lobbyCard.BundleName, lobbyCard.BundleVersion, false);
             if (cachedAssetBundle == null)
             {
                 Debug.Log($"Lobby cachedAssetBundle is null assetBundleName={lobbyCard.BundleName} assetBundleVersion={lobbyCard.BundleVersion} isScene=false");
@@ -547,7 +547,7 @@ namespace Bettr.Core
 
         public IEnumerator LoadLobbyPage(Table self, int pageNumber)
         {
-            var lobbyCardsPerPage = 8;
+            var lobbyCardsPerPage = 9;
             var numLobbyCardsToLoad = pageNumber == 1 ? lobbyCardsPerPage - 1 : lobbyCardsPerPage;
             
             var bettrUser = BettrUserController.Instance.BettrUserConfig;
@@ -569,7 +569,7 @@ namespace Bettr.Core
             {
                 yield break;
             }
-
+            
             var manifests = new List<BettrAssetMultiByteRange>();
             
             //get lobby cards from startIndex to endIndex
@@ -588,20 +588,77 @@ namespace Bettr.Core
                 manifests.Add(manifest);
             }
 
+            var group = "Group1";
+            
+            var machineGroupProperty = (TilePropertyGameObjectGroup) self[group];
+
             var binaryFile = "lobbycardv0_1_0.merged.control.bin";
 
             BettrAssetController.Instance.LoadMultiByteRangeAssets(binaryFile, manifests,
-                (name, version, bundle, manifest, success, loaded, error) =>
+                (machineBundleName, machineBundleVariant, assetBundle, assetBundleManifest, success, loaded, error) =>
                 {
                     // gets called once per asset bundle
-                    if (success)
+                    if (!success)
                     {
-                        Debug.Log($"MultiByteRange asset=${name} version={version} success={true} loaded={loaded}");
+                        Debug.LogError($"MultiByteRange asset=${machineBundleName} version={machineBundleVariant} success={false} loaded={loaded} error={error}");
+                        return;
+                    }
+                    
+                    Debug.Log($"MultiByteRange asset=${machineBundleName} version={machineBundleVariant} success={true} loaded={loaded}");
+                    
+                    var index = manifests.FindIndex(m => m.Bundle.BundleName == machineBundleName && m.Bundle.BundleVersion == machineBundleVariant);
+                    var lobbyCard = lobbyCardConfigs[index];
+                    var lobbyCardId = $"LobbyCard{index + 1:D3}";
+                    var machineCardProperty = machineGroupProperty[lobbyCardId];
+                    if (machineCardProperty == null)
+                    {
+                        Debug.LogWarning($"LoadApp machineCardProperty is nil group={group} lobbyCard={lobbyCardId} lobbyCard.MachineName={lobbyCard.MachineName} lobbyCard.MaterialName={lobbyCard.MaterialName} card={lobbyCard.Card}");
+                        return;
+                    }
+                    
+                    var lobbyCardGameObject = machineCardProperty.GameObject;
+                    var lobbyCardKey = group + "__" + lobbyCard.Card;
+                            
+                    // Debug.Log($"LoadApp lobbyCardGameObject={lobbyCardGameObject.name} renaming to lobbyCardKey={lobbyCardKey}");
+
+                    lobbyCardGameObject.name = lobbyCardKey;
+
+                    GameObject quadGameObject = lobbyCardGameObject.transform.GetChild(0).GetChild(0).gameObject;
+
+                    State.LobbyCardMap[lobbyCardKey] = lobbyCard;
+                    
+                    // Get the MeshRenderer component
+                    var renderer = quadGameObject.GetComponent<MeshRenderer>();
+                    if (renderer.material != null)
+                    {
+                        Object.Destroy(renderer.material);
+                        renderer.material = null;
+                    }
+                    
+                    if (LobbyCardMaterialMap.TryGetValue(lobbyCardId, out var newMaterial))
+                    {
+                        renderer.material = newMaterial;
                     }
                     else
                     {
-                        Debug.LogError($"MultiByteRange asset=${name} version={version} success={false} loaded={loaded} error={error}");
+                        var materialName = lobbyCard.MaterialName;
+                    
+                        var material = assetBundle.LoadAsset<Material>(materialName);
+                        if (material == null)
+                        {
+                            Debug.LogError(
+                                $"Failed to load material={materialName} from asset bundle={machineBundleName} version={machineBundleVariant}");
+                            return;
+                        }
+                        
+                        renderer.material = material;
+                        
+                        // cache the material
+                        LobbyCardMaterialMap[lobbyCardId] = material;
                     }
+                    
+                    LoadedLobbyCardCount++;
+
                 });
         }
         
@@ -615,13 +672,15 @@ namespace Bettr.Core
             {
                 loadingProperty.SetActive(false);
             }
-            yield return LoadLobbyPage(self, CurrentPageNumber);
+            // yield return LoadLobbyPage(self, CurrentPageNumber);
             IsMainLobbyLoaded = true;
+            yield break;
         }
         
         // Convert the method from Lua to C#
         // TODO: deprecated
-        public IEnumerator LoadLobbyCardsOLD(Table self)
+        [Obsolete]
+        public IEnumerator LoadLobbyCardsObsolete(Table self)
         {
             Console.WriteLine("LoadLobbyCards invoked");
 

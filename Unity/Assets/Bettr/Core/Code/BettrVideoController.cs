@@ -295,7 +295,7 @@ namespace Bettr.Core
             // lowercase everything for safety
             var bundleName = $"{machineName}{machineVariant}".ToLower();
             var bundleVersion = $"{experimentVariant}".ToLower();
-            var cachedAssetBundle = BettrAssetController.Instance.GetCachedAssetBundle(bundleName, bundleVersion, false);
+            var cachedAssetBundle = BettrAssetController.Instance.GetLoadedAssetBundle(bundleName, bundleVersion, false);
             if (cachedAssetBundle == null)
             {
                 // fail quietly

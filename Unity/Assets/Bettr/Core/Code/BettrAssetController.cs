@@ -321,14 +321,14 @@ namespace Bettr.Core
                 var bettrAssetBundleName = assetByteRange.Bundle.BundleName;
                 var bettrAssetBundleVersion = assetByteRange.Bundle.BundleVersion;
                 
-                // check if this asset bundle is already loaded
-                AssetBundle previouslyDownloadedAssetBundle = null;
-                previouslyDownloadedAssetBundle = _bettrAssetController.GetCachedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);
-                if (previouslyDownloadedAssetBundle != null)
+                // check if this asset bundle is already loaded into memory
+                AssetBundle previouslyLoadedAssetBundle = null;
+                previouslyLoadedAssetBundle = _bettrAssetController.GetLoadedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);
+                if (previouslyLoadedAssetBundle != null)
                 {
                     // check if this is a valid bundle
                     callback(bettrAssetBundleName, bettrAssetBundleVersion,
-                        previouslyDownloadedAssetBundle,  null, true, true, null);
+                        previouslyLoadedAssetBundle,  null, true, true, null);
                     continue;
                 }
                 
@@ -411,7 +411,7 @@ namespace Bettr.Core
         {
             yield return _bettrAssetPackageController.LoadPackage(bettrAssetBundleName, bettrAssetBundleVersion, false);
             
-            var assetBundle = _bettrAssetController.GetCachedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);
+            var assetBundle = _bettrAssetController.GetLoadedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);
             
             var prefab = assetBundle.LoadAsset<GameObject>(prefabName);
             if (prefab == null)
@@ -445,7 +445,7 @@ namespace Bettr.Core
             
             yield return _bettrAssetPackageController.LoadPackage(bettrAssetBundleName, bettrAssetBundleVersion, false);
             
-            var assetBundle = _bettrAssetController.GetCachedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);
+            var assetBundle = _bettrAssetController.GetLoadedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);
             
             var prefab = assetBundle.LoadAsset<GameObject>(prefabName);
             if (prefab == null)
@@ -522,7 +522,7 @@ namespace Bettr.Core
         public IEnumerator LoadMaterial(string bettrAssetBundleName, string bettrAssetBundleVersion, string materialName,
             GameObject targetGameObject)
         {
-            var assetBundle = _bettrAssetController.GetCachedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);
+            var assetBundle = _bettrAssetController.GetLoadedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);
             
             var material = assetBundle.LoadAsset<Material>(materialName);
             if (material == null)
@@ -569,7 +569,7 @@ namespace Bettr.Core
         {
             yield return _bettrAssetPackageController.LoadPackage(bettrAssetBundleName, bettrAssetBundleVersion, true);
             
-            var assetBundle = _bettrAssetController.GetCachedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion, true);
+            var assetBundle = _bettrAssetController.GetLoadedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion, true);
             
             var allScenePaths = assetBundle.GetAllScenePaths();
             var scenePath = string.IsNullOrWhiteSpace(bettrSceneName)
@@ -858,7 +858,7 @@ namespace Bettr.Core
             yield return BettrAssetMaterialsController.LoadMaterial(bettrAssetBundleName, bettrAssetBundleVersion, materialName, targetGameObject);
         }
 
-        public AssetBundle GetCachedAssetBundle(string bettrAssetBundleName, string bettrAssetBundleVersion, bool isScene = false)
+        public AssetBundle GetLoadedAssetBundle(string bettrAssetBundleName, string bettrAssetBundleVersion, bool isScene = false)
         {
             var assetBundleName = GetAssetBundleName(bettrAssetBundleName, bettrAssetBundleVersion, isScene);
             
@@ -878,7 +878,7 @@ namespace Bettr.Core
 
         public IEnumerator UnloadCachedAssetBundle(string bettrAssetBundleName, string bettrAssetBundleVersion)
         {
-            var assetBundle = GetCachedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);
+            var assetBundle = GetLoadedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);
             if (assetBundle == null)
             {
                 yield break;
@@ -962,7 +962,7 @@ namespace Bettr.Core
                 {
                     yield return null;
                 }
-                previouslyDownloadedAssetBundle = GetCachedAssetBundle(assetBundleManifest.AssetBundleName,
+                previouslyDownloadedAssetBundle = GetLoadedAssetBundle(assetBundleManifest.AssetBundleName,
                     assetBundleManifest.AssetBundleVersion);
                 callback(assetBundleName, previouslyDownloadedAssetBundle, true, true, null);
                 yield break;
@@ -971,7 +971,7 @@ namespace Bettr.Core
             //
             // Check if the current bundle is already loaded
             //
-            previouslyDownloadedAssetBundle = GetCachedAssetBundle(assetBundleManifest.AssetBundleName,
+            previouslyDownloadedAssetBundle = GetLoadedAssetBundle(assetBundleManifest.AssetBundleName,
                 assetBundleManifest.AssetBundleVersion);
             if (previouslyDownloadedAssetBundle != null)
             {
@@ -1046,7 +1046,7 @@ namespace Bettr.Core
                 {
                     yield return null;
                 }
-                previouslyDownloadedAssetBundle = GetCachedAssetBundle(assetBundleManifest.AssetBundleName,
+                previouslyDownloadedAssetBundle = GetLoadedAssetBundle(assetBundleManifest.AssetBundleName,
                     assetBundleManifest.AssetBundleVersion);
                 callback(assetBundleName, previouslyDownloadedAssetBundle, true, true, null);
                 yield break;
@@ -1055,7 +1055,7 @@ namespace Bettr.Core
             //
             // Check if the current bundle is already loaded
             //
-            previouslyDownloadedAssetBundle = GetCachedAssetBundle(assetBundleManifest.AssetBundleName,
+            previouslyDownloadedAssetBundle = GetLoadedAssetBundle(assetBundleManifest.AssetBundleName,
                 assetBundleManifest.AssetBundleVersion);
             if (previouslyDownloadedAssetBundle != null)
             {
