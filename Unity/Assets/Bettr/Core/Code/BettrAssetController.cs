@@ -878,16 +878,24 @@ namespace Bettr.Core
 
         public IEnumerator UnloadCachedAssetBundle(string bettrAssetBundleName, string bettrAssetBundleVersion)
         {
-            var assetBundle = GetLoadedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);
-            if (assetBundle == null)
+            var sceneAssetBundle = GetLoadedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion, isScene:true);
+            if (sceneAssetBundle != null)
             {
-                yield break;
+                AsyncOperation asyncOperation = sceneAssetBundle.UnloadAsync(true);
+                while (!asyncOperation.isDone)
+                {
+                    yield return null;
+                }
             }
-
-            AsyncOperation asyncOperation = assetBundle.UnloadAsync(true);
-            while (!asyncOperation.isDone)
+            
+            var assetBundle = GetLoadedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion, isScene:false);
+            if (assetBundle != null)
             {
-                yield return null;
+                AsyncOperation asyncOperation = assetBundle.UnloadAsync(true);
+                while (!asyncOperation.isDone)
+                {
+                    yield return null;
+                }
             }
         }
 
