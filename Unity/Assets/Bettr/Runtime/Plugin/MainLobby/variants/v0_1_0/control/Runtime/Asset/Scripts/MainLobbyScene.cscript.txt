@@ -103,8 +103,15 @@ function MainLobbyScene:OnPointerClick1Param(param)
         System.Print("MainLobbyScene OnPointerClick1Param Volume")
         BettrMainLobbySceneController.ToggleVolume(self)
     elseif string.find(param, "TopPanel__", 1, true) == 1 then
-        System.Print("MainLobbyScene OnPointerClick1Param TopPanel")
-        BettrMainLobbySceneController.OnTopPanelClick(self, param)
+        System.StartCoroutine(self, "OnTopPanelClick", param)
+    end
+end
+
+function MainLobbyScene:OnTopPanelClick(param)
+    series
+        do
+            BettrMainLobbySceneController.OnTopPanelClick(self, param)
+        end
     end
 end
 
