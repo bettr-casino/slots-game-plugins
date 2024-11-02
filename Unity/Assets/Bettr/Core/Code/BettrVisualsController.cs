@@ -307,6 +307,12 @@ namespace Bettr.Core
                 yield break;
             }
             
+            if (animatorProperty.GameObject == null)
+            {
+                context.SetError(new ScriptRuntimeException(new NullReferenceException($"null game object {animatorProperty.animationStateName}")));
+                yield break;
+            }
+            
             var isSlamStopped = BettrUserController.UserInSlamStopMode;
             if (isSlamStopped)
             {
@@ -328,6 +334,11 @@ namespace Bettr.Core
                     }
                     yield return null;
                 }
+            }
+            if (animatorProperty.GameObject == null)
+            {
+                // this is possible if the GameObject has been destroyed
+                yield break;
             }
             var animator = animatorProperty.animator;
             var normalizedTime = 0.0f;
