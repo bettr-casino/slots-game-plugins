@@ -270,6 +270,13 @@ namespace Bettr.Core
                 yield break;
             }
             
+            if (backgroundFBX.gameObject == null)
+            {
+                // log info and quietly fail
+                Debug.Log($"Failed to load backgroundFBX gameObject from backgroundTable machineName={machineName}, machineVariant={machineVariant}, experimentVariant={experimentVariant}");
+                yield break;
+            }
+            
             // get the VideoPlayer component from the backgroundFBX
             var videoPlayer = backgroundFBX.gameObject.GetComponent<VideoPlayer>();
             // if null, log and quietly fail
