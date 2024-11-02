@@ -6,6 +6,7 @@ using System.IO.Compression;
 using System.Linq;
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
+using CrayonScript.Interpreter.Execution.VM;
 using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -18,12 +19,9 @@ namespace Bettr.Core
 {
     public class BettrMainLobbySceneControllerState
     {
-        public Dictionary<string, BettrLobbyCardConfig> LobbyCardMap;
-
         public BettrMainLobbySceneControllerState()
         {
             TileController.RegisterType<BettrMainLobbySceneControllerState>("BettrMainLobbySceneControllerState");
-            LobbyCardMap = new Dictionary<string, BettrLobbyCardConfig>();
         }
     }
     
@@ -38,6 +36,8 @@ namespace Bettr.Core
         public bool IsMainLobbyLoaded { get; private set; }
 
         public int CurrentPageNumber = 1;
+
+        public BettrLobbyCardConfig CurrentLobbyCard { get; private set; }
         
         public string webAssetBaseURL;
         
@@ -93,6 +93,16 @@ namespace Bettr.Core
             }
         }
 
+        public void SetTopPanelSelector(Table mainLobbyTable, GameObject gameObject)
+        {
+            var bettrCardSelectorProperty = (PropertyGameObject) mainLobbyTable["LobbyCardSelector"];
+            if (gameObject != null)
+            {
+                bettrCardSelectorProperty.GameObject.transform.position = gameObject.transform.position;
+            }
+            bettrCardSelectorProperty.SetActive(true);
+        }
+
         public void SetSelector(Table mainLobbyTable, GameObject gameObject)
         {
             if (gameObject == null)
@@ -146,7 +156,66 @@ namespace Bettr.Core
             }
             return null; // Return null if the child is not found
         }
+        
+        public IEnumerator OnTopPanelClick(Table self, string topPanelPropertyKey)
+        {
+            var group = "TopPanel";
+            var key = topPanelPropertyKey.Replace($"{group}__", "");
+            // if key == "Prev" or "Next" then load the next or previous page
+            if (key == "Prev")
+            {
+                // TODO: handle Prev
+                yield break;
+            }
+            if (key == "Next")
+            {
+                // TODO: handle Next
+                yield break;
+            }
+            // this is on a card
+            var groupProperty = (TilePropertyGameObjectGroup) self[group];
+            var property = groupProperty[key];
+            var gameObject = property.GameObject;
+            
+            SetTopPanelSelector(self, gameObject);
+            
+            // if this is the first page and LobbyCard001, then this is the home screen
+            if (CurrentPageNumber == 1 && key == "LobbyCard001")
+            {
+                // TODO: handle Home
+                yield break;
+            }
+            // this is click on a game card
+            // first locate the card using the game object name
+            var card = property.GameObject.name;
+            var bettrUser = BettrUserController.Instance.BettrUserConfig;
+            var lobbyCards = bettrUser.LobbyCards;
+            // find the LobbyCard by card
+            var lobbyCard = lobbyCards.Find(lc => lc.Card == card);
+            // machine bundle name
+            var currentLobbyCard = CurrentLobbyCard;
+            if (currentLobbyCard != null)
+            {
+                var currentMachineBundleName = currentLobbyCard.MachineBundleName;
+                var currentMachineBundleVariant = currentLobbyCard.MachineBundleVariant;
+                // unload any cached version
+                yield return BettrAssetController.Instance.UnloadCachedAssetBundle(currentMachineBundleName, currentMachineBundleVariant);
+            }
+            // get the machineName and machineVariant
+            var machineBundleName = lobbyCard.MachineBundleName;
+            var machineBundleVariant = lobbyCard.MachineBundleVariant;
+            var machineName = lobbyCard.MachineName;
+            var machineVariant = lobbyCard.GetMachineVariant();
+            var machineSceneName = lobbyCard.MachineSceneName;
 
+            var gamePanelProperty = (PropertyGameObject) self["GamePanel"];
+            var gamePanel = gamePanelProperty.GameObject;
+
+            yield return LoadGamePrefabAsync(machineBundleName, machineBundleVariant, machineName, machineVariant, gamePanel);
+        }
+
+        [Obsolete]
+        // TODO: Remove once the new LoadTopPanelGame is tested
         public IEnumerator LoadLobbySideBar(Table self, string lobbyCardName)
         {
             var sideBar = (TilePropertyGameObjectGroup) self["SideBar"];
@@ -292,6 +361,112 @@ namespace Bettr.Core
             var machineSceneName = lobbyCard.MachineSceneName;
 
             yield return LoadGameSceneAsync(machineSceneName, machineBundleName, machineBundleVariant, machineName, machineVariant);
+        }
+        
+        private IEnumerator LoadGamePrefabAsync(string machineBundleName, string machineBundleVariant, string machineName, string machineVariant, GameObject parent)
+        {
+            // Load the prefab
+            var prefabName = $"{machineName}{machineVariant}Prefab";
+            yield return BettrAssetController.Instance.LoadPrefab(context:null, machineBundleName, machineBundleVariant, prefabName, parent);
+            
+            // get the loaded prefab
+            var pivotGameObject = parent.transform.GetChild(0).gameObject;
+            
+            // turn off Machines
+            var machines = FindChildRecursive(pivotGameObject, "Machines");
+            if (machines != null)
+            {
+                machines.SetActive(false);
+            }
+            // Find the Background Camera Camera_Background
+            var backgroundCamera = FindChildRecursive(pivotGameObject, "Camera_Background");
+            // turn it off
+            if (backgroundCamera != null)
+            {
+                backgroundCamera.SetActive(false);
+            }
+            
+            // Find the UI Camera (To fix the > 1 active AudioListeners issue)
+            var uiCamera = FindChildRecursive(pivotGameObject, "UI Camera");
+            // disable it
+            if (uiCamera != null)
+            {
+                uiCamera.SetActive(false);
+            }
+            
+            // Find the BackgroundFBX from the pivotGameObject
+            var backgroundFBX = FindChildRecursive(pivotGameObject, "BackgroundFBX");
+            var backgroundGameObject = backgroundFBX.transform.parent.parent.transform.gameObject;
+            
+            // Find the Game GameObject
+            var gameGameObject = FindChildRecursive(pivotGameObject, "Game");
+            // Get the Game Tile component
+            var gameTile = gameGameObject?.GetComponentInChildren<Tile>();
+            
+            // Get the Background Tile component
+            var backgroundTile = backgroundGameObject?.GetComponentInChildren<Tile>();
+            var backgroundTable = backgroundTile?.Type;
+            
+            // wait a few frames to ensure Awake and Start are called on the Tile components
+            // ReSharper disable once PossibleNullReferenceException
+            while (!gameTile.IsInitialized)
+            {
+                yield return null;
+            }
+            
+            // wait a few frames to ensure Awake and Start are called on the Tile components
+            // ReSharper disable once PossibleNullReferenceException
+            while (!backgroundTile.IsInitialized)
+            {
+                yield return null;
+            }
+            
+            var machineExperiment = machineBundleVariant; // this is the experiment variant
+            
+            yield return BettrVideoController.Instance.LoadBackgroundVideo(backgroundTable, machineName, machineVariant, machineExperiment);
+            
+            // Turn on UI Camera (To fix the > 1 active AudioListeners issue)
+            if (uiCamera != null)
+            {
+                uiCamera.SetActive(true);
+            }            
+            
+            // turn on Background Camera
+            if (backgroundCamera != null)
+            {
+                backgroundCamera.SetActive(true);
+            }
+            
+            // check BettrVideoController.Instance.HasBackgroundVideo
+            if (BettrVideoController.Instance.HasBackgroundVideo)
+            {
+                yield return BettrVideoController.Instance.PlayBackgroundVideo(backgroundTable, machineName, machineVariant, machineExperiment);
+                
+                // wait until video preparation is complete
+                yield return new WaitUntil(() => BettrVideoController.Instance.VideoPreparationComplete);
+                
+                if (!BettrVideoController.Instance.VideoPreparationError)
+                {
+                    // wait until VideoStartedPlaying is true
+                    yield return new WaitUntil(() => BettrVideoController.Instance.VideoStartedPlaying);
+                }
+            }
+            
+            // check if VideoPreparationError is true
+            if (!BettrVideoController.Instance.VideoPreparationError)
+            {
+                // wait until VideoLoopPointReached is true
+                yield return new WaitUntil(() => BettrVideoController.Instance.VideoLoopPointReached);
+            }
+            
+            // turn on Machines
+            if (machines != null)
+            {
+                machines.SetActive(true);
+            }
+            
+            // set the base game to active
+            gameTile.Call("SetBaseGameActive", true);
         }
 
         private IEnumerator LoadGameSceneAsync(string machineSceneName, string machineBundleName, string machineBundleVariant, string machineName, string machineVariant)
@@ -549,7 +724,7 @@ namespace Bettr.Core
         {
             var lobbyCardsPerPage = 9;
             var numLobbyCardsToLoad = pageNumber == 1 ? lobbyCardsPerPage - 1 : lobbyCardsPerPage;
-            
+            var lobbyCardOffset = pageNumber == 1 ? 2 : 1;
             var bettrUser = BettrUserController.Instance.BettrUserConfig;
 
             var totalLobbyCardCount = bettrUser.LobbyCards.Count;
@@ -588,9 +763,8 @@ namespace Bettr.Core
                 manifests.Add(manifest);
             }
 
-            var group = "Group1";
-            
-            var machineGroupProperty = (TilePropertyGameObjectGroup) self[group];
+            var groupName = "TopPanel";
+            var groupProperty = (TilePropertyGameObjectGroup) self[groupName];
 
             var binaryFile = "lobbycardv0_1_0.merged.control.bin";
 
@@ -608,25 +782,25 @@ namespace Bettr.Core
                     
                     var index = manifests.FindIndex(m => m.Bundle.BundleName == machineBundleName && m.Bundle.BundleVersion == machineBundleVariant);
                     var lobbyCard = lobbyCardConfigs[index];
-                    var lobbyCardId = $"LobbyCard{index + 1:D3}";
-                    var machineCardProperty = machineGroupProperty[lobbyCardId];
+                    var propertyId = $"LobbyCard{index + lobbyCardOffset:D3}";
+                    var machineCardProperty = groupProperty[propertyId];
                     if (machineCardProperty == null)
                     {
-                        Debug.LogWarning($"LoadApp machineCardProperty is nil group={group} lobbyCard={lobbyCardId} lobbyCard.MachineName={lobbyCard.MachineName} lobbyCard.MaterialName={lobbyCard.MaterialName} card={lobbyCard.Card}");
+                        Debug.LogWarning($"LoadApp machineCardProperty is nil group={groupName} lobbyCard={propertyId} lobbyCard.MachineName={lobbyCard.MachineName} lobbyCard.MaterialName={lobbyCard.MaterialName} card={lobbyCard.Card}");
                         return;
                     }
                     
                     var lobbyCardGameObject = machineCardProperty.GameObject;
-                    var lobbyCardKey = group + "__" + lobbyCard.Card;
+                    
+                    // this will be the key used to locate the lobby card later
+                    // lobbyCard.Card ids are now unique
+                    var lobbyCardKey = lobbyCard.Card;
                             
                     // Debug.Log($"LoadApp lobbyCardGameObject={lobbyCardGameObject.name} renaming to lobbyCardKey={lobbyCardKey}");
-
                     lobbyCardGameObject.name = lobbyCardKey;
 
                     GameObject quadGameObject = lobbyCardGameObject.transform.GetChild(0).GetChild(0).gameObject;
 
-                    State.LobbyCardMap[lobbyCardKey] = lobbyCard;
-                    
                     // Get the MeshRenderer component
                     var renderer = quadGameObject.GetComponent<MeshRenderer>();
                     if (renderer.material != null)
@@ -635,7 +809,7 @@ namespace Bettr.Core
                         renderer.material = null;
                     }
                     
-                    if (LobbyCardMaterialMap.TryGetValue(lobbyCardId, out var newMaterial))
+                    if (LobbyCardMaterialMap.TryGetValue(lobbyCardKey, out var newMaterial))
                     {
                         renderer.material = newMaterial;
                     }
@@ -654,7 +828,7 @@ namespace Bettr.Core
                         renderer.material = material;
                         
                         // cache the material
-                        LobbyCardMaterialMap[lobbyCardId] = material;
+                        LobbyCardMaterialMap[lobbyCardKey] = material;
                     }
                     
                     LoadedLobbyCardCount++;
@@ -663,7 +837,7 @@ namespace Bettr.Core
         }
         
         // Convert the method from Lua to C#
-        public IEnumerator LoadLobbyCards(Table self)
+        public IEnumerator LoadTopPanelLobbyCards(Table self)
         {
             // turn off the loading screen
             // TODO: remove loading screen
@@ -672,15 +846,14 @@ namespace Bettr.Core
             {
                 loadingProperty.SetActive(false);
             }
-            // yield return LoadLobbyPage(self, CurrentPageNumber);
+            yield return LoadLobbyPage(self, CurrentPageNumber);
             IsMainLobbyLoaded = true;
-            yield break;
         }
         
         // Convert the method from Lua to C#
         // TODO: deprecated
         [Obsolete]
-        public IEnumerator LoadLobbyCardsObsolete(Table self)
+        public IEnumerator LoadLobbyCards(Table self)
         {
             Console.WriteLine("LoadLobbyCards invoked");
 
@@ -707,8 +880,6 @@ namespace Bettr.Core
             int cardCount = bettrUser.LobbyCards.Count;  // Assuming LobbyCards is a list or similar collection
             Console.WriteLine($"LoadApp lobbyCard cardCount={cardCount}");
 
-            State.LobbyCardMap.Clear();
-            
             var lobbyCard = bettrUser.LobbyCards[0];
             
             yield return BettrAssetController.Instance.LoadPackage(lobbyCard.BundleName, lobbyCard.BundleVersion, false);
@@ -746,8 +917,6 @@ namespace Bettr.Core
                             lobbyCardGameObject.name = lobbyCardKey;
 
                             quadGameObject = lobbyCardGameObject.transform.GetChild(0).GetChild(0).gameObject;
-
-                            State.LobbyCardMap[lobbyCardKey] = lobbyCard;
                         }
                     }
                     catch (Exception e)

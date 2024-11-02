@@ -51,10 +51,13 @@ function Game005:Start()
 --        do
 --            BettrVideoController.PlayBackgroundVideo(Game005BaseGameBackground, "Game005", "FortunesLuckyCharms", "variant1")
 --        end
-        do
-            System.Print("Game005:Start Load Machine Prefabs tile id={0}", self.id)
-            self:LoadBaseGamePrefab()
-        end
+-- NOTE: Commented out: Will be preloaded into the Scene
+--        do
+--            System.Print("Game005:Start Load Machine Prefabs tile id={0}", self.id)
+--
+--            self:LoadBaseGamePrefab()
+--
+--        end
 -- NOTE: Commented out: Will be controlled by the BettrMainLobbySceneController        
 --        do
 --            self:SetBaseGameActive(true)
@@ -62,37 +65,40 @@ function Game005:Start()
     end
 end
 
-function Game005:LoadBaseGameBackgroundPrefab()
-    series
-        do
-            System.Print("Game005:LoadBaseGameBackgroundPrefab tile id={0}", self.id)
-            local manifest = self.Manifest
-            local backgroundParentProperty = self.BaseGameBackgroundParent
-            local backgroundParent = backgroundParentProperty["Pivot"]                        
-            BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, manifest.BaseGameBackgroundPrefabName, backgroundParent)
-        end
-    end
-end
+-- NOTE: Commented out: Will be preloaded into the Scene
+-- function Game005:LoadBaseGameBackgroundPrefab()
+--     series
+--         do
+--             System.Print("Game005:LoadBaseGameBackgroundPrefab tile id={0}", self.id)
+--             local manifest = self.Manifest
+--             local backgroundParentProperty = self.BaseGameBackgroundParent
+--             local backgroundParent = backgroundParentProperty["Pivot"]                        
+--             BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, manifest.BaseGameBackgroundPrefabName, backgroundParent)
+--         end
+--     end
+-- end
 
-function Game005:LoadBaseGamePrefab()
-    series
-        do            
-            local manifest = self.Manifest
-            local baseGameMachineParentProperty = self.BaseGameMachineParent
-            local baseGameMachineParent = baseGameMachineParentProperty["Pivot"]
-            BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, manifest.BaseGameMachinePrefabName, baseGameMachineParent)
-        end
-    end
-end
+-- NOTE: Commented out: Will be preloaded into the Scene
+-- function Game005:LoadBaseGamePrefab()
+--    series
+--         do            
+--             local manifest = self.Manifest
+--             local baseGameMachineParentProperty = self.BaseGameMachineParent
+--             local baseGameMachineParent = baseGameMachineParentProperty["Pivot"]
+--             BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, manifest.BaseGameMachinePrefabName, baseGameMachineParent)
+--         end
+--     end
+-- end
 
-function Game005:SetBaseGameActive(active)
-    if active then
-        self.BaseGameMachineParent.SetActive(true)
-        Game005MachineState.Current.First.ActiveGame = "BaseGame"
-    else
-        self.BaseGameMachineParent.SetActive(false)
-    end
-end
+-- NOTE: Commented out: Will be preloaded into the Scene
+-- function Game005:SetBaseGameActive(active)
+--     if active then
+--         self.BaseGameMachineParent.SetActive(true)
+--         Game005MachineState.Current.First.ActiveGame = "BaseGame"
+--     else
+--         self.BaseGameMachineParent.SetActive(false)
+--     end
+-- end
 
 function Game005:ActiveGame()
     return Game005MachineState.Current.First.ActiveGame

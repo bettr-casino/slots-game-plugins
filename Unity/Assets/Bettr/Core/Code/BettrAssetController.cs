@@ -439,7 +439,7 @@ namespace Bettr.Core
             if (string.IsNullOrWhiteSpace(prefabName))
             {
                 Debug.LogError($"Prefab name is null or empty for asset bundle={bettrAssetBundleName} version={bettrAssetBundleVersion}");
-                context.SetError(new ScriptRuntimeException($"Prefab name is null or empty for asset bundle={bettrAssetBundleName} version={bettrAssetBundleVersion}"));
+                context?.SetError(new ScriptRuntimeException($"Prefab name is null or empty for asset bundle={bettrAssetBundleName} version={bettrAssetBundleVersion}"));
                 yield break;
             }
             

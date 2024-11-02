@@ -30,15 +30,24 @@ function MainLobbyScene:Start()
         do
             System.Print("MainLobbyScene Starting...")
             self:InitLoading()
-            self:LoadLobbyCards()
+            self:LoadTopPanelLobbyCards()
         end
     end
 end
 
 function MainLobbyScene:InitLoading()
     self.LoadingText.SetText("Preparing Your Lobby, Please Wait...")
-    self.Loading.SetActive(true)
-    self.Lobby.SetActive(false)
+    self.Loading.SetActive(false)
+    self.Lobby.SetActive(true)
+end
+
+function MainLobbyScene:LoadTopPanelLobbyCards()
+    System.Print("LoadTopPanelLobbyCards invoked")          
+    series
+        do
+            BettrMainLobbySceneController.LoadTopPanelLobbyCards(self)
+        end
+    end
 end
 
 function MainLobbyScene:LoadLobbyCards()
@@ -93,6 +102,9 @@ function MainLobbyScene:OnPointerClick1Param(param)
     elseif param == "Volume" then
         System.Print("MainLobbyScene OnPointerClick1Param Volume")
         BettrMainLobbySceneController.ToggleVolume(self)
+    elseif string.find(param, "TopPanel__", 1, true) == 1 then
+        System.Print("MainLobbyScene OnPointerClick1Param TopPanel")
+        BettrMainLobbySceneController.OnTopPanelClick(self, param)
     end
 end
 
