@@ -908,11 +908,11 @@ namespace Bettr.Core
                     // gets called once per asset bundle
                     if (!success)
                     {
-                        Debug.LogError($"MultiByteRange asset=${machineBundleName} version={machineBundleVariant} success={false} loaded={loaded} error={error}");
+                        Debug.LogError($"MultiByteRange asset={machineBundleName} version={machineBundleVariant} success={false} loaded={loaded} error={error}");
                         return;
                     }
                     
-                    Debug.Log($"MultiByteRange asset=${machineBundleName} version={machineBundleVariant} success={true} loaded={loaded}");
+                    Debug.Log($"MultiByteRange asset={machineBundleName} version={machineBundleVariant} success={true} loaded={loaded}");
                     
                     var index = manifests.FindIndex(m => m.Bundle.BundleName == machineBundleName && m.Bundle.BundleVersion == machineBundleVariant);
                     var lobbyCard = lobbyCardConfigs[index];
