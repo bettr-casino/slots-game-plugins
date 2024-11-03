@@ -24,6 +24,9 @@ using Object = UnityEngine.Object;
 // ReSharper disable once CheckNamespace
 namespace Bettr.Core
 {
+    public delegate void MultiByteAssetLoadCompleteCallback(BettrAssetMultiByteRange manifest, string assetBundleName, string assetBundleVersion,
+        AssetBundle assetBundle, BettrAssetBundleManifest assetBundleManifest, bool success,
+        bool previouslyLoaded, string error);
     public delegate void AssetLoadCompleteCallback(string assetBundleName, string assetBundleVersion,
         AssetBundle assetBundle, BettrAssetBundleManifest assetBundleManifest, bool success,
         bool previouslyLoaded, string error);
@@ -242,10 +245,10 @@ namespace Bettr.Core
         }
 
         public IEnumerator LoadMultiByteRangeAsset(Task<BettrMultiByteRange> manifestFetchTask, Task<BettrMultiByteRange> bundleFetchTask,
-            BettrAssetMultiByteRange assetByteRange, AssetLoadCompleteCallback callback)
+            BettrAssetMultiByteRange manifest, MultiByteAssetLoadCompleteCallback callback)
         {
-            var bettrAssetBundleName = assetByteRange.Bundle.BundleName;
-            var bettrAssetBundleVersion = assetByteRange.Bundle.BundleVersion;
+            var bettrAssetBundleName = manifest.Bundle.BundleName;
+            var bettrAssetBundleVersion = manifest.Bundle.BundleVersion;
             
             // Wait until the task is completed
             yield return new WaitUntil(() => manifestFetchTask.IsCompleted);
@@ -255,7 +258,7 @@ namespace Bettr.Core
             {
                 var error = $"Error fetching manifest byte range: {manifestFetchTask.Exception.Message} assetBundleName={bettrAssetBundleName} assetBundleVersion={bettrAssetBundleVersion}";
                 Debug.LogError(error);
-                callback(bettrAssetBundleName, bettrAssetBundleVersion, null, null, false, false, error);
+                callback(manifest, bettrAssetBundleName, bettrAssetBundleVersion, null, null, false, false, error);
                 yield break;
             }
             
@@ -266,7 +269,7 @@ namespace Bettr.Core
             {
                 var error = $"null asset manifest data for assetBundleName={bettrAssetBundleName} assetBundleVersion={bettrAssetBundleVersion}";
                 Debug.LogError(error);
-                callback(bettrAssetBundleName, bettrAssetBundleVersion, null, null, false, false, error);
+                callback(manifest, bettrAssetBundleName, bettrAssetBundleVersion, null, null, false, false, error);
                 yield break;
             }
                 
@@ -289,7 +292,7 @@ namespace Bettr.Core
             {
                 var error = $"Error fetching bundle byte range: {bundleFetchTask.Exception.Message} assetBundleName={bettrAssetBundleName} assetBundleVersion={bettrAssetBundleVersion}";
                 Debug.LogError(error);
-                callback(bettrAssetBundleName, bettrAssetBundleVersion, null, assetBundleManifest, false, false, error);
+                callback(manifest, bettrAssetBundleName, bettrAssetBundleVersion, null, assetBundleManifest, false, false, error);
                 yield break;
             }
             
@@ -301,25 +304,25 @@ namespace Bettr.Core
             {
                 var error = $"null downloaded asset bundle for assetBundleName={bettrAssetBundleName} assetBundleVersion={bettrAssetBundleVersion}";
                 Debug.LogError(error);
-                callback(bettrAssetBundleName, bettrAssetBundleVersion,
+                callback(manifest, bettrAssetBundleName, bettrAssetBundleVersion,
                     null,  assetBundleManifest, false, false, error);
                 yield break;
             }
                 
-            callback(bettrAssetBundleName, bettrAssetBundleVersion,
+            callback(manifest, bettrAssetBundleName, bettrAssetBundleVersion,
                 downloadedAssetBundle,  assetBundleManifest, true, false, null);   
 
         }
 
-        public void LoadMultiByteRangeAssets(string binaryFileName, List<BettrAssetMultiByteRange> assetByteRanges, AssetLoadCompleteCallback callback)
+        public void LoadMultiByteRangeAssets(string binaryFileName, List<BettrAssetMultiByteRange> manifests, MultiByteAssetLoadCompleteCallback callback)
         {
             var webAssetBaseURL = _bettrAssetController.webAssetBaseURL;
             var binaryAssetURL = $"{webAssetBaseURL}/{binaryFileName}";
 
-            foreach (var assetByteRange in assetByteRanges)
+            foreach (var manifest in manifests)
             {
-                var bettrAssetBundleName = assetByteRange.Bundle.BundleName;
-                var bettrAssetBundleVersion = assetByteRange.Bundle.BundleVersion;
+                var bettrAssetBundleName = manifest.Bundle.BundleName;
+                var bettrAssetBundleVersion = manifest.Bundle.BundleVersion;
                 
                 // check if this asset bundle is already loaded into memory
                 AssetBundle previouslyLoadedAssetBundle = null;
@@ -327,16 +330,16 @@ namespace Bettr.Core
                 if (previouslyLoadedAssetBundle != null)
                 {
                     // check if this is a valid bundle
-                    callback(bettrAssetBundleName, bettrAssetBundleVersion,
+                    callback(manifest, bettrAssetBundleName, bettrAssetBundleVersion,
                         previouslyLoadedAssetBundle,  null, true, true, null);
                     continue;
                 }
                 
-                var manifestByteRange = assetByteRange.Manifest;
+                var manifestByteRange = manifest.Manifest;
                 Task<BettrMultiByteRange> manifestFetchTask = FetchAssetByteRange(binaryAssetURL, manifestByteRange);
-                var bundleByteRange = assetByteRange.Bundle;
+                var bundleByteRange = manifest.Bundle;
                 Task<BettrMultiByteRange> bundleFetchTask = FetchAssetByteRange(binaryAssetURL, bundleByteRange);
-                BettrRoutineRunner.Instance.StartCoroutine(LoadMultiByteRangeAsset(manifestFetchTask, bundleFetchTask, assetByteRange, callback));
+                BettrRoutineRunner.Instance.StartCoroutine(LoadMultiByteRangeAsset(manifestFetchTask, bundleFetchTask, manifest, callback));
             }
         }
     }
@@ -825,7 +828,7 @@ namespace Bettr.Core
             return isScene ? $"{bundleName}_scenes.{bundleVariant}.manifest" : $"{bundleName}.{bundleVariant}.manifest";
         }
         
-        public void LoadMultiByteRangeAssets(string binaryFileName, List<BettrAssetMultiByteRange> byteRanges, AssetLoadCompleteCallback callback)
+        public void LoadMultiByteRangeAssets(string binaryFileName, List<BettrAssetMultiByteRange> byteRanges, MultiByteAssetLoadCompleteCallback callback)
         {
             BettrMultiByteRangeAssetController.LoadMultiByteRangeAssets(binaryFileName, byteRanges, callback);
         }

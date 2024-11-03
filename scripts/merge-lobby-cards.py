@@ -20,8 +20,8 @@ def find_files(directory, patterns):
 def extract_game_info(file_name):
     """Extract game name, variant, and experiment from the file name."""
     game_match = re.search(r'game(\d{3})', file_name)
-    variant_match = re.search(r'game\d{3}([a-zA-Z]+)', file_name)
-    experiment_match = re.search(r'game\d{3}[a-zA-Z]+\.(\w+)', file_name)
+    variant_match = re.search(r'game\d{3}([^.]+)', file_name)
+    experiment_match = re.search(r'game\d{3}[^.]+\.(\w+)', file_name)
 
     # get the file extension
     file_type = file_name.split('.')[-1]

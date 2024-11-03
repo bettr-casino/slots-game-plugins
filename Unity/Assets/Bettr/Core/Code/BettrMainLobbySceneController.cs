@@ -891,8 +891,8 @@ namespace Bettr.Core
                 var manifest = Manifests.FindManifest(machineBundleName, machineBundleVariant);
                 if (manifest == null)
                 {
-                    Debug.Log($"LoadLobbyPage manifest is null machineBundleName={machineBundleName} machineBundleVariant={machineBundleVariant} pageNumber={pageNumber}");
-                    continue;
+                    Debug.LogError($"LoadLobbyPage manifest is null machineBundleName={machineBundleName} machineBundleVariant={machineBundleVariant} pageNumber={pageNumber}");
+                    yield break;
                 }
                 manifests.Add(manifest);
             }
@@ -903,7 +903,7 @@ namespace Bettr.Core
             var binaryFile = "lobbycardv0_1_0.merged.control.bin";
 
             BettrAssetController.Instance.LoadMultiByteRangeAssets(binaryFile, manifests,
-                (machineBundleName, machineBundleVariant, assetBundle, assetBundleManifest, success, loaded, error) =>
+                (manifest, machineBundleName, machineBundleVariant, assetBundle, assetBundleManifest, success, loaded, error) =>
                 {
                     // gets called once per asset bundle
                     if (!success)
@@ -913,8 +913,8 @@ namespace Bettr.Core
                     }
                     
                     Debug.Log($"MultiByteRange asset={machineBundleName} version={machineBundleVariant} success={true} loaded={loaded}");
-                    
-                    var index = manifests.FindIndex(m => m.Bundle.BundleName == machineBundleName && m.Bundle.BundleVersion == machineBundleVariant);
+
+                    var index = manifests.FindIndex(m => m == manifest);
                     var lobbyCard = lobbyCardConfigs[index];
                     var propertyId = $"LobbyCard{index + lobbyCardOffset:D3}";
                     var machineCardProperty = groupProperty[propertyId];
