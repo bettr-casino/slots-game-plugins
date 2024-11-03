@@ -17,14 +17,16 @@ namespace Bettr.Core
     public class BettrVideoPlayerController : MonoBehaviour
     {
 
-        [NonSerialized] private VideoPlayer VideoPlayer;
+        private float waitTime = 15.0f;
 
+        [NonSerialized] private VideoPlayer VideoPlayer;
+        
         private void Awake()
         {
             VideoPlayer = gameObject.GetComponent<VideoPlayer>();
         }
 
-        void Start()
+        private IEnumerator Start()
         {
             // Set up the video player events
             VideoPlayer.prepareCompleted += OnVideoPrepared;
@@ -34,6 +36,20 @@ namespace Bettr.Core
             VideoPlayer.Stop();
             // Prepare the video
             VideoPlayer.Prepare();
+
+            yield return new WaitForSeconds(waitTime);
+
+            while (true)
+            {
+                if (!gameObject.activeInHierarchy)
+                {
+                    yield return null;
+                }
+                
+                VideoPlayer.Play();
+                
+                yield return new WaitForSeconds(waitTime);
+            }
         }
 
         private void OnVideoPrepared(VideoPlayer vp)

@@ -191,15 +191,42 @@ namespace Bettr.Core
         {
             return CurrentPageNumber == 1 && TopPanelLobbyCardPropertyId == "LobbyCard001";
         }
-        
-        public IEnumerator OnTopPanelPrevClick(Table self)
+
+        private IEnumerator OnTopPanelPrevClick(Table self)
         {
-            yield break;
+            if (CurrentPageNumber <= 1) 
+            {
+                yield break;
+            }
+            CurrentPageNumber--;
+            yield return LoadLobbyPage(self, CurrentPageNumber);
         }
-        
-        public IEnumerator OnTopPanelNextClick(Table self)
+
+        private IEnumerator OnTopPanelNextClick(Table self)
         {
-            yield break;
+            var maxPageNumber = GetMaxPageNumber();
+            if (CurrentPageNumber >= maxPageNumber)
+            {
+                yield break;
+            }
+            CurrentPageNumber++;
+            yield return LoadLobbyPage(self, CurrentPageNumber);
+        }
+
+        public int GetMaxPageNumber()
+        {
+            var lobbyCardsPerPage = 9;
+            var pageNumber = 1;
+            var numLobbyCardsToLoad = lobbyCardsPerPage - 1;
+            var endIndex = numLobbyCardsToLoad;
+            while (endIndex < TotalLobbyCardCount)
+            {
+                pageNumber += 1;
+                numLobbyCardsToLoad = pageNumber == 1 ? lobbyCardsPerPage - 1 : lobbyCardsPerPage;
+                var startIndex = pageNumber == 1 ? 0 : (pageNumber - 1) * lobbyCardsPerPage - 1;
+                endIndex = startIndex + numLobbyCardsToLoad;
+            }
+            return pageNumber;
         }
 
         public IEnumerator OnTopPanelClick(Table self, string topPanelPropertyKey)
