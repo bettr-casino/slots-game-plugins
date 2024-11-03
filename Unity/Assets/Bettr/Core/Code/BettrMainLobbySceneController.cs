@@ -559,6 +559,8 @@ namespace Bettr.Core
             var machineExperiment = machineBundleVariant; // this is the experiment variant
             
             yield return BettrVideoController.Instance.LoadBackgroundVideo(backgroundTable, machineName, machineVariant, machineExperiment);
+
+            yield return BettrAudioController.Instance.LoadBackgroundAudio($"{machineName}{machineVariant}");
             
             // Turn on UI Camera (To fix the > 1 active AudioListeners issue)
             if (uiCamera != null)
@@ -575,6 +577,9 @@ namespace Bettr.Core
             // check BettrVideoController.Instance.HasBackgroundVideo
             if (BettrVideoController.Instance.HasBackgroundVideo)
             {
+                // Play Audio
+                BettrAudioController.Instance.PlayGameAudioLoop(machineName, machineVariant, $"{machineName}{machineVariant}BackgroundMusic");
+                
                 yield return BettrVideoController.Instance.PlayBackgroundVideo(backgroundTable, machineName, machineVariant, machineExperiment);
                 
                 // wait until video preparation is complete
