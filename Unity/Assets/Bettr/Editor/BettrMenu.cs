@@ -2259,6 +2259,22 @@ namespace Bettr.Editor
                             machinesPivotBackgrounds.transform.localPosition = new Vector3(0.05f, -0.2f, 0);
                             machinesPivotBackgrounds.transform.localScale = new Vector3(2.96f, 2.2f, 1.0f);
                             
+                            // Find all Mesh Colliders under Machines
+                            var meshColliders = machinesPivotBackgrounds.GetComponentsInChildren<MeshCollider>();
+                            // disable all of them
+                            foreach (var meshCollider in meshColliders)
+                            {
+                                meshCollider.enabled = false;
+                            }
+                            // find all Mesh colliders under Background
+                            meshColliders = pivotBackgrounds.GetComponentsInChildren<MeshCollider>();
+                            // disable all of them
+                            foreach (var meshCollider in meshColliders)
+                            {
+                                meshCollider.enabled = false;
+                            }
+                            
+                            
                             // Disable the "SettingsPanel"
                             var settingsPanel = FindGameObjectInHierarchy(prefabRoot, "SettingsPanel");
                             if (settingsPanel != null)
