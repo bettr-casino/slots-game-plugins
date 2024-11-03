@@ -17,14 +17,17 @@ namespace Bettr.Core
     public class BettrVideoPlayerController : MonoBehaviour
     {
 
-        private float delayBetweenLoops = 90.0f;
-        private bool loop = true;
-
         [NonSerialized] private VideoPlayer VideoPlayer;
+
+        [NonSerialized] private bool isVideoPlaying;
+        
+        public static BettrVideoPlayerController Instance { get; private set; }
         
         private void Awake()
         {
             VideoPlayer = gameObject.GetComponent<VideoPlayer>();
+            
+            Instance = this;
         }
 
         private IEnumerator Start()
@@ -40,39 +43,24 @@ namespace Bettr.Core
             VideoPlayer.Stop();
             // Prepare the video
             VideoPlayer.Prepare();
-
-            yield return new WaitForSeconds(delayBetweenLoops);
-            
-            if (!loop) yield break;
-
-            while (true)
-            {
-                if (!loop) yield break;
-                
-                if (!gameObject.activeInHierarchy)
-                {
-                    yield return null;
-                }
-                
-                PlayAudioAndVideo(VideoPlayer);
-                
-                yield return new WaitForSeconds(delayBetweenLoops);
-            }
         }
 
-        private void OnVideoPrepared(VideoPlayer vp)
+        private void OnVideoPrepared(VideoPlayer _)
         {
-            PlayAudioAndVideo(vp);
+            PlayAudioAndVideo();
         }
 
-        private void OnVideoEnded(VideoPlayer vp)
+        private void OnVideoEnded(VideoPlayer _)
         {
-            vp.Stop();
+            VideoPlayer.Stop();
+            isVideoPlaying = false;
         }
 
-        private void PlayAudioAndVideo(VideoPlayer vp)
+        public void PlayAudioAndVideo()
         {
-            vp.Play();
+            if (isVideoPlaying) return;
+            isVideoPlaying = true;
+            VideoPlayer.Play();
             BettrAudioController.Instance.PlayAudioOnce("BettrVideo");
         }
     }

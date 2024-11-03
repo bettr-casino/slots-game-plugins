@@ -233,11 +233,24 @@ namespace Bettr.Core
         {
             var group = "Settings";
             var settingsPropertyId = settingsPropertyKey.Replace($"{group}__", "");
-            if (settingsPropertyId == "VolumeOn" || settingsPropertyId == "VolumeOff")
+
+            switch (settingsPropertyId)
             {
-                ToggleVolume(self);
-                ((PropertyGameObject) self["VolumeButton"]).SetActive(BettrAudioController.Instance.IsVolumeOn());
-                ((PropertyGameObject) self["VolumeOffButton"]).SetActive(!BettrAudioController.Instance.IsVolumeOn());
+                case "VolumeOn":
+                case "VolumeOff":    
+                    ToggleVolume(self);
+                    ((PropertyGameObject) self["VolumeButton"]).SetActive(BettrAudioController.Instance.IsVolumeOn());
+                    ((PropertyGameObject) self["VolumeOffButton"]).SetActive(!BettrAudioController.Instance.IsVolumeOn());
+                    break;
+                case "Info":
+                    var isGamePanelActive = !IsTopPanelVideoCardActive();
+                    if (!isGamePanelActive)
+                    {
+                        BettrVideoPlayerController.Instance.PlayAudioAndVideo();
+                    }
+                    break;
+                default:
+                    break;
             }
             
             yield break;
@@ -248,11 +261,13 @@ namespace Bettr.Core
             Debug.Log($"ScriptRunner.PoolSize={ScriptRunner.PoolSize}");
             
             var currentTopPanelPropertyId = TopPanelLobbyCardPropertyId;
-            var isGamePanelActive = !IsTopPanelVideoCardActive();
+            var wasGamePanelActive = !IsTopPanelVideoCardActive();
             
             var group = "TopPanel";
             var topPanelPropertyId = topPanelPropertyKey.Replace($"{group}__", "");
             TopPanelLobbyCardPropertyId = topPanelPropertyId;
+            
+            var isGamePanelActive = !IsTopPanelVideoCardActive();
             
             if (topPanelPropertyId == "Prev")
             {
@@ -265,12 +280,16 @@ namespace Bettr.Core
                 yield break;
             }
             
+            // update the MachineControls
+            var machineControlsProperty = (PropertyGameObject) self["MachineControls"];
+            machineControlsProperty.SetActive(isGamePanelActive);
+            
             var gamePanelProperty = (PropertyGameObject) self["GamePanel"];
             var gamePanel = gamePanelProperty.GameObject;
 
-            gamePanelProperty.SetActive(!IsTopPanelVideoCardActive());
+            gamePanelProperty.SetActive(isGamePanelActive);
             
-            if (isGamePanelActive)
+            if (wasGamePanelActive)
             {
                 // remove the children of the gamePanelProperty.GameObject
                 foreach (Transform child in gamePanel.transform)
@@ -318,6 +337,9 @@ namespace Bettr.Core
                 var machineSceneName = lobbyCard.MachineSceneName;
 
                 yield return LoadGamePrefabAsync(machineBundleName, machineBundleVariant, machineName, machineVariant, gamePanel);
+                
+                // update the MachineControls
+                machineControlsProperty.SetActive(isGamePanelActive);
             }
 
         }
