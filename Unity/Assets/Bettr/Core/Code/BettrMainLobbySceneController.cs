@@ -215,15 +215,15 @@ namespace Bettr.Core
 
         public int GetMaxPageNumber()
         {
-            var lobbyCardsPerPage = 9;
+            var lobbyCardsPerPage = 8;
             var pageNumber = 1;
-            var numLobbyCardsToLoad = lobbyCardsPerPage - 1;
+            var numLobbyCardsToLoad = lobbyCardsPerPage;
             var endIndex = numLobbyCardsToLoad;
             while (endIndex < TotalLobbyCardCount)
             {
                 pageNumber += 1;
-                numLobbyCardsToLoad = pageNumber == 1 ? lobbyCardsPerPage - 1 : lobbyCardsPerPage;
-                var startIndex = pageNumber == 1 ? 0 : (pageNumber - 1) * lobbyCardsPerPage - 1;
+                numLobbyCardsToLoad = lobbyCardsPerPage;
+                var startIndex = (pageNumber - 1) * lobbyCardsPerPage;
                 endIndex = startIndex + numLobbyCardsToLoad;
             }
             return pageNumber;
@@ -854,9 +854,9 @@ namespace Bettr.Core
 
         public IEnumerator LoadLobbyPage(Table self, int pageNumber)
         {
-            var lobbyCardsPerPage = 9;
-            var numLobbyCardsToLoad = pageNumber == 1 ? lobbyCardsPerPage - 1 : lobbyCardsPerPage;
-            var lobbyCardOffset = pageNumber == 1 ? 2 : 1;
+            var lobbyCardsPerPage = 8;
+            var numLobbyCardsToLoad = lobbyCardsPerPage;
+            var lobbyCardOffset = 2;
             var bettrUser = BettrUserController.Instance.BettrUserConfig;
 
             var totalLobbyCardCount = bettrUser.LobbyCards.Count;
@@ -867,15 +867,16 @@ namespace Bettr.Core
             // pageNumber startIndex
             // 1 0
             // 2 8
-            // 3 17
-            // 4 26
-            var startIndex = pageNumber == 1 ? 0 : (pageNumber - 1) * lobbyCardsPerPage - 1;
+            // 3 16
+            var startIndex = (pageNumber - 1) * lobbyCardsPerPage;
             LobbyCardStartIndex = startIndex;
             
             var endIndex = startIndex + numLobbyCardsToLoad;
             if (endIndex >= TotalLobbyCardCount)
             {
-                yield break;
+                // readjust the startIndex
+                endIndex = TotalLobbyCardCount;
+                startIndex = endIndex - numLobbyCardsToLoad;
             }
             LobbyCardEndIndex = endIndex;
             
