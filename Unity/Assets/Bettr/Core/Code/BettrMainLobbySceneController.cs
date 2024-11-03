@@ -229,6 +229,12 @@ namespace Bettr.Core
             return pageNumber;
         }
 
+        private void UpdateVolumeControls(Table self)
+        {
+            ((PropertyGameObject) self["VolumeButton"]).SetActive(BettrAudioController.Instance.IsVolumeOn());
+            ((PropertyGameObject) self["VolumeOffButton"]).SetActive(!BettrAudioController.Instance.IsVolumeOn());
+        }
+
         public IEnumerator OnSettingsClick(Table self, string settingsPropertyKey)
         {
             var group = "Settings";
@@ -239,8 +245,7 @@ namespace Bettr.Core
                 case "VolumeOn":
                 case "VolumeOff":    
                     ToggleVolume(self);
-                    ((PropertyGameObject) self["VolumeButton"]).SetActive(BettrAudioController.Instance.IsVolumeOn());
-                    ((PropertyGameObject) self["VolumeOffButton"]).SetActive(!BettrAudioController.Instance.IsVolumeOn());
+                    UpdateVolumeControls(self);
                     break;
                 case "Info":
                     var isGamePanelActive = !IsTopPanelVideoCardActive();
@@ -975,6 +980,10 @@ namespace Bettr.Core
             {
                 loadingProperty.SetActive(false);
             }
+            
+            // Update Volume Controls
+            UpdateVolumeControls(self);
+            
             yield return LoadLobbyPage(self, CurrentPageNumber);
             
             TopPanelLobbyCardPropertyId = "LobbyCard001";

@@ -30,6 +30,10 @@ namespace Bettr.Core
             AudioSource.Stop();
 
             Instance = this;
+            
+            // get the player prefs, default is IsVolumeOn == 1
+            var isVolumeOn = PlayerPrefs.GetInt("IsVolumeOn", 1);
+            AudioSource.mute = isVolumeOn == 0;
         }
 
         private bool ClipExists(string clipName)
@@ -140,12 +144,15 @@ namespace Bettr.Core
 
         public void ToggleVolume()
         {
-            AudioSource.volume = AudioSource.volume == 0 ? 1 : 0;
+            AudioSource.mute = !AudioSource.mute;
+            // save to player prefs
+            PlayerPrefs.SetInt("IsVolumeOn", AudioSource.mute ? 0 : 1);
         }
         
         public bool IsVolumeOn()
         {
-            return AudioSource.volume > 0;
+            var isVolumeOn = PlayerPrefs.GetInt("IsVolumeOn", 1) == 1;
+            return isVolumeOn;
         }
 
         public void PlayAudioOnce(string audioClipName)
