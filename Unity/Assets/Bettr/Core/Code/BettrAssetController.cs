@@ -323,10 +323,11 @@ namespace Bettr.Core
             {
                 var bettrAssetBundleName = manifest.Bundle.BundleName;
                 var bettrAssetBundleVersion = manifest.Bundle.BundleVersion;
+                var lobbyCardAssetBundleName = $"lobbycard{bettrAssetBundleName}";
                 
                 // check if this asset bundle is already loaded into memory
                 AssetBundle previouslyLoadedAssetBundle = null;
-                previouslyLoadedAssetBundle = _bettrAssetController.GetLoadedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);
+                previouslyLoadedAssetBundle = _bettrAssetController.GetLoadedAssetBundle(lobbyCardAssetBundleName, bettrAssetBundleVersion);
                 if (previouslyLoadedAssetBundle != null)
                 {
                     // check if this is a valid bundle
