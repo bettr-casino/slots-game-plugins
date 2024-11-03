@@ -187,9 +187,12 @@ namespace Bettr.Core
             return lobbyCard;
         }
 
-        public bool IsTopPanelVideoCardActive()
+        public bool IsTopPanelVideoCardActive(Table self)
         {
-            return CurrentPageNumber == 1 && TopPanelLobbyCardPropertyId == "LobbyCard001";
+            var gamePanelProperty = (PropertyGameObject) self["GamePanel"];
+            var gamePanel = gamePanelProperty.GameObject;
+            var childCount = gamePanel.transform.childCount;
+            return childCount == 0;
         }
 
         private IEnumerator OnTopPanelPrevClick(Table self)
@@ -248,7 +251,7 @@ namespace Bettr.Core
                     UpdateVolumeControls(self);
                     break;
                 case "Info":
-                    var isGamePanelActive = !IsTopPanelVideoCardActive();
+                    var isGamePanelActive = !IsTopPanelVideoCardActive(self);
                     if (!isGamePanelActive)
                     {
                         BettrVideoPlayerController.Instance.PlayAudioAndVideo();
@@ -266,13 +269,13 @@ namespace Bettr.Core
             Debug.Log($"ScriptRunner.PoolSize={ScriptRunner.PoolSize}");
             
             var currentTopPanelPropertyId = TopPanelLobbyCardPropertyId;
-            var wasGamePanelActive = !IsTopPanelVideoCardActive();
+            var wasGamePanelActive = !IsTopPanelVideoCardActive(self);
             
             var group = "TopPanel";
             var topPanelPropertyId = topPanelPropertyKey.Replace($"{group}__", "");
             TopPanelLobbyCardPropertyId = topPanelPropertyId;
             
-            var isGamePanelActive = !IsTopPanelVideoCardActive();
+            var isGamePanelActive = !IsTopPanelVideoCardActive(self);
             
             if (topPanelPropertyId == "Prev")
             {
@@ -313,7 +316,7 @@ namespace Bettr.Core
             }
             
 
-            if (IsTopPanelVideoCardActive())
+            if (IsTopPanelVideoCardActive(self))
             {
                 yield break;
             }
