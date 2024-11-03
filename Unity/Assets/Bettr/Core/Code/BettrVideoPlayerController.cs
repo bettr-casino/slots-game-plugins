@@ -56,7 +56,15 @@ namespace Bettr.Core
             isVideoPlaying = false;
         }
 
-        public void PlayAudioAndVideo()
+        public void Replay()
+        {
+            // Ensure video is not playing initially
+            VideoPlayer.Stop();
+            // Prepare the video
+            VideoPlayer.Prepare();
+        }
+        
+        private void PlayAudioAndVideo()
         {
             if (isVideoPlaying) return;
             isVideoPlaying = true;

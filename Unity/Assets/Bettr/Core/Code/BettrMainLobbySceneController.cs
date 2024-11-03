@@ -254,7 +254,7 @@ namespace Bettr.Core
                     var isGamePanelActive = !IsTopPanelVideoCardActive(self);
                     if (!isGamePanelActive)
                     {
-                        BettrVideoPlayerController.Instance.PlayAudioAndVideo();
+                        BettrVideoPlayerController.Instance.Replay();
                     }
                     break;
                 default:
@@ -275,7 +275,7 @@ namespace Bettr.Core
             var topPanelPropertyId = topPanelPropertyKey.Replace($"{group}__", "");
             TopPanelLobbyCardPropertyId = topPanelPropertyId;
             
-            var isGamePanelActive = !IsTopPanelVideoCardActive(self);
+            var isGameCardClicked = TopPanelLobbyCardPropertyId != "LobbyCard001";
             
             if (topPanelPropertyId == "Prev")
             {
@@ -295,8 +295,6 @@ namespace Bettr.Core
             var gamePanelProperty = (PropertyGameObject) self["GamePanel"];
             var gamePanel = gamePanelProperty.GameObject;
 
-            gamePanelProperty.SetActive(isGamePanelActive);
-            
             if (wasGamePanelActive)
             {
                 // remove the children of the gamePanelProperty.GameObject
@@ -315,20 +313,19 @@ namespace Bettr.Core
                 }
             }
             
-
-            if (IsTopPanelVideoCardActive(self))
-            {
-                yield break;
-            }
-            
             // this is on a card
             var groupProperty = (TilePropertyGameObjectGroup) self[group];
             var property = groupProperty[topPanelPropertyId];
             var gameObject = property.GameObject;
-            
+
             SetTopPanelSelector(self, gameObject);
 
-            // this is click on a different game card
+            if (!isGameCardClicked)
+            {
+                yield break;
+            }
+            
+            // this is click on a game card
             // first locate the card using the game object name
             var card = property.GameObject.name;
             var bettrUser = BettrUserController.Instance.BettrUserConfig;
@@ -347,7 +344,7 @@ namespace Bettr.Core
                 yield return LoadGamePrefabAsync(machineBundleName, machineBundleVariant, machineName, machineVariant, gamePanel);
                 
                 // update the MachineControls
-                machineControlsProperty.SetActive(isGamePanelActive);
+                machineControlsProperty.SetActive(isGameCardClicked);
             }
 
         }
