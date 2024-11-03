@@ -282,7 +282,7 @@ namespace Bettr.Core
             
             // update the MachineControls
             var machineControlsProperty = (PropertyGameObject) self["MachineControls"];
-            machineControlsProperty.SetActive(isGamePanelActive);
+            machineControlsProperty.SetActive(false);
             
             var gamePanelProperty = (PropertyGameObject) self["GamePanel"];
             var gamePanel = gamePanelProperty.GameObject;
