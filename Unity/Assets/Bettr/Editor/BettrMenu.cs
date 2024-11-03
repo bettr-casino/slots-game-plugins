@@ -4023,7 +4023,7 @@ namespace Bettr.Editor
             {
                 var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
                 // Check that the MachineName starts with "Game" and is not "Game001Alpha"
-                if (!machineNameDir.Name.StartsWith("Game") || machineNameDir.Name == "Game001Alpha")
+                if (machineNameDir.Name == "Game001Alpha")
                 {
                     continue;
                 }
