@@ -54,6 +54,10 @@ namespace Bettr.Core
         [NonSerialized] private int LobbyCardEndIndex = 0;
         
         [NonSerialized] private string TopPanelLobbyCardPropertyId;
+
+        [NonSerialized] private Tile GameTile;
+        
+        [NonSerialized] private Tile BaseGameMachineTile;
         
         public BettrMainLobbySceneController(BettrExperimentController bettrExperimentController)
         {
@@ -257,6 +261,12 @@ namespace Bettr.Core
                         BettrVideoPlayerController.Instance.Replay();
                     }
                     break;
+                case "Spin":
+                    if (BaseGameMachineTile != null)
+                    {
+                        BaseGameMachineTile.Call("OnPointerClick");
+                    }
+                    break;
                 default:
                     break;
             }
@@ -343,18 +353,14 @@ namespace Bettr.Core
 
                 yield return LoadGamePrefabAsync(machineBundleName, machineBundleVariant, machineName, machineVariant, gamePanel);
 
-                var baseGameMachineGameObject = FindChildRecursive(gamePanel, $"{machineName}BaseGameMachine");
-                // Get the Game Tile component
-                var baseGameMachineTile = baseGameMachineGameObject?.GetComponentInChildren<Tile>();
-                
                 var properties = new string[] { "CreditsText", "BetText", "WinText" };
                 foreach (var p in properties)
                 {
                     var propValue = self[p];
-                    baseGameMachineTile?.SetProperty(p, propValue);
+                    BaseGameMachineTile?.SetProperty(p, propValue);
                 }
                 
-                baseGameMachineTile?.Call("ConfigureSettings");
+                BaseGameMachineTile?.Call("ConfigureSettings");
                 
                 // update the MachineControls
                 machineControlsProperty.SetActive(true);
@@ -550,6 +556,7 @@ namespace Bettr.Core
             var gameGameObject = FindChildRecursive(pivotGameObject, "Game");
             // Get the Game Tile component
             var gameTile = gameGameObject?.GetComponentInChildren<Tile>();
+            GameTile = gameTile;
             
             // Get the Background Tile component
             var backgroundTile = backgroundGameObject?.GetComponentInChildren<Tile>();
@@ -568,6 +575,12 @@ namespace Bettr.Core
             {
                 yield return null;
             }
+            
+            var baseGameMachineGameObject = FindChildRecursive(pivotGameObject, $"{machineName}BaseGameMachine");
+            // Get the Game Tile component
+            var baseGameMachineTile = baseGameMachineGameObject?.GetComponentInChildren<Tile>();
+            
+            BaseGameMachineTile = baseGameMachineTile;
             
             var machineExperiment = machineBundleVariant; // this is the experiment variant
             
@@ -617,7 +630,7 @@ namespace Bettr.Core
             {
                 machines.SetActive(true);
             }
-            
+
             // set the base game to active
             if (gameTile != null)
             {
