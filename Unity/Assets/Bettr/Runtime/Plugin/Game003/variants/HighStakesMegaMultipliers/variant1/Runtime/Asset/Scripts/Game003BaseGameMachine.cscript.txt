@@ -103,24 +103,6 @@ function Game003BaseGameMachine:ConfigureSettings()
     self.BetText.SetText(bet) 
 end
 
-function Game003BaseGameMachine:ShowSettings()
-    series
-        do
-            local settings = self["Settings"]
-            settings.SetActive(true)
-        end
-    end
-end
-
-function Game003BaseGameMachine:HideSettings()
-    series
-        do
-            local settings = self["Settings"]
-            settings.SetActive(false)
-        end
-    end
-end
-
 function Game003BaseGameMachine:ResetSettings()
     self.WinText.SetText("0")
 end
@@ -137,7 +119,6 @@ function Game003BaseGameMachine:BaseGameWaiting()
 end
 
 function Game003BaseGameMachine:BaseGameCompleted()
-   self:ShowSettings()
    Game003BaseGameState.SpinState.First.State = "Waiting"
 end
 

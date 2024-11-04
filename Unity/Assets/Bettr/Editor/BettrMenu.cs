@@ -2274,12 +2274,18 @@ namespace Bettr.Editor
                                 Object.DestroyImmediate(meshCollider);
                             }
                             
-                            
-                            // Disable the "SettingsPanel"
-                            var settingsPanel = FindGameObjectInHierarchy(prefabRoot, "SettingsPanel");
+                            // Disable the "Settings"
+                            var settingsPanel = FindGameObjectInHierarchy(prefabRoot, "Settings");
                             if (settingsPanel != null)
                             {
                                 settingsPanel.SetActive(false);
+                            }
+                            
+                            // Disable the "WinSymbols"
+                            var winSymbols = FindGameObjectInHierarchy(prefabRoot, "WinSymbols");
+                            if (winSymbols != null)
+                            {
+                                winSymbols.SetActive(false);
                             }
                             
                             // save the prefab prefabRoot

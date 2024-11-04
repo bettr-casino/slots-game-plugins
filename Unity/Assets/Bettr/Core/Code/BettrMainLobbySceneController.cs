@@ -362,6 +362,9 @@ namespace Bettr.Core
                 
                 BaseGameMachineTile?.Call("ConfigureSettings");
                 
+                // wait for 1 second
+                yield return new WaitForSeconds(1.0f);
+                
                 // update the MachineControls
                 machineControlsProperty.SetActive(true);
             }
@@ -618,12 +621,12 @@ namespace Bettr.Core
                 }
             }
             
-            // check if VideoPreparationError is true
-            if (!BettrVideoController.Instance.VideoPreparationError)
-            {
-                // wait until VideoLoopPointReached is true
-                yield return new WaitUntil(() => BettrVideoController.Instance.VideoLoopPointReached);
-            }
+            // Commented out since VideoLoopPointReached is controlled from PlayBackgroundVideo
+            // if (!BettrVideoController.Instance.VideoPreparationError)
+            // {
+            //     // wait until VideoLoopPointReached is true
+            //     yield return new WaitUntil(() => BettrVideoController.Instance.VideoLoopPointReached);
+            // }
             
             // turn on Machines
             if (machines != null)
