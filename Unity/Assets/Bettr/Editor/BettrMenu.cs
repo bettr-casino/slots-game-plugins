@@ -2255,23 +2255,23 @@ namespace Bettr.Editor
                             
                             // Find the "Machines" game object
                             var machines = FindGameObjectInHierarchy(prefabRoot, "Machines");
-                            var machinesPivotBackgrounds = machines.transform.GetChild(0).gameObject;
-                            machinesPivotBackgrounds.transform.localPosition = new Vector3(0.05f, -0.2f, 0);
-                            machinesPivotBackgrounds.transform.localScale = new Vector3(2.96f, 2.2f, 1.0f);
+                            var pivotMachines = machines.transform.GetChild(0).gameObject;
+                            pivotMachines.transform.localPosition = new Vector3(0.05f, -0.2f, 0);
+                            pivotMachines.transform.localScale = new Vector3(2.96f, 2.2f, 1.0f);
                             
                             // Find all Mesh Colliders under Machines
-                            var meshColliders = machinesPivotBackgrounds.GetComponentsInChildren<MeshCollider>();
-                            // disable all of them
+                            var meshColliders = pivotMachines.GetComponentsInChildren<MeshCollider>(true);
+                            // remove all of them
                             foreach (var meshCollider in meshColliders)
                             {
-                                meshCollider.enabled = false;
+                                Object.DestroyImmediate(meshCollider);
                             }
                             // find all Mesh colliders under Background
-                            meshColliders = pivotBackgrounds.GetComponentsInChildren<MeshCollider>();
-                            // disable all of them
+                            meshColliders = pivotBackgrounds.GetComponentsInChildren<MeshCollider>(true);
+                            // remove all of them
                             foreach (var meshCollider in meshColliders)
                             {
-                                meshCollider.enabled = false;
+                                Object.DestroyImmediate(meshCollider);
                             }
                             
                             

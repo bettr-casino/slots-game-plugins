@@ -342,9 +342,22 @@ namespace Bettr.Core
                 var machineSceneName = lobbyCard.MachineSceneName;
 
                 yield return LoadGamePrefabAsync(machineBundleName, machineBundleVariant, machineName, machineVariant, gamePanel);
+
+                var baseGameMachineGameObject = FindChildRecursive(gamePanel, $"{machineName}BaseGameMachine");
+                // Get the Game Tile component
+                var baseGameMachineTile = baseGameMachineGameObject?.GetComponentInChildren<Tile>();
+                
+                var properties = new string[] { "CreditsText", "BetText", "WinText" };
+                foreach (var p in properties)
+                {
+                    var propValue = self[p];
+                    baseGameMachineTile?.SetProperty(p, propValue);
+                }
+                
+                baseGameMachineTile?.Call("ConfigureSettings");
                 
                 // update the MachineControls
-                machineControlsProperty.SetActive(isGameCardClicked);
+                machineControlsProperty.SetActive(true);
             }
 
         }
