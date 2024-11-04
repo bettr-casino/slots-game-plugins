@@ -277,9 +277,28 @@ namespace Bettr.Core
         public IEnumerator OnTopPanelClick(Table self, string topPanelPropertyKey)
         {
             Debug.Log($"ScriptRunner.PoolSize={ScriptRunner.PoolSize}");
-            
+
             var currentTopPanelPropertyId = TopPanelLobbyCardPropertyId;
             var wasGamePanelActive = !IsTopPanelVideoCardActive(self);
+            if (wasGamePanelActive)
+            {
+                var currentTopPanelLobbyCard = GetTopPanelLobbyCard(self, currentTopPanelPropertyId);
+                if (currentTopPanelLobbyCard != null)
+                {
+                    var machineName = currentTopPanelLobbyCard.MachineName;
+                    var globals = (Table) self.OwnerScript.Globals;
+                    var baseGameState = (Table) globals[$"{machineName}BaseGameState"];
+                    var spinState = (Table) baseGameState["SpinState"];
+                    var firstState = (Table) spinState["First"];
+                    var state = (string) firstState["State"];
+                    if (state != "Waiting")
+                    {
+                        Debug.Log($"OnTopPanelClick skip since Panel={currentTopPanelPropertyId} is in ({state}) state");
+                        yield break;
+                    }
+
+                }
+            }
             
             var group = "TopPanel";
             var topPanelPropertyId = topPanelPropertyKey.Replace($"{group}__", "");
