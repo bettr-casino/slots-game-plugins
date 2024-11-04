@@ -144,18 +144,6 @@ def main():
         # Write manifest to file
         write_manifest(manifest, manifest_file_path)
         print(f'Manifest file created: {args.manifest_file}')
-
-        # Compress manifest file and upload
-        gz_manifest_file_path = compress_file(manifest_file_path)
-        upload_to_s3(gz_manifest_file_path, args.s3_bucket_name, args.s3_object_prefix, content_type="application/json", content_encoding="gzip")
-        
-        # Upload the uncompressed .bin file
-        upload_to_s3(output_file_path, args.s3_bucket_name, args.s3_object_prefix, content_type="application/octet-stream")
-        
-        # Delete local files to clean up
-        os.remove(gz_manifest_file_path)
-        os.remove(output_file_path)
-
     else:
         print(f'No files matching patterns {args.patterns} found in {args.directory}.')
 

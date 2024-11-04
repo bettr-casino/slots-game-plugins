@@ -623,13 +623,19 @@ deploy-target-webgl: publish-target-webgl invalidate-target_webgl
 	@echo "Deploying WebGL project..."
 	@echo "Deployment completed."
 
-build-webgl:  build-assets-webgl build-audio-webgl build-video-webgl build-target-webgl
+build-webgl:  build-assets-webgl build-lobbycard-assets-webgl build-audio-webgl build-video-webgl build-target-webgl
+	@echo "Building WebGL project..."
+	@echo "Running merge-lobby-cards script..."
+	@./scripts/merge-lobby-cards.sh
+	@echo "Build completed."
 
 deploy-webgl:  deploy-assets-webgl deploy-audio-webgl deploy-video-webgl deploy-target-webgl
+	@echo "Deploying WebGL project..."
+	@echo "Running upload-lobby-cards script..."
+	@./scripts/deploy-lobby-cards.sh
+	@echo "Deploy completed."
 
 deploy-webgl-all: build-webgl deploy-webgl
-	@echo "Deploying WebGL project..."
-	@echo "Deployment completed."
 
 # =============================================================================
 #

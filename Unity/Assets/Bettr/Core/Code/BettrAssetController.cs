@@ -2,17 +2,15 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
 using CrayonScript.Interpreter.Execution.VM;
 using Newtonsoft.Json;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
@@ -157,190 +155,120 @@ namespace Bettr.Core
             _bettrAssetController = bettrAssetController;
         }
         
-        private async Task<BettrMultiByteRange> FetchAssetByteRange(string url, BettrMultiByteRange range)
+        private IEnumerator FetchAssetByteRange(string url, BettrMultiByteRange range, Action<BettrMultiByteRange> onComplete)
         {
-            try
+            // Set up UnityWebRequest with the range header
+            UnityWebRequest request = UnityWebRequest.Get(url);
+            request.SetRequestHeader("Range", $"bytes={range.ByteStart}-{range.ByteStart + range.ByteLength - 1}");
+        
+            // Send request
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success && request.responseCode == 206)
             {
-                // Set up the HttpRequestMessage
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
-                request.Headers.Range = new RangeHeaderValue(range.ByteStart, range.ByteStart + range.ByteLength - 1);
-
-                // Send the request and await the response
-                HttpResponseMessage response = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead);
-
-                // Check if the request was successful and the response is a partial content (206)
-                if (response.StatusCode == HttpStatusCode.PartialContent)
+                byte[] content = request.downloadHandler.data;
+                if (content != null && content.Length > 0)
                 {
-                    // Since it's a single byte range, just read the content
-                    byte[] content = await response.Content.ReadAsByteArrayAsync();
-
-                    if (content != null && content.Length > 0)
-                    {
-                        // You can process the data here, e.g., save to file or parse
-                        range.Data = content;  // Assuming BettrMultiByteRange has a 'Data' property to hold the content
-                        return range;
-                    }
-                    else
-                    {
-                        Debug.LogError($"The response did not contain any content. url={url}");
-                    }
-                }
-                else if (response.IsSuccessStatusCode)
-                {
-                    Debug.LogWarning($"Request was successful, but not a partial content response (206). url={url}");
+                    // Process the data if available
+                    range.Data = content;
+                    onComplete?.Invoke(range);
                 }
                 else
                 {
-                    Debug.LogError($"Error: {response.StatusCode} url={url}");
+                    Debug.LogError($"The response did not contain any content. url={url}");
+                    onComplete?.Invoke(null);
                 }
             }
-            catch (Exception e)
+            else
             {
-                Debug.LogError($"Exception during fetch: {e.Message} url={url}");
-            }
-            return null;
-        }
-
-        private void ParseByteRange(byte[] content, string boundary, BettrMultiByteRange bundleByteRange)
-        {
-            string boundaryString = $"--{boundary}";
-
-            // Split the content by the boundary string
-            var contentParts = Encoding.UTF8.GetString(content).Split(new string[] { boundaryString }, StringSplitOptions.RemoveEmptyEntries);
-
-            foreach (var part in contentParts)
-            {
-                if (string.IsNullOrWhiteSpace(part))
-                    continue;
-
-                // Find headers section and data section in the part
-                int headersEndIndex = part.IndexOf("\r\n\r\n");
-                if (headersEndIndex == -1)
-                    continue;
-
-                string headers = part.Substring(0, headersEndIndex);
-                string dataString = part.Substring(headersEndIndex + 4); // Skip "\r\n\r\n"
-
-                // Extract content-range header to determine which byte range this part represents
-                string[] headerLines = headers.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (var headerLine in headerLines)
-                {
-                    if (headerLine.StartsWith("Content-Range", StringComparison.OrdinalIgnoreCase))
-                    {
-                        // Extract the byte range information
-                        // Example: Content-Range: bytes 0-99/1234
-                        string[] contentRangeParts = headerLine.Split(' ');
-                        if (contentRangeParts.Length > 1)
-                        {
-                            string rangePart = contentRangeParts[1];
-                            string[] rangeBounds = rangePart.Split('-');
-                            if (rangeBounds.Length == 2)
-                            {
-                                bundleByteRange.Data = Encoding.UTF8.GetBytes(dataString);
-                            }
-                        }
-                    }
-                }
+                Debug.LogError($"Error: {request.result} | Status Code: {request.responseCode} url={url}");
+                onComplete?.Invoke(null);
             }
         }
 
-        public IEnumerator LoadMultiByteRangeAsset(Task<BettrMultiByteRange> manifestFetchTask, Task<BettrMultiByteRange> bundleFetchTask,
-            BettrAssetMultiByteRange manifest, MultiByteAssetLoadCompleteCallback callback)
+        public IEnumerator LoadMultiByteRangeAsset(string url, BettrAssetMultiByteRange manifest, MultiByteAssetLoadCompleteCallback callback)
         {
             var bettrAssetBundleName = manifest.Bundle.BundleName;
             var bettrAssetBundleVersion = manifest.Bundle.BundleVersion;
-            
-            // Wait until the task is completed
-            yield return new WaitUntil(() => manifestFetchTask.IsCompleted);
-            
-            // Handle the result once the task is completed
-            if (manifestFetchTask.Exception != null)
+
+            BettrAssetBundleManifest assetBundleManifest = null;
+
+            // Fetch manifest byte range
+            yield return FetchAssetByteRange(url, manifest.Manifest, fetchedManifest =>
             {
-                var error = $"Error fetching manifest byte range: {manifestFetchTask.Exception.Message} assetBundleName={bettrAssetBundleName} assetBundleVersion={bettrAssetBundleVersion}";
+                if (fetchedManifest == null)
+                {
+                    return;
+                }
+                manifest.Manifest = fetchedManifest;
+                var assetBundleText = Encoding.ASCII.GetString(fetchedManifest.Data);
+                var deserializer = new DeserializerBuilder().WithNamingConvention(PascalCaseNamingConvention.Instance).Build();
+                assetBundleManifest = deserializer.Deserialize<BettrAssetBundleManifest>(assetBundleText);
+                assetBundleManifest.AssetBundleName = bettrAssetBundleName;
+                assetBundleManifest.AssetBundleVersion = bettrAssetBundleVersion;
+            });
+
+            if (assetBundleManifest == null)
+            {
+                string error = $"Failed to download BettrAssetBundleManifest. AssetBundleName={bettrAssetBundleName} AssetBundleVersion={bettrAssetBundleVersion}";
                 Debug.LogError(error);
-                callback(manifest, bettrAssetBundleName, bettrAssetBundleVersion, null, null, false, false, error);
+                callback(manifest, bettrAssetBundleName, bettrAssetBundleVersion, null, null, false, false, $"error fetching multi byte range AssetManifest manifest url={url}");
                 yield break;
             }
-            
-            BettrMultiByteRange manifestDataMap = manifestFetchTask.Result;
-            var manifestData = manifestDataMap.Data;
-            
-            if (manifestData == null)
-            {
-                var error = $"null asset manifest data for assetBundleName={bettrAssetBundleName} assetBundleVersion={bettrAssetBundleVersion}";
-                Debug.LogError(error);
-                callback(manifest, bettrAssetBundleName, bettrAssetBundleVersion, null, null, false, false, error);
-                yield break;
-            }
-                
-            var deserializer = new DeserializerBuilder()
-                .WithNamingConvention(PascalCaseNamingConvention.Instance)
-                .Build();
 
-            var assetBundleManifestBytes = manifestData;
-            var assetBundleText = Encoding.ASCII.GetString(assetBundleManifestBytes);
-
-            var assetBundleManifest = deserializer.Deserialize<BettrAssetBundleManifest>(assetBundleText);
-            assetBundleManifest.AssetBundleName = bettrAssetBundleName;
-            assetBundleManifest.AssetBundleVersion = bettrAssetBundleVersion;
+            AssetBundle downloadedAssetBundle = null;
             
-            // Wait until the task is completed
-            yield return new WaitUntil(() => bundleFetchTask.IsCompleted);
-            
-            // Handle the result once the task is completed
-            if (bundleFetchTask.Exception != null)
+            // Fetch asset bundle byte range
+            yield return FetchAssetByteRange(url, manifest.Bundle, fetchedBundle =>
             {
-                var error = $"Error fetching bundle byte range: {bundleFetchTask.Exception.Message} assetBundleName={bettrAssetBundleName} assetBundleVersion={bettrAssetBundleVersion}";
+                if (fetchedBundle == null)
+                {
+                    string error = $"Failed to fetch bundle byte range. AssetBundleName={bettrAssetBundleName} AssetBundleVersion={bettrAssetBundleVersion}";
+                    Debug.LogError(error);
+                    return;
+                }
+
+                downloadedAssetBundle = AssetBundle.LoadFromMemory(fetchedBundle.Data);
+                if (downloadedAssetBundle == null)
+                {
+                    string error = $"Failed to load AssetBundle from memory. AssetBundleName={bettrAssetBundleName} AssetBundleVersion={bettrAssetBundleVersion}";
+                    Debug.LogError(error);
+                }
+            });
+            
+            if (downloadedAssetBundle == null)
+            {
+                string error = $"Failed to download AssetBundle. AssetBundleName={bettrAssetBundleName} AssetBundleVersion={bettrAssetBundleVersion}";
                 Debug.LogError(error);
                 callback(manifest, bettrAssetBundleName, bettrAssetBundleVersion, null, assetBundleManifest, false, false, error);
                 yield break;
             }
-            
-            BettrMultiByteRange bundleDataMap = bundleFetchTask.Result;
-            var bundleData = bundleDataMap.Data;
-            
-            AssetBundle downloadedAssetBundle = AssetBundle.LoadFromMemory(bundleData);
-            if (downloadedAssetBundle == null)
-            {
-                var error = $"null downloaded asset bundle for assetBundleName={bettrAssetBundleName} assetBundleVersion={bettrAssetBundleVersion}";
-                Debug.LogError(error);
-                callback(manifest, bettrAssetBundleName, bettrAssetBundleVersion,
-                    null,  assetBundleManifest, false, false, error);
-                yield break;
-            }
-                
-            callback(manifest, bettrAssetBundleName, bettrAssetBundleVersion,
-                downloadedAssetBundle,  assetBundleManifest, true, false, null);   
-
+                            
+            callback(manifest, bettrAssetBundleName, bettrAssetBundleVersion, downloadedAssetBundle, assetBundleManifest, true, false, null);
         }
 
         public void LoadMultiByteRangeAssets(string binaryFileName, List<BettrAssetMultiByteRange> manifests, MultiByteAssetLoadCompleteCallback callback)
         {
             var webAssetBaseURL = _bettrAssetController.webAssetBaseURL;
             var binaryAssetURL = $"{webAssetBaseURL}/{binaryFileName}";
-
+            
             foreach (var manifest in manifests)
             {
                 var bettrAssetBundleName = manifest.Bundle.BundleName;
                 var bettrAssetBundleVersion = manifest.Bundle.BundleVersion;
                 var lobbyCardAssetBundleName = $"lobbycard{bettrAssetBundleName}";
-                
-                // check if this asset bundle is already loaded into memory
-                AssetBundle previouslyLoadedAssetBundle = null;
-                previouslyLoadedAssetBundle = _bettrAssetController.GetLoadedAssetBundle(lobbyCardAssetBundleName, bettrAssetBundleVersion);
+
+                // Check if this asset bundle is already loaded into memory
+                AssetBundle previouslyLoadedAssetBundle = _bettrAssetController.GetLoadedAssetBundle(lobbyCardAssetBundleName, bettrAssetBundleVersion);
                 if (previouslyLoadedAssetBundle != null)
                 {
-                    // check if this is a valid bundle
-                    callback(manifest, bettrAssetBundleName, bettrAssetBundleVersion,
-                        previouslyLoadedAssetBundle,  null, true, true, null);
+                    // If already loaded, invoke callback immediately
+                    callback(manifest, bettrAssetBundleName, bettrAssetBundleVersion, previouslyLoadedAssetBundle, null, true, true, null);
                     continue;
                 }
-                
-                var manifestByteRange = manifest.Manifest;
-                Task<BettrMultiByteRange> manifestFetchTask = FetchAssetByteRange(binaryAssetURL, manifestByteRange);
-                var bundleByteRange = manifest.Bundle;
-                Task<BettrMultiByteRange> bundleFetchTask = FetchAssetByteRange(binaryAssetURL, bundleByteRange);
-                BettrRoutineRunner.Instance.StartCoroutine(LoadMultiByteRangeAsset(manifestFetchTask, bundleFetchTask, manifest, callback));
+
+                // Start fetching byte ranges for the asset
+                BettrRoutineRunner.Instance.StartCoroutine(LoadMultiByteRangeAsset(binaryAssetURL, manifest, callback));
             }
         }
     }
@@ -472,7 +400,7 @@ namespace Bettr.Core
             }
             
             // update the TextMeshProUI shaders
-            var textMeshProUGUIs = prefab.GetComponentsInChildren<TMPro.TextMeshProUGUI>(true);
+            var textMeshProUGUIs = prefab.GetComponentsInChildren<TextMeshProUGUI>(true);
             foreach (var textMeshProUGUI in textMeshProUGUIs)
             {
                 // check if the shader is in the cache
@@ -482,7 +410,7 @@ namespace Bettr.Core
                 }
             }
             // similarly for TextMeshPro shaders
-            var textMeshPros = prefab.GetComponentsInChildren<TMPro.TextMeshPro>(true);
+            var textMeshPros = prefab.GetComponentsInChildren<TextMeshPro>(true);
             foreach (var textMeshPro in textMeshPros)
             {
                 // check if the shader is in the cache
@@ -608,7 +536,7 @@ namespace Bettr.Core
 
             // Update shaders for all active and inactive TextMeshProUGUI components in the scene
             // ReSharper disable once InconsistentNaming
-            var textMeshProUGUIs = Object.FindObjectsOfType<TMPro.TextMeshProUGUI>(true);
+            var textMeshProUGUIs = Object.FindObjectsOfType<TextMeshProUGUI>(true);
             foreach (var textMeshProUGUI in textMeshProUGUIs)
             {
                 if (ShaderCaches.TmProShaderCache.TryGetValue(textMeshProUGUI.fontMaterial.shader.name, out Shader bettrShader))
@@ -618,7 +546,7 @@ namespace Bettr.Core
             }
 
             // Update shaders for all active and inactive TextMeshPro components in the scene
-            var textMeshPros = Object.FindObjectsOfType<TMPro.TextMeshPro>(true);
+            var textMeshPros = Object.FindObjectsOfType<TextMeshPro>(true);
             foreach (var textMeshPro in textMeshPros)
             {
                 if (ShaderCaches.TmProShaderCache.TryGetValue(textMeshPro.fontMaterial.shader.name, out Shader bettrShader))
