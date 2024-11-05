@@ -3,8 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Text;
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
@@ -142,12 +140,6 @@ namespace Bettr.Core
     [Serializable]
     public class BettrMultiByteRangeAssetBundleController
     {
-        private static readonly HttpClient HttpClient = new HttpClient(new HttpClientHandler
-        {
-            AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
-            MaxConnectionsPerServer = int.MaxValue,
-        });
-        
         [NonSerialized] private BettrAssetController _bettrAssetController;
         
         public BettrMultiByteRangeAssetBundleController(BettrAssetController bettrAssetController)
