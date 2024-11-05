@@ -14,7 +14,7 @@ manifest_file="lobbycardv0_1_0.merged.control.manifest"
 s3_bucket_name="bettr-casino-assets"
 s3_object_prefix="assets/latest/WebGL"
 
-python merge-lobby-cards.py --directory $asset_directory \
+python $SCRIPT_DIR/build-lobby-cards.py --directory $asset_directory \
     --patterns $lobbycard_pattern $lobbycard_manifest_pattern \
     --output_file $lobbycard_merged_file \
     --manifest_file $manifest_file \
