@@ -37,8 +37,6 @@ function Game003BaseGameMachine:Start()
             self:ConfigurePreviewMode()
             self:ConfigureSpinCoins()
             self:ConfigureSlamStopped()
-	        self:ConfigureSettings()
-	        self:ShowSettings()
 	        self:PlayStartAnimations()
 	        self:StartEngines()
         end
@@ -99,25 +97,10 @@ end
 function Game003BaseGameMachine:ConfigureSettings()
     self.CreditsText.SetText(BettrUser.Coins)
     self.WinText.SetText("0")       
-    self.BetText.SetText(Game003BetMultiplierState.Current.First.BetMultiplier) 
-end
-
-function Game003BaseGameMachine:ShowSettings()
-    series
-        do
-            local settings = self["Settings"]
-            settings.SetActive(true)
-        end
-    end
-end
-
-function Game003BaseGameMachine:HideSettings()
-    series
-        do
-            local settings = self["Settings"]
-            settings.SetActive(false)
-        end
-    end
+    local baseWager = Game003BaseGameProperties.BaseWager.First.Value
+    local betMultiplier = Game003BetMultiplierState.Current.First.BetMultiplier
+    local bet = baseWager * betMultiplier
+    self.BetText.SetText(bet) 
 end
 
 function Game003BaseGameMachine:ResetSettings()
@@ -136,7 +119,6 @@ function Game003BaseGameMachine:BaseGameWaiting()
 end
 
 function Game003BaseGameMachine:BaseGameCompleted()
-   self:ShowSettings()
    Game003BaseGameState.SpinState.First.State = "Waiting"
 end
 

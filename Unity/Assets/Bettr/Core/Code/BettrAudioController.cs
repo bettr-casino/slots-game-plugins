@@ -30,6 +30,10 @@ namespace Bettr.Core
             AudioSource.Stop();
 
             Instance = this;
+            
+            // get the player prefs, default is IsVolumeOn == 1
+            var isVolumeOn = PlayerPrefs.GetInt("IsVolumeOn", 1);
+            AudioSource.mute = isVolumeOn == 0;
         }
 
         private bool ClipExists(string clipName)
@@ -62,20 +66,26 @@ namespace Bettr.Core
 
         public IEnumerator LoadBackgroundAudio(string bundleName)
         {
+            var backgroundAudioClipName = $"{bundleName}BackgroundMusic";
+            yield return LoadAudio(backgroundAudioClipName);
+        }
+
+        public IEnumerator LoadAudio(string bundleName)
+        {
             if (UseFileSystemAudio)
             {
-                yield return LoadFileSystemBackgroundAudio(bundleName);
+                yield return LoadFileSystemAudio(bundleName);
             }
             else
             {
-                yield return LoadS3SystemBackgroundAudio(bundleName);
+                yield return LoadS3SystemAudio(bundleName);
             }
         }
 
-        public IEnumerator LoadFileSystemBackgroundAudio(string bundleName)
+        public IEnumerator LoadFileSystemAudio(string bundleName)
         {
-            var backgroundAudioClipName = $"{bundleName}BackgroundMusic";
-            var assetPath = Path.Combine(FileSystemAudioBaseURL, $"{backgroundAudioClipName}.mp3");
+            var audioClipName = bundleName;
+            var assetPath = Path.Combine(FileSystemAudioBaseURL, $"{audioClipName}.mp3");
             var absolutePath = Path.Combine(Application.dataPath, assetPath);
             var absoluteFileUrl = $"file://{absolutePath}";
             AudioClip clip = null;
@@ -89,7 +99,7 @@ namespace Bettr.Core
             clip = DownloadHandlerAudioClip.GetContent(request);
             if (clip != null)
             {
-                clip.name = backgroundAudioClipName;
+                clip.name = audioClipName;
                 AddToClips(clip);
                 Debug.Log("Audio clip successfully loaded from file system.");
             }
@@ -99,11 +109,11 @@ namespace Bettr.Core
             }
         }
         
-        public IEnumerator LoadS3SystemBackgroundAudio(string bundleName)
+        public IEnumerator LoadS3SystemAudio(string bundleName)
         {
             // Create the URL for the background music
-            var backgroundAudioClipName = $"{bundleName}BackgroundMusic";
-            var assetUrl = $"{AudioServerBaseURL}/audio/latest/{backgroundAudioClipName}.mp3";
+            var audioClipName = bundleName;
+            var assetUrl = $"{AudioServerBaseURL}/audio/latest/{audioClipName}.mp3";
 
             // Use UnityWebRequest to load the AudioClip from S3
             using (UnityWebRequest request = UnityWebRequestMultimedia.GetAudioClip(assetUrl, AudioType.MPEG))
@@ -121,7 +131,7 @@ namespace Bettr.Core
                 AudioClip clip = DownloadHandlerAudioClip.GetContent(request);
                 if (clip != null)
                 {
-                    clip.name = backgroundAudioClipName;
+                    clip.name = audioClipName;
                     AddToClips(clip);
                     Debug.Log($"Audio clip successfully loaded from s3 {assetUrl}");
                 }
@@ -134,12 +144,15 @@ namespace Bettr.Core
 
         public void ToggleVolume()
         {
-            AudioSource.volume = AudioSource.volume == 0 ? 1 : 0;
+            AudioSource.mute = !AudioSource.mute;
+            // save to player prefs
+            PlayerPrefs.SetInt("IsVolumeOn", AudioSource.mute ? 0 : 1);
         }
         
         public bool IsVolumeOn()
         {
-            return AudioSource.volume > 0;
+            var isVolumeOn = PlayerPrefs.GetInt("IsVolumeOn", 1) == 1;
+            return isVolumeOn;
         }
 
         public void PlayAudioOnce(string audioClipName)

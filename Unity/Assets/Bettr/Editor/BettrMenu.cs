@@ -1681,7 +1681,7 @@ namespace Bettr.Editor
             }
         }
         
-        private static GameObject FindGameObjectInPrefab(GameObject prefab, string gameObjectName)
+        private static GameObject FindGameObjectInHierarchy(GameObject prefab, string gameObjectName)
         {
             Transform[] allTransforms = prefab.GetComponentsInChildren<Transform>(true);
             foreach (Transform transform in allTransforms)
@@ -1767,15 +1767,15 @@ namespace Bettr.Editor
                         }
                         
                         // Get the WinSymbols GameObject
-                        GameObject winSymbols = FindGameObjectInPrefab(machinePrefab, "WinSymbols");
+                        GameObject winSymbols = FindGameObjectInHierarchy(machinePrefab, "WinSymbols");
                         winSymbols.transform.localPosition = new Vector3(-6.34f, -4.55f, -20);
                         winSymbols.transform.localScale = new Vector3(1, 1, 1);
                         // Switch to SLOT_OVERLAY Layer
                         SetLayerRecursively(winSymbols, LayerMask.NameToLayer("SLOT_OVERLAY"));
                         
                         // Get the GoodLuckTexts and PaysText Game Objects which are descendants of the machine prefab
-                        GameObject goodLuckText = FindGameObjectInPrefab(machinePrefab, "GoodLuckText");
-                        GameObject paysText = FindGameObjectInPrefab(machinePrefab, "PaysText");                                               
+                        GameObject goodLuckText = FindGameObjectInHierarchy(machinePrefab, "GoodLuckText");
+                        GameObject paysText = FindGameObjectInHierarchy(machinePrefab, "PaysText");                                               
                         // Fix the scale of the paysText component to match the goodLuckText component
                         paysText.transform.localScale = goodLuckText.transform.localScale;
                         // Get the RectTransform height of the goodLuckText component
@@ -1977,7 +1977,7 @@ namespace Bettr.Editor
             
             Debug.Log($"Processed Fix Base Game Directional Light {processCount} machine variants.");
         }
-        
+
         [MenuItem("Bettr/Tools/Fix Game Scene")]
         public static void FixGameScene()
         {
@@ -1993,11 +1993,13 @@ namespace Bettr.Editor
                 {
                     continue;
                 }
+
                 var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
                 if (variantsDir == null)
                 {
                     continue;
                 }
+
                 var machineVariantsDirs = variantsDir?.GetDirectories();
                 // loop over machineVariantsDir
                 foreach (var machineVariantsDir in machineVariantsDirs)
@@ -2007,6 +2009,7 @@ namespace Bettr.Editor
                     {
                         continue;
                     }
+
                     // loop over experimentVariantDirs
                     foreach (var experimentVariantDir in experimentVariantDirs)
                     {
@@ -2014,22 +2017,25 @@ namespace Bettr.Editor
                         string machineName = machineNameDir.Name;
                         string machineVariant = machineVariantsDir?.Name;
                         string experimentVariant = experimentVariantDir?.Name;
-                        
-                        string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
+
+                        string runtimeAssetPath =
+                            $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
                         if (!Directory.Exists(runtimeAssetPath))
                         {
                             Debug.LogError($"Directory not found: {runtimeAssetPath}");
                             continue;
                         }
-                        
+
                         // Load the {{machine}}{{machineVariant}}BaseGameBackground prefab under the runtime assets "prefabs" directory
                         string prefabsDirectory = Path.Combine(runtimeAssetPath, "Prefabs");
-                        string backgroundPrefabPath = Directory.GetFiles(prefabsDirectory, $"{machineName}BaseGameBackground.prefab", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                        string backgroundPrefabPath = Directory.GetFiles(prefabsDirectory,
+                            $"{machineName}BaseGameBackground.prefab", SearchOption.TopDirectoryOnly).FirstOrDefault();
                         if (string.IsNullOrEmpty(backgroundPrefabPath))
                         {
                             Debug.LogError($"Background prefab not found: {machineName}BaseGameBackground.prefab");
                             continue;
                         }
+
                         // load the prefab
                         GameObject backgroundPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(backgroundPrefabPath);
                         if (backgroundPrefab == null)
@@ -2038,63 +2044,263 @@ namespace Bettr.Editor
                             continue;
                         }
                         
+                        //
+                        
+                        string machinePrefabPath = Directory.GetFiles(prefabsDirectory,
+                            $"{machineName}BaseGameMachine.prefab", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                        if (string.IsNullOrEmpty(machinePrefabPath))
+                        {
+                            Debug.LogError($"Machine prefab not found: {machineName}BaseGameMachine.prefab");
+                            continue;
+                        }
+
+                        // load the prefab
+                        GameObject machinePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(machinePrefabPath);
+                        if (machinePrefab == null)
+                        {
+                            Debug.LogError($"Failed to load prefab: {machineName}BaseGameMachine.prefab");
+                            continue;
+                        }
+                        
+                        //
+
                         // load the GameScene of the form {{machineName}}{{machineVariant}}Scene.unity in Editor
                         string scenesDirectory = Path.Combine(runtimeAssetPath, "Scenes");
-                        string scenePath = Directory.GetFiles(scenesDirectory, $"{machineName}{machineVariant}Scene.unity", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                        string scenePath = Directory.GetFiles(scenesDirectory,
+                            $"{machineName}{machineVariant}Scene.unity",
+                            SearchOption.TopDirectoryOnly).FirstOrDefault();
                         if (string.IsNullOrEmpty(scenePath))
                         {
                             Debug.LogError($"Scene not found: {machineName}{machineVariant}Scene.unity");
                             continue;
                         }
+
                         // load the scene in this editor script
                         Scene scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
-                        
-                        // find the game object called "BaseGameBackgroundParent" in the open scene and attach this backgroundPrefab to it
-                        GameObject baseGameBackgroundParent = GameObject.Find("BaseGameBackgroundParent");
-                        if (baseGameBackgroundParent == null)
+                        try
                         {
-                            Debug.LogError($"BaseGameBackgroundParent not found in scene: {machineName}{machineVariant}Scene.unity");
-                            continue;
+                            var pivotRootGameObject = scene.GetRootGameObjects().FirstOrDefault(go => go.name == "Pivot");
+                            
+                            // BaseGameMachineParent
+                            
+                            // find the game object called "BaseGameBackgroundParent" in the open scene and attach this backgroundPrefab to it
+                            GameObject baseGameMachineParent = FindGameObjectInHierarchy(pivotRootGameObject, "BaseGameMachineParent");
+                            if (baseGameMachineParent == null)
+                            {
+                                Debug.LogError(
+                                    $"BaseGameMachineParent not found in scene: {machineName}{machineVariant}Scene.unity");
+                                continue;
+                            }
+                            
+                            // set baseGameMachineParent to active
+                            baseGameMachineParent.SetActive(true);
+
+                            // get the "Pivot" child of baseGameMachineParent
+                            var pivot = baseGameMachineParent.transform.Find("Pivot");
+                            if (pivot == null)
+                            {
+                                Debug.LogError($"Pivot not found in BaseGameBackgroundParent");
+                                continue;
+                            }
+
+                            // remove any existing child of "Pivot"
+                            foreach (Transform child in pivot)
+                            {
+                                Object.DestroyImmediate(child.gameObject);
+                            }
+
+                            // instantiate the backgroundPrefab
+                            GameObject machine = PrefabUtility.InstantiatePrefab(machinePrefab) as GameObject;
+                            // null check machine
+                            if (machine == null)
+                            {
+                                Debug.LogError(
+                                    $"Failed to instantiate machine prefab: {machineName}{machineVariant}BaseGameMachine.prefab");
+                                continue;
+                            }
+
+                            // set the parent of the background to the baseGameBackgroundParent
+                            machine.transform.SetParent(pivot);
+                            
+                            //
+                            
+                            
+                            // find the game object called "BaseGameBackgroundParent" in the open scene and attach this backgroundPrefab to it
+                            GameObject baseGameBackgroundParent = GameObject.Find("BaseGameBackgroundParent");
+                            if (baseGameBackgroundParent == null)
+                            {
+                                Debug.LogError(
+                                    $"BaseGameBackgroundParent not found in scene: {machineName}{machineVariant}Scene.unity");
+                                continue;
+                            }
+
+                            // get the "Pivot" child of baseGameBackgroundParent
+                            pivot = baseGameBackgroundParent.transform.Find("Pivot");
+                            if (pivot == null)
+                            {
+                                Debug.LogError($"Pivot not found in BaseGameBackgroundParent");
+                                continue;
+                            }
+
+                            // remove any existing child of "Pivot"
+                            foreach (Transform child in pivot)
+                            {
+                                Object.DestroyImmediate(child.gameObject);
+                            }
+
+                            // instantiate the backgroundPrefab
+                            GameObject background = PrefabUtility.InstantiatePrefab(backgroundPrefab) as GameObject;
+                            // null check background
+                            if (background == null)
+                            {
+                                Debug.LogError(
+                                    $"Failed to instantiate background prefab: {machineName}{machineVariant}BaseGameBackground.prefab");
+                                continue;
+                            }
+
+                            // set the parent of the background to the baseGameBackgroundParent
+                            background.transform.SetParent(pivot);
+
+                            // Save the changes to the scene
+                            EditorSceneManager.MarkSceneDirty(scene);
+                            EditorSceneManager.SaveScene(scene);
+
+                            Debug.Log(
+                                $"Fixing Background for machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant}");
+
+                            processCount++;
                         }
-                        // get the "Pivot" child of baseGameBackgroundParent
-                        Transform pivot = baseGameBackgroundParent.transform.Find("Pivot");
-                        if (pivot == null)
+                        finally
                         {
-                            Debug.LogError($"Pivot not found in BaseGameBackgroundParent");
-                            continue;
+                            EditorSceneManager.CloseScene(scene, true);
                         }
-                        
-                        // remove any existing child of "Pivot"
-                        foreach (Transform child in pivot)
+
+                        scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+                        try
                         {
-                            Object.DestroyImmediate(child.gameObject);
+                            string prefabName = $"{machineName}{machineVariant}Prefab";
+                            string prefabPath = Path.Combine(prefabsDirectory, $"{prefabName}.prefab");
+                            
+                            // Start - Save the "Pivot" Root Game Object also as a Prefab for load into other scenes
+                            
+                            // First get the "Pivot" root game object
+                            var rootPivot = scene.GetRootGameObjects().FirstOrDefault(go => go.name == "Pivot");
+                            if (rootPivot == null)
+                            {
+                                Debug.LogError("No 'Pivot' root object found in the scene.");
+                                continue;
+                            }
+                                
+                            // Create the prefab
+                            GameObject prefabAsset = PrefabUtility.SaveAsPrefabAsset(rootPivot, prefabPath);
+                            if (prefabAsset == null)
+                            {
+                                Debug.LogError($"Failed to create prefab at {prefabPath}");
+                                continue;
+                            }
+                            
+                            Debug.Log($"Saved {prefabName}.prefab to {prefabsDirectory}");
+                            
+                            AssetDatabase.Refresh();
+                                
+                            // End - Save the "Pivot" Root Game Object also as a Prefab for load into other scenes
+                            
+                            // Open the prefab for editing
+                            PrefabStage prefabStage = PrefabStageUtility.OpenPrefab(prefabPath);
+                            if (prefabStage == null)
+                            {
+                                Debug.LogError($"Failed to open prefab stage for {prefabPath}");
+                                return;
+                            }
+                            
+                            GameObject prefabRoot = prefabStage.prefabContentsRoot;
+                            
+                            // Remove the EventSystem
+                            Transform eventSystemTransform = prefabRoot.transform.Find("EventSystem");
+                            if (eventSystemTransform != null)
+                            {
+                                Object.DestroyImmediate(eventSystemTransform.gameObject);
+                            }
+                            
+                            // Find the "UI Camera"
+                            var uiCamera = FindGameObjectInHierarchy(prefabRoot, "UI Camera");
+                            // remove the audio listener
+                            if (uiCamera != null)
+                            {
+                                var audioListener = uiCamera.GetComponent<AudioListener>();
+                                if (audioListener != null)
+                                {
+                                    Object.DestroyImmediate(audioListener);
+                                }
+                            }
+                            
+                            // Find the "Camera_Background"
+                            var cameraBackground = FindGameObjectInHierarchy(prefabRoot, "Camera_Background");
+                            // switch it to DepthOnly
+                            if (cameraBackground != null)
+                            {
+                                cameraBackground.GetComponent<Camera>().clearFlags = CameraClearFlags.Depth;
+                            }
+                            // change camera to orthographic
+                            if (cameraBackground != null)
+                            {
+                                cameraBackground.GetComponent<Camera>().orthographic = true;
+                            }
+                            
+                            // Find the "Backgrounds" game object
+                            var backgrounds = FindGameObjectInHierarchy(prefabRoot, "Backgrounds");
+                            var pivotBackgrounds = backgrounds.transform.GetChild(0).gameObject;
+                            pivotBackgrounds.transform.localPosition = new Vector3(0.05f, -1.05f, 0);
+                            pivotBackgrounds.transform.localScale = new Vector3(16.25f, 22.35f, 1.0f);
+                            
+                            // Find the "Machines" game object
+                            var machines = FindGameObjectInHierarchy(prefabRoot, "Machines");
+                            var pivotMachines = machines.transform.GetChild(0).gameObject;
+                            pivotMachines.transform.localPosition = new Vector3(0.05f, -0.2f, 0);
+                            pivotMachines.transform.localScale = new Vector3(2.96f, 2.2f, 1.0f);
+                            
+                            // Find all Mesh Colliders under Machines
+                            var meshColliders = pivotMachines.GetComponentsInChildren<MeshCollider>(true);
+                            // remove all of them
+                            foreach (var meshCollider in meshColliders)
+                            {
+                                Object.DestroyImmediate(meshCollider);
+                            }
+                            // find all Mesh colliders under Background
+                            meshColliders = pivotBackgrounds.GetComponentsInChildren<MeshCollider>(true);
+                            // remove all of them
+                            foreach (var meshCollider in meshColliders)
+                            {
+                                Object.DestroyImmediate(meshCollider);
+                            }
+                            
+                            // Disable the "Settings"
+                            var settingsPanel = FindGameObjectInHierarchy(prefabRoot, "Settings");
+                            if (settingsPanel != null)
+                            {
+                                settingsPanel.SetActive(false);
+                            }
+                            
+                            // Disable the "WinSymbols"
+                            var winSymbols = FindGameObjectInHierarchy(prefabRoot, "WinSymbols");
+                            if (winSymbols != null)
+                            {
+                                winSymbols.SetActive(false);
+                            }
+                            
+                            // save the prefab prefabRoot
+                            PrefabUtility.SaveAsPrefabAsset(prefabRoot, prefabPath);
                         }
-                        
-                        // instantiate the backgroundPrefab
-                        GameObject background = PrefabUtility.InstantiatePrefab(backgroundPrefab) as GameObject;
-                        // null check background
-                        if (background == null)
+                        finally
                         {
-                            Debug.LogError($"Failed to instantiate background prefab: {machineName}{machineVariant}BaseGameBackgroundPrefab.prefab");
-                            continue;
+                            EditorSceneManager.CloseScene(scene, true);
                         }
-                        
-                        // set the parent of the background to the baseGameBackgroundParent
-                        background.transform.SetParent(pivot);
-                        
-                        // Save the changes to the scene
-                        EditorSceneManager.MarkSceneDirty(scene);
-                        EditorSceneManager.SaveScene(scene);
-                        
-                        Debug.Log($"Fixing Background for machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant}");
-                
-                        processCount++;
                     }
                 }
             }
-            
+
             AssetDatabase.Refresh();
-            
+
             Debug.Log($"Processed Fix Game Scene {processCount} machine variants.");
         }
         
@@ -2231,7 +2437,7 @@ namespace Bettr.Editor
                         }
                         
                         // find the BackgroundFBX from the background prefab
-                        GameObject backgroundFBX = FindGameObjectInPrefab(background, "BackgroundFBX");
+                        GameObject backgroundFBX = FindGameObjectInHierarchy(background, "BackgroundFBX");
                         // change the layer for backgroundFBX to SLOT_VIDEO
                         // backgroundFBX.layer = LayerMask.NameToLayer("SLOT_VIDEO");
                         backgroundFBX.layer = LayerMask.NameToLayer("SLOT_BACKGROUND");
@@ -2662,8 +2868,8 @@ namespace Bettr.Editor
                             continue;
                         }
 
-                        GameObject nextGameObject = FindGameObjectInPrefab(prefabInstance, "Next");
-                        GameObject prevGameObject = FindGameObjectInPrefab(prefabInstance, "Prev");
+                        GameObject nextGameObject = FindGameObjectInHierarchy(prefabInstance, "Next");
+                        GameObject prevGameObject = FindGameObjectInHierarchy(prefabInstance, "Prev");
                         GameObject pivotGameObject = nextGameObject.transform.parent.gameObject;
                         GameObject firstChildGameObject = pivotGameObject.transform.GetChild(0).gameObject;
                         GameObject volumeGameObject = null;
@@ -3823,7 +4029,7 @@ namespace Bettr.Editor
             {
                 var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
                 // Check that the MachineName starts with "Game" and is not "Game001Alpha"
-                if (!machineNameDir.Name.StartsWith("Game") || machineNameDir.Name == "Game001Alpha")
+                if (machineNameDir.Name == "Game001Alpha")
                 {
                     continue;
                 }

@@ -568,6 +568,9 @@ build-dev-target-webgl: prepare-project
 	$(UNITY_APP) -quit -batchmode -logFile $(LOGS_WEBGL)/logfile.log -projectPath $(UNITY_PROJECT_PATH) -executeMethod $(BUILD_METHOD_WEBGL) -buildOutput $(BUILD_WEBGL) -buildTarget WebGL -dev -cleanBuildCache
 	@echo "Build completed."
 
+build-lobby-cards-webgl:
+	@./scripts/build-lobby-cards.sh
+
 build-target-webgl: prepare-project
 	@echo "Cleaning up BuildCache..."
 	if [ -d "$(UNITY_PROJECT_PATH)/Library/BuildCache" ]; then $(RM) -r $(UNITY_PROJECT_PATH)/Library/BuildCache; fi
@@ -619,17 +622,24 @@ invalidate-target_webgl: publish-target-webgl
 	aws cloudfront create-invalidation --distribution-id $(S3_WEBGL_CLOUDFRONT_DISTRIBUTION_ID) --paths "/*" --profile $(AWS_DEFAULT_PROFILE)
 	@echo "CloudFront invalidation completed."
 
+deploy-lobby-cards-webgl:
+	@./scripts/deploy-lobby-cards.sh
+
 deploy-target-webgl: publish-target-webgl invalidate-target_webgl
 	@echo "Deploying WebGL project..."
 	@echo "Deployment completed."
 
-build-webgl:  build-assets-webgl build-audio-webgl build-video-webgl build-target-webgl
+build-webgl:  build-assets-webgl build-lobbycard-assets-webgl build-audio-webgl build-video-webgl build-target-webgl build-lobby-cards-webgl
+	@echo "Build completed."
 
-deploy-webgl:  deploy-assets-webgl deploy-audio-webgl deploy-video-webgl deploy-target-webgl
+deploy-webgl:  deploy-assets-webgl deploy-audio-webgl deploy-video-webgl deploy-target-webgl deploy-lobby-cards-webgl
+	@echo "Deploy completed."
 
 deploy-webgl-all: build-webgl deploy-webgl
-	@echo "Deploying WebGL project..."
-	@echo "Deployment completed."
+
+start-local-server:
+	@echo "Starting local web server..."
+	@cd $(BUILD_WEBGL)/BettrSlots; $(CURDIR)/scripts/https-server.sh
 
 # =============================================================================
 #
