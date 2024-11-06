@@ -637,13 +637,9 @@ deploy-webgl:  deploy-assets-webgl deploy-audio-webgl deploy-video-webgl deploy-
 
 deploy-webgl-all: build-webgl deploy-webgl
 
-install-http-server:
-	@echo "Installing http-server locally..."
-	@npm install http-server
-
-start-local-server: install-http-server
+start-local-server:
 	@echo "Starting local web server..."
-	@cd $(BUILD_WEBGL)/BettrSlots; $(CURDIR)/scripts/http-server.sh
+	@cd $(BUILD_WEBGL)/BettrSlots; $(CURDIR)/scripts/https-server.sh
 
 # =============================================================================
 #
