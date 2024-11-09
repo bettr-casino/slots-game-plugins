@@ -125,8 +125,7 @@ end
 function Game003BaseGameMachine:OnBaseGameSpinCompleted()
     series
         do
-            Game003BaseGameState.SpinState.First.State = "Completed"
-            Game003BaseGameState.DisplayState.First.State = "Idle" 
+            self.Mechanics:OnBaseGameSpinCompleted(self) 
         end
     end
 end

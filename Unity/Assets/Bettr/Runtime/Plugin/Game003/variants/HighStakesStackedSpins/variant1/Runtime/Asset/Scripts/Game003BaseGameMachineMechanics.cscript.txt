@@ -63,11 +63,27 @@ end
 function Game003BaseGameMachineMechanics:RollupCredits(machine)
     -- this is hardcoded
     -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
-    if self.WaysMechanic ~= nil then
-       self.WaysMechanic:RollupCredits(machine)
-    elseif self.CascadingReelsMechanic ~= nil then
+    if self.CascadingReelsMechanic ~= nil then
        self.CascadingReelsMechanic:RollupCredits(machine)
+    elseif self.WaysMechanic ~= nil then
+       self.WaysMechanic:RollupCredits(machine)
     elseif self.PaylinesMechanic ~= nil then
        self.PaylinesMechanic:RollupCredits(machine)
+    end
+end
+
+function Game003BaseGameMachineMechanics:OnBaseGameSpinCompleted(machine)
+    series
+        do
+            -- this is hardcoded
+            -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
+            if self.CascadingReelsMechanic ~= nil then
+               self.CascadingReelsMechanic:OnBaseGameSpinCompleted(machine)
+            elseif self.WaysMechanic ~= nil then
+               self.WaysMechanic:OnBaseGameSpinCompleted(machine)
+            elseif self.PaylinesMechanic ~= nil then
+               self.PaylinesMechanic:OnBaseGameSpinCompleted(machine)
+            end 
+        end
     end
 end
