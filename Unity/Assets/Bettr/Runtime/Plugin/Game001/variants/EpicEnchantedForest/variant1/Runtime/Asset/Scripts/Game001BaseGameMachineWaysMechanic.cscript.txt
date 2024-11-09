@@ -11,6 +11,10 @@ function Game001BaseGameMachineWaysMechanic:new(o)
 	return o
 end
 
+function Game001BaseGameMachineWaysMechanic:OnError(callStack)
+	System.Error("BaseGameMachineWaysMechanic Error CallStack: {0}", callStack)
+end
+
 function Game001BaseGameMachineWaysMechanic:Initialize(machine)
     -- Appending new entries to the table
     Game001BaseGameMachine.BaseGameStateDispatchTable.Paying = function()

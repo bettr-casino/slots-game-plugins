@@ -17,6 +17,10 @@ function Game002BaseGameMachineMechanics:new(o)
 	return o
 end
 
+function Game002BaseGameMachineMechanics:OnError(callStack)
+	System.Error("BaseGameMachineMechanics Error CallStack: {0}", callStack)
+end
+
 function Game002BaseGameMachineMechanics:Initialize(machine)
 
     self.WaysMechanic = Game002BaseGameMachineWaysMechanic:new()

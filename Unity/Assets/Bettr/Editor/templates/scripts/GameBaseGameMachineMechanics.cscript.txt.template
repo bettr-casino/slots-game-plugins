@@ -17,6 +17,10 @@ function {{machineName}}BaseGameMachineMechanics:new(o)
 	return o
 end
 
+function {{machineName}}BaseGameMachineMechanics:OnError(callStack)
+	System.Error("BaseGameMachineMechanics Error CallStack: {0}", callStack)
+end
+
 function {{machineName}}BaseGameMachineMechanics:Initialize(machine)
 {{for mechanic in baseGameMechanics}}
     self.{{mechanic}}Mechanic = {{machineName}}BaseGameMachine{{mechanic}}Mechanic:new()
