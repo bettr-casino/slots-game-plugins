@@ -47,3 +47,10 @@ function Game004BaseGameMachineMechanics:TryPaying(machine)
        self.PaylinesMechanic:TryPaying(machine)
     end
 end
+
+function Game004BaseGameMachineMechanics:OnPayingCompleted(machine)
+    BettrAudioController.StopAudio()
+    BettrUserController.DisableUserInSlamStopMode()
+    machine:RollupCredits()
+    machine:OnBaseGameSpinCompleted()
+end

@@ -329,10 +329,7 @@ function Game006BaseGameMachine:CurrentSpinState()
 end
 
 function Game006BaseGameMachine:OnPayingCompleted()
-    BettrAudioController.StopAudio()
-    BettrUserController.DisableUserInSlamStopMode()
-    self:RollupCredits()
-    self:OnBaseGameSpinCompleted()
+    self.Mechanics:OnPayingCompleted(self)
 end
 
 function Game006BaseGameMachine:OnSpinReelsStopped()
