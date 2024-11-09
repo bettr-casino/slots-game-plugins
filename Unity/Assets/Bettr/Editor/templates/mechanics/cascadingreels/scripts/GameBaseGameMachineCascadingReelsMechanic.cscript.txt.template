@@ -71,6 +71,14 @@ function {{machineName}}BaseGameMachineCascadingReelsMechanic:OnRollupCredits(ma
             end
         end
         do
+            machine:StartCascade(machine)
+        end
+    end
+end
+
+function {{machineName}}BaseGameMachineCascadingReelsMechanic:StartCascade(machine)
+    series
+        do
             machine:OnBaseGameSpinCompleted()
         end
     end
