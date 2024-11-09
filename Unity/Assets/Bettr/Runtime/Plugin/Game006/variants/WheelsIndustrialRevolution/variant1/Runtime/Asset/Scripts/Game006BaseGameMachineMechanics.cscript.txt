@@ -27,10 +27,10 @@ end
 function Game006BaseGameMachineMechanics:BaseGamePayout(machine)
     -- this is hardcoded
     -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
-    if self.CascadingReelsMechanic ~= nil then
-       self.CascadingReelsMechanic:BaseGamePayout(machine)
-    elseif self.WaysMechanic ~= nil then
+    if self.WaysMechanic ~= nil then
        self.WaysMechanic:BaseGamePayout(machine)
+    elseif self.CascadingReelsMechanic ~= nil then
+       self.CascadingReelsMechanic:BaseGamePayout(machine)
     elseif self.PaylinesMechanic ~= nil then
        self.PaylinesMechanic:BaseGamePayout(machine)
     end
@@ -39,10 +39,10 @@ end
 function Game006BaseGameMachineMechanics:TryPaying(machine)
     -- this is hardcoded
     -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
-    if self.CascadingReelsMechanic ~= nil then
-       self.CascadingReelsMechanic:TryPaying(machine)
-    elseif self.WaysMechanic ~= nil then
+    if self.WaysMechanic ~= nil then
        self.WaysMechanic:TryPaying(machine)
+    elseif self.CascadingReelsMechanic ~= nil then
+       self.CascadingReelsMechanic:TryPaying(machine)
     elseif self.PaylinesMechanic ~= nil then
        self.PaylinesMechanic:TryPaying(machine)
     end
