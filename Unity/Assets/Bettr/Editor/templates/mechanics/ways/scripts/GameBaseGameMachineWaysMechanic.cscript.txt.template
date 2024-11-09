@@ -158,4 +158,42 @@ function {{machineName}}BaseGameMachineWaysMechanic:RollUpWaysWin(machine, way, 
     end    
 end
 
+function {{machineName}}BaseGameMachineWaysMechanic:OnPayingCompleted(machine)
+    BettrAudioController.StopAudio()
+    BettrUserController.DisableUserInSlamStopMode()
+    machine:RollupCredits()
+    machine:OnBaseGameSpinCompleted()
+end
 
+function {{machineName}}BaseGameMachineWaysMechanic:RollupCredits(machine)
+    local oldCoins = BettrUser.Coins
+    local newCoins = BettrUser.SpinCoins
+    BettrUser.ApplySpinCoins()
+    local pays = newCoins - oldCoins
+    System.StartCoroutine(self, "OnRollupCredits", machine, oldCoins, newCoins, pays)
+end
+
+function {{machineName}}BaseGameMachineWaysMechanic:OnRollupCredits(machine, oldCoins, newCoins, pays)
+    series
+        do
+            local winTextProperty = machine.WinText            
+            if pays > 0 then
+                BettrAudioController.PlayAudioLoop("rollupwins")            
+                BettrVisualsController.RollUpCounter(winTextProperty, 0, pays, 0.3)
+                System.WaitForSeconds(0.3)
+                BettrAudioController.StopAudio()
+            end
+        end
+        do
+            local creditsTextProperty = machine.CreditsText   
+            if pays ~= 0 then
+                if pays > 0 then
+                    BettrAudioController.PlayAudioLoop("rollupcoins")            
+                end
+                BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 1)
+                System.WaitForSeconds(1)
+                BettrAudioController.StopAudio()
+            end
+        end
+    end
+end

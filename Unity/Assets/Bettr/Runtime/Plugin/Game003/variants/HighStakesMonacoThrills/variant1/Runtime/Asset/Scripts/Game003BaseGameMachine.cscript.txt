@@ -140,36 +140,7 @@ function Game003BaseGameMachine:BaseGamePayout()
 end
 
 function Game003BaseGameMachine:RollupCredits()
-    local oldCoins = BettrUser.Coins
-    local newCoins = BettrUser.SpinCoins
-    BettrUser.ApplySpinCoins()
-    local pays = newCoins - oldCoins
-    System.StartCoroutine(self, "OnRollupCredits", oldCoins, newCoins, pays)
-end
-
-function Game003BaseGameMachine:OnRollupCredits(oldCoins, newCoins, pays)
-    series
-        do
-            local winTextProperty = self.WinText            
-            if pays > 0 then
-                BettrAudioController.PlayAudioLoop("rollupwins")            
-                BettrVisualsController.RollUpCounter(winTextProperty, 0, pays, 0.3)
-                System.WaitForSeconds(0.3)
-                BettrAudioController.StopAudio()
-            end
-        end
-        do
-            local creditsTextProperty = self.CreditsText   
-            if pays ~= 0 then
-                if pays > 0 then
-                    BettrAudioController.PlayAudioLoop("rollupcoins")            
-                end
-                BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 1)
-                System.WaitForSeconds(1)
-                BettrAudioController.StopAudio()
-            end
-        end
-    end
+    self.Mechanics:RollupCredits(self)
 end
 
 function Game003BaseGameMachine:UpdateStatusText(text)

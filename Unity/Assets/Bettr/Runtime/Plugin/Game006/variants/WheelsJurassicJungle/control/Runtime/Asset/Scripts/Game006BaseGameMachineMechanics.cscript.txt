@@ -49,8 +49,25 @@ function Game006BaseGameMachineMechanics:TryPaying(machine)
 end
 
 function Game006BaseGameMachineMechanics:OnPayingCompleted(machine)
-    BettrAudioController.StopAudio()
-    BettrUserController.DisableUserInSlamStopMode()
-    machine:RollupCredits()
-    machine:OnBaseGameSpinCompleted()
+    -- this is hardcoded
+    -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
+    if self.WaysMechanic ~= nil then
+       self.WaysMechanic:OnPayingCompleted(machine)
+    elseif self.CascadingReelsMechanic ~= nil then
+       self.CascadingReelsMechanic:OnPayingCompleted(machine)
+    elseif self.PaylinesMechanic ~= nil then
+       self.PaylinesMechanic:OnPayingCompleted(machine)
+    end
+end
+
+function Game006BaseGameMachineMechanics:RollupCredits(machine)
+    -- this is hardcoded
+    -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
+    if self.WaysMechanic ~= nil then
+       self.WaysMechanic:RollupCredits(machine)
+    elseif self.CascadingReelsMechanic ~= nil then
+       self.CascadingReelsMechanic:RollupCredits(machine)
+    elseif self.PaylinesMechanic ~= nil then
+       self.PaylinesMechanic:RollupCredits(machine)
+    end
 end
