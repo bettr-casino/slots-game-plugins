@@ -45,6 +45,7 @@ function Game001BaseGameMachineCascadingReelsMechanic:RollupCredits(machine)
     local newCoins = BettrUser.SpinCoins
     BettrUser.ApplySpinCoins()
     local pays = newCoins - oldCoins
+    System.Print("RollupCredits Old Coins={0} New Coins={1} Pays={2}", oldCoins, newCoins, pays)
     System.StartCoroutine(self, "OnRollupCredits", machine, oldCoins, newCoins, pays)
 end
 
@@ -71,13 +72,35 @@ function Game001BaseGameMachineCascadingReelsMechanic:OnRollupCredits(machine, o
             end
         end
         do
-            machine:StartCascade(machine)
+            self:StartCascade(machine)
         end
     end
 end
 
 function Game001BaseGameMachineCascadingReelsMechanic:StartCascade(machine)
     series
+        do                
+            local cascadeCount = Game001BaseGameCascadingReelsSummary.CascadingReels.Count
+            local cascades = Game001BaseGameCascadingReelsCascades.CascadingReels.Array
+            local cascadesMatrix = Game001BaseGameCascadingReelsCascadesMatrix
+            for counterIndex = 1, cascadeCount do
+                local cascade = cascades[counterIndex]
+                local cascadeID = cascade.Cascade
+                local cascadeAction = cascade.Action
+                local cascadeMatrix = cascadesMatrix[cascadeID].Array
+                local cascadeMatrixCount = cascadesMatrix[cascadeID].Count
+                for matrixIndex = 1, cascadeMatrixCount parallel do
+                    local cascadeMatrixRow = cascadeMatrix[matrixIndex]
+                    local cascadeReelID = cascadeMatrixRow.ReelID
+                    local cascadeRowIndex = cascadeMatrixRow.RowIndex                     
+                    if cascadeAction == "SymbolRemoval" then
+                        -- run parallel symbol disappear animations
+                        System.Print("Cascade Reel ID={0} Row Index={1}", cascadeReelID, cascadeRowIndex)
+                        System.WaitForSeconds(1.0)
+                    end
+                end
+            end                        
+        end
         do
             machine:OnBaseGameSpinCompleted()
         end
