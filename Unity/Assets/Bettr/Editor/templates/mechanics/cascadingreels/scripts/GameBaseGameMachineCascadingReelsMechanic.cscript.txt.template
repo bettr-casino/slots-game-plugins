@@ -25,4 +25,12 @@ function {{machineName}}BaseGameMachineCascadingReelsMechanic:BaseGamePayout(mac
     end
 end
 
+function {{machineName}}BaseGameMachineCascadingReelsMechanic:OnPayingCompleted(machine)
+    BettrAudioController.StopAudio()
+    BettrUserController.DisableUserInSlamStopMode()
+    machine:RollupCredits()
+    machine:OnBaseGameSpinCompleted()
+end
+
+
 

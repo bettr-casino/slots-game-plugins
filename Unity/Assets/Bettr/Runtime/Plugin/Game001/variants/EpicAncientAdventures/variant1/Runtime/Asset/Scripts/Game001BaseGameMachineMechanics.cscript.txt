@@ -58,10 +58,10 @@ end
 function Game001BaseGameMachineMechanics:OnPayingCompleted(machine)
     -- this is hardcoded
     -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
-    if self.WaysMechanic ~= nil then
-       self.WaysMechanic:OnPayingCompleted(machine)
-    elseif self.CascadingReelsMechanic ~= nil then
+    if self.CascadingReelsMechanic ~= nil then
        self.CascadingReelsMechanic:OnPayingCompleted(machine)
+    elseif self.WaysMechanic ~= nil then
+       self.WaysMechanic:OnPayingCompleted(machine)
     elseif self.PaylinesMechanic ~= nil then
        self.PaylinesMechanic:OnPayingCompleted(machine)
     end

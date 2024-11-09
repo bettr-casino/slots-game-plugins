@@ -25,4 +25,12 @@ function Game001BaseGameMachineCascadingReelsMechanic:BaseGamePayout(machine)
     end
 end
 
+function Game001BaseGameMachineCascadingReelsMechanic:OnPayingCompleted(machine)
+    BettrAudioController.StopAudio()
+    BettrUserController.DisableUserInSlamStopMode()
+    machine:RollupCredits()
+    machine:OnBaseGameSpinCompleted()
+end
+
+
 
