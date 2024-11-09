@@ -32,5 +32,14 @@ function {{machineName}}BaseGameMachineCascadingReelsMechanic:OnPayingCompleted(
     machine:OnBaseGameSpinCompleted()
 end
 
+function {{machineName}}BaseGameMachineCascadingReelsMechanic:OnBaseGameSpinCompleted(machine)
+    series
+        do
+            {{machineName}}BaseGameState.SpinState.First.State = "Completed"
+            {{machineName}}BaseGameState.DisplayState.First.State = "Idle" 
+        end
+    end
+end
+
 
 

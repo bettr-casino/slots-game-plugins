@@ -165,6 +165,15 @@ function {{machineName}}BaseGameMachineWaysMechanic:OnPayingCompleted(machine)
     machine:OnBaseGameSpinCompleted()
 end
 
+function {{machineName}}BaseGameMachineWaysMechanic:OnBaseGameSpinCompleted(machine)
+    series
+        do
+            {{machineName}}BaseGameState.SpinState.First.State = "Completed"
+            {{machineName}}BaseGameState.DisplayState.First.State = "Idle" 
+        end
+    end
+end
+
 function {{machineName}}BaseGameMachineWaysMechanic:RollupCredits(machine)
     local oldCoins = BettrUser.Coins
     local newCoins = BettrUser.SpinCoins
