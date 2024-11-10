@@ -166,7 +166,6 @@ function Game001BaseGameMachineWaysMechanic:OnPayingCompleted(machine)
     BettrAudioController.StopAudio()
     BettrUserController.DisableUserInSlamStopMode()
     machine:RollupCredits()
-    machine:OnBaseGameSpinCompleted()
 end
 
 function Game001BaseGameMachineWaysMechanic:OnBaseGameSpinCompleted(machine)
@@ -208,5 +207,8 @@ function Game001BaseGameMachineWaysMechanic:OnRollupCredits(machine, oldCoins, n
                 BettrAudioController.StopAudio()
             end
         end
+        do
+            machine:OnBaseGameSpinCompleted()
+        end        
     end
 end
