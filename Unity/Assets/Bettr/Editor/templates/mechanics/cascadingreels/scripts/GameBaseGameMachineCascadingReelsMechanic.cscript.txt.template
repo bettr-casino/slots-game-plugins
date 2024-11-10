@@ -43,7 +43,9 @@ function {{machineName}}BaseGameMachineCascadingReelsMechanic:StartCascade(machi
                 System.Print("cascadeID={0} counterIndex={1} cascadeAction={2}", cascadeID, counterIndex, cascadeAction)                                    
                 local cascadeMatrix = cascadesMatrix[cascadeID].Array
                 local cascadeMatrixCount = cascadesMatrix[cascadeID].Count
-                self:SymbolRemovalActions(cascadeMatrix, cascadeMatrixCount, cascadeAction)
+                if cascadeAction == "SymbolRemoval" then
+                    self:SymbolRemovalActions(cascadeMatrix, cascadeMatrixCount, cascadeAction)
+                end
             end                        
         end
     end
@@ -55,9 +57,7 @@ function {{machineName}}BaseGameMachineCascadingReelsMechanic:SymbolRemovalActio
         local cascadeReelID = cascadeMatrixRow.ReelID
         local cascadeRowIndex = cascadeMatrixRow.RowIndex 
         System.Print("cascadeReelID={0} cascadeRowIndex={1} cascadeAction={2}", cascadeReelID, cascadeRowIndex, cascadeAction)                    
-        if cascadeAction == "SymbolRemoval" then
-            self:SymbolRemovalAction(cascadeReelID, cascadeRowIndex)
-        end
+        self:SymbolRemovalAction(cascadeReelID, cascadeRowIndex)
     end
 end
 
