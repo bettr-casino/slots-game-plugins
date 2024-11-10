@@ -33,9 +33,9 @@ end
 function {{machineName}}BaseGameMachineCascadingReelsMechanic:StartCascade(machine)
     series
         do                
-            local cascadeCount = Game001BaseGameCascadingReelsSummary.CascadingReels.First.CascadeCount
-            local cascades = Game001BaseGameCascadingReelsCascades.CascadingReels.Array
-            local cascadesMatrix = Game001BaseGameCascadingReelsCascadesMatrix
+            local cascadeCount = {{machineName}}BaseGameCascadingReelsSummary.CascadingReels.First.CascadeCount
+            local cascades = {{machineName}}BaseGameCascadingReelsCascades.CascadingReels.Array
+            local cascadesMatrix = {{machineName}}BaseGameCascadingReelsCascadesMatrix
             for counterIndex = 1, cascadeCount parallel do
                 local cascade = cascades[counterIndex]
                 local cascadeID = cascade.Cascade
@@ -62,7 +62,7 @@ function {{machineName}}BaseGameMachineCascadingReelsMechanic:SymbolRemovalActio
 end
 
 function {{machineName}}BaseGameMachineCascadingReelsMechanic:SymbolRemovalAction(reelID, rowIndex)
-    local reel = _G["Game001BaseGame" .. reelID]
+    local reel = _G["{{machineName}}BaseGame" .. reelID]
     local luaRowIndex = rowIndex + 1
     local symbolGroupProperty = reel["SymbolGroup" .. luaRowIndex]
     symbolGroupProperty.SetAllInactive()
