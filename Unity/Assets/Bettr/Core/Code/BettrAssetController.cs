@@ -17,6 +17,11 @@ using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using Object = UnityEngine.Object;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
+
 // ReSharper disable once CheckNamespace
 namespace Bettr.Core
 {
@@ -616,18 +621,40 @@ namespace Bettr.Core
             var scriptAssetNames = assetNames.Where(name => name.EndsWith(".cscript.txt")).ToArray();
             foreach (var scriptAssetName in scriptAssetNames)
             {
-                var textAsset = assetBundle.LoadAsset<TextAsset>(scriptAssetName);
-                var script = textAsset.text;
-                var className = Path.GetFileNameWithoutExtension(scriptAssetName);
-                try
+#if UNITY_EDITOR
+                // Load from the Local Asset
                 {
-                    className = Path.GetFileNameWithoutExtension(className);
-                    TileController.LoadScript(className, script);
+                    var textAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(scriptAssetName);
+                    var script = textAsset.text;
+                    var className = Path.GetFileNameWithoutExtension(scriptAssetName);
+                    try
+                    {
+                        className = Path.GetFileNameWithoutExtension(className);
+                        TileController.LoadScript(className, script);
+
+                        continue;
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError($"error loading script{scriptAssetName} class={className} error={e.Message}");
+                        throw;
+                    }
                 }
-                catch (Exception e)
+#endif
                 {
-                    Debug.LogError($"error loading script{scriptAssetName} class={className} error={e.Message}");
-                    throw;
+                    var textAsset = assetBundle.LoadAsset<TextAsset>(scriptAssetName);
+                    var script = textAsset.text;
+                    var className = Path.GetFileNameWithoutExtension(scriptAssetName);
+                    try
+                    {
+                        className = Path.GetFileNameWithoutExtension(className);
+                        TileController.LoadScript(className, script);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError($"error loading script{scriptAssetName} class={className} error={e.Message}");
+                        throw;
+                    }
                 }
             }
 
