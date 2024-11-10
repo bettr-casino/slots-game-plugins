@@ -2944,6 +2944,98 @@ namespace Bettr.Editor
 
             BuildMachinesFromCommandLine();
         }
+        
+        // Define a delegate to handle each mechanic's action
+        public delegate void ProcessMechanic(string machineName, string machineVariant, string experimentVariant, string machineModel);
+
+        public static void BuildMachinesMechanicsFromCommandLine()
+        {
+            SetupCoreAssetPath();
+
+            // Create the mechanics dictionary with mechanic names mapped to their respective delegate actions
+            var mechanicsDictionary = new Dictionary<string, ProcessMechanic>
+            {
+                { "cascadingmultipliers", BettrMechanics.ProcessCascadingMultipliersMechanic },
+                { "cascadingreels", BettrMechanics.ProcessCascadingReelsMechanic },
+                { "chooseaside", BettrMechanics.ProcessChooseAsideMechanic },
+                { "expandingpaylines", BettrMechanics.ProcessExpandingPaylinesMechanic },
+                { "expandingreels", BettrMechanics.ProcessExpandingReelsMechanic },
+                { "flipreels", BettrMechanics.ProcessFlipReelsMechanic },
+                { "freespinscollectionmeter", BettrMechanics.ProcessFreeSpinsCollectionMeterMechanic },
+                { "horizontalreels", BettrMechanics.ProcessHorizontalReelsMechanic },
+                { "horizontalreelshift", BettrMechanics.ProcessHorizontalReelShiftMechanic },
+                { "hotreels", BettrMechanics.ProcessHotReelsMechanic },
+                { "infinityreels", BettrMechanics.ProcessInfinityReelsMechanic },
+                { "linkedreels", BettrMechanics.ProcessLinkedReelsMechanic },
+                { "lockedreels", BettrMechanics.ProcessLockedReelsMechanic },
+                { "megasymbols", BettrMechanics.ProcessMegaSymbolsMechanic },
+                { "megaways", BettrMechanics.ProcessMegaWaysMechanic },
+                { "mirrorreels", BettrMechanics.ProcessMirrorReelsMechanic },
+                { "mysteryreels", BettrMechanics.ProcessMysteryReelsMechanic },
+                { "mysterysymbols", BettrMechanics.ProcessMysterySymbolsMechanic },
+                { "nudgingreels", BettrMechanics.ProcessNudgingReelsMechanic },
+                { "paylines", BettrMechanics.ProcessPaylinesMechanic },
+                { "progressivemultipliers", BettrMechanics.ProcessProgressiveMultipliersMechanic },
+                { "randommultipliers", BettrMechanics.ProcessRandomMultipliersMechanic },
+                { "randommultiplierwilds", BettrMechanics.ProcessRandomMultiplierWildsMechanic },
+                { "randomwilds", BettrMechanics.ProcessRandomWildsMechanic },
+                { "reelburst", BettrMechanics.ProcessReelBurstMechanic },
+                { "reelrush", BettrMechanics.ProcessReelRushMechanic },
+                { "reelsplitter", BettrMechanics.ProcessReelSplitterMechanic },
+                { "reelswap", BettrMechanics.ProcessReelSwapMechanic },
+                { "scatterbonusfreespins", BettrMechanics.ProcessScatterBonusFreeSpinsMechanic },
+                { "scatterrespins", BettrMechanics.ProcessScatterRespinsMechanic },
+                { "shiftingreels", BettrMechanics.ProcessShiftingReelsMechanic },
+                { "splitsymbols", BettrMechanics.ProcessSplitSymbolsMechanic },
+                { "stackedwilds", BettrMechanics.ProcessStackedWildsMechanic },
+                { "stickywilds", BettrMechanics.ProcessStickyWildsMechanic },
+                { "surroundingwilds", BettrMechanics.ProcessSurroundingWildsMechanic },
+                { "symbolburst", BettrMechanics.ProcessSymbolBurstMechanic },
+                { "symbolcollection", BettrMechanics.ProcessSymbolCollectionMechanic },
+                { "symbollockrespins", BettrMechanics.ProcessSymbolLockRespinsMechanic },
+                { "symbolslide", BettrMechanics.ProcessSymbolSlideMechanic },
+                { "symbolswap", BettrMechanics.ProcessSymbolSwapMechanic },
+                { "symboltransformation", BettrMechanics.ProcessSymbolTransformationMechanic },
+                { "symbolupgrade", BettrMechanics.ProcessSymbolUpgradeMechanic },
+                { "syncedreels", BettrMechanics.ProcessSyncedReelsMechanic },
+                { "wanderingwilds", BettrMechanics.ProcessWanderingWildsMechanic },
+                { "ways", BettrMechanics.ProcessWaysMechanic },
+                { "wildsgeneration", BettrMechanics.ProcessWildsGenerationMechanic },
+                { "wildsmultiplier", BettrMechanics.ProcessWildsMultiplierMechanic },
+                { "wildsoverlays", BettrMechanics.ProcessWildsOverlaysMechanic },
+                { "wildsreels", BettrMechanics.ProcessWildsReelsMechanic },
+                { "winbothways", BettrMechanics.ProcessWinBothWaysMechanic }
+            };
+
+            string machineName = GetArgument("-machineName");
+            string machineVariant = GetArgument("-machineVariant");
+            string machineModel = GetArgument("-machineModel");
+
+            string experimentVariant = "control";
+            
+            var mechanics = mechanicsDictionary.Values.Select(m => m.Method.Name.ToLower()).ToList();
+
+            foreach (var mechanic in mechanics)
+            {
+                Debug.Log($"Processing mechanic: {mechanic}");
+                
+                if (mechanic == "ways" || mechanic == "paylines")
+                {
+                    Debug.Log($"Skip processing {mechanic} mechanic");
+                    continue;
+                }
+
+                if (mechanicsDictionary.ContainsKey(mechanic))
+                {
+                    // Invoke the corresponding delegate to process the mechanic
+                    mechanicsDictionary[mechanic]?.Invoke(machineName, machineVariant, experimentVariant, machineModel);
+                }
+                else
+                {
+                    Debug.LogWarning($"No handler found for mechanic: {mechanic}");
+                }
+            }
+        }
 
         // ReSharper disable once MemberCanBePrivate.Global
         public static void BuildMachinesFromCommandLine()

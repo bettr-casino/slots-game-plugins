@@ -66,6 +66,7 @@ BUILDS_HOME := ${BETTR_CASINO_BUILDS_HOME}/UnityBuilds
 LOGS_HOME := ${BETTR_CASINO_LOGS_HOME}/UnityBuilds
 
 SYNC_MACHINE_METHOD := "Bettr.Editor.BettrMenu.BuildMachinesFromCommandLine"
+SYNC_MACHINE_MECHANICS_METHOD := "Bettr.Editor.BettrMenu.BuildMachinesMechanicsFromCommandLine"
 SYNC_BACKGROUND_TEXTURES_METHOD := "Bettr.Editor.BettrMenu.SyncBackgroundTexturesFromCommandLine"
 
 BUILD_IOS := ${BUILDS_HOME}/iOS
@@ -398,46 +399,12 @@ sync-machine-models: prepare-project
 			echo "Skipping directory: $${MACHINE_NAME} (does not match Game<NNN> pattern)"; \
 		fi; \
 	done;
+	
 
-
-sync-machines: prepare-project
-	@echo "Running sync-machines..."
-	@echo "Running caffeinate to keep the drives awake..."
-	# keep the drives awake
-	caffeinate -i -m -u &
-	@MODELS_DIR="${MODELS_DIR}"; \
-	for MACHINE_NAME_DIR in "$${MODELS_DIR}/"*/; do \
-		MACHINE_NAME=$$(basename "$${MACHINE_NAME_DIR}"); \
-		if [[ "$${MACHINE_NAME}" =~ ^Game[0-9]{3}$$ ]]; then \
-			echo "Processing MACHINE_NAME: $${MACHINE_NAME}"; \
-			for MACHINE_VARIANT_DIR in "$${MACHINE_NAME_DIR}/"*/; do \
-				MACHINE_VARIANT=$$(basename "$${MACHINE_VARIANT_DIR}"); \
-				echo "Processing MACHINE_VARIANT: $${MACHINE_VARIANT}"; \
-				MACHINE_MODEL="$${MODELS_DIR}/$${MACHINE_NAME}/$${MACHINE_VARIANT}/$${MACHINE_NAME}Models.lua"; \
-				UNITY_OUTPUT=$$(${UNITY_APP} -batchmode -logFile "${ASSET_DATA_LOG_FILE_PATH}" -quit -projectPath "${UNITY_PROJECT_PATH}" -executeMethod "${SYNC_MACHINE_METHOD}" -machineName "$${MACHINE_NAME}" -machineVariant "$${MACHINE_VARIANT}" -machineModel "$${MACHINE_MODEL}" 2>&1); \
-				UNITY_EXIT_STATUS=$$?; \
-				if [ "$$UNITY_EXIT_STATUS" -ne 0 ]; then \
-					echo "Error executing Unity for MACHINE_NAME=$${MACHINE_NAME}, MACHINE_VARIANT=$${MACHINE_VARIANT} ASSET_DATA_LOG_FILE_PATH=${ASSET_DATA_LOG_FILE_PATH}"; \
-					echo "Unity Output: $$UNITY_OUTPUT"; \
-					exit $$UNITY_EXIT_STATUS; \
-				fi; \
-				echo "Executed for MACHINE_NAME=$${MACHINE_NAME}, MACHINE_VARIANT=$${MACHINE_VARIANT}, MACHINE_MODEL=$${MACHINE_MODEL} ASSET_DATA_LOG_FILE_PATH=${ASSET_DATA_LOG_FILE_PATH}"; \
-				sleep ${SLEEP_DURATION}; \
-			done; \
-		else \
-			echo "Skipping directory: $${MACHINE_NAME} (does not match Game<NNN> pattern)"; \
-		fi; \
-	done
-	# Kill all caffeinate processes
-	@echo "Killing caffeinate..."
-	killall caffeinate
-
-
-# Define the arrays for MACHINE_NAME and MACHINE_VARIANT
-MACHINE_NAME_ARRAY := Game007
-MACHINE_VARIANT_ARRAY := TrueVegasDiamondDazzle TrueVegasGoldRush TrueVegasInfiniteSpins TrueVegasLucky7s TrueVegasLuckyCharms TrueVegasMegaJackpot TrueVegasMegaWheels TrueVegasRubyRiches TrueVegasSuper7s TrueVegasTripleSpins TrueVegasWheelBonanza TrueVegasWildCherries
-sync-machines-specific: prepare-project
-	@echo "Running sync-machines-specific..."
+MACHINE_NAME_ARRAY := Game001
+MACHINE_VARIANT_ARRAY := EpicAncientAdventures
+sync-machines-mechanics-specific: prepare-project
+	@echo "Running sync-machines-mechanics-specific..."
 	@echo "Running caffeinate to keep the drives awake..."
 	# Keep the drives awake
 	caffeinate -i -m -u &
@@ -447,7 +414,7 @@ sync-machines-specific: prepare-project
 		for MACHINE_VARIANT in $(MACHINE_VARIANT_ARRAY); do \
 			echo "Processing MACHINE_VARIANT: $${MACHINE_VARIANT}"; \
 			MACHINE_MODEL="$${MODELS_DIR}/$${MACHINE_NAME}/$${MACHINE_VARIANT}/$${MACHINE_NAME}Models.lua"; \
-			UNITY_OUTPUT=$$(${UNITY_APP} -batchmode -logFile "${ASSET_DATA_LOG_FILE_PATH}" -quit -projectPath "${UNITY_PROJECT_PATH}" -executeMethod "${SYNC_MACHINE_METHOD}" -machineName "$${MACHINE_NAME}" -machineVariant "$${MACHINE_VARIANT}" -machineModel "$${MACHINE_MODEL}" 2>&1); \
+			UNITY_OUTPUT=$$(${UNITY_APP} -batchmode -logFile "${ASSET_DATA_LOG_FILE_PATH}" -quit -projectPath "${UNITY_PROJECT_PATH}" -executeMethod "${SYNC_MACHINE_MECHANICS_METHOD}" -machineName "$${MACHINE_NAME}" -machineVariant "$${MACHINE_VARIANT}" -machineModel "$${MACHINE_MODEL}" 2>&1); \
 			UNITY_EXIT_STATUS=$$?; \
 			if [ "$$UNITY_EXIT_STATUS" -ne 0 ]; then \
 				echo "Error executing Unity for MACHINE_NAME=$${MACHINE_NAME}, MACHINE_VARIANT=$${MACHINE_VARIANT} ASSET_DATA_LOG_FILE_PATH=${ASSET_DATA_LOG_FILE_PATH}"; \
@@ -461,6 +428,72 @@ sync-machines-specific: prepare-project
 	# Kill all caffeinate processes
 	@echo "Killing caffeinate..."
 	killall caffeinate
+
+
+
+# DISABLING FOR NOW UNTIL BettrMenu fixes are integrated back into the templates
+# sync-machines: prepare-project
+# 	@echo "Running sync-machines..."
+# 	@echo "Running caffeinate to keep the drives awake..."
+# 	# keep the drives awake
+# 	caffeinate -i -m -u &
+# 	@MODELS_DIR="${MODELS_DIR}"; \
+# 	for MACHINE_NAME_DIR in "$${MODELS_DIR}/"*/; do \
+# 		MACHINE_NAME=$$(basename "$${MACHINE_NAME_DIR}"); \
+# 		if [[ "$${MACHINE_NAME}" =~ ^Game[0-9]{3}$$ ]]; then \
+# 			echo "Processing MACHINE_NAME: $${MACHINE_NAME}"; \
+# 			for MACHINE_VARIANT_DIR in "$${MACHINE_NAME_DIR}/"*/; do \
+# 				MACHINE_VARIANT=$$(basename "$${MACHINE_VARIANT_DIR}"); \
+# 				echo "Processing MACHINE_VARIANT: $${MACHINE_VARIANT}"; \
+# 				MACHINE_MODEL="$${MODELS_DIR}/$${MACHINE_NAME}/$${MACHINE_VARIANT}/$${MACHINE_NAME}Models.lua"; \
+# 				UNITY_OUTPUT=$$(${UNITY_APP} -batchmode -logFile "${ASSET_DATA_LOG_FILE_PATH}" -quit -projectPath "${UNITY_PROJECT_PATH}" -executeMethod "${SYNC_MACHINE_METHOD}" -machineName "$${MACHINE_NAME}" -machineVariant "$${MACHINE_VARIANT}" -machineModel "$${MACHINE_MODEL}" 2>&1); \
+# 				UNITY_EXIT_STATUS=$$?; \
+# 				if [ "$$UNITY_EXIT_STATUS" -ne 0 ]; then \
+# 					echo "Error executing Unity for MACHINE_NAME=$${MACHINE_NAME}, MACHINE_VARIANT=$${MACHINE_VARIANT} ASSET_DATA_LOG_FILE_PATH=${ASSET_DATA_LOG_FILE_PATH}"; \
+# 					echo "Unity Output: $$UNITY_OUTPUT"; \
+# 					exit $$UNITY_EXIT_STATUS; \
+# 				fi; \
+# 				echo "Executed for MACHINE_NAME=$${MACHINE_NAME}, MACHINE_VARIANT=$${MACHINE_VARIANT}, MACHINE_MODEL=$${MACHINE_MODEL} ASSET_DATA_LOG_FILE_PATH=${ASSET_DATA_LOG_FILE_PATH}"; \
+# 				sleep ${SLEEP_DURATION}; \
+# 			done; \
+# 		else \
+# 			echo "Skipping directory: $${MACHINE_NAME} (does not match Game<NNN> pattern)"; \
+# 		fi; \
+# 	done
+# 	# Kill all caffeinate processes
+# 	@echo "Killing caffeinate..."
+# 	killall caffeinate
+
+
+# DISABLING FOR NOW UNTIL BettrMenu fixes are integrated back into the templates
+# Define the arrays for MACHINE_NAME and MACHINE_VARIANT
+# MACHINE_NAME_ARRAY := Game007
+# MACHINE_VARIANT_ARRAY := TrueVegasDiamondDazzle TrueVegasGoldRush TrueVegasInfiniteSpins TrueVegasLucky7s TrueVegasLuckyCharms TrueVegasMegaJackpot TrueVegasMegaWheels TrueVegasRubyRiches TrueVegasSuper7s TrueVegasTripleSpins TrueVegasWheelBonanza TrueVegasWildCherries
+# sync-machines-specific: prepare-project
+# 	@echo "Running sync-machines-specific..."
+# 	@echo "Running caffeinate to keep the drives awake..."
+# 	# Keep the drives awake
+# 	caffeinate -i -m -u &
+# 	@MODELS_DIR="${MODELS_DIR}"; \
+# 	for MACHINE_NAME in $(MACHINE_NAME_ARRAY); do \
+# 		echo "Processing MACHINE_NAME: $${MACHINE_NAME}"; \
+# 		for MACHINE_VARIANT in $(MACHINE_VARIANT_ARRAY); do \
+# 			echo "Processing MACHINE_VARIANT: $${MACHINE_VARIANT}"; \
+# 			MACHINE_MODEL="$${MODELS_DIR}/$${MACHINE_NAME}/$${MACHINE_VARIANT}/$${MACHINE_NAME}Models.lua"; \
+# 			UNITY_OUTPUT=$$(${UNITY_APP} -batchmode -logFile "${ASSET_DATA_LOG_FILE_PATH}" -quit -projectPath "${UNITY_PROJECT_PATH}" -executeMethod "${SYNC_MACHINE_METHOD}" -machineName "$${MACHINE_NAME}" -machineVariant "$${MACHINE_VARIANT}" -machineModel "$${MACHINE_MODEL}" 2>&1); \
+# 			UNITY_EXIT_STATUS=$$?; \
+# 			if [ "$$UNITY_EXIT_STATUS" -ne 0 ]; then \
+# 				echo "Error executing Unity for MACHINE_NAME=$${MACHINE_NAME}, MACHINE_VARIANT=$${MACHINE_VARIANT} ASSET_DATA_LOG_FILE_PATH=${ASSET_DATA_LOG_FILE_PATH}"; \
+# 				echo "Unity Output: $$UNITY_OUTPUT"; \
+# 				exit $$UNITY_EXIT_STATUS; \
+# 			fi; \
+# 			echo "Executed for MACHINE_NAME=$${MACHINE_NAME}, MACHINE_VARIANT=$${MACHINE_VARIANT}, MACHINE_MODEL=$${MACHINE_MODEL} ASSET_DATA_LOG_FILE_PATH=${ASSET_DATA_LOG_FILE_PATH}"; \
+# 			sleep ${SLEEP_DURATION}; \
+# 		done; \
+# 	done
+# 	# Kill all caffeinate processes
+# 	@echo "Killing caffeinate..."
+# 	killall caffeinate
 
 
 sync-background-textures:
