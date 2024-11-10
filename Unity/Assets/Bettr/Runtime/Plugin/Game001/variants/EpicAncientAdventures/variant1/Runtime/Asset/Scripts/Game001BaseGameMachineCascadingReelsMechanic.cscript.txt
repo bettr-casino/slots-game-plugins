@@ -18,64 +18,14 @@ end
 function Game001BaseGameMachineCascadingReelsMechanic:Initialize(machine)
 end
 
-function Game001BaseGameMachineCascadingReelsMechanic:TryPaying(machine)
-end
-
-function Game001BaseGameMachineCascadingReelsMechanic:BaseGamePayout(machine)
-    series
-        do
-            machine:OnPayingCompleted()
-        end
-    end
-end
-
-function Game001BaseGameMachineCascadingReelsMechanic:OnPayingCompleted(machine)
-    BettrAudioController.StopAudio()
-    BettrUserController.DisableUserInSlamStopMode()
-    machine:RollupCredits()
-end
-
 function Game001BaseGameMachineCascadingReelsMechanic:OnBaseGameSpinCompleted(machine)
     series
         do
+            self:StartCascade(machine)
+        end        
+        do
             Game001BaseGameState.SpinState.First.State = "Completed"
             Game001BaseGameState.DisplayState.First.State = "Idle" 
-        end
-    end
-end
-
-function Game001BaseGameMachineCascadingReelsMechanic:RollupCredits(machine)
-    local oldCoins = BettrUser.Coins
-    local newCoins = BettrUser.SpinCoins
-    BettrUser.ApplySpinCoins()
-    local pays = newCoins - oldCoins
-    System.StartCoroutine(self, "OnRollupCredits", machine, oldCoins, newCoins, pays)
-end
-
-function Game001BaseGameMachineCascadingReelsMechanic:OnRollupCredits(machine, oldCoins, newCoins, pays)
-    series
-        do
-            local winTextProperty = machine.WinText            
-            if pays > 0 then
-                BettrAudioController.PlayAudioLoop("rollupwins")            
-                BettrVisualsController.RollUpCounter(winTextProperty, 0, pays, 0.3)
-                System.WaitForSeconds(0.3)
-                BettrAudioController.StopAudio()
-            end
-        end
-        do
-            local creditsTextProperty = machine.CreditsText   
-            if pays ~= 0 then
-                if pays > 0 then
-                    BettrAudioController.PlayAudioLoop("rollupcoins")            
-                end
-                BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 1)
-                System.WaitForSeconds(1)
-                BettrAudioController.StopAudio()
-            end
-        end
-        do
-            self:StartCascade(machine)
         end
     end
 end
@@ -95,9 +45,6 @@ function Game001BaseGameMachineCascadingReelsMechanic:StartCascade(machine)
                 local cascadeMatrixCount = cascadesMatrix[cascadeID].Count
                 self:SymbolRemovalActions(cascadeMatrix, cascadeMatrixCount, cascadeAction)
             end                        
-        end
-        do
-            machine:OnBaseGameSpinCompleted()
         end
     end
 end
