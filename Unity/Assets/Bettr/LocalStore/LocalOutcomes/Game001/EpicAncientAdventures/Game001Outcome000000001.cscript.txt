@@ -52,10 +52,10 @@ Game001BaseGameCascadingReelsSummary = {
     CascadingReels = 
         {
 			Array = {
-				{CascadeCount = 1}
+				{CascadeCount = 2}
 			},
-			First = {CascadeCount = 1},
-			Last = {CascadeCount = 1},
+			First = {CascadeCount = 2},
+			Last = {CascadeCount = 2},
 			Count = 1
 		},
   }
@@ -130,11 +130,12 @@ Game001BaseGameCascadingReelsCascades = {
     CascadingReels = 
         {
 			Array = {
-				{Cascade = "Cascade1", Action = "SymbolRemoval"}
+				{Cascade = "Cascade1", Action = "SymbolRemoval"},
+				{Cascade = "Cascade2", Action = "SymbolCascade"}
 			},
 			First = {Cascade = "Cascade1", Action = "SymbolRemoval"},
-			Last = {Cascade = "Cascade1", Action = "SymbolRemoval"},
-			Count = 1
+			Last = {Cascade = "Cascade2", Action = "SymbolCascade"},
+			Count = 2
 		},
   }
 
@@ -154,14 +155,27 @@ Game001BaseGameCascadingReelsCascadesMatrix = {
     Cascade1 = 
         {
 			Array = {
-				{ReelID = "Reel1", RowIndex = 2, EmptyReelPosition = 0, CollapseReelPosition = 0, NewReelIndex = 0},
-				{ReelID = "Reel2", RowIndex = 2, EmptyReelPosition = 0, CollapseReelPosition = 0, NewReelIndex = 0},
-				{ReelID = "Reel3", RowIndex = 2, EmptyReelPosition = 0, CollapseReelPosition = 0, NewReelIndex = 0},
-				{ReelID = "Reel4", RowIndex = 2, EmptyReelPosition = 0, CollapseReelPosition = 0, NewReelIndex = 0},
-				{ReelID = "Reel5", RowIndex = 2, EmptyReelPosition = 0, CollapseReelPosition = 0, NewReelIndex = 0}
+				{ReelID = "Reel1", RowIndex = 2, RowIndex2 = 0},
+				{ReelID = "Reel2", RowIndex = 2, RowIndex2 = 0},
+				{ReelID = "Reel3", RowIndex = 2, RowIndex2 = 0},
+				{ReelID = "Reel4", RowIndex = 2, RowIndex2 = 0},
+				{ReelID = "Reel5", RowIndex = 2, RowIndex2 = 0}
 			},
-			First = {ReelID = "Reel1", RowIndex = 2, EmptyReelPosition = 0, CollapseReelPosition = 0, NewReelIndex = 0},
-			Last = {ReelID = "Reel5", RowIndex = 2, EmptyReelPosition = 0, CollapseReelPosition = 0, NewReelIndex = 0},
+			First = {ReelID = "Reel1", RowIndex = 2, RowIndex2 = 0},
+			Last = {ReelID = "Reel5", RowIndex = 2, RowIndex2 = 0},
+			Count = 5
+		},
+    Cascade2 = 
+        {
+			Array = {
+				{ReelID = "Reel1", RowIndex = 1, RowIndex2 = 2},
+				{ReelID = "Reel2", RowIndex = 1, RowIndex2 = 2},
+				{ReelID = "Reel3", RowIndex = 1, RowIndex2 = 2},
+				{ReelID = "Reel4", RowIndex = 1, RowIndex2 = 2},
+				{ReelID = "Reel5", RowIndex = 1, RowIndex2 = 2}
+			},
+			First = {ReelID = "Reel1", RowIndex = 1, RowIndex2 = 2},
+			Last = {ReelID = "Reel5", RowIndex = 1, RowIndex2 = 2},
 			Count = 5
 		},
   }
