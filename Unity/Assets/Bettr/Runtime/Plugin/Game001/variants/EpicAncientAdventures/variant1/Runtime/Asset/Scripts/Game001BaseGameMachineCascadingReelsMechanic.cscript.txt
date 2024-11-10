@@ -49,7 +49,6 @@ function Game001BaseGameMachineCascadingReelsMechanic:RollupCredits(machine)
     local newCoins = BettrUser.SpinCoins
     BettrUser.ApplySpinCoins()
     local pays = newCoins - oldCoins
-    System.Print("RollupCredits Old Coins={0} New Coins={1} Pays={2}", oldCoins, newCoins, pays)
     System.StartCoroutine(self, "OnRollupCredits", machine, oldCoins, newCoins, pays)
 end
 
@@ -84,29 +83,45 @@ end
 function Game001BaseGameMachineCascadingReelsMechanic:StartCascade(machine)
     series
         do                
-            local cascadeCount = Game001BaseGameCascadingReelsSummary.CascadingReels.Count
+            local cascadeCount = Game001BaseGameCascadingReelsSummary.CascadingReels.First.CascadeCount
             local cascades = Game001BaseGameCascadingReelsCascades.CascadingReels.Array
             local cascadesMatrix = Game001BaseGameCascadingReelsCascadesMatrix
-            for counterIndex = 1, cascadeCount do
+            for counterIndex = 1, cascadeCount series do
                 local cascade = cascades[counterIndex]
                 local cascadeID = cascade.Cascade
                 local cascadeAction = cascade.Action
+                System.Print("cascadeID={0} counterIndex={1} cascadeAction={2}", cascadeID, counterIndex, cascadeAction)                                    
                 local cascadeMatrix = cascadesMatrix[cascadeID].Array
                 local cascadeMatrixCount = cascadesMatrix[cascadeID].Count
-                for matrixIndex = 1, cascadeMatrixCount parallel do
-                    local cascadeMatrixRow = cascadeMatrix[matrixIndex]
-                    local cascadeReelID = cascadeMatrixRow.ReelID
-                    local cascadeRowIndex = cascadeMatrixRow.RowIndex                     
-                    if cascadeAction == "SymbolRemoval" then
-                        -- run parallel symbol disappear animations
-                        System.Print("Cascade Reel ID={0} Row Index={1}", cascadeReelID, cascadeRowIndex)
-                        System.WaitForSeconds(1.0)
-                    end
-                end
+                self:SymbolRemovalActions(cascadeMatrix, cascadeMatrixCount, cascadeAction)
             end                        
         end
         do
             machine:OnBaseGameSpinCompleted()
+        end
+    end
+end
+
+function Game001BaseGameMachineCascadingReelsMechanic:SymbolRemovalActions(cascadeMatrix, cascadeMatrixCount, cascadeAction)
+    for matrixIndex = 1, cascadeMatrixCount parallel do
+        local cascadeMatrixRow = cascadeMatrix[matrixIndex]
+        local cascadeReelID = cascadeMatrixRow.ReelID
+        local cascadeRowIndex = cascadeMatrixRow.RowIndex 
+        System.Print("cascadeReelID={0} cascadeRowIndex={1} cascadeAction={2}", cascadeReelID, cascadeRowIndex, cascadeAction)                    
+        if cascadeAction == "SymbolRemoval" then
+            self:SymbolRemovalAction(cascadeReelID, cascadeRowIndex)
+        end
+    end
+end
+
+function Game001BaseGameMachineCascadingReelsMechanic:SymbolRemovalAction(reelID, rowIndex)
+    series
+        do
+            local reel = _G["Game001BaseGame" .. reelID]
+            local luaRowIndex = rowIndex + 1
+            local symbolGroupProperty = reel["SymbolGroup" .. luaRowIndex]
+            symbolGroupProperty.SetAllInactive()
+            System.WaitForSeconds(1.0)
         end
     end
 end

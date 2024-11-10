@@ -274,7 +274,7 @@ namespace Bettr.Editor
         {
             BuildAssetBundles();
             BuildLocalServer();
-            BuildLocalOutcomes();
+            SetupLocalOutcomes();
         }
         
         public static HashSet<string> GetAllAssetLabels()
@@ -3716,8 +3716,8 @@ namespace Bettr.Editor
             AssetDatabase.Refresh();
         }
         
-        [MenuItem("Bettr/Build/Local Outcomes")] 
-        public static void BuildLocalOutcomes()
+        [MenuItem("Bettr/PlayMode/Start/Setup Local Outcomes")]
+        public static void SetupLocalOutcomes()
         {
             Debug.Log("Refreshing database before building local outcomes.");
             
