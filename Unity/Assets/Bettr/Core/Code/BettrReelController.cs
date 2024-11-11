@@ -408,6 +408,35 @@ namespace Bettr.Core
             // Set the SlideDistanceInSymbolUnits for the reel spin state
             this.ReelSpinStateTable["SlideDistanceInSymbolUnits"] = slideDistanceInSymbolUnits;
         }
+
+        public IEnumerator CascadeSymbol(int symbolIndex, float cascadeDistance)
+        {
+            var slideDistance = -cascadeDistance;
+            float duration = 0.3f; // Duration of 1 second
+            float elapsedTime = 0f;
+
+            var symbolState = (Table) this.ReelSymbolsStateTable[symbolIndex];
+            var symbolProperty = (PropertyGameObject) this.ReelTable[$"Symbol{symbolIndex}"];
+            float symbolPosition = (float) (double) symbolState["SymbolPosition"];
+            float verticalSpacing = (float) (double) this.ReelStateTable["SymbolVerticalSpacing"];
+            float symbolOffsetY = (float) (double) this.ReelStateTable["SymbolOffsetY"];
+            float yLocalPosition = verticalSpacing * symbolPosition;
+            
+            while (elapsedTime < duration)
+            {
+                float slideDistanceInSymbolUnits = (slideDistance / duration) * Time.deltaTime;
+                if ((bool) symbolState["SymbolIsLocked"])
+                {
+                    yield break;
+                }
+                yLocalPosition = yLocalPosition + verticalSpacing * slideDistanceInSymbolUnits + symbolOffsetY;
+                Vector3 localPosition = symbolProperty.gameObject.transform.localPosition;
+                localPosition = new Vector3(localPosition.x, yLocalPosition, localPosition.z);
+                symbolProperty.gameObject.transform.localPosition = localPosition;
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+        }
         
         public void SlideSymbol(int symbolIndex, float slideDistanceInSymbolUnits)
         {

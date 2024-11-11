@@ -75,16 +75,21 @@ function {{machineName}}BaseGameMachineCascadingReelsMechanic:SymbolCascadeActio
         local cascadeMatrixRow = cascadeMatrix[matrixIndex]
         local cascadeReelID = cascadeMatrixRow.ReelID
         local rowIndex = cascadeMatrixRow.RowIndex
-        local rowIndex2 = cascadeMatrixRow.RowIndex2 
-        System.Print("cascadeReelID={0} rowIndex={1} rowIndex2={2} cascadeAction={3}", cascadeReelID, rowIndex, rowIndex2, cascadeAction)                    
-        self:SymbolCascadeAction(cascadeReelID, rowIndex, rowIndex2)
+        local cascadeDistance = cascadeMatrixRow.CascadeDistance 
+        self:SymbolCascadeAction(cascadeReelID, rowIndex, cascadeDistance)
     end
 end
 
-function {{machineName}}BaseGameMachineCascadingReelsMechanic:SymbolCascadeAction(reelID, rowIndex, rowIndex2)
-    local reel = _G["{{machineName}}BaseGame" .. reelID]
-    local luaRowIndex = rowIndex2 + 1
-    local symbolGroupProperty = reel["SymbolGroup" .. luaRowIndex]   
+function {{machineName}}BaseGameMachineCascadingReelsMechanic:SymbolCascadeAction(reelID, rowIndex, cascadeDistance)
+    series
+        do
+            local luaRowIndex = rowIndex + 1
+            local reel = _G["{{machineName}}BaseGame" .. reelID]
+            local symbolGroupProperty = reel["SymbolGroup" .. luaRowIndex]
+            symbolGroupProperty.Current.SetActive(true)
+            reel.BettrReelController.CascadeSymbol(luaRowIndex, cascadeDistance)
+        end
+    end
 end
 
 
