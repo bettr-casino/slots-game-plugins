@@ -84,10 +84,7 @@ end
 function {{machineName}}BaseGameMachineCascadingReelsMechanic:SymbolCascadeAction(reelID, rowIndex, rowIndex2)
     local reel = _G["{{machineName}}BaseGame" .. reelID]
     local luaRowIndex = rowIndex2 + 1
-    local symbolGroupProperty = reel["SymbolGroup" .. luaRowIndex]
-    symbolGroupProperty.SetCurrentActive("M2")
-    System.WaitForSeconds(1.0)
-    symbolGroupProperty.SetCurrentActive("M3")
+    local symbolGroupProperty = reel["SymbolGroup" .. luaRowIndex]   
 end
 
 
