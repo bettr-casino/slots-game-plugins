@@ -436,6 +436,14 @@ namespace Bettr.Core
                 elapsedTime += Time.deltaTime;
                 yield return null;
             }
+
+            {
+                yLocalPosition = verticalSpacing * symbolPosition + verticalSpacing * slideDistance + symbolOffsetY;
+                Vector3 localPosition = symbolProperty.gameObject.transform.localPosition;
+                localPosition = new Vector3(localPosition.x, yLocalPosition, localPosition.z);
+                symbolProperty.gameObject.transform.localPosition = localPosition;
+            }
+            
         }
         
         public void SlideSymbol(int symbolIndex, float slideDistanceInSymbolUnits)
