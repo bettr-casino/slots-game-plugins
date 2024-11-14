@@ -34,8 +34,8 @@ function Game001BaseGameMachineCascadingReelsMechanic:StartCascade(machine)
     series
         do                
             local cascadeCount = Game001BaseGameCascadingReelsSummary.CascadingReels.First.CascadeCount
-            local cascades = Game001BaseGameCascadingReelsCascades.CascadingReels.Array
-            local cascadesMatrix = Game001BaseGameCascadingReelsCascadesMatrix
+            local cascades = Game001BaseGameCascadingReels.CascadingReels.Array
+            local cascadesMatrix = Game001BaseGameCascadingReelsMatrix
             for counterIndex = 1, cascadeCount parallel do
                 local cascade = cascades[counterIndex]
                 local cascadeID = cascade.Cascade
@@ -45,6 +45,8 @@ function Game001BaseGameMachineCascadingReelsMechanic:StartCascade(machine)
                 local cascadeMatrixCount = cascadesMatrix[cascadeID].Count
                 if cascadeAction == "SymbolRemoval" then
                     self:SymbolRemovalActions(cascadeMatrix, cascadeMatrixCount, cascadeAction)
+                elseif cascadeAction == "SymbolCascade" then
+                    self:SymbolCascadeActions(cascadeMatrix, cascadeMatrixCount, cascadeAction)
                 end
             end                        
         end
@@ -66,6 +68,28 @@ function Game001BaseGameMachineCascadingReelsMechanic:SymbolRemovalAction(reelID
     local luaRowIndex = rowIndex + 1
     local symbolGroupProperty = reel["SymbolGroup" .. luaRowIndex]
     symbolGroupProperty.SetAllInactive()
+end
+
+function Game001BaseGameMachineCascadingReelsMechanic:SymbolCascadeActions(cascadeMatrix, cascadeMatrixCount, cascadeAction)
+    for matrixIndex = 1, cascadeMatrixCount parallel do
+        local cascadeMatrixRow = cascadeMatrix[matrixIndex]
+        local cascadeReelID = cascadeMatrixRow.ReelID
+        local rowIndex = cascadeMatrixRow.RowIndex
+        local cascadeDistance = cascadeMatrixRow.CascadeDistance 
+        self:SymbolCascadeAction(cascadeReelID, rowIndex, cascadeDistance)
+    end
+end
+
+function Game001BaseGameMachineCascadingReelsMechanic:SymbolCascadeAction(reelID, rowIndex, cascadeDistance)
+    series
+        do
+            local luaRowIndex = rowIndex + 1
+            local reel = _G["Game001BaseGame" .. reelID]
+            local symbolGroupProperty = reel["SymbolGroup" .. luaRowIndex]
+            symbolGroupProperty.Current.SetActive(true)
+            reel.BettrReelController.CascadeSymbol(luaRowIndex, cascadeDistance)
+        end
+    end
 end
 
 
