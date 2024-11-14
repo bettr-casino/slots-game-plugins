@@ -36,6 +36,9 @@ function Game001BaseGameMachineCascadingReelsMechanic:StartCascade(machine)
             local cascadeCount = Game001BaseGameCascadingReelsSummary.CascadingReels.First.CascadeCount
             local cascades = Game001BaseGameCascadingReels.CascadingReels.Array
             local cascadesMatrix = Game001BaseGameCascadingReelsMatrix
+            if cascadeCount > 2 then
+                cascadeCount = 2
+            end
             for counterIndex = 1, cascadeCount parallel do
                 local cascade = cascades[counterIndex]
                 local cascadeID = cascade.Cascade
@@ -87,6 +90,7 @@ function Game001BaseGameMachineCascadingReelsMechanic:SymbolCascadeAction(reelID
             local reel = _G["Game001BaseGame" .. reelID]
             local symbolGroupProperty = reel["SymbolGroup" .. luaRowIndex]
             symbolGroupProperty.Current.SetActive(true)
+            System.Print("SymbolCascadeAction reelID={0} rowIndex={1} cascadeDistance={2}", reelID, rowIndex, cascadeDistance)
             reel.BettrReelController.CascadeSymbol(luaRowIndex, cascadeDistance)
         end
     end

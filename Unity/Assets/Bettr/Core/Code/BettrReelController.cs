@@ -409,39 +409,58 @@ namespace Bettr.Core
             this.ReelSpinStateTable["SlideDistanceInSymbolUnits"] = slideDistanceInSymbolUnits;
         }
 
-        public IEnumerator CascadeSymbol(int symbolIndex, float cascadeDistance)
+        public IEnumerator CascadeSymbol(int fromSymbolIndex, int cascadeDistance)
         {
             var slideDistance = -cascadeDistance;
             float duration = 0.3f; // Duration of 1 second
             float elapsedTime = 0f;
-
-            var symbolState = (Table) this.ReelSymbolsStateTable[symbolIndex];
-            var symbolProperty = (PropertyGameObject) this.ReelTable[$"Symbol{symbolIndex}"];
-            float symbolPosition = (float) (double) symbolState["SymbolPosition"];
+            
             float verticalSpacing = (float) (double) this.ReelStateTable["SymbolVerticalSpacing"];
             float symbolOffsetY = (float) (double) this.ReelStateTable["SymbolOffsetY"];
-            float yLocalPosition = verticalSpacing * symbolPosition;
+            
+            int toSymbolIndex = fromSymbolIndex + cascadeDistance;
+
+            var fromSymbolState = (Table) this.ReelSymbolsStateTable[fromSymbolIndex];
+            var fromSymbolIsLocked = (bool) fromSymbolState["SymbolIsLocked"];
+            var fromSymbolProperty = (PropertyGameObject) this.ReelTable[$"Symbol{fromSymbolIndex}"];
+            float fromSymbolPosition = (float) (double) fromSymbolState["SymbolPosition"];
+            var fromSymbolGroupProperty = (TilePropertyGameObjectGroup) this.ReelTable[$"SymbolGroup{fromSymbolIndex}"];
+            var fromSymbolLocalPosition = fromSymbolProperty.gameObject.transform.localPosition;
+            
+            var toSymbolState = (Table) this.ReelSymbolsStateTable[toSymbolIndex];
+            var toSymbolProperty = (PropertyGameObject) this.ReelTable[$"Symbol{toSymbolIndex}"];
+            float toSymbolPosition = (float) (double) toSymbolState["SymbolPosition"];
+            var toSymbolGroupProperty = (TilePropertyGameObjectGroup) this.ReelTable[$"SymbolGroup{toSymbolIndex}"];
+            
+            if (fromSymbolIsLocked)
+            {
+                yield break;
+            }
+            
+            float yLocalPosition = verticalSpacing * fromSymbolPosition;
             
             while (elapsedTime < duration)
             {
                 float slideDistanceInSymbolUnits = (slideDistance / duration) * Time.deltaTime;
-                if ((bool) symbolState["SymbolIsLocked"])
-                {
-                    yield break;
-                }
                 yLocalPosition = yLocalPosition + verticalSpacing * slideDistanceInSymbolUnits + symbolOffsetY;
-                Vector3 localPosition = symbolProperty.gameObject.transform.localPosition;
+                Vector3 localPosition = fromSymbolProperty.gameObject.transform.localPosition;
                 localPosition = new Vector3(localPosition.x, yLocalPosition, localPosition.z);
-                symbolProperty.gameObject.transform.localPosition = localPosition;
+                fromSymbolProperty.gameObject.transform.localPosition = localPosition;
                 elapsedTime += Time.deltaTime;
                 yield return null;
             }
+            
+            // swap symbols out
+            // from symbol property will be hidden and localPosition reset to the original localPosition
+            // to symbol property will be visible and its symbol set to the from symbol
 
             {
-                yLocalPosition = verticalSpacing * symbolPosition + verticalSpacing * slideDistance + symbolOffsetY;
-                Vector3 localPosition = symbolProperty.gameObject.transform.localPosition;
-                localPosition = new Vector3(localPosition.x, yLocalPosition, localPosition.z);
-                symbolProperty.gameObject.transform.localPosition = localPosition;
+                // hide the fromSymbolGroupProperty.Current
+                fromSymbolGroupProperty.Current.SetActive(false);
+                // reset fromSymbolProperty localPosition
+                fromSymbolProperty.gameObject.transform.localPosition = fromSymbolLocalPosition;
+                
+                toSymbolGroupProperty.SetCurrentActive(fromSymbolGroupProperty.CurrentKey);
             }
             
         }
