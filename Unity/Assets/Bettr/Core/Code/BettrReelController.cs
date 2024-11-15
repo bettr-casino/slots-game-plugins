@@ -409,10 +409,17 @@ namespace Bettr.Core
             this.ReelSpinStateTable["SlideDistanceInSymbolUnits"] = slideDistanceInSymbolUnits;
         }
 
-        public IEnumerator CascadeSymbol(int fromSymbolIndex, int cascadeDistance)
+        public IEnumerator SymbolRemovalAction(TilePropertyGameObjectGroup symbolGroupProperty)
+        {
+            yield return new WaitForSeconds(1.0f);
+            symbolGroupProperty.SetAllInactive();
+            yield break;
+        }
+
+        public IEnumerator SymbolCascadeAction(int fromSymbolIndex, int cascadeDistance, string cascadeSymbol)
         {
             var slideDistance = -cascadeDistance;
-            float duration = 0.3f; // Duration of 1 second
+            float duration = 0.4f;
             float elapsedTime = 0f;
             
             float verticalSpacing = (float) (double) this.ReelStateTable["SymbolVerticalSpacing"];
@@ -426,6 +433,8 @@ namespace Bettr.Core
             float fromSymbolPosition = (float) (double) fromSymbolState["SymbolPosition"];
             var fromSymbolGroupProperty = (TilePropertyGameObjectGroup) this.ReelTable[$"SymbolGroup{fromSymbolIndex}"];
             var fromSymbolLocalPosition = fromSymbolProperty.gameObject.transform.localPosition;
+            // set the fromSymbolGroupProperty.CurrentKey to cascadeSymbol
+            fromSymbolGroupProperty.SetCurrentActive(cascadeSymbol);
             
             var toSymbolState = (Table) this.ReelSymbolsStateTable[toSymbolIndex];
             var toSymbolProperty = (PropertyGameObject) this.ReelTable[$"Symbol{toSymbolIndex}"];
