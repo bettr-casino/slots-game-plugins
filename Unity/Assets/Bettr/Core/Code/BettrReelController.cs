@@ -27,7 +27,7 @@ namespace Bettr.Core
         [NonSerialized] private bool ShouldSpliceReel;
         
         [NonSerialized] private BettrUserController BettrUserController;
-        
+
         private void Awake()
         {
             ReelTile = GetComponent<TileWithUpdate>();
@@ -409,11 +409,55 @@ namespace Bettr.Core
             this.ReelSpinStateTable["SlideDistanceInSymbolUnits"] = slideDistanceInSymbolUnits;
         }
 
+        public GameObject FindSymbolQuad(TilePropertyGameObjectGroup symbolGroupProperty)
+        {
+            var pivotGameObject = symbolGroupProperty.Current["Pivot"];
+            var childCount = pivotGameObject.transform.childCount;
+            for (int i = 0; i < childCount; i++)
+            {
+                var child = pivotGameObject.transform.GetChild(i);
+                if (child.name == "Quad")
+                {
+                    return child.gameObject;
+                }
+            }
+
+            return null;
+        }
+        
         public IEnumerator SymbolRemovalAction(TilePropertyGameObjectGroup symbolGroupProperty)
         {
-            yield return new WaitForSeconds(1.0f);
+            var symbolQuad = FindSymbolQuad(symbolGroupProperty);
+            var symbolMeshRenderer = symbolQuad.GetComponent<MeshRenderer>();
+            var originalMaterial = symbolMeshRenderer.material;
+    
+            float dissolveTime = 1.0f;
+            float elapsedTime = 0.0f;
+
+            // Get the original color of the material
+            Color originalColor = originalMaterial.color;
+            var originalAlpha = originalMaterial.color.a;
+
+            while (elapsedTime < dissolveTime)
+            {
+                // Calculate the new alpha value based on elapsed time
+                float alpha = Mathf.Lerp(originalAlpha, 0.0f, elapsedTime / dissolveTime);
+        
+                // Set the material's color with the new alpha
+                originalMaterial.color = new Color(originalColor.r, originalColor.g, originalColor.b, alpha);
+
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+
+            // Reset the material's alpha to 1.0f
+            originalMaterial.color = new Color(originalColor.r, originalColor.g, originalColor.b, originalColor.a);
+
+            // Hide the object by setting it inactive
             symbolGroupProperty.SetAllInactive();
-            yield break;
+
+            // Restore the original material or perform any final actions as needed
+            symbolMeshRenderer.material = originalMaterial;
         }
 
         public IEnumerator SymbolCascadeAction(int fromSymbolIndex, int cascadeDistance, string cascadeSymbol)
