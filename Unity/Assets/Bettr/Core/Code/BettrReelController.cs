@@ -431,7 +431,7 @@ namespace Bettr.Core
             var symbolMeshRenderer = symbolQuad.GetComponent<MeshRenderer>();
             var originalMaterial = symbolMeshRenderer.material;
     
-            float dissolveTime = 1.0f;
+            float dissolveTime = 0.4f;
             float elapsedTime = 0.0f;
 
             // Get the original color of the material
