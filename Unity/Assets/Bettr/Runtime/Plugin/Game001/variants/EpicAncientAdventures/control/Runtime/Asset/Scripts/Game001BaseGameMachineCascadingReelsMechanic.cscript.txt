@@ -163,12 +163,14 @@ function Game001BaseGameMachineCascadingReelsMechanic:SymbolWaysActions(machine,
 
             local filteredWaysState = {}
             if Game001BaseGameCascadingReelsWaysState and Game001BaseGameCascadingReelsWaysState.Ways then
-                local state = Game001BaseGameCascadingReelsWaysState.Ways.First
-                if state and state.Cascade == cascadeID then
-                    filteredWaysState = {
-                        PaysRollup = state.PaysRollup or 0,
-                        WaysIndex = state.WaysIndex or 0
-                    }
+                local waysArray = Game001BaseGameCascadingReelsWaysState.Ways.Array
+                if waysArray then
+                    for _, state in ipairs(waysArray) do
+                        if state.Cascade == cascadeID then
+                            filteredWaysState = state
+                            break
+                        end
+                    end
                 end
             end
 
