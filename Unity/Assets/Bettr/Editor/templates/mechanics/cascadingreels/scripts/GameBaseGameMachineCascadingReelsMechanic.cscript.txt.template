@@ -41,8 +41,6 @@ function {{machineName}}BaseGameMachineCascadingReelsMechanic:StartCascade(machi
         local cascadeID = cascade.Cascade
         local cascadeAction = cascade.Action
 
---        System.Print("Processing cascadeID={0} counterIndex={1} cascadeAction={2}", cascadeID, counterIndex, cascadeAction)
-
         local cascadeMatrix = nil
         local cascadeMatrixCount = 0
         if cascadeAction ~= "SymbolWays" then
@@ -59,8 +57,6 @@ function {{machineName}}BaseGameMachineCascadingReelsMechanic:StartCascade(machi
                 local cascadeID = cascade.Cascade
                 local cascadeAction = cascade.Action
 
-                System.Print("Processing cascadeID={0} counterIndex={1} cascadeAction={2}", cascadeID, counterIndex, cascadeAction)
-
                 cascadeMatrix = cascadesMatrix[cascadeID] and cascadesMatrix[cascadeID].Array or {}
                 cascadeMatrixCount = cascadesMatrix[cascadeID] and cascadesMatrix[cascadeID].Count or 0
 
@@ -76,8 +72,6 @@ function {{machineName}}BaseGameMachineCascadingReelsMechanic:StartCascade(machi
                 local cascadeID = cascade.Cascade
                 local cascadeAction = cascade.Action
 
-                System.Print("Processing cascadeID={0} counterIndex={1} cascadeAction={2}", cascadeID, counterIndex, cascadeAction)
-
                 cascadeMatrix = cascadesMatrix[cascadeID] and cascadesMatrix[cascadeID].Array or {}
                 cascadeMatrixCount = cascadesMatrix[cascadeID] and cascadesMatrix[cascadeID].Count or 0
 
@@ -88,8 +82,6 @@ function {{machineName}}BaseGameMachineCascadingReelsMechanic:StartCascade(machi
                     local cascade = cascades[counterIndex]
                     local cascadeID = cascade.Cascade
                     local cascadeAction = cascade.Action
-
-                    System.Print("Processing cascadeID={0} counterIndex={1} cascadeAction={2}", cascadeID, counterIndex, cascadeAction)
 
                     cascadeMatrix = cascadesMatrix[cascadeID] and cascadesMatrix[cascadeID].Array or {}
                     cascadeMatrixCount = cascadesMatrix[cascadeID] and cascadesMatrix[cascadeID].Count or 0
@@ -137,27 +129,24 @@ function {{machineName}}BaseGameMachineCascadingReelsMechanic:SymbolWaysActions(
             end
 
             local filteredWaysMatrix = {}
-            for _, matrixRow in ipairs({{machineName}}BaseGameCascadingReelsWaysMatrix) do
-                if matrixRow.Cascade == cascadeID then
-                    if not filteredWaysMatrix[matrixRow.Symbol] then
-                        filteredWaysMatrix[matrixRow.Symbol] = {
-                            Array = {},
-                            First = nil,
-                            Last = nil,
-                            Count = 0
-                        }
+            for symbol, symbolData in pairs({{machineName}}BaseGameCascadingReelsWaysMatrix) do
+                local matchingRows = {} -- Temporary table to store matching rows for the current symbol
+            
+                -- Loop through the Array of rows for the current symbol
+                for _, matrixRow in ipairs(symbolData.Array) do
+                    if matrixRow.Cascade == cascadeID then
+                        table.insert(matchingRows, matrixRow)
                     end
-                    local matrixEntry = {
-                        ReelID = matrixRow.ReelID,
-                        RowIndex = matrixRow.RowIndex,
-                        IsWild = matrixRow.IsWild,
-                        IsMultiplier = matrixRow.IsMultiplier,
-                        Multiplier = matrixRow.Multiplier
+                end
+            
+                -- Only include the symbol if there are matching rows
+                if #matchingRows > 0 then
+                    filteredWaysMatrix[symbol] = {
+                        Array = matchingRows,                      -- The filtered rows
+                        First = matchingRows[1],                  -- The first matching row
+                        Last = matchingRows[#matchingRows],       -- The last matching row
+                        Count = #matchingRows                     -- Count of matching rows
                     }
-                    table.insert(filteredWaysMatrix[matrixRow.Symbol].Array, matrixEntry)
-                    filteredWaysMatrix[matrixRow.Symbol].Count = #filteredWaysMatrix[matrixRow.Symbol].Array
-                    filteredWaysMatrix[matrixRow.Symbol].First = filteredWaysMatrix[matrixRow.Symbol].Array[1]
-                    filteredWaysMatrix[matrixRow.Symbol].Last = filteredWaysMatrix[matrixRow.Symbol].Array[#filteredWaysMatrix[matrixRow.Symbol].Array]
                 end
             end
 
@@ -190,6 +179,7 @@ function {{machineName}}BaseGameMachineCascadingReelsMechanic:SymbolWaysActions(
                     First = filteredWaysState
                 }
             }
+                                    
         end
     end
 end
@@ -199,7 +189,6 @@ function {{machineName}}BaseGameMachineCascadingReelsMechanic:SymbolRemovalActio
         local cascadeMatrixRow = cascadeMatrix[matrixIndex]
         local cascadeReelID = cascadeMatrixRow.ReelID
         local cascadeRowIndex = cascadeMatrixRow.RowIndex 
-        System.Print("cascadeReelID={0} cascadeRowIndex={1} cascadeAction={2}", cascadeReelID, cascadeRowIndex, cascadeAction)                    
         self:SymbolRemovalAction(cascadeReelID, cascadeRowIndex)
     end
 end
