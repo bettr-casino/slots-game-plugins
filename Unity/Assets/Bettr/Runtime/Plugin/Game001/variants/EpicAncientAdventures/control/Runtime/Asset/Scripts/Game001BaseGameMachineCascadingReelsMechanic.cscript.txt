@@ -21,13 +21,26 @@ end
 function Game001BaseGameMachineCascadingReelsMechanic:OnBaseGameSpinCompleted(machine)
     series
         do
-            self:StartCascade(machine)
+            if self:HasCascade(machine) then
+                self:StartCascade(machine)
+            end
         end        
         do
             Game001BaseGameState.SpinState.First.State = "Completed"
             Game001BaseGameState.DisplayState.First.State = "Idle" 
         end
     end
+end
+
+function Game001BaseGameMachineCascadingReelsMechanic:HasCascade(machine)
+    if Game001BaseGameCascadingReelsSummary == nil then
+        return false
+    end
+    if Game001BaseGameCascadingReelsSummary.CascadingReels == nil then
+        return false
+    end
+    local cascadeCount = Game001BaseGameCascadingReelsSummary.CascadingReels.First.CascadeCount
+    return cascadeCount > 0
 end
 
 function Game001BaseGameMachineCascadingReelsMechanic:StartCascade(machine)
@@ -142,12 +155,10 @@ function Game001BaseGameMachineCascadingReelsMechanic:SymbolWaysActions(machine,
                 -- Only include the symbol if there are matching rows
                 if #matchingRows > 0 then
                     filteredWaysMatrix[symbol] = {
-                        Array = matchingRows,                      -- The filtered rows
-                        First = matchingRows[1],                  -- The first matching row
-                        Last = matchingRows[#matchingRows],       -- The last matching row
-                        Count = #matchingRows                     -- Count of matching rows
+                        Array = matchingRows
                     }
                 end
+                                
             end
 
             local filteredWaysState = {}
@@ -186,7 +197,7 @@ function Game001BaseGameMachineCascadingReelsMechanic:SymbolWaysActions(machine,
             self:TryPaying(machine)
         end
         do
-            self:DisplayWays(machine)
+            self:DisplayWays(machine, cascadeID)
         end
         do
             BettrAudioController.StopAudio()
@@ -235,7 +246,7 @@ function Game001BaseGameMachineCascadingReelsMechanic:SymbolCascadeAction(reelID
     end
 end
 
-function Game001BaseGameMachineCascadingReelsMechanic:DisplayWays(machine)
+function Game001BaseGameMachineCascadingReelsMechanic:DisplayWays(machine, cascadeID)
     series
         do
             local waysSummary = Game001BaseGameWaysSummary.Ways.First
@@ -270,6 +281,7 @@ function Game001BaseGameMachineCascadingReelsMechanic:DisplayWays(machine)
                         local wayMultiplier = way.Multiplier
                         local wayPay = way.Pay
                         local wayTotalPay = way.Pays
+                        System.Print("waySymbol={0} cascadeID={1}", waySymbol, cascadeID)
                         local wayMatrix = waysMatrix[waySymbol].Array
                         -- update status text 
                         local statusTexts = machine.StatusTexts
