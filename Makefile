@@ -210,7 +210,7 @@ deploy-assets-ios: publish-assets-ios
 deploy-assets-android: publish-assets-android
 	@echo "Deploying Android asset bundles..."
 
-deploy-assets-webgl: publish-assets-webgl
+deploy-assets-webgl: publish-assets-webgl deploy-lobby-cards-webgl
 	@echo "Deploying WebGL asset bundles..."
 
 deploy-audio-webgl: publish-audio-webgl
