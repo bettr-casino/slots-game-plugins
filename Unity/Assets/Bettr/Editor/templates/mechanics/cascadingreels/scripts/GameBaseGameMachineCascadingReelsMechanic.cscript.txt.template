@@ -18,20 +18,6 @@ end
 function {{machineName}}BaseGameMachineCascadingReelsMechanic:Initialize(machine)
 end
 
-function {{machineName}}BaseGameMachineCascadingReelsMechanic:OnBaseGameSpinCompleted(machine)
-    series
-        do
-            if self:HasCascade(machine) then
-                self:StartCascade(machine)
-            end
-        end        
-        do
-            {{machineName}}BaseGameState.SpinState.First.State = "Completed"
-            {{machineName}}BaseGameState.DisplayState.First.State = "Idle" 
-        end
-    end
-end
-
 function {{machineName}}BaseGameMachineCascadingReelsMechanic:HasCascade(machine)
     if {{machineName}}BaseGameCascadingReelsSummary == nil then
         return false
@@ -62,6 +48,7 @@ function {{machineName}}BaseGameMachineCascadingReelsMechanic:StartCascade(machi
         end
 
         if cascadeAction == "SymbolRemoval" then
+            System.Print("cascadeID={0}, SymbolRemovalActions", cascadeID)
             self:SymbolRemovalActions(cascadeMatrix, cascadeMatrixCount, cascadeAction)
             counterIndex = counterIndex + 1
 
@@ -73,10 +60,12 @@ function {{machineName}}BaseGameMachineCascadingReelsMechanic:StartCascade(machi
                 cascadeMatrix = cascadesMatrix[cascadeID] and cascadesMatrix[cascadeID].Array or {}
                 cascadeMatrixCount = cascadesMatrix[cascadeID] and cascadesMatrix[cascadeID].Count or 0
 
+                System.Print("cascadeID={0}, SymbolCascadeActions", cascadeID)
                 self:SymbolCascadeActions(cascadeMatrix, cascadeMatrixCount, cascadeAction)
                 counterIndex = counterIndex + 1
             end
         elseif cascadeAction == "SymbolWays" then
+            System.Print("cascadeID={0}, SymbolWaysActions", cascadeID)
             self:SymbolWaysActions(machine, cascadeID)
             counterIndex = counterIndex + 1
 
@@ -88,6 +77,7 @@ function {{machineName}}BaseGameMachineCascadingReelsMechanic:StartCascade(machi
                 cascadeMatrix = cascadesMatrix[cascadeID] and cascadesMatrix[cascadeID].Array or {}
                 cascadeMatrixCount = cascadesMatrix[cascadeID] and cascadesMatrix[cascadeID].Count or 0
 
+                System.Print("cascadeID={0}, SymbolRemovalActions", cascadeID)
                 self:SymbolRemovalActions(cascadeMatrix, cascadeMatrixCount, cascadeAction)
                 counterIndex = counterIndex + 1
 
@@ -99,6 +89,7 @@ function {{machineName}}BaseGameMachineCascadingReelsMechanic:StartCascade(machi
                     cascadeMatrix = cascadesMatrix[cascadeID] and cascadesMatrix[cascadeID].Array or {}
                     cascadeMatrixCount = cascadesMatrix[cascadeID] and cascadesMatrix[cascadeID].Count or 0
 
+                    System.Print("cascadeID={0}, SymbolCascadeActions", cascadeID)
                     self:SymbolCascadeActions(cascadeMatrix, cascadeMatrixCount, cascadeAction)
                     counterIndex = counterIndex + 1
                 end
@@ -194,15 +185,15 @@ function {{machineName}}BaseGameMachineCascadingReelsMechanic:SymbolWaysActions(
         end
         do
             BettrUser.InitSpinCoins()
-            self:TryPaying(machine)
+            machine.Mechanics.WaysMechanic:TryPaying(machine)
         end
         do
-            self:DisplayWays(machine, cascadeID)
+            machine.Mechanics.WaysMechanic:BaseGamePayout(machine)
         end
         do
             BettrAudioController.StopAudio()
             BettrUserController.DisableUserInSlamStopMode()
-            self:RollupCredits(machine)
+            machine:RollupCredits()
         end
     end
 end
@@ -245,147 +236,3 @@ function {{machineName}}BaseGameMachineCascadingReelsMechanic:SymbolCascadeActio
         end
     end
 end
-
-function {{machineName}}BaseGameMachineCascadingReelsMechanic:DisplayWays(machine, cascadeID)
-    series
-        do
-            local waysSummary = {{machineName}}BaseGameWaysSummary.Ways.First
-            local waysCount = waysSummary.WaysCount
-            if waysCount == 0 then
-                machine:OnPayingCompleted()
-                return
-            end
-            local waysState = {{machineName}}BaseGameWaysState.Ways.First
-            waysState.PaysRollup = 0
-            local ways = {{machineName}}BaseGameWays.Ways.Array
-            local waysMatrix = {{machineName}}BaseGameWaysMatrix
-            local waysCount = waysSummary.WaysCount 
-            local startDelay = waysSummary.DisplayLoopStartDelay
-            local duration = waysSummary.DisplayLoopDuration
-            local endDelay = waysSummary.DisplayLoopEndDelay            
-            local waysIndex = waysState.WaysIndex
-            -- TODO: FIXME outcomes are not storing the ways state
-            System.WaitForSeconds(startDelay*2 + endDelay*2)
-            BettrAudioController.PlayAudioLoop("rollupwins")                
-            for waysCounterIndex = 1, waysCount do
-                series
-                    do
-                        local isSlamStopped = BettrUserController.UserInSlamStopMode
-                        if isSlamStopped then
-                            break
-                        end
-                        local way = ways[waysCounterIndex]
-                        local waySymbol = way.Symbol
-                        local wayReelCount = way.ReelCount
-                        local waySymbolCount = way.SymbolCount
-                        local wayMultiplier = way.Multiplier
-                        local wayPay = way.Pay
-                        local wayTotalPay = way.Pays
-                        System.Print("waySymbol={0} cascadeID={1}", waySymbol, cascadeID)
-                        local wayMatrix = waysMatrix[waySymbol].Array
-                        -- update status text 
-                        local statusTexts = machine.StatusTexts
-                        -- {0}        Pays  {1} x {2} ways = {3} CREDITS!!
-                        statusTexts.FormatAndSetCurrentActive("PaysText", wayReelCount, wayPay, wayMultiplier, wayTotalPay)
-                        local winSymbols = machine.WinSymbols
-                        winSymbols.SetCurrentActive(waySymbol)
-                        parallel
-                            do
-                                self:RollUpWaysWin(machine, way, waysState, waysSummary, duration)
-                            end
-                            do
-                                -- display ways
-                                for i=1,wayReelCount parallel do
-                                    local reel = _G["{{machineName}}BaseGameReel" .. i]
-                                    if reel != nil then
-                                        reel.Mechanics.WaysMechanic:DisplayWays(reel, waySymbol, wayMatrix, waySymbolCount, duration)
-                                        System.WaitForSeconds(duration)
-                                        reel.Mechanics.WaysMechanic:HideWays(reel, waySymbol, wayMatrix, waySymbolCount)
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end                            
-            end
-            waysIndex = waysState.WaysIndex
-            waysState.WaysIndex = waysIndex + 1
-            if waysIndex >= 0 then
-                return
-            end
-            local isSlamStopped = BettrUserController.UserInSlamStopMode
-            if isSlamStopped then
-                return
-            end
-        end
-    end
-end
-
-function {{machineName}}BaseGameMachineCascadingReelsMechanic:RollUpWaysWin(machine, way, waysState, waysSummary, duration)
-    series
-        do
-            -- rollup ways win once
-            local startDelay = waysSummary.DisplayLoopStartDelay
-            local duration = waysSummary.DisplayLoopDuration
-            local oldCoins = waysState.PaysRollup
-            local pays = way.Pays
-            local newCoins = oldCoins + pays            
-            waysState.PaysRollup = newCoins
-            System.WaitForSeconds(startDelay)
-            local winTextProperty = machine.WinText            
-            BettrVisualsController.RollUpCounter(winTextProperty, oldCoins, newCoins, duration)
-        end
-    end    
-end
-
-function {{machineName}}BaseGameMachineCascadingReelsMechanic:RollupCredits(machine)
-    local oldCoins = BettrUser.Coins
-    local newCoins = BettrUser.SpinCoins
-    BettrUser.ApplySpinCoins()
-    local pays = newCoins - oldCoins
-    System.StartCoroutine(self, "OnRollupCredits", machine, oldCoins, newCoins, pays)
-end
-
-function {{machineName}}BaseGameMachineCascadingReelsMechanic:OnRollupCredits(machine, oldCoins, newCoins, pays)
-    series
-        do
-            local winTextProperty = machine.WinText            
-            if pays > 0 then
-                BettrAudioController.PlayAudioLoop("rollupwins")            
-                BettrVisualsController.RollUpCounter(winTextProperty, 0, pays, 0.3)
-                System.WaitForSeconds(0.3)
-                BettrAudioController.StopAudio()
-            end
-        end
-        do
-            local creditsTextProperty = machine.CreditsText   
-            if pays ~= 0 then
-                if pays > 0 then
-                    BettrAudioController.PlayAudioLoop("rollupcoins")            
-                end
-                BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 1)
-                System.WaitForSeconds(1)
-                BettrAudioController.StopAudio()
-            end
-        end
-    end
-end
-
-function {{machineName}}BaseGameMachineCascadingReelsMechanic:TryPaying(machine)
-    local summary = {{machineName}}BaseGameWaysSummary.Ways.First
-    local count = summary.WaysCount
-    if count == 0 then
-        return
-    end    
-    local spinCoins = BettrUser.SpinCoins
-    local ways = {{machineName}}BaseGameWays.Ways.Array
-    for counterIndex = 1, count do
-        local way = ways[counterIndex]
-        local totalPay = way.Pays
-        spinCoins = spinCoins + totalPay
-    end
-    BettrUser.SpinCoins = spinCoins
-end
-
-
-
