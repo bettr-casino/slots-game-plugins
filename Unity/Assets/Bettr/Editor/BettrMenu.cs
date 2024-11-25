@@ -997,6 +997,7 @@ namespace Bettr.Editor
             }
         }
 
+        // DONE: Doesn't need to be ported
         [MenuItem("Bettr/Tools/Fix Symbols Material Alpha")]
         public static void FixSymbolsMaterialsAlpha()
         {
@@ -1441,6 +1442,9 @@ namespace Bettr.Editor
             }
         }
         
+        // DONE: Ported partially
+        // Conditional change (if (machineName is "Game004" or "Game007")) not PORTED
+        // As a workaround move StatusText and Pays to the shared Settings prefab
         [MenuItem("Bettr/Tools/Fix Status Texts")]
         public static void FixStatusTexts()
         {
@@ -1578,6 +1582,7 @@ namespace Bettr.Editor
             Debug.Log("Updated default lighting settings based on user configuration.");
         }
         
+        // DONE: Ported over to Scene.template
         [MenuItem("Bettr/Tools/Fix Base Game Directional Light")]
         public static void FixBaseGameDirectionalLight()
         {
@@ -1715,6 +1720,8 @@ namespace Bettr.Editor
             Debug.Log($"Processed Fix Base Game Directional Light {processCount} machine variants.");
         }
 
+        // Ported to template
+        // TODO: saving of scene asset to prefab needs to be moved out
         [MenuItem("Bettr/Tools/Fix Game Scene")]
         public static void FixGameScene()
         {
@@ -2041,6 +2048,7 @@ namespace Bettr.Editor
             Debug.Log($"Processed Fix Game Scene {processCount} machine variants.");
         }
         
+        // DONE: Doesnt Require Porting
         [MenuItem("Bettr/Tools/Fix Background Video Player")]
         public static void FixBaseGameBackgroundVideoPlayerComponent()
         {
@@ -2431,6 +2439,7 @@ namespace Bettr.Editor
         }
 
         
+        // DONE: Ported to BaseGameMachine.template
         [MenuItem("Bettr/Tools/Fix Audio Source")]
         public static void FixAudioSource()
         {
@@ -2542,6 +2551,7 @@ namespace Bettr.Editor
             Debug.Log($"Processed Fix Audio Source {processCount} machine variants.");
         }
         
+        // DONE: Ported to BaseGameMachine.template
         [MenuItem("Bettr/Tools/Fix Settings")]
         public static void FixSettings()
         {
@@ -4207,6 +4217,11 @@ namespace Bettr.Editor
             EnsureDirectory(corePath);
             
             InstanceComponent.CorePath = corePath;
+            
+            string mainLobbyPath = $"Assets/Bettr/Runtime/Plugin/MainLobby";
+            EnsureDirectory(mainLobbyPath);
+            
+            InstanceComponent.MainLobbyPath = mainLobbyPath;
         }
 
         private static void ClearRuntimeAssetPath(string machineName, string machineVariant, string experimentVariant)

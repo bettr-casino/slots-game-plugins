@@ -42,6 +42,8 @@ namespace Bettr.Editor
         
         public bool IsPrefab { get; set; }
         
+        public bool IsMainLobbyPrefab { get; set; }
+        
         public string ModelName { get; set; }
         
         public bool IsModel { get; set; }
@@ -260,6 +262,21 @@ namespace Bettr.Editor
                         }
                     }
                 }
+                else if (IsMainLobbyPrefab)
+                {
+                    Debug.Log($"loading prefab from path: {InstanceComponent.MainLobbyPath}/Prefabs/{PrefabName}.prefab");
+                    var prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{InstanceComponent.MainLobbyPath}/Prefabs/{PrefabName}.prefab");
+                    var prefabGameObject = new PrefabGameObject(prefab, Name);
+                    _go = prefabGameObject.GameObject;
+                    if (PrefabIds != null)
+                    {
+                        foreach (var prefabId in PrefabIds)
+                        {
+                            var referencedGameObject = prefabGameObject.FindReferencedId(prefabId.Id, prefabId.Index);
+                            InstanceGameObject.IdGameObjects[$"{prefabId.Prefix}{prefabId.Id}"] = new InstanceGameObject(referencedGameObject);
+                        }
+                    }
+                }
                 else if (IsPrimitive)
                 {
                     var primitiveGameObject = GameObject.CreatePrimitive(Enum.GetValues(typeof(PrimitiveType)).GetValue(Primitive) as PrimitiveType? ?? PrimitiveType.Quad);
@@ -396,6 +413,7 @@ namespace Bettr.Editor
     {
         public static string RuntimeAssetPath;
         public static string CorePath;
+        public static string MainLobbyPath;
         
         public string Name { get; set; }
         
@@ -540,6 +558,14 @@ namespace Bettr.Editor
                 case "MonoBehaviour":
                     var monoBehaviourComponent = new MonoBehaviourComponent(Name);
                     monoBehaviourComponent.AddComponent(gameObject);
+                    break;
+                case "AudioSource":
+                    var audioComponent = new AudioComponent(Name);
+                    audioComponent.AddComponent(gameObject);
+                    break;
+                case "DirectionalLight":
+                    var directionalLightComponent = new DirectionalLightComponent();
+                    directionalLightComponent.AddComponent(gameObject);
                     break;
                 case "Tile":
                 {
@@ -862,6 +888,99 @@ namespace Bettr.Editor
         public void AddComponent(GameObject gameObject)
         {
             gameObject.AddComponent(_scriptType);
+        }
+    }
+    
+    [Serializable]
+    public class DirectionalLightComponent : IComponent
+    {
+        public DirectionalLightComponent()
+        {
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            var light = gameObject.AddComponent<Light>();
+            // Set the Light Type to Directional
+            light.type = LightType.Directional;
+            // Set the Light Color to white
+            light.color = Color.white;
+            // Set the Light Intensity to 1.0
+            light.intensity = 1.0f;
+            // Set the Light Rotation to 45, 45, 0
+            light.transform.rotation = Quaternion.Euler(50, -30, 0);
+            // Set the Light Position to 0, 0, 0
+            light.transform.position = new Vector3(0, 0, 0);
+            // no shadows
+            light.shadows = LightShadows.None;
+            
+            string scenesDirectory = Path.Combine(InstanceComponent.RuntimeAssetPath, "Scenes");
+            
+            string lightingSettingsPath = $"{scenesDirectory}/LightingSettings.asset";
+            
+            LightingSettings existingSettings = AssetDatabase.LoadAssetAtPath<LightingSettings>(lightingSettingsPath);
+            if (existingSettings != null)
+            {
+                Debug.Log($"LightingSettings asset already exists: {lightingSettingsPath}");
+                Lightmapping.lightingSettings = existingSettings; // Assign existing settings
+                return; // Skip creating a new asset
+            }
+            
+            LightingSettings lightingSettings = new LightingSettings();
+            AssetDatabase.CreateAsset(lightingSettings, lightingSettingsPath);
+            Lightmapping.lightingSettings = lightingSettings;
+        }
+    }
+
+    
+    [Serializable]
+    public class AudioComponent : IComponent
+    {
+        private readonly string _audioSourceFilename;
+        
+        private const string AUDIO_FORMAT = ".wav";
+        
+        public AudioComponent(string audioFileName)
+        {
+            string audioDirectory = Path.Combine(InstanceComponent.CorePath, "Audio");
+            // get the audio files under the audio directory
+            string[] audioFiles = Directory.GetFiles(audioDirectory, $"*{AUDIO_FORMAT}", SearchOption.AllDirectories);
+            foreach (var audioFile in audioFiles)
+            {
+                var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(audioFile);
+                if (fileNameWithoutExtension == audioFileName)
+                {
+                    _audioSourceFilename = audioFile;
+                    break;
+                }
+            }
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            if (_audioSourceFilename == null)
+            {
+                Debug.LogError($"Failed to find audio file with name: {_audioSourceFilename}");
+                return;
+            }
+            // load the audio clip
+            AudioClip audioClip = AssetDatabase.LoadAssetAtPath<AudioClip>(_audioSourceFilename);
+            if (audioClip == null)
+            {
+                Debug.LogError($"Failed to load audio clip: {_audioSourceFilename}");
+                return;
+            }
+                            
+            // add an audio source to the top level game object of the machine prefab
+            AudioSource audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.clip = audioClip;
+            audioSource.playOnAwake = false;
+            audioSource.loop = true;
+            audioSource.pitch = 1;
+            audioSource.priority = 128;
+            audioSource.spatialBlend = 0; // 0 = 2D
+            audioSource.volume = 1; // can turn off using Key "V"
+            audioSource.panStereo = 0; // -1 = left, 1 = right
         }
     }
 
