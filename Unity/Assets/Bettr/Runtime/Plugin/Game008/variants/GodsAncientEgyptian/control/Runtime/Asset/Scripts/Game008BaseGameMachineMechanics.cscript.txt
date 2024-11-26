@@ -1,13 +1,9 @@
 require "math"
 require "Core"
-
 require "Game008BaseGameMachinePaylinesMechanic"
 
-
 Game008BaseGameMachineMechanics = {
-
     PaylinesMechanic = nil,
-
 }
 
 function Game008BaseGameMachineMechanics:new(o)
@@ -22,10 +18,8 @@ function Game008BaseGameMachineMechanics:OnError(callStack)
 end
 
 function Game008BaseGameMachineMechanics:Initialize(machine)
-
     self.PaylinesMechanic = Game008BaseGameMachinePaylinesMechanic:new()
     self.PaylinesMechanic:Initialize(machine)
-
 end
 
 function Game008BaseGameMachineMechanics:BaseGamePayout(machine)

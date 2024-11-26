@@ -5,12 +5,16 @@ require "Game001BaseGameReelWaysMechanic"
 
 require "Game001BaseGameReelCascadingReelsMechanic"
 
+require "Game001BaseGameReelCascadingReelsMultiplierMechanic"
+
 
 Game001BaseGameReelMechanics = {
 
     WaysMechanic = nil,
 
     CascadingReelsMechanic = nil,
+
+    CascadingReelsMultiplierMechanic = nil,
 
 }
 
@@ -28,6 +32,9 @@ function Game001BaseGameReelMechanics:Initialize(reel)
 
     self.CascadingReelsMechanic = Game001BaseGameReelCascadingReelsMechanic:new()
     self.CascadingReelsMechanic:Initialize(reel)
+
+    self.CascadingReelsMultiplierMechanic = Game001BaseGameReelCascadingReelsMultiplierMechanic:new()
+    self.CascadingReelsMultiplierMechanic:Initialize(reel)
 
 end
 
