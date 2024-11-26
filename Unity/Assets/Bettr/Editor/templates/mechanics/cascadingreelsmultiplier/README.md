@@ -1,6 +1,6 @@
-# Cascading Multipliers Mechanic
+# Cascading Reels Multipliers Mechanic
 
-The **Cascading Multipliers** mechanic is a feature in slot games where a multiplier increases with each consecutive win in a cascading sequence. This mechanic is often paired with cascading reels (where winning symbols disappear and new symbols fall into place), and the multiplier grows progressively as more wins occur in a single spin sequence. The mechanic offers players the potential for significantly larger payouts, especially during bonus rounds, as the multiplier continues to increase with each cascade.
+The **Cascading Reels Multipliers** mechanic is a feature in slot games where a multiplier increases with each consecutive win in a cascading sequence. This mechanic is often paired with cascading reels (where winning symbols disappear and new symbols fall into place), and the multiplier grows progressively as more wins occur in a single spin sequence. The mechanic offers players the potential for significantly larger payouts, especially during bonus rounds, as the multiplier continues to increase with each cascade.
 
 ## Key Features
 

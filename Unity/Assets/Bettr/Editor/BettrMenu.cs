@@ -58,7 +58,7 @@ namespace Bettr.Editor
     {
         public int OutcomeCount { get; set; }
     }
-    
+
     public static class BettrMenu
     {
         private const string PluginRootDirectory = "Assets/Bettr/Runtime/Plugin";
@@ -141,6 +141,98 @@ namespace Bettr.Editor
 
             // Optional: Log to confirm package creation
             Debug.Log("Package exported: " + outputPackagePath);
+        }
+
+        private static void ApplyMechanicDelegate(string mechanic, ProcessMechanic processMechanic)
+        {
+            Debug.Log($"Applying {mechanic} mechanic...");
+            
+            var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+            for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
+            {
+                var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
+                // Check that the MachineName starts with "Game" and is not "Game001Alpha"
+                if (!machineNameDir.Name.StartsWith("Game") || machineNameDir.Name == "Game001Alpha")
+                {
+                    continue;
+                }
+                var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
+                if (variantsDir == null)
+                {
+                    continue;
+                }
+                var machineVariantsDirs = variantsDir?.GetDirectories();
+                // loop over machineVariantsDir
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir?.GetDirectories();
+                    if (experimentVariantDirs == null)
+                    {
+                        continue;
+                    }
+                    // loop over experimentVariantDirs
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        // now extract the machineName from machineNameDir, machineVariant from machineVariantsDir, and experimentVariant from experimentVariantDir
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir?.Name;
+                        string experimentVariant = experimentVariantDir?.Name;
+                        
+                        string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
+                        EnsureDirectory(runtimeAssetPath);
+                        
+                        BettrMechanics.RuntimeAssetPath = runtimeAssetPath;
+                        
+                        var machineModelName =$"{machineName}Models";
+                        
+                        string modelDestinationPath = Path.Combine(runtimeAssetPath, "Models",  $"{machineModelName}.cscript.txt");
+                        
+                        // Load and run the Model file
+                        var modelTextAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(modelDestinationPath);
+                        var machineModelScript = modelTextAsset.text;
+                        TileController.StaticInit();
+                        DynValue dynValue = TileController.LuaScript.LoadString(machineModelScript, codeFriendlyName: machineModelName);
+                        TileController.LuaScript.Call(dynValue);
+                        
+                        // Process Mechanics scripts
+                        var mechanicsTable = GetTable($"{machineName}Mechanics");
+                        var pkArray = GetTablePkArray(mechanicsTable);
+                        foreach (var pk in pkArray)
+                        {
+                            var activeMechanics = GetTableArray<string>(mechanicsTable, pk, "Mechanic");
+                            var isMechanicActive = activeMechanics.Contains(mechanic);
+                            if (!isMechanicActive)
+                            {
+                                continue;
+                            }
+                            // call the delegate
+                            processMechanic(machineName, machineVariant, experimentVariant, modelDestinationPath);
+                        }
+                        
+                    }
+                }
+            }
+        }
+        
+        public static void LoadMachineModel(string machineName, string machineVariant, string experimentVariant, string modelDestinationPath)
+        {
+            var machineModelName =$"{machineName}Models";
+            
+            Debug.Log($"Processing Loading Model file {machineModelName} for machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant}");
+                        
+            // Load and run the Model file
+            var modelTextAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(modelDestinationPath);
+            var machineModelScript = modelTextAsset.text;
+            TileController.StaticInit();
+            DynValue dynValue = TileController.LuaScript.LoadString(machineModelScript, codeFriendlyName: machineModelName);
+            TileController.LuaScript.Call(dynValue);
+        }
+        
+        [MenuItem("Bettr/Tools/Apply Mechanics/CascadingReelsMultiplier")]
+        static void ApplyMechanicCascadingReelsMultiplier()
+        {
+            var mechanic = "CascadingReelsMultiplier";
+            ApplyMechanicDelegate(mechanic, BettrMechanics.ProcessCascadingReelsMultiplierMechanic);
         }
         
         [MenuItem("Tools/Update Prefab References")]
@@ -2958,8 +3050,7 @@ namespace Bettr.Editor
         }
         
         // Define a delegate to handle each mechanic's action
-        public delegate void ProcessMechanic(string machineName, string machineVariant, string experimentVariant, string machineModel);
-
+        private delegate void ProcessMechanic(string machineName, string machineVariant, string experimentVariant, string machineModel);
         public static void BuildMachinesMechanicsFromCommandLine()
         {
             SetupCoreAssetPath();
@@ -2967,7 +3058,7 @@ namespace Bettr.Editor
             // Create the mechanics dictionary with mechanic names mapped to their respective delegate actions
             var mechanicsDictionary = new Dictionary<string, ProcessMechanic>
             {
-                { "cascadingmultipliers", BettrMechanics.ProcessCascadingMultipliersMechanic },
+                { "cascadingreelsmultiplier", BettrMechanics.ProcessCascadingReelsMultiplierMechanic },
                 { "cascadingreels", BettrMechanics.ProcessCascadingReelsMechanic },
                 { "chooseaside", BettrMechanics.ProcessChooseAsideMechanic },
                 { "expandingpaylines", BettrMechanics.ProcessExpandingPaylinesMechanic },

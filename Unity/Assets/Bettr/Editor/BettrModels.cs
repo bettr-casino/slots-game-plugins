@@ -54,6 +54,8 @@ namespace Bettr.Editor
         
         public string PrimitiveTexture { get; set; }
         
+        public bool PrimitiveTextureCreate { get; set; }
+        
         public string PrimitiveColor { get; set; }
         
         public float PrimitiveAlpha { get; set; } = 1.0f;
@@ -280,7 +282,7 @@ namespace Bettr.Editor
                 else if (IsPrimitive)
                 {
                     var primitiveGameObject = GameObject.CreatePrimitive(Enum.GetValues(typeof(PrimitiveType)).GetValue(Primitive) as PrimitiveType? ?? PrimitiveType.Quad);
-                    var primitiveMaterial = BettrMaterialGenerator.CreateOrLoadMaterial(PrimitiveMaterial, PrimitiveShader, PrimitiveTexture, PrimitiveColor, PrimitiveAlpha, InstanceComponent.RuntimeAssetPath);
+                    var primitiveMaterial = BettrMaterialGenerator.CreateOrLoadMaterial(PrimitiveMaterial, PrimitiveShader, PrimitiveTexture, PrimitiveColor, PrimitiveAlpha, InstanceComponent.RuntimeAssetPath, PrimitiveTextureCreate);
                     
                     var primitiveMeshRenderer = primitiveGameObject.GetComponent<MeshRenderer>();
                     primitiveMeshRenderer.material = primitiveMaterial;
