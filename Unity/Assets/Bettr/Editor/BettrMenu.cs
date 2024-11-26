@@ -4404,7 +4404,7 @@ namespace Bettr.Editor
             }
         }
 
-        private static void CopyScripts(string scriptsPath, string[] filePaths, string machineName, string machineVariant, string experimentVariant, string runtimeAssetPath)
+        private static void CopyScripts(string scriptsPath, string[] filePaths, string machineName, string machineVariant, string experimentVariant, string runtimeAssetPath, bool clobber = false)
         {
             var mechanicsTable = GetTable($"{machineName}Mechanics");
             var baseGameMechanics = GetTableArray<string>(mechanicsTable, "BaseGame", "Mechanic");
@@ -4438,6 +4438,12 @@ namespace Bettr.Editor
                 scriptName = Regex.Replace(scriptName, @"^Game", machineName);
                 
                 var destinationPath = Path.Combine(runtimeAssetPath, "Scripts", $"{scriptName}");
+                
+                if (File.Exists(destinationPath) && !clobber)
+                {
+                    Debug.Log($"Skipping script {scriptName} as it already exists.");
+                    continue;
+                }
                 File.WriteAllText(destinationPath, scriptText);
             }
         }
