@@ -5,9 +5,9 @@ require "{{machineName}}BaseGameReel{{mechanic}}Mechanic"
 {{end}}
 
 {{machineName}}BaseGameReelMechanics = {
-{{for mechanic in baseGameMechanics}}
+{{-for mechanic in baseGameMechanics}}
     {{mechanic}}Mechanic = nil,
-{{end}}
+{{-end}}
 }
 
 function {{machineName}}BaseGameReelMechanics:new(o)
@@ -18,9 +18,9 @@ function {{machineName}}BaseGameReelMechanics:new(o)
 end
 
 function {{machineName}}BaseGameReelMechanics:Initialize(reel)
-{{for mechanic in baseGameMechanics}}
+{{-for mechanic in baseGameMechanics}}
     self.{{mechanic}}Mechanic = {{machineName}}BaseGameReel{{mechanic}}Mechanic:new()
     self.{{mechanic}}Mechanic:Initialize(reel)
-{{end}}
+{{-end}}
 end
 
