@@ -51,7 +51,7 @@ namespace Bettr.Editor
             };
             
             // append the mechanic name to the runtimeAssetPath
-            var mechanicRuntimeAssetPath = Path.Combine(runtimeAssetPath, mechanicName);
+            var mechanicRuntimeAssetPath = Path.Combine(runtimeAssetPath, "Mechanics", mechanicName);
             EnsureMechanicsDirectory(mechanicRuntimeAssetPath);
             
             var json = scribanTemplate.Render(model);

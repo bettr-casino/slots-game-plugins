@@ -4438,6 +4438,7 @@ namespace Bettr.Editor
                 scriptName = Regex.Replace(scriptName, @"^Game", machineName);
                 
                 var destinationPath = Path.Combine(runtimeAssetPath, "Scripts", $"{scriptName}");
+                EnsureDirectory(Path.GetDirectoryName(destinationPath));
                 
                 if (File.Exists(destinationPath) && !clobber)
                 {
@@ -4465,10 +4466,18 @@ namespace Bettr.Editor
                 var mechanicsData = GetTableArray<string>(mechanicsTable, pk, "Mechanic");
                 foreach (var mechanic in mechanicsData)
                 {
+                    var mechanicRuntimeAssetPath = runtimeAssetPath;
+                    // only ways and paylines are treated as part of the runtime asset path
+                    // the other mechanics have are under the Mechanics/<MechanicName> asset path
+                    if (!(mechanic.ToLower() == "ways" || mechanic.ToLower() == "paylines"))
+                    {
+                        mechanicRuntimeAssetPath = Path.Combine(runtimeAssetPath, "Mechanics", mechanic);
+                        EnsureDirectory(mechanicRuntimeAssetPath);
+                    }
                     dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "templates", "mechanics", mechanic, "scripts");
                     filePaths = Directory.GetFiles(dirPath, "*.cscript.txt.template");
                     scriptsPath = $"mechanics/{mechanic}/scripts";
-                    CopyScripts(scriptsPath, filePaths, machineName, machineVariant, experimentVariant, runtimeAssetPath);
+                    CopyScripts(scriptsPath, filePaths, machineName, machineVariant, experimentVariant, mechanicRuntimeAssetPath);
                 }
             }
 
