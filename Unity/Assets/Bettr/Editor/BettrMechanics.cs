@@ -92,7 +92,7 @@ namespace Bettr.Editor
             var mechanicName = "CascadingReelsMultiplier";
             
             var templateName = $"BaseGame{mechanicName}Mechanic";
-            var prefabName = $"BaseGameMachine{mechanicName}MechanicPrefab";
+            var prefabName = $"BaseGameMachine{mechanicName}";
             var runtimeAssetPath = BettrMechanics.RuntimeAssetPath;
             
             BettrMechanicsHelpers.ProcessBaseGameMechanic(

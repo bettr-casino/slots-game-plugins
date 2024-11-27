@@ -12,6 +12,10 @@ function Game001BaseGameMachineCascadingReelsMultiplierMechanic:new(o)
 end
 
 function Game001BaseGameMachineCascadingReelsMultiplierMechanic:Initialize(machine)
+    local manifest = Game001.Manifest
+    local prefabName = "BaseGameMachineCascadingReelsMultiplier"
+    System.Print("Game001BaseGameMachineCascadingReelsMultiplierMechanic:Initialize manifest.BundleName={0} manifest.BundleVersion={1} prefabName={2}", manifest.BundleName, manifest.BundleVersion, prefabName)    
+    BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, prefabName, nil)
 end
 
 function Game001BaseGameMachineCascadingReelsMultiplierMechanic:TryPaying(machine)

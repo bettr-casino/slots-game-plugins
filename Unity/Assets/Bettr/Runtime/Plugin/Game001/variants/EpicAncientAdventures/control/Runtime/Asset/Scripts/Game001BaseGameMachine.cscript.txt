@@ -30,11 +30,9 @@ function Game001BaseGameMachine:Awake()
 end
 
 function Game001BaseGameMachine:Initialize()
-	self.Mechanics = {}
-    self.Mechanics.WaysMechanic = Game001BaseGameMachineWaysMechanic:new()
-    self.Mechanics.WaysMechanic:Initialize(self)
-    self.Mechanics.CascadingReelsMechanic = Game001BaseGameMachineCascadingReelsMechanic:new()
-    self.Mechanics.CascadingReelsMechanic:Initialize(self)
+	System.Print("Game001BaseGameMachine Awake tile id={0}", self.id)
+    self.Mechanics = Game001BaseGameMachineMechanics:new()
+    self.Mechanics:Initialize(self)
 end
 
 function Game001BaseGameMachine:Start()
