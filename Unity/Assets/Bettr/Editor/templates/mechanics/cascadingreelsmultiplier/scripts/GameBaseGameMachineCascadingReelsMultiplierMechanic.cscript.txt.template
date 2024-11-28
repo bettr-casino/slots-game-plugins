@@ -2,6 +2,9 @@ require "math"
 require "Core"
 
 {{machineName}}BaseGameMachineCascadingReelsMultiplierMechanic = {
+    State = {
+        MechanicsPrefab = nil
+    }
 }
 
 function {{machineName}}BaseGameMachineCascadingReelsMultiplierMechanic:new(o)
@@ -20,6 +23,7 @@ function {{machineName}}BaseGameMachineCascadingReelsMultiplierMechanic:Initiali
             System.Print("{{machineName}}BaseGameMachineCascadingReelsMultiplierMechanic:Initialize before manifest.BundleName={0} manifest.BundleVersion={1} prefabName={2} parentGameObject={3}", manifest.BundleName, manifest.BundleVersion, prefabName, parentGameObject.name)    
             local mechanicsPrefab = BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, prefabName, parentGameObject)
             mechanicsPrefab.SetActive(false)
+            self.State.MechanicsPrefab = mechanicsPrefab
             System.Print("{{machineName}}BaseGameMachineCascadingReelsMultiplierMechanic:Initialize mechanicsPrefab={0}", mechanicsPrefab.name)
         end
     end
@@ -28,7 +32,22 @@ end
 function {{machineName}}BaseGameMachineCascadingReelsMultiplierMechanic:BaseGamePayout(machine, cascadeID)
     series
         do
-            System.Print("{{machineName}}BaseGameMachineCascadingReelsMultiplierMechanic BaseGamePayout cascadeID={0}", cascadeID)
+            local isTriggered = {{machineName}}BaseGameCascadingReelsMultiplierSummary.CascadingReelsMultiplier.First.Triggered
+            System.Print("{{machineName}}BaseGameMachineCascadingReelsMultiplierMechanic BaseGamePayout cascadeID={0} isTriggered={1}", cascadeID, isTriggered)
+            if not isTriggered then
+                return
+            end
+            local arr = {{machineName}}BaseGameCascadingReelsMultiplier.CascadingReelsMultiplier.Array
+            for i = 1, #arr do
+                local cascadingReelsMultiplier = arr[i]
+                local thisCascadeID = cascadingReelsMultiplier.Cascade
+                if thisCascadeID == cascadeID then
+                    local multiplier = cascadingReelsMultiplier.Multiplier
+                    local pays = cascadingReelsMultiplier.Pays
+                    local totalPays = cascadingReelsMultiplier.TotalPays
+                    System.Print("{{machineName}}BaseGameMachineCascadingReelsMultiplierMechanic BaseGamePayout cascadeID={0} multiplier={1} pays={2} totalPays={3}", cascadeID, multiplier, pays, totalPays)
+                end
+            end
         end
     end
 end
