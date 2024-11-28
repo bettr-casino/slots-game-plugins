@@ -1,7 +1,6 @@
 require "math"
 require "Core"
 require "{{machineName}}BaseGameReel"
-require "{{machineName}}BaseGameMachineMechanics"
 
 {{machineName}}BaseGameMachine = {
     Mechanics = nil,
@@ -27,8 +26,13 @@ end
 
 function {{machineName}}BaseGameMachine:Awake()
 	System.Print("{{machineName}}BaseGameMachine Awake tile id={0}", self.id)
-	self.Mechanics = {{machineName}}BaseGameMachineMechanics:new()
-	self.Mechanics:Initialize(self)
+	self:Initialize()
+end
+
+function {{machineName}}BaseGameMachine:Initialize()
+	System.Print("{{machineName}}BaseGameMachine Awake tile id={0}", self.id)
+    self.Mechanics = {{machineName}}BaseGameMachineMechanics:new()
+    self.Mechanics:Initialize(self)
 end
 
 function {{machineName}}BaseGameMachine:Start()
@@ -107,44 +111,6 @@ function {{machineName}}BaseGameMachine:ResetSettings()
     self.WinText.SetText("0")
 end
 
-function {{machineName}}BaseGameMachine:Update()
-    local spinState = {{machineName}}BaseGameState.SpinState.First.State
-    self.BaseGameStateDispatchTable[spinState](self)    
-end
-
-function {{machineName}}BaseGameMachine:BaseGameSpinning()    
-end
-
-function {{machineName}}BaseGameMachine:BaseGameWaiting()    
-end
-
-function {{machineName}}BaseGameMachine:BaseGameCompleted()
-   {{machineName}}BaseGameState.SpinState.First.State = "Waiting"
-end
-
-function {{machineName}}BaseGameMachine:OnBaseGameSpinCompleted()
-    series
-        do
-            self.Mechanics:OnBaseGameSpinCompleted(self) 
-        end
-    end
-end
-
-function {{machineName}}BaseGameMachine:BaseGamePayout()
-    series
-        do
-            self.Mechanics:BaseGamePayout(self)
-        end
-    end      
-end
-
-function {{machineName}}BaseGameMachine:RollupCredits()
-    self.Mechanics:RollupCredits(self)
-end
-
-function {{machineName}}BaseGameMachine:UpdateStatusText(text)
-end
-
 function {{machineName}}BaseGameMachine:PlayStartAnimations()
     series
         do
@@ -167,7 +133,7 @@ end
 function {{machineName}}BaseGameMachine:LoadServerOutcome()
     series
         do
-            BettrOutcomeController.LoadServerOutcome("{{machineName}}", "{{machineVariant}}")
+            BettrOutcomeController.LoadServerOutcome("{{machineName}}", "EpicAncientAdventures")
         end
     end
 end
@@ -235,46 +201,101 @@ function {{machineName}}BaseGameMachine:SpinEngines()
     {{machineName}}BaseGameState.SpinState.First.State = "Spinning"
     self:ResetSettings()
     parallel
-        {{ for reelIndex in 1..reelCount }}
+        {{- for reelIndex in 1..reelCount }}
             do
                 {{machineName}}BaseGameReel{{ reelIndex }}:SpinEngines()
             end
-        {{ end }}
+        {{- end }}
     end
 end
 
 function {{machineName}}BaseGameMachine:UpdateBaseGameReelsSpinState(state)
-{{ for reelIndex in 1..reelCount }}
-    {{machineName}}BaseGameReelSpinState.Reel{{ reelIndex }}.First.ReelSpinState = state
-{{ end }}
-end
-
-function {{machineName}}BaseGameMachine:TryPaying()
-    self.Mechanics:TryPaying(self)
-    {{machineName}}BaseGameState.SpinState.First.State = "Paying"
+    {{- for reelIndex in 1..reelCount }}
+        {{machineName}}BaseGameReelSpinState.Reel{{ reelIndex }}.First.ReelSpinState = state
+    {{- end }}
 end
 
 function {{machineName}}BaseGameMachine:CurrentSpinState()
     return {{machineName}}BaseGameState.SpinState.First.State
 end
 
-function {{machineName}}BaseGameMachine:OnPayingCompleted()
-    self.Mechanics:OnPayingCompleted(self)
-end
-
 function {{machineName}}BaseGameMachine:OnSpinReelsStopped()
     self:UpdateBaseGameReelsSpinState("Waiting")
     self.StatusTexts.SetAllInactive()
-    self:TryPaying()
+    System.StartCoroutine(self, "SpinReelsStopped")
+end
+
+function {{machineName}}BaseGameMachine:SpinReelsStopped()
+    series
+        do
+            local coinsPaid = self.Mechanics.WaysMechanic:TryPaying(self)
+            if coinsPaid > 0 then
+                self.Mechanics.WaysMechanic:BaseGamePayout(self)
+                self:OnPayingCompleted()
+                if self.Mechanics.CascadingReelsMechanic:HasCascade(self) then
+                    self.Mechanics.CascadingReelsMechanic:StartCascade(self)
+                end
+            end
+            self:OnBaseGameSpinCompleted(self)
+        end
+    end
+end
+
+function {{machineName}}BaseGameMachine:OnPayingCompleted()
+    BettrAudioController.StopAudio()
+    BettrUserController.DisableUserInSlamStopMode()
+    self:RollupCredits()
+end
+
+function {{machineName}}BaseGameMachine:RollupCredits()
+    local oldCoins = BettrUser.Coins
+    local newCoins = BettrUser.SpinCoins
+    BettrUser.ApplySpinCoins()
+    local pays = newCoins - oldCoins
+    System.StartCoroutine(self, "OnRollupCredits", oldCoins, newCoins, pays)
+end
+
+function {{machineName}}BaseGameMachine:OnRollupCredits(oldCoins, newCoins, pays)
+    series
+        do
+            local winTextProperty = self.WinText            
+            if pays > 0 then
+                BettrAudioController.PlayAudioLoop("rollupwins")            
+                BettrVisualsController.RollUpCounter(winTextProperty, 0, pays, 0.3)
+                System.WaitForSeconds(0.3)
+                BettrAudioController.StopAudio()
+            end
+        end
+        do
+            local creditsTextProperty = self.CreditsText   
+            if pays ~= 0 then
+                if pays > 0 then
+                    BettrAudioController.PlayAudioLoop("rollupcoins")            
+                end
+                BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 1)
+                System.WaitForSeconds(1)
+                BettrAudioController.StopAudio()
+            end
+        end
+    end
+end
+
+function {{machineName}}BaseGameMachine:OnBaseGameSpinCompleted(machine)
+    series
+        do
+            {{machineName}}BaseGameState.SpinState.First.State = "Completed"
+            {{machineName}}BaseGameState.DisplayState.First.State = "Idle" 
+        end
+    end
 end
 
 function {{machineName}}BaseGameMachine:OnOutcomeReceived()
     parallel
-        {{ for reelIndex in 1..reelCount }}
-            do
-                {{machineName}}BaseGameReel{{ reelIndex }}:OnOutcomeReceived()
-            end
-        {{ end }}
+        {{- for reelIndex in 1..reelCount }}
+        do
+            {{machineName}}BaseGameReel{{ reelIndex }}:OnOutcomeReceived()
+        end
+        {{- end }}
     end
 end
 
@@ -306,11 +327,5 @@ end
 function {{machineName}}BaseGameMachine:OnBecameVisible()
 	System.Print("{{machineName}}BaseGameMachine OnBecameVisible tile id={0}", self.id)
 end
-
-{{machineName}}BaseGameMachine.BaseGameStateDispatchTable = {
-    Waiting = {{machineName}}BaseGameMachine.BaseGameWaiting,
-    Spinning = {{machineName}}BaseGameMachine.BaseGameSpinning,
-    Completed = {{machineName}}BaseGameMachine.BaseGameCompleted,
-}
 
 return {{machineName}}BaseGameMachine:new()
