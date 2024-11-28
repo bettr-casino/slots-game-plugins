@@ -191,6 +191,11 @@ function Game001BaseGameMachineCascadingReelsMechanic:SymbolWaysActions(machine,
             machine.Mechanics.WaysMechanic:BaseGamePayout(machine)
         end
         do
+            if machine.Mechanics.CascadingReelsMultiplierMechanic ~= nil then
+                machine.Mechanics.CascadingReelsMultiplierMechanic:BaseGamePayout(machine, cascadeID)
+            end
+        end
+        do
             BettrAudioController.StopAudio()
             BettrUserController.DisableUserInSlamStopMode()
             machine:RollupCredits()
