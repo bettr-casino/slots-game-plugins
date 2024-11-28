@@ -1511,13 +1511,17 @@ namespace Bettr.Editor
             }
         }
         
-        private static GameObject FindGameObjectInHierarchy(GameObject prefab, string gameObjectName)
+        private static GameObject FindGameObjectInHierarchy(GameObject prefab, string gameObjectName, string parentGameObjectName = null)
         {
             Transform[] allTransforms = prefab.GetComponentsInChildren<Transform>(true);
             foreach (Transform transform in allTransforms)
             {
                 if (transform.gameObject.name == gameObjectName)
                 {
+                    if (parentGameObjectName != null && transform.parent.name != parentGameObjectName)
+                    {
+                        continue;
+                    }
                     return transform.gameObject;
                 }
             }
@@ -2131,6 +2135,8 @@ namespace Bettr.Editor
                         {
                             EditorSceneManager.CloseScene(scene, true);
                         }
+
+                        break;
                     }
                 }
             }
@@ -2531,10 +2537,149 @@ namespace Bettr.Editor
             
             Debug.Log($"Fix Background Texture to Video frame texture {processCount} machine variants.");
         }
+        
+        
+        [MenuItem("Bettr/Tools/Add Base Game Machine Mechanics Parent")]
+        public static void FixBaseGameMechanicsParent()
+        {
+            // Walk the entire directory tree under the plugin root directory
+            var processCount = 0;
+            var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+            string coreAssetPath = $"Assets/Bettr/Core";
+            
+            bool hasChanges = false;
+            
+            for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
+            {
+                var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
+                // Check that the MachineName starts with "Game" and is not "Game001Alpha"
+                if (!machineNameDir.Name.StartsWith("Game") || machineNameDir.Name == "Game001Alpha")
+                {
+                    continue;
+                }
+                var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
+                if (variantsDir == null)
+                {
+                    continue;
+                }
+                var machineVariantsDirs = variantsDir?.GetDirectories();
+                // loop over machineVariantsDir
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir?.GetDirectories();
+                    if (experimentVariantDirs == null)
+                    {
+                        continue;
+                    }
+                    // loop over experimentVariantDirs
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        // now extract the machineName from machineNameDir, machineVariant from machineVariantsDir, and experimentVariant from experimentVariantDir
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir?.Name;
+                        string experimentVariant = experimentVariantDir?.Name;
+                        
+                        string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
+                        if (!Directory.Exists(runtimeAssetPath))
+                        {
+                            Debug.LogError($"Directory not found: {runtimeAssetPath}");
+                            continue;
+                        }
+                        
+                        // get the prefabs directory
+                        string prefabsDirectory = Path.Combine(runtimeAssetPath, "Prefabs");
+                        // get the Game<NNN>BaseGameMachine.prefab
+                        string machinePrefabPath = Directory.GetFiles(prefabsDirectory, $"{machineName}BaseGameMachine.prefab", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                        if (string.IsNullOrEmpty(machinePrefabPath))
+                        {
+                            Debug.LogError($"Machine prefab not found: {machineName}BaseGameMachine.prefab");
+                            continue;
+                        }
+                        
+                        // load the Prefab asset
+                        GameObject prefabInstance = PrefabUtility.LoadPrefabContents(machinePrefabPath);
+                        if (prefabInstance == null)
+                        {
+                            Debug.LogError($"Failed to load prefab: {machineName}BaseGameMachine.prefab");
+                            continue;
+                        }
+                        
+                        var pivotGameObject = FindGameObjectInHierarchy(prefabInstance, "Pivot", prefabInstance.gameObject.name);
+                        // check if the MechanicsParent exists
+                        var mechanicsParent = FindGameObjectInHierarchy(pivotGameObject, "MechanicsParent");
+                        if (mechanicsParent == null)
+                        {
+                            hasChanges = true;
+                            
+                            // create the MechanicsParent
+                            mechanicsParent = new GameObject("MechanicsParent");
+                            // set the parent of the MechanicsParent to the Pivot
+                            mechanicsParent.transform.SetParent(pivotGameObject.transform);
+                            // set the local position of the MechanicsParent to (0, 0, 0)
+                            mechanicsParent.transform.localPosition = Vector3.zero;
+                            // set the local rotation of the MechanicsParent to (0, 0, 0)
+                            mechanicsParent.transform.localRotation = Quaternion.identity;
+                            // set the local scale of the MechanicsParent to (1, 1, 1)
+                            mechanicsParent.transform.localScale = Vector3.one;
+                            
+                            // set the layer of the MechanicsParent to same as the Pivot
+                            mechanicsParent.layer = pivotGameObject.layer;
+                        }
+                        
+                        var foundMechanicsParentInTilePropertyGameObjects = false;
+                        
+                        // now check the components on the prefab. Search for TilePropertyGameObjects components
+                        var tilePropertyGameObjects = prefabInstance.GetComponents<TilePropertyGameObjects>();
+                        // loop over and check if there is a reference to the MechanicsParent
+                        foreach (var tilePropertyGameObject in tilePropertyGameObjects)
+                        {
+                            // check if the key MechanicsParent exists in the tileGameObjectProperties
+                            if (tilePropertyGameObject.tileGameObjectProperties.Any(p => p.key == "MechanicsParent"))
+                            {
+                                foundMechanicsParentInTilePropertyGameObjects = true;
+                            }
+                        }
+
+                        if (!foundMechanicsParentInTilePropertyGameObjects)
+                        {
+                            hasChanges = true;
+                            
+                            // add to the tileGameObjectProperties property of the tilePropertyGameObjects
+                            var tilePropertyGameObject = new TilePropertyGameObject()
+                            {
+                                key = "MechanicsParent",
+                                value = new PropertyGameObject()
+                                {
+                                    gameObject = mechanicsParent,
+                                }
+                            };
+                            // add the tilePropertyGameObject to the TilePropertyGameObjects
+                            var tilePropertyGameObjectList = new List<TilePropertyGameObject>();
+                            tilePropertyGameObjectList.Add(tilePropertyGameObject);
+                            // add the TilePropertyGameObjects to the machinePrefab
+                            var tilePropertyGameObjectsComponent = prefabInstance.AddComponent<TilePropertyGameObjects>();
+                            tilePropertyGameObjectsComponent.tileGameObjectProperties = tilePropertyGameObjectList;
+                        }
+                        
+                        // save the prefab
+                        if (hasChanges)
+                        {
+                            PrefabUtility.SaveAsPrefabAsset(prefabInstance, machinePrefabPath);
+                        }
+                        
+                        Debug.Log($"Fixing Audio Source for machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant}");
+                
+                        processCount++;
+                    }
+                }
+            }
+            
+            Debug.Log($"Processed Fix Audio Source {processCount} machine variants.");
+        }
 
         
         // DONE: Ported to BaseGameMachine.template
-        [MenuItem("Bettr/Tools/Fix Audio Source")]
+        [MenuItem("Bettr/Tools/Fix Base Game Machine Audio Source")]
         public static void FixAudioSource()
         {
             // Walk the entire directory tree under the plugin root directory
@@ -4466,6 +4611,8 @@ namespace Bettr.Editor
                 var mechanicsData = GetTableArray<string>(mechanicsTable, pk, "Mechanic");
                 foreach (var mechanic in mechanicsData)
                 {
+                    Debug.Log($"Processing mechanic: {mechanic}");
+                    
                     var mechanicRuntimeAssetPath = runtimeAssetPath;
                     // only ways and paylines are treated as part of the runtime asset path
                     // the other mechanics have are under the Mechanics/<MechanicName> asset path
@@ -4474,7 +4621,7 @@ namespace Bettr.Editor
                         mechanicRuntimeAssetPath = Path.Combine(runtimeAssetPath, "Mechanics", mechanic);
                         EnsureDirectory(mechanicRuntimeAssetPath);
                     }
-                    dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "templates", "mechanics", mechanic, "scripts");
+                    dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "templates", "mechanics", mechanic.ToLower(), "scripts");
                     filePaths = Directory.GetFiles(dirPath, "*.cscript.txt.template");
                     scriptsPath = $"mechanics/{mechanic}/scripts";
                     CopyScripts(scriptsPath, filePaths, machineName, machineVariant, experimentVariant, mechanicRuntimeAssetPath);

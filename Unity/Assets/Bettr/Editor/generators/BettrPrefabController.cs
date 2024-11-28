@@ -6,14 +6,14 @@ namespace Bettr.Editor.generators
 {
     public static class BettrPrefabController
     {
-        public static GameObject ProcessPrefab(string prefabName, IGameObject rootGameObject, string runtimeAssetPath)
+        public static GameObject ProcessPrefab(string prefabName, IGameObject rootGameObject, string runtimeAssetPath, bool force = false)
         {
             AssetDatabase.Refresh();
             
             var prefabPath = $"{runtimeAssetPath}/Prefabs/{prefabName}.prefab";
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
 
-            if (prefab == null)
+            if (prefab == null || force)
             {
                 prefab = rootGameObject.GameObject;
                 PrefabUtility.SaveAsPrefabAsset(prefab, prefabPath);

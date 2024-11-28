@@ -68,7 +68,7 @@ namespace Bettr.Editor
 
             BettrPrefabController.ProcessPrefab(prefabName, 
                 hierarchyInstance, 
-                mechanicRuntimeAssetPath);
+                mechanicRuntimeAssetPath, force:true);
         }
     }
     

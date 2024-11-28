@@ -430,7 +430,11 @@ namespace Bettr.Core
                 }
             }
             
-            Object.Instantiate(prefab, parent == null ? null : parent.transform);
+            var instance = Object.Instantiate(prefab, parent == null ? null : parent.transform);
+            if (context != null)
+            {
+                context.GameObjectResult = instance;
+            }
         }
     }
     

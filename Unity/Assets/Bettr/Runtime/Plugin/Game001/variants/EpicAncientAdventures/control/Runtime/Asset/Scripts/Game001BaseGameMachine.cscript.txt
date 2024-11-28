@@ -25,17 +25,21 @@ function Game001BaseGameMachine:OnError(callStack)
 end
 
 function Game001BaseGameMachine:Awake()
-	System.Print("Game001BaseGameMachine Awake tile id={0}", self.id)
-	self:Initialize()
-end
-
-function Game001BaseGameMachine:Initialize()
-	System.Print("Game001BaseGameMachine Awake tile id={0}", self.id)
-    self.Mechanics = Game001BaseGameMachineMechanics:new()
-    self.Mechanics:Initialize(self)
+	System.Print("Game001BaseGameMachine Awake2 tile id={0}", self.id)
 end
 
 function Game001BaseGameMachine:Start()
+    series
+        do
+            System.Print("Game001BaseGameMachine Start tile id={0}", self.id)
+            self.Mechanics = Game001BaseGameMachineMechanics:new()
+            self.Mechanics:Initialize(self)
+            self:StartMachine()
+        end
+    end
+end
+
+function Game001BaseGameMachine:StartMachine()
     series
         do
             self:ConfigurePreviewMode()
