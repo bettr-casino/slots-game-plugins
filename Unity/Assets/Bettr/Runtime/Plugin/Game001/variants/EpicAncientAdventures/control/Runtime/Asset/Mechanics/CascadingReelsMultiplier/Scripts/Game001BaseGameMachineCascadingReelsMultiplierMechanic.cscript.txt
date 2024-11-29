@@ -42,11 +42,14 @@ function Game001BaseGameMachineCascadingReelsMultiplierMechanic:BaseGamePayout(m
                 local cascadingReelsMultiplier = arr[i]
                 local thisCascadeID = cascadingReelsMultiplier.Cascade
                 if thisCascadeID == cascadeID then
+                    self.State.MechanicsPrefab.SetActive(true)
                     local multiplier = cascadingReelsMultiplier.Multiplier
                     local pays = cascadingReelsMultiplier.Pays
                     local totalPays = cascadingReelsMultiplier.TotalPays
-                    System.Print("Game001BaseGameMachineCascadingReelsMultiplierMechanic BaseGamePayout cascadeID={0} multiplier={1} pays={2} totalPays={3}", cascadeID, multiplier, pays, totalPays)
-                    self.State.MechanicsPrefab.SetActive(true)
+                    System.WaitForFrame(1)                    
+                    local textProperty = machine.BaseGameCascadingReelsMultiplierText
+                    System.Print("Game001BaseGameMachineCascadingReelsMultiplierMechanic BaseGamePayout cascadeID={0} multiplier={1} pays={2} totalPays={3} textProperty={4}", cascadeID, multiplier, pays, totalPays, textProperty)
+                    textProperty.SetText("" .. pays)
                 end
             end
         end
