@@ -39,7 +39,13 @@ namespace Bettr.Core
 
     [RequireComponent(typeof(Tile))]
     [Serializable]
-    public class TilePropertyPathCreators : MonoBehaviour, ITileProperty
+    public class TilePropertyPathCreators : TilePropertyPathCreatorsBase
+    {
+        
+    }
+
+    [Serializable]
+    public class TilePropertyPathCreatorsBase : MonoBehaviour, ITileProperty
     {
         public List<TilePropertyPathCreator> tilePathCreatorProperties;
 

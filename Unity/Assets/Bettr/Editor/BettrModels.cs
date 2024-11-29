@@ -605,10 +605,22 @@ namespace Bettr.Editor
                 }
                     break;
                 case "TilePropertyTextMeshPros":
+                case "TilePropertyTextMeshProsInjected":
                     var tileTextMeshProProperties = new List<TilePropertyTextMeshPro>();
                     var tileTextMeshProGroupProperties = new List<TilePropertyTextMeshProGroup>();
-                    var tilePropertyTextMeshProsComponent = new TilePropertyTextMeshProsComponent(tileTextMeshProProperties, tileTextMeshProGroupProperties);
-                    tilePropertyTextMeshProsComponent.AddComponent(gameObject);
+                    if (ComponentType == "TilePropertyTextMeshProsInjected")
+                    {
+                        var tilePropertyTextMeshProsComponent = new TilePropertyTextMeshProsInjectedComponent(tileTextMeshProProperties, tileTextMeshProGroupProperties);
+                        tilePropertyTextMeshProsComponent.AddComponent(gameObject);
+                    }
+                    else
+                    {
+                        var tilePropertyTextMeshProsComponent =
+                            new TilePropertyTextMeshProsComponent(tileTextMeshProProperties,
+                                tileTextMeshProGroupProperties);
+                        tilePropertyTextMeshProsComponent.AddComponent(gameObject);
+                    }
+
                     foreach (var kvPair in TextMeshProsProperty)
                     {
                         InstanceGameObject.IdGameObjects.TryGetValue(kvPair.Id, out var referenceGameObject);
@@ -642,10 +654,19 @@ namespace Bettr.Editor
                     }
                     break;
                 case "TilePropertyGameObjects":
+                case "TilePropertyGameObjectsInjected":
                     var tileGameObjectProperties = new List<TilePropertyGameObject>();
                     var tileGameObjectGroupProperties = new List<TilePropertyGameObjectGroup>();
-                    var tilePropertyGameObjectsComponent = new TilePropertyGameObjectsComponent(tileGameObjectProperties, tileGameObjectGroupProperties);
-                    tilePropertyGameObjectsComponent.AddComponent(gameObject);
+                    if (ComponentType == "TilePropertyGameObjectsInjected")
+                    {
+                        var tilePropertyGameObjectsComponent = new TilePropertyGameObjectsInjectedComponent(tileGameObjectProperties, tileGameObjectGroupProperties);
+                        tilePropertyGameObjectsComponent.AddComponent(gameObject);
+                    }
+                    else
+                    {
+                        var tilePropertyGameObjectsComponent = new TilePropertyGameObjectsComponent(tileGameObjectProperties, tileGameObjectGroupProperties);
+                        tilePropertyGameObjectsComponent.AddComponent(gameObject);
+                    }
                     if (GameObjectsProperty != null)
                     {
                         foreach (var kvPair in GameObjectsProperty)
@@ -683,10 +704,19 @@ namespace Bettr.Editor
                     }
                     break;
                 case "TilePropertyAnimators":
+                case "TilePropertyAnimatorsInjected":
                     var properties = new List<TilePropertyAnimator>();
                     var groupProperties = new List<TilePropertyAnimatorGroup>();
-                    var tilePropertyAnimatorsComponent = new TilePropertyAnimatorsComponent(properties, groupProperties);
-                    tilePropertyAnimatorsComponent.AddComponent(gameObject);
+                    if (ComponentType == "TilePropertyAnimatorsInjected")
+                    {
+                        var tilePropertyAnimatorsComponent = new TilePropertyAnimatorsInjectedComponent(properties, groupProperties);
+                        tilePropertyAnimatorsComponent.AddComponent(gameObject);
+                    }
+                    else
+                    {
+                        var tilePropertyAnimatorsComponent = new TilePropertyAnimatorsComponent(properties, groupProperties);
+                        tilePropertyAnimatorsComponent.AddComponent(gameObject);
+                    }
                     foreach (var kvPair in AnimatorsProperty)
                     {
                         InstanceGameObject.IdGameObjects.TryGetValue(kvPair.Id, out var referenceGameObject);
@@ -741,10 +771,20 @@ namespace Bettr.Editor
                     }
                     break;
                 case "TilePropertyInts":
+                case "TilePropertyIntsInjected":
                     var tileIntProperties = new List<TilePropertyInt>();
                     var tileIntGroupProperties = new List<TilePropertyIntGroup>();
-                    var tilePropertyIntsComponent = new TilePropertyIntsComponent(tileIntProperties, tileIntGroupProperties);
-                    tilePropertyIntsComponent.AddComponent(gameObject);
+                    if (ComponentType == "TilePropertyIntsInjected")
+                    {
+                        var tilePropertyIntsComponent = new TilePropertyIntsInjectedComponent(tileIntProperties, tileIntGroupProperties);
+                        tilePropertyIntsComponent.AddComponent(gameObject);
+                    }
+                    else
+                    {
+                        var tilePropertyIntsComponent = new TilePropertyIntsComponent(tileIntProperties, tileIntGroupProperties);
+                        tilePropertyIntsComponent.AddComponent(gameObject);
+                    }
+                    
                     if (IntsProperty != null)
                     {
                         foreach (var kvPair in IntsProperty)
@@ -780,10 +820,21 @@ namespace Bettr.Editor
                     }
                     break;                
                 case "TilePropertyStrings":
+                case "TilePropertyStringsInjected":
                     var tileStringProperties = new List<TilePropertyString>();
                     var tileStringGroupProperties = new List<TilePropertyStringGroup>();
-                    var tilePropertyStringsComponent = new TilePropertyStringsComponent(tileStringProperties, tileStringGroupProperties);
-                    tilePropertyStringsComponent.AddComponent(gameObject);
+                    if (ComponentType == "TilePropertyStringsInjected")
+                    {
+                        var tilePropertyStringsComponent = new TilePropertyStringsInjectedComponent(tileStringProperties, tileStringGroupProperties);
+                        tilePropertyStringsComponent.AddComponent(gameObject);
+                    }
+                    else
+                    {
+                        var tilePropertyStringsComponent =
+                            new TilePropertyStringsComponent(tileStringProperties, tileStringGroupProperties);
+                        tilePropertyStringsComponent.AddComponent(gameObject);
+                    }
+
                     if (StringsProperty != null)
                     {
                         foreach (var kvPair in StringsProperty)
@@ -1019,6 +1070,26 @@ namespace Bettr.Editor
         public List<AnimatorProperty> Group;
     }
     
+    [Serializable]
+    public class TilePropertyAnimatorsInjectedComponent : IComponent
+    {
+        public List<TilePropertyAnimator> tileAnimatorProperties;
+        public List<TilePropertyAnimatorGroup> tileAnimatorGroupProperties;
+        
+        public TilePropertyAnimatorsInjectedComponent(List<TilePropertyAnimator> tileAnimatorProperties, List<TilePropertyAnimatorGroup> tileAnimatorGroupProperties)
+        {
+            this.tileAnimatorProperties = tileAnimatorProperties;
+            this.tileAnimatorGroupProperties = tileAnimatorGroupProperties;
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            var component = gameObject.AddComponent<TilePropertyAnimatorsInjected>();
+            component.tileAnimatorProperties = tileAnimatorProperties;
+            component.tileAnimatorGroupProperties = tileAnimatorGroupProperties;
+        }
+    }
+    
     
     [Serializable]
     public class TilePropertyAnimatorsComponent : IComponent
@@ -1054,6 +1125,26 @@ namespace Bettr.Editor
         public string GroupKey;
 
         public List<GameObjectProperty> Group;
+    }
+    
+    [Serializable]
+    public class TilePropertyGameObjectsInjectedComponent : IComponent
+    {
+        private readonly List<TilePropertyGameObject> _tileGameObjectProperties;
+        private readonly List<TilePropertyGameObjectGroup> _tileGameObjectGroupProperties;
+        
+        public TilePropertyGameObjectsInjectedComponent(List<TilePropertyGameObject> tileGameObjectProperties, List<TilePropertyGameObjectGroup> tileGameObjectGroupProperties)
+        {
+            this._tileGameObjectProperties = tileGameObjectProperties;
+            this._tileGameObjectGroupProperties = tileGameObjectGroupProperties;
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            var component = gameObject.AddComponent<TilePropertyGameObjectsInjected>();
+            component.tileGameObjectProperties = _tileGameObjectProperties;
+            component.tileGameObjectGroupProperties = _tileGameObjectGroupProperties;
+        }
     }
     
     [Serializable]
@@ -1097,6 +1188,26 @@ namespace Bettr.Editor
 
         // ReSharper disable once InconsistentNaming
         public List<TextMeshProProperty> Group;
+    }
+    
+    [Serializable]
+    public class TilePropertyTextMeshProsInjectedComponent : IComponent
+    {
+        private readonly List<TilePropertyTextMeshPro> _tileTextMeshProProperties;
+        private readonly List<TilePropertyTextMeshProGroup> _tileTextMeshProGroupProperties;
+        
+        public TilePropertyTextMeshProsInjectedComponent(List<TilePropertyTextMeshPro> properties, List<TilePropertyTextMeshProGroup> groupProperties)
+        {
+            this._tileTextMeshProProperties = properties;
+            this._tileTextMeshProGroupProperties = groupProperties;
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            var component = gameObject.AddComponent<TilePropertyTextMeshProsInjected>();
+            component.tileTextMeshProProperties = _tileTextMeshProProperties;
+            component.tileTextMeshProGroupProperties = _tileTextMeshProGroupProperties;
+        }
     }
     
     [Serializable]
@@ -1187,6 +1298,26 @@ namespace Bettr.Editor
     }
     
     [Serializable]
+    public class TilePropertyIntsInjectedComponent : IComponent
+    {
+        private readonly List<TilePropertyInt> _tileIntProperties;
+        private readonly List<TilePropertyIntGroup> _tileIntGroupProperties;
+        
+        public TilePropertyIntsInjectedComponent(List<TilePropertyInt> properties, List<TilePropertyIntGroup> groupProperties)
+        {
+            this._tileIntProperties = properties;
+            this._tileIntGroupProperties = groupProperties;
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            var component = gameObject.AddComponent<TilePropertyIntsInjected>();
+            component.tileGameIntProperties = _tileIntProperties;
+            component.tileGameIntGroupProperties = _tileIntGroupProperties;
+        }
+    }
+    
+    [Serializable]
     public class TilePropertyIntsComponent : IComponent
     {
         private readonly List<TilePropertyInt> _tileIntProperties;
@@ -1222,6 +1353,26 @@ namespace Bettr.Editor
         public string GroupKey;
 
         public List<StringProperty> Group;
+    }
+    
+    [Serializable]
+    public class TilePropertyStringsInjectedComponent : IComponent
+    {
+        private readonly List<TilePropertyString> _tileStringProperties;
+        private readonly List<TilePropertyStringGroup> _tileStringGroupProperties;
+        
+        public TilePropertyStringsInjectedComponent(List<TilePropertyString> properties, List<TilePropertyStringGroup> groupProperties)
+        {
+            this._tileStringProperties = properties;
+            this._tileStringGroupProperties = groupProperties;
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            var component = gameObject.AddComponent<TilePropertyStringsInjected>();
+            component.tileGameStringProperties = _tileStringProperties;
+            component.tileGameStringGroupProperties = _tileStringGroupProperties;
+        }
     }
     
     [Serializable]
