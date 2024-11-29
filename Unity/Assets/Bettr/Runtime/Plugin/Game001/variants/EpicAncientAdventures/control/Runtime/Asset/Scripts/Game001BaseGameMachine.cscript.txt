@@ -125,29 +125,10 @@ function Game001BaseGameMachine:PlayStartAnimations()
 end
 
 function Game001BaseGameMachine:StartEngines()
-    parallel
-    
-        do
-            Game001BaseGameReel1:StartEngines()
-        end
-        
-        do
-            Game001BaseGameReel2:StartEngines()
-        end
-        
-        do
-            Game001BaseGameReel3:StartEngines()
-        end
-        
-        do
-            Game001BaseGameReel4:StartEngines()
-        end
-        
-        do
-            Game001BaseGameReel5:StartEngines()
-        end
-        
-    end
+    local reelCount = Game001BaseGameLayout.ReelCount.First.Value
+    for i = 1, reelCount parallel do
+        _G["Game001BaseGameReel" .. i]:StartEngines()
+    end    
 end
 
 function Game001BaseGameMachine:LoadServerOutcome()
@@ -220,31 +201,17 @@ function Game001BaseGameMachine:SpinEngines()
     BettrVisualsController.RollUpCounter(self.CreditsText, oldCoins, newCoins, 0.05)
     Game001BaseGameState.SpinState.First.State = "Spinning"
     self:ResetSettings()
-    parallel        
-        do
-            Game001BaseGameReel1:SpinEngines()
-        end
-        do
-            Game001BaseGameReel2:SpinEngines()
-        end
-        do
-            Game001BaseGameReel3:SpinEngines()
-        end    
-        do
-            Game001BaseGameReel4:SpinEngines()
-        end   
-        do
-            Game001BaseGameReel5:SpinEngines()
-        end                
+    local reelCount = Game001BaseGameLayout.ReelCount.First.Value
+    for i = 1, reelCount parallel do
+        _G["Game001BaseGameReel" .. i]:SpinEngines()
     end
 end
 
 function Game001BaseGameMachine:UpdateBaseGameReelsSpinState(state)
-    Game001BaseGameReelSpinState.Reel1.First.ReelSpinState = state
-    Game001BaseGameReelSpinState.Reel2.First.ReelSpinState = state
-    Game001BaseGameReelSpinState.Reel3.First.ReelSpinState = state
-    Game001BaseGameReelSpinState.Reel4.First.ReelSpinState = state
-    Game001BaseGameReelSpinState.Reel5.First.ReelSpinState = state
+    local reelCount = Game001BaseGameLayout.ReelCount.First.Value
+    for i = 1, reelCount do
+        Game001BaseGameReelSpinState["Reel" .. i].First.ReelSpinState = state
+    end
 end
 
 function Game001BaseGameMachine:CurrentSpinState()

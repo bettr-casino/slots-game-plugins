@@ -1,13 +1,13 @@
 require "math"
 require "Core"
-{{-for mechanic in baseGameMechanics}}
-require "{{machineName}}BaseGameMachine{{mechanic}}Mechanic"
-{{-end}}
+require "{{machineName}}BaseGameMachineWaysMechanic"
+require "{{machineName}}BaseGameMachineCascadingReelsMechanic"
+require "{{machineName}}BaseGameMachineCascadingReelsMultiplierMechanic"
 
 {{machineName}}BaseGameMachineMechanics = {
-{{-for mechanic in baseGameMechanics}}
-    {{mechanic}}Mechanic = nil,
-{{-end}}
+    WaysMechanic = nil,
+    CascadingReelsMechanic = nil,
+    CascadingReelsMultiplierMechanic = nil,
 }
 
 function {{machineName}}BaseGameMachineMechanics:new(o)
@@ -22,10 +22,12 @@ function {{machineName}}BaseGameMachineMechanics:OnError(callStack)
 end
 
 function {{machineName}}BaseGameMachineMechanics:Initialize(machine)
-{{-for mechanic in baseGameMechanics}}
-    self.{{mechanic}}Mechanic = {{machineName}}BaseGameMachine{{mechanic}}Mechanic:new()
-    self.{{mechanic}}Mechanic:Initialize(machine)
-{{-end}}
+    self.WaysMechanic = {{machineName}}BaseGameMachineWaysMechanic:new()
+    self.WaysMechanic:Initialize(machine)
+    self.CascadingReelsMechanic = {{machineName}}BaseGameMachineCascadingReelsMechanic:new()
+    self.CascadingReelsMechanic:Initialize(machine)
+    self.CascadingReelsMultiplierMechanic = {{machineName}}BaseGameMachineCascadingReelsMultiplierMechanic:new()
+    self.CascadingReelsMultiplierMechanic:Initialize(machine)
 end
 
 function {{machineName}}BaseGameMachineMechanics:BaseGamePayout(machine)

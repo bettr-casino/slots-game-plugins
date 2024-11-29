@@ -32,6 +32,8 @@ namespace Bettr.Core
         [NonSerialized] private BettrVisualsController _bettrVisualsController;
         // ReSharper disable once NotAccessedField.Local
         [NonSerialized] private BettrOutcomeController _bettrOutcomeController;
+        // ReSharper disable once NotAccessedField.Local
+        [NonSerialized] private BettrTextMeshProController _bettrTextMeshProController;
 
         private bool _oneTimeSetUpComplete;
 
@@ -186,6 +188,8 @@ namespace Bettr.Core
                     WebOutcomesBaseURL = _configData.WebOutcomesBaseURL,
                     UseFileSystemOutcomes = _configData.UseFileSystemOutcomes,
                 };
+
+            _bettrTextMeshProController = new BettrTextMeshProController();
             
             // Register the specialized performance controllers
             TileController.RegisterType<BettrReelController>("BettrReelController");

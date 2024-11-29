@@ -45,7 +45,9 @@ function {{machineName}}BaseGameMachineCascadingReelsMultiplierMechanic:BaseGame
                     local multiplier = cascadingReelsMultiplier.Multiplier
                     local pays = cascadingReelsMultiplier.Pays
                     local totalPays = cascadingReelsMultiplier.TotalPays
+                    BettrTextMeshProController.SetText(self.State.MechanicsPrefab, 0)
                     System.Print("{{machineName}}BaseGameMachineCascadingReelsMultiplierMechanic BaseGamePayout cascadeID={0} multiplier={1} pays={2} totalPays={3}", cascadeID, multiplier, pays, totalPays)
+                    self.State.MechanicsPrefab.SetActive(true)
                 end
             end
         end

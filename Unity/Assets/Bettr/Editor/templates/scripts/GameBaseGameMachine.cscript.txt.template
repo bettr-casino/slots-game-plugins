@@ -25,7 +25,7 @@ function {{machineName}}BaseGameMachine:OnError(callStack)
 end
 
 function {{machineName}}BaseGameMachine:Awake()
-	System.Print("{{machineName}}BaseGameMachine Awake tile id={0}", self.id)
+	System.Print("{{machineName}}BaseGameMachine Awake2 tile id={0}", self.id)
 end
 
 function {{machineName}}BaseGameMachine:Start()
@@ -125,13 +125,10 @@ function {{machineName}}BaseGameMachine:PlayStartAnimations()
 end
 
 function {{machineName}}BaseGameMachine:StartEngines()
-    parallel
-    {{ for reelIndex in 1..reelCount }}
-    do
-        {{machineName}}BaseGameReel{{ reelIndex }}:StartEngines()
-    end
-    {{ end }}
-    end
+    local reelCount = {{machineName}}BaseGameLayout.ReelCount.First.Value
+    for i = 1, reelCount parallel do
+        _G["{{machineName}}BaseGameReel" .. i]:StartEngines()
+    end    
 end
 
 function {{machineName}}BaseGameMachine:LoadServerOutcome()
@@ -204,19 +201,17 @@ function {{machineName}}BaseGameMachine:SpinEngines()
     BettrVisualsController.RollUpCounter(self.CreditsText, oldCoins, newCoins, 0.05)
     {{machineName}}BaseGameState.SpinState.First.State = "Spinning"
     self:ResetSettings()
-    parallel
-        {{- for reelIndex in 1..reelCount }}
-            do
-                {{machineName}}BaseGameReel{{ reelIndex }}:SpinEngines()
-            end
-        {{- end }}
+    local reelCount = {{machineName}}BaseGameLayout.ReelCount.First.Value
+    for i = 1, reelCount parallel do
+        _G["{{machineName}}BaseGameReel" .. i]:SpinEngines()
     end
 end
 
 function {{machineName}}BaseGameMachine:UpdateBaseGameReelsSpinState(state)
-    {{- for reelIndex in 1..reelCount }}
-        {{machineName}}BaseGameReelSpinState.Reel{{ reelIndex }}.First.ReelSpinState = state
-    {{- end }}
+    local reelCount = {{machineName}}BaseGameLayout.ReelCount.First.Value
+    for i = 1, reelCount do
+        {{machineName}}BaseGameReelSpinState["Reel" .. i].First.ReelSpinState = state
+    end
 end
 
 function {{machineName}}BaseGameMachine:CurrentSpinState()
@@ -295,11 +290,21 @@ end
 
 function {{machineName}}BaseGameMachine:OnOutcomeReceived()
     parallel
-        {{- for reelIndex in 1..reelCount }}
         do
-            {{machineName}}BaseGameReel{{ reelIndex }}:OnOutcomeReceived()
+            {{machineName}}BaseGameReel1:OnOutcomeReceived()
         end
-        {{- end }}
+        do
+            {{machineName}}BaseGameReel2:OnOutcomeReceived()
+        end
+        do
+            {{machineName}}BaseGameReel3:OnOutcomeReceived()
+        end
+        do
+            {{machineName}}BaseGameReel4:OnOutcomeReceived()
+        end
+        do
+            {{machineName}}BaseGameReel5:OnOutcomeReceived()
+        end
     end
 end
 
