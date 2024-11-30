@@ -64,6 +64,9 @@ namespace Bettr.Core
                 "Bettr/UIImage",
                 "Unlit/Texture",
                 "Unlit/Color",
+                "Legacy Shaders/Particles/Additive",
+                "Standard",
+                
             };
             
             // load the shaders into the cache
@@ -389,6 +392,7 @@ namespace Bettr.Core
             {
                 foreach (Material mat in renderer.sharedMaterials)
                 {
+                    if (mat == null) continue;
                     if (ShaderCaches.ShaderCache.TryGetValue(mat.shader.name, out Shader bettrShader))
                     {
                         mat.shader = bettrShader;
