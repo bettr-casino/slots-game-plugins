@@ -65,6 +65,7 @@ namespace Bettr.Core
                 "Unlit/Texture",
                 "Unlit/Color",
                 "Legacy Shaders/Particles/Additive",
+                "Legacy Shaders/Particles/Alpha Blended Premultiply",
                 "Standard",
                 
             };

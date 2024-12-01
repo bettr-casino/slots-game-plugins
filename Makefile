@@ -224,7 +224,7 @@ deploy-video-webgl: publish-video-webgl
 # Build specific asset bundles
 #
 
-build-lobby-assets-webgl: prepare-project
+build-lobby-assets-webgl: prepare-project build-lobby-cards-webgl
 	@echo "Building WebGL lobby asset bundles..."
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "lobbycardv0_1_0" -assetSubLabel "control" -buildTarget WebGL; \
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "mainlobbyv0_1_0" -assetSubLabel "control" -buildTarget WebGL; \
