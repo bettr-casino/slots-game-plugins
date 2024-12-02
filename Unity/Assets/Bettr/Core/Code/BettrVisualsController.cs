@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
@@ -14,10 +15,91 @@ using Object = UnityEngine.Object;
 namespace Bettr.Core
 {
     public delegate void RollupText(long value);
+
+    public class LayerToCameraMap
+    {
+        private static Dictionary<string, string> _layerIDToCameraNamesMap = new Dictionary<string, string>()
+        {
+            {"UI", "Camera_UI"},
+            {"SLOT_BACKGROUND", "Camera_Background"},
+            {"SLOT_REELS", "Camera_Reels"},
+            {"SLOT_FRAME", "Camera_Frame"},
+            {"SLOT_OVERLAY", "Camera_Overlay"},
+            {"SLOT_REELS_OVERLAY", "Camera_Reels_Overlay"},
+            {"SLOT_TRANSITION", "Camera_Transition"},
+        };
+        
+        Dictionary<string, Camera> _layerToCamera = new Dictionary<string, Camera>();
+
+        public void Reset()
+        {
+            _layerToCamera.Clear();
+        }
+        
+        public Camera GetCameraForLayer(string layerName)
+        {
+            if (_layerToCamera.TryGetValue(layerName, out var layer))
+            {
+                return layer;
+            }
+            // find the camera for the layer and if not exists throw an exception
+            if (_layerIDToCameraNamesMap.TryGetValue(layerName, out var cameraName))
+            {
+                var camera = GameObject.Find(cameraName)?.GetComponent<Camera>();
+                if (camera == null)
+                {
+                    throw new ScriptRuntimeException($"Camera not found for layer {layerName}");
+                }
+                _layerToCamera[layerName] = camera;
+                return camera;
+            }
+            throw new ScriptRuntimeException($"Camera not found for layer {layerName}");
+        }
+    }
     
     public class BettrVisualsController
     {
+
+        private GameObject _fireball;
+        private ParticleSystem _particleSystem;
         
+        private LayerToCameraMap _layerToCameraMap = new LayerToCameraMap();
+
+        public GameObject Fireball
+        {
+            get => _fireball;
+            set
+            {
+                _fireball = value;
+
+                if (_fireball == null)
+                {
+                    _particleSystem = null;
+                    return;
+                }
+
+                var ball = _fireball.transform.Find("ball")?.gameObject;
+                if (ball == null)
+                {
+                    Debug.LogWarning("Fireball does not contain a 'ball' child object.");
+                    return;
+                }
+
+                _particleSystem = ball.GetComponent<ParticleSystem>();
+                if (_particleSystem != null)
+                {
+                    var main = _particleSystem.main;
+                    main.startSpeed = 0;
+                    main.duration = 0;
+                    main.loop = true;
+                    main.playOnAwake = false;
+                    main.simulationSpeed = 1;
+                }
+
+                _fireball.SetActive(false);
+            }
+        }
+
         public BettrUserController BettrUserController { get; private set; }
         
         public BettrVisualsController(BettrUserController bettrUserController)
@@ -41,7 +123,86 @@ namespace Bettr.Core
             TileController.RegisterType<iTween>("iTween");
             TileController.RegisterType<iTween.EaseType>("iTween.EaseType");
             
+            _layerToCameraMap.Reset();
+            
             BettrUserController = bettrUserController;
+        }
+        
+        public IEnumerator FireballMoveTo(GameObject to, float offsetY = 10, float duration = 1.0f)
+        {
+            // Set the particle system duration dynamically
+            var main = _particleSystem.main;
+            main.duration = duration;
+            main.startLifetime = duration; // Ensure particles fade out in sync
+
+            // Get the layer name of the 'to' GameObject
+            string layerName = LayerMask.LayerToName(to.layer);
+
+            // Get the camera associated with the layer of the 'to' GameObject
+            Camera targetCamera = _layerToCameraMap.GetCameraForLayer(layerName);
+            if (targetCamera == null)
+            {
+                throw new ScriptRuntimeException($"No camera found for layer {layerName}");
+            }
+
+            // Convert 'to' position from the target layer's camera to screen space
+            Vector3 toScreenPosition = targetCamera.WorldToScreenPoint(to.transform.position);
+
+            // Get the Fireball's camera (assume Fireball uses SLOT_TRANSITION layer)
+            Camera fireballCamera = _layerToCameraMap.GetCameraForLayer("SLOT_TRANSITION");
+            if (fireballCamera == null)
+            {
+                throw new ScriptRuntimeException($"No camera found for SLOT_TRANSITION");
+            }
+
+            // Convert screen position to world position in the Fireball's camera
+            Vector3 fireballWorldPosition = fireballCamera.ScreenToWorldPoint(new Vector3(
+                toScreenPosition.x,
+                toScreenPosition.y + offsetY, // Apply vertical offset
+                fireballCamera.nearClipPlane // Set depth relative to Fireball's camera
+            ));
+
+            // Set Fireball position relative to Fireball's camera
+            Fireball.transform.position = fireballWorldPosition;
+
+            // Enable fireball and start the particle system
+            Fireball.SetActive(true);
+            _particleSystem.Play();
+
+            // Wait for the fireball to reach the destination
+            yield return new WaitForSeconds(duration);
+
+            // Stop the particle system and disable the fireball
+            _particleSystem.Stop();
+            Fireball.SetActive(false);
+        }
+
+        public IEnumerator FireballFromTo(GameObject from, GameObject to, float duration = 1.0f)
+        {
+            // Set the particle system duration dynamically
+            var main = _particleSystem.main;
+            main.duration = duration;
+            main.startLifetime = duration; // Ensure particles fade out in sync
+            
+            Fireball.transform.position = from.transform.position;
+
+            // Enable fireball and start particle system
+            Fireball.SetActive(true);
+            _particleSystem.Play();
+
+            // Move the fireball using iTween
+            iTween.MoveTo(Fireball, iTween.Hash(
+                "position", to.transform.position,
+                "time", duration,
+                "easetype", iTween.EaseType.easeInOutSine
+            ));
+
+            // Wait for the fireball to reach the destination
+            yield return new WaitForSeconds(duration);
+
+            // Stop the particle system and disable the fireball
+            _particleSystem.Stop();
+            Fireball.SetActive(false);
         }
         
         public void RollUpCounter(PropertyTextMeshPro counterTextProperty, long start, long end, float duration)

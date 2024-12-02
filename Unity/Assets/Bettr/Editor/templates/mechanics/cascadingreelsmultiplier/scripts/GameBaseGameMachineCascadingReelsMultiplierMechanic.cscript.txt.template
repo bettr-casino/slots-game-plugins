@@ -24,7 +24,7 @@ function {{machineName}}BaseGameMachineCascadingReelsMultiplierMechanic:Initiali
             local mechanicsPrefab = BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, prefabName, parentGameObject)
             mechanicsPrefab.SetActive(false)
             self.State.MechanicsPrefab = mechanicsPrefab
-            System.Print("{{machineName}}BaseGameMachineCascadingReelsMultiplierMechanic:Initialize mechanicsPrefab={0}", mechanicsPrefab.name)
+            System.Print("{{machineName}}BaseGameMachineCascadingReelsMultiplierMechanic:Initialize mechanicsPrefab={0}", mechanicsPrefab.name)            
         end
     end
 end
@@ -41,12 +41,16 @@ function {{machineName}}BaseGameMachineCascadingReelsMultiplierMechanic:BaseGame
             for i = 1, #arr do
                 local cascadingReelsMultiplier = arr[i]
                 local thisCascadeID = cascadingReelsMultiplier.Cascade
-                if thisCascadeID == cascadeID then
+                if thisCascadeID == cascadeID then                    
+                    self.State.MechanicsPrefab.SetActive(true)
                     local multiplier = cascadingReelsMultiplier.Multiplier
                     local pays = cascadingReelsMultiplier.Pays
                     local totalPays = cascadingReelsMultiplier.TotalPays
-                    System.Print("{{machineName}}BaseGameMachineCascadingReelsMultiplierMechanic BaseGamePayout cascadeID={0} multiplier={1} pays={2} totalPays={3}", cascadeID, multiplier, pays, totalPays)
-                    self.State.MechanicsPrefab.SetActive(true)
+                    System.WaitForFrame(1)                    
+                    local textProperty = machine.BaseGameCascadingReelsMultiplierText
+                    System.Print("{{machineName}}BaseGameMachineCascadingReelsMultiplierMechanic BaseGamePayout cascadeID={0} multiplier={1} pays={2} totalPays={3} textProperty={4}", cascadeID, multiplier, pays, totalPays, textProperty)
+                    textProperty.SetText("" .. pays)
+                    BettrVisualsController.FireballMoveTo(machine.WinText.GameObject, 10, 2)
                 end
             end
         end

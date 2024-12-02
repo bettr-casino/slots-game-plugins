@@ -1816,7 +1816,7 @@ namespace Bettr.Editor
             Debug.Log($"Processed Fix Base Game Directional Light {processCount} machine variants.");
         }
 
-        // Ported to template
+        // DONE: Ported to template
         // TODO: saving of scene asset to prefab needs to be moved out
         [MenuItem("Bettr/Tools/Fix Game Scene")]
         public static void FixGameScene()
@@ -2085,6 +2085,14 @@ namespace Bettr.Editor
                             if (cameraBackground != null)
                             {
                                 cameraBackground.GetComponent<Camera>().orthographic = true;
+                            }
+                            
+                            // Find the "Camera_Transition"
+                            var cameraTransition = FindGameObjectInHierarchy(prefabRoot, "Camera_Transition");
+                            // if it exists destroy it
+                            if (cameraTransition != null)
+                            {
+                                Object.DestroyImmediate(cameraTransition);
                             }
                             
                             // Find the "Backgrounds" game object

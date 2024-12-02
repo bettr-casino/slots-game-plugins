@@ -29,10 +29,15 @@ function MainLobbyScene:Start()
     series
         do
             System.Print("MainLobbyScene Starting...")
+            self:InitParticleEffects()
             self:InitLoading()
             self:LoadTopPanelLobbyCards()
         end
     end
+end
+
+function MainLobbyScene:InitParticleEffects()
+    BettrVisualsController.Fireball = self.Fireball.GameObject
 end
 
 function MainLobbyScene:InitLoading()
