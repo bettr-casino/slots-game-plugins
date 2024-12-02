@@ -24,7 +24,7 @@ function Game001BaseGameMachineCascadingReelsMultiplierMechanic:Initialize(machi
             local mechanicsPrefab = BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, prefabName, parentGameObject)
             mechanicsPrefab.SetActive(false)
             self.State.MechanicsPrefab = mechanicsPrefab
-            System.Print("Game001BaseGameMachineCascadingReelsMultiplierMechanic:Initialize mechanicsPrefab={0}", mechanicsPrefab.name)
+            System.Print("Game001BaseGameMachineCascadingReelsMultiplierMechanic:Initialize mechanicsPrefab={0}", mechanicsPrefab.name)            
         end
     end
 end
@@ -50,6 +50,7 @@ function Game001BaseGameMachineCascadingReelsMultiplierMechanic:BaseGamePayout(m
                     local textProperty = machine.BaseGameCascadingReelsMultiplierText
                     System.Print("Game001BaseGameMachineCascadingReelsMultiplierMechanic BaseGamePayout cascadeID={0} multiplier={1} pays={2} totalPays={3} textProperty={4}", cascadeID, multiplier, pays, totalPays, textProperty)
                     textProperty.SetText("" .. pays)
+                    BettrVisualsController.FireballMoveTo(machine.WinText.GameObject, 2)
                 end
             end
         end
