@@ -128,82 +128,96 @@ namespace Bettr.Core
             BettrUserController = bettrUserController;
         }
         
-        public IEnumerator FireballMoveTo(GameObject to, float offsetY = 10, float duration = 1.0f)
+        public IEnumerator FireballMoveTo(CrayonScriptContext context, GameObject from, GameObject to, float offsetY = 10, float duration = 1.0f, bool tween = false)
         {
+            Fireball.SetActive(false);
+
             // Set the particle system duration dynamically
             var main = _particleSystem.main;
             main.duration = duration;
             main.startLifetime = duration; // Ensure particles fade out in sync
 
-            // Get the layer name of the 'to' GameObject
-            string layerName = LayerMask.LayerToName(to.layer);
-
-            // Get the camera associated with the layer of the 'to' GameObject
-            Camera targetCamera = _layerToCameraMap.GetCameraForLayer(layerName);
-            if (targetCamera == null)
+            // Determine the starting position (from GameObject or current Fireball position)
+            Vector3 startWorldPosition;
+            if (from != null)
             {
-                throw new ScriptRuntimeException($"No camera found for layer {layerName}");
+                string fromLayerName = LayerMask.LayerToName(from.layer);
+                Camera fromCamera = _layerToCameraMap.GetCameraForLayer(fromLayerName);
+                if (fromCamera == null)
+                {
+                    throw new ScriptRuntimeException($"No camera found for layer {fromLayerName}");
+                }
+                startWorldPosition = fromCamera.WorldToScreenPoint(from.transform.position);
+            }
+            else
+            {
+                startWorldPosition = Fireball.transform.position;
             }
 
-            // Convert 'to' position from the target layer's camera to screen space
-            Vector3 toScreenPosition = targetCamera.WorldToScreenPoint(to.transform.position);
-
-            // Get the Fireball's camera (assume Fireball uses SLOT_TRANSITION layer)
-            Camera fireballCamera = _layerToCameraMap.GetCameraForLayer("SLOT_TRANSITION");
-            if (fireballCamera == null)
+            // Determine the target position (to GameObject or current Fireball position)
+            Vector3 targetWorldPosition;
+            if (to != null)
             {
-                throw new ScriptRuntimeException($"No camera found for SLOT_TRANSITION");
+                string toLayerName = LayerMask.LayerToName(to.layer);
+                Camera toCamera = _layerToCameraMap.GetCameraForLayer(toLayerName);
+                if (toCamera == null)
+                {
+                    throw new ScriptRuntimeException($"No camera found for layer {toLayerName}");
+                }
+                Vector3 toScreenPosition = toCamera.WorldToScreenPoint(to.transform.position);
+                Camera fireballCamera = _layerToCameraMap.GetCameraForLayer("SLOT_TRANSITION");
+                if (fireballCamera == null)
+                {
+                    throw new ScriptRuntimeException("No camera found for SLOT_TRANSITION");
+                }
+                targetWorldPosition = fireballCamera.ScreenToWorldPoint(new Vector3(
+                    toScreenPosition.x,
+                    toScreenPosition.y + offsetY,
+                    fireballCamera.nearClipPlane
+                ));
+            }
+            else
+            {
+                targetWorldPosition = Fireball.transform.position;
             }
 
-            // Convert screen position to world position in the Fireball's camera
-            Vector3 fireballWorldPosition = fireballCamera.ScreenToWorldPoint(new Vector3(
-                toScreenPosition.x,
-                toScreenPosition.y + offsetY, // Apply vertical offset
-                fireballCamera.nearClipPlane // Set depth relative to Fireball's camera
-            ));
+            // Set the starting position of the Fireball
+            Fireball.transform.position = startWorldPosition;
 
-            // Set Fireball position relative to Fireball's camera
-            Fireball.transform.position = fireballWorldPosition;
+            if (tween)
+            {
+                // Use iTween to move the Fireball smoothly to the target
+                iTween.MoveTo(Fireball, iTween.Hash(
+                    "position", targetWorldPosition,
+                    "time", duration,
+                    "easetype", iTween.EaseType.linear // Adjust easing as needed
+                ));
 
-            // Enable fireball and start the particle system
-            Fireball.SetActive(true);
-            _particleSystem.Play();
+                // Enable fireball and start the particle system
+                Fireball.SetActive(true);
+                _particleSystem.Play();
 
-            // Wait for the fireball to reach the destination
-            yield return new WaitForSeconds(duration);
+                // Wait for the tween duration
+                yield return new WaitForSeconds(duration);
+            }
+            else
+            {
+                // Instantly move the Fireball to the target position
+                Fireball.transform.position = targetWorldPosition;
 
-            // Stop the particle system and disable the fireball
+                // Enable fireball and start the particle system
+                Fireball.SetActive(true);
+                _particleSystem.Play();
+
+                // Wait for the duration
+                yield return new WaitForSeconds(duration);
+            }
+
+            // Stop the particle system and disable the Fireball
             _particleSystem.Stop();
             Fireball.SetActive(false);
         }
 
-        public IEnumerator FireballFromTo(GameObject from, GameObject to, float duration = 1.0f)
-        {
-            // Set the particle system duration dynamically
-            var main = _particleSystem.main;
-            main.duration = duration;
-            main.startLifetime = duration; // Ensure particles fade out in sync
-            
-            Fireball.transform.position = from.transform.position;
-
-            // Enable fireball and start particle system
-            Fireball.SetActive(true);
-            _particleSystem.Play();
-
-            // Move the fireball using iTween
-            iTween.MoveTo(Fireball, iTween.Hash(
-                "position", to.transform.position,
-                "time", duration,
-                "easetype", iTween.EaseType.easeInOutSine
-            ));
-
-            // Wait for the fireball to reach the destination
-            yield return new WaitForSeconds(duration);
-
-            // Stop the particle system and disable the fireball
-            _particleSystem.Stop();
-            Fireball.SetActive(false);
-        }
         
         public void RollUpCounter(PropertyTextMeshPro counterTextProperty, long start, long end, float duration)
         {

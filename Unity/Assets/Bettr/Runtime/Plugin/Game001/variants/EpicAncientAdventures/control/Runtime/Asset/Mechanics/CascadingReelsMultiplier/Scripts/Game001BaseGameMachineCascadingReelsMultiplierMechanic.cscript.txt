@@ -38,7 +38,7 @@ function Game001BaseGameMachineCascadingReelsMultiplierMechanic:BaseGamePayout(m
                 return
             end
             local arr = Game001BaseGameCascadingReelsMultiplier.CascadingReelsMultiplier.Array
-            for i = 1, #arr do
+            for i = 1, #arr series do
                 local cascadingReelsMultiplier = arr[i]
                 local thisCascadeID = cascadingReelsMultiplier.Cascade
                 if thisCascadeID == cascadeID then                    
@@ -50,7 +50,8 @@ function Game001BaseGameMachineCascadingReelsMultiplierMechanic:BaseGamePayout(m
                     local textProperty = machine.BaseGameCascadingReelsMultiplierText
                     System.Print("Game001BaseGameMachineCascadingReelsMultiplierMechanic BaseGamePayout cascadeID={0} multiplier={1} pays={2} totalPays={3} textProperty={4}", cascadeID, multiplier, pays, totalPays, textProperty)
                     textProperty.SetText("" .. pays)
-                    BettrVisualsController.FireballMoveTo(machine.WinText.GameObject, 10, 2)
+                    BettrVisualsController.FireballMoveTo(self.State.MechanicsPrefab, self.State.MechanicsPrefab, 60, 2, false)
+                    self.State.MechanicsPrefab.SetActive(false)
                 end
             end
         end
