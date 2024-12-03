@@ -193,12 +193,16 @@ function {{machineName}}BaseGameMachineCascadingReelsMechanic:SymbolWaysActions(
         do
             if machine.Mechanics.CascadingReelsMultiplierMechanic ~= nil then
                 machine.Mechanics.CascadingReelsMultiplierMechanic:BaseGamePayout(machine, cascadeID)
+                BettrAudioController.StopAudio()
+                BettrUserController.DisableUserInSlamStopMode()
+                machine:RollupOnlyCreditsText()
+                System.WaitForSeconds(1.0)
+            else
+                BettrAudioController.StopAudio()
+                BettrUserController.DisableUserInSlamStopMode()
+                machine:RollupCredits()
+                System.WaitForSeconds(1.3)
             end
-        end
-        do
-            BettrAudioController.StopAudio()
-            BettrUserController.DisableUserInSlamStopMode()
-            machine:RollupCredits()
         end
     end
 end

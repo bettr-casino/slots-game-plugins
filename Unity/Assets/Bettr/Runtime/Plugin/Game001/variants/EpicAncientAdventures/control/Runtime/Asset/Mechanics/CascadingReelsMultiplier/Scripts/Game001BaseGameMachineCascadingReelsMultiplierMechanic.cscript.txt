@@ -32,6 +32,10 @@ end
 function Game001BaseGameMachineCascadingReelsMultiplierMechanic:MultiplierPayout(machine, cascadeID, cascadingReelsMultiplier)
     series
         do
+            local pays = cascadingReelsMultiplier.Pays
+            local totalPays = cascadingReelsMultiplier.TotalPays
+            local spinCoins = BettrUser.SpinCoins
+            BettrUser.SpinCoins = spinCoins + totalPays - pays
             self.State.MechanicsPrefab.SetActive(true)
             System.WaitForFrame(1)                    
         end
@@ -47,12 +51,24 @@ function Game001BaseGameMachineCascadingReelsMultiplierMechanic:MultiplierPayout
             local textProperty = machine.BaseGameCascadingReelsMultiplierText
             BettrAudioController.PlayAudioLoop("rollupwins")      
             BettrVisualsController.RollUpCounter(textProperty, 0, pays, 0.3)
-            System.WaitForSeconds(2)
+            System.WaitForSeconds(1)
             textProperty.SetText("X" .. multiplier)
-            System.WaitForSeconds(2)      
+            System.WaitForSeconds(1)      
             BettrVisualsController.RollUpCounter(textProperty, pays, totalPays, 0.3)
-            System.WaitForSeconds(2) 
+            System.WaitForSeconds(1)   
+            BettrVisualsController.FireballMoveTo(nil, nil, 0, 1, false)
+        end
+        do
+            local pays = cascadingReelsMultiplier.Pays
+            local totalPays = cascadingReelsMultiplier.TotalPays
+            local textProperty = machine.BaseGameCascadingReelsMultiplierText
+            BettrVisualsController.FireballMoveTo(machine.BaseGameCascadingReelsMultiplierText.GameObject, machine.WinText.GameObject, 0, 1, true)
+            BettrVisualsController.RollUpCounter(machine.WinText, pays, totalPays, 0.3)
+            System.WaitForSeconds(0.3)
             self.State.MechanicsPrefab.SetActive(false)
+            textProperty.SetText("0")     
+            BettrVisualsController.FireballMoveTo(machine.WinText.GameObject,  machine.CreditsText.GameObject, 0, 1, true) 
+            BettrVisualsController.FireballMoveTo(nil,  nil, 0, 1, false) 
         end
     end
 end

@@ -246,17 +246,32 @@ function Game001BaseGameMachine:OnPayingCompleted()
     self:RollupCredits()
 end
 
+function Game001BaseGameMachine:RollupOnlyCreditsText()
+    local oldCoins = BettrUser.Coins
+    local newCoins = BettrUser.SpinCoins
+    BettrUser.ApplySpinCoins()
+    local pays = newCoins - oldCoins
+    local rollupWinsText = false
+    local rollupCreditsText = true
+    System.StartCoroutine(self, "OnRollupCredits", oldCoins, newCoins, pays, rollupWinsText, rollupCreditsText)
+end
+
 function Game001BaseGameMachine:RollupCredits()
     local oldCoins = BettrUser.Coins
     local newCoins = BettrUser.SpinCoins
     BettrUser.ApplySpinCoins()
     local pays = newCoins - oldCoins
-    System.StartCoroutine(self, "OnRollupCredits", oldCoins, newCoins, pays)
+    local rollupWinsText = true
+    local rollupCreditsText = true
+    System.StartCoroutine(self, "OnRollupCredits", oldCoins, newCoins, pays, rollupWinsText, rollupCreditsText)
 end
 
-function Game001BaseGameMachine:OnRollupCredits(oldCoins, newCoins, pays)
+function Game001BaseGameMachine:OnRollupCredits(oldCoins, newCoins, pays, rollupWinsText, rollupCreditsText)
     series
         do
+            if not rollupWinsText then
+                return
+            end
             local winTextProperty = self.WinText            
             if pays > 0 then
                 BettrAudioController.PlayAudioLoop("rollupwins")            
@@ -266,6 +281,9 @@ function Game001BaseGameMachine:OnRollupCredits(oldCoins, newCoins, pays)
             end
         end
         do
+            if not rollupCreditsText then
+                return
+            end
             local creditsTextProperty = self.CreditsText   
             if pays ~= 0 then
                 if pays > 0 then
