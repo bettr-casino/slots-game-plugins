@@ -29,6 +29,23 @@ function Game001BaseGameMachineCascadingReelsMultiplierMechanic:Initialize(machi
     end
 end
 
+function Game001BaseGameMachineCascadingReelsMultiplierMechanic:MultiplierPayout(machine, cascadeID, cascadingReelsMultiplier)
+    series
+        do
+            self.State.MechanicsPrefab.SetActive(true)
+            local multiplier = cascadingReelsMultiplier.Multiplier
+            local pays = cascadingReelsMultiplier.Pays
+            local totalPays = cascadingReelsMultiplier.TotalPays
+            System.WaitForFrame(1)                    
+            local textProperty = machine.BaseGameCascadingReelsMultiplierText
+            System.Print("Game001BaseGameMachineCascadingReelsMultiplierMechanic BaseGamePayout cascadeID={0} multiplier={1} pays={2} totalPays={3} textProperty={4}", cascadeID, multiplier, pays, totalPays, textProperty)
+            textProperty.SetText("" .. pays)
+            BettrVisualsController.FireballMoveTo(machine.WinText.GameObject, machine.BaseGameCascadingReelsMultiplierText.GameObject, 0, 2, true)
+            self.State.MechanicsPrefab.SetActive(false)
+        end
+    end
+end
+
 function Game001BaseGameMachineCascadingReelsMultiplierMechanic:BaseGamePayout(machine, cascadeID)
     series
         do
@@ -42,16 +59,7 @@ function Game001BaseGameMachineCascadingReelsMultiplierMechanic:BaseGamePayout(m
                 local cascadingReelsMultiplier = arr[i]
                 local thisCascadeID = cascadingReelsMultiplier.Cascade
                 if thisCascadeID == cascadeID then                    
-                    self.State.MechanicsPrefab.SetActive(true)
-                    local multiplier = cascadingReelsMultiplier.Multiplier
-                    local pays = cascadingReelsMultiplier.Pays
-                    local totalPays = cascadingReelsMultiplier.TotalPays
-                    System.WaitForFrame(1)                    
-                    local textProperty = machine.BaseGameCascadingReelsMultiplierText
-                    System.Print("Game001BaseGameMachineCascadingReelsMultiplierMechanic BaseGamePayout cascadeID={0} multiplier={1} pays={2} totalPays={3} textProperty={4}", cascadeID, multiplier, pays, totalPays, textProperty)
-                    textProperty.SetText("" .. pays)
-                    BettrVisualsController.FireballMoveTo(self.State.MechanicsPrefab, self.State.MechanicsPrefab, 60, 2, false)
-                    self.State.MechanicsPrefab.SetActive(false)
+                    self:MultiplierPayout(machine, cascadeID, cascadingReelsMultiplier)
                 end
             end
         end
