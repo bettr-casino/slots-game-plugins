@@ -33,14 +33,25 @@ function Game001BaseGameMachineCascadingReelsMultiplierMechanic:MultiplierPayout
     series
         do
             self.State.MechanicsPrefab.SetActive(true)
-            local multiplier = cascadingReelsMultiplier.Multiplier
-            local pays = cascadingReelsMultiplier.Pays
-            local totalPays = cascadingReelsMultiplier.TotalPays
             System.WaitForFrame(1)                    
+        end
+        do
             local textProperty = machine.BaseGameCascadingReelsMultiplierText
-            System.Print("Game001BaseGameMachineCascadingReelsMultiplierMechanic BaseGamePayout cascadeID={0} multiplier={1} pays={2} totalPays={3} textProperty={4}", cascadeID, multiplier, pays, totalPays, textProperty)
-            textProperty.SetText("" .. pays)
-            BettrVisualsController.FireballMoveTo(machine.WinText.GameObject, machine.BaseGameCascadingReelsMultiplierText.GameObject, 0, 0.5, true)
+            textProperty.SetText("0")      
+            BettrVisualsController.FireballMoveTo(machine.WinText.GameObject, machine.BaseGameCascadingReelsMultiplierText.GameObject, 0, 1, true)
+        end
+        do
+            local pays = cascadingReelsMultiplier.Pays
+            local multiplier = cascadingReelsMultiplier.Multiplier
+            local totalPays = cascadingReelsMultiplier.TotalPays
+            local textProperty = machine.BaseGameCascadingReelsMultiplierText
+            BettrAudioController.PlayAudioLoop("rollupwins")      
+            BettrVisualsController.RollUpCounter(textProperty, 0, pays, 0.3)
+            System.WaitForSeconds(2)
+            textProperty.SetText("X" .. multiplier)
+            System.WaitForSeconds(2)      
+            BettrVisualsController.RollUpCounter(textProperty, pays, totalPays, 0.3)
+            System.WaitForSeconds(2) 
             self.State.MechanicsPrefab.SetActive(false)
         end
     end
