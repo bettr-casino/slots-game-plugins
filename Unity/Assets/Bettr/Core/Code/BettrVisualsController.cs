@@ -147,6 +147,8 @@ namespace Bettr.Core
                 fireballCamera.nearClipPlane
             ));
         }
+
+        private bool _tweenComplete = false;
         
         public IEnumerator FireballMoveTo(CrayonScriptContext context, GameObject from, GameObject to, float offsetY = 10, float duration = 1.0f, bool tween = false)
         {
@@ -177,18 +179,17 @@ namespace Bettr.Core
 
             if (tween)
             {
-                // Create completion callback to track when tween is done
-                bool tweenComplete = false;
+                _tweenComplete = false;
                 iTween.MoveTo(Fireball, iTween.Hash(
                     "position", targetWorldPosition,
                     "time", duration,
                     "easetype", iTween.EaseType.linear,
-                    "oncomplete", (Action)(() => tweenComplete = true)
+                    "oncomplete", "OnFireballTweenComplete",
+                    "oncompletetarget", Fireball
                 ));
 
-                // Wait for tween to complete
-                float elapsedTime = 0f;
-                while (!tweenComplete && elapsedTime < duration + 0.1f)
+                var elapsedTime = 0f;
+                while (!_tweenComplete && elapsedTime < duration + 0.1f)
                 {
                     elapsedTime += Time.deltaTime;
                     yield return null;
@@ -204,6 +205,10 @@ namespace Bettr.Core
             Fireball.SetActive(false);
         }
 
+        private void OnFireballTweenComplete()
+        {
+            _tweenComplete = true;
+        }
         
         public void RollUpCounter(PropertyTextMeshPro counterTextProperty, long start, long end, float duration)
         {

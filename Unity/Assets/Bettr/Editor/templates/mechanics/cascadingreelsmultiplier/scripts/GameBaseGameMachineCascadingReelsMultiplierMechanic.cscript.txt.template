@@ -40,7 +40,7 @@ function {{machineName}}BaseGameMachineCascadingReelsMultiplierMechanic:Multipli
             local textProperty = machine.BaseGameCascadingReelsMultiplierText
             System.Print("{{machineName}}BaseGameMachineCascadingReelsMultiplierMechanic BaseGamePayout cascadeID={0} multiplier={1} pays={2} totalPays={3} textProperty={4}", cascadeID, multiplier, pays, totalPays, textProperty)
             textProperty.SetText("" .. pays)
-            BettrVisualsController.FireballMoveTo(machine.WinText.GameObject, machine.BaseGameCascadingReelsMultiplierText.GameObject, 0, 2, true)
+            BettrVisualsController.FireballMoveTo(machine.WinText.GameObject, machine.BaseGameCascadingReelsMultiplierText.GameObject, 0, 0.5, true)
             self.State.MechanicsPrefab.SetActive(false)
         end
     end
