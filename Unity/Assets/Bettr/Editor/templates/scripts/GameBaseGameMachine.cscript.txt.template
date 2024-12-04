@@ -231,7 +231,7 @@ function {{machineName}}BaseGameMachine:SpinReelsStopped()
             if coinsPaid > 0 then
                 self.Mechanics.WaysMechanic:BaseGamePayout(self)
                 self:OnPayingCompleted()
-                if self.Mechanics.CascadingReelsMechanic:HasCascade(self) then
+                if self.Mechanics.CascadingReelsMechanic ~= nil and self.Mechanics.CascadingReelsMechanic:HasCascade(self) then
                     self.Mechanics.CascadingReelsMechanic:StartCascade(self)
                 end
             end

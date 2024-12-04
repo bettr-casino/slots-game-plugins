@@ -6,8 +6,6 @@ require "{{machineName}}BaseGameMachineCascadingReelsMultiplierMechanic"
 
 {{machineName}}BaseGameMachineMechanics = {
     WaysMechanic = nil,
-    CascadingReelsMechanic = nil,
-    CascadingReelsMultiplierMechanic = nil,
 }
 
 function {{machineName}}BaseGameMachineMechanics:new(o)
@@ -24,10 +22,6 @@ end
 function {{machineName}}BaseGameMachineMechanics:Initialize(machine)
     self.WaysMechanic = {{machineName}}BaseGameMachineWaysMechanic:new()
     self.WaysMechanic:Initialize(machine)
-    self.CascadingReelsMechanic = {{machineName}}BaseGameMachineCascadingReelsMechanic:new()
-    self.CascadingReelsMechanic:Initialize(machine)
-    self.CascadingReelsMultiplierMechanic = {{machineName}}BaseGameMachineCascadingReelsMultiplierMechanic:new()
-    self.CascadingReelsMultiplierMechanic:Initialize(machine)
 end
 
 function {{machineName}}BaseGameMachineMechanics:BaseGamePayout(machine)
