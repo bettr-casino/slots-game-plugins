@@ -1184,6 +1184,11 @@ namespace Bettr.Editor
         [MenuItem("Bettr/Tools/Sync Game Scripts")]
         public static void SyncGameScripts()
         {
+            var specificMachineVariants = new string[] 
+            {
+                "EpicAtlantisTreasures",
+            };
+            
             // Walk the entire directory tree under the plugin root directory
             var processCount = 0;
             var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
@@ -1206,6 +1211,10 @@ namespace Bettr.Editor
                 {
                     var experimentVariantDirs = machineVariantsDir?.GetDirectories();
                     if (experimentVariantDirs == null)
+                    {
+                        continue;
+                    }
+                    if (!specificMachineVariants.Contains(machineVariantsDir.Name))
                     {
                         continue;
                     }
@@ -1509,6 +1518,25 @@ namespace Bettr.Editor
 
                 Debug.Log($"Copied and imported audio asset: {assetDestinationPath}");
             }
+        }
+        
+        private static GameObject FindChildGameObjectInHierarchy(GameObject prefab, string gameObjectName, string parentGameObjectName = null)
+        {
+            var childCount = prefab.transform.childCount;
+            for (var i = 0; i < childCount; i++)
+            {
+                var child = prefab.transform.GetChild(i).gameObject;
+                if (child.name == gameObjectName)
+                {
+                    if (parentGameObjectName != null && child.transform.parent.name != parentGameObjectName)
+                    {
+                        continue;
+                    }
+                    return child;
+                }
+            }
+
+            return null;
         }
         
         private static GameObject FindGameObjectInHierarchy(GameObject prefab, string gameObjectName, string parentGameObjectName = null)
@@ -2681,6 +2709,108 @@ namespace Bettr.Editor
                     }
                 }
             }
+            
+            Debug.Log($"Processed Fix Audio Source {processCount} machine variants.");
+        }
+        
+        
+        // DONE: Ported to BetteMenu ProcessBaseGameMachine
+        [MenuItem("Bettr/Tools/Fix Base Game Machine Transform")]
+        public static void FixBaseGameMachineTransform()
+        {
+            // Walk the entire directory tree under the plugin root directory
+            var processCount = 0;
+            var pluginMachineGroupDirectories = Directory.GetDirectories(PluginRootDirectory);
+            string coreAssetPath = $"Assets/Bettr/Core";
+            for (var i = 0; i < pluginMachineGroupDirectories.Length; i++)
+            {
+                var machineNameDir = new DirectoryInfo(pluginMachineGroupDirectories[i]);
+                // Check that the MachineName starts with "Game" and is not "Game001Alpha"
+                if (!machineNameDir.Name.StartsWith("Game") || machineNameDir.Name == "Game001Alpha")
+                {
+                    continue;
+                }
+                var variantsDir = machineNameDir.GetDirectories().FirstOrDefault(d => d.Name == "variants");
+                if (variantsDir == null)
+                {
+                    continue;
+                }
+                var machineVariantsDirs = variantsDir?.GetDirectories();
+                // loop over machineVariantsDir
+                foreach (var machineVariantsDir in machineVariantsDirs)
+                {
+                    var experimentVariantDirs = machineVariantsDir?.GetDirectories();
+                    if (experimentVariantDirs == null)
+                    {
+                        continue;
+                    }
+                    // loop over experimentVariantDirs
+                    foreach (var experimentVariantDir in experimentVariantDirs)
+                    {
+                        // now extract the machineName from machineNameDir, machineVariant from machineVariantsDir, and experimentVariant from experimentVariantDir
+                        string machineName = machineNameDir.Name;
+                        string machineVariant = machineVariantsDir?.Name;
+                        string experimentVariant = experimentVariantDir?.Name;
+                        
+                        string runtimeAssetPath = $"Assets/Bettr/Runtime/Plugin/{machineName}/variants/{machineVariant}/{experimentVariant}/Runtime/Asset";
+                        if (!Directory.Exists(runtimeAssetPath))
+                        {
+                            Debug.LogError($"Directory not found: {runtimeAssetPath}");
+                            continue;
+                        }
+                        
+                        // get the prefabs directory
+                        string prefabsDirectory = Path.Combine(runtimeAssetPath, "Prefabs");
+                        // get the Game<NNN>BaseGameMachine.prefab
+                        string machinePrefabPath = Directory.GetFiles(prefabsDirectory, $"{machineName}BaseGameMachine.prefab", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                        if (string.IsNullOrEmpty(machinePrefabPath))
+                        {
+                            Debug.LogError($"Machine prefab not found: {machineName}BaseGameMachine.prefab");
+                            continue;
+                        }
+                        
+                        // load the Prefab asset
+                        GameObject machinePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(machinePrefabPath);
+                        if (machinePrefab == null)
+                        {
+                            Debug.LogError($"Failed to load prefab: {machineName}BaseGameMachine.prefab");
+                            continue;
+                        }
+                        
+                        GameObject prefabInstance = PrefabUtility.InstantiatePrefab(machinePrefab) as GameObject;
+                        if (prefabInstance == null)
+                        {
+                            Debug.LogError($"Failed to instantiate prefab: {machineName}BaseGameMachine.prefab");
+                            continue;
+                        }
+                        
+                        // get the Pivot Child
+                        var pivot = FindGameObjectInHierarchy(prefabInstance, "Pivot", prefabInstance.name);
+                        if (pivot == null)
+                        {
+                            Debug.LogError($"Pivot not found in BaseGameMachine prefab: {machineName}BaseGameMachine.prefab");
+                            continue;
+                        }
+                        
+                        // update the ScaleY of the Pivot to 0.8
+                        var localScale = pivot.transform.localScale;
+                        pivot.transform.localScale = new Vector3(localScale.x, 0.8f, localScale.z);
+                        
+                        // update the local Y position of the Pivot to -0.1f
+                        var localPosition = pivot.transform.localPosition;
+                        pivot.transform.localPosition = new Vector3(localPosition.x, -0.1f, localPosition.z);
+                        
+                        // save the prefab
+                        PrefabUtility.SaveAsPrefabAsset(prefabInstance, machinePrefabPath);
+                        
+                        Debug.Log($"Fixing Audio Source for machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant}");
+                
+                        processCount++;
+                    }
+                }
+            }
+            
+            AssetDatabase.Refresh();
             
             Debug.Log($"Processed Fix Audio Source {processCount} machine variants.");
         }
@@ -4724,7 +4854,9 @@ namespace Bettr.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             
+            // ReSharper disable once RedundantAssignment
             var maxOffsetY = GetReelMaxOffsetY(machineName);
+            maxOffsetY = -0.1f; // along with the 0.8 scaleY change (see below)
             
             var reelBackgroundX = GetReelBackgroundX(machineName);
             var reelBackgroundY = GetReelBackgroundY(machineName);
@@ -4742,7 +4874,7 @@ namespace Bettr.Editor
             var reelMaskScaleY = GetReelMaskScaleY(machineName);
 
             var scaleX = 0.90;
-            var scaleY = 0.90;
+            var scaleY = 0.80; // updated to accomodate for the mechanics panel
             
             var templateName = "BaseGameMachine";
             var scribanTemplate = ParseScribanTemplate($"common", templateName);
