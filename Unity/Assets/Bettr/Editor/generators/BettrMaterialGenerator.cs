@@ -129,9 +129,12 @@ namespace Bettr.Editor.generators
             {
                 if (!string.IsNullOrEmpty(textureName) || !string.IsNullOrEmpty(hexColor))
                 {
-                    Color color = material.GetColor((int) Color);
-                    color.a = alpha;
-                    material.SetColor((int) Color, color);
+                    if (material.HasColor((int) Color))
+                    {
+                        Color color = material.GetColor((int) Color);
+                        color.a = alpha;
+                        material.SetColor((int) Color, color);
+                    }
                 }
             }
             

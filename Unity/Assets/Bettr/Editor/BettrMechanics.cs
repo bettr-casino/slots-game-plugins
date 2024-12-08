@@ -37,19 +37,13 @@ namespace Bettr.Editor
         }
         
         public static void ProcessBaseGameMechanic(
-            string machineName, string machineVariant, string runtimeAssetPath,
+            string runtimeAssetPath, Dictionary<string, object> model,
             string templateName, string prefabName, string mechanicName)
         {
-            Debug.Log($"ProcessBaseGameMechanic {machineName} {machineVariant} {runtimeAssetPath} {templateName} {prefabName}");
+            Debug.Log($"ProcessBaseGameMechanic {mechanicName} {templateName} {prefabName}");
             
             var scribanTemplate = BettrMenu.ParseScribanTemplate(Path.Combine("mechanics", mechanicName.ToLower()), templateName);
 
-            var model = new Dictionary<string, object>
-            {
-                { "machineName", machineName },
-                { "machineVariant", machineVariant },
-            };
-            
             // append the mechanic name to the runtimeAssetPath
             var mechanicRuntimeAssetPath = Path.Combine(runtimeAssetPath, "Mechanics", mechanicName);
             EnsureMechanicsDirectory(mechanicRuntimeAssetPath);
@@ -59,9 +53,6 @@ namespace Bettr.Editor
             
             InstanceComponent.RuntimeAssetPath = mechanicRuntimeAssetPath;
             InstanceGameObject.IdGameObjects.Clear();
-            
-            BettrMaterialGenerator.MachineName = machineName;
-            BettrMaterialGenerator.MachineVariant = machineVariant;
             
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
             hierarchyInstance.SetParent((GameObject) null);
@@ -95,8 +86,17 @@ namespace Bettr.Editor
             var prefabName = $"BaseGameMachine{mechanicName}";
             var runtimeAssetPath = BettrMechanics.RuntimeAssetPath;
             
+            BettrMaterialGenerator.MachineName = machineName;
+            BettrMaterialGenerator.MachineVariant = machineVariant;
+            
+            var model = new Dictionary<string, object>
+            {
+                { "machineName", machineName },
+                { "machineVariant", machineVariant },
+            };
+            
             BettrMechanicsHelpers.ProcessBaseGameMechanic(
-                 machineName,  machineVariant,  runtimeAssetPath,
+                 runtimeAssetPath, model,
                 templateName, prefabName, mechanicName);
                 
         }
@@ -113,8 +113,17 @@ namespace Bettr.Editor
             var prefabName = $"BaseGameMachine{mechanicName}";
             var runtimeAssetPath = BettrMechanics.RuntimeAssetPath;
             
+            BettrMaterialGenerator.MachineName = machineName;
+            BettrMaterialGenerator.MachineVariant = machineVariant;
+            
+            var model = new Dictionary<string, object>
+            {
+                { "machineName", machineName },
+                { "machineVariant", machineVariant },
+            };
+            
             BettrMechanicsHelpers.ProcessBaseGameMechanic(
-                machineName,  machineVariant,  runtimeAssetPath,
+                runtimeAssetPath, model,
                 templateName, prefabName, mechanicName);
         }
 
