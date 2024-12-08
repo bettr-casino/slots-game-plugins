@@ -13,7 +13,7 @@
     "Layer": "SLOT_OVERLAY",
     "Children": [
       {
-        "Name": "Quad",
+        "Name": "Slider",
         "Layer": "SLOT_OVERLAY",
         "Active": true,
         "IsPrimitive": true,
@@ -24,15 +24,38 @@
         "PrimitiveTextureCreate": true,
         "Position": {
             "X": 0,
-            "Y": -5,
+            "Y": 0,
             "Z": 0
         },
         "Scale": {
-            "X": 20,
-            "Y": 2,
+            "X": {{steps * 2 + 2}},
+            "Y": 1,
             "Z": 1
         }
+      },
+      {{ for step in 1..steps }}
+      {
+          "Name": "SliderSlot{{ step }}",
+          "Layer": "SLOT_OVERLAY",
+          "Active": true,
+          "IsPrimitive": true,
+          "Primitive": 5,
+          "PrimitiveMaterial": "BaseGameChooseASideMechanic",
+          "PrimitiveShader": "Unlit/Texture",
+          "PrimitiveTexture": "BaseGameChooseASideMechanic",
+          "PrimitiveTextureCreate": true,
+          "Position": {
+              "X": {{ -1 * steps + step * 2 - 1 }},
+              "Y": 0,
+              "Z": 0
+          },
+          "Scale": {
+              "X": 1,
+              "Y": 2,
+              "Z": 1
+          }
       }
+      {{ if !for.last }},{{ end }}{{ end }}
     ],
     "Components": [
     ]

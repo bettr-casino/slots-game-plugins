@@ -116,10 +116,17 @@ namespace Bettr.Editor
             BettrMaterialGenerator.MachineName = machineName;
             BettrMaterialGenerator.MachineVariant = machineVariant;
             
+            var dataSummary = BettrMenu.GetTable($"{machineName}BaseGameChooseASideDataSummary");
+            
+            // get the model
+            var steps = BettrMenu.GetTableValue<int>(dataSummary, "ChooseASide", "Steps", 0);
+            Debug.Log($"ProcessChooseAsideMechanic steps: {steps}");
+            
             var model = new Dictionary<string, object>
             {
                 { "machineName", machineName },
                 { "machineVariant", machineVariant },
+                { "steps", steps}
             };
             
             BettrMechanicsHelpers.ProcessBaseGameMechanic(
