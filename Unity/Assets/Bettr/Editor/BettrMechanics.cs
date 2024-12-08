@@ -105,7 +105,17 @@ namespace Bettr.Editor
             string experimentVariant, string machineModelPath)
         {
             Debug.Log(
-                $"Processing choose aside mechanic for {machineName} {machineVariant} {experimentVariant} {machineModelPath}");
+                $"Processing choose a side mechanic for {machineName} {machineVariant} {experimentVariant} {machineModelPath}");
+            
+            var mechanicName = "ChooseAside";
+            
+            var templateName = $"BaseGame{mechanicName}Mechanic";
+            var prefabName = $"BaseGameMachine{mechanicName}";
+            var runtimeAssetPath = BettrMechanics.RuntimeAssetPath;
+            
+            BettrMechanicsHelpers.ProcessBaseGameMechanic(
+                machineName,  machineVariant,  runtimeAssetPath,
+                templateName, prefabName, mechanicName);
         }
 
         public static void ProcessExpandingPaylinesMechanic(string machineName, string machineVariant,
