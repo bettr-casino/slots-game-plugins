@@ -27,7 +27,7 @@ function Game001BaseGameMachineMechanics:Initialize(machine)
     self.CascadingReelsMechanic = Game001BaseGameMachineCascadingReelsMechanic:new()
     self.CascadingReelsMechanic:Initialize(machine)
     self.CascadingReelsMultiplierMechanic = Game001BaseGameMachineCascadingReelsMultiplierMechanic:new()
-    self.CascadingReelsMultiplierMechanic:Initialize(machine)
+    self.CascadingReelsMultiplierMechanic:Initialize(machine)    
 end
 
 function Game001BaseGameMachineMechanics:BaseGamePayout(machine)
@@ -46,10 +46,11 @@ function Game001BaseGameMachineMechanics:TryPaying(machine)
     -- this is hardcoded
     -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
     if self.WaysMechanic ~= nil then
-       self.WaysMechanic:TryPaying(machine)
+       return self.WaysMechanic:TryPaying(machine)
     elseif self.PaylinesMechanic ~= nil then
-       self.PaylinesMechanic:TryPaying(machine)
+       return self.PaylinesMechanic:TryPaying(machine)
     end
+    return 0
 end
 
 function Game001BaseGameMachineMechanics:OnPayingCompleted(machine)

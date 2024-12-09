@@ -19,7 +19,7 @@ end
 
 function Game007BaseGameMachineMechanics:Initialize(machine)
     self.PaylinesMechanic = Game007BaseGameMachinePaylinesMechanic:new()
-    self.PaylinesMechanic:Initialize(machine)
+    self.PaylinesMechanic:Initialize(machine)    
 end
 
 function Game007BaseGameMachineMechanics:BaseGamePayout(machine)
@@ -38,10 +38,11 @@ function Game007BaseGameMachineMechanics:TryPaying(machine)
     -- this is hardcoded
     -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
     if self.WaysMechanic ~= nil then
-       self.WaysMechanic:TryPaying(machine)
+       return self.WaysMechanic:TryPaying(machine)
     elseif self.PaylinesMechanic ~= nil then
-       self.PaylinesMechanic:TryPaying(machine)
+       return self.PaylinesMechanic:TryPaying(machine)
     end
+    return 0
 end
 
 function Game007BaseGameMachineMechanics:OnPayingCompleted(machine)

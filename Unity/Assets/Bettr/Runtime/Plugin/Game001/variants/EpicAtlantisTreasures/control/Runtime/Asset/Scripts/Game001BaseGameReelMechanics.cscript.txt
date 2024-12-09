@@ -1,17 +1,15 @@
 require "math"
 require "Core"
 
+
 require "Game001BaseGameReelWaysMechanic"
 
-require "Game001BaseGameReelCascadingReelsMechanic"
+require "Game001BaseGameReelChooseASideMechanic"
 
 
 Game001BaseGameReelMechanics = {
-
     WaysMechanic = nil,
-
-    CascadingReelsMechanic = nil,
-
+    ChooseASideMechanic = nil,
 }
 
 function Game001BaseGameReelMechanics:new(o)
@@ -22,12 +20,9 @@ function Game001BaseGameReelMechanics:new(o)
 end
 
 function Game001BaseGameReelMechanics:Initialize(reel)
-
     self.WaysMechanic = Game001BaseGameReelWaysMechanic:new()
     self.WaysMechanic:Initialize(reel)
-
-    self.CascadingReelsMechanic = Game001BaseGameReelCascadingReelsMechanic:new()
-    self.CascadingReelsMechanic:Initialize(reel)
-
+    self.ChooseASideMechanic = Game001BaseGameReelChooseASideMechanic:new()
+    self.ChooseASideMechanic:Initialize(reel)
 end
 

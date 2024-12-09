@@ -1,7 +1,6 @@
 require "math"
 require "Core"
 require "Game001BaseGameReel"
-require "Game001BaseGameMachineMechanics"
 
 Game001BaseGameMachine = {
     Mechanics = nil,
@@ -26,12 +25,21 @@ function Game001BaseGameMachine:OnError(callStack)
 end
 
 function Game001BaseGameMachine:Awake()
-	System.Print("Game001BaseGameMachine Awake tile id={0}", self.id)
-	self.Mechanics = Game001BaseGameMachineMechanics:new()
-	self.Mechanics:Initialize(self)
+	System.Print("Game001BaseGameMachine Awake2 tile id={0}", self.id)
 end
 
 function Game001BaseGameMachine:Start()
+    series
+        do
+            System.Print("Game001BaseGameMachine Start tile id={0}", self.id)
+            self.Mechanics = Game001BaseGameMachineMechanics:new()
+            self.Mechanics:Initialize(self)
+            self:StartMachine()
+        end
+    end
+end
+
+function Game001BaseGameMachine:StartMachine()
     series
         do
             self:ConfigurePreviewMode()
@@ -48,6 +56,7 @@ function Game001BaseGameMachine:OnSpinButtonClicked()
         do
             local isSlamStopped = BettrUserController.UserInSlamStopMode
             if isSlamStopped then
+                BettrUserController.UserInSlamStopMode = false
                 System.Print("Game001BaseGameMachine:OnSpinButtonClicked ignoring click since IsSlamStopped is true")
                 return
             end
@@ -107,44 +116,6 @@ function Game001BaseGameMachine:ResetSettings()
     self.WinText.SetText("0")
 end
 
-function Game001BaseGameMachine:Update()
-    local spinState = Game001BaseGameState.SpinState.First.State
-    self.BaseGameStateDispatchTable[spinState](self)    
-end
-
-function Game001BaseGameMachine:BaseGameSpinning()    
-end
-
-function Game001BaseGameMachine:BaseGameWaiting()    
-end
-
-function Game001BaseGameMachine:BaseGameCompleted()
-   Game001BaseGameState.SpinState.First.State = "Waiting"
-end
-
-function Game001BaseGameMachine:OnBaseGameSpinCompleted()
-    series
-        do
-            self.Mechanics:OnBaseGameSpinCompleted(self) 
-        end
-    end
-end
-
-function Game001BaseGameMachine:BaseGamePayout()
-    series
-        do
-            self.Mechanics:BaseGamePayout(self)
-        end
-    end      
-end
-
-function Game001BaseGameMachine:RollupCredits()
-    self.Mechanics:RollupCredits(self)
-end
-
-function Game001BaseGameMachine:UpdateStatusText(text)
-end
-
 function Game001BaseGameMachine:PlayStartAnimations()
     series
         do
@@ -155,29 +126,10 @@ function Game001BaseGameMachine:PlayStartAnimations()
 end
 
 function Game001BaseGameMachine:StartEngines()
-    parallel
-    
-        do
-            Game001BaseGameReel1:StartEngines()
-        end
-        
-        do
-            Game001BaseGameReel2:StartEngines()
-        end
-        
-        do
-            Game001BaseGameReel3:StartEngines()
-        end
-        
-        do
-            Game001BaseGameReel4:StartEngines()
-        end
-        
-        do
-            Game001BaseGameReel5:StartEngines()
-        end
-        
-    end
+    local reelCount = Game001BaseGameLayout.ReelCount.First.Value
+    for i = 1, reelCount parallel do
+        _G["Game001BaseGameReel" .. i]:StartEngines()
+    end    
 end
 
 function Game001BaseGameMachine:LoadServerOutcome()
@@ -250,87 +202,128 @@ function Game001BaseGameMachine:SpinEngines()
     BettrVisualsController.RollUpCounter(self.CreditsText, oldCoins, newCoins, 0.05)
     Game001BaseGameState.SpinState.First.State = "Spinning"
     self:ResetSettings()
-    parallel
-        
-                    do
-                        Game001BaseGameReel1:SpinEngines()
-                    end
-                
-                    do
-                        Game001BaseGameReel2:SpinEngines()
-                    end
-                
-                    do
-                        Game001BaseGameReel3:SpinEngines()
-                    end
-                
-                    do
-                        Game001BaseGameReel4:SpinEngines()
-                    end
-                
-                    do
-                        Game001BaseGameReel5:SpinEngines()
-                    end
-                
+    local reelCount = Game001BaseGameLayout.ReelCount.First.Value
+    for i = 1, reelCount parallel do
+        _G["Game001BaseGameReel" .. i]:SpinEngines()
     end
 end
 
 function Game001BaseGameMachine:UpdateBaseGameReelsSpinState(state)
-
-    Game001BaseGameReelSpinState.Reel1.First.ReelSpinState = state
-
-    Game001BaseGameReelSpinState.Reel2.First.ReelSpinState = state
-
-    Game001BaseGameReelSpinState.Reel3.First.ReelSpinState = state
-
-    Game001BaseGameReelSpinState.Reel4.First.ReelSpinState = state
-
-    Game001BaseGameReelSpinState.Reel5.First.ReelSpinState = state
-
-end
-
-function Game001BaseGameMachine:TryPaying()
-    self.Mechanics:TryPaying(self)
-    Game001BaseGameState.SpinState.First.State = "Paying"
+    local reelCount = Game001BaseGameLayout.ReelCount.First.Value
+    for i = 1, reelCount do
+        Game001BaseGameReelSpinState["Reel" .. i].First.ReelSpinState = state
+    end
 end
 
 function Game001BaseGameMachine:CurrentSpinState()
     return Game001BaseGameState.SpinState.First.State
 end
 
-function Game001BaseGameMachine:OnPayingCompleted()
-    self.Mechanics:OnPayingCompleted(self)
-end
-
 function Game001BaseGameMachine:OnSpinReelsStopped()
     self:UpdateBaseGameReelsSpinState("Waiting")
     self.StatusTexts.SetAllInactive()
-    self:TryPaying()
+    System.StartCoroutine(self, "SpinReelsStopped")
+end
+
+function Game001BaseGameMachine:SpinReelsStopped()
+    series
+        do
+            local coinsPaid = self.Mechanics:TryPaying(self)
+            if coinsPaid > 0 then
+                self.Mechanics:BaseGamePayout(self)
+                self:OnPayingCompleted()
+                if self.Mechanics.CascadingReelsMechanic ~= nil and self.Mechanics.CascadingReelsMechanic:HasCascade(self) then
+                    self.Mechanics.CascadingReelsMechanic:StartCascade(self)
+                end
+            end
+            self:OnBaseGameSpinCompleted(self)
+        end
+    end
+end
+
+function Game001BaseGameMachine:OnPayingCompleted()
+    BettrAudioController.StopAudio()
+    BettrUserController.DisableUserInSlamStopMode()
+    self:RollupCredits()
+end
+
+function Game001BaseGameMachine:RollupOnlyCreditsText()
+    local oldCoins = BettrUser.Coins
+    local newCoins = BettrUser.SpinCoins
+    BettrUser.ApplySpinCoins()
+    local pays = newCoins - oldCoins
+    local rollupWinsText = false
+    local rollupCreditsText = true
+    System.StartCoroutine(self, "OnRollupCredits", oldCoins, newCoins, pays, rollupWinsText, rollupCreditsText)
+end
+
+function Game001BaseGameMachine:RollupCredits()
+    local oldCoins = BettrUser.Coins
+    local newCoins = BettrUser.SpinCoins
+    BettrUser.ApplySpinCoins()
+    local pays = newCoins - oldCoins
+    local rollupWinsText = true
+    local rollupCreditsText = true
+    System.StartCoroutine(self, "OnRollupCredits", oldCoins, newCoins, pays, rollupWinsText, rollupCreditsText)
+end
+
+function Game001BaseGameMachine:OnRollupCredits(oldCoins, newCoins, pays, rollupWinsText, rollupCreditsText)
+    series
+        do
+            if not rollupWinsText then
+                return
+            end
+            local winTextProperty = self.WinText            
+            if pays > 0 then
+                BettrAudioController.PlayAudioLoop("rollupwins")            
+                BettrVisualsController.RollUpCounter(winTextProperty, 0, pays, 0.3)
+                System.WaitForSeconds(0.3)
+                BettrAudioController.StopAudio()
+            end
+        end
+        do
+            if not rollupCreditsText then
+                return
+            end
+            local creditsTextProperty = self.CreditsText   
+            if pays ~= 0 then
+                if pays > 0 then
+                    BettrAudioController.PlayAudioLoop("rollupcoins")            
+                end
+                BettrVisualsController.RollUpCounter(creditsTextProperty, oldCoins, newCoins, 1)
+                System.WaitForSeconds(1)
+                BettrAudioController.StopAudio()
+            end
+        end
+    end
+end
+
+function Game001BaseGameMachine:OnBaseGameSpinCompleted(machine)
+    series
+        do
+            Game001BaseGameState.SpinState.First.State = "Waiting"
+            Game001BaseGameState.DisplayState.First.State = "Idle" 
+        end
+    end
 end
 
 function Game001BaseGameMachine:OnOutcomeReceived()
     parallel
-        
-                    do
-                        Game001BaseGameReel1:OnOutcomeReceived()
-                    end
-                
-                    do
-                        Game001BaseGameReel2:OnOutcomeReceived()
-                    end
-                
-                    do
-                        Game001BaseGameReel3:OnOutcomeReceived()
-                    end
-                
-                    do
-                        Game001BaseGameReel4:OnOutcomeReceived()
-                    end
-                
-                    do
-                        Game001BaseGameReel5:OnOutcomeReceived()
-                    end
-                
+        do
+            Game001BaseGameReel1:OnOutcomeReceived()
+        end
+        do
+            Game001BaseGameReel2:OnOutcomeReceived()
+        end
+        do
+            Game001BaseGameReel3:OnOutcomeReceived()
+        end
+        do
+            Game001BaseGameReel4:OnOutcomeReceived()
+        end
+        do
+            Game001BaseGameReel5:OnOutcomeReceived()
+        end
     end
 end
 
@@ -362,11 +355,5 @@ end
 function Game001BaseGameMachine:OnBecameVisible()
 	System.Print("Game001BaseGameMachine OnBecameVisible tile id={0}", self.id)
 end
-
-Game001BaseGameMachine.BaseGameStateDispatchTable = {
-    Waiting = Game001BaseGameMachine.BaseGameWaiting,
-    Spinning = Game001BaseGameMachine.BaseGameSpinning,
-    Completed = Game001BaseGameMachine.BaseGameCompleted,
-}
 
 return Game001BaseGameMachine:new()

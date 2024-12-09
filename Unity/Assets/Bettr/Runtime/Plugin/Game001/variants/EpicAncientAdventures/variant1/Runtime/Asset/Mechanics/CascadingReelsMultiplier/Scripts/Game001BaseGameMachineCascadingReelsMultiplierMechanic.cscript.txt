@@ -2,6 +2,9 @@ require "math"
 require "Core"
 
 Game001BaseGameMachineCascadingReelsMultiplierMechanic = {
+    State = {
+        MechanicsPrefab = nil
+    }
 }
 
 function Game001BaseGameMachineCascadingReelsMultiplierMechanic:new(o)
@@ -12,10 +15,82 @@ function Game001BaseGameMachineCascadingReelsMultiplierMechanic:new(o)
 end
 
 function Game001BaseGameMachineCascadingReelsMultiplierMechanic:Initialize(machine)
-    local manifest = Game001.Manifest
-    local prefabName = "BaseGameMachineCascadingReelsMultiplier"
-    System.Print("Game001BaseGameMachineCascadingReelsMultiplierMechanic:Initialize manifest.BundleName={0} manifest.BundleVersion={1} prefabName={2}", manifest.BundleName, manifest.BundleVersion, prefabName)    
-    BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, prefabName, nil)
+    series
+        do
+            local manifest = Game001.Manifest
+            local prefabName = "BaseGameMachineCascadingReelsMultiplier"
+            local parentGameObject = machine.MechanicsParent.GameObject
+            System.Print("Game001BaseGameMachineCascadingReelsMultiplierMechanic:Initialize before manifest.BundleName={0} manifest.BundleVersion={1} prefabName={2} parentGameObject={3}", manifest.BundleName, manifest.BundleVersion, prefabName, parentGameObject.name)    
+            local mechanicsPrefab = BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, prefabName, parentGameObject)
+            mechanicsPrefab.SetActive(false)
+            self.State.MechanicsPrefab = mechanicsPrefab
+            System.Print("Game001BaseGameMachineCascadingReelsMultiplierMechanic:Initialize mechanicsPrefab={0}", mechanicsPrefab.name)            
+        end
+    end
+end
+
+function Game001BaseGameMachineCascadingReelsMultiplierMechanic:MultiplierPayout(machine, cascadeID, cascadingReelsMultiplier)
+    series
+        do
+            local pays = cascadingReelsMultiplier.Pays
+            local totalPays = cascadingReelsMultiplier.TotalPays
+            local spinCoins = BettrUser.SpinCoins
+            BettrUser.SpinCoins = spinCoins + totalPays - pays
+            self.State.MechanicsPrefab.SetActive(true)
+            System.WaitForFrame(1)                    
+        end
+        do
+            local textProperty = machine.BaseGameCascadingReelsMultiplierText
+            textProperty.SetText("0")      
+            BettrVisualsController.FireballMoveTo(machine.WinText.GameObject, machine.BaseGameCascadingReelsMultiplierText.GameObject, 0, 1, true)
+        end
+        do
+            local pays = cascadingReelsMultiplier.Pays
+            local multiplier = cascadingReelsMultiplier.Multiplier
+            local totalPays = cascadingReelsMultiplier.TotalPays
+            local textProperty = machine.BaseGameCascadingReelsMultiplierText
+            BettrAudioController.PlayAudioLoop("rollupwins")      
+            BettrVisualsController.RollUpCounter(textProperty, 0, pays, 0.3)
+            System.WaitForSeconds(1)
+            textProperty.SetText("X" .. multiplier)
+            System.WaitForSeconds(1)      
+            BettrVisualsController.RollUpCounter(textProperty, pays, totalPays, 0.3)
+            System.WaitForSeconds(1)   
+            BettrVisualsController.FireballMoveTo(nil, nil, 0, 1, false)
+        end
+        do
+            local pays = cascadingReelsMultiplier.Pays
+            local totalPays = cascadingReelsMultiplier.TotalPays
+            local textProperty = machine.BaseGameCascadingReelsMultiplierText
+            BettrVisualsController.FireballMoveTo(machine.BaseGameCascadingReelsMultiplierText.GameObject, machine.WinText.GameObject, 0, 1, true)
+            BettrVisualsController.RollUpCounter(machine.WinText, pays, totalPays, 0.3)
+            System.WaitForSeconds(0.3)
+            self.State.MechanicsPrefab.SetActive(false)
+            textProperty.SetText("0")     
+            BettrVisualsController.FireballMoveTo(machine.WinText.GameObject,  machine.CreditsText.GameObject, 0, 1, true) 
+            BettrVisualsController.FireballMoveTo(nil,  nil, 0, 1, false) 
+        end
+    end
+end
+
+function Game001BaseGameMachineCascadingReelsMultiplierMechanic:BaseGamePayout(machine, cascadeID)
+    series
+        do
+            local isTriggered = Game001BaseGameCascadingReelsMultiplierSummary.CascadingReelsMultiplier.First.Triggered
+            System.Print("Game001BaseGameMachineCascadingReelsMultiplierMechanic BaseGamePayout cascadeID={0} isTriggered={1}", cascadeID, isTriggered)
+            if not isTriggered then
+                return
+            end
+            local arr = Game001BaseGameCascadingReelsMultiplier.CascadingReelsMultiplier.Array
+            for i = 1, #arr series do
+                local cascadingReelsMultiplier = arr[i]
+                local thisCascadeID = cascadingReelsMultiplier.Cascade
+                if thisCascadeID == cascadeID then                    
+                    self:MultiplierPayout(machine, cascadeID, cascadingReelsMultiplier)
+                end
+            end
+        end
+    end
 end
 
 function Game001BaseGameMachineCascadingReelsMultiplierMechanic:TryPaying(machine)

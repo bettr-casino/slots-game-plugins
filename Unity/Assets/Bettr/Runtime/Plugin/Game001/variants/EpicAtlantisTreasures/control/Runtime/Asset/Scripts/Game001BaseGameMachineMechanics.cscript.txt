@@ -1,11 +1,11 @@
 require "math"
 require "Core"
 require "Game001BaseGameMachineWaysMechanic"
-require "Game001BaseGameMachineCascadingReelsMechanic"
-require "Game001BaseGameMachineCascadingReelsMultiplierMechanic"
+require "Game001BaseGameMachineChooseASideMechanic"
 
 Game001BaseGameMachineMechanics = {
     WaysMechanic = nil,
+    ChooseASideMechanic = nil,
 }
 
 function Game001BaseGameMachineMechanics:new(o)
@@ -22,6 +22,8 @@ end
 function Game001BaseGameMachineMechanics:Initialize(machine)
     self.WaysMechanic = Game001BaseGameMachineWaysMechanic:new()
     self.WaysMechanic:Initialize(machine)
+    self.ChooseASideMechanic = Game001BaseGameMachineChooseASideMechanic:new()
+    self.ChooseASideMechanic:Initialize(machine)    
 end
 
 function Game001BaseGameMachineMechanics:BaseGamePayout(machine)
@@ -40,10 +42,11 @@ function Game001BaseGameMachineMechanics:TryPaying(machine)
     -- this is hardcoded
     -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
     if self.WaysMechanic ~= nil then
-       self.WaysMechanic:TryPaying(machine)
+       return self.WaysMechanic:TryPaying(machine)
     elseif self.PaylinesMechanic ~= nil then
-       self.PaylinesMechanic:TryPaying(machine)
+       return self.PaylinesMechanic:TryPaying(machine)
     end
+    return 0
 end
 
 function Game001BaseGameMachineMechanics:OnPayingCompleted(machine)
