@@ -2803,13 +2803,23 @@ namespace Bettr.Editor
                         pivot.transform.localScale = new Vector3(localScale.x, 0.8f, localScale.z);
                         
                         // update the local Y position of the Pivot to -0.1f
+                        var localY = -0.1f;
+                        if (machineName == "Game003" || machineName == "Game004" || machineName == "Game005" || machineName == "Game007" || machineName == "Game008")
+                        {
+                            localY = 1.47f;
+                        }
+                        else if (machineName == "Game006")
+                        {
+                            localY = 1.87f;
+                        }
+                        
                         var localPosition = pivot.transform.localPosition;
-                        pivot.transform.localPosition = new Vector3(localPosition.x, -0.1f, localPosition.z);
+                        pivot.transform.localPosition = new Vector3(localPosition.x,localY, localPosition.z);
                         
                         // save the prefab
                         PrefabUtility.SaveAsPrefabAsset(prefabInstance, machinePrefabPath);
                         
-                        Debug.Log($"Fixing Audio Source for machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant}");
+                        Debug.Log($"Fixing Machine Transform for machineName={machineName} machineVariant={machineVariant} experimentVariant={experimentVariant}");
                 
                         processCount++;
                     }
@@ -2818,7 +2828,7 @@ namespace Bettr.Editor
             
             AssetDatabase.Refresh();
             
-            Debug.Log($"Processed Fix Audio Source {processCount} machine variants.");
+            Debug.Log($"Processed Fix Machine Transform {processCount} machine variants.");
         }
 
         
@@ -4863,6 +4873,24 @@ namespace Bettr.Editor
             // ReSharper disable once RedundantAssignment
             var maxOffsetY = GetReelMaxOffsetY(machineName);
             maxOffsetY = -0.1f; // along with the 0.8 scaleY change (see below)
+            
+            // update the maxOffsetY based on the machineName
+            
+            // Game003 Y=1.47
+            // Game004 Y=1.47
+            // Game005 Y=1.47
+            // Game006 Y=1.87
+            // Game007 Y=1.47
+            // Game008 Y=1.47
+            
+            if (machineName == "Game003" || machineName == "Game004" || machineName == "Game005" || machineName == "Game007" || machineName == "Game008")
+            {
+                maxOffsetY = 1.47f;
+            }
+            else if (machineName == "Game006")
+            {
+                maxOffsetY = 1.87f;
+            }
             
             var reelBackgroundX = GetReelBackgroundX(machineName);
             var reelBackgroundY = GetReelBackgroundY(machineName);

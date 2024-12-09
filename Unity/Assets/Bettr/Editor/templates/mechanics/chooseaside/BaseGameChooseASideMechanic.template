@@ -56,6 +56,85 @@
           }
       }
       {{ if !for.last }},{{ end }}{{ end }}
+      ,
+      {
+            "Name": "EVIL",
+            "Layer": "SLOT_OVERLAY",
+            "Active": true,
+            "IsPrimitive": true,
+            "Primitive": 5,
+            "PrimitiveMaterial": "BaseGameChooseASideMechanic",
+            "PrimitiveShader": "Unlit/Texture",
+            "PrimitiveTexture": "BaseGameChooseASideMechanic",
+            "PrimitiveTextureCreate": true,
+            "Position": {
+              "X": {{ -1 * steps - 4 }},
+              "Y": 0,
+              "Z": 0
+            },
+            "Scale": {
+              "X": 4,
+              "Y": 4,
+              "Z": 1
+            }
+        },
+        {
+            "Name": "EVILText",
+            "Id": "EVILText",
+            "Layer": "SLOT_OVERLAY",
+            "Active": true,
+            "Position": {
+              "X": {{ -1 * steps - 4 }},
+              "Y": 0,
+              "Z": 0
+            },
+            "Scale": {
+              "X": 1,
+              "Y": 1,
+              "Z": 1
+            },
+            "Components": [
+                {
+                    "ComponentType": "RectTransform",
+                    "Rect": {
+                        "X": 0,
+                        "Y": 0,
+                        "Width": 6,
+                        "Height": 1.5
+                    }
+                },
+                {
+                    "ComponentType": "TextMeshPro",
+                    "Text": "EVIL",
+                    "Font": "LiberationSans SDF",
+                    "FontSize": 4,
+                    "HorizontalAlignment": "Center",
+                    "VerticalAlignment": "Middle",
+                    "Color": "#FFFFFF"          
+                }
+            ]
+        },
+        {
+            "Name": "GOOD",
+            "Layer": "SLOT_OVERLAY",
+            "Active": true,
+            "IsPrimitive": true,
+            "Primitive": 5,
+            "PrimitiveMaterial": "BaseGameChooseASideMechanic",
+            "PrimitiveShader": "Unlit/Texture",
+            "PrimitiveTexture": "BaseGameChooseASideMechanic",
+            "PrimitiveTextureCreate": true,
+            "Position": {
+                "X": {{ 1 * steps + 4 }},
+                "Y": 0,
+                "Z": 0
+            },
+            "Scale": {
+                "X": 4,
+                "Y": 4,
+                "Z": 1
+            }
+        }
     ],
     "Components": [
     ]
