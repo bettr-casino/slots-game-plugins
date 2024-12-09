@@ -1,17 +1,14 @@
 require "math"
 require "Core"
 
-require "{{machineName}}BaseGameReelWaysMechanic"
-
-require "{{machineName}}BaseGameReelCascadingReelsMechanic"
-
+{{for mechanic in baseGameMechanics}}
+require "{{machineName}}BaseGameReel{{mechanic}}Mechanic"
+{{end}}
 
 {{machineName}}BaseGameReelMechanics = {
-
-    WaysMechanic = nil,
-
-    CascadingReelsMechanic = nil,
-
+{{-for mechanic in baseGameMechanics}}
+    {{mechanic}}Mechanic = nil,
+{{-end}}
 }
 
 function {{machineName}}BaseGameReelMechanics:new(o)
@@ -22,12 +19,9 @@ function {{machineName}}BaseGameReelMechanics:new(o)
 end
 
 function {{machineName}}BaseGameReelMechanics:Initialize(reel)
-
-    self.WaysMechanic = {{machineName}}BaseGameReelWaysMechanic:new()
-    self.WaysMechanic:Initialize(reel)
-
-    self.CascadingReelsMechanic = {{machineName}}BaseGameReelCascadingReelsMechanic:new()
-    self.CascadingReelsMechanic:Initialize(reel)
-
+{{-for mechanic in baseGameMechanics}}
+    self.{{mechanic}}Mechanic = {{machineName}}BaseGameReel{{mechanic}}Mechanic:new()
+    self.{{mechanic}}Mechanic:Initialize(reel)
+{{-end}}
 end
 

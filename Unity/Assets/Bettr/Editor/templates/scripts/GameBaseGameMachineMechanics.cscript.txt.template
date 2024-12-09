@@ -1,11 +1,13 @@
 require "math"
 require "Core"
-require "{{machineName}}BaseGameMachineWaysMechanic"
-require "{{machineName}}BaseGameMachineCascadingReelsMechanic"
-require "{{machineName}}BaseGameMachineCascadingReelsMultiplierMechanic"
+{{-for mechanic in baseGameMechanics}}
+require "{{machineName}}BaseGameMachine{{mechanic}}Mechanic"
+{{-end}}
 
 {{machineName}}BaseGameMachineMechanics = {
-    WaysMechanic = nil,
+{{-for mechanic in baseGameMechanics}}
+    {{mechanic}}Mechanic = nil,
+{{-end}}
 }
 
 function {{machineName}}BaseGameMachineMechanics:new(o)
@@ -20,8 +22,10 @@ function {{machineName}}BaseGameMachineMechanics:OnError(callStack)
 end
 
 function {{machineName}}BaseGameMachineMechanics:Initialize(machine)
-    self.WaysMechanic = {{machineName}}BaseGameMachineWaysMechanic:new()
-    self.WaysMechanic:Initialize(machine)
+{{-for mechanic in baseGameMechanics}}
+    self.{{mechanic}}Mechanic = {{machineName}}BaseGameMachine{{mechanic}}Mechanic:new()
+    self.{{mechanic}}Mechanic:Initialize(machine)
+{{-end}}    
 end
 
 function {{machineName}}BaseGameMachineMechanics:BaseGamePayout(machine)
@@ -40,10 +44,11 @@ function {{machineName}}BaseGameMachineMechanics:TryPaying(machine)
     -- this is hardcoded
     -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
     if self.WaysMechanic ~= nil then
-       self.WaysMechanic:TryPaying(machine)
+       return self.WaysMechanic:TryPaying(machine)
     elseif self.PaylinesMechanic ~= nil then
-       self.PaylinesMechanic:TryPaying(machine)
+       return self.PaylinesMechanic:TryPaying(machine)
     end
+    return 0
 end
 
 function {{machineName}}BaseGameMachineMechanics:OnPayingCompleted(machine)

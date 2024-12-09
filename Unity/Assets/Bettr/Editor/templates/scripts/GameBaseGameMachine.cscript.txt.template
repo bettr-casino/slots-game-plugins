@@ -56,6 +56,7 @@ function {{machineName}}BaseGameMachine:OnSpinButtonClicked()
         do
             local isSlamStopped = BettrUserController.UserInSlamStopMode
             if isSlamStopped then
+                BettrUserController.UserInSlamStopMode = false
                 System.Print("{{machineName}}BaseGameMachine:OnSpinButtonClicked ignoring click since IsSlamStopped is true")
                 return
             end
@@ -134,7 +135,7 @@ end
 function {{machineName}}BaseGameMachine:LoadServerOutcome()
     series
         do
-            BettrOutcomeController.LoadServerOutcome("{{machineName}}", "EpicAncientAdventures")
+            BettrOutcomeController.LoadServerOutcome("{{machineName}}", "{{machineVariant}}")
         end
     end
 end
@@ -227,9 +228,9 @@ end
 function {{machineName}}BaseGameMachine:SpinReelsStopped()
     series
         do
-            local coinsPaid = self.Mechanics.WaysMechanic:TryPaying(self)
+            local coinsPaid = self.Mechanics:TryPaying(self)
             if coinsPaid > 0 then
-                self.Mechanics.WaysMechanic:BaseGamePayout(self)
+                self.Mechanics:BaseGamePayout(self)
                 self:OnPayingCompleted()
                 if self.Mechanics.CascadingReelsMechanic ~= nil and self.Mechanics.CascadingReelsMechanic:HasCascade(self) then
                     self.Mechanics.CascadingReelsMechanic:StartCascade(self)
@@ -300,7 +301,7 @@ end
 function {{machineName}}BaseGameMachine:OnBaseGameSpinCompleted(machine)
     series
         do
-            {{machineName}}BaseGameState.SpinState.First.State = "Completed"
+            {{machineName}}BaseGameState.SpinState.First.State = "Waiting"
             {{machineName}}BaseGameState.DisplayState.First.State = "Idle" 
         end
     end
