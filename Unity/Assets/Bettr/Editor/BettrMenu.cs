@@ -2721,6 +2721,7 @@ namespace Bettr.Editor
         
         
         // DONE: Ported to BetteMenu ProcessBaseGameMachine
+        // DONE: game specific offsetY ported
         [MenuItem("Bettr/Tools/Fix Base Game Machine Transform")]
         public static void FixBaseGameMachineTransform()
         {
