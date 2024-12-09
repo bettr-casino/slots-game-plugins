@@ -1193,7 +1193,6 @@ namespace Bettr.Editor
         {
             var specificMachineVariants = new string[] 
             {
-                "EpicAtlantisTreasures",
             };
             
             // Walk the entire directory tree under the plugin root directory
@@ -1221,7 +1220,7 @@ namespace Bettr.Editor
                     {
                         continue;
                     }
-                    if (!specificMachineVariants.Contains(machineVariantsDir.Name))
+                    if (specificMachineVariants.Length > 0 && !specificMachineVariants.Contains(machineVariantsDir.Name))
                     {
                         continue;
                     }
@@ -4746,7 +4745,7 @@ namespace Bettr.Editor
             string dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "templates", "scripts");
             string[] filePaths = Directory.GetFiles(dirPath, "*.cscript.txt.template");
             string scriptsPath = $"scripts";
-            CopyScripts(scriptsPath, filePaths, machineName, machineVariant, experimentVariant, runtimeAssetPath);
+            CopyScripts(scriptsPath, filePaths, machineName, machineVariant, experimentVariant, runtimeAssetPath, true);
             
             // Process Mechanics scripts
             var mechanicsTable = GetTable($"{machineName}Mechanics");
@@ -4769,7 +4768,7 @@ namespace Bettr.Editor
                     dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "templates", "mechanics", mechanic.ToLower(), "scripts");
                     filePaths = Directory.GetFiles(dirPath, "*.cscript.txt.template");
                     scriptsPath = $"mechanics/{mechanic}/scripts";
-                    CopyScripts(scriptsPath, filePaths, machineName, machineVariant, experimentVariant, mechanicRuntimeAssetPath);
+                    CopyScripts(scriptsPath, filePaths, machineName, machineVariant, experimentVariant, mechanicRuntimeAssetPath, true);
                 }
             }
 
