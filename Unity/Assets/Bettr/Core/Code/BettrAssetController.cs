@@ -133,6 +133,8 @@ namespace Bettr.Core
         public string BundleVersion { get; set; }
         
         [NonSerialized] public byte[] Data = null;
+
+        public string BundleId => $"{BundleName}.{BundleVersion}";
     }
 
     public class BettrMainLobbyManifests
@@ -192,23 +194,43 @@ namespace Bettr.Core
             var bettrAssetBundleName = manifest.Bundle.BundleName;
             var bettrAssetBundleVersion = manifest.Bundle.BundleVersion;
 
+            int retries = 0;
+            int retryIndex = 0;
+
             BettrAssetBundleManifest assetBundleManifest = null;
 
-            // Fetch manifest byte range
-            yield return FetchAssetByteRange(url, manifest.Manifest, fetchedManifest =>
+            while (true)
             {
-                if (fetchedManifest == null)
+                // Fetch manifest byte range
+                yield return FetchAssetByteRange(url, manifest.Manifest, fetchedManifest =>
                 {
-                    return;
-                }
-                manifest.Manifest = fetchedManifest;
-                var assetBundleText = Encoding.ASCII.GetString(fetchedManifest.Data);
-                var deserializer = new DeserializerBuilder().WithNamingConvention(PascalCaseNamingConvention.Instance).Build();
-                assetBundleManifest = deserializer.Deserialize<BettrAssetBundleManifest>(assetBundleText);
-                assetBundleManifest.AssetBundleName = bettrAssetBundleName;
-                assetBundleManifest.AssetBundleVersion = bettrAssetBundleVersion;
-            });
+                    if (fetchedManifest == null)
+                    {
+                        return;
+                    }
+                    manifest.Manifest = fetchedManifest;
+                    var assetBundleText = Encoding.ASCII.GetString(fetchedManifest.Data);
+                    var deserializer = new DeserializerBuilder().WithNamingConvention(PascalCaseNamingConvention.Instance).Build();
+                    assetBundleManifest = deserializer.Deserialize<BettrAssetBundleManifest>(assetBundleText);
+                    assetBundleManifest.AssetBundleName = bettrAssetBundleName;
+                    assetBundleManifest.AssetBundleVersion = bettrAssetBundleVersion;
+                });
 
+                if (assetBundleManifest != null)
+                {
+                    break;
+                }
+                
+                retryIndex++;
+
+                if (retryIndex >= retries)
+                {
+                    break;
+                }
+                
+                yield return new WaitForSeconds(0.1f);
+            }
+            
             if (assetBundleManifest == null)
             {
                 string error = $"Failed to download BettrAssetBundleManifest. AssetBundleName={bettrAssetBundleName} AssetBundleVersion={bettrAssetBundleVersion}";
@@ -217,25 +239,63 @@ namespace Bettr.Core
                 yield break;
             }
 
+            retryIndex = 0;
+
             AssetBundle downloadedAssetBundle = null;
             
-            // Fetch asset bundle byte range
-            yield return FetchAssetByteRange(url, manifest.Bundle, fetchedBundle =>
+            downloadedAssetBundle = AssetBundle.GetAllLoadedAssetBundles()
+                .FirstOrDefault(bundle => bundle.name == manifest.Bundle.BundleId);
+
+            if (downloadedAssetBundle != null)
             {
-                if (fetchedBundle == null)
+                callback(manifest, bettrAssetBundleName, bettrAssetBundleVersion, downloadedAssetBundle, assetBundleManifest, true, false, null);
+                
+                yield break;
+            }
+
+            while (true)
+            {
+                // Fetch asset bundle byte range
+                yield return FetchAssetByteRange(url, manifest.Bundle, fetchedBundle =>
                 {
-                    string error = $"Failed to fetch bundle byte range. AssetBundleName={bettrAssetBundleName} AssetBundleVersion={bettrAssetBundleVersion}";
-                    Debug.LogError(error);
-                    return;
+                    if (fetchedBundle == null)
+                    {
+                        string error = $"Failed to fetch bundle byte range. AssetBundleName={bettrAssetBundleName} AssetBundleVersion={bettrAssetBundleVersion}";
+                        Debug.LogError(error);
+                        return;
+                    }
+                
+                    downloadedAssetBundle = AssetBundle.GetAllLoadedAssetBundles()
+                        .FirstOrDefault(bundle => bundle.name == manifest.Bundle.FileName);
+
+                    if (downloadedAssetBundle == null)
+                    {
+                        try
+                        {
+                            downloadedAssetBundle = AssetBundle.LoadFromMemory(fetchedBundle.Data);                    
+                        }
+                        catch (Exception e)
+                        {
+                            string error = $"Failed to load AssetBundle from memory. AssetBundleName={bettrAssetBundleName} AssetBundleVersion={bettrAssetBundleVersion} error={e.Message}";
+                            Debug.LogError(error);    
+                        }
+                    }
+                });
+                
+                if (downloadedAssetBundle != null)
+                {
+                    break;
+                }
+                
+                retryIndex++;
+
+                if (retryIndex >= retries)
+                {
+                    break;
                 }
 
-                downloadedAssetBundle = AssetBundle.LoadFromMemory(fetchedBundle.Data);
-                if (downloadedAssetBundle == null)
-                {
-                    string error = $"Failed to load AssetBundle from memory. AssetBundleName={bettrAssetBundleName} AssetBundleVersion={bettrAssetBundleVersion}";
-                    Debug.LogError(error);
-                }
-            });
+                yield return new WaitForSeconds(0.1f);
+            }
             
             if (downloadedAssetBundle == null)
             {
@@ -244,7 +304,7 @@ namespace Bettr.Core
                 callback(manifest, bettrAssetBundleName, bettrAssetBundleVersion, null, assetBundleManifest, false, false, error);
                 yield break;
             }
-                            
+            
             callback(manifest, bettrAssetBundleName, bettrAssetBundleVersion, downloadedAssetBundle, assetBundleManifest, true, false, null);
         }
 
