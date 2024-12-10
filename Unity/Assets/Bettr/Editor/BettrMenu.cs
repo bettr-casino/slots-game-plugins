@@ -2805,7 +2805,7 @@ namespace Bettr.Editor
                         
                         // update the local Y position of the Pivot to -0.1f
                         var localY = -0.1f;
-                        if (machineName == "Game003" || machineName == "Game004" || machineName == "Game005" || machineName == "Game007" || machineName == "Game008")
+                        if (machineName == "Game003" || machineName == "Game004" || machineName == "Game005" || machineName == "Game007" || machineName == "Game009")
                         {
                             localY = 1.47f;
                         }
