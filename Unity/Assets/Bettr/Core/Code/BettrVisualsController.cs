@@ -102,6 +102,8 @@ namespace Bettr.Core
 
         public BettrUserController BettrUserController { get; private set; }
         
+        public static BettrVisualsController Instance { get; private set; }
+        
         public BettrVisualsController(BettrUserController bettrUserController)
         {
             TileController.RegisterType<BettrVisualsController>("BettrVisualsController");
@@ -126,6 +128,16 @@ namespace Bettr.Core
             _layerToCameraMap.Reset();
             
             BettrUserController = bettrUserController;
+            
+            Instance = this;
+        }
+
+        public void Reset()
+        {
+            if (_layerToCameraMap != null)
+            {
+                _layerToCameraMap.Reset();
+            }
         }
         
         private Vector3? CalculatePosition(GameObject obj, Camera fireballCamera, float offsetY = 0)

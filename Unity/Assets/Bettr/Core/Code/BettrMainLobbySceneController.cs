@@ -363,35 +363,66 @@ namespace Bettr.Core
             var lobbyCard = lobbyCards.Find(lc => lc.Card == card);
             if (lobbyCard != null)
             {
-                // get the machineName and machineVariant
-                var machineBundleName = lobbyCard.MachineBundleName;
-                var machineBundleVariant = lobbyCard.MachineBundleVariant;
-                var machineName = lobbyCard.MachineName;
-                var machineVariant = lobbyCard.GetMachineVariant();
-                var machineSceneName = lobbyCard.MachineSceneName;
-
-                yield return LoadGamePrefabAsync(machineBundleName, machineBundleVariant, machineName, machineVariant, gamePanel);
-
-                var properties = new string[] { "CreditsText", "BetText", "WinText" };
-                foreach (var p in properties)
-                {
-                    var propValue = self[p];
-                    BaseGameMachineTile?.SetProperty(p, propValue);
-                }
-                
-                BaseGameMachineTile?.Call("ConfigureSettings");
-                
-                // wait for 1 second
-                yield return new WaitForSeconds(1.0f);
-                
-                // update the MachineControls
-                machineControlsProperty.SetActive(true);
+                CurrentLobbyCard = lobbyCard;
+                yield return LoadLobbySideBar(self, card);
             }
 
         }
 
-        [Obsolete]
-        // TODO: Remove once the new LoadTopPanelGame is tested
+        private IEnumerator EnableMachine(Table self, BettrLobbyCardConfig lobbyCard)
+        {
+            // get the machineName and machineVariant
+            var machineBundleName = lobbyCard.MachineBundleName;
+            var machineBundleVariant = lobbyCard.MachineBundleVariant;
+            var machineName = lobbyCard.MachineName;
+            var machineVariant = lobbyCard.GetMachineVariant();
+            var machineSceneName = lobbyCard.MachineSceneName;
+            
+            var gamePanelProperty = (PropertyGameObject) self["GamePanel"];
+            var gamePanel = gamePanelProperty.GameObject;
+            
+            // update the MachineControls
+            var machineControlsProperty = (PropertyGameObject) self["MachineControls"];
+            machineControlsProperty.SetActive(false);
+
+            yield return LoadGamePrefabAsync(machineBundleName, machineBundleVariant, machineName, machineVariant, gamePanel);
+
+            var properties = new string[] { "CreditsText", "BetText", "WinText" };
+            foreach (var p in properties)
+            {
+                var propValue = self[p];
+                BaseGameMachineTile?.SetProperty(p, propValue);
+            }
+                
+            BaseGameMachineTile?.Call("ConfigureSettings");
+                
+            // wait for 1 second
+            yield return new WaitForSeconds(1.0f);
+                
+            // update the MachineControls
+            machineControlsProperty.SetActive(true);
+        }
+
+        public IEnumerator HideLobbySideBar(Table self)
+        {
+            var sideBar = (TilePropertyGameObjectGroup) self["SideBar"];
+            if (sideBar == null)
+            {
+                Debug.LogError($"LoadLobbySideBar sideBar is null");
+                yield break;
+            }
+
+            var gameDetails = (PropertyGameObject) sideBar["GameDetails"];
+            var bettrUser = BettrUserController.Instance.BettrUserConfig;
+            if (bettrUser == null)
+            {
+                Debug.Log($"LoadLobbyCardMachine invalid BettrUserConfig");
+                yield break;
+            }
+            
+            gameDetails.SetActive(false);
+        }
+
         public IEnumerator LoadLobbySideBar(Table self, string lobbyCardName)
         {
             var sideBar = (TilePropertyGameObjectGroup) self["SideBar"];
@@ -415,7 +446,9 @@ namespace Bettr.Core
                 yield break;
             }
             var lobbyCard = bettrUser.LobbyCards[lobbyCardIndex];
-            var cachedAssetBundle = BettrAssetController.Instance.GetLoadedAssetBundle(lobbyCard.BundleName, lobbyCard.BundleVersion, false);
+            
+            var cachedAssetBundle = AssetBundle.GetAllLoadedAssetBundles()
+                .FirstOrDefault(bundle => bundle.name == lobbyCard.LobbyCardBundleId);
             if (cachedAssetBundle == null)
             {
                 Debug.Log($"Lobby cachedAssetBundle is null assetBundleName={lobbyCard.BundleName} assetBundleVersion={lobbyCard.BundleVersion} isScene=false");
@@ -504,39 +537,8 @@ namespace Bettr.Core
         public int FindLobbyCardIndex(string lobbyCardName)
         {
             var bettrUser = BettrUserController.Instance.BettrUserConfig;
-            // lobbyCardName example Game001__LobbyCard001
-            if (!lobbyCardName.Contains("__"))
-            {
-                Debug.Log($"FindLobbyCard invalid lobbyCardName={lobbyCardName}");
-                return -1;
-            }
-            var lobbyCardIndex = bettrUser.FindLobbyCardIndexById(lobbyCardName.Split("__")[1]);
+            var lobbyCardIndex = bettrUser.FindLobbyCardIndexById(lobbyCardName);
             return lobbyCardIndex;
-        }
-
-        public IEnumerator LoadLobbyCardMachine(string lobbyCardName)
-        {
-            var bettrUser = BettrUserController.Instance.BettrUserConfig;
-            var lobbyCardIndex = FindLobbyCardIndex(lobbyCardName);
-            if (lobbyCardIndex == -1)
-            {
-                Debug.Log($"LoadLobbyCardMachine invalid lobbyCardIndex={lobbyCardIndex} lobbyCardName={lobbyCardName}");
-                yield break;
-            }
-            BettrUserController.Instance.DisableUserPreviewMode();
-            bettrUser.LobbyCardIndex = lobbyCardIndex;
-            var lobbyCard = bettrUser.LobbyCards[lobbyCardIndex];
-            bettrUser.LobbyCardName = lobbyCard.Card;
-            var (machineBundleName, machineBundleVariant) = GetLobbyCardExperiment(lobbyCard);
-            // unload any cached version
-            yield return BettrAssetController.Instance.UnloadCachedAssetBundle(machineBundleName, machineBundleVariant);
-            
-            // get the machineName and machineVariant
-            var machineName = lobbyCard.MachineName;
-            var machineVariant = lobbyCard.GetMachineVariant();
-            var machineSceneName = lobbyCard.MachineSceneName;
-
-            yield return LoadGameSceneAsync(machineSceneName, machineBundleName, machineBundleVariant, machineName, machineVariant);
         }
         
         private IEnumerator LoadGamePrefabAsync(string machineBundleName, string machineBundleVariant, string machineName, string machineVariant, GameObject parent)
@@ -780,29 +782,20 @@ namespace Bettr.Core
             gameTile.Call("SetBaseGameActive", true);
         }
         
-        public IEnumerator LoadLobbyCardMachinePreview(string lobbyCardName)
+        public IEnumerator LoadLobbyCardMachinePreview(Table self)
         {
-            var bettrUser = BettrUserController.Instance.BettrUserConfig;
-            var lobbyCardIndex = FindLobbyCardIndex(lobbyCardName);
-            if (lobbyCardIndex == -1)
-            {
-                Debug.Log($"LoadLobbyCardMachinePreview invalid lobbyCardIndex={lobbyCardIndex} lobbyCardName={lobbyCardName}");
-                yield break;
-            }
             BettrUserController.Instance.EnableUserPreviewMode();
-            bettrUser.LobbyCardIndex = lobbyCardIndex;
-            var lobbyCard = bettrUser.LobbyCards[lobbyCardIndex];
-            bettrUser.LobbyCardName = lobbyCard.Card;
-            var (machineBundleName, machineBundleVariant) = GetLobbyCardExperiment(lobbyCard);
-            // unload any cached version
-            yield return BettrAssetController.Instance.UnloadCachedAssetBundle(machineBundleName, machineBundleVariant);
-            
-            // get the machineName and machineVariant
-            var machineName = lobbyCard.MachineName;
-            var machineVariant = lobbyCard.GetMachineVariant();
-            var machineSceneName = lobbyCard.MachineSceneName;
-
-            yield return LoadGameSceneAsync(machineSceneName, machineBundleName, machineBundleVariant, machineName, machineVariant);
+            BettrVisualsController.Instance.Reset();
+            yield return HideLobbySideBar(self);
+            yield return EnableMachine(self, CurrentLobbyCard);
+        }
+        
+        public IEnumerator LoadLobbyCardMachine(Table self)
+        {
+            BettrUserController.Instance.DisableUserPreviewMode();
+            BettrVisualsController.Instance.Reset();
+            yield return HideLobbySideBar(self);
+            yield return EnableMachine(self, CurrentLobbyCard);
         }
 
         public IEnumerator LoadMachine()

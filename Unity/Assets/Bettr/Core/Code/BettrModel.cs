@@ -45,6 +45,9 @@ namespace Bettr.Core
         public string MaterialName { get; set; }
         public string Format { get; set; }
         
+        public string MachineBundleId => $"{MachineBundleName}.{MachineBundleVariant}";
+        public string LobbyCardBundleId => $"lobbycard{MachineBundleId}";
+        
         public string GetMachineVariant()
         {
             var partial = MachineSceneName.Substring(MachineName.Length);
