@@ -239,7 +239,7 @@ namespace Bettr.Editor
         static void ApplyMechanicChooseASide()
         {
             var mechanic = "ChooseASide";
-            ApplyMechanicDelegate(mechanic, BettrMechanics.ProcessChooseAsideMechanic);
+            ApplyMechanicDelegate(mechanic, BettrMechanics.ProcessChooseASideMechanic);
         }
         
         [MenuItem("Tools/Update Prefab References")]
@@ -3360,7 +3360,7 @@ namespace Bettr.Editor
             {
                 { "cascadingreelsmultiplier", BettrMechanics.ProcessCascadingReelsMultiplierMechanic },
                 { "cascadingreels", BettrMechanics.ProcessCascadingReelsMechanic },
-                { "chooseaside", BettrMechanics.ProcessChooseAsideMechanic },
+                { "chooseaside", BettrMechanics.ProcessChooseASideMechanic },
                 { "expandingpaylines", BettrMechanics.ProcessExpandingPaylinesMechanic },
                 { "expandingreels", BettrMechanics.ProcessExpandingReelsMechanic },
                 { "flipreels", BettrMechanics.ProcessFlipReelsMechanic },

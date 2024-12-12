@@ -4,8 +4,13 @@
   "Layer": "SLOT_OVERLAY",
   "Position": {
     "X": 0,
-    "Y": 0,
+    "Y": -4.7,
     "Z": 0
+  },
+  "Scale": {
+    "X": 0.25,
+    "Y": 0.4,
+    "Z": 1
   },
   "Child": {
     "Name": "Pivot",
@@ -18,9 +23,9 @@
         "Active": true,
         "IsPrimitive": true,
         "Primitive": 5,
-        "PrimitiveMaterial": "BaseGameChooseASideMechanic",
+        "PrimitiveMaterial": "BaseGameChooseASideMechanicSlider",
         "PrimitiveShader": "Unlit/Texture",
-        "PrimitiveTexture": "BaseGameChooseASideMechanic",
+        "PrimitiveTexture": "BaseGameChooseASideMechanicSlider",
         "PrimitiveTextureCreate": true,
         "Position": {
             "X": 0,
@@ -40,9 +45,9 @@
           "Active": true,
           "IsPrimitive": true,
           "Primitive": 5,
-          "PrimitiveMaterial": "BaseGameChooseASideMechanic",
+          "PrimitiveMaterial": "BaseGameChooseASideMechanicSliderSlot",
           "PrimitiveShader": "Unlit/Texture",
-          "PrimitiveTexture": "BaseGameChooseASideMechanic",
+          "PrimitiveTexture": "BaseGameChooseASideMechanicSliderSlot",
           "PrimitiveTextureCreate": true,
           "Position": {
               "X": {{ -1 * steps + step * 2 - 1 }},
@@ -63,9 +68,9 @@
             "Active": true,
             "IsPrimitive": true,
             "Primitive": 5,
-            "PrimitiveMaterial": "BaseGameChooseASideMechanic",
+            "PrimitiveMaterial": "BaseGameChooseASideMechanicEvil",
             "PrimitiveShader": "Unlit/Texture",
-            "PrimitiveTexture": "BaseGameChooseASideMechanic",
+            "PrimitiveTexture": "BaseGameChooseASideMechanicEvil",
             "PrimitiveTextureCreate": true,
             "Position": {
               "X": {{ -1 * steps - 4 }},
@@ -120,9 +125,9 @@
             "Active": true,
             "IsPrimitive": true,
             "Primitive": 5,
-            "PrimitiveMaterial": "BaseGameChooseASideMechanic",
+            "PrimitiveMaterial": "BaseGameChooseASideMechanicGood",
             "PrimitiveShader": "Unlit/Texture",
-            "PrimitiveTexture": "BaseGameChooseASideMechanic",
+            "PrimitiveTexture": "BaseGameChooseASideMechanicGood",
             "PrimitiveTextureCreate": true,
             "Position": {
                 "X": {{ 1 * steps + 4 }},
@@ -134,6 +139,42 @@
                 "Y": 4,
                 "Z": 1
             }
+        },
+        {
+            "Name": "GOODText",
+            "Id": "GOODText",
+            "Layer": "SLOT_OVERLAY",
+            "Active": true,
+            "Position": {
+                "X": {{ 1 * steps + 4 }},
+                "Y": 0,
+                "Z": 0
+            },
+            "Scale": {
+                "X": 1,
+                "Y": 1,
+                "Z": 1
+            },
+            "Components": [
+                 {
+                     "ComponentType": "RectTransform",
+                     "Rect": {
+                         "X": 0,
+                         "Y": 0,
+                         "Width": 6,
+                         "Height": 1.5
+                     }
+                 },
+                 {
+                     "ComponentType": "TextMeshPro",
+                     "Text": "GOOD",
+                     "Font": "LiberationSans SDF",
+                     "FontSize": 4,
+                     "HorizontalAlignment": "Center",
+                     "VerticalAlignment": "Middle",
+                     "Color": "#FFFFFF"          
+                 }
+            ]
         }
     ],
     "Components": [

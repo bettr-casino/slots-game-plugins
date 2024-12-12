@@ -101,13 +101,13 @@ namespace Bettr.Editor
                 
         }
 
-        public static void ProcessChooseAsideMechanic(string machineName, string machineVariant,
+        public static void ProcessChooseASideMechanic(string machineName, string machineVariant,
             string experimentVariant, string machineModelPath)
         {
             Debug.Log(
                 $"Processing choose a side mechanic for {machineName} {machineVariant} {experimentVariant} {machineModelPath}");
             
-            var mechanicName = "ChooseAside";
+            var mechanicName = "ChooseASide";
             
             var templateName = $"BaseGame{mechanicName}Mechanic";
             var prefabName = $"BaseGameMachine{mechanicName}";
@@ -120,7 +120,7 @@ namespace Bettr.Editor
             
             // get the model
             var steps = BettrMenu.GetTableValue<int>(dataSummary, "ChooseASide", "Steps", 0);
-            Debug.Log($"ProcessChooseAsideMechanic steps: {steps}");
+            Debug.Log($"ProcessChooseASideMechanic steps: {steps}");
             
             var model = new Dictionary<string, object>
             {
