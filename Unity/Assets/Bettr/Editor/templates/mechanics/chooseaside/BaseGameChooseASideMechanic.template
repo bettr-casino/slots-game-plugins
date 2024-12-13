@@ -13,164 +13,100 @@
     "Z": 1
   },
   "Child": {
-    "Name": "Pivot",
-    "Id": "Pivot",
-    "Layer": "SLOT_OVERLAY",
-    "Children": [
-      {
-        "Name": "Slider",
-        "Layer": "SLOT_OVERLAY",
-        "Active": true,
-        "IsPrimitive": true,
-        "Primitive": 5,
-        "PrimitiveMaterial": "BaseGameChooseASideMechanicSlider",
-        "PrimitiveShader": "Unlit/Texture",
-        "PrimitiveTexture": "BaseGameChooseASideMechanicSlider",
-        "PrimitiveTextureCreate": true,
-        "PrimitiveAlpha": 0.3,
-        "PrimitiveTextureCreateSource": "default-yellow.png",
-        "Position": {
-            "X": 0,
-            "Y": 0,
-            "Z": 10
-        },
-        "Scale": {
-            "X": {{steps * 2 + 2}},
-            "Y": 0.3,
-            "Z": 1
-        }
-      },
-      {{ for step in leftStepStartInclusive..leftStepEndExclusive }}
-      {
-          "Name": "SliderSlot{{ step }}",
-          "Layer": "SLOT_OVERLAY",
-          "Active": true,
-          "IsPrimitive": true,
-          "Primitive": 5,
-          "PrimitiveMaterial": "BaseGameChooseASideMechanicSliderSlot",
-          "PrimitiveShader": "Unlit/Texture",
-          "PrimitiveTexture": "BaseGameChooseASideMechanicSliderSlot",
-          "PrimitiveTextureCreate": true,
-          "PrimitiveTextureCreateSource": "default.png",
-          "Position": {
-              "X": {{ -1 * steps + step * 2 - 1 }},
-              "Y": 0,
-              "Z": 0
-          },
-          "Scale": {
-              "X": 1,
-              "Y": 2,
-              "Z": 1
-          }
-      }
-      {{ if !for.last }},{{ end }}{{ end }}
-      ,
-      {
-        "Name": "SliderSlot{{ middleStep }}",
-        "Layer": "SLOT_OVERLAY",
-        "Active": true,
-        "IsPrimitive": true,
-        "Primitive": 5,
-        "PrimitiveMaterial": "BaseGameChooseASideMechanicSliderSlotEvil",
-        "PrimitiveShader": "Unlit/Texture",
-        "PrimitiveTexture": "BaseGameChooseASideMechanicSliderSlotEvil",
-        "PrimitiveTextureCreate": true,
-        "PrimitiveTextureCreateSource": "default-yellow.png",
-        "Position": {
-          "X": 0,
-          "Y": 0,
-          "Z": 0
-        },
-        "Scale": {
-          "X": 1,
-          "Y": 2,
-          "Z": 1
-        }
-      }
-      ,
-      {{ for step in rightStepStartInclusive..rightStepEndExclusive }}
-      {
-        "Name": "SliderSlot{{ step }}",
-        "Layer": "SLOT_OVERLAY",
-        "Active": true,
-        "IsPrimitive": true,
-        "Primitive": 5,
-        "PrimitiveMaterial": "BaseGameChooseASideMechanicSliderSlotGood",
-        "PrimitiveShader": "Unlit/Texture",
-        "PrimitiveTexture": "BaseGameChooseASideMechanicSliderSlotGood",
-        "PrimitiveTextureCreate": true,
-        "PrimitiveTextureCreateSource": "default-green.png",
-        "Position": {
-            "X": {{ -1 * steps + step * 2 - 1 }},
-            "Y": 0,
-            "Z": 0
-        },
-        "Scale": {
-            "X": 1,
-            "Y": 2,
-            "Z": 1
-        }
-      }
-      {{ if !for.last }},{{ end }}{{ end }}
-      ,
-      {
-                "Name": "SliderPointer",
-                "Layer": "SLOT_OVERLAY",
+      "Name": "Pivot",
+      "Id": "Pivot",
+      "Layer": "SLOT_OVERLAY",
+      "Children": [      
+        {
+            "Name": "BaseGameChooseASideDialogEvilParent",
+            "Id": "BaseGameChooseASideDialogEvilParent",
+            "Layer": "SLOT_REELS_OVERLAY",
+            "Position": {
+                "X": -12,
+                "Y": 12,
+                "Z": 0
+            },
+            "Scale": {
+                "X": 1.5,
+                "Y": 1.5,
+                "Z": 1
+            },
+            "Children": [
+              {
+                "Name": "Quad",
+                "Layer": "SLOT_REELS_OVERLAY",
                 "Active": true,
                 "IsPrimitive": true,
                 "Primitive": 5,
-                "PrimitiveMaterial": "BaseGameChooseASideMechanicSliderPointer",
+                "PrimitiveMaterial": "BaseGameChooseASideDialogEvil",
                 "PrimitiveShader": "Unlit/Texture",
-                "PrimitiveTexture": "BaseGameChooseASideMechanicSliderPointer",
+                "PrimitiveTexture": "BaseGameChooseASideDialogEvil",
                 "PrimitiveTextureCreate": true,
-                "PrimitiveTextureCreateSource": "default-yellow.png",
+                "PrimitiveTextureCreateSource": "default.png",
                 "Position": {
                     "X": 0,
                     "Y": 0,
                     "Z": 0
                 },
                 "Scale": {
-                    "X": 1.5,
-                    "Y": 3,
+                    "X": 8,
+                    "Y": 8,
                     "Z": 1
                 }
-            }
-      ,
-      {
-            "Name": "EVIL",
-            "Layer": "SLOT_OVERLAY",
+              },
+              {
+                  "Name": "Text",
+                  "Id": "BaseGameChooseASideDialogEvilText",
+                  "Layer": "SLOT_REELS_OVERLAY",
+                  "Active": true,
+                  "Position": {
+                      "X": 0,
+                      "Y": 0,
+                      "Z": 0
+                  },
+                  "Scale": {
+                      "X": 4,
+                      "Y": 4,
+                      "Z": 1
+                  },
+                  "Components": [
+                    {
+                        "ComponentType": "RectTransform",
+                        "Rect": {
+                            "X": 0,
+                            "Y": 0,
+                            "Width": 6,
+                            "Height": 1.5
+                        }
+                    },
+                    {
+                        "ComponentType": "TextMeshPro",
+                        "Text": "Evil?",
+                        "Font": "LiberationSans SDF",
+                        "FontSize": 4,
+                        "HorizontalAlignment": "Center",
+                        "VerticalAlignment": "Middle",
+                        "Color": "#FFFFFF"          
+                    }
+                  ]
+              }
+            ],
+            "Components": [
+            ]
+        },
+        {
+            "Name": "Text",
+            "Id": "BaseGameChooseASideDialogChooseText",
+            "Layer": "SLOT_REELS_OVERLAY",
             "Active": true,
-            "IsPrimitive": true,
-            "Primitive": 5,
-            "PrimitiveMaterial": "BaseGameChooseASideMechanicEvil",
-            "PrimitiveShader": "Unlit/Texture",
-            "PrimitiveTexture": "BaseGameChooseASideMechanicEvil",
-            "PrimitiveTextureCreate": true,
-            "PrimitiveTextureCreateSource": "default.png",
             "Position": {
-              "X": {{ -1 * steps - 4 }},
-              "Y": 0,
+              "X": 0,
+              "Y": 12,
               "Z": 0
             },
             "Scale": {
               "X": 4,
               "Y": 4,
-              "Z": 1
-            }
-        },
-        {
-            "Name": "EVILText",
-            "Id": "EVILText",
-            "Layer": "SLOT_OVERLAY",
-            "Active": true,
-            "Position": {
-              "X": {{ -1 * steps - 4 }},
-              "Y": 0,
-              "Z": 0
-            },
-            "Scale": {
-              "X": 1,
-              "Y": 1,
               "Z": 1
             },
             "Components": [
@@ -185,76 +121,338 @@
                 },
                 {
                     "ComponentType": "TextMeshPro",
-                    "Text": "EVIL",
+                    "Text": "ARE YOU?",
                     "Font": "LiberationSans SDF",
-                    "FontSize": 8,
+                    "FontSize": 4,
                     "HorizontalAlignment": "Center",
                     "VerticalAlignment": "Middle",
                     "Color": "#FFFFFF"          
                 }
             ]
-        },
+        }                
+        ,        
         {
-            "Name": "GOOD",
-            "Layer": "SLOT_OVERLAY",
-            "Active": true,
-            "IsPrimitive": true,
-            "Primitive": 5,
-            "PrimitiveMaterial": "BaseGameChooseASideMechanicGood",
-            "PrimitiveShader": "Unlit/Texture",
-            "PrimitiveTexture": "BaseGameChooseASideMechanicGood",
-            "PrimitiveTextureCreate": true,
-            "PrimitiveTextureCreateSource": "default-green.png",
-            "Position": {
-                "X": {{ 1 * steps + 4 }},
-                "Y": 0,
-                "Z": 0
-            },
-            "Scale": {
-                "X": 4,
-                "Y": 4,
-                "Z": 1
-            }
-        },
-        {
-            "Name": "GOODText",
-            "Id": "GOODText",
-            "Layer": "SLOT_OVERLAY",
-            "Active": true,
-            "Position": {
-                "X": {{ 1 * steps + 4 }},
-                "Y": 0,
-                "Z": 0
-            },
-            "Scale": {
-                "X": 1,
-                "Y": 1,
-                "Z": 1
-            },
-            "Components": [
-                 {
-                     "ComponentType": "RectTransform",
-                     "Rect": {
-                         "X": 0,
-                         "Y": 0,
-                         "Width": 6,
-                         "Height": 1.5
-                     }
+             "Name": "BaseGameChooseASideDialogGoodParent",
+             "Id": "BaseGameChooseASideDialogGoodParent",
+             "Layer": "SLOT_REELS_OVERLAY",
+             "Position": {
+                 "X": 12,
+                 "Y": 12,
+                 "Z": 0
+             },
+             "Scale": {
+                 "X": 1.5,
+                 "Y": 1.5,
+                 "Z": 1
+             },
+             "Children": [
+               {
+                 "Name": "Quad",
+                 "Layer": "SLOT_REELS_OVERLAY",
+                 "Active": true,
+                 "IsPrimitive": true,
+                 "Primitive": 5,
+                 "PrimitiveMaterial": "BaseGameChooseASideDialogGood",
+                 "PrimitiveShader": "Unlit/Texture",
+                 "PrimitiveTexture": "BaseGameChooseASideDialogGood",
+                 "PrimitiveTextureCreate": true,
+                 "PrimitiveTextureCreateSource": "default-green.png",
+                 "Position": {
+                     "X": 0,
+                     "Y": 0,
+                     "Z": 0
                  },
-                 {
-                     "ComponentType": "TextMeshPro",
-                     "Text": "GOOD",
-                     "Font": "LiberationSans SDF",
-                     "FontSize": 8,
-                     "HorizontalAlignment": "Center",
-                     "VerticalAlignment": "Middle",
-                     "Color": "#FFFFFF"          
+                 "Scale": {
+                     "X": 8,
+                     "Y": 8,
+                     "Z": 1
                  }
+               },
+               {
+                   "Name": "Text",
+                   "Id": "BaseGameChooseASideDialogGoodText",
+                   "Layer": "SLOT_REELS_OVERLAY",
+                   "Active": true,
+                   "Position": {
+                       "X": 0,
+                       "Y": 0,
+                       "Z": 0
+                   },
+                   "Scale": {
+                       "X": 4,
+                       "Y": 4,
+                       "Z": 1
+                   },
+                   "Components": [
+                     {
+                         "ComponentType": "RectTransform",
+                         "Rect": {
+                             "X": 0,
+                             "Y": 0,
+                             "Width": 6,
+                             "Height": 1.5
+                         }
+                     },
+                     {
+                         "ComponentType": "TextMeshPro",
+                         "Text": "Good?",
+                         "Font": "LiberationSans SDF",
+                         "FontSize": 4,
+                         "HorizontalAlignment": "Center",
+                         "VerticalAlignment": "Middle",
+                         "Color": "#FFFFFF"          
+                     }
+                   ]
+               }
+             ],
+             "Components": [
+             ]
+         },      
+        {
+            "Name": "SliderParent",
+            "Id": "SliderParent",
+            "Layer": "SLOT_OVERLAY",
+            "Children": [
+              {
+                "Name": "Slider",
+                "Layer": "SLOT_OVERLAY",
+                "Active": true,
+                "IsPrimitive": true,
+                "Primitive": 5,
+                "PrimitiveMaterial": "BaseGameChooseASideMechanicSlider",
+                "PrimitiveShader": "Unlit/Texture",
+                "PrimitiveTexture": "BaseGameChooseASideMechanicSlider",
+                "PrimitiveTextureCreate": true,
+                "PrimitiveAlpha": 0.3,
+                "PrimitiveTextureCreateSource": "default-yellow.png",
+                "Position": {
+                    "X": 0,
+                    "Y": 0,
+                    "Z": 10
+                },
+                "Scale": {
+                    "X": {{steps * 2 + 2}},
+                    "Y": 0.3,
+                    "Z": 1
+                }
+              },
+              {{ for step in leftStepStartInclusive..leftStepEndExclusive }}
+              {
+                  "Name": "SliderSlot{{ step }}",
+                  "Layer": "SLOT_OVERLAY",
+                  "Active": true,
+                  "IsPrimitive": true,
+                  "Primitive": 5,
+                  "PrimitiveMaterial": "BaseGameChooseASideMechanicSliderSlot",
+                  "PrimitiveShader": "Unlit/Texture",
+                  "PrimitiveTexture": "BaseGameChooseASideMechanicSliderSlot",
+                  "PrimitiveTextureCreate": true,
+                  "PrimitiveTextureCreateSource": "default.png",
+                  "Position": {
+                      "X": {{ -1 * steps + step * 2 - 1 }},
+                      "Y": 0,
+                      "Z": 0
+                  },
+                  "Scale": {
+                      "X": 1,
+                      "Y": 2,
+                      "Z": 1
+                  }
+              }
+              {{ if !for.last }},{{ end }}{{ end }}
+              ,
+              {
+                "Name": "SliderSlot{{ middleStep }}",
+                "Layer": "SLOT_OVERLAY",
+                "Active": true,
+                "IsPrimitive": true,
+                "Primitive": 5,
+                "PrimitiveMaterial": "BaseGameChooseASideMechanicSliderSlotEvil",
+                "PrimitiveShader": "Unlit/Texture",
+                "PrimitiveTexture": "BaseGameChooseASideMechanicSliderSlotEvil",
+                "PrimitiveTextureCreate": true,
+                "PrimitiveTextureCreateSource": "default-yellow.png",
+                "Position": {
+                  "X": 0,
+                  "Y": 0,
+                  "Z": 0
+                },
+                "Scale": {
+                  "X": 1,
+                  "Y": 2,
+                  "Z": 1
+                }
+              }
+              ,
+              {{ for step in rightStepStartInclusive..rightStepEndExclusive }}
+              {
+                "Name": "SliderSlot{{ step }}",
+                "Layer": "SLOT_OVERLAY",
+                "Active": true,
+                "IsPrimitive": true,
+                "Primitive": 5,
+                "PrimitiveMaterial": "BaseGameChooseASideMechanicSliderSlotGood",
+                "PrimitiveShader": "Unlit/Texture",
+                "PrimitiveTexture": "BaseGameChooseASideMechanicSliderSlotGood",
+                "PrimitiveTextureCreate": true,
+                "PrimitiveTextureCreateSource": "default-green.png",
+                "Position": {
+                    "X": {{ -1 * steps + step * 2 - 1 }},
+                    "Y": 0,
+                    "Z": 0
+                },
+                "Scale": {
+                    "X": 1,
+                    "Y": 2,
+                    "Z": 1
+                }
+              }
+              {{ if !for.last }},{{ end }}{{ end }}
+              ,
+              {
+                        "Name": "SliderPointer",
+                        "Layer": "SLOT_OVERLAY",
+                        "Active": true,
+                        "IsPrimitive": true,
+                        "Primitive": 5,
+                        "PrimitiveMaterial": "BaseGameChooseASideMechanicSliderPointer",
+                        "PrimitiveShader": "Unlit/Texture",
+                        "PrimitiveTexture": "BaseGameChooseASideMechanicSliderPointer",
+                        "PrimitiveTextureCreate": true,
+                        "PrimitiveTextureCreateSource": "default-yellow.png",
+                        "Position": {
+                            "X": 0,
+                            "Y": 0,
+                            "Z": 0
+                        },
+                        "Scale": {
+                            "X": 1.5,
+                            "Y": 3,
+                            "Z": 1
+                        }
+                    }
+              ,
+              {
+                    "Name": "BaseGameChooseASideMechanicEvil",
+                    "Layer": "SLOT_OVERLAY",
+                    "Active": true,
+                    "IsPrimitive": true,
+                    "Primitive": 5,
+                    "PrimitiveMaterial": "BaseGameChooseASideMechanicEvil",
+                    "PrimitiveShader": "Unlit/Texture",
+                    "PrimitiveTexture": "BaseGameChooseASideMechanicEvil",
+                    "PrimitiveTextureCreate": true,
+                    "PrimitiveTextureCreateSource": "default.png",
+                    "Position": {
+                      "X": {{ -1 * steps - 4 }},
+                      "Y": 0,
+                      "Z": 0
+                    },
+                    "Scale": {
+                      "X": 4,
+                      "Y": 4,
+                      "Z": 1
+                    }
+                },
+                {
+                    "Name": "EVILText",
+                    "Id": "EVILText",
+                    "Layer": "SLOT_OVERLAY",
+                    "Active": true,
+                    "Position": {
+                      "X": {{ -1 * steps - 4 }},
+                      "Y": 0,
+                      "Z": 0
+                    },
+                    "Scale": {
+                      "X": 1,
+                      "Y": 1,
+                      "Z": 1
+                    },
+                    "Components": [
+                        {
+                            "ComponentType": "RectTransform",
+                            "Rect": {
+                                "X": 0,
+                                "Y": 0,
+                                "Width": 6,
+                                "Height": 1.5
+                            }
+                        },
+                        {
+                            "ComponentType": "TextMeshPro",
+                            "Text": "EVIL",
+                            "Font": "LiberationSans SDF",
+                            "FontSize": 8,
+                            "HorizontalAlignment": "Center",
+                            "VerticalAlignment": "Middle",
+                            "Color": "#FFFFFF"          
+                        }
+                    ]
+                },
+                {
+                    "Name": "BaseGameChooseASideMechanicGood",
+                    "Layer": "SLOT_OVERLAY",
+                    "Active": true,
+                    "IsPrimitive": true,
+                    "Primitive": 5,
+                    "PrimitiveMaterial": "BaseGameChooseASideMechanicGood",
+                    "PrimitiveShader": "Unlit/Texture",
+                    "PrimitiveTexture": "BaseGameChooseASideMechanicGood",
+                    "PrimitiveTextureCreate": true,
+                    "PrimitiveTextureCreateSource": "default-green.png",
+                    "Position": {
+                        "X": {{ 1 * steps + 4 }},
+                        "Y": 0,
+                        "Z": 0
+                    },
+                    "Scale": {
+                        "X": 4,
+                        "Y": 4,
+                        "Z": 1
+                    }
+                },
+                {
+                    "Name": "GOODText",
+                    "Id": "GOODText",
+                    "Layer": "SLOT_OVERLAY",
+                    "Active": true,
+                    "Position": {
+                        "X": {{ 1 * steps + 4 }},
+                        "Y": 0,
+                        "Z": 0
+                    },
+                    "Scale": {
+                        "X": 1,
+                        "Y": 1,
+                        "Z": 1
+                    },
+                    "Components": [
+                         {
+                             "ComponentType": "RectTransform",
+                             "Rect": {
+                                 "X": 0,
+                                 "Y": 0,
+                                 "Width": 6,
+                                 "Height": 1.5
+                             }
+                         },
+                         {
+                             "ComponentType": "TextMeshPro",
+                             "Text": "GOOD",
+                             "Font": "LiberationSans SDF",
+                             "FontSize": 8,
+                             "HorizontalAlignment": "Center",
+                             "VerticalAlignment": "Middle",
+                             "Color": "#FFFFFF"          
+                         }
+                    ]
+                }
+            ],
+            "Components": [
             ]
-        }
-    ],
-    "Components": [
-    ]
+          }      
+      ]
   },
   "Components": [        
   ]
