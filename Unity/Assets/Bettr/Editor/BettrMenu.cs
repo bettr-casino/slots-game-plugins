@@ -2645,18 +2645,31 @@ namespace Bettr.Editor
                             Debug.LogError($"Failed to load prefab: {machineName}BaseGameMachine.prefab");
                             continue;
                         }
+
+                        hasChanges = false;
+                        var shouldDestroyTilePropertyGameObjects = false;
                         
                         var pivotGameObject = FindGameObjectInHierarchy(prefabInstance, "Pivot", prefabInstance.gameObject.name);
                         // check if the MechanicsParent exists
                         var mechanicsParent = FindGameObjectInHierarchy(pivotGameObject, "MechanicsParent");
+                        if (mechanicsParent != null)
+                        {
+                            // remove it if its parent is the PivotGameObject
+                            if (mechanicsParent.transform.parent == pivotGameObject.transform)
+                            {
+                                Object.DestroyImmediate(mechanicsParent);
+                                shouldDestroyTilePropertyGameObjects = true;
+                                mechanicsParent = null;
+                                hasChanges = true;                            
+                            }
+                        }
+
                         if (mechanicsParent == null)
                         {
-                            hasChanges = true;
-                            
                             // create the MechanicsParent
                             mechanicsParent = new GameObject("MechanicsParent");
-                            // set the parent of the MechanicsParent to the Pivot
-                            mechanicsParent.transform.SetParent(pivotGameObject.transform);
+                            // set the parent of the MechanicsParent to the prefabInstance
+                            mechanicsParent.transform.SetParent(prefabInstance.transform);
                             // set the local position of the MechanicsParent to (0, 0, 0)
                             mechanicsParent.transform.localPosition = Vector3.zero;
                             // set the local rotation of the MechanicsParent to (0, 0, 0)
@@ -2665,27 +2678,38 @@ namespace Bettr.Editor
                             mechanicsParent.transform.localScale = Vector3.one;
                             
                             // set the layer of the MechanicsParent to same as the Pivot
-                            mechanicsParent.layer = pivotGameObject.layer;
+                            mechanicsParent.layer = pivotGameObject.layer;                            
                         }
-                        
-                        var foundMechanicsParentInTilePropertyGameObjects = false;
+
+                        var hasTilePropertyGameObjectsComponent = false;
+                        TilePropertyGameObjects tilePropertyGameObjectsComponent = null;
                         
                         // now check the components on the prefab. Search for TilePropertyGameObjects components
-                        var tilePropertyGameObjects = prefabInstance.GetComponents<TilePropertyGameObjects>();
+                        var tilePropertyGameObjectsList = prefabInstance.GetComponents<TilePropertyGameObjects>();
                         // loop over and check if there is a reference to the MechanicsParent
-                        foreach (var tilePropertyGameObject in tilePropertyGameObjects)
+                        foreach (var tilePropertyGameObjects in tilePropertyGameObjectsList)
                         {
                             // check if the key MechanicsParent exists in the tileGameObjectProperties
-                            if (tilePropertyGameObject.tileGameObjectProperties.Any(p => p.key == "MechanicsParent"))
+                            if (tilePropertyGameObjects.tileGameObjectProperties.Any(p => p.key == "MechanicsParent"))
                             {
-                                foundMechanicsParentInTilePropertyGameObjects = true;
+                                // remove this component
+                                if (shouldDestroyTilePropertyGameObjects)
+                                {
+                                    Object.DestroyImmediate(tilePropertyGameObjects);
+                                    shouldDestroyTilePropertyGameObjects = false;
+
+                                    hasChanges = true;
+                                }
+                                else
+                                {
+                                    hasTilePropertyGameObjectsComponent = true;
+                                    tilePropertyGameObjectsComponent = tilePropertyGameObjects;
+                                }
                             }
                         }
 
-                        if (!foundMechanicsParentInTilePropertyGameObjects)
+                        if (!hasTilePropertyGameObjectsComponent)
                         {
-                            hasChanges = true;
-                            
                             // add to the tileGameObjectProperties property of the tilePropertyGameObjects
                             var tilePropertyGameObject = new TilePropertyGameObject()
                             {
@@ -2699,8 +2723,25 @@ namespace Bettr.Editor
                             var tilePropertyGameObjectList = new List<TilePropertyGameObject>();
                             tilePropertyGameObjectList.Add(tilePropertyGameObject);
                             // add the TilePropertyGameObjects to the machinePrefab
-                            var tilePropertyGameObjectsComponent = prefabInstance.AddComponent<TilePropertyGameObjects>();
+                            tilePropertyGameObjectsComponent = prefabInstance.AddComponent<TilePropertyGameObjects>();
                             tilePropertyGameObjectsComponent.tileGameObjectProperties = tilePropertyGameObjectList;
+                        }
+                        
+                        // now check the tilePropertyGameObjectsComponent for the "MachineParent" key
+                        if (tilePropertyGameObjectsComponent.tileGameObjectProperties.All(p => p.key != "MachineParent"))
+                        {
+                            // add the key "MachineParent" and the value of the key "Pivot" to the tileGameObjectProperties
+                            var tilePropertyGameObject = new TilePropertyGameObject()
+                            {
+                                key = "MachineParent",
+                                value = new PropertyGameObject()
+                                {
+                                    gameObject = pivotGameObject,
+                                }
+                            };
+                            
+                            tilePropertyGameObjectsComponent.tileGameObjectProperties.Add(tilePropertyGameObject);
+                            hasChanges = true;
                         }
                         
                         // save the prefab

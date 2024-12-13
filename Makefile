@@ -700,6 +700,17 @@ start-local-server:
 
 # =============================================================================
 #
+# Menu Fixes
+#
+# =============================================================================
+menu-fixes-add-base-game-mechanics-parent:
+	@echo "Invoking Menu Action FixBaseGameMechanicsParent..."
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.FixBaseGameMechanicsParent -buildTarget WebGL; \
+
+
+
+# =============================================================================
+#
 # HELPERS
 #
 # =============================================================================
