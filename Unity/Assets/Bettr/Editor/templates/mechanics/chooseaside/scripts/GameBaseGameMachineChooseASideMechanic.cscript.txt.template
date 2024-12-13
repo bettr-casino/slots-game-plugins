@@ -19,9 +19,12 @@ function {{machineName}}BaseGameMachineChooseASideMechanic:Initialize(machine)
         do
             local manifest = {{machineName}}.Manifest
             local prefabName = "BaseGameMachineChooseASide"
-            local parentGameObject = machine.MechanicsParent.GameObject
-            System.Print("{{machineName}}BaseGameMachineChooseASideMechanic:Initialize before manifest.BundleName={0} manifest.BundleVersion={1} prefabName={2} parentGameObject={3}", manifest.BundleName, manifest.BundleVersion, prefabName, parentGameObject.name)    
-            local mechanicsPrefab = BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, prefabName, parentGameObject)
+            local machineParent = machine.MachineParent
+            machineParent.SetActive(false)
+            local mechanicsParent = machine.MechanicsParent
+            mechanicsParent.SetActive(true)
+            System.Print("{{machineName}}BaseGameMachineChooseASideMechanic:Initialize before manifest.BundleName={0} manifest.BundleVersion={1} prefabName={2} mechanicsParentGameObject={3}", manifest.BundleName, manifest.BundleVersion, prefabName, mechanicsParent.GameObject.name)    
+            local mechanicsPrefab = BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, prefabName, mechanicsParent.GameObject)
             mechanicsPrefab.SetActive(true)
             self.State.MechanicsPrefab = mechanicsPrefab
             System.Print("{{machineName}}BaseGameMachineCascadingReelsMultiplierMechanic:Initialize mechanicsPrefab={0}", mechanicsPrefab.name)            

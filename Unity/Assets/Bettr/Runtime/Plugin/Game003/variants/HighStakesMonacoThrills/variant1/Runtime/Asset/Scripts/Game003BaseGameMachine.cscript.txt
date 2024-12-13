@@ -34,7 +34,7 @@ function Game003BaseGameMachine:Start()
             System.Print("Game003BaseGameMachine Start tile id={0}", self.id)
             self.Mechanics = Game003BaseGameMachineMechanics:new()
             self.Mechanics:Initialize(self)
-            self:StartMachine()
+            self:Mechanics:StartMachine(self)
         end
     end
 end
@@ -135,7 +135,7 @@ end
 function Game003BaseGameMachine:LoadServerOutcome()
     series
         do
-            BettrOutcomeController.LoadServerOutcome("Game003", "HighStakesMonacoThrills")
+            BettrOutcomeController.LoadServerOutcome("Game003", "EpicAtlantisTreasures")
         end
     end
 end

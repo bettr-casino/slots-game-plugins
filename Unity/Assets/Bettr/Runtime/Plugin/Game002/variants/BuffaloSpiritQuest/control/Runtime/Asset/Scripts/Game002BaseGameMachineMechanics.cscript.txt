@@ -1,6 +1,7 @@
 require "math"
 require "Core"
 require "Game002BaseGameMachineWaysMechanic"
+require "Game002BaseGameMachineChooseASideMechanic"
 
 Game002BaseGameMachineMechanics = {
     WaysMechanic = nil,
@@ -19,7 +20,13 @@ end
 
 function Game002BaseGameMachineMechanics:Initialize(machine)
     self.WaysMechanic = Game002BaseGameMachineWaysMechanic:new()
-    self.WaysMechanic:Initialize(machine)    
+    self.WaysMechanic:Initialize(machine)
+end
+
+function Game002BaseGameMachineMechanics:StartMachine(machine)
+    if self.ChooseASideMechanic ~= nil then
+        self.ChooseASideMechanic:StartMachine(machine)
+    end
 end
 
 function Game002BaseGameMachineMechanics:BaseGamePayout(machine)

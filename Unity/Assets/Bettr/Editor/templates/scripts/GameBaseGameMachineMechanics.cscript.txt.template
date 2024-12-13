@@ -4,8 +4,9 @@ require "{{machineName}}BaseGameMachineWaysMechanic"
 require "{{machineName}}BaseGameMachineChooseASideMechanic"
 
 {{machineName}}BaseGameMachineMechanics = {
-    WaysMechanic = nil,
-    ChooseASideMechanic = nil,
+{{- for baseGameMechanic in baseGameMechanics }}
+    {{baseGameMechanic}}Mechanic = nil,
+{{- end }}
 }
 
 function {{machineName}}BaseGameMachineMechanics:new(o)
@@ -20,10 +21,16 @@ function {{machineName}}BaseGameMachineMechanics:OnError(callStack)
 end
 
 function {{machineName}}BaseGameMachineMechanics:Initialize(machine)
-    self.WaysMechanic = {{machineName}}BaseGameMachineWaysMechanic:new()
-    self.WaysMechanic:Initialize(machine)
-    self.ChooseASideMechanic = {{machineName}}BaseGameMachineChooseASideMechanic:new()
-    self.ChooseASideMechanic:Initialize(machine)    
+{{- for baseGameMechanic in baseGameMechanics }}
+    self.{{baseGameMechanic}}Mechanic = {{machineName}}BaseGameMachine{{baseGameMechanic}}Mechanic:new()
+    self.{{baseGameMechanic}}Mechanic:Initialize(machine)
+{{- end }}
+end
+
+function {{machineName}}BaseGameMachineMechanics:StartMachine(machine)
+    if self.ChooseASideMechanic ~= nil then
+        self.ChooseASideMechanic:StartMachine(machine)
+    end
 end
 
 function {{machineName}}BaseGameMachineMechanics:BaseGamePayout(machine)

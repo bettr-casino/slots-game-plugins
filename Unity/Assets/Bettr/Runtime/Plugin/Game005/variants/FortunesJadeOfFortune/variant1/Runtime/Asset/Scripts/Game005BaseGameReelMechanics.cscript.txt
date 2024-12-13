@@ -4,9 +4,12 @@ require "Core"
 
 require "Game005BaseGameReelWaysMechanic"
 
+require "Game005BaseGameReelChooseASideMechanic"
+
 
 Game005BaseGameReelMechanics = {
     WaysMechanic = nil,
+    ChooseASideMechanic = nil,
 }
 
 function Game005BaseGameReelMechanics:new(o)
@@ -19,5 +22,7 @@ end
 function Game005BaseGameReelMechanics:Initialize(reel)
     self.WaysMechanic = Game005BaseGameReelWaysMechanic:new()
     self.WaysMechanic:Initialize(reel)
+    self.ChooseASideMechanic = Game005BaseGameReelChooseASideMechanic:new()
+    self.ChooseASideMechanic:Initialize(reel)
 end
 

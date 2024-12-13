@@ -23,7 +23,13 @@ function Game001BaseGameMachineMechanics:Initialize(machine)
     self.WaysMechanic = Game001BaseGameMachineWaysMechanic:new()
     self.WaysMechanic:Initialize(machine)
     self.ChooseASideMechanic = Game001BaseGameMachineChooseASideMechanic:new()
-    self.ChooseASideMechanic:Initialize(machine)    
+    self.ChooseASideMechanic:Initialize(machine)
+end
+
+function Game001BaseGameMachineMechanics:StartMachine(machine)
+    if self.ChooseASideMechanic ~= nil then
+        self.ChooseASideMechanic:StartMachine(machine)
+    end
 end
 
 function Game001BaseGameMachineMechanics:BaseGamePayout(machine)

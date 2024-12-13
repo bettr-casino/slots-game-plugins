@@ -1,8 +1,7 @@
 require "math"
 require "Core"
 require "Game001BaseGameMachineWaysMechanic"
-require "Game001BaseGameMachineCascadingReelsMechanic"
-require "Game001BaseGameMachineCascadingReelsMultiplierMechanic"
+require "Game001BaseGameMachineChooseASideMechanic"
 
 Game001BaseGameMachineMechanics = {
     WaysMechanic = nil,
@@ -27,7 +26,13 @@ function Game001BaseGameMachineMechanics:Initialize(machine)
     self.CascadingReelsMechanic = Game001BaseGameMachineCascadingReelsMechanic:new()
     self.CascadingReelsMechanic:Initialize(machine)
     self.CascadingReelsMultiplierMechanic = Game001BaseGameMachineCascadingReelsMultiplierMechanic:new()
-    self.CascadingReelsMultiplierMechanic:Initialize(machine)    
+    self.CascadingReelsMultiplierMechanic:Initialize(machine)
+end
+
+function Game001BaseGameMachineMechanics:StartMachine(machine)
+    if self.ChooseASideMechanic ~= nil then
+        self.ChooseASideMechanic:StartMachine(machine)
+    end
 end
 
 function Game001BaseGameMachineMechanics:BaseGamePayout(machine)

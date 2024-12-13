@@ -94,7 +94,10 @@ function Game004BaseGameMachineWaysMechanic:DisplayWays(machine)
                         statusTexts.FormatAndSetCurrentActive("PaysText", wayReelCount, wayPay, wayMultiplier, wayTotalPay)
                         local winSymbols = machine.WinSymbols
                         winSymbols.SetCurrentActive(waySymbol)
-                        series
+                        parallel
+                            do
+                                self:RollUpWaysWin(machine, way, waysState, waysSummary, duration)
+                            end
                             do
                                 -- display ways
                                 for i=1,wayReelCount parallel do
@@ -105,9 +108,6 @@ function Game004BaseGameMachineWaysMechanic:DisplayWays(machine)
                                         reel.Mechanics.WaysMechanic:HideWays(reel, waySymbol, wayMatrix, waySymbolCount)
                                     end
                                 end
-                            end
-                            do
-                                self:RollUpWaysWin(machine, way, waysState, waysSummary, duration)
                             end
                         end
                     end
@@ -140,7 +140,6 @@ function Game004BaseGameMachineWaysMechanic:RollUpWaysWin(machine, way, waysStat
             System.WaitForSeconds(startDelay)
             local winTextProperty = machine.WinText            
             BettrVisualsController.RollUpCounter(winTextProperty, oldCoins, newCoins, duration)
-            System.WaitForSeconds(duration)
         end
     end    
 end
