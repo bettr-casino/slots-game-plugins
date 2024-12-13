@@ -27,18 +27,20 @@
         "PrimitiveShader": "Unlit/Texture",
         "PrimitiveTexture": "BaseGameChooseASideMechanicSlider",
         "PrimitiveTextureCreate": true,
+        "PrimitiveAlpha": 0.3,
+        "PrimitiveTextureCreateSource": "default-yellow.png",
         "Position": {
             "X": 0,
             "Y": 0,
-            "Z": 0
+            "Z": 10
         },
         "Scale": {
             "X": {{steps * 2 + 2}},
-            "Y": 1,
+            "Y": 0.3,
             "Z": 1
         }
       },
-      {{ for step in 1..steps }}
+      {{ for step in leftStepStartInclusive..leftStepEndExclusive }}
       {
           "Name": "SliderSlot{{ step }}",
           "Layer": "SLOT_OVERLAY",
@@ -49,6 +51,7 @@
           "PrimitiveShader": "Unlit/Texture",
           "PrimitiveTexture": "BaseGameChooseASideMechanicSliderSlot",
           "PrimitiveTextureCreate": true,
+          "PrimitiveTextureCreateSource": "default.png",
           "Position": {
               "X": {{ -1 * steps + step * 2 - 1 }},
               "Y": 0,
@@ -63,6 +66,77 @@
       {{ if !for.last }},{{ end }}{{ end }}
       ,
       {
+        "Name": "SliderSlot{{ middleStep }}",
+        "Layer": "SLOT_OVERLAY",
+        "Active": true,
+        "IsPrimitive": true,
+        "Primitive": 5,
+        "PrimitiveMaterial": "BaseGameChooseASideMechanicSliderSlotEvil",
+        "PrimitiveShader": "Unlit/Texture",
+        "PrimitiveTexture": "BaseGameChooseASideMechanicSliderSlotEvil",
+        "PrimitiveTextureCreate": true,
+        "PrimitiveTextureCreateSource": "default-yellow.png",
+        "Position": {
+          "X": 0,
+          "Y": 0,
+          "Z": 0
+        },
+        "Scale": {
+          "X": 1,
+          "Y": 2,
+          "Z": 1
+        }
+      }
+      ,
+      {{ for step in rightStepStartInclusive..rightStepEndExclusive }}
+      {
+        "Name": "SliderSlot{{ step }}",
+        "Layer": "SLOT_OVERLAY",
+        "Active": true,
+        "IsPrimitive": true,
+        "Primitive": 5,
+        "PrimitiveMaterial": "BaseGameChooseASideMechanicSliderSlotGood",
+        "PrimitiveShader": "Unlit/Texture",
+        "PrimitiveTexture": "BaseGameChooseASideMechanicSliderSlotGood",
+        "PrimitiveTextureCreate": true,
+        "PrimitiveTextureCreateSource": "default-green.png",
+        "Position": {
+            "X": {{ -1 * steps + step * 2 - 1 }},
+            "Y": 0,
+            "Z": 0
+        },
+        "Scale": {
+            "X": 1,
+            "Y": 2,
+            "Z": 1
+        }
+      }
+      {{ if !for.last }},{{ end }}{{ end }}
+      ,
+      {
+                "Name": "SliderPointer",
+                "Layer": "SLOT_OVERLAY",
+                "Active": true,
+                "IsPrimitive": true,
+                "Primitive": 5,
+                "PrimitiveMaterial": "BaseGameChooseASideMechanicSliderPointer",
+                "PrimitiveShader": "Unlit/Texture",
+                "PrimitiveTexture": "BaseGameChooseASideMechanicSliderPointer",
+                "PrimitiveTextureCreate": true,
+                "PrimitiveTextureCreateSource": "default-yellow.png",
+                "Position": {
+                    "X": 0,
+                    "Y": 0,
+                    "Z": 0
+                },
+                "Scale": {
+                    "X": 1.5,
+                    "Y": 3,
+                    "Z": 1
+                }
+            }
+      ,
+      {
             "Name": "EVIL",
             "Layer": "SLOT_OVERLAY",
             "Active": true,
@@ -72,6 +146,7 @@
             "PrimitiveShader": "Unlit/Texture",
             "PrimitiveTexture": "BaseGameChooseASideMechanicEvil",
             "PrimitiveTextureCreate": true,
+            "PrimitiveTextureCreateSource": "default.png",
             "Position": {
               "X": {{ -1 * steps - 4 }},
               "Y": 0,
@@ -112,7 +187,7 @@
                     "ComponentType": "TextMeshPro",
                     "Text": "EVIL",
                     "Font": "LiberationSans SDF",
-                    "FontSize": 4,
+                    "FontSize": 8,
                     "HorizontalAlignment": "Center",
                     "VerticalAlignment": "Middle",
                     "Color": "#FFFFFF"          
@@ -129,6 +204,7 @@
             "PrimitiveShader": "Unlit/Texture",
             "PrimitiveTexture": "BaseGameChooseASideMechanicGood",
             "PrimitiveTextureCreate": true,
+            "PrimitiveTextureCreateSource": "default-green.png",
             "Position": {
                 "X": {{ 1 * steps + 4 }},
                 "Y": 0,
@@ -169,7 +245,7 @@
                      "ComponentType": "TextMeshPro",
                      "Text": "GOOD",
                      "Font": "LiberationSans SDF",
-                     "FontSize": 4,
+                     "FontSize": 8,
                      "HorizontalAlignment": "Center",
                      "VerticalAlignment": "Middle",
                      "Color": "#FFFFFF"          

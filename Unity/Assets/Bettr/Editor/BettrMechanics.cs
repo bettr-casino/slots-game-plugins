@@ -126,7 +126,12 @@ namespace Bettr.Editor
             {
                 { "machineName", machineName },
                 { "machineVariant", machineVariant },
-                { "steps", steps}
+                { "steps", steps},
+                { "leftStepStartInclusive", 1},
+                { "leftStepEndExclusive", (int)(steps / 2) + 1},
+                { "rightStepStartInclusive", (int)(steps / 2) + 2},
+                { "rightStepEndExclusive", steps},
+                { "middleStep", (int)(steps / 2) + 1},
             };
             
             BettrMechanicsHelpers.ProcessBaseGameMechanic(
