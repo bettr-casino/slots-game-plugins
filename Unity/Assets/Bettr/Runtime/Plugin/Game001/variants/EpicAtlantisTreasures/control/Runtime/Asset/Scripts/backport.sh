@@ -7,15 +7,17 @@ mechanics_dir="$script_dir/../Mechanics"
 
 function process_mechanics_dir() {
   dir=$1
+  game=$2
+  machine_variant=$3
+  experiment_variant=$4
   # Find all .cscript.txt files recursively in the script directory
   find "$dir" -type f -name "*.cscript.txt" | while read -r file; do
       # Extract the filename from the path
       filename=$(basename "$file")
   
-      # Check for the first pattern: Game<NNN>BaseGameMachine{mechanic}Mechanic.cscript.txt
-      if [[ "$filename" =~ Game([0-9]+)BaseGameMachine([a-zA-Z]+)Mechanic.cscript.txt ]]; then
-          game_number="${BASH_REMATCH[1]}"
-          mechanic="${BASH_REMATCH[2]}"
+      # Check for the first pattern: GameNNNBaseGameMachine{mechanic}Mechanic.cscript.txt
+      if [[ "$filename" =~ Game[0-9]+BaseGameMachine([a-zA-Z]+)Mechanic.cscript.txt ]]; then
+          mechanic="${BASH_REMATCH[1]}"
           
           # Convert mechanic to lowercase for the directory path
           mechanic_lower=$(echo "$mechanic" | tr '[:upper:]' '[:lower:]')
@@ -26,8 +28,11 @@ function process_mechanics_dir() {
           # Ensure the target directory exists
           mkdir -p "$(dirname "$target_path")"
   
-          # Copy the file with replacement
-          sed "s/Game${game_number}/{{machineName}}/g" "$file" > "$target_path"
+          # Copy the file with multiple replacements
+          sed -e "s/${game}/{{machineName}}/g" \
+              -e "s/${machine_variant}/{{machineVariant}}/g" \
+              -e "s/${experiment_variant}/{{experimentVariant}}/g" \
+              "$file" > "$target_path"
   
           echo "Processed $filename for GameBaseGameMachine pattern."
   
@@ -46,7 +51,11 @@ function process_mechanics_dir() {
           mkdir -p "$(dirname "$target_path")"
   
           # Copy the file with replacement
-          sed "s/Game${game_number}/{{machineName}}/g" "$file" > "$target_path"
+          # Copy the file with multiple replacements
+                    sed -e "s/${game}/{{machineName}}/g" \
+                        -e "s/${machine_variant}/{{machineVariant}}/g" \
+                        -e "s/${experiment_variant}/{{experimentVariant}}/g" \
+                        "$file" > "$target_path"
   
           echo "Processed $filename for GameBaseGameReel pattern."
       fi
@@ -102,7 +111,26 @@ mechanics_directories=(
 
 for dir in "${mechanics_directories[@]}"; do
     echo "Processing directory $dir"
-    process_mechanics_dir "$dir"
+    # get the processing dir
+    #  Assets/Bettr/Runtime/Plugin/Game001/variants/EpicAtlantisTreasures/control/Runtime/Asset/Scripts/../Mechanics
+    # .../<GameNNN>/variants/<MachineVariant>/<ExperimentVariant>/Runtime/Assets/Scripts/../Mechanics
+    # remove the "/Runtime/Assets/Scripts/../Mechanics" suffix from the $dir
+    suffix="/Runtime/Asset/Scripts/../Mechanics"
+    modified_dir=${dir%$suffix}
+    # experiment variant is the last part of the modified_dir path
+    experiment_variant=$(basename $modified_dir)
+    # now remove the experiment variant from the modified_dir
+    modified_dir=${modified_dir%/$experiment_variant}
+    # machine variant is the last part of the modified_dir path
+    machine_variant=$(basename $modified_dir)
+    # now remove the machine variant from the modified_dir
+    modified_dir=${modified_dir%/$machine_variant}
+    # now remove the "variants" from the modified_dir
+    modified_dir=${modified_dir%variants}
+    # now the game is the last part of the modified_dir path
+    game=$(basename $modified_dir)
+    echo "Game: $game, Machine Variant: $machine_variant, Experiment Variant: $experiment_variant"
+     process_mechanics_dir "$dir" "$game" "$machine_variant" "$experiment_variant" 
 done
 
 #
