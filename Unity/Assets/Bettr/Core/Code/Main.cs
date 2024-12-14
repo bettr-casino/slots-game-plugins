@@ -165,6 +165,9 @@ namespace Bettr.Core
             BettrVideoController.VideoServerBaseURL = _configData.VideoServerBaseURL;
             TileController.RegisterType<BettrVideoController>("BettrVideoController");
             TileController.AddToGlobals("BettrVideoController", BettrVideoController.Instance);
+            
+            TileController.RegisterType<BettrDialogController>("BettrDialogController");
+            TileController.AddToGlobals("BettrDialogController", BettrDialogController.Instance);
 
             _bettrMainLobbySceneController = new BettrMainLobbySceneController(_bettrExperimentController)
             {
