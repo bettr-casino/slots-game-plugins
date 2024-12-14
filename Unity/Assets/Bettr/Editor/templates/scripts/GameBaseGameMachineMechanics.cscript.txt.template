@@ -4,6 +4,11 @@ require "{{machineName}}BaseGameMachineWaysMechanic"
 require "{{machineName}}BaseGameMachineChooseASideMechanic"
 
 {{machineName}}BaseGameMachineMechanics = {
+    Config = {
+        Machine = "{{machineName}}",
+        Variant = "{{machineVariant}}",
+        Experiment = "{{experimentVariant}}",
+    },
 {{- for baseGameMechanic in baseGameMechanics }}
     {{baseGameMechanic}}Mechanic = nil,
 {{- end }}
