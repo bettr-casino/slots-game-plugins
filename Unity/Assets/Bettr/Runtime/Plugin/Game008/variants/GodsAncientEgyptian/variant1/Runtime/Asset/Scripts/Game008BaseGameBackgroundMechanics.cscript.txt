@@ -2,6 +2,7 @@ require "math"
 require "Core"
 
 Game008BaseGameBackgroundMechanics = {
+    PaylinesMechanic = nil,
 }
 
 function Game008BaseGameBackgroundMechanics:new(o)
@@ -21,6 +22,11 @@ end
 
 function Game008BaseGameBackgroundMechanics:Awake()
 	System.Print("Game008BaseGameBackgroundMechanics Awake tile id={0}", self.id)
+end
+
+function Game008BaseGameBackgroundMechanics:Initialize(background)
+     self.PaylinesMechanic = Game008BaseGameBackgroundPaylinesMechanic:new()
+     self.PaylinesMechanic:Initialize(background)
 end
 
 return Game008BaseGameBackgroundMechanics:new()

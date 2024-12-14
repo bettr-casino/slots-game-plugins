@@ -2,6 +2,9 @@ require "math"
 require "Core"
 
 Game001BaseGameBackgroundMechanics = {
+    WaysMechanic = nil,
+    CascadingReelsMechanic = nil,
+    CascadingReelsMultiplierMechanic = nil,
 }
 
 function Game001BaseGameBackgroundMechanics:new(o)
@@ -21,6 +24,15 @@ end
 
 function Game001BaseGameBackgroundMechanics:Awake()
 	System.Print("Game001BaseGameBackgroundMechanics Awake tile id={0}", self.id)
+end
+
+function Game001BaseGameBackgroundMechanics:Initialize(background)
+     self.WaysMechanic = Game001BaseGameBackgroundWaysMechanic:new()
+     self.WaysMechanic:Initialize(background)
+     self.CascadingReelsMechanic = Game001BaseGameBackgroundCascadingReelsMechanic:new()
+     self.CascadingReelsMechanic:Initialize(background)
+     self.CascadingReelsMultiplierMechanic = Game001BaseGameBackgroundCascadingReelsMultiplierMechanic:new()
+     self.CascadingReelsMultiplierMechanic:Initialize(background)
 end
 
 return Game001BaseGameBackgroundMechanics:new()
