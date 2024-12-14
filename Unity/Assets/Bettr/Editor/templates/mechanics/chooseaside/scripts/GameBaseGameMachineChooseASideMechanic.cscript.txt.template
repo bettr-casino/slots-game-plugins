@@ -30,7 +30,7 @@ function {{machineName}}BaseGameMachineChooseASideMechanic:Initialize(machine)
             mechanicsParent.SetActive(true)
             System.Print("{{machineName}}BaseGameMachineChooseASideMechanic:Initialize before manifest.BundleName={0} manifest.BundleVersion={1} prefabName={2} mechanicsParentGameObject={3}", manifest.BundleName, manifest.BundleVersion, prefabName, mechanicsParent.GameObject.name)    
             local mechanicsPrefab = BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, prefabName, mechanicsParent.GameObject)
-            mechanicsPrefab.SetActive(true)
+            mechanicsPrefab.SetActive(false)
             self.State.MechanicsPrefab = mechanicsPrefab
             System.Print("{{machineName}}BaseGameMachineCascadingReelsMultiplierMechanic:Initialize mechanicsPrefab={0}", mechanicsPrefab.name)            
         end
@@ -38,6 +38,11 @@ function {{machineName}}BaseGameMachineChooseASideMechanic:Initialize(machine)
 end
 
 function {{machineName}}BaseGameMachineChooseASideMechanic:StartMachine(machine)
+    series
+        do
+            BettrDialogController.ShowModalDialog(self.State.MechanicsPrefab)
+        end
+    end
 end
 
 function {{machineName}}BaseGameMachineChooseASideMechanic:TryPaying(machine)
