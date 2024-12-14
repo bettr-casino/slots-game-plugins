@@ -105,11 +105,14 @@ for dir in "${mechanics_directories[@]}"; do
     process_mechanics_dir "$dir"
 done
 
-script_directories=(
-    "${script_dir}"
-)
-
-for dir in "${script_directories[@]}"; do
-    echo "Processing directory $dir"
-    process_scripts_dir "$dir"
-done
+#
+# TODO: FIXME TURN OFF SCRIPTS DIRECTORY PROCESSING 
+#
+#script_directories=(
+#    "${script_dir}"
+#)
+#
+#for dir in "${script_directories[@]}"; do
+#    echo "Processing directory $dir"
+#    process_scripts_dir "$dir"
+#done
