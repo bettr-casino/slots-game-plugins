@@ -19,13 +19,15 @@ function Game004BaseGameMachineMechanics:OnError(callStack)
 end
 
 function Game004BaseGameMachineMechanics:Initialize(machine)
-    self.PaylinesMechanic = Game004BaseGameMachinePaylinesMechanic:new()
-    self.PaylinesMechanic:Initialize(machine)
+     self.PaylinesMechanic = Game004BaseGameMachinePaylinesMechanic:new()
+     self.PaylinesMechanic:Initialize(machine)
 end
 
 function Game004BaseGameMachineMechanics:StartMachine(machine)
     if self.ChooseASideMechanic ~= nil then
         self.ChooseASideMechanic:StartMachine(machine)
+    else
+        machine:StartMachine()
     end
 end
 

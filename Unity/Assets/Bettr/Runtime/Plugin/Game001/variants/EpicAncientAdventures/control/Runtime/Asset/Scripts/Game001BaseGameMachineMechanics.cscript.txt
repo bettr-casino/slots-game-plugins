@@ -21,17 +21,19 @@ function Game001BaseGameMachineMechanics:OnError(callStack)
 end
 
 function Game001BaseGameMachineMechanics:Initialize(machine)
-    self.WaysMechanic = Game001BaseGameMachineWaysMechanic:new()
-    self.WaysMechanic:Initialize(machine)
-    self.CascadingReelsMechanic = Game001BaseGameMachineCascadingReelsMechanic:new()
-    self.CascadingReelsMechanic:Initialize(machine)
-    self.CascadingReelsMultiplierMechanic = Game001BaseGameMachineCascadingReelsMultiplierMechanic:new()
-    self.CascadingReelsMultiplierMechanic:Initialize(machine)
+     self.WaysMechanic = Game001BaseGameMachineWaysMechanic:new()
+     self.WaysMechanic:Initialize(machine)
+     self.CascadingReelsMechanic = Game001BaseGameMachineCascadingReelsMechanic:new()
+     self.CascadingReelsMechanic:Initialize(machine)
+     self.CascadingReelsMultiplierMechanic = Game001BaseGameMachineCascadingReelsMultiplierMechanic:new()
+     self.CascadingReelsMultiplierMechanic:Initialize(machine)
 end
 
 function Game001BaseGameMachineMechanics:StartMachine(machine)
     if self.ChooseASideMechanic ~= nil then
         self.ChooseASideMechanic:StartMachine(machine)
+    else
+        machine:StartMachine()
     end
 end
 
