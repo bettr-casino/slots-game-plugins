@@ -1,7 +1,8 @@
 require "math"
 require "Core"
-require "{{machineName}}BaseGameMachineWaysMechanic"
-require "{{machineName}}BaseGameMachineChooseASideMechanic"
+{{- for baseGameMechanic in baseGameMechanics }}
+require "{{machineName}}BaseGameMachine{{baseGameMechanic}}Mechanic"
+{{- end }}
 
 {{machineName}}BaseGameMachineMechanics = {
     Config = {

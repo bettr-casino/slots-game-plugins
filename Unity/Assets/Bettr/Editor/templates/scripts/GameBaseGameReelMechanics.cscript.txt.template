@@ -1,11 +1,9 @@
 require "math"
 require "Core"
 
-
-require "{{machineName}}BaseGameReelWaysMechanic"
-
-require "{{machineName}}BaseGameReelChooseASideMechanic"
-
+{{- for baseGameMechanic in baseGameMechanics }}
+require "{{machineName}}BaseGameReel{{baseGameMechanic}}Mechanic"
+{{- end }}
 
 {{machineName}}BaseGameReelMechanics = {
     Config = {
@@ -13,8 +11,9 @@ require "{{machineName}}BaseGameReelChooseASideMechanic"
         Variant = "{{machineVariant}}",
         Experiment = "{{experimentVariant}}",
     },
-    WaysMechanic = nil,
-    ChooseASideMechanic = nil,
+{{- for baseGameMechanic in baseGameMechanics }}
+    {{baseGameMechanic}}Mechanic = nil,
+{{- end }}
 }
 
 function {{machineName}}BaseGameReelMechanics:new(o)
@@ -25,9 +24,9 @@ function {{machineName}}BaseGameReelMechanics:new(o)
 end
 
 function {{machineName}}BaseGameReelMechanics:Initialize(reel)
-    self.WaysMechanic = {{machineName}}BaseGameReelWaysMechanic:new()
-    self.WaysMechanic:Initialize(reel)
-    self.ChooseASideMechanic = {{machineName}}BaseGameReelChooseASideMechanic:new()
-    self.ChooseASideMechanic:Initialize(reel)
+    {{- for baseGameMechanic in baseGameMechanics }}
+    self.{{baseGameMechanic}}Mechanic = {{machineName}}BaseGameReel{{baseGameMechanic}}Mechanic:new()
+    self.{{baseGameMechanic}}Mechanic:Initialize(reel)
+    {{- end }}
 end
 
