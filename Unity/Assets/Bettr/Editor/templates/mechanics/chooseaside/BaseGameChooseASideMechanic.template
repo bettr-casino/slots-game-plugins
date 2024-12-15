@@ -1,7 +1,7 @@
 {
   "Name": "BaseGameChooseASideMechanic",
   "Id": "BaseGameChooseASideMechanic",
-  "Layer": "SLOT_OVERLAY",
+  "Layer": "SLOT_REELS_OVERLAY",
   "Position": {
     "X": 0,
     "Y": -4.7,
@@ -15,7 +15,7 @@
   "Child": {
       "Name": "Pivot",
       "Id": "Pivot",
-      "Layer": "SLOT_OVERLAY",
+      "Layer": "SLOT_REELS_OVERLAY",
       "Position": {
         "X": 0,
         "Y": 3.2,
@@ -30,17 +30,22 @@
         {
                     "Name": "SliderParent",
                     "Id": "SliderParent",
-                    "Layer": "SLOT_OVERLAY",
+                    "Layer": "SLOT_REELS_OVERLAY",
                     "Active": false,
                     "Position": {
                         "X": 0,
-                        "Y": -1.3,
+                        "Y": 1,
                         "Z": 0
+                    },
+                    "Scale": {
+                         "X": 0.9,
+                         "Y": 0.75,
+                         "Z": 1
                     },
                     "Children": [
                       {
                         "Name": "Slider",
-                        "Layer": "SLOT_OVERLAY",
+                        "Layer": "SLOT_REELS_OVERLAY",
                         "Active": true,
                         "IsPrimitive": true,
                         "Primitive": 5,
@@ -64,7 +69,7 @@
                       {{ for step in leftStepStartInclusive..leftStepEndExclusive }}
                       {
                           "Name": "SliderSlot{{ step }}",
-                          "Layer": "SLOT_OVERLAY",
+                          "Layer": "SLOT_REELS_OVERLAY",
                           "Active": true,
                           "IsPrimitive": true,
                           "Primitive": 5,
@@ -88,7 +93,7 @@
                       ,
                       {
                         "Name": "SliderSlot{{ middleStep }}",
-                        "Layer": "SLOT_OVERLAY",
+                        "Layer": "SLOT_REELS_OVERLAY",
                         "Active": true,
                         "IsPrimitive": true,
                         "Primitive": 5,
@@ -112,7 +117,7 @@
                       {{ for step in rightStepStartInclusive..rightStepEndExclusive }}
                       {
                         "Name": "SliderSlot{{ step }}",
-                        "Layer": "SLOT_OVERLAY",
+                        "Layer": "SLOT_REELS_OVERLAY",
                         "Active": true,
                         "IsPrimitive": true,
                         "Primitive": 5,
@@ -136,7 +141,7 @@
                       ,
                       {
                                 "Name": "SliderPointer",
-                                "Layer": "SLOT_OVERLAY",
+                                "Layer": "SLOT_REELS_OVERLAY",
                                 "Active": true,
                                 "IsPrimitive": true,
                                 "Primitive": 5,
@@ -159,7 +164,7 @@
                       ,
                       {
                             "Name": "BaseGameChooseASideMechanicEvil",
-                            "Layer": "SLOT_OVERLAY",
+                            "Layer": "SLOT_REELS_OVERLAY",
                             "Active": true,
                             "IsPrimitive": true,
                             "Primitive": 5,
@@ -182,7 +187,7 @@
                         {
                             "Name": "EVILText",
                             "Id": "EVILText",
-                            "Layer": "SLOT_OVERLAY",
+                            "Layer": "SLOT_REELS_OVERLAY",
                             "Active": true,
                             "Position": {
                               "X": {{ -1 * steps - 4 }},
@@ -217,7 +222,7 @@
                         },
                         {
                             "Name": "BaseGameChooseASideMechanicGood",
-                            "Layer": "SLOT_OVERLAY",
+                            "Layer": "SLOT_REELS_OVERLAY",
                             "Active": true,
                             "IsPrimitive": true,
                             "Primitive": 5,
@@ -240,7 +245,7 @@
                         {
                             "Name": "GOODText",
                             "Id": "GOODText",
-                            "Layer": "SLOT_OVERLAY",
+                            "Layer": "SLOT_REELS_OVERLAY",
                             "Active": true,
                             "Position": {
                                 "X": {{ 1 * steps + 4 }},
