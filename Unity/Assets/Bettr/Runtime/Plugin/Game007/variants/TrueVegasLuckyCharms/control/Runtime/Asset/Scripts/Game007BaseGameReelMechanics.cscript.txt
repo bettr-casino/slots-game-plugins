@@ -1,11 +1,6 @@
 require "math"
 require "Core"
-
-
-require "Game007BaseGameReelWaysMechanic"
-
-require "Game007BaseGameReelChooseASideMechanic"
-
+require "Game007BaseGameReelPaylinesMechanic"
 
 Game007BaseGameReelMechanics = {
     Config = {
@@ -13,8 +8,7 @@ Game007BaseGameReelMechanics = {
         Variant = "TrueVegasLuckyCharms",
         Experiment = "control",
     },
-    WaysMechanic = nil,
-    ChooseASideMechanic = nil,
+    PaylinesMechanic = nil,
 }
 
 function Game007BaseGameReelMechanics:new(o)
@@ -25,9 +19,7 @@ function Game007BaseGameReelMechanics:new(o)
 end
 
 function Game007BaseGameReelMechanics:Initialize(reel)
-    self.WaysMechanic = Game007BaseGameReelWaysMechanic:new()
-    self.WaysMechanic:Initialize(reel)
-    self.ChooseASideMechanic = Game007BaseGameReelChooseASideMechanic:new()
-    self.ChooseASideMechanic:Initialize(reel)
+    self.PaylinesMechanic = Game007BaseGameReelPaylinesMechanic:new()
+    self.PaylinesMechanic:Initialize(reel)
 end
 

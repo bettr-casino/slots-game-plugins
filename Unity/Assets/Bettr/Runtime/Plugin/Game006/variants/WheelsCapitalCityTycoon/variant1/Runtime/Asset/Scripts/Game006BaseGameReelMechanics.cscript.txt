@@ -1,11 +1,6 @@
 require "math"
 require "Core"
-
-
 require "Game006BaseGameReelWaysMechanic"
-
-require "Game006BaseGameReelChooseASideMechanic"
-
 
 Game006BaseGameReelMechanics = {
     Config = {
@@ -14,7 +9,6 @@ Game006BaseGameReelMechanics = {
         Experiment = "variant1",
     },
     WaysMechanic = nil,
-    ChooseASideMechanic = nil,
 }
 
 function Game006BaseGameReelMechanics:new(o)
@@ -27,7 +21,5 @@ end
 function Game006BaseGameReelMechanics:Initialize(reel)
     self.WaysMechanic = Game006BaseGameReelWaysMechanic:new()
     self.WaysMechanic:Initialize(reel)
-    self.ChooseASideMechanic = Game006BaseGameReelChooseASideMechanic:new()
-    self.ChooseASideMechanic:Initialize(reel)
 end
 

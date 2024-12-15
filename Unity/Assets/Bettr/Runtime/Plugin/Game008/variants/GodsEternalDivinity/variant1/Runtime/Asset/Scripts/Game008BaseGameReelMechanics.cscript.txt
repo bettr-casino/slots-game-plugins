@@ -1,11 +1,6 @@
 require "math"
 require "Core"
-
-
-require "Game008BaseGameReelWaysMechanic"
-
-require "Game008BaseGameReelChooseASideMechanic"
-
+require "Game008BaseGameReelPaylinesMechanic"
 
 Game008BaseGameReelMechanics = {
     Config = {
@@ -13,8 +8,7 @@ Game008BaseGameReelMechanics = {
         Variant = "GodsEternalDivinity",
         Experiment = "variant1",
     },
-    WaysMechanic = nil,
-    ChooseASideMechanic = nil,
+    PaylinesMechanic = nil,
 }
 
 function Game008BaseGameReelMechanics:new(o)
@@ -25,9 +19,7 @@ function Game008BaseGameReelMechanics:new(o)
 end
 
 function Game008BaseGameReelMechanics:Initialize(reel)
-    self.WaysMechanic = Game008BaseGameReelWaysMechanic:new()
-    self.WaysMechanic:Initialize(reel)
-    self.ChooseASideMechanic = Game008BaseGameReelChooseASideMechanic:new()
-    self.ChooseASideMechanic:Initialize(reel)
+    self.PaylinesMechanic = Game008BaseGameReelPaylinesMechanic:new()
+    self.PaylinesMechanic:Initialize(reel)
 end
 
