@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 using Bettr.Core;
 using Bettr.Editor.generators;
@@ -11,6 +12,7 @@ using UnityEditor;
 using UnityEditor.Animations;
 using UnityEditor.Events;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
@@ -558,6 +560,19 @@ namespace Bettr.Editor
                 case "EventSystem":
                     var eventSystemComponent = new EventSystemComponent();
                     eventSystemComponent.AddComponent(gameObject);
+                    break;
+                case "BettrEventListener":
+                    var eventListener = gameObject.GetComponent<BettrEventListener>();
+                    if (eventListener == null)
+                    {
+                        eventListener = gameObject.AddComponent<BettrEventListener>();
+                    }
+                    foreach (var eventTrigger in EventTriggers)
+                    {
+                        var eventTriggerComponent = new EventTriggerComponent(eventListener, eventTrigger.ReferenceId, eventTrigger.Params);
+                        eventTriggerComponent.AddComponent(gameObject);
+                        
+                    }
                     break;
                 case "MonoBehaviour":
                     var monoBehaviourComponent = new MonoBehaviourComponent(Name);
@@ -2274,8 +2289,10 @@ namespace Bettr.Editor
     public class EventTriggerComponent : IComponent
     {
         private readonly Tile _tile;
+        private readonly BettrEventListener _eventListener;
         private readonly int _paramCount;
         private readonly string _param;
+        private readonly string _referenceId;
         
         public EventTriggerComponent(Tile tile, params string[] param)
         {
@@ -2285,7 +2302,19 @@ namespace Bettr.Editor
             _paramCount = (int)param?.Length;
             if (_paramCount > 1)
             {
-                throw new ArgumentOutOfRangeException("param", "EventTriggerComponent only supports 0 or 1 parameters");
+                throw new ArgumentOutOfRangeException(nameof(param), "EventTriggerComponent only supports 0 or 1 parameters");
+            }
+        }
+        
+        public EventTriggerComponent(BettrEventListener eventListener, string referenceId, params string[] param)
+        {
+            _eventListener = eventListener;
+            param ??= Array.Empty<string>();
+            _param = param.Length > 0 ? $"{referenceId}__{param[0]}" : referenceId;
+            _paramCount = (int)param?.Length;
+            if (_paramCount > 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(param), "EventTriggerComponent only supports 0 or 1 parameters");
             }
         }
         
@@ -2306,7 +2335,18 @@ namespace Bettr.Editor
             EventTrigger eventTrigger =gameObject.AddComponent<EventTrigger>();
             EventTrigger.Entry entry = new EventTrigger.Entry { eventID = EventTriggerType.PointerClick };
             var triggerEvent = entry.callback;
-            UnityEventTools.AddVoidPersistentListener(triggerEvent, _tile.OnPointerClick);
+            if (_tile != null)
+            {
+                UnityEventTools.AddVoidPersistentListener(triggerEvent, _tile.OnPointerClick);
+            } 
+            else if (_eventListener != null)
+            {
+                UnityEventTools.AddVoidPersistentListener(triggerEvent, _eventListener.OnPointerClick);
+            }
+            else
+            {
+                throw new ArgumentNullException(nameof(_tile), "Tile or Type must be provided");
+            }
             eventTrigger.triggers.Add(entry);
         }
         
@@ -2315,7 +2355,18 @@ namespace Bettr.Editor
             EventTrigger eventTrigger =gameObject.AddComponent<EventTrigger>();
             EventTrigger.Entry entry = new EventTrigger.Entry { eventID = EventTriggerType.PointerClick };
             var triggerEvent = entry.callback;
-            UnityEventTools.AddStringPersistentListener(triggerEvent, _tile.OnPointerClick, _param);
+            if (_tile != null)
+            {
+                UnityEventTools.AddStringPersistentListener(triggerEvent, _tile.OnPointerClick, _param);
+            } 
+            else if (_eventListener != null)
+            {
+                UnityEventTools.AddStringPersistentListener(triggerEvent, _eventListener.OnPointerClick, _param);
+            } 
+            else
+            {
+                throw new ArgumentNullException(nameof(_tile), "Tile or Type must be provided");
+            }
             eventTrigger.triggers.Add(entry);
         }
     }

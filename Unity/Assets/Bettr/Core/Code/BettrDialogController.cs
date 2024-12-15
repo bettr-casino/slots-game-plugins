@@ -1,21 +1,66 @@
+using System;
 using System.Collections;
+using CrayonScript.Code;
+using CrayonScript.Interpreter.Execution.VM;
 using UnityEngine;
 
 // ReSharper disable once CheckNamespace
 namespace Bettr.Core
 {
-    public class BettrDialogController : MonoBehaviour
+    [Serializable]
+    public class BettrDialogController
     {
         public static BettrDialogController Instance { get; private set; }
         
-        public void Awake()
+        private string _param;
+        private string _result;
+        
+        private bool _waitingForClick;
+        private bool _dialogLocked;
+        
+        public BettrDialogController()
         {
+            TileController.RegisterType<BettrDialogController>("BettrDialogController");
+            TileController.AddToGlobals("BettrDialogController", this);
+            
             Instance = this;
         }
-
-        public IEnumerator ShowModalDialog(GameObject dialog)
+        
+        public IEnumerator ShowModalDialog(CrayonScriptContext context, GameObject dialog)
         {
-            yield return new WaitForSeconds(100.0f);
+            if (_dialogLocked)
+            {
+                context.StringResult = "__locked";
+                yield break;
+            }
+            
+            _dialogLocked = true;
+            _result = null;
+            dialog.SetActive(true);
+            _waitingForClick = true;
+            while (_waitingForClick)
+            {
+                yield return null;
+            }
+            dialog.SetActive(false);
+            _dialogLocked = false;
+            
+            context.StringResult = _result;
+        }
+
+        public void OnPointerClick(string param)
+        {
+            _param = param;
+            Debug.Log("BettrDialogController OnPointerClick: " + _param);
+            // handle the click
+            HandlePointerClick(param);
+        }
+        
+        private void HandlePointerClick(string param)
+        {
+            Debug.Log("BettrDialogController HandlePointerClick: " + param);
+            _result = param;
+            _waitingForClick = false;
         }
     }
 }

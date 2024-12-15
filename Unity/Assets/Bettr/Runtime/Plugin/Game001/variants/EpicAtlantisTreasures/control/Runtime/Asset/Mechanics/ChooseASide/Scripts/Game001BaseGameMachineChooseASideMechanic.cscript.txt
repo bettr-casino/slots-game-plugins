@@ -40,7 +40,14 @@ end
 function Game001BaseGameMachineChooseASideMechanic:StartMachine(machine)
     series
         do
-            BettrDialogController.ShowModalDialog(self.State.MechanicsPrefab)
+            local result = BettrDialogController.ShowModalDialog(self.State.MechanicsPrefab)
+            System.Print("Game001BaseGameMachineChooseASideMechanic:StartMachine result={0}", result)
+            local machineParent = machine.MachineParent
+            machineParent.SetActive(true)
+            machine:StartMachine()
+            machine.ChooseASideMechanicDialogParent.SetActive(false)
+            machine.ChooseASideMechanicSliderParent.SetActive(true)
+            self.State.MechanicsPrefab.SetActive(true)
         end
     end
 end
