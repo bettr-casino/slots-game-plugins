@@ -47,11 +47,11 @@ function Game001BaseGameMachineChooseASideMechanic:StartMachine(machine)
             System.Print("Game001BaseGameMachineChooseASideMechanic:StartMachine result={0}", result)
             local machineParent = machine.MachineParent
             if result == "Evil" then
-                self:_ActivateMechanic(machine, machine.ChooseASideMechanicDialogEvilText.GameObject, machine.ChooseASideMechanicEvilText.GameObject, "WIN")
-                self:_ActivateMechanic(machine, machine.ChooseASideMechanicDialogGoodText.GameObject, machine.ChooseASideMechanicGoodText.GameObject, "LOSE")
+                self:_ActivateMechanic(machine, machine.ChooseASideMechanicDialogEvilText, machine.ChooseASideMechanicEvilText, "WIN")
+                self:_ActivateMechanic(machine, machine.ChooseASideMechanicDialogGoodText, machine.ChooseASideMechanicGoodText, "LOSE")
             else
-                self:_ActivateMechanic(machine, machine.ChooseASideMechanicDialogGoodText.GameObject, machine.ChooseASideMechanicGoodText.GameObject, "WIN")            
-                self:_ActivateMechanic(machine, machine.ChooseASideMechanicDialogEvilText.GameObject, machine.ChooseASideMechanicEvilText.GameObject, "LOSE")
+                self:_ActivateMechanic(machine, machine.ChooseASideMechanicDialogGoodText, machine.ChooseASideMechanicGoodText, "WIN")            
+                self:_ActivateMechanic(machine, machine.ChooseASideMechanicDialogEvilText, machine.ChooseASideMechanicEvilText, "LOSE")
             end
             machine.ChooseASideMechanicDialogParent.SetActive(false)
             local sliderPointerGameObject = machine.ChooseASideMechanicSliderPointer.GameObject
@@ -66,11 +66,11 @@ end
 function Game001BaseGameMachineChooseASideMechanic:TryPaying(machine)
 end
 
-function Game001BaseGameMachineChooseASideMechanic:_ActivateMechanic(machine, startGameObject, endGameObject, newText)
-    BettrVisualsController.FireballMoveTo(nil, startGameObject, 0, 1, false)
-    BettrVisualsController.FireballMoveTo(startGameObject, endGameObject, 0, 1, true)
-    machine.ChooseASideMechanicEvilText.SetText(newText)
-    BettrVisualsController.FireballMoveTo(nil, endGameObject, 0, 1, false)
+function Game001BaseGameMachineChooseASideMechanic:_ActivateMechanic(machine, startTmPro, endTmPro, newText)
+    BettrVisualsController.FireballMoveTo(nil, startTmPro.GameObject, 0, 1, false)
+    BettrVisualsController.FireballMoveTo(startTmPro.GameObject, endTmPro.GameObject, 0, 1, true)
+    endTmPro.SetText(newText)
+    BettrVisualsController.FireballMoveTo(nil, endTmPro.GameObject, 0, 1, false)
 end
 
 
