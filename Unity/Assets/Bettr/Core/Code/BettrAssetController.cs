@@ -439,8 +439,24 @@ namespace Bettr.Core
             yield return _bettrAssetPackageController.LoadPackage(bettrAssetBundleName, bettrAssetBundleVersion, false);
             
             var assetBundle = _bettrAssetController.GetLoadedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);
+
+            GameObject prefab = null;
             
-            var prefab = assetBundle.LoadAsset<GameObject>(prefabName);
+#if UNITY_EDITOR            
+            
+            // find the prefabName from the assetBundle
+            string prefabPath = assetBundle.GetAllAssetNames()
+                .FirstOrDefault(s => s.EndsWith($"{prefabName}.prefab", System.StringComparison.OrdinalIgnoreCase));
+            if (prefabPath != null)
+            {
+                prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            }
+#endif
+            if (prefab == null)
+            {
+                prefab = assetBundle.LoadAsset<GameObject>(prefabName);
+            }
+            
             if (prefab == null)
             {
                 Debug.LogError(
