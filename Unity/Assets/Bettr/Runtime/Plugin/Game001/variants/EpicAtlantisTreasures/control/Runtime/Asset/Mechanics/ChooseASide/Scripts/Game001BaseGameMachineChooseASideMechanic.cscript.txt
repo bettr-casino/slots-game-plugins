@@ -45,31 +45,15 @@ function Game001BaseGameMachineChooseASideMechanic:StartMachine(machine)
             machine.ChooseASideMechanicSliderParent.SetActive(true)
             local result = BettrDialogController.ShowModalDialog(self.State.MechanicsPrefab)
             System.Print("Game001BaseGameMachineChooseASideMechanic:StartMachine result={0}", result)
-            if result == "Evil" then
-                machine.ChooseASideMechanicDialogGoodText.GameObject.SetActive(false)
-                machine.ChooseASideMechanicDialogGoodImage.SetActive(false)
-            else
-                machine.ChooseASideMechanicDialogEvilText.GameObject.SetActive(false)
-                machine.ChooseASideMechanicDialogEvilImage.SetActive(false)
-            end
-            local startGameObject = machine.ChooseASideMechanicDialogGoodText.GameObject
-            local endGameObject = machine.ChooseASideMechanicGoodText.GameObject
-            if result == "Evil" then
-                startGameObject = machine.ChooseASideMechanicDialogEvilText.GameObject
-                endGameObject = machine.ChooseASideMechanicEvilText.GameObject
-            end
             local machineParent = machine.MachineParent
-            BettrVisualsController.FireballMoveTo(nil, startGameObject, 0, 1, false)
-            BettrVisualsController.FireballMoveTo(startGameObject, endGameObject, 0, 1, true)
-            machine.ChooseASideMechanicDialogParent.SetActive(false)
-            BettrVisualsController.FireballMoveTo(nil, endGameObject, 0, 1, false)
-            if result == "Evil" then 
-                machine.ChooseASideMechanicEvilText.SetText("WIN")
-                machine.ChooseASideMechanicGoodText.SetText("LOSE")
+            if result == "Evil" then
+                self:_ActivateMechanic(machine, machine.ChooseASideMechanicDialogEvilText.GameObject, machine.ChooseASideMechanicEvilText.GameObject, "WIN")
+                self:_ActivateMechanic(machine, machine.ChooseASideMechanicDialogGoodText.GameObject, machine.ChooseASideMechanicGoodText.GameObject, "LOSE")
             else
-                machine.ChooseASideMechanicEvilText.SetText("LOSE")
-                machine.ChooseASideMechanicGoodText.SetText("WIN")
+                self:_ActivateMechanic(machine, machine.ChooseASideMechanicDialogGoodText.GameObject, machine.ChooseASideMechanicGoodText.GameObject, "WIN")            
+                self:_ActivateMechanic(machine, machine.ChooseASideMechanicDialogEvilText.GameObject, machine.ChooseASideMechanicEvilText.GameObject, "LOSE")
             end
+            machine.ChooseASideMechanicDialogParent.SetActive(false)
             local sliderPointerGameObject = machine.ChooseASideMechanicSliderPointer.GameObject
             BettrVisualsController.FireballMoveTo(nil, sliderPointerGameObject, 0, 1, false)
             sliderPointerGameObject.SetActive(true)
@@ -80,6 +64,13 @@ function Game001BaseGameMachineChooseASideMechanic:StartMachine(machine)
 end
 
 function Game001BaseGameMachineChooseASideMechanic:TryPaying(machine)
+end
+
+function Game001BaseGameMachineChooseASideMechanic:_ActivateMechanic(machine, startGameObject, endGameObject, newText)
+    BettrVisualsController.FireballMoveTo(nil, startGameObject, 0, 1, false)
+    BettrVisualsController.FireballMoveTo(startGameObject, endGameObject, 0, 1, true)
+    machine.ChooseASideMechanicEvilText.SetText(newText)
+    BettrVisualsController.FireballMoveTo(nil, endGameObject, 0, 1, false)
 end
 
 

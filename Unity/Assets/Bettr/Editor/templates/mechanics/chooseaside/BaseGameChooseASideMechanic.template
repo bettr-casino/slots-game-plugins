@@ -68,6 +68,7 @@
                       {{ for step in leftStepStartInclusive..leftStepEndExclusive }}
                       {
                           "Name": "SliderSlot{{ step }}",
+                          "Id": "SliderSlot{{ step }}",
                           "Layer": "SLOT_REELS_OVERLAY",
                           "Active": true,
                           "IsPrimitive": true,
@@ -92,6 +93,7 @@
                       ,
                       {
                         "Name": "SliderSlot{{ middleStep }}",
+                        "Id": "SliderSlot{{ middleStep }}",
                         "Layer": "SLOT_REELS_OVERLAY",
                         "Active": true,
                         "IsPrimitive": true,
@@ -116,6 +118,7 @@
                       {{ for step in rightStepStartInclusive..rightStepEndExclusive }}
                       {
                         "Name": "SliderSlot{{ step }}",
+                        "Id": "SliderSlot{{ step }}",
                         "Layer": "SLOT_REELS_OVERLAY",
                         "Active": true,
                         "IsPrimitive": true,
@@ -163,7 +166,7 @@
                             }
                       ,
                       {
-                            "Name": "BaseGameChooseASideMechanicEvil",
+                            "Name": "EvilImage",
                             "Id": "EvilImage",
                             "Layer": "SLOT_REELS_OVERLAY",
                             "Active": true,
@@ -222,7 +225,7 @@
                             ]
                         },
                         {
-                            "Name": "BaseGameChooseASideMechanicGood",
+                            "Name": "GoodImage",
                             "Id": "GoodImage",
                             "Layer": "SLOT_REELS_OVERLAY",
                             "Active": true,
@@ -288,8 +291,8 @@
                     "Id": "DialogParent",
                     "Children": [      
                     {
-                    "Name": "BaseGameChooseASideDialogEvilParent",
-                    "Id": "BaseGameChooseASideDialogEvilParent",
+                    "Name": "DialogEvilParent",
+                    "Id": "DialogEvilParent",
                     "Layer": "SLOT_REELS_OVERLAY",
                     "Position": {
                         "X": -12,
@@ -303,7 +306,7 @@
                     },
                     "Children": [
                       {
-                        "Name": "Quad",
+                        "Name": "DialogEvilImage",
                         "Id": "DialogEvilImage",
                         "Layer": "SLOT_REELS_OVERLAY",
                         "Active": true,
@@ -337,7 +340,7 @@
                         ]
                       },
                       {
-                          "Name": "Text",
+                          "Name": "DialogEvilText",
                           "Id": "DialogEvilText",
                           "Layer": "SLOT_REELS_OVERLAY",
                           "Active": true,
@@ -377,8 +380,8 @@
                     ]
                 },
                 {
-                    "Name": "Text",
-                    "Id": "BaseGameChooseASideDialogChooseText",
+                    "Name": "DialogEvilText",
+                    "Id": "DialogChooseText",
                     "Layer": "SLOT_REELS_OVERLAY",
                     "Active": true,
                     "Position": {
@@ -413,8 +416,8 @@
                     ]
                 },        
                 {
-                     "Name": "BaseGameChooseASideDialogGoodParent",
-                     "Id": "BaseGameChooseASideDialogGoodParent",
+                     "Name": "DialogGoodParent",
+                     "Id": "DialogGoodParent",
                      "Layer": "SLOT_REELS_OVERLAY",
                      "Position": {
                          "X": 12,
@@ -428,7 +431,7 @@
                      },
                      "Children": [
                        {
-                         "Name": "Quad",
+                         "Name": "DialogGoodImage",
                          "Id": "DialogGoodImage",
                          "Layer": "SLOT_REELS_OVERLAY",
                          "Active": true,
@@ -462,7 +465,7 @@
                          ]
                        },
                        {
-                           "Name": "Text",
+                           "Name": "DialogGoodText",
                            "Id": "DialogGoodText",
                            "Layer": "SLOT_REELS_OVERLAY",
                            "Active": true,
@@ -538,6 +541,18 @@
               "Key": "ChooseASideMechanicSliderPointer",
               "Id": "SliderPointer"
          }
+       ],
+       "GameObjectGroupsProperty": [
+          {
+            "GroupKey": "ChooseASideMechanicSliderSlots",
+            "Group": [
+                {{- for step in 1..steps }}
+                {
+                    "Key": "ChooseASideMechanicSliderSlot{{ step }}",
+                    "Id": "SliderSlot{{ step }}"
+                }{{ if !for.last }},{{ end }}{{- end }}
+            ]
+          }
        ]
      },
      {
