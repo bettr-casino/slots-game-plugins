@@ -70,6 +70,9 @@ function {{machineName}}BaseGameMachineChooseASideMechanic:StartMachine(machine)
                 machine.ChooseASideMechanicEvilText.SetText("LOSE")
                 machine.ChooseASideMechanicGoodText.SetText("WIN")
             end
+            local sliderPointerGameObject = machine.ChooseASideMechanicSliderPointer.GameObject
+            BettrVisualsController.FireballMoveTo(nil, sliderPointerGameObject, 0, 1, false)
+            sliderPointerGameObject.SetActive(true)
             machineParent.SetActive(true)
             machine:StartMachine()
         end
