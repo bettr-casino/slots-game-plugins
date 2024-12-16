@@ -40,14 +40,38 @@ end
 function Game001BaseGameMachineChooseASideMechanic:StartMachine(machine)
     series
         do
+            self.State.MechanicsPrefab.SetActive(true);            
+            System.WaitForFrame(1)
+            machine.ChooseASideMechanicSliderParent.SetActive(true)
             local result = BettrDialogController.ShowModalDialog(self.State.MechanicsPrefab)
             System.Print("Game001BaseGameMachineChooseASideMechanic:StartMachine result={0}", result)
+            if result == "Evil" then
+                machine.ChooseASideMechanicDialogGoodText.GameObject.SetActive(false)
+                machine.ChooseASideMechanicDialogGoodImage.SetActive(false)
+            else
+                machine.ChooseASideMechanicDialogEvilText.GameObject.SetActive(false)
+                machine.ChooseASideMechanicDialogEvilImage.SetActive(false)
+            end
+            local startGameObject = machine.ChooseASideMechanicDialogGoodText.GameObject
+            local endGameObject = machine.ChooseASideMechanicGoodText.GameObject
+            if result == "Evil" then
+                startGameObject = machine.ChooseASideMechanicDialogEvilText.GameObject
+                endGameObject = machine.ChooseASideMechanicEvilText.GameObject
+            end
             local machineParent = machine.MachineParent
+            BettrVisualsController.FireballMoveTo(nil, startGameObject, 0, 1, false)
+            BettrVisualsController.FireballMoveTo(startGameObject, endGameObject, 0, 1, true)
+            machine.ChooseASideMechanicDialogParent.SetActive(false)
+            BettrVisualsController.FireballMoveTo(nil, endGameObject, 0, 1, false)
+            if result == "Evil" then 
+                machine.ChooseASideMechanicEvilText.SetText("WIN")
+                machine.ChooseASideMechanicGoodText.SetText("LOSE")
+            else
+                machine.ChooseASideMechanicEvilText.SetText("LOSE")
+                machine.ChooseASideMechanicGoodText.SetText("WIN")
+            end
             machineParent.SetActive(true)
             machine:StartMachine()
-            self.State.MechanicsPrefab.SetActive(true)
-            machine.ChooseASideMechanicDialogParent.SetActive(false)
-            machine.ChooseASideMechanicSliderParent.SetActive(true)
         end
     end
 end

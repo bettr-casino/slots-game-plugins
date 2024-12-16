@@ -59,6 +59,7 @@ namespace Bettr.Core
     
     public class BettrVisualsController
     {
+        private static readonly int Color1 = Shader.PropertyToID("_Color");
 
         private GameObject _fireball;
         private ParticleSystem _particleSystem;
@@ -629,6 +630,26 @@ namespace Bettr.Core
         public void DestroyGameObject(GameObject gameObject)
         {
             Object.Destroy(gameObject);
+        }
+
+        public void SetMaterialAlpha(GameObject go, float alpha)
+        {
+            var meshRenderer = go.GetComponent<MeshRenderer>();
+            if (meshRenderer == null)
+            {
+                Debug.LogWarning($"MeshRenderer not found for {go.name}");
+                return;
+            }
+            var material = meshRenderer.material;
+            // Verify material has color property
+            if (!material.HasProperty(Color1))
+            {
+                Debug.LogWarning($"Material {material.name} does not have _Color property");
+                return;
+            }
+            var color = material.color;
+            color.a = alpha;
+            material.color = color;
         }
 
         public static void SwitchOrientationToPortrait()

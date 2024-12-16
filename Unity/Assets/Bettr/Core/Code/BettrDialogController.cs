@@ -36,13 +36,11 @@ namespace Bettr.Core
             
             _dialogLocked = true;
             _result = null;
-            dialog.SetActive(true);
             _waitingForClick = true;
             while (_waitingForClick)
             {
                 yield return null;
             }
-            dialog.SetActive(false);
             _dialogLocked = false;
             
             context.StringResult = _result;
