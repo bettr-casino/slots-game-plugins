@@ -141,27 +141,77 @@ namespace Bettr.Core
             }
         }
         
-        private Vector3? CalculatePosition(GameObject obj, Camera fireballCamera, float offsetY = 0)
+        private Vector3? CalculatePosition(GameObject obj, Camera referenceCamera, float offsetY = 0)
         {
             if (obj == null) return null;
 
+            // Retrieve the camera associated with the object's layer
             string layerName = LayerMask.LayerToName(obj.layer);
             Camera objCamera = _layerToCameraMap.GetCameraForLayer(layerName);
+
             if (objCamera == null)
             {
                 Debug.LogError($"No camera found for layer {layerName}");
                 return null;
             }
 
+            // If objCamera and referenceCamera are the same, no need to convert
+            if (objCamera == referenceCamera)
+            {
+                Vector3 adjustedPosition = obj.transform.position;
+                adjustedPosition.y += offsetY; // Apply the offset
+                return adjustedPosition;
+            }
+
+            // Convert the object's position from objCamera to referenceCamera
             Vector3 screenPos = objCamera.WorldToScreenPoint(obj.transform.position);
-            return fireballCamera.ScreenToWorldPoint(new Vector3(
+
+            return referenceCamera.ScreenToWorldPoint(new Vector3(
                 screenPos.x,
-                screenPos.y + offsetY,
-                fireballCamera.nearClipPlane
+                screenPos.y + offsetY, // Apply the offset
+                screenPos.z // Preserve the object's depth
             ));
         }
 
+
         private bool _tweenComplete = false;
+        
+        public IEnumerator TweenGameObject(
+            CrayonScriptContext context, GameObject tweenThisGameObject, GameObject tweenFromThisGameObject, GameObject tweenToThisGameObject, float duration = 1.0f, bool tween = false)
+        {
+            string layerName = LayerMask.LayerToName(tweenThisGameObject.layer);
+            Camera tweenCamera = _layerToCameraMap.GetCameraForLayer(layerName);
+            if (tweenCamera == null)
+            {
+                throw new ScriptRuntimeException($"No camera found for layer '{layerName}'");
+            }
+            iTween.Stop(tweenThisGameObject);
+            Vector3 startWorldPosition = CalculatePosition(tweenFromThisGameObject, tweenCamera) ?? tweenThisGameObject.transform.position;
+            Vector3 targetWorldPosition = CalculatePosition(tweenToThisGameObject, tweenCamera) ?? tweenThisGameObject.transform.position;
+            tweenThisGameObject.transform.position = startWorldPosition;
+            if (tween)
+            {
+                _tweenComplete = false;
+                iTween.MoveTo(tweenThisGameObject, iTween.Hash(
+                    "position", targetWorldPosition,
+                    "time", duration,
+                    "easetype", iTween.EaseType.linear,
+                    "oncomplete", "OnTweenComplete",
+                    "oncompletetarget", tweenThisGameObject
+                ));
+                var elapsedTime = 0f;
+                while (!_tweenComplete && elapsedTime < duration + 0.1f)
+                {
+                    elapsedTime += Time.deltaTime;
+                    yield return null;
+                }
+            }
+            else
+            {
+                tweenThisGameObject.transform.position = targetWorldPosition;
+                yield return new WaitForSeconds(duration);
+            }
+        }
         
         public IEnumerator FireballMoveTo(CrayonScriptContext context, GameObject from, GameObject to, float offsetY = 10, float duration = 1.0f, bool tween = false)
         {
@@ -219,6 +269,11 @@ namespace Bettr.Core
         }
 
         private void OnFireballTweenComplete()
+        {
+            _tweenComplete = true;
+        }
+        
+        private void OnTweenComplete()
         {
             _tweenComplete = true;
         }

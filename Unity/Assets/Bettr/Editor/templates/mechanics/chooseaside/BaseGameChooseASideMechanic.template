@@ -548,7 +548,7 @@
             "Group": [
                 {{- for step in 1..steps }}
                 {
-                    "Key": "ChooseASideMechanicSliderSlot{{ step }}",
+                    "Key": "SliderSlot{{ step }}",
                     "Id": "SliderSlot{{ step }}"
                 }{{ if !for.last }},{{ end }}{{- end }}
             ]
@@ -575,6 +575,19 @@
               "Id": "GoodText"
           }  
        ]
+      },
+      {
+          "ComponentType": "TilePropertyIntsInjected",
+          "IntsProperty": [
+            {
+               "Key": "ChooseASliderMechanicSliderCount",
+               "Value": {{ steps }}
+            },
+            {
+               "Key": "ChooseASliderMechanicMiddleSliderIndex",
+               "Value": {{ middleStep }}
+            }
+         ]
       }
   ]
 }
