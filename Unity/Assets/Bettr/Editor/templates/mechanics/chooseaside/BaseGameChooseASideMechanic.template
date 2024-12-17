@@ -44,6 +44,12 @@
                     },
                     "Children": [
                       {
+                         "Name": "SliderBar",
+                         "Id": "SliderBar",
+                         "Layer": "SLOT_REELS_OVERLAY",
+                         "Active": false,
+                         "Children": [                         
+                        {
                         "Name": "Slider",
                         "Layer": "SLOT_REELS_OVERLAY",
                         "Active": true,
@@ -142,34 +148,38 @@
                       {{ if !for.last }},{{ end }}{{ end }}
                       ,
                       {
-                                "Name": "SliderPointer",
-                                "Id": "SliderPointer",
-                                "Layer": "SLOT_REELS_OVERLAY",
-                                "Active": false,
-                                "IsPrimitive": true,
-                                "Primitive": 5,
-                                "PrimitiveMaterial": "BaseGameChooseASideMechanicSliderPointer",
-                                "PrimitiveShader": "Bettr/Symbol",
-                                "PrimitiveTexture": "BaseGameChooseASideMechanicSliderPointer",
-                                "PrimitiveTextureCreate": true,
-                                "PrimitiveTextureCreateSource": "default-yellow.png",
-                                "Position": {
-                                    "X": 0,
-                                    "Y": 0,
-                                    "Z": 0
-                                },
-                                "Scale": {
-                                    "X": 1.5,
-                                    "Y": 3,
-                                    "Z": 1
-                                }
-                            }
+                        "Name": "SliderPointer",
+                        "Id": "SliderPointer",
+                        "Layer": "SLOT_REELS_OVERLAY",
+                        "Active": false,
+                        "IsPrimitive": true,
+                        "Primitive": 5,
+                        "PrimitiveMaterial": "BaseGameChooseASideMechanicSliderPointer",
+                        "PrimitiveShader": "Bettr/Symbol",
+                        "PrimitiveTexture": "BaseGameChooseASideMechanicSliderPointer",
+                        "PrimitiveTextureCreate": true,
+                        "PrimitiveTextureCreateSource": "default-yellow.png",
+                        "Position": {
+                            "X": 0,
+                            "Y": 0,
+                            "Z": 0
+                        },
+                        "Scale": {
+                            "X": 1.5,
+                            "Y": 3,
+                            "Z": 1
+                        }
+                    }                         
+                         
+                         
+                         ]
+                      }
                       ,
                       {
                             "Name": "EvilImage",
                             "Id": "EvilImage",
                             "Layer": "SLOT_REELS_OVERLAY",
-                            "Active": true,
+                            "Active": false,
                             "IsPrimitive": true,
                             "Primitive": 5,
                             "PrimitiveMaterial": "BaseGameChooseASideMechanicEvil",
@@ -192,7 +202,7 @@
                             "Name": "EVILText",
                             "Id": "EvilText",
                             "Layer": "SLOT_REELS_OVERLAY",
-                            "Active": true,
+                            "Active": false,
                             "Position": {
                               "X": {{ -1 * steps - 4 }},
                               "Y": 0,
@@ -228,7 +238,7 @@
                             "Name": "GoodImage",
                             "Id": "GoodImage",
                             "Layer": "SLOT_REELS_OVERLAY",
-                            "Active": true,
+                            "Active": false,
                             "IsPrimitive": true,
                             "Primitive": 5,
                             "PrimitiveMaterial": "BaseGameChooseASideMechanicGood",
@@ -251,7 +261,7 @@
                             "Name": "GOODText",
                             "Id": "GoodText",
                             "Layer": "SLOT_REELS_OVERLAY",
-                            "Active": true,
+                            "Active": false,
                             "Position": {
                                 "X": {{ 1 * steps + 4 }},
                                 "Y": 0,
@@ -540,6 +550,10 @@
          {
               "Key": "ChooseASideMechanicSliderPointer",
               "Id": "SliderPointer"
+         },
+         {
+            "Key": "ChooseASideMechanicSliderBar",
+            "Id": "SliderBar"
          }
        ],
        "GameObjectGroupsProperty": [
