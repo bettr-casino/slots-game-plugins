@@ -57,6 +57,16 @@ function {{machineName}}BaseGameMachineChooseASideMechanic:StartMachine(machine)
             local sliderPointerGameObject = machine.ChooseASideMechanicSliderPointer.GameObject
             BettrVisualsController.FireballMoveTo(nil, sliderPointerGameObject, 0, 1, false)
             sliderPointerGameObject.SetActive(true)
+            local sliderCount = machine.ChooseASliderMechanicSliderCount
+            local middleSliderIndex = machine.ChooseASliderMechanicMiddleSliderIndex
+            local sliderGroup = machine.ChooseASideMechanicSliderSlots
+            local middleSliderSlot = sliderGroup["SliderSlot" .. middleSliderIndex]
+            local startSliderSlot = sliderGroup["SliderSlot1"]
+            local endSliderSlot = sliderGroup["SliderSlot" .. sliderCount]
+            BettrVisualsController.TweenGameObject(sliderPointerGameObject, nil, middleSliderSlot.GameObject, 0.3, false)
+            BettrVisualsController.TweenGameObject(sliderPointerGameObject, middleSliderSlot.GameObject, startSliderSlot.GameObject, 2, true)
+            BettrVisualsController.TweenGameObject(sliderPointerGameObject, startSliderSlot.GameObject, endSliderSlot.GameObject, 4, true)
+            BettrVisualsController.TweenGameObject(sliderPointerGameObject, endSliderSlot.GameObject, middleSliderSlot.GameObject, 2, true)
             machineParent.SetActive(true)
             machine:StartMachine()
         end
