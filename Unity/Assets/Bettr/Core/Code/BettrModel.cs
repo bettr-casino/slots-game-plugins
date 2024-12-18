@@ -14,6 +14,8 @@ namespace Bettr.Core
             TileController.RegisterType<BettrLobbyCardConfig>("BettrLobbyCardConfig");
             TileController.RegisterType<BettrLobbyCardGroupConfig>("BettrLobbyCardGroupConfig");
             TileController.RegisterType<BettrUserConfig>("BettrUserConfig");
+            TileController.RegisterType<BettrUserGameAttributesConfig>("BettrUserGameAttributesConfig");
+            TileController.RegisterType<BettrUserMechanicAttributesConfig>("BettrUserMechanicAttributesConfig");
         }
     }
     
@@ -58,8 +60,55 @@ namespace Bettr.Core
     }
     
     [Serializable]
+    public class BettrUserMechanicAttributesConfig
+    {
+        public string MechanicId { get; set; }
+        public string MechanicsData { get; set; }
+    }
+
+    [Serializable]
+    public class BettrUserGameAttributesConfig
+    {
+        public string GameId { get; set; }
+        public Dictionary<string, string> MechanicsAttributesMap { get; set; }
+        
+        public BettrUserMechanicAttributesConfig GetMechanicAttributes(string mechanicId)
+        {
+            if (MechanicsAttributesMap == null)
+            {
+                MechanicsAttributesMap = new Dictionary<string, string>();
+            }
+            
+            if (MechanicsAttributesMap.TryGetValue(mechanicId, out var mechanicsData))
+            {
+                return JsonConvert.DeserializeObject<BettrUserMechanicAttributesConfig>(mechanicsData);
+            }
+            return null;
+        }
+    }
+    
+    [Serializable]
     public class BettrUserConfig
     {
+        public List<BettrUserGameAttributesConfig> GameAttributes { get; set; }
+        
+        public BettrUserGameAttributesConfig GetGameAttributes(string gameId)
+        {
+            if (GameAttributes == null)
+            {
+                GameAttributes = new List<BettrUserGameAttributesConfig>();
+            }
+            
+            foreach (var gameAttribute in GameAttributes)
+            {
+                if (gameAttribute.GameId == gameId)
+                {
+                    return gameAttribute;
+                }
+            }
+            return null;
+        }
+        
         public string UserId { get; set; }
         private long _coins = 0;
 
