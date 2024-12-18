@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using CrayonScript.Code;
+using CrayonScript.Interpreter;
 using Newtonsoft.Json;
 
 // ReSharper disable once CheckNamespace
@@ -15,7 +16,7 @@ namespace Bettr.Core
             TileController.RegisterType<BettrLobbyCardGroupConfig>("BettrLobbyCardGroupConfig");
             TileController.RegisterType<BettrUserConfig>("BettrUserConfig");
             TileController.RegisterType<BettrUserGameAttributesConfig>("BettrUserGameAttributesConfig");
-            TileController.RegisterType<BettrUserMechanicAttributesConfig>("BettrUserMechanicAttributesConfig");
+            TileController.RegisterType<BettrUserGameMechanicsAttributesConfig>("BettrUserMechanicAttributesConfig");
         }
     }
     
@@ -60,55 +61,30 @@ namespace Bettr.Core
     }
     
     [Serializable]
-    public class BettrUserMechanicAttributesConfig
+    public class BettrUserGameMechanicsAttributesConfig
     {
+        public string UserId { get; set; }
+        public string GameId { get; set; }
         public string MechanicId { get; set; }
         public string MechanicsData { get; set; }
+        public string Key => $"{UserId}__{GameId}__{MechanicId}";
     }
 
     [Serializable]
     public class BettrUserGameAttributesConfig
     {
+        public string UserId { get; set; } 
         public string GameId { get; set; }
-        public Dictionary<string, string> MechanicsAttributesMap { get; set; }
-        
-        public BettrUserMechanicAttributesConfig GetMechanicAttributes(string mechanicId)
-        {
-            if (MechanicsAttributesMap == null)
-            {
-                MechanicsAttributesMap = new Dictionary<string, string>();
-            }
-            
-            if (MechanicsAttributesMap.TryGetValue(mechanicId, out var mechanicsData))
-            {
-                return JsonConvert.DeserializeObject<BettrUserMechanicAttributesConfig>(mechanicsData);
-            }
-            return null;
-        }
+        public string GameData { get; set; }
+        public string Key => $"{UserId}__{GameId}";
     }
     
     [Serializable]
     public class BettrUserConfig
     {
-        public List<BettrUserGameAttributesConfig> GameAttributes { get; set; }
-        
-        public BettrUserGameAttributesConfig GetGameAttributes(string gameId)
-        {
-            if (GameAttributes == null)
-            {
-                GameAttributes = new List<BettrUserGameAttributesConfig>();
-            }
-            
-            foreach (var gameAttribute in GameAttributes)
-            {
-                if (gameAttribute.GameId == gameId)
-                {
-                    return gameAttribute;
-                }
-            }
-            return null;
-        }
-        
+        public List<BettrUserGameAttributesConfig> GameKeys { get; set; }
+        public List<string> GameMechanicKeys { get; set; }
+
         public string UserId { get; set; }
         private long _coins = 0;
 

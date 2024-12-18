@@ -4193,6 +4193,18 @@ namespace Bettr.Editor
             {
                 Debug.LogError("Failed to load bettrUserConfig.");
             }
+            
+            // load the mechanics files 
+            var mechanicsScripts = LoadUserMechanicsScriptsFromWebAssets();
+            foreach (var mechanicScript in mechanicsScripts)
+            {
+                var mechanicFileName = mechanicScript.Key;
+                var mechanicScriptData = mechanicScript.Value;
+                var mechanicDestinationFilePath = $"{usersDirectory}/mechanics/{mechanicFileName}";
+                // Ensure the directory exists
+                BuildDirectory(new DirectoryInfo($"{usersDirectory}/mechanics"));
+                File.WriteAllText(mechanicDestinationFilePath, mechanicScriptData);
+            }
 
             Debug.Log("Refreshing database after building local server.");
             AssetDatabase.Refresh();
@@ -4578,6 +4590,41 @@ namespace Bettr.Editor
                     return null;
                 }
             }
+        }
+        
+        private static Dictionary<string, string> LoadUserMechanicsScriptsFromWebAssets()
+        {
+            var mechanicsScripts = new Dictionary<string, string>();
+            
+            var mechanics = new string[]
+            {
+                "chooseaside",
+            };
+
+            foreach (var mechanic in mechanics)
+            {
+                var mechanicFileName = $"user__mechanic__{mechanic}.cscript.txt";
+                var webAssetName = $"users/default/mechanics/{mechanicFileName}";
+                var assetBundleURL = $"{AssetsServerBaseURL}/{webAssetName}";
+                
+                using (var webClient = new WebClient())
+                {
+                    try
+                    {
+                        byte[] luaScriptBytes = webClient.DownloadData(assetBundleURL);
+                        string luaScript = Encoding.UTF8.GetString(luaScriptBytes);
+                        mechanicsScripts.Add(mechanicFileName, luaScript);
+                    }
+                    catch (Exception ex)
+                    {
+                        var error = $"Error loading user JSON from server: {ex.Message}";
+                        Debug.LogError(error);
+                        return null;
+                    }
+                }
+            }
+
+            return mechanicsScripts;
         }
 
         private static Dictionary<string, Dictionary<string, string>> LoadOutcomesFromWeb()
