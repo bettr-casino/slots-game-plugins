@@ -4176,35 +4176,32 @@ namespace Bettr.Editor
             BuildDirectory(new DirectoryInfo(LocalServerDirectory));
             AssetDatabase.Refresh();
 
-            var bettrUserConfigJsonData = LoadUserJsonFromWebAssets();
-
             var usersDirectory = $"{LocalServerDirectory}/users";
             BuildDirectory(new DirectoryInfo(usersDirectory));
             AssetDatabase.Refresh();
 
-            var destinationFilePath = $"{usersDirectory}/default.json";
+            var (userJson, userGameScript) = LoadUserAssetsFromWeb();
 
-            if (bettrUserConfigJsonData != null)
+            if (userJson != null)
             {
-                File.WriteAllText(destinationFilePath, bettrUserConfigJsonData);
+                File.WriteAllText($"{usersDirectory}/default.json", userJson);
                 Debug.Log("Copied latest user data from s3.");
             }
             else
             {
-                Debug.LogError("Failed to load bettrUserConfig.");
+                Debug.LogError("Failed to load bettrUserConfig user json.");
             }
             
-            // load the mechanics files 
-            var mechanicsScripts = LoadUserMechanicsScriptsFromWebAssets();
-            foreach (var mechanicScript in mechanicsScripts)
+            if (userGameScript != null)
             {
-                var mechanicFileName = mechanicScript.Key;
-                var mechanicScriptData = mechanicScript.Value;
-                var mechanicDestinationFilePath = $"{usersDirectory}/mechanics/{mechanicFileName}";
-                // Ensure the directory exists
-                BuildDirectory(new DirectoryInfo($"{usersDirectory}/mechanics"));
-                File.WriteAllText(mechanicDestinationFilePath, mechanicScriptData);
+                File.WriteAllText($"{usersDirectory}/default__game.cscript.txt", userGameScript);
+                Debug.Log("Copied latest user game cscript data from s3.");
             }
+            else
+            {
+                Debug.LogError("Failed to load bettrUserConfig user game cscript.");
+            }
+            
 
             Debug.Log("Refreshing database after building local server.");
             AssetDatabase.Refresh();
@@ -4570,62 +4567,37 @@ namespace Bettr.Editor
             }
         }
         
-        private static string LoadUserJsonFromWebAssets()
+        private static (string userJson, string gameScript) LoadUserAssetsFromWeb()
         {
-            string webAssetName = "users/default/user.json";
-            string assetBundleURL = $"{AssetsServerBaseURL}/{webAssetName}";
+            string userJsonPath = "users/default/user.json";
+            string gameScriptPath = "users/default/user__game.cscript.txt";
+
+            string userJsonUrl = $"{AssetsServerBaseURL}/{userJsonPath}";
+            string gameScriptUrl = $"{AssetsServerBaseURL}/{gameScriptPath}";
 
             using (var webClient = new WebClient())
             {
                 try
                 {
-                    byte[] jsonBytes = webClient.DownloadData(assetBundleURL);
+                    // Load user JSON
+                    byte[] jsonBytes = webClient.DownloadData(userJsonUrl);
                     string jsonString = Encoding.UTF8.GetString(jsonBytes);
-                    return jsonString;
+
+                    // Load game script
+                    byte[] scriptBytes = webClient.DownloadData(gameScriptUrl);
+                    string scriptString = Encoding.UTF8.GetString(scriptBytes);
+
+                    return (jsonString, scriptString);
                 }
                 catch (Exception ex)
                 {
-                    var error = $"Error loading user JSON from server: {ex.Message}";
+                    var error = $"Error loading assets from server: {ex.Message}";
                     Debug.LogError(error);
-                    return null;
+                    return (null, null);
                 }
             }
         }
         
-        private static Dictionary<string, string> LoadUserMechanicsScriptsFromWebAssets()
-        {
-            var mechanicsScripts = new Dictionary<string, string>();
-            
-            var mechanics = new string[]
-            {
-                "chooseaside",
-            };
-
-            foreach (var mechanic in mechanics)
-            {
-                var mechanicFileName = $"user__mechanic__{mechanic}.cscript.txt";
-                var webAssetName = $"users/default/mechanics/{mechanicFileName}";
-                var assetBundleURL = $"{AssetsServerBaseURL}/{webAssetName}";
-                
-                using (var webClient = new WebClient())
-                {
-                    try
-                    {
-                        byte[] luaScriptBytes = webClient.DownloadData(assetBundleURL);
-                        string luaScript = Encoding.UTF8.GetString(luaScriptBytes);
-                        mechanicsScripts.Add(mechanicFileName, luaScript);
-                    }
-                    catch (Exception ex)
-                    {
-                        var error = $"Error loading user JSON from server: {ex.Message}";
-                        Debug.LogError(error);
-                        return null;
-                    }
-                }
-            }
-
-            return mechanicsScripts;
-        }
 
         private static Dictionary<string, Dictionary<string, string>> LoadOutcomesFromWeb()
         {

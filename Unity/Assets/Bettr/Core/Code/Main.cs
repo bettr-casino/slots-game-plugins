@@ -27,13 +27,13 @@ namespace Bettr.Core
         [NonSerialized] private BettrAssetController _bettrAssetController;
         [NonSerialized] private BettrAssetScriptsController _bettrAssetScriptsController;
         [NonSerialized] private BettrUserController _bettrUserController;
+        [NonSerialized] private BettrUserGameController _bettrUserGameController;
         [NonSerialized] private BettrExperimentController _bettrExperimentController;
         // ReSharper disable once NotAccessedField.Local
         [NonSerialized] private BettrVisualsController _bettrVisualsController;
         // ReSharper disable once NotAccessedField.Local
         [NonSerialized] private BettrOutcomeController _bettrOutcomeController;
         [NonSerialized] private BettrDialogController _bettrDialogController;
-        [NonSerialized] private BettrLuaTableToStringSerializer _bettrLuaTableToStringSerializer;
 
         private bool _oneTimeSetUpComplete;
 
@@ -168,8 +168,6 @@ namespace Bettr.Core
             TileController.RegisterType<BettrVideoController>("BettrVideoController");
             TileController.AddToGlobals("BettrVideoController", BettrVideoController.Instance);
             
-            _bettrLuaTableToStringSerializer = new BettrLuaTableToStringSerializer();
-
             _bettrDialogController = new BettrDialogController();
 
             _bettrMainLobbySceneController = new BettrMainLobbySceneController(_bettrExperimentController)
@@ -193,6 +191,12 @@ namespace Bettr.Core
                     UseFileSystemOutcomes = _configData.UseFileSystemOutcomes,
                 };
 
+            _bettrUserGameController = new BettrUserGameController(_bettrAssetScriptsController)
+            {
+                bettrServer = _bettrServer,
+                configData = _configData,
+            };
+            
             // Register the specialized performance controllers
             TileController.RegisterType<BettrReelController>("BettrReelController");
 
@@ -201,6 +205,8 @@ namespace Bettr.Core
             if (_oneTimeSetUpComplete) yield break;
             
             yield return LoginUser();
+            
+            yield return LoadUserGameTables();
 
             yield return LoadManifests();
 
@@ -214,6 +220,11 @@ namespace Bettr.Core
         private IEnumerator LoginUser()
         {
             yield return BettrUserController.Instance.Login();
+        }
+        
+        private IEnumerator LoadUserGameTables()
+        {
+            yield return BettrUserGameController.Instance.LoadUserGameTables();
         }
         
         private IEnumerator LoadManifests()

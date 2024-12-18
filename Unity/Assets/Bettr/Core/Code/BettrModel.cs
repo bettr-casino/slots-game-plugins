@@ -15,8 +15,6 @@ namespace Bettr.Core
             TileController.RegisterType<BettrLobbyCardConfig>("BettrLobbyCardConfig");
             TileController.RegisterType<BettrLobbyCardGroupConfig>("BettrLobbyCardGroupConfig");
             TileController.RegisterType<BettrUserConfig>("BettrUserConfig");
-            TileController.RegisterType<BettrUserGameAttributesConfig>("BettrUserGameAttributesConfig");
-            TileController.RegisterType<BettrUserGameMechanicsAttributesConfig>("BettrUserMechanicAttributesConfig");
         }
     }
     
@@ -61,30 +59,8 @@ namespace Bettr.Core
     }
     
     [Serializable]
-    public class BettrUserGameMechanicsAttributesConfig
-    {
-        public string UserId { get; set; }
-        public string GameId { get; set; }
-        public string MechanicId { get; set; }
-        public string MechanicsData { get; set; }
-        public string Key => $"{UserId}__{GameId}__{MechanicId}";
-    }
-
-    [Serializable]
-    public class BettrUserGameAttributesConfig
-    {
-        public string UserId { get; set; } 
-        public string GameId { get; set; }
-        public string GameData { get; set; }
-        public string Key => $"{UserId}__{GameId}";
-    }
-    
-    [Serializable]
     public class BettrUserConfig
     {
-        public List<BettrUserGameAttributesConfig> GameKeys { get; set; }
-        public List<string> GameMechanicKeys { get; set; }
-
         public string UserId { get; set; }
         private long _coins = 0;
 

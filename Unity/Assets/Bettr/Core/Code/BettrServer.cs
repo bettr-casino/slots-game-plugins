@@ -40,7 +40,7 @@ namespace Bettr.Core
     public class StorageResponse
     {
         [JsonProperty("value")]
-        public string value;
+        public byte[] value;
         
         [JsonProperty("cas")]
         public string cas;
@@ -227,10 +227,10 @@ namespace Bettr.Core
                 string localFilePath = Path.Combine(fileSystemLocalStorageBaseURL, "users", $"default.json");
                 if (File.Exists(localFilePath))
                 {
-                    string json = File.ReadAllText(localFilePath);
+                    var bytes = File.ReadAllBytes(localFilePath);
                     StorageResponse storageResponse = new StorageResponse()
                     {
-                        value = json,
+                        value = bytes,
                         cas = "local",
                     };
                     storageCallback(localFilePath, storageResponse, true, null);
@@ -259,68 +259,71 @@ namespace Bettr.Core
             yield return PutStorage(requestUri, bodyData, 0, true, storageCallback, SessionTokenHeader, ApplicationJsonHeader);
         }
         
-        public IEnumerator LoadMechanicBlob(string mechanicName, GetStorageCallback storageCallback)
+        public IEnumerator LoadUserGameBlob(GetStorageCallback storageCallback)
         {
-            Debug.Log($"Starting LoadGameBlob");
+            Debug.Log($"Starting LoadUserGameBlob");
             if (useLocalServer)
             {
-                string localFilePath = Path.Combine(fileSystemLocalStorageBaseURL, "users", $"default.json");
+                var userGameFileName = $"default__game.cscript.txt";
+                string localFilePath = Path.Combine(fileSystemLocalStorageBaseURL, "users", $"{userGameFileName}");
                 if (File.Exists(localFilePath))
                 {
-                    string json = File.ReadAllText(localFilePath);
+                    var bytes = File.ReadAllBytes(localFilePath);
                     StorageResponse storageResponse = new StorageResponse()
                     {
-                        value = json,
+                        value = bytes,
                         cas = "local",
                     };
                     storageCallback(localFilePath, storageResponse, true, null);
                 }
                 else
                 {
-                    var error = $"Local mechanic blob file not found at path: {localFilePath}";
+                    var error = $"Local user game blob file not found at path: {localFilePath}";
                     Debug.LogError(error);
                     storageCallback(localFilePath, null, false, error);
                 }
                 yield break;
             }
-            var requestUri = $"/storage/owner/{AuthResponse.User.Id}/protected/blobs/mechanic__{mechanicName}";
+            var mechanicUri = $"user__game";
+            var requestUri = $"/storage/owner/{AuthResponse.User.Id}/protected/blobs/{mechanicUri}";
             yield return GetStorage(requestUri, storageCallback, SessionTokenHeader, ApplicationJsonHeader);
         }
         
-        public IEnumerator PutMechanicBlob(BettrMechanicConfig mechanicConfig, PutStorageCallback storageCallback)
+        public IEnumerator PutUserGameBlob(string userGameScriptData, PutStorageCallback storageCallback)
         {
-            Debug.Log($"Starting PutMechanicBlob");
+            Debug.Log($"Starting PutUserGameBlob");
             if (useLocalServer)
             {
                 yield break;
             }
-            string bodyData = JsonConvert.SerializeObject(mechanicConfig);
-            string requestUri = $"/storage/owner/{AuthResponse.User.Id}/protected/blobs/mechanic__{mechanicConfig.MechanicName}";
-            yield return PutStorage(requestUri, bodyData, 0, true, storageCallback, SessionTokenHeader, ApplicationJsonHeader);
+            var userGameUri = $"user__game";
+            var requestUri = $"/storage/owner/{AuthResponse.User.Id}/protected/blobs/{userGameUri}";
+            yield return PutStorage(requestUri, userGameScriptData, 0, true, storageCallback, SessionTokenHeader, ApplicationJsonHeader);
         }
         
-        public IEnumerator LoadEvents(GetStorageCallback storageCallback)
-        {
-            Debug.Log($"Starting PutEvent");
-            if (useLocalServer)
-            {
-                yield break;
-            }
-            string requestUri = $"/storage/owner/{AuthResponse.User.Id}/protected/blobs/events";
-            yield return GetStorage(requestUri, storageCallback, ApplicationJsonHeader);
-        }
-        
-        public IEnumerator PutEvents(BettrUserEvents userEvents, PutStorageCallback storageCallback)
-        {
-            Debug.Log($"Starting PutEvent");
-            if (useLocalServer)
-            {
-                yield break;
-            }
-            string bodyData = JsonConvert.SerializeObject(userEvents);
-            string requestUri = $"/storage/owner/{AuthResponse.User.Id}/protected/blobs/events";
-            yield return PutStorage(requestUri, bodyData, 0, true, storageCallback, SessionTokenHeader, ApplicationJsonHeader);
-        }
+        // TODO: uncomment when events are required
+        // public IEnumerator LoadEvents(GetStorageCallback storageCallback)
+        // {
+        //     Debug.Log($"Starting PutEvent");
+        //     if (useLocalServer)
+        //     {
+        //         yield break;
+        //     }
+        //     string requestUri = $"/storage/owner/{AuthResponse.User.Id}/protected/blobs/events";
+        //     yield return GetStorage(requestUri, storageCallback, ApplicationJsonHeader);
+        // }
+        //
+        // public IEnumerator PutEvents(BettrUserEvents userEvents, PutStorageCallback storageCallback)
+        // {
+        //     Debug.Log($"Starting PutEvent");
+        //     if (useLocalServer)
+        //     {
+        //         yield break;
+        //     }
+        //     string bodyData = JsonConvert.SerializeObject(userEvents);
+        //     string requestUri = $"/storage/owner/{AuthResponse.User.Id}/protected/blobs/events";
+        //     yield return PutStorage(requestUri, bodyData, 0, true, storageCallback, SessionTokenHeader, ApplicationJsonHeader);
+        // }
         
         public IEnumerator GetStorage(string requestUri, GetStorageCallback storageCallback, params KeyValuePair<string, string>[] headers)
         {

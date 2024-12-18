@@ -20,6 +20,7 @@ namespace Bettr.Core
         
         public BettrUserConfig BettrPreviewUserConfig { get; private set; }
         
+        
         public static BettrUserController Instance { get; private set; }
         
         public bool UserIsLoggedIn { get; private set; }
@@ -33,7 +34,7 @@ namespace Bettr.Core
         public int UserPreviewModeSpins { get; private set; }
 
         const string ErrorBlobDoesNotExist = "HTTP/1.1 404 Not Found";
-
+        
         public BettrUserController()
         {
             TileController.RegisterType<BettrUserController>("BettrUserController");
@@ -114,7 +115,7 @@ namespace Bettr.Core
 
         public IEnumerator Login()
         {
-            bool replaceBlob = true;
+            bool insertUserBlob = true;
             Debug.Log($"Starting User Login");
             
             BettrUserConfig = null;
@@ -134,7 +135,7 @@ namespace Bettr.Core
                 {
                     if (error == ErrorBlobDoesNotExist)
                     {
-                        replaceBlob = true;
+                        insertUserBlob = true;
                         return;
                     }
                     if (!success)
@@ -142,21 +143,23 @@ namespace Bettr.Core
                         Debug.LogError($"Error loading user blob: {error}");
                         return;
                     }
-                    var userBlob = JsonConvert.DeserializeObject<BettrUserConfig>(payload.value);
+                    string result = Encoding.UTF8.GetString(payload.value);
+                    var userBlob = JsonConvert.DeserializeObject<BettrUserConfig>(result);
                     BettrUserConfig = userBlob;
                 });
             
                 // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-                if (replaceBlob)
+                if (insertUserBlob)
                 {
-                    yield return LoadUserJsonFromWebAssets((_, payload, success, error) =>
+                    yield return LoadDefaultUserJsonFromWebAssets((_, payload, success, error) =>
                     {
                         if (!success)
                         {
                             Debug.LogError($"Error loading user JSON: {error}");
                             return;
                         }
-                        var user = JsonConvert.DeserializeObject<BettrUserConfig>(payload.value);
+                        string result = Encoding.UTF8.GetString(payload.value);
+                        var user = JsonConvert.DeserializeObject<BettrUserConfig>(result);
                         user.UserId = userId; // device id
                         BettrUserConfig = user;
                     });
@@ -182,7 +185,7 @@ namespace Bettr.Core
             TileController.AddToGlobals("BettrUser", BettrUserConfig);
         }
         
-        public IEnumerator LoadUserJsonFromWebAssets(GetStorageCallback storageCallback)
+        public IEnumerator LoadDefaultUserJsonFromWebAssets(GetStorageCallback storageCallback)
         {
             string webAssetName = "users/default/user.json";
             string assetBundleURL = $"{configData.AssetsServerBaseURL}/{webAssetName}";
@@ -191,12 +194,11 @@ namespace Bettr.Core
 
             if (www.result == UnityWebRequest.Result.Success)
             {
-                byte[] jsonBytes = www.downloadHandler.data;
-                string jsonData = Encoding.UTF8.GetString(jsonBytes);
+                byte[] bytes = www.downloadHandler.data;
                 StorageResponse response = new StorageResponse()
                 {
                     cas = null,
-                    value = jsonData,
+                    value = bytes,
                 };
                 storageCallback(assetBundleURL, response, true, null);
             }
