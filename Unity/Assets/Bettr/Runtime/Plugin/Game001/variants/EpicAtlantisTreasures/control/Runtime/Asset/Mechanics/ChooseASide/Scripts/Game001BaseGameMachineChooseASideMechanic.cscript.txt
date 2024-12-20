@@ -8,7 +8,8 @@ Game001BaseGameMachineChooseASideMechanic = {
         Experiment = "control",
     },
     State = {
-        MechanicsPrefab = nil
+        MechanicsPrefab = nil,
+        MechanicsTable = nil,
     }
 }
 
@@ -32,8 +33,9 @@ function Game001BaseGameMachineChooseASideMechanic:Initialize(machine)
             local mechanicsPrefab = BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, prefabName, mechanicsParent.GameObject)
             mechanicsPrefab.SetActive(false)
             self.State.MechanicsPrefab = mechanicsPrefab
-            BettrMechanicsController.LoadUserMechanicTables("chooseaside", self.Config.Machine, self.Config.Variant)
-            System.Print("Game001BaseGameMachineCascadingReelsMultiplierMechanic:Initialize mechanicsPrefab={0}", mechanicsPrefab.name)            
+            local userMechanicsTable = BettrMechanicsController.LoadUserMechanicsTable("chooseaside", self.Config.Machine, self.Config.Variant)
+            self.State.MechanicsTable = userMechanicsTable                                    
+            System.Print("Game001BaseGameMachineCascadingReelsMultiplierMechanic:Initialize mechanicsPrefab={0} self.State.MechanicsTable={1}", mechanicsPrefab.name, self.State.MechanicsTable)
         end
     end
 end

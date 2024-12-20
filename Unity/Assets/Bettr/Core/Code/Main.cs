@@ -34,7 +34,8 @@ namespace Bettr.Core
         // ReSharper disable once NotAccessedField.Local
         [NonSerialized] private BettrOutcomeController _bettrOutcomeController;
         [NonSerialized] private BettrDialogController _bettrDialogController;
-
+        [NonSerialized] private BettrMechanicsController _bettrMechanicsController;
+        
         private bool _oneTimeSetUpComplete;
 
         public void StartApp()
@@ -169,6 +170,8 @@ namespace Bettr.Core
             TileController.AddToGlobals("BettrVideoController", BettrVideoController.Instance);
             
             _bettrDialogController = new BettrDialogController();
+            
+            _bettrMechanicsController = new BettrMechanicsController();
 
             _bettrMainLobbySceneController = new BettrMainLobbySceneController(_bettrExperimentController)
             {
