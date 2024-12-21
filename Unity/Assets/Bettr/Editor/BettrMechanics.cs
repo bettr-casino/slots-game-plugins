@@ -128,9 +128,9 @@ namespace Bettr.Editor
                 { "machineVariant", machineVariant },
                 { "steps", steps},
                 { "leftStepStartInclusive", 1},
-                { "leftStepEndExclusive", (int)(steps / 2) + 1},
+                { "leftStepEndInclusive", (int)(steps / 2)},
                 { "rightStepStartInclusive", (int)(steps / 2) + 2},
-                { "rightStepEndExclusive", steps},
+                { "rightStepEndInclusive", steps},
                 { "middleStep", (int)(steps / 2) + 1},
             };
             

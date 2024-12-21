@@ -6,6 +6,7 @@ Game001BaseGameMachineChooseASideMechanic = {
         Machine = "Game001",
         Variant = "EpicAtlantisTreasures",
         Experiment = "control",
+        Mechanic = "ChooseASide",
     },
     State = {
         MechanicsPrefab = nil,
@@ -29,13 +30,12 @@ function Game001BaseGameMachineChooseASideMechanic:Initialize(machine)
             machineParent.SetActive(false)
             local mechanicsParent = machine.MechanicsParent
             mechanicsParent.SetActive(true)
-            System.Print("Game001BaseGameMachineChooseASideMechanic:Initialize before manifest.BundleName={0} manifest.BundleVersion={1} prefabName={2} mechanicsParentGameObject={3}", manifest.BundleName, manifest.BundleVersion, prefabName, mechanicsParent.GameObject.name)    
             local mechanicsPrefab = BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, prefabName, mechanicsParent.GameObject)
             mechanicsPrefab.SetActive(false)
             self.State.MechanicsPrefab = mechanicsPrefab
-            local userMechanicsTable = BettrMechanicsController.LoadUserMechanicsTable("chooseaside", self.Config.Machine, self.Config.Variant)
+            local userMechanicsTable = BettrMechanicsController.LoadUserMechanicsTable(self.Config.Mechanic, self.Config.Machine, self.Config.Variant)
             self.State.MechanicsTable = userMechanicsTable                                    
-            System.Print("Game001BaseGameMachineCascadingReelsMultiplierMechanic:Initialize mechanicsPrefab={0} self.State.MechanicsTable={1}", mechanicsPrefab.name, self.State.MechanicsTable)
+            System.Print("Game001BaseGameMachineChooseASideMechanic:Initialize mechanicsPrefab={0} self.State.MechanicsTable={1}", mechanicsPrefab.name, self.State.MechanicsTable)
         end
     end
 end
@@ -45,13 +45,16 @@ function Game001BaseGameMachineChooseASideMechanic:StartMachine(machine)
         do
             self.State.MechanicsPrefab.SetActive(true);            
             System.WaitForFrame(1)
-            local sliderIndex = self:_GetSliderIndex(machine)
-            local result = self:_ShowChoiceDialog(machine)
             if self.State.MechanicsTable ~= nil then
                 result = self.State.MechanicsTable.summary.choice
                 sliderOffset = self.State.MechanicsTable.summary.sliderOffset
-            end            
-            System.Print("Game001BaseGameMachineChooseASideMechanic:StartMachine result={0}", result)
+            end   
+            local sliderIndex = machine.ChooseASliderMechanicMiddleSliderIndex + sliderOffset
+            if result == "" then
+                result = self:_SetupChoiceMechanic(machine)
+                self.State.MechanicsTable.summary.choice = result
+            end
+            self:_ShowChoiceMechanic(machine)
             local sliderPointerGameObject = machine.ChooseASideMechanicSliderPointer.GameObject
             local sliderGroup = machine.ChooseASideMechanicSliderSlots
             local sliderSlot = sliderGroup["SliderSlot" .. sliderIndex]                       
@@ -72,22 +75,26 @@ function Game001BaseGameMachineChooseASideMechanic:_ActivateMechanic(machine, st
     BettrVisualsController.FireballMoveTo(nil, endTmPro.GameObject, 0, 1, false)
 end
 
-function Game001BaseGameMachineChooseASideMechanic:_ShowChoiceDialog(machine)
+function Game001BaseGameMachineChooseASideMechanic:_ShowChoiceMechanic(machine)
+    machine.ChooseASideMechanicDialogParent.SetActive(false)
+    machine.ChooseASideMechanicGoodImage.SetActive(true)
+    machine.ChooseASideMechanicGoodText.GameObject.SetActive(true)
+    machine.ChooseASideMechanicEvilImage.SetActive(true)
+    machine.ChooseASideMechanicEvilText.GameObject.SetActive(true)
+    machine.ChooseASideMechanicSliderBar.SetActive(true)
+    machine.ChooseASideMechanicSliderPointer.GameObject.SetActive(true)
+    machine.ChooseASideMechanicSliderParent.SetActive(true)
+end
+
+function Game001BaseGameMachineChooseASideMechanic:_SetupChoiceMechanic(machine)
     local result = ""
     series
         do
             if self.State.MechanicsTable ~= nil then
                 result = self.State.MechanicsTable.summary.choice
             end
-            System.Print("Game001BaseGameMachineChooseASideMechanic:_ShowChoiceDialog result={0}", result)
+            System.Print("Game001BaseGameMachineChooseASideMechanic:_SetupChoiceMechanic result={0}", result)
             if result ~= "" then
-                machine.ChooseASideMechanicGoodImage.SetActive(true)
-                machine.ChooseASideMechanicGoodText.GameObject.SetActive(true)
-                machine.ChooseASideMechanicEvilImage.SetActive(true)
-                machine.ChooseASideMechanicEvilText.GameObject.SetActive(true)
-                machine.ChooseASideMechanicSliderBar.SetActive(true)
-                machine.ChooseASideMechanicSliderPointer.GameObject.SetActive(true)
-                machine.ChooseASideMechanicSliderParent.SetActive(true)
                 return result
             end
             machine.ChooseASideMechanicDialogParent.SetActive(true)
