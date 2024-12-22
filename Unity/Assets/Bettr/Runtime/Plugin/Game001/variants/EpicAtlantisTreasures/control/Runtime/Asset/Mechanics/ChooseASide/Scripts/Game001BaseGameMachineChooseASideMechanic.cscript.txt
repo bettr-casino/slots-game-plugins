@@ -234,6 +234,11 @@ function Game001BaseGameMachineChooseASideMechanic:OnBaseGameSpinCompleted(machi
                 end
             end
             payoutText.GameObject.SetActive(true)
+            local currentPayout = self.State.MechanicsTable.summary.goodPayout
+            if side == "Evil" then
+                currentPayout = self.MechanicsTable.summary.evilPayout
+            end
+            local newPayout = currentPayout + numSymbols
             BettrVisualsController.RollUpCounter(payoutText, 0, 100, 1, 1)
             machine:OnBaseGameSpinCompleted()
         end
