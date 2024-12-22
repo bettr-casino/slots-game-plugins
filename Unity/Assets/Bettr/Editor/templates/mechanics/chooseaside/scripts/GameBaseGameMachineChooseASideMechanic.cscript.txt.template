@@ -69,10 +69,32 @@ end
 function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:TryPaying(machine)
 end
 
-function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_ActivateMechanic(machine, startTmPro, endTmPro)
-    BettrVisualsController.FireballMoveTo(nil, startTmPro.GameObject, 0, 1, false)
-    BettrVisualsController.FireballMoveTo(startTmPro.GameObject, endTmPro.GameObject, 0, 1, true)
-    BettrVisualsController.FireballMoveTo(nil, endTmPro.GameObject, 0, 1, false)
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_ActivateMechanic(machine, dialogImage, dialogText, image, text)
+    series
+        do
+            parallel
+                do
+                    dialogText.GameObject.SetActive(false)
+                    BettrVisualsController.FireballMoveTo(nil, dialogText.GameObject, 0, 1, false)
+                end
+                do
+                    BettrVisualsController.TweenScaleGameObject(dialogImage.GameObject, 2.88, 2.4, 1)
+                end
+            end
+            parallel
+                do
+                    BettrVisualsController.FireballMoveTo(dialogText.GameObject, text.GameObject, 0, 1, true)
+                end
+                do
+                    BettrVisualsController.TweenGameObject(dialogImage.GameObject, dialogImage.GameObject, image.GameObject, 1, true)
+                end
+            end
+            BettrVisualsController.FireballMoveTo(nil, text.GameObject, 0, 1, false)
+            dialogImage.SetActive(false)
+            image.SetActive(true)
+            text.GameObject.SetActive(true)        
+        end
+    end
 end
 
 function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_ShowChoiceMechanic(machine)
@@ -102,27 +124,11 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_SetupChoiceMech
             result = BettrDialogController.ShowModalDialog(self.State.MechanicsPrefab)
             local machineParent = machine.MachineParent
             if result == "Evil" then
-                self:_ActivateMechanic(machine, machine.{{mechanicName}}MechanicDialogEvilText, machine.{{mechanicName}}MechanicEvilText)
-                machine.{{mechanicName}}MechanicDialogEvilImage.SetActive(false)
-                machine.{{mechanicName}}MechanicDialogEvilText.GameObject.SetActive(false)
-                machine.{{mechanicName}}MechanicEvilImage.SetActive(true)
-                machine.{{mechanicName}}MechanicEvilText.GameObject.SetActive(true)
-                self:_ActivateMechanic(machine, machine.{{mechanicName}}MechanicDialogGoodText, machine.{{mechanicName}}MechanicGoodText)
-                machine.{{mechanicName}}MechanicDialogGoodImage.SetActive(false)
-                machine.{{mechanicName}}MechanicDialogGoodText.GameObject.SetActive(false)
-                machine.{{mechanicName}}MechanicGoodImage.SetActive(true)
-                machine.{{mechanicName}}MechanicGoodText.GameObject.SetActive(true)
+                self:_ActivateMechanic(machine, machine.{{mechanicName}}MechanicDialogEvilImage, machine.{{mechanicName}}MechanicDialogEvilText, machine.{{mechanicName}}MechanicEvilImage, machine.{{mechanicName}}MechanicEvilText)
+                self:_ActivateMechanic(machine, machine.{{mechanicName}}MechanicDialogGoodImage, machine.{{mechanicName}}MechanicDialogGoodText, machine.{{mechanicName}}MechanicGoodImage, machine.{{mechanicName}}MechanicGoodText)
             else
-                self:_ActivateMechanic(machine, machine.{{mechanicName}}MechanicDialogGoodText, machine.{{mechanicName}}MechanicGoodText)            
-                machine.{{mechanicName}}MechanicDialogGoodImage.SetActive(false)
-                machine.{{mechanicName}}MechanicDialogGoodText.GameObject.SetActive(false)
-                machine.{{mechanicName}}MechanicGoodImage.SetActive(true)
-                machine.{{mechanicName}}MechanicGoodText.GameObject.SetActive(true)
-                self:_ActivateMechanic(machine, machine.{{mechanicName}}MechanicDialogEvilText, machine.{{mechanicName}}MechanicEvilText)
-                machine.{{mechanicName}}MechanicDialogEvilImage.SetActive(false)
-                machine.{{mechanicName}}MechanicDialogEvilText.GameObject.SetActive(false)
-                machine.{{mechanicName}}MechanicEvilImage.SetActive(true)
-                machine.{{mechanicName}}MechanicEvilText.GameObject.SetActive(true)
+                self:_ActivateMechanic(machine, machine.{{mechanicName}}MechanicDialogGoodImage, machine.{{mechanicName}}MechanicDialogGoodText, machine.{{mechanicName}}MechanicGoodImage, machine.{{mechanicName}}MechanicGoodText)            
+                self:_ActivateMechanic(machine, machine.{{mechanicName}}MechanicDialogEvilImage, machine.{{mechanicName}}MechanicDialogEvilText, machine.{{mechanicName}}MechanicEvilImage, machine.{{mechanicName}}MechanicEvilText)
             end
             machine.{{mechanicName}}MechanicDialogParent.SetActive(false)
             BettrVisualsController.FireballMoveTo(nil, machine.{{mechanicName}}MechanicSliderPointer.GameObject, 0, 1, false)

@@ -568,6 +568,26 @@ namespace Bettr.Core
             }
         }
         
+        public IEnumerator TweenScaleGameObject(GameObject objectToScale, float scaleX, float scaleY, float duration = 1.0f)
+        {
+            var propertyTween = new PropertyTween
+            {
+                useScale = true,
+                scaleTo = new Vector3(scaleX, scaleY),
+                tweenDuration = duration,
+                tweenDelay = 0,
+                easeType = iTween.EaseType.linear
+            };
+            
+            TweenScaleTo(objectToScale, propertyTween);
+
+            if (duration > 0)
+            {
+                yield return new WaitForSeconds(duration);
+            }
+        }
+
+
         public void TweenScaleTo(GameObject objectToScale, PropertyTween propertyTween)
         {
             if (propertyTween == null)
