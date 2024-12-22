@@ -211,18 +211,24 @@ function Game001BaseGameMachineChooseASideMechanic:OnBaseGameSpinCompleted(machi
             parallel
                 do
                     BettrVisualsController.FireballMoveTo(nil, sliderPointerGameObject, 0, 1, false)
+                end
+                do
+                    BettrVisualsController.FireballMoveTo(nil, machine.BetText.GameObject, 0, 1, false)
+                end
+            end
+            parallel
+                do
                     BettrVisualsController.FireballMoveTo(sliderPointerGameObject, payoutText.GameObject, 0, 1, true)
                 end
                 do
                     BettrVisualsController.CloneAndTweenGameObject(machine.BetText.GameObject, payoutText.GameObject, 1, true)
                 end
                 do
-                    BettrVisualsController.FireballMoveTo(nil, machine.BetText.GameObject, 0, 1, false)
                     BettrVisualsController.FireballMoveTo(machine.BetText.GameObject, payoutText.GameObject, 0, 1, true)
                 end
             end
             payoutText.GameObject.SetActive(true)
-            payoutText.SetText("100")
+            BettrVisualsController.RollUpCounter(payoutText, 0, 100, 1, 1)
             machine:OnBaseGameSpinCompleted()
         end
     end
