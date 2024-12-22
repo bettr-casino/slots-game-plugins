@@ -56,11 +56,10 @@ namespace Bettr.Core
             throw new ScriptRuntimeException($"Camera not found for layer {layerName}");
         }
     }
-    
-    public class BettrVisualsController
-    {
-        private static readonly int Color1 = Shader.PropertyToID("_Color");
 
+    [Serializable]
+    internal class FireballObject
+    {
         private GameObject _fireball;
         private ParticleSystem _particleSystem;
         
@@ -99,6 +98,72 @@ namespace Bettr.Core
 
                 _fireball.SetActive(false);
             }
+        }
+        
+        public ParticleSystem ParticleSystem => _particleSystem;
+
+        public FireballObject(GameObject seed)
+        {
+            // clone seed
+            Fireball = Object.Instantiate(seed);
+        }
+    }
+
+    [Serializable]
+    internal class FireballObjectsCache
+    {
+        private ParticleSystem _particleSystem;
+        
+        // list of fireballs created
+        private readonly List<FireballObject> _freeList;
+
+        private readonly GameObject _seed;
+        
+        public FireballObjectsCache(GameObject seed)
+        {
+            _seed = seed;
+            _freeList = new List<FireballObject>();
+        }
+
+        public FireballObject Acquire()
+        {
+            if (_freeList.Count == 0)
+            {
+                return new FireballObject(this._seed);
+            }
+            var fireball = _freeList[0];
+            _freeList.RemoveAt(0);
+            return fireball;
+        }
+
+        public void Release(FireballObject fireball)
+        {
+            _freeList.Add(fireball);
+        }
+
+        public void Reset()
+        {
+            // release all fireballs back into the _freeList
+            foreach (var fireball in _freeList)
+            {
+                Object.Destroy(fireball.Fireball);
+                fireball.Fireball = null;
+            }
+            _freeList.Clear();
+        }
+    }
+    
+    public class BettrVisualsController
+    {
+        private static readonly int Color1 = Shader.PropertyToID("_Color");
+
+        private LayerToCameraMap _layerToCameraMap = new LayerToCameraMap();
+
+        private FireballObjectsCache _fireballObjectsCache;
+
+        public void InitFireballs(GameObject fireball)
+        {
+            _fireballObjectsCache = new FireballObjectsCache(fireball);
         }
 
         public BettrUserController BettrUserController { get; private set; }
@@ -271,35 +336,41 @@ namespace Bettr.Core
             {
                 throw new ScriptRuntimeException("No camera found for SLOT_TRANSITION");
             }
+            
+            // acquire a fireball object
+            var fireballObject = _fireballObjectsCache.Acquire();
+            
+            var fireball = fireballObject.Fireball;
+            var particleSystem = fireballObject.ParticleSystem;
 
-            _particleSystem.Stop();
-            Fireball.SetActive(false);
+            particleSystem.Stop();
+            fireball.SetActive(false);
 
             // Make sure any existing tweens are stopped
-            iTween.Stop(Fireball);
+            iTween.Stop(fireball);
 
             // Calculate positions
-            Vector3 startWorldPosition = CalculatePosition(from, fireballCamera) ?? Fireball.transform.position;
-            Vector3 targetWorldPosition = CalculatePosition(to, fireballCamera, offsetY) ?? Fireball.transform.position;
+            Vector3 startWorldPosition = CalculatePosition(from, fireballCamera) ?? fireball.transform.position;
+            Vector3 targetWorldPosition = CalculatePosition(to, fireballCamera, offsetY) ?? fireball.transform.position;
 
             // Debug log positions
             Debug.Log($"Start Position: {startWorldPosition}");
             Debug.Log($"Target Position: {targetWorldPosition}");
 
             // Set initial position and activate
-            Fireball.transform.position = startWorldPosition;
-            Fireball.SetActive(true);
-            _particleSystem.Play();
+            fireball.transform.position = startWorldPosition;
+            fireball.SetActive(true);
+            particleSystem.Play();
 
             if (tween)
             {
                 _tweenComplete = false;
-                iTween.MoveTo(Fireball, iTween.Hash(
+                iTween.MoveTo(fireball, iTween.Hash(
                     "position", targetWorldPosition,
                     "time", duration,
                     "easetype", iTween.EaseType.linear,
                     "oncomplete", "OnFireballTweenComplete",
-                    "oncompletetarget", Fireball
+                    "oncompletetarget", fireball
                 ));
 
                 var elapsedTime = 0f;
@@ -311,12 +382,15 @@ namespace Bettr.Core
             }
             else
             {
-                Fireball.transform.position = targetWorldPosition;
+                fireball.transform.position = targetWorldPosition;
                 yield return new WaitForSeconds(duration);
             }
 
-            _particleSystem.Stop();
-            Fireball.SetActive(false);
+            particleSystem.Stop();
+            fireball.SetActive(false);
+            
+            // release the fireball object
+            _fireballObjectsCache.Release(fireballObject);
         }
 
         private void OnFireballTweenComplete()
