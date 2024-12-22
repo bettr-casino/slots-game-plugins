@@ -83,3 +83,15 @@ function {{machineName}}BaseGameMachineMechanics:RollupCredits(machine)
        self.PaylinesMechanic:RollupCredits(machine)
     end
 end
+
+function {{machineName}}BaseGameMachineMechanics:OnBaseGameSpinCompleted(machine)
+    series
+        do
+            if self.ChooseASideMechanic ~= nil then
+                self.ChooseASideMechanic:OnBaseGameSpinCompleted(machine)            
+            else
+                machine:OnBaseGameSpinCompleted()
+            end
+        end
+    end
+end

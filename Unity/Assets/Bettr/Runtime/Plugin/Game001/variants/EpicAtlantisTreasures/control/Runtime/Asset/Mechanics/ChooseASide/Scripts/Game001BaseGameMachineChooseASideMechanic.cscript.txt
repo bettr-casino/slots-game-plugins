@@ -175,4 +175,38 @@ function Game001BaseGameMachineChooseASideMechanic:_GetSliderIndex(machine)
     return sliderIndex    
 end
 
+function Game001BaseGameMachineChooseASideMechanic:OnBaseGameSpinCompleted(machine)
+    series
+        do
+            local summary = Game001BaseGameChooseASideSummary.ChooseASide.First
+            local numSymbols = summary.NumSymbols
+            if numSymbols == 0 then
+                machine:OnBaseGameSpinCompleted()
+                return
+            end
+            local increment = Game001BaseGameChooseASide.ChooseASide.First.Increment
+            local sliderOffset = self.State.MechanicsTable.summary.sliderOffset
+            local newSliderOffset = sliderOffset + increment
+            System.Print("Game001BaseGameMachineChooseASideMechanic:OnBaseGameSpinCompleted sliderOffset={0} increment={1} newSliderOffset={2}", sliderOffset, increment, newSliderOffset)
+            self.State.MechanicsTable.summary.sliderOffset = newSliderOffset
+            local middleSliderIndex = machine.ChooseASliderMechanicMiddleSliderIndex
+            local sliderIndex = self:_GetSliderIndex(machine)
+            local side = summary.Side
+            local userChoice = self.State.MechanicsTable.summary.choice
+            local sliderPointerGameObject = machine.ChooseASideMechanicSliderPointer.GameObject
+            BettrVisualsController.FireballMoveTo(nil, sliderPointerGameObject, 0, 1, false)
+            local sliderGroup = machine.ChooseASideMechanicSliderSlots
+            local sliderSlot = sliderGroup["SliderSlot" .. sliderIndex]                       
+            BettrVisualsController.TweenGameObject(sliderPointerGameObject, nil, sliderSlot.GameObject, 1, true)        
+            BettrVisualsController.FireballMoveTo(nil, sliderPointerGameObject, 0, 1, false)
+            local materialName = "BaseGameChooseASideMechanicSliderSlotGood"
+            if sliderIndex < middleSliderIndex then
+                materialName = "BaseGameChooseASideMechanicSliderSlotEvil"
+            end
+            local manifest = Game001.Manifest
+            BettrAssetController.LoadMaterial(manifest.BundleName, manifest.BundleVersion, materialName, sliderPointerGameObject)
+            machine:OnBaseGameSpinCompleted()
+        end
+    end
+end
 

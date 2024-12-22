@@ -81,15 +81,11 @@ end
 function Game007BaseGameMachineMechanics:OnBaseGameSpinCompleted(machine)
     series
         do
-            -- this is hardcoded
-            -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
-            if self.CascadingReelsMechanic ~= nil then
-               self.CascadingReelsMechanic:OnBaseGameSpinCompleted(machine)
-            elseif self.WaysMechanic ~= nil then
-               self.WaysMechanic:OnBaseGameSpinCompleted(machine)
-            elseif self.PaylinesMechanic ~= nil then
-               self.PaylinesMechanic:OnBaseGameSpinCompleted(machine)
-            end 
+            if self.ChooseASideMechanic ~= nil then
+                self.ChooseASideMechanic:OnBaseGameSpinCompleted(machine)            
+            else
+                machine:OnBaseGameSpinCompleted()
+            end
         end
     end
 end

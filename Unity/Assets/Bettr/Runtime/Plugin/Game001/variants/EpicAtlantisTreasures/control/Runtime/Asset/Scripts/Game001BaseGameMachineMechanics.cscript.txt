@@ -82,3 +82,14 @@ function Game001BaseGameMachineMechanics:RollupCredits(machine)
     end
 end
 
+function Game001BaseGameMachineMechanics:OnBaseGameSpinCompleted(machine)
+    series
+        do
+            if self.ChooseASideMechanic ~= nil then
+                self.ChooseASideMechanic:OnBaseGameSpinCompleted(machine)            
+            else
+                machine:OnBaseGameSpinCompleted()
+            end
+        end
+    end
+end

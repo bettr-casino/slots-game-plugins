@@ -241,7 +241,7 @@ function Game007BaseGameMachine:SpinReelsStopped()
                     self.Mechanics.CascadingReelsMechanic:StartCascade(self)
                 end
             end
-            self:OnBaseGameSpinCompleted(self)
+            self.Mechanics:OnBaseGameSpinCompleted(self)
         end
     end
 end
@@ -303,7 +303,7 @@ function Game007BaseGameMachine:OnRollupCredits(oldCoins, newCoins, pays, rollup
     end
 end
 
-function Game007BaseGameMachine:OnBaseGameSpinCompleted(machine)
+function Game007BaseGameMachine:OnBaseGameSpinCompleted()
     series
         do
             Game007BaseGameState.SpinState.First.State = "Waiting"
