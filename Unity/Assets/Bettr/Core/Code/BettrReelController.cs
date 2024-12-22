@@ -27,11 +27,13 @@ namespace Bettr.Core
         [NonSerialized] private bool ShouldSpliceReel;
         
         [NonSerialized] private BettrUserController BettrUserController;
+        [NonSerialized] private BettrMathController BettrMathController;
 
         private void Awake()
         {
             ReelTile = GetComponent<TileWithUpdate>();
             BettrUserController = BettrUserController.Instance;
+            BettrMathController = BettrMathController.Instance;
         }
         
         private IEnumerator Start()
@@ -42,47 +44,17 @@ namespace Bettr.Core
             this.MachineID = ReelTile.GetProperty<string>("MachineID");
             this.MachineVariantID = ReelTile.GetProperty<string>("MachineVariantID");
 
-            this.ReelTable = GetGlobalTable(ReelTile.globalTileId);
-            this.ReelStateTable = GetTableFirst("BaseGameReelState", this.MachineID, this.ReelID);
-            this.ReelSpinStateTable = GetTableFirst("BaseGameReelSpinState", this.MachineID, this.ReelID);
-            this.SpinOutcomeTable = GetTableFirst("BaseGameReelSpinOutcome", this.MachineID, this.ReelID);
-            this.ReelSymbolsStateTable = GetTableArray("BaseGameReelSymbolsState", this.MachineID, this.ReelID);
-            this.ReelSymbolsTable = GetTableArray("BaseGameReelSet", this.MachineID, this.ReelID);
+            this.ReelTable = BettrMathController.GetGlobalTable(ReelTile.globalTileId);
+            this.ReelStateTable = BettrMathController.GetTableFirst("BaseGameReelState", this.MachineID, this.ReelID);
+            this.ReelSpinStateTable = BettrMathController.GetTableFirst("BaseGameReelSpinState", this.MachineID, this.ReelID);
+            this.SpinOutcomeTable = BettrMathController.GetTableFirst("BaseGameReelSpinOutcome", this.MachineID, this.ReelID);
+            this.ReelSymbolsStateTable = BettrMathController.GetTableArray("BaseGameReelSymbolsState", this.MachineID, this.ReelID);
+            this.ReelSymbolsTable = BettrMathController.GetTableArray("BaseGameReelSet", this.MachineID, this.ReelID);
             
             // add this to the ReelTile properties
             this.ReelTable["BettrReelController"] = this;
             
             yield break;
-        }
-        
-        private Table GetGlobalTable(string tableName)
-        {
-            var globalTable = (Table) TileController.LuaScript.Globals[tableName];
-            return globalTable;
-        }
-
-        private Table GetTableFirst(string tableName, string machineID, string reelID)
-        {
-            var machineTable = (Table) TileController.LuaScript.Globals[$"{machineID}{tableName}"];
-            var reelTable = (Table) machineTable[reelID];
-            var reelStateTable = (Table) reelTable["First"];
-            return reelStateTable;
-        }
-
-        private Table GetTableArray(string tableName, string machineID, string reelID)
-        {
-            var machineTable = (Table) TileController.LuaScript.Globals[$"{machineID}{tableName}"];
-            var reelTable = (Table) machineTable[reelID];
-            var reelStateTable = (Table) reelTable["Array"];
-            return reelStateTable;
-        }
-        
-        private int GetTableCount(string tableName, string machineID, string reelID)
-        {
-            var machineTable = (Table) TileController.LuaScript.Globals[$"{machineID}{tableName}"];
-            var reelTable = (Table) machineTable[reelID];
-            var reelTableCount = (int) (double) reelTable["Count"];
-            return reelTableCount;
         }
         
         public IEnumerator StartEngines()
@@ -112,7 +84,7 @@ namespace Bettr.Core
 
         public IEnumerator OnOutcomeReceived()
         {
-            this.SpinOutcomeTable = GetTableFirst("BaseGameReelSpinOutcome", this.MachineID, this.ReelID);
+            this.SpinOutcomeTable = BettrMathController.GetTableFirst("BaseGameReelSpinOutcome", this.MachineID, this.ReelID);
             float delayInSeconds = (float) (double) this.ReelStateTable["ReelStopDelayInSeconds"];
             if (!BettrUserController.UserInSlamStopMode)
             {

@@ -35,6 +35,7 @@ namespace Bettr.Core
         [NonSerialized] private BettrOutcomeController _bettrOutcomeController;
         [NonSerialized] private BettrDialogController _bettrDialogController;
         [NonSerialized] private BettrMechanicsController _bettrMechanicsController;
+        [NonSerialized] private BettrMathController _bettrMathController;
         
         private bool _oneTimeSetUpComplete;
 
@@ -168,6 +169,8 @@ namespace Bettr.Core
             BettrVideoController.VideoServerBaseURL = _configData.VideoServerBaseURL;
             TileController.RegisterType<BettrVideoController>("BettrVideoController");
             TileController.AddToGlobals("BettrVideoController", BettrVideoController.Instance);
+            
+            _bettrMathController = new BettrMathController();
             
             _bettrDialogController = new BettrDialogController();
             
