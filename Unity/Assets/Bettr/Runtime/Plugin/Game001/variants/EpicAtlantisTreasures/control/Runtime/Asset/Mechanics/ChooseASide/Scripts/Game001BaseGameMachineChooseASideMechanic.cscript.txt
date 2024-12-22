@@ -198,7 +198,6 @@ function Game001BaseGameMachineChooseASideMechanic:OnBaseGameSpinCompleted(machi
             local sliderGroup = machine.ChooseASideMechanicSliderSlots
             local sliderSlot = sliderGroup["SliderSlot" .. sliderIndex]                       
             BettrVisualsController.TweenGameObject(sliderPointerGameObject, nil, sliderSlot.GameObject, 1, true)        
-            BettrVisualsController.FireballMoveTo(nil, sliderPointerGameObject, 0, 1, false)
             local materialName = "BaseGameChooseASideMechanicSliderSlotGood"
             if sliderIndex < middleSliderIndex then
                 materialName = "BaseGameChooseASideMechanicSliderSlotEvil"
@@ -209,8 +208,19 @@ function Game001BaseGameMachineChooseASideMechanic:OnBaseGameSpinCompleted(machi
             end
             local manifest = Game001.Manifest
             BettrAssetController.LoadMaterial(manifest.BundleName, manifest.BundleVersion, materialName, sliderPointerGameObject)
-            BettrVisualsController.FireballMoveTo(nil, machine.BetText.GameObject, 0, 1, false)
-            BettrVisualsController.CloneAndTweenGameObject(machine.BetText.GameObject, payoutText.GameObject, 1, true)
+            parallel
+                do
+                    BettrVisualsController.FireballMoveTo(nil, sliderPointerGameObject, 0, 1, false)
+                    BettrVisualsController.FireballMoveTo(sliderPointerGameObject, payoutText.GameObject, 0, 1, true)
+                end
+                do
+                    BettrVisualsController.CloneAndTweenGameObject(machine.BetText.GameObject, payoutText.GameObject, 1, true)
+                end
+                do
+                    BettrVisualsController.FireballMoveTo(nil, machine.BetText.GameObject, 0, 1, false)
+                    BettrVisualsController.FireballMoveTo(machine.BetText.GameObject, payoutText.GameObject, 0, 1, true)
+                end
+            end
             payoutText.GameObject.SetActive(true)
             payoutText.SetText("100")
             machine:OnBaseGameSpinCompleted()
