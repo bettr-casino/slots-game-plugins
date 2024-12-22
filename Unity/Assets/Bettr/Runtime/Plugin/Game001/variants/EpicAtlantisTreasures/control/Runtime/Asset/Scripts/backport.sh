@@ -32,6 +32,7 @@ function process_mechanics_dir() {
           sed -e "s/${game}/{{machineName}}/g" \
               -e "s/${machine_variant}/{{machineVariant}}/g" \
               -e "s/${experiment_variant}/{{experimentVariant}}/g" \
+              -e "s/${mechanic}/{{mechanicName}}/g" \
               "$file" > "$target_path"
   
           echo "Processed $filename for GameBaseGameMachine pattern."
@@ -52,10 +53,11 @@ function process_mechanics_dir() {
   
           # Copy the file with replacement
           # Copy the file with multiple replacements
-                    sed -e "s/${game}/{{machineName}}/g" \
-                        -e "s/${machine_variant}/{{machineVariant}}/g" \
-                        -e "s/${experiment_variant}/{{experimentVariant}}/g" \
-                        "$file" > "$target_path"
+          sed -e "s/${game}/{{machineName}}/g" \
+              -e "s/${machine_variant}/{{machineVariant}}/g" \
+              -e "s/${experiment_variant}/{{experimentVariant}}/g" \
+              -e "s/${mechanic}/{{mechanicName}}/g" \
+              "$file" > "$target_path"
   
           echo "Processed $filename for GameBaseGameReel pattern."
       fi

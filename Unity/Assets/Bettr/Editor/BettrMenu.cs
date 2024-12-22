@@ -4802,7 +4802,7 @@ namespace Bettr.Editor
             }
         }
 
-        private static void CopyScripts(string scriptsPath, string[] filePaths, string machineName, string machineVariant, string experimentVariant, string runtimeAssetPath, bool clobber = false)
+        private static void CopyScripts(string scriptsPath, string[] filePaths, string machineName, string machineVariant, string experimentVariant, string runtimeAssetPath, string mechanicName = null, bool clobber = false)
         {
             var mechanicsTable = GetTable($"{machineName}Mechanics");
             var baseGameMechanics = GetTableArray<string>(mechanicsTable, "BaseGame", "Mechanic");
@@ -4830,6 +4830,7 @@ namespace Bettr.Editor
                     },
                     { "reelCount", reelCount },
                     { "baseGameMechanics", baseGameMechanics},
+                    { "mechanicName", mechanicName },
                 };
                 var scriptText = scribanTemplate.Render(model);
                 var scriptName = Path.GetFileNameWithoutExtension(filePath); // remove the .template
@@ -4854,7 +4855,7 @@ namespace Bettr.Editor
             string dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "templates", "scripts");
             string[] filePaths = Directory.GetFiles(dirPath, "*.cscript.txt.template");
             string scriptsPath = $"scripts";
-            CopyScripts(scriptsPath, filePaths, machineName, machineVariant, experimentVariant, runtimeAssetPath, true);
+            CopyScripts(scriptsPath, filePaths, machineName, machineVariant, experimentVariant, runtimeAssetPath, null, true);
             
             // Process Mechanics scripts
             var mechanicsTable = GetTable($"{machineName}Mechanics");
@@ -4877,7 +4878,7 @@ namespace Bettr.Editor
                     dirPath = Path.Combine(Application.dataPath, "Bettr", "Editor", "templates", "mechanics", mechanic.ToLower(), "scripts");
                     filePaths = Directory.GetFiles(dirPath, "*.cscript.txt.template");
                     scriptsPath = $"mechanics/{mechanic}/scripts";
-                    CopyScripts(scriptsPath, filePaths, machineName, machineVariant, experimentVariant, mechanicRuntimeAssetPath, true);
+                    CopyScripts(scriptsPath, filePaths, machineName, machineVariant, experimentVariant, mechanicRuntimeAssetPath, mechanic, true);
                 }
             }
 
