@@ -213,6 +213,57 @@ namespace Bettr.Core
             }
         }
         
+        public IEnumerator CloneAndTweenGameObject(
+            CrayonScriptContext context, GameObject tweenFromThisGameObject, GameObject tweenToThisGameObject, float duration = 1.0f, bool tween = false)
+        {
+            bool destroyAfter = true;
+            // clone this tweenThisGameObject
+            var tweenThisGameObject = Object.Instantiate(tweenFromThisGameObject, tweenFromThisGameObject.transform.parent);
+            // ensure this is an overlay over the original object
+            OverlayFirstOverSecond(tweenThisGameObject, tweenFromThisGameObject);
+            
+            string layerName = LayerMask.LayerToName(tweenThisGameObject.layer);
+            Camera tweenCamera = _layerToCameraMap.GetCameraForLayer(layerName);
+            if (tweenCamera == null)
+            {
+                throw new ScriptRuntimeException($"No camera found for layer '{layerName}'");
+            }
+            iTween.Stop(tweenThisGameObject);
+            Vector3 startWorldPosition = CalculatePosition(tweenFromThisGameObject, tweenCamera) ?? tweenFromThisGameObject.transform.position;
+            Vector3 targetWorldPosition = CalculatePosition(tweenToThisGameObject, tweenCamera) ?? tweenToThisGameObject.transform.position;
+            tweenThisGameObject.transform.position = startWorldPosition;
+            if (tween)
+            {
+                _tweenComplete = false;
+                iTween.MoveTo(tweenThisGameObject, iTween.Hash(
+                    "position", targetWorldPosition,
+                    "time", duration,
+                    "easetype", iTween.EaseType.linear,
+                    "oncomplete", "OnTweenComplete",
+                    "oncompletetarget", tweenThisGameObject
+                ));
+                var elapsedTime = 0f;
+                while (!_tweenComplete && elapsedTime < duration + 0.1f)
+                {
+                    elapsedTime += Time.deltaTime;
+                    yield return null;
+                }
+                if (destroyAfter)
+                {
+                    Object.Destroy(tweenThisGameObject);
+                }
+            }
+            else
+            {
+                tweenThisGameObject.transform.position = targetWorldPosition;
+                yield return new WaitForSeconds(duration);
+                if (destroyAfter)
+                {
+                    Object.Destroy(tweenThisGameObject);
+                }
+            }
+        }
+        
         public IEnumerator FireballMoveTo(CrayonScriptContext context, GameObject from, GameObject to, float offsetY = 10, float duration = 1.0f, bool tween = false)
         {
             Camera fireballCamera = _layerToCameraMap.GetCameraForLayer("SLOT_TRANSITION");

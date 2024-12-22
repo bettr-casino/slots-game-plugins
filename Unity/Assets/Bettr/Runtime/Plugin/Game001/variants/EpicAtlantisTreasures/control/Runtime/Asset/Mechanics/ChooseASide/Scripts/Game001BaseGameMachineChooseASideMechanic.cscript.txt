@@ -203,8 +203,16 @@ function Game001BaseGameMachineChooseASideMechanic:OnBaseGameSpinCompleted(machi
             if sliderIndex < middleSliderIndex then
                 materialName = "BaseGameChooseASideMechanicSliderSlotEvil"
             end
+            local payoutText = machine.ChooseASideMechanicGoodPayout
+            if side == "Evil" then
+                payoutText = machine.ChooseASideMechanicEvilPayout
+            end
             local manifest = Game001.Manifest
             BettrAssetController.LoadMaterial(manifest.BundleName, manifest.BundleVersion, materialName, sliderPointerGameObject)
+            BettrVisualsController.FireballMoveTo(nil, machine.BetText.GameObject, 0, 1, false)
+            BettrVisualsController.CloneAndTweenGameObject(machine.BetText.GameObject, payoutText.GameObject, 1, true)
+            payoutText.GameObject.SetActive(true)
+            payoutText.SetText("100")
             machine:OnBaseGameSpinCompleted()
         end
     end
