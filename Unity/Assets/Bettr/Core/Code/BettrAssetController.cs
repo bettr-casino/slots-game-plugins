@@ -537,21 +537,45 @@ namespace Bettr.Core
             GameObject targetGameObject)
         {
             var assetBundle = _bettrAssetController.GetLoadedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);
+
+            Material material = null;
             
-            var material = assetBundle.LoadAsset<Material>(materialName);
+#if UNITY_EDITOR            
+            
+            // find the prefabName from the assetBundle
+            string materialPath = assetBundle.GetAllAssetNames()
+                .FirstOrDefault(s => s.EndsWith($"{materialName}.mat", System.StringComparison.OrdinalIgnoreCase));
+            if (materialPath != null)
+            {
+                material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+            }
+#endif
+            if (material == null)
+            {
+                material = assetBundle.LoadAsset<Material>(materialName);
+            }
             if (material == null)
             {
                 Debug.LogError(
                     $"Failed to load material={materialName} from asset bundle={bettrAssetBundleName} version={bettrAssetBundleVersion}");
                 yield break;
             }
-
+            
             if (targetGameObject != null)
             {
                 var meshRenderer = targetGameObject.GetComponent<MeshRenderer>();
                 if (meshRenderer != null)
                 {
                     meshRenderer.material = material;
+                    
+                    foreach (Material mat in meshRenderer.sharedMaterials)
+                    {
+                        if (mat == null) continue;
+                        if (ShaderCaches.ShaderCache.TryGetValue(mat.shader.name, out Shader bettrShader))
+                        {
+                            mat.shader = bettrShader;
+                        }
+                    }
                 }
                 else
                 {
