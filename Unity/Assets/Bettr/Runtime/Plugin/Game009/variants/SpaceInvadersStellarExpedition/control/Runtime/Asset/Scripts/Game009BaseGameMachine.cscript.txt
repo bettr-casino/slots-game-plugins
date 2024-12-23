@@ -61,7 +61,7 @@ function Game009BaseGameMachine:OnSpinButtonClicked()
         do
             local isSlamStopped = BettrUserController.UserInSlamStopMode
             if isSlamStopped then
-                BettrUserController.UserInSlamStopMode = false
+                BettrUserController.DisableUserInSlamStopMode()
                 System.Print("Game009BaseGameMachine:OnSpinButtonClicked ignoring click since IsSlamStopped is true")
                 return
             end
