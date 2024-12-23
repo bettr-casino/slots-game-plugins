@@ -204,8 +204,10 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             local sliderGroup = machine.{{mechanicName}}MechanicSliderSlots
             local sliderSlot = sliderGroup["SliderSlot" .. sliderIndex]                       
             BettrVisualsController.TweenGameObject(sliderPointerGameObject, nil, sliderSlot.GameObject, 1, true)        
-            local materialName = "BaseGame{{mechanicName}}MechanicSliderSlotGood"
-            if sliderIndex < middleSliderIndex then
+            local materialName = "BaseGame{{mechanicName}}MechanicSliderSlot"
+            if sliderIndex > middleSliderIndex then
+                materialName = "BaseGame{{mechanicName}}MechanicSliderSlotGood"
+            elseif sliderIndex < middleSliderIndex then
                 materialName = "BaseGame{{mechanicName}}MechanicSliderSlotEvil"
             end
             local payoutText = machine.{{mechanicName}}MechanicGoodPayout
@@ -224,12 +226,14 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             local increment = mechanicTable[1].Increment
             local totalContribution = contribution * increment
             if side == "EVIL" then
+                increment = -increment
                 totalContribution = -totalContribution
             end
             
             local clonedBetText = BettrVisualsController.CloneAndOverlayText(machine.BetText)
             BettrVisualsController.OverlayFirstOverSecond(clonedBetText.GameObject, sliderPointerGameObject)
             clonedBetText.SetText("+" .. contribution)
+            clonedBetText.FontSize = 12
             
             System.WaitForSeconds(1.0)
             
@@ -240,9 +244,12 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             System.WaitForSeconds(1.0)
             
             BettrVisualsController.TweenScaleGameObject(clonedBetText2.GameObject, 3, 3, 1)
+            clonedBetText2.FontSize = 24
             BettrVisualsController.TweenScaleGameObject(clonedBetText2.GameObject, 0, 0, 1)
+            clonedBetText2.FontSize = 0
             
             clonedBetText.SetText("+" .. totalContribution)
+            
             BettrVisualsController.DestroyGameObject(clonedBetText2.GameObject)
             
             local currentPayout = self.State.MechanicsTable.summary.goodPayout
