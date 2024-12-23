@@ -6,6 +6,7 @@ using CrayonScript.Code;
 using CrayonScript.Interpreter;
 using CrayonScript.Interpreter.Execution.VM;
 using PathCreation;
+using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -820,6 +821,29 @@ namespace Bettr.Core
         {
             var particleSystem = particleSystemProperty.particleSystem;
             particleSystem.Stop();
+        }
+        
+        public GameObject CloneAndOverlay(GameObject gameObject)
+        {
+            var clonedGameObject = Object.Instantiate(gameObject, gameObject.transform.parent);
+            // ensure this is an overlay over the original object
+            OverlayFirstOverSecond(clonedGameObject, gameObject);
+            return clonedGameObject;
+        }
+        
+        public PropertyTextMeshPro CloneAndOverlayText(PropertyTextMeshPro textProperty)
+        {
+            var text = textProperty.textMeshPro;
+            var gameObject = text.gameObject;
+            var clonedGameObject = Object.Instantiate(gameObject, gameObject.transform.parent);
+            // ensure this is an overlay over the original object
+            OverlayFirstOverSecond(clonedGameObject, gameObject);
+            var clonedText = clonedGameObject.GetComponent<TMP_Text>();
+            var tmPro = new PropertyTextMeshPro()
+            {
+                textMeshPro = clonedText,
+            };
+            return tmPro;
         }
 
         public void OverlayFirstOverSecond(GameObject firstGameObject, GameObject secondGameObject)

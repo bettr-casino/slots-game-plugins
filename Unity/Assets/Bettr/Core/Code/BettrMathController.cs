@@ -86,10 +86,10 @@ namespace Bettr.Core
             return globalTable;
         }
 
-        public Table GetTableFirst(string tableName, string machineID, string reelID)
+        public Table GetTableFirst(string tableName, string machineID, string pk)
         {
             var machineTable = (Table) TileController.LuaScript.Globals[$"{machineID}{tableName}"];
-            var reelTable = (Table) machineTable[reelID];
+            var reelTable = (Table) machineTable[pk];
             var reelStateTable = (Table) reelTable["First"];
             return reelStateTable;
         }
