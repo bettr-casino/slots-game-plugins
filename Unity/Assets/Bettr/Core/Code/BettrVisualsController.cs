@@ -848,7 +848,28 @@ namespace Bettr.Core
 
         public void OverlayFirstOverSecond(GameObject firstGameObject, GameObject secondGameObject)
         {
-            firstGameObject.transform.position = secondGameObject.transform.position;
+            // Get the layer names
+            string firstLayerName = LayerMask.LayerToName(firstGameObject.layer);
+            string secondLayerName = LayerMask.LayerToName(secondGameObject.layer);
+
+            // Retrieve the cameras associated with the layers
+            Camera firstCamera = _layerToCameraMap.GetCameraForLayer(firstLayerName);
+            Camera secondCamera = _layerToCameraMap.GetCameraForLayer(secondLayerName);
+
+            if (firstCamera == null || secondCamera == null)
+            {
+                Debug.LogWarning($"Camera not found for layers {firstLayerName} or {secondLayerName}");
+                return;
+            }
+
+            // Convert second object's world position to the first object's camera view
+            Vector3 secondObjectScreenPosition = secondCamera.WorldToScreenPoint(secondGameObject.transform.position);
+            Vector3 worldPositionForFirstObject = firstCamera.ScreenToWorldPoint(
+                new Vector3(secondObjectScreenPosition.x, secondObjectScreenPosition.y, firstCamera.nearClipPlane)
+            );
+
+            // Align the first object to the second object's position based on cameras
+            firstGameObject.transform.position = worldPositionForFirstObject;
         }
         
         public void DestroyGameObject(GameObject gameObject)
