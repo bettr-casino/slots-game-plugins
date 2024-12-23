@@ -243,8 +243,10 @@ namespace Bettr.Core
         private bool _tweenComplete = false;
         
         public IEnumerator TweenGameObject(
-            CrayonScriptContext context, GameObject tweenThisGameObject, GameObject tweenFromThisGameObject, GameObject tweenToThisGameObject, float duration = 1.0f, bool tween = false)
+            CrayonScriptContext context, GameObject tweenThisGameObject, GameObject tweenFromThisGameObject, GameObject tweenToThisGameObject, float duration = 1.0f, bool tween = false, bool preserveLocalZ = false)
         {
+            var originalLocalPosition = tweenThisGameObject.transform.localPosition;
+            
             string layerName = LayerMask.LayerToName(tweenThisGameObject.layer);
             Camera tweenCamera = _layerToCameraMap.GetCameraForLayer(layerName);
             if (tweenCamera == null)
@@ -276,6 +278,13 @@ namespace Bettr.Core
             {
                 tweenThisGameObject.transform.position = targetWorldPosition;
                 yield return new WaitForSeconds(duration);
+            }
+
+            if (preserveLocalZ)
+            {
+                var localPosition = tweenThisGameObject.transform.localPosition;
+                localPosition.z = originalLocalPosition.z;
+                tweenThisGameObject.transform.localPosition = localPosition;
             }
         }
         
