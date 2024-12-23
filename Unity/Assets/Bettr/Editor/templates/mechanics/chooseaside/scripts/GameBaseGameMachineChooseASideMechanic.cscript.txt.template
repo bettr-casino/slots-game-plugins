@@ -58,7 +58,7 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:StartMachine(mac
             local sliderPointerGameObject = machine.{{mechanicName}}MechanicSliderPointer.GameObject
             local sliderGroup = machine.{{mechanicName}}MechanicSliderSlots
             local sliderSlot = sliderGroup["SliderSlot" .. sliderIndex]                       
-            BettrVisualsController.TweenGameObject(sliderPointerGameObject, nil, sliderSlot.GameObject, 1, true)
+            BettrVisualsController.TweenGameObject(sliderPointerGameObject, nil, sliderSlot.GameObject, 1, true, true)
             local machineParent = machine.MachineParent
             machineParent.SetActive(true)
             machine:StartMachine()
@@ -86,7 +86,7 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_ActivateMechani
                     BettrVisualsController.FireballMoveTo(dialogText.GameObject, text.GameObject, 0, 1, true)
                 end
                 do
-                    BettrVisualsController.TweenGameObject(dialogImage.GameObject, dialogImage.GameObject, image.GameObject, 1, true)
+                    BettrVisualsController.TweenGameObject(dialogImage.GameObject, dialogImage.GameObject, image.GameObject, 1, true, true)
                 end
             end
             BettrVisualsController.FireballMoveTo(nil, text.GameObject, 0, 1, false)
@@ -135,6 +135,7 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_SetupChoiceMech
             machine.{{mechanicName}}MechanicSliderPointer.GameObject.SetActive(true)
             machine.{{mechanicName}}MechanicSliderParent.SetActive(true)
             machine.{{mechanicName}}MechanicSliderBar.SetActive(true)
+            
             local sliderCount = machine.ChooseASliderMechanicSliderCount
             local sliderGroup = machine.{{mechanicName}}MechanicSliderSlots
             local middleSliderIndex = machine.ChooseASliderMechanicMiddleSliderIndex
@@ -153,12 +154,12 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_SetupChoiceMech
             end
             local startSliderTextOriginal = startSliderText.Text
             local endSliderTextOriginal = endSliderText.Text
-            BettrVisualsController.TweenGameObject(machine.{{mechanicName}}MechanicSliderPointer.GameObject, nil, middleSliderSlot.GameObject, 0.3, false)
-            BettrVisualsController.TweenGameObject(machine.{{mechanicName}}MechanicSliderPointer.GameObject, middleSliderSlot.GameObject, startSliderSlot.GameObject, 1, true)
+            BettrVisualsController.TweenGameObject(machine.{{mechanicName}}MechanicSliderPointer.GameObject, nil, middleSliderSlot.GameObject, 0.3, false, true)
+            BettrVisualsController.TweenGameObject(machine.{{mechanicName}}MechanicSliderPointer.GameObject, middleSliderSlot.GameObject, startSliderSlot.GameObject, 1, true, true)
             startSliderText.SetText("YOU WIN")
             System.WaitForSeconds(1)
             startSliderText.SetText(startSliderTextOriginal)
-            BettrVisualsController.TweenGameObject(machine.{{mechanicName}}MechanicSliderPointer.GameObject, startSliderSlot.GameObject, endSliderSlot.GameObject, 2, true)
+            BettrVisualsController.TweenGameObject(machine.{{mechanicName}}MechanicSliderPointer.GameObject, startSliderSlot.GameObject, endSliderSlot.GameObject, 2, true, true)
             endSliderText.SetText("YOU LOSE")
             System.WaitForSeconds(1)
             endSliderText.SetText(endSliderTextOriginal)
@@ -203,7 +204,7 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             BettrVisualsController.FireballMoveTo(nil, sliderPointerGameObject, 0, 1, false)
             local sliderGroup = machine.{{mechanicName}}MechanicSliderSlots
             local sliderSlot = sliderGroup["SliderSlot" .. sliderIndex]                       
-            BettrVisualsController.TweenGameObject(sliderPointerGameObject, nil, sliderSlot.GameObject, 1, true)        
+            BettrVisualsController.TweenGameObject(sliderPointerGameObject, nil, sliderSlot.GameObject, 1, true, true)        
             local materialName = "BaseGame{{mechanicName}}MechanicSliderSlot"
             if sliderIndex > middleSliderIndex then
                 materialName = "BaseGame{{mechanicName}}MechanicSliderSlotGood"
@@ -268,7 +269,7 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             
             parallel
                 do
-                    BettrVisualsController.TweenGameObject(clonedBetText.GameObject, sliderPointerGameObject, payoutText.GameObject, 1, true)
+                    BettrVisualsController.TweenGameObject(clonedBetText.GameObject, sliderPointerGameObject, payoutText.GameObject, 1, true, true)
                 end
                 do
                     BettrVisualsController.FireballMoveTo(sliderPointerGameObject, payoutText.GameObject, 0, 1, true)
