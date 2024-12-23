@@ -185,6 +185,10 @@ end
 function Game001BaseGameMachineChooseASideMechanic:OnBaseGameSpinCompleted(machine)
     series
         do
+            local mechanicDataSummaryTable = BettrMathController.GetBaseGameMechanicDataSummaryTable(self.Config.Machine, self.Config.Mechanic)
+            local mechanicTable = BettrMathController.GetBaseGameMechanicTable(self.Config.Machine, self.Config.Mechanic)
+            local contributionPercent = mechanicDataSummaryTable.ContributionPercent
+            local maxSteps = mechanicDataSummaryTable.Steps
             local summary = Game001BaseGameChooseASideSummary.ChooseASide.First
             local numSymbols = summary.NumSymbols
             if numSymbols == 0 then
@@ -198,6 +202,17 @@ function Game001BaseGameMachineChooseASideMechanic:OnBaseGameSpinCompleted(machi
             self.State.MechanicsTable.summary.sliderOffset = newSliderOffset
             local middleSliderIndex = machine.ChooseASliderMechanicMiddleSliderIndex
             local sliderIndex = self:_GetSliderIndex(machine)
+            if sliderIndex > maxSteps then
+                sliderIndex = maxSteps
+            elseif sliderIndex < -maxSteps then
+                sliderIndex = -maxSteps
+            end
+            local wonSide = ""
+            if sliderIndex == maxSteps then
+                wonSide = "GOOD"
+            elseif sliderIndex == -maxSteps then
+                wonSide = "EVIL"
+            end
             local side = summary.Side
             local userChoice = self.State.MechanicsTable.summary.choice
             local sliderPointerGameObject = machine.ChooseASideMechanicSliderPointer.GameObject
@@ -219,9 +234,6 @@ function Game001BaseGameMachineChooseASideMechanic:OnBaseGameSpinCompleted(machi
             BettrAssetController.LoadMaterial(manifest.BundleName, manifest.BundleVersion, materialName, sliderPointerGameObject)
             BettrVisualsController.FireballMoveTo(nil, machine.BetText.GameObject, 0, 1, false)
             BettrVisualsController.FireballMoveTo(machine.BetText.GameObject, sliderPointerGameObject, 0, 1, true)
-            local mechanicDataSummaryTable = BettrMathController.GetBaseGameMechanicDataSummaryTable(self.Config.Machine, self.Config.Mechanic)
-            local mechanicTable = BettrMathController.GetBaseGameMechanicTable(self.Config.Machine, self.Config.Mechanic)
-            local contributionPercent = mechanicDataSummaryTable.ContributionPercent
             local bet = BettrMathController.GetBaseGameBet(self.Config.Machine)
             local contribution = bet * contributionPercent / 100
             local increment = mechanicTable[1].Increment
@@ -280,7 +292,42 @@ function Game001BaseGameMachineChooseASideMechanic:OnBaseGameSpinCompleted(machi
             BettrVisualsController.DestroyGameObject(clonedBetText.GameObject)
             BettrVisualsController.RollUpCounter(payoutText, currentPayout, newPayout, 1, 1)
             
+            self:_HandleWin(machine, wonSide, userChoice)
+            self:_HandleLoss(machine, wonSide, userChoice)
+            
             machine:OnBaseGameSpinCompleted()
+        end
+    end
+end
+
+function Game001BaseGameMachineChooseASideMechanic:_HandleWin(machine, wonSide, userChoice)
+    series
+        do
+            if wonSide == "" then
+                return
+            end
+            if userChoice == "" then
+                return
+            end
+            if wonSide ~= userChoice then
+                return
+            end
+        end
+    end
+end
+
+function Game001BaseGameMachineChooseASideMechanic:_HandleLoss(machine, wonSide, userChoice)
+    series
+        do
+            if wonSide == "" then
+                return
+            end
+            if userChoice == "" then
+                return
+            end
+            if wonSide == userChoice then
+                return
+            end
         end
     end
 end
