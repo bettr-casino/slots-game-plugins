@@ -26,7 +26,199 @@
           "Y": 0.8,
           "Z": 1
       },
-      "Children": [
+      "Children": [    
+      {
+          "Name": "WinParent",
+          "Id": "WinParent",
+          "Layer": "SLOT_REELS_OVERLAY",
+          "Active": false,
+          "Position":
+          {
+              "X": 0,
+              "Y": 5,
+              "Z": 0
+          },
+          "Children":
+          [
+              {
+                  "Name": "WinImage",
+                  "Id": "WinImage",
+                  "Layer": "SLOT_REELS_OVERLAY",
+                  "Active": true,
+                  "IsPrimitive": true,
+                  "Primitive": 5,
+                  "PrimitiveMaterial": "BaseGameChooseASideDialogWin",
+                  "PrimitiveShader": "Bettr/Symbol",
+                  "PrimitiveTexture": "BaseGameChooseASideDialogWin",
+                  "PrimitiveTextureCreate": true,
+                  "PrimitiveTextureCreateSource": "default.png",
+                  "Position":
+                  {
+                      "X": 0,
+                      "Y": 0,
+                      "Z": 0
+                  },
+                  "Scale":
+                  {
+                      "X": 8,
+                      "Y": 8,
+                      "Z": 1
+                  },
+                  "Components":
+                  [
+                      {
+                          "ComponentType": "BettrEventListener",
+                          "EventTriggers":
+                          [
+                              {
+                                  "ReferenceId": "BettrDialogController",
+                                  "Params":
+                                  [
+                                      "Win"
+                                  ]
+                              }
+                          ]
+                      }
+                  ]
+              },
+              {
+                  "Name": "WinText",
+                  "Id": "WinText",
+                  "Layer": "SLOT_REELS_OVERLAY",
+                  "Active": true,
+                  "Position":
+                  {
+                      "X": 0,
+                      "Y": -2,
+                      "Z": 0
+                  },
+                  "Scale":
+                  {
+                      "X": 4,
+                      "Y": 4,
+                      "Z": 1
+                  },
+                  "Components":
+                  [
+                      {
+                          "ComponentType": "RectTransform",
+                          "Rect":
+                          {
+                              "X": 0,
+                              "Y": 0,
+                              "Width": 10,
+                              "Height": 1.5
+                          }
+                      },
+                      {
+                          "ComponentType": "TextMeshPro",
+                          "Text": "0",
+                          "Font": "Roboto-Bold SDF",
+                          "FontSize": 4,
+                          "HorizontalAlignment": "Center",
+                          "VerticalAlignment": "Middle",
+                          "Color": "#FFFFFF"
+                      }
+                  ]
+              }
+          ]
+      },
+      {
+          "Name": "LoseParent",
+          "Id": "LoseParent",
+          "Layer": "SLOT_REELS_OVERLAY",
+          "Active": false,
+          "Position":
+          {
+              "X": 0,
+              "Y": 5,
+              "Z": 0
+          },
+          "Children":
+          [
+              {
+                  "Name": "LoseImage",
+                  "Id": "LoseImage",
+                  "Layer": "SLOT_REELS_OVERLAY",
+                  "Active": true,
+                  "IsPrimitive": true,
+                  "Primitive": 5,
+                  "PrimitiveMaterial": "BaseGameChooseASideDialogLose",
+                  "PrimitiveShader": "Bettr/Symbol",
+                  "PrimitiveTexture": "BaseGameChooseASideDialogLose",
+                  "PrimitiveTextureCreate": true,
+                  "PrimitiveTextureCreateSource": "default.png",
+                  "Position":
+                  {
+                      "X": 0,
+                      "Y": 0,
+                      "Z": 0
+                  },
+                  "Scale":
+                  {
+                      "X": 8,
+                      "Y": 8,
+                      "Z": 1
+                  },
+                  "Components":
+                  [
+                      {
+                          "ComponentType": "BettrEventListener",
+                          "EventTriggers":
+                          [
+                              {
+                                  "ReferenceId": "BettrDialogController",
+                                  "Params":
+                                  [
+                                      "Lose"
+                                  ]
+                              }
+                          ]
+                      }
+                  ]
+              },
+              {
+                  "Name": "LoseText",
+                  "Id": "LoseText",
+                  "Layer": "SLOT_REELS_OVERLAY",
+                  "Active": true,
+                  "Position":
+                  {
+                      "X": 0,
+                      "Y": -2,
+                      "Z": 0
+                  },
+                  "Scale":
+                  {
+                      "X": 4,
+                      "Y": 4,
+                      "Z": 1
+                  },
+                  "Components":
+                  [
+                      {
+                          "ComponentType": "RectTransform",
+                          "Rect":
+                          {
+                              "X": 0,
+                              "Y": 0,
+                              "Width": 10,
+                              "Height": 1.5
+                          }
+                      },
+                      {
+                          "ComponentType": "TextMeshPro",
+                          "Text": "0",
+                          "Font": "Roboto-Bold SDF",
+                          "FontSize": 4,
+                          "HorizontalAlignment": "Center",
+                          "VerticalAlignment": "Middle",
+                          "Color": "#FFFFFF"
+                      }
+                  ]
+              }
+          ]
+      },     
         {
                     "Name": "SliderParent",
                     "Id": "SliderParent",
@@ -463,7 +655,7 @@
                     ]
                 },
                 {
-                    "Name": "DialogEvilText",
+                    "Name": "DialogChooseText",
                     "Id": "DialogChooseText",
                     "Layer": "SLOT_REELS_OVERLAY",
                     "Active": true,
@@ -627,7 +819,15 @@
          {
             "Key": "ChooseASideMechanicSliderBar",
             "Id": "SliderBar"
-         }
+         },
+         {
+           "Key": "ChooseASideMechanicWinParent",
+           "Id": "WinParent"
+         },
+           {
+             "Key": "ChooseASideMechanicLoseParent",
+             "Id": "LoseParent"
+           }
        ],
        "GameObjectGroupsProperty": [
           {
