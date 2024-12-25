@@ -832,12 +832,16 @@ namespace Bettr.Core
             particleSystem.Stop();
         }
         
-        public GameObject CloneAndOverlay(GameObject gameObject)
+        public PropertyGameObject CloneAndOverlay(PropertyGameObject gameObjectProperty)
         {
-            var clonedGameObject = Object.Instantiate(gameObject, gameObject.transform.parent);
+            var clonedGameObject = Object.Instantiate(gameObjectProperty.GameObject, gameObjectProperty.GameObject.transform.parent);
             // ensure this is an overlay over the original object
-            OverlayFirstOverSecond(clonedGameObject, gameObject);
-            return clonedGameObject;
+            OverlayFirstOverSecond(clonedGameObject, gameObjectProperty.GameObject);
+            var clonedGameObjectProperty = new PropertyGameObject()
+            {
+                gameObject = clonedGameObject,
+            };
+            return clonedGameObjectProperty;
         }
         
         public PropertyTextMeshPro CloneAndOverlayText(PropertyTextMeshPro textProperty)
