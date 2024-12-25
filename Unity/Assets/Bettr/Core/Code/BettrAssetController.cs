@@ -482,6 +482,20 @@ namespace Bettr.Core
             foreach (var textMeshProUGUI in textMeshProUGUIs)
             {
                 // check if the shader is in the cache
+                if (textMeshProUGUI == null)
+                {
+                    Debug.LogWarning($"TextMeshProUGUI fontMaterial is null for prefab={prefabName} textMeshProUGUI=null");
+                    continue;
+                }
+                
+                // check if the shader is in the cache
+                if (textMeshProUGUI.fontMaterial == null)
+                {
+                    Debug.LogWarning($"TextMeshProUGUI fontMaterial is null for prefab={prefabName} textMeshProUGUI={textMeshProUGUI.name}");
+                    continue;
+                }
+                
+                // check if the shader is in the cache
                 if (ShaderCaches.TmProShaderCache.TryGetValue(textMeshProUGUI.fontMaterial.shader.name, out Shader bettrShader))
                 {
                     textMeshProUGUI.fontMaterial.shader = bettrShader;
@@ -492,6 +506,19 @@ namespace Bettr.Core
             foreach (var textMeshPro in textMeshPros)
             {
                 // check if the shader is in the cache
+                if (textMeshPro == null)
+                {
+                    Debug.LogWarning($"TextMeshPro fontMaterial is null for prefab={prefabName} textMeshPro=null");
+                    continue;
+                }
+                
+                // check if the shader is in the cache
+                if (textMeshPro.fontMaterial == null)
+                {
+                    Debug.LogWarning($"TextMeshPro fontMaterial is null for prefab={prefabName} textMeshPro={textMeshPro.name}");
+                    continue;
+                }
+
                 if (ShaderCaches.TmProShaderCache.TryGetValue(textMeshPro.fontMaterial.shader.name, out Shader bettrShader))
                 {
                     textMeshPro.fontMaterial.shader = bettrShader;
