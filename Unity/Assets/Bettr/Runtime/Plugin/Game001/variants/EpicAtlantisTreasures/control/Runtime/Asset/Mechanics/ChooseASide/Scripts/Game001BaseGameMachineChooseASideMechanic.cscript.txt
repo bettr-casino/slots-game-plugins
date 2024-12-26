@@ -237,9 +237,12 @@ function Game001BaseGameMachineChooseASideMechanic:OnBaseGameSpinCompleted(machi
             elseif sliderIndex < 1 then
                 sliderIndex = 1
             end
-            local wonSide = "GOOD"
+            local wonSide = ""
             if sliderIndex == 1 then
                 wonSide = "EVIL"
+            end
+            if sliderIndex == maxSteps then
+                wonSide = "GOOD"            
             end
             local side = summary.Side
             side = string.upper(side)
@@ -393,8 +396,18 @@ function Game001BaseGameMachineChooseASideMechanic:_HandleWin(machine, wonSide, 
                 end
             end
             
-            wonText.SetActive(true)
-            BettrVisualsController.RollUpCounterAndWait(wonText, 0, wonPayout, 1)                        
+            parallel
+                do
+                    wonText.SetActive(true)
+                    BettrVisualsController.RollUpCounterAndWait(wonText, 0, wonPayout, 1)                        
+                end
+                do
+                    BettrVisualsController.RollUpCounter(payoutTextGood, currentPayoutGood, newPayoutGood, 1)
+                end
+                do
+                    BettrVisualsController.RollUpCounter(payoutTextEvil, currentPayoutEvil, newPayoutEvil, 1)
+                end
+            end
             
             BettrDialogController.WaitForDialogAction(machine.ChooseASideMechanicWonParent.GameObject)                                    
             BettrVisualsController.FireballMoveTo(wonText.GameObject, machine.CreditsText.GameObject, 0, 1, true)
@@ -409,19 +422,6 @@ function Game001BaseGameMachineChooseASideMechanic:_HandleWin(machine, wonSide, 
                     wonText.SetActive(false)
                 end
             end            
-            
-            parallel
-                do
-                    BettrVisualsController.FireballMoveTo(wonText.GameObject, payoutTextGood.GameObject, 0, 1, true)
-                end
-                do
-                    BettrVisualsController.FireballMoveTo(wonText.GameObject, payoutTextEvil.GameObject, 0, 1, true)
-                end
-                do                    
-                    BettrVisualsController.RollUpCounter(payoutTextGood, currentPayoutGood, newPayoutGood, 1)
-                    BettrVisualsController.RollUpCounter(payoutTextEvil, currentPayoutEvil, newPayoutEvil, 1)
-                end
-            end
             
             self.State.MechanicsTable.summary.evilPayout = newPayoutEvil
             self.State.MechanicsTable.summary.goodPayout = newPayoutGood
