@@ -234,17 +234,17 @@ function Game001BaseGameMachineChooseASideMechanic:OnBaseGameSpinCompleted(machi
             local sliderIndex = self:_GetSliderIndex(machine)
             if sliderIndex > maxSteps then
                 sliderIndex = maxSteps
-            elseif sliderIndex < -maxSteps then
-                sliderIndex = -maxSteps
+            elseif sliderIndex < 1 then
+                sliderIndex = 1
             end
-            local wonSide = ""
-            if sliderIndex == maxSteps then
-                wonSide = "GOOD"
-            elseif sliderIndex == -maxSteps then
+            local wonSide = "GOOD"
+            if sliderIndex == 1 then
                 wonSide = "EVIL"
             end
             local side = summary.Side
+            side = string.upper(side)
             local userChoice = self.State.MechanicsTable.summary.choice
+            userChoice = string.upper(userChoice)
             local sliderPointerGameObject = machine.ChooseASideMechanicSliderPointer.GameObject
             BettrVisualsController.FireballMoveTo(nil, sliderPointerGameObject, 0, 1, false)
             local sliderGroup = machine.ChooseASideMechanicSliderSlots
@@ -259,11 +259,10 @@ function Game001BaseGameMachineChooseASideMechanic:OnBaseGameSpinCompleted(machi
             local bet = BettrMathController.GetBaseGameBet(self.Config.Machine)
             local contribution = bet * contributionPercent / 100
             local increment = mechanicTable[1].Increment
-            local totalContribution = contribution * increment
-            if side == "EVIL" then
+            if increment < 0 then
                 increment = -increment
-                totalContribution = -totalContribution
             end
+            local totalContribution = contribution * increment
             
             local clonedBetText = BettrVisualsController.CloneAndOverlayText(machine.BetText)
             BettrVisualsController.OverlayFirstOverSecond(clonedBetText.GameObject, sliderPointerGameObject)
@@ -355,8 +354,9 @@ end
 function Game001BaseGameMachineChooseASideMechanic:_HandleWin(machine, wonSide, userChoice)
     series
         do
-            wonSide = string.lower(wonSide)
-            userChoice = string.lower(userChoice)                
+            wonSide = string.upper(wonSide)
+            userChoice = string.upper(userChoice)       
+            System.Print("Game001BaseGameMachineChooseASideMechanic:_HandleWin CHECK wonSide={0} userChoice={1}", wonSide, userChoice)         
             if wonSide == "" then
                 return
             end
@@ -468,10 +468,10 @@ function Game001BaseGameMachineChooseASideMechanic:_HandleLoss(machine, wonSide,
                         
             parallel
                 do
-                    BettrVisualsController.FireballMoveTo(machine.ChooseASideMechanicLostParent.GameObject, payoutTextGood.GameObject, 0, 1, true)
+                    BettrVisualsController.FireballMoveTo(machine.ChooseASideMechanicLostText.GameObject, payoutTextGood.GameObject, 0, 1, true)
                 end
                 do
-                    BettrVisualsController.FireballMoveTo(machine.ChooseASideMechanicLostParent.GameObject, payoutTextEvil.GameObject, 0, 1, true)
+                    BettrVisualsController.FireballMoveTo(machine.ChooseASideMechanicLostText.GameObject, payoutTextEvil.GameObject, 0, 1, true)
                 end
                 do                    
                     BettrVisualsController.RollUpCounter(payoutTextGood, currentPayoutGood, newPayoutGood, 1)
