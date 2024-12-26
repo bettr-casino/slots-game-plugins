@@ -412,7 +412,13 @@ namespace Bettr.Core
         {
             _tweenComplete = true;
         }
-        
+
+        public IEnumerator RollUpCounterAndWait(CrayonScriptContext context, PropertyTextMeshPro counterTextProperty, long start, long end, float duration)
+        {
+            RollUpCounter(counterTextProperty, start, end, duration);
+            yield return new WaitForSeconds(duration);
+        }
+
         public void RollUpCounter(PropertyTextMeshPro counterTextProperty, long start, long end, float duration)
         {
             if (counterTextProperty == null)
@@ -460,7 +466,18 @@ namespace Bettr.Core
                 elapsed += Time.deltaTime;
 
                 // Update the current value
-                currentValue += (isRollingUp ? 1 : -1) * speed * Time.deltaTime;
+                currentValue += speed * Time.deltaTime;
+                
+                // if rollingUp and currentValue drops above end, set it to end
+                if (isRollingUp && currentValue > end)
+                {
+                    currentValue = end;
+                }
+                // if rollingDown and currentValue goes below end, set it to end
+                else if (!isRollingUp && currentValue < end)
+                {
+                    currentValue = end;
+                }
 
                 // Update the text and wait for the next frame
                 rollupText(Mathf.RoundToInt(currentValue));

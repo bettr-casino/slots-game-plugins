@@ -26,7 +26,7 @@ namespace Bettr.Core
             Instance = this;
         }
         
-        public IEnumerator ShowModalDialog(CrayonScriptContext context, GameObject dialog)
+        public IEnumerator WaitForDialogAction(CrayonScriptContext context, GameObject dialog)
         {
             if (_dialogLocked)
             {

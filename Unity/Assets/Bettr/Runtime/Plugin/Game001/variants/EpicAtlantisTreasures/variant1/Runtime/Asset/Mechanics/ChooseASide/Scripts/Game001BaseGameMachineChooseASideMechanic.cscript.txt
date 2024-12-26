@@ -121,7 +121,7 @@ function Game001BaseGameMachineChooseASideMechanic:_SetupChoiceMechanic(machine)
             end
             machine.ChooseASideMechanicDialogParent.SetActive(true)
             machine.ChooseASideMechanicSliderParent.SetActive(true)
-            result = BettrDialogController.ShowModalDialog(self.State.MechanicsPrefab)
+            result = BettrDialogController.WaitForDialogAction(self.State.MechanicsPrefab)
             local machineParent = machine.MachineParent
             if result == "Evil" then
                 self:_ActivateMechanic(machine, machine.ChooseASideMechanicDialogEvilImage, machine.ChooseASideMechanicDialogEvilText, machine.ChooseASideMechanicEvilImage, machine.ChooseASideMechanicEvilText)
