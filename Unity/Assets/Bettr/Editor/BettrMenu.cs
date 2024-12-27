@@ -1218,6 +1218,8 @@ namespace Bettr.Editor
                 // save the changes and ensure refresh
                 EditorUtility.SetDirty(material);
                 AssetDatabase.SaveAssets();
+                
+                AssetDatabase.Refresh();
             }
             
             AssetDatabase.Refresh();
