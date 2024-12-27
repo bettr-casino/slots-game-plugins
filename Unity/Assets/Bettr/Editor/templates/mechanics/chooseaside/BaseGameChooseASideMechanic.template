@@ -26,7 +26,63 @@
           "Y": 0.8,
           "Z": 1
       },
-      "Children": [    
+      "Children": [   
+        {
+            "Name": "SymbolsParent",
+            "Id": "SymbolsParent",
+            "Layer": "SLOT_REELS",
+            "Active": true,
+            "Children": [
+            {{- for symbolName in symbolNames }}            
+                {
+                  "Name": "{{symbolName}}",
+                  "Id": "{{symbolName}}",
+                  "Layer": "SLOT_REELS",
+                  "Active": false,
+                  "Components": [
+                    {
+                      "ComponentType": "AnimatorController",
+                      "Filename": "BaseGameChooseASideSymbol{{symbolPrefabName}}",
+                      "AnimationStates": [
+                        {
+                          "Name": "noop",
+                          "Speed": 1,
+                          "IsLoop": false,
+                          "IsDefault": true
+                        }
+                      ],
+                      "AnimatorStateTransitions": [
+                      ]
+                    }
+                  ],
+                  "Child": {
+                    "Name": "Pivot",
+                    "Layer": "SLOT_REELS",
+                    "Children": [
+                      {
+                        "Name": "Quad",
+                        "Layer": "SLOT_REELS",
+                        "IsPrimitive": true,
+                        "Primitive": 5,
+                        "PrimitiveMaterial": "BaseGameChooseASideSymbol{{symbolName}}",
+                        "PrimitiveShader": "Bettr/Symbol",
+                        "PrimitiveTexture": "BaseGameChooseASideSymbol{{symbolName}}",
+                        "PrimitiveTextureCreate": true,
+                        "PrimitiveTextureCreateSource": "default.png",                        
+                        "PrimitiveAlpha": 0.7,
+                        "Scale": {
+                          "X": 1,
+                          "Y": 1,
+                          "Z": 1
+                        }
+                      }
+                    ]
+                  }
+                }            
+            
+            {{ if !for.last }},{{ end }}{{ end }}                            
+          ]
+        }, 
         {
           "Name": "WonParent",
           "Id": "WonParent",
@@ -864,6 +920,16 @@
                     "Key": "SliderSlot{{ step }}",
                     "Id": "SliderSlot{{ step }}"
                 }{{ if !for.last }},{{ end }}{{- end }}
+            ]
+          },
+          {
+            "GroupKey": "ChooseASideMechanicSymbols",
+            "Group": [
+              {{- for symbolName in symbolNames }}
+              {
+                  "Key": "{{symbolName}}",
+                  "Id": "{{symbolName}}"
+              }{{ if !for.last }},{{ end }}{{- end }}
             ]
           }
        ]

@@ -132,6 +132,7 @@ namespace Bettr.Editor
                 { "rightStepStartInclusive", (int)(steps / 2) + 2},
                 { "rightStepEndInclusive", steps},
                 { "middleStep", (int)(steps / 2) + 1},
+                { "symbolNames", new string[] { "GOOD", "EVIL" } }
             };
             
             BettrMechanicsHelpers.ProcessBaseGameMechanic(
