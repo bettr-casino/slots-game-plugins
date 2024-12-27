@@ -36,7 +36,8 @@ end
 function Game003BaseGameReel:StartEngines()
     series
         do
-            self.BettrReelController.StartEngines()                          
+            self.BettrReelController.StartEngines()
+            self.Mechanics:StartEngines(self)                          
         end
     end
 end
@@ -45,12 +46,14 @@ function Game003BaseGameReel:OnOutcomeReceived()
     series
         do
             self.BettrReelController.OnOutcomeReceived()
+            self.Mechanics:OnOutcomeReceived(self)
         end
     end
 end
 
 function Game003BaseGameReel:SpinEngines()
     self.BettrReelController.SpinEngines()
+    self.Mechanics.SpinEngines(self)
 end
 
 function Game003BaseGameReel:Update()
@@ -65,25 +68,30 @@ function Game003BaseGameReel:Update()
 end
 
 function Game003BaseGameReel:SpinReelSpinStartedRollBack()
-    self.BettrReelController.SpinReelSpinStartedRollBack()    
+    self.BettrReelController.SpinReelSpinStartedRollBack()
+    self.Mechanics:SpinReelSpinStartedRollBack(self)    
 end
 
 function Game003BaseGameReel:SpinReelSpinStartedRollForward()
-    self.BettrReelController.SpinReelSpinStartedRollForward()    
+    self.BettrReelController.SpinReelSpinStartedRollForward()
+    self.Mechanics:SpinReelSpinStartedRollForward(self)    
 end
 
 function Game003BaseGameReel:SpinReelSpinEndingRollBack()    
-    self.BettrReelController.SpinReelSpinEndingRollBack()    
+    self.BettrReelController.SpinReelSpinEndingRollBack()
+    self.Mechanics:SpinReelSpinEndingRollBack(self)    
 end
 
 function Game003BaseGameReel:SpinReelSpinEndingRollForward()
-    self.BettrReelController.SpinReelSpinEndingRollForward()    
+    self.BettrReelController.SpinReelSpinEndingRollForward()
+    self.Mechanics:SpinReelSpinEndingRollForward(self)    
 end
 
 function Game003BaseGameReel:SpinReelReachedOutcomeStopIndex()
     BettrAudioController.PlayAudioOnce("reelstop")
     local reelSpinState = Game003BaseGameReelSpinState[self.ReelID].First
     reelSpinState.ReelSpinState = "SpinEndingRollForward"
+    self.Mechanics:SpinReelReachedOutcomeStopIndex(self)
 end
 
 function Game003BaseGameReel:SpinReelStopped()
@@ -91,10 +99,11 @@ function Game003BaseGameReel:SpinReelStopped()
     local lastReeID = "Reel" .. reelCount
     if self.ReelID == lastReeID then
         Game003BaseGameMachine:OnSpinReelsStopped()
+        self.Mechanics:OnSpinReelsStopped(self)
     end 
 end
 
-function Game003BaseGameReel:SpinReelWaiting()
+function Game003BaseGameReel:SpinReelWaiting()    
 end
 
 function Game003BaseGameReel:SpinReelSpinning()

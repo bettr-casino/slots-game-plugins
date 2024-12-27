@@ -71,7 +71,9 @@ function Game004BaseGameMachine:OnSpinButtonClicked()
             end
             BettrAudioController.StopAudio()
             BettrAudioController.PlayAudioOnce("spinbutton")
-            if self:CanSpinEngines() then            
+            local canSpin = self:CanSpinEngines()
+            canSpin = self.Mechanics:CanSpin(self, canSpin)
+            if canSpin then            
                 self:SpinEngines()
                 self:WaitForApplyOutcomeDelay()
                 self:LoadServerOutcome()
