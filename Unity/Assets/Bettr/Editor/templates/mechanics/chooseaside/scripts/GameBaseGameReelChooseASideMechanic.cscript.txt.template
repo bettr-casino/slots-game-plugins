@@ -7,6 +7,9 @@ require "Core"
         Variant = "{{machineVariant}}",
         Experiment = "{{experimentVariant}}",
     },
+    State = {
+        ReelSymbolGroups = nil,
+    },
 }
 
 function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:new(o)
@@ -16,11 +19,20 @@ function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:new(o)
 	return o
 end
 
+function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:destroy()
+	System.Print("{{machineName}}BaseGameReel{{mechanicName}}Mechanic destroy tile id={0}", self.id)
+end
+
 function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:Initialize(reel)
 end
 
 function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:StartEngines(reel, machine)
     local source = machine.{{mechanicName}}MechanicSymbolGroup
-    BettrMechanicsController.AddMechanicsReelSymbolGroups("{{mechanicName}}", reel.BettrReelController, source)
+    self.State.ReelSymbolGroups = BettrMechanicsController.AddSymbolsToReelSymbolGroups("{{mechanicName}}", reel.BettrReelController, source)
+end
+
+function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:OnOutcomeReceived(reel)
+    local outcomeReelStopIndex = reel.BettrReelController.SpinOutcomeTable["OutcomeReelStopIndex"];
+    reel.BettrReelController.ReplaceSymbolForSpin(outcomeReelStopIndex, "BN1")
 end
 
