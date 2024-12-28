@@ -19,7 +19,8 @@ end
 function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:Initialize(reel)
 end
 
-function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:StartEngines(reel)
-    BettrMechanicsController.AddMechanicsReelSymbolGroups("{{mechanicName}}", reel.BettrReelController, nil)
+function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:StartEngines(reel, machine)
+    local source = machine.{{mechanicName}}MechanicSymbolGroup
+    BettrMechanicsController.AddMechanicsReelSymbolGroups("{{mechanicName}}", reel.BettrReelController, source)
 end
 
