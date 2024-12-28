@@ -29,6 +29,51 @@ namespace Bettr.Core
             return table;
         }
 
+        public void AddMechanicsReelSymbolGroups(string mechanicName, BettrReelController reelController, TilePropertyGameObjectGroup source)
+        {
+            var symbolCount = (int) (double) reelController.ReelStateTable["SymbolCount"];
+            for (var symbolIndex = 1; symbolIndex <= symbolCount; symbolIndex++)
+            {
+                AddMechanicsReelSymbolGroup(mechanicName, reelController, source, symbolIndex);
+            }
+        }
+
+        public void RemoveMechanicsReelSymbolGroups(string mechanicName, BettrReelController reelController)
+        {
+            var symbolCount = (int) (double) reelController.ReelStateTable["SymbolCount"];
+            for (var symbolIndex = 1; symbolIndex <= symbolCount; symbolIndex++)
+            {
+                RemoveMechanicsReelSymbolGroup(mechanicName, reelController, symbolIndex);
+            }
+        }
+
+        public void AddMechanicsReelSymbolGroup(string mechanicName, BettrReelController reelController,
+            TilePropertyGameObjectGroup source, int symbolIndex)
+        {
+            var symbolGroupKey = $"SymbolGroup{symbolIndex}";
+            var target = (TilePropertyGameObjectGroup) reelController.ReelTable[symbolGroupKey];
+            source = BettrVisualsController.Instance.CloneAndOverlayGroup(source);
+            BettrVisualsController.Instance.AddSymbolGroup(source, target);
+            // append the mechanic symbol group key
+            var mechanicSymbolGroupKey = $"{mechanicName}{symbolGroupKey}";
+            // add to reelTable
+            reelController.ReelTable[mechanicSymbolGroupKey] = source;
+        }
+
+        public void RemoveMechanicsReelSymbolGroup(string mechanicName, BettrReelController reelController, int symbolIndex)
+        {
+            var symbolGroupKey = $"SymbolGroup{symbolIndex}";
+            var mechanicSymbolGroupKey = $"{mechanicName}{symbolGroupKey}";
+            // remove from ReelTable
+            var source = (TilePropertyGameObjectGroup) reelController.ReelTable[mechanicSymbolGroupKey];
+            if (source != null)
+            {
+                BettrVisualsController.Instance.RemoveSymbolGroup(source);
+            }
+            reelController.ReelTable.Remove(mechanicSymbolGroupKey);
+        }
+        
+
         // Function to print the table with recursion for nested tables using StringBuilder
         public void PrintTable(Table table, int indent = 2)
         {

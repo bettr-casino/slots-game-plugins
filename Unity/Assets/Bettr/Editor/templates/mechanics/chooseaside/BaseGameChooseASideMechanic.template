@@ -929,6 +929,17 @@
                   "Id": "{{symbolName}}"
               }{{ if !for.last }},{{ end }}{{- end }}
             ]
+          },
+          {
+            "GroupKey": "ChooseASideMechanicSymbolGroup",
+            "Group": [
+              {{ for symbolName in symbolNames }}
+              {
+                  "Key": "{{symbolName}}",
+                  "Id": "{{symbolName}}"
+              }
+              {{ if !for.last }},{{ end }}{{ end }}
+            ]
           }
        ]
      },

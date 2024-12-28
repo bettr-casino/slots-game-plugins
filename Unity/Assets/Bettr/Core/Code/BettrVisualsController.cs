@@ -849,9 +849,71 @@ namespace Bettr.Core
             particleSystem.Stop();
         }
         
+        public void AddSymbolGroup(TilePropertyGameObjectGroup source, TilePropertyGameObjectGroup target)
+        {
+            // Get the first gameObject from the target
+            var targetGameObject = target.gameObjectProperties[0].value.gameObject;
+
+            // Get its parent game object
+            var targetSymbolGroupGameObject = targetGameObject.transform.parent.gameObject;
+
+            // Create a new GameObject with the same parent as targetSymbolGroupGameObject
+            var newSymbolGroupGameObject = new GameObject(source.groupKey)
+            {
+                transform =
+                {
+                    parent = targetSymbolGroupGameObject.transform.parent
+                }
+            };
+
+            // Ensure the clonedSource game objects are children of the newSymbolGroupGameObject
+            foreach (var gameObjectProperty in source.gameObjectProperties)
+            {
+                gameObjectProperty.value.gameObject.transform.parent = newSymbolGroupGameObject.transform;
+            }
+        }
+
+        public void RemoveSymbolGroup(TilePropertyGameObjectGroup source)
+        {
+            var sourceGameObject = source.gameObjectProperties[0].value.gameObject;
+            // get its parent game Object
+            var sourceSymbolGroupGameObject = sourceGameObject.transform.parent.gameObject;
+            // destroy each of the gameObjects in source
+            foreach (var gameObjectProperty in source.gameObjectProperties)
+            {
+                Object.Destroy(gameObjectProperty.value.gameObject);
+            }
+            // destroy the sourceSymbolGroupGameObject
+            Object.Destroy(sourceSymbolGroupGameObject);
+        }
+
+        public TilePropertyGameObjectGroup CloneAndOverlayGroup(TilePropertyGameObjectGroup group)
+        {
+            var groupClone = new TilePropertyGameObjectGroup
+            {
+                groupKey = group.groupKey,
+                gameObjectProperties = new List<TilePropertyGameObject>()
+            };
+            foreach (var property in group.gameObjectProperties)
+            {
+                var value = property.value;
+                value = BettrVisualsController.Instance.CloneAndOverlay(value);
+                
+                var propertyClone = new TilePropertyGameObject
+                {
+                    key = property.key,
+                    value = value
+                };
+                groupClone.gameObjectProperties.Add(propertyClone);
+            }
+            
+            return groupClone;
+        }
+        
         public PropertyGameObject CloneAndOverlay(PropertyGameObject gameObjectProperty)
         {
             var clonedGameObject = Object.Instantiate(gameObjectProperty.GameObject, gameObjectProperty.GameObject.transform.parent);
+            clonedGameObject.name = gameObjectProperty.GameObject.name;
             // ensure this is an overlay over the original object
             OverlayFirstOverSecond(clonedGameObject, gameObjectProperty.GameObject);
             var clonedGameObjectProperty = new PropertyGameObject()
@@ -874,6 +936,11 @@ namespace Bettr.Core
                 textMeshPro = clonedText,
             };
             return tmPro;
+        }
+
+        public void OverlayFirstOverSecond(PropertyGameObject firstGameObjectProperty, PropertyGameObject secondGameObjectProperty)
+        {
+            OverlayFirstOverSecond(firstGameObjectProperty.gameObject, secondGameObjectProperty.gameObject);
         }
 
         public void OverlayFirstOverSecond(GameObject firstGameObject, GameObject secondGameObject)
@@ -905,6 +972,19 @@ namespace Bettr.Core
         public void DestroyGameObject(GameObject gameObject)
         {
             Object.Destroy(gameObject);
+        }
+        
+        public void DestroyGameObject(PropertyGameObject gameObjectProperty)
+        {
+            Object.Destroy(gameObjectProperty.GameObject);
+        }
+        
+        public void DestroyGameObject(TilePropertyGameObjectGroup gameObjectGroupProperty)
+        {
+            foreach (var gameObjectProperty in gameObjectGroupProperty.gameObjectProperties)
+            {
+                DestroyGameObject(gameObjectProperty.value);
+            }
         }
 
         public void SetMaterialAlpha(GameObject go, float alpha)

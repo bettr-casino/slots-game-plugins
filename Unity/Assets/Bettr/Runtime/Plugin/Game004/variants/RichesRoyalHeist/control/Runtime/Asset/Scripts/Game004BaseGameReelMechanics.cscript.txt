@@ -41,7 +41,10 @@ end
 function Game004BaseGameReelMechanics:OnSpinReelsStopped(reel)
 end
 
-function Game004BaseGameReelMechanics:StartEngines(reel)
+function Game004BaseGameReelMechanics:StartEngines(reel, machine)
+    if self.ChooseASideMechanic then
+        self.ChooseASideMechanic:StartEngines(reel, machine)
+    end
 end
 
 function Game004BaseGameReelMechanics:OnOutcomeReceived(reel)

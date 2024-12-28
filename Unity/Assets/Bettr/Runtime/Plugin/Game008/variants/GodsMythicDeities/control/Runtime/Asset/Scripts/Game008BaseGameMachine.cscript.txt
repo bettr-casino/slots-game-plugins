@@ -135,7 +135,7 @@ end
 function Game008BaseGameMachine:StartEngines()
     local reelCount = Game008BaseGameLayout.ReelCount.First.Value
     for i = 1, reelCount parallel do
-        _G["Game008BaseGameReel" .. i]:StartEngines()
+        _G["Game008BaseGameReel" .. i]:StartEngines(self)
     end    
 end
 

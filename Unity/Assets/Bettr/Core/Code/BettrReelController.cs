@@ -16,12 +16,12 @@ namespace Bettr.Core
         [NonSerialized] private string MachineID;
         [NonSerialized] private string MachineVariantID;
         
-        [NonSerialized] private Table ReelTable;
-        [NonSerialized] private Table ReelStateTable;
-        [NonSerialized] private Table ReelSpinStateTable;
-        [NonSerialized] private Table SpinOutcomeTable;
-        [NonSerialized] private Table ReelSymbolsStateTable;
-        [NonSerialized] private Table ReelSymbolsTable;
+        public Table ReelTable { get; private set; }
+        public Table ReelStateTable { get; private set; }
+        public Table ReelSpinStateTable { get; private set; }
+        public Table SpinOutcomeTable { get; private set; }
+        public Table ReelSymbolsStateTable { get; private set; }
+        public Table ReelSymbolsTable { get; private set; }
         
         // TODO: FIXME move this to ReelStateTable
         [NonSerialized] private bool ShouldSpliceReel;

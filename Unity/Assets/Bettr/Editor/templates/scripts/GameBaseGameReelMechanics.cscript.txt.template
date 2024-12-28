@@ -48,7 +48,10 @@ end
 function {{machineName}}BaseGameReelMechanics:OnSpinReelsStopped(reel)
 end
 
-function {{machineName}}BaseGameReelMechanics:StartEngines(reel)
+function {{machineName}}BaseGameReelMechanics:StartEngines(reel, machine)
+    if self.ChooseASideMechanic then
+        self.ChooseASideMechanic:StartEngines(reel, machine)
+    end
 end
 
 function {{machineName}}BaseGameReelMechanics:OnOutcomeReceived(reel)

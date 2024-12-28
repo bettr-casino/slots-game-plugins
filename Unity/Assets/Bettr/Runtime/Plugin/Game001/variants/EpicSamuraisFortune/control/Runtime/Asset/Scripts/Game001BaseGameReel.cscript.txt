@@ -33,11 +33,11 @@ function Game001BaseGameReel:Awake()
 	self.Mechanics:Initialize(self)
 end
 
-function Game001BaseGameReel:StartEngines()
+function Game001BaseGameReel:StartEngines(machine)
     series
         do
             self.BettrReelController.StartEngines()
-            self.Mechanics:StartEngines(self)                          
+            self.Mechanics:StartEngines(self, machine)                          
         end
     end
 end
