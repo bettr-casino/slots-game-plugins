@@ -1,6 +1,7 @@
 // ReSharper disable All
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
 using UnityEngine;
@@ -28,6 +29,8 @@ namespace Bettr.Core
         
         [NonSerialized] private BettrUserController BettrUserController;
         [NonSerialized] private BettrMathController BettrMathController;
+
+        [NonSerialized] private List<string> ReelSymbolsForThisSpin;
 
         private void Awake()
         {
@@ -99,6 +102,35 @@ namespace Bettr.Core
             this.ReelSpinStateTable["ReelSpinState"] = "SpinStartedRollBack";
             this.ReelStateTable["OutcomeReceived"] = false;
             this.ShouldSpliceReel = false;
+
+            this.SetupReelSymbolsForSpin();
+        }
+
+        public string ReplaceSymbolForSpin(int zeroIndex, string newSymbol)
+        {
+            var reelSymbolCount = (int) (double) this.ReelStateTable["ReelSymbolCount"];
+            int oneIndexed = 1 +zeroIndex % reelSymbolCount;
+            var oldSymbol = this.ReelSymbolsForThisSpin[oneIndexed];
+            this.ReelSymbolsForThisSpin[oneIndexed] = newSymbol;
+            return oldSymbol;
+        }
+
+        public void SetupReelSymbolsForSpin()
+        {
+            // create a copy of the ReelSymbolsTable
+            if (this.ReelSymbolsForThisSpin == null)
+            {
+                this.ReelSymbolsForThisSpin = new List<string>();
+            }
+            this.ReelSymbolsForThisSpin.Clear();
+            this.ReelSymbolsForThisSpin.Add("Blank");
+
+            var length = this.ReelSymbolsTable.Length;
+            for (int i = 0; i < length; i++)
+            {
+                // 1 indexed
+                this.ReelSymbolsForThisSpin.Add((string) ((Table) this.ReelSymbolsTable[i + 1])["ReelSymbol"]);
+            }
         }
         
         public void SpinReelSpinStartedRollBack()
@@ -312,7 +344,7 @@ namespace Bettr.Core
             var reelSymbolCount = (int) (double) this.ReelStateTable["ReelSymbolCount"];
             var reelPosition = (int) (double) symbolState["ReelPosition"];
             var symbolStopIndex = 1 + (reelSymbolCount + reelStopIndex + reelPosition) % reelSymbolCount;
-            var reelSymbol = (string) ((Table) this.ReelSymbolsTable[symbolStopIndex])["ReelSymbol"];
+            var reelSymbol = this.ReelSymbolsForThisSpin[symbolStopIndex]; //(string) ((Table) this.ReelSymbolsTable[symbolStopIndex])["ReelSymbol"];
             var symbolGroupProperty = (TilePropertyGameObjectGroup) this.ReelTable[$"SymbolGroup{symbolIndex}"];
             if (symbolGroupProperty.Current != null)
             {

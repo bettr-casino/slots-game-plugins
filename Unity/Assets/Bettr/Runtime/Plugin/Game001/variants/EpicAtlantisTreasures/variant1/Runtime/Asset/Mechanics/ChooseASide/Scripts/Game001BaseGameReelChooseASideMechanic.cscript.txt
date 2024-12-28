@@ -19,7 +19,8 @@ end
 function Game001BaseGameReelChooseASideMechanic:Initialize(reel)
 end
 
-function Game001BaseGameReelChooseASideMechanic:StartEngines(reel)
-    BettrMechanicsController.AddMechanicsReelSymbolGroups("ChooseASide", reel.BettrReelController, nil)
+function Game001BaseGameReelChooseASideMechanic:StartEngines(reel, machine)
+    local source = machine.ChooseASideMechanicSymbolGroup
+    BettrMechanicsController.AddMechanicsReelSymbolGroups("ChooseASide", reel.BettrReelController, source)
 end
 

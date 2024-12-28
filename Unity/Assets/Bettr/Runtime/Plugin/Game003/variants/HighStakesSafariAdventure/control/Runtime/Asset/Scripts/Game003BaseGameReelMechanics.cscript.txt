@@ -48,6 +48,9 @@ function Game003BaseGameReelMechanics:StartEngines(reel, machine)
 end
 
 function Game003BaseGameReelMechanics:OnOutcomeReceived(reel)
+    if self.ChooseASideMechanic then
+        self.ChooseASideMechanic:OnOutcomeReceived(reel)
+    end
 end
 
 function Game003BaseGameReelMechanics:SpinEngines(reel)

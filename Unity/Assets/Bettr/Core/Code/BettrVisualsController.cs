@@ -28,6 +28,7 @@ namespace Bettr.Core
             {"SLOT_OVERLAY", "Camera_Overlay"},
             {"SLOT_REELS_OVERLAY", "Camera_Reels_Overlay"},
             {"SLOT_TRANSITION", "Camera_Transition"},
+            {"Default", "Main Camera"},
         };
         
         Dictionary<string, Camera> _layerToCamera = new Dictionary<string, Camera>();
@@ -848,46 +849,8 @@ namespace Bettr.Core
             var particleSystem = particleSystemProperty.particleSystem;
             particleSystem.Stop();
         }
-        
-        public void AddSymbolGroup(TilePropertyGameObjectGroup source, TilePropertyGameObjectGroup target)
-        {
-            // Get the first gameObject from the target
-            var targetGameObject = target.gameObjectProperties[0].value.gameObject;
 
-            // Get its parent game object
-            var targetSymbolGroupGameObject = targetGameObject.transform.parent.gameObject;
-
-            // Create a new GameObject with the same parent as targetSymbolGroupGameObject
-            var newSymbolGroupGameObject = new GameObject(source.groupKey)
-            {
-                transform =
-                {
-                    parent = targetSymbolGroupGameObject.transform.parent
-                }
-            };
-
-            // Ensure the clonedSource game objects are children of the newSymbolGroupGameObject
-            foreach (var gameObjectProperty in source.gameObjectProperties)
-            {
-                gameObjectProperty.value.gameObject.transform.parent = newSymbolGroupGameObject.transform;
-            }
-        }
-
-        public void RemoveSymbolGroup(TilePropertyGameObjectGroup source)
-        {
-            var sourceGameObject = source.gameObjectProperties[0].value.gameObject;
-            // get its parent game Object
-            var sourceSymbolGroupGameObject = sourceGameObject.transform.parent.gameObject;
-            // destroy each of the gameObjects in source
-            foreach (var gameObjectProperty in source.gameObjectProperties)
-            {
-                Object.Destroy(gameObjectProperty.value.gameObject);
-            }
-            // destroy the sourceSymbolGroupGameObject
-            Object.Destroy(sourceSymbolGroupGameObject);
-        }
-
-        public TilePropertyGameObjectGroup CloneAndOverlayGroup(TilePropertyGameObjectGroup group)
+        public TilePropertyGameObjectGroup CloneGameObjectGroup(TilePropertyGameObjectGroup group)
         {
             var groupClone = new TilePropertyGameObjectGroup
             {
@@ -897,7 +860,7 @@ namespace Bettr.Core
             foreach (var property in group.gameObjectProperties)
             {
                 var value = property.value;
-                value = BettrVisualsController.Instance.CloneAndOverlay(value);
+                value = Clone(value);
                 
                 var propertyClone = new TilePropertyGameObject
                 {
@@ -908,6 +871,17 @@ namespace Bettr.Core
             }
             
             return groupClone;
+        }
+
+        public PropertyGameObject Clone(PropertyGameObject gameObjectProperty)
+        {
+            var clonedGameObject = Object.Instantiate(gameObjectProperty.GameObject, gameObjectProperty.GameObject.transform.parent);
+            clonedGameObject.name = gameObjectProperty.GameObject.name;
+            var clonedGameObjectProperty = new PropertyGameObject()
+            {
+                gameObject = clonedGameObject,
+            };
+            return clonedGameObjectProperty;
         }
         
         public PropertyGameObject CloneAndOverlay(PropertyGameObject gameObjectProperty)

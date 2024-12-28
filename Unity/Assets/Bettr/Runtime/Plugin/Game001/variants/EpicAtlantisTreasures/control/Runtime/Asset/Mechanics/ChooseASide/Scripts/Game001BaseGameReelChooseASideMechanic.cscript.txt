@@ -7,6 +7,9 @@ Game001BaseGameReelChooseASideMechanic = {
         Variant = "EpicAtlantisTreasures",
         Experiment = "control",
     },
+    State = {
+        ReelSymbolGroups = nil,
+    },
 }
 
 function Game001BaseGameReelChooseASideMechanic:new(o)
@@ -16,11 +19,20 @@ function Game001BaseGameReelChooseASideMechanic:new(o)
 	return o
 end
 
+function Game001BaseGameReelChooseASideMechanic:destroy()
+	System.Print("Game001BaseGameReelChooseASideMechanic destroy tile id={0}", self.id)
+end
+
 function Game001BaseGameReelChooseASideMechanic:Initialize(reel)
 end
 
 function Game001BaseGameReelChooseASideMechanic:StartEngines(reel, machine)
     local source = machine.ChooseASideMechanicSymbolGroup
-    BettrMechanicsController.AddMechanicsReelSymbolGroups("ChooseASide", reel.BettrReelController, source)
+    self.State.ReelSymbolGroups = BettrMechanicsController.AddSymbolsToReelSymbolGroups("ChooseASide", reel.BettrReelController, source)
+end
+
+function Game001BaseGameReelChooseASideMechanic:OnOutcomeReceived(reel)
+    local outcomeReelStopIndex = reel.BettrReelController.SpinOutcomeTable["OutcomeReelStopIndex"];
+    reel.BettrReelController.ReplaceSymbolForSpin(outcomeReelStopIndex, "BN1")
 end
 

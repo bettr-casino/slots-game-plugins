@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text;
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
@@ -29,48 +30,65 @@ namespace Bettr.Core
             return table;
         }
 
-        public void AddMechanicsReelSymbolGroups(string mechanicName, BettrReelController reelController, TilePropertyGameObjectGroup source)
+        public List<TilePropertyGameObjectGroup> AddSymbolsToReelSymbolGroups(string mechanicName, BettrReelController reelController, TilePropertyGameObjectGroup symbolPropertiesGroup)
+        {
+            var newSymbolPropertiesGroups = new List<TilePropertyGameObjectGroup>();
+            var symbolCount = (int) (double) reelController.ReelStateTable["SymbolCount"];
+            for (var symbolIndex = 1; symbolIndex <= symbolCount; symbolIndex++)
+            {
+                var symbolGroupKey = $"SymbolGroup{symbolIndex}";
+                var symbolGroupProperty = (TilePropertyGameObjectGroup) reelController.ReelTable[symbolGroupKey];
+                if (symbolGroupProperty == null)
+                {
+                    throw new System.Exception($"SymbolGroup{symbolIndex} is null");
+                }
+                // at least one symbol should exist in symbolGroupProperty
+                if (symbolGroupProperty.gameObjectProperties.Count == 0)
+                {
+                    throw new System.Exception($"SymbolGroup{symbolIndex} gameObjectProperties.Count == 0");
+                }
+                // get the 1st symbol
+                var firstSymbolProperty = symbolGroupProperty.gameObjectProperties[0];
+                var firstSymbolGameObject = firstSymbolProperty.value.GameObject;
+                // get the parent
+                var parent = firstSymbolGameObject.transform.parent;
+                // clone symbolPropertiesGroup
+                var newSymbolPropertiesGroup =
+                    BettrVisualsController.Instance.CloneGameObjectGroup(symbolPropertiesGroup);
+                foreach (var newSymbolProperty in newSymbolPropertiesGroup.gameObjectProperties)
+                {
+                    var newSymbolGameObject = newSymbolProperty.value.GameObject;
+                    symbolGroupProperty.gameObjectProperties.Add(newSymbolProperty); 
+                    newSymbolGameObject.transform.SetParent(parent, false);
+                }
+                newSymbolPropertiesGroups.Add(newSymbolPropertiesGroup);
+            }
+
+            return newSymbolPropertiesGroups;
+        }
+
+        public void RemoveSymbolsFromReelSymbolGroups(string mechanicName, BettrReelController reelController, List<TilePropertyGameObjectGroup> newSymbolPropertiesGroups)
         {
             var symbolCount = (int) (double) reelController.ReelStateTable["SymbolCount"];
             for (var symbolIndex = 1; symbolIndex <= symbolCount; symbolIndex++)
             {
-                AddMechanicsReelSymbolGroup(mechanicName, reelController, source, symbolIndex);
+                var symbolGroupKey = $"SymbolGroup{symbolIndex}";
+                var symbolGroupProperty = (TilePropertyGameObjectGroup) reelController.ReelTable[symbolGroupKey];
+                if (symbolGroupProperty == null)
+                {
+                    throw new System.Exception($"SymbolGroup{symbolIndex} is null");
+                }
+                var newSymbolPropertiesGroup = newSymbolPropertiesGroups[symbolIndex - 1];
+                var newSymbolProperties = newSymbolPropertiesGroup.gameObjectProperties;
+                // remove symbolGroupProperty.gameObjectProperties entries if the key matches a  newSymbolProperties
+                symbolGroupProperty.gameObjectProperties.RemoveAll(newSymbolProperties.Contains);
+                // set parent of newSymbolProperties.Value.GameObject to null and destroy the GameObject
+                foreach (var newSymbolProperty in newSymbolProperties)
+                {
+                    newSymbolProperty.value.GameObject.transform.SetParent(null);
+                    Object.Destroy(newSymbolProperty.value.GameObject);
+                }
             }
-        }
-
-        public void RemoveMechanicsReelSymbolGroups(string mechanicName, BettrReelController reelController)
-        {
-            var symbolCount = (int) (double) reelController.ReelStateTable["SymbolCount"];
-            for (var symbolIndex = 1; symbolIndex <= symbolCount; symbolIndex++)
-            {
-                RemoveMechanicsReelSymbolGroup(mechanicName, reelController, symbolIndex);
-            }
-        }
-
-        public void AddMechanicsReelSymbolGroup(string mechanicName, BettrReelController reelController,
-            TilePropertyGameObjectGroup source, int symbolIndex)
-        {
-            var symbolGroupKey = $"SymbolGroup{symbolIndex}";
-            var target = (TilePropertyGameObjectGroup) reelController.ReelTable[symbolGroupKey];
-            source = BettrVisualsController.Instance.CloneAndOverlayGroup(source);
-            BettrVisualsController.Instance.AddSymbolGroup(source, target);
-            // append the mechanic symbol group key
-            var mechanicSymbolGroupKey = $"{mechanicName}{symbolGroupKey}";
-            // add to reelTable
-            reelController.ReelTable[mechanicSymbolGroupKey] = source;
-        }
-
-        public void RemoveMechanicsReelSymbolGroup(string mechanicName, BettrReelController reelController, int symbolIndex)
-        {
-            var symbolGroupKey = $"SymbolGroup{symbolIndex}";
-            var mechanicSymbolGroupKey = $"{mechanicName}{symbolGroupKey}";
-            // remove from ReelTable
-            var source = (TilePropertyGameObjectGroup) reelController.ReelTable[mechanicSymbolGroupKey];
-            if (source != null)
-            {
-                BettrVisualsController.Instance.RemoveSymbolGroup(source);
-            }
-            reelController.ReelTable.Remove(mechanicSymbolGroupKey);
         }
         
 
