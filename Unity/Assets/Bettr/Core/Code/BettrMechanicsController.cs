@@ -30,6 +30,38 @@ namespace Bettr.Core
             return table;
         }
 
+        public List<GameObject> GetSymbolMatrixGameObjects(string machineName, int reelCount, params string[] symbols)
+        {
+            var symbolMatrixGameObjects = new List<GameObject>();
+            var symbolMatrix = GetSymbolMatrix(machineName, reelCount, symbols);
+            foreach (var reelMatrixSymbols in symbolMatrix)
+            {
+                foreach (var symbol in reelMatrixSymbols)
+                {
+                    var gameObject = symbol.value.GameObject;
+                    // get the Quad game object within this gameObject
+                    var quadGameObject = gameObject.transform.Find("Pivot").Find("Quad").gameObject;
+                    symbolMatrixGameObjects.Add(quadGameObject);
+                }
+            }
+            return symbolMatrixGameObjects;
+        }
+
+        public List<List<TilePropertyGameObject>> GetSymbolMatrix(string machineName, int reelCount, params string[] symbols)
+        {
+            var symbolMatrixSymbols = new List<List<TilePropertyGameObject>>();
+            var globals = TileController.LuaScript.Globals;
+            for (int i = 0; i < reelCount; i++)
+            {
+                var globalKey = $"{machineName}BaseGameReel{i + 1}";
+                var reelTable = (Table) globals[globalKey];
+                var reelController = (BettrReelController) reelTable["BettrReelController"];
+                var reelMatrixSymbols = reelController.GetReelMatrixSymbols(symbols);
+                symbolMatrixSymbols.Add(reelMatrixSymbols);
+            }
+            return symbolMatrixSymbols;
+        }
+
         public List<TilePropertyGameObjectGroup> AddSymbolsToReelSymbolGroups(string mechanicName, BettrReelController reelController, TilePropertyGameObjectGroup symbolPropertiesGroup)
         {
             var newSymbolPropertiesGroups = new List<TilePropertyGameObjectGroup>();

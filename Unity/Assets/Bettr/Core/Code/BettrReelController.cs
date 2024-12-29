@@ -330,6 +330,36 @@ namespace Bettr.Core
             }
         }
 
+        public List<TilePropertyGameObject> GetReelMatrixSymbols(params string[] symbols)
+        {
+            var reelMatrixSymbols = new List<TilePropertyGameObject>();
+            var symbolCount = (int) (double) this.ReelStateTable["SymbolCount"];
+            for (var symbolIndex = 1; symbolIndex <= symbolCount; symbolIndex++)
+            {
+                var symbolGroupProperty = (TilePropertyGameObjectGroup) this.ReelTable[$"SymbolGroup{symbolIndex}"];
+                var currentKey = symbolGroupProperty.CurrentKey;
+                // find the corresponding TilePropertyGameObject in the symbolGroupProperty.GameObjectProperties
+                var symbolProperty = symbolGroupProperty.gameObjectProperties.Find(x => x.key == currentKey);
+                if (symbolProperty != null)
+                {
+                    // if symbols is not null, then the symbol should be in the symbols array to be added 
+                    // to the reelMatrixSymbols list else add it by default
+                    if (symbols != null)
+                    {
+                        if (Array.Exists(symbols, symbol => symbol == currentKey))
+                        {
+                            reelMatrixSymbols.Add(symbolProperty);
+                        }
+                    }
+                    else
+                    {
+                        reelMatrixSymbols.Add(symbolProperty);
+                    }
+                }
+            }
+            return reelMatrixSymbols;
+        }
+
         public void UpdateReelSymbolForSpin(int symbolIndex)
         {
             var symbolState = (Table) this.ReelSymbolsStateTable[symbolIndex];

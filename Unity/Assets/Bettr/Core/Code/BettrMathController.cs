@@ -29,6 +29,31 @@ namespace Bettr.Core
             var table = GetTableArray(tableName, machineID, mechanicName);
             return table;
         }
+
+        public Table GetBaseGameMechanicDataRow(string machineID, string mechanicName, params string[] kvPairs)
+        {
+            // get the table
+            var table = GetBaseGameMechanicDataTable(machineID, mechanicName);
+            // find the row where the kvPairs match
+            for (int i = 0; i < table.Length; i++)
+            {
+                var row = (Table) table[i + 1];
+                for (int j = 0; j < kvPairs.Length; j = j + 2)
+                {
+                    var key = kvPairs[j];
+                    var value = kvPairs[j + 1];
+                    if (row[key].ToString() != value)
+                    {
+                        break;
+                    }
+                    if (j == kvPairs.Length - 2)
+                    {
+                        return row;
+                    }
+                }
+            }
+            return null;
+        }
         
         public Table GetBaseGameMechanicDataMatrix(string machineID, string mechanicName)
         {
@@ -36,7 +61,7 @@ namespace Bettr.Core
             var table = GetTableArray(tableName, machineID, mechanicName);
             return table;
         }
-        
+
         public Table GetBaseGameMechanicSummaryTable(string machineID, string mechanicName)
         {
             var tableName = $"BaseGame{mechanicName}Summary";

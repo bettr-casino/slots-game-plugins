@@ -225,6 +225,9 @@ function Game001BaseGameMachineChooseASideMechanic:OnBaseGameSpinCompleted(machi
                 machine:OnBaseGameSpinCompleted()
                 return
             end
+            local goodSymbol = BettrMathController.GetBaseGameMechanicDataRow(self.Config.Machine, "ChooseASide", "Side", "Good")["Symbol"]
+            local evilSymbol = BettrMathController.GetBaseGameMechanicDataRow(self.Config.Machine, "ChooseASide", "Side", "Evil")["Symbol"]
+            System.Print("Game001BaseGameMachineChooseASideMechanic:OnBaseGameSpinCompleted goodSymbol={0} evilSymbol={1}", goodSymbol, evilSymbol)
             local increment = Game001BaseGameChooseASide.ChooseASide.First.Increment
             local sliderOffset = self.State.MechanicsTable.summary.sliderOffset
             local newSliderOffset = sliderOffset + increment
@@ -246,12 +249,23 @@ function Game001BaseGameMachineChooseASideMechanic:OnBaseGameSpinCompleted(machi
             end
             local side = summary.Side
             side = string.upper(side)
+            local symbol = goodSymbol
+            if side == "EVIL" then
+                symbol = evilSymbol
+            end
             local userChoice = self.State.MechanicsTable.summary.choice
             userChoice = string.upper(userChoice)
             local sliderPointerGameObject = machine.ChooseASideMechanicSliderPointer.GameObject
             BettrVisualsController.FireballMoveTo(nil, sliderPointerGameObject, 0, 1, false)
             local sliderGroup = machine.ChooseASideMechanicSliderSlots
-            local sliderSlot = sliderGroup["SliderSlot" .. sliderIndex]                       
+            local sliderSlot = sliderGroup["SliderSlot" .. sliderIndex]
+            local reelCount = Game001BaseGameLayout.ReelCount.First.Value
+            local symbolGameObjects = BettrMechanicsController.GetSymbolMatrixGameObjects(self.Config.Machine, reelCount, "BN1")
+            for i = 1, #symbolGameObjects parallel do
+                local symbolGameObject = symbolGameObjects[i]
+                BettrVisualsController.FireballMoveTo(symbolGameObject, sliderPointerGameObject, 0, 1, true)
+            end
+                                   
             BettrVisualsController.TweenGameObject(sliderPointerGameObject, nil, sliderSlot.GameObject, 1, true, true)        
             local payoutText = machine.ChooseASideMechanicGoodPayout
             if side == "EVIL" then
