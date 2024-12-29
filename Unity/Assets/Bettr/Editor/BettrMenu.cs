@@ -482,9 +482,11 @@ namespace Bettr.Editor
                 var assetLabel = "";
                 if (isTextFile)
                 {
-                    // file is of the form Game<NNN><Variant>.txt
-                    var game = assetName.Substring(0, "Game001".Length);
-                    var variantName = assetName.Substring(game.Length);
+                    // file is of the form Game<NNN><Variant>.txt or of the form Game<NNN><Variant>_<Text>.txt
+                    // get the 1st half before the __
+                    var subAssetName = assetName.Split("__")[0];
+                    var game = subAssetName.Substring(0, "Game001".Length);
+                    var variantName = subAssetName.Substring(game.Length);
                     assetLabel = $"LobbyCard{game}{variantName}";
                     assetLabel = assetLabel.ToLower();
                 }

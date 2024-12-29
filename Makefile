@@ -46,6 +46,7 @@ LOBBY_CARD_IMAGES_DIR := $(PWD)/Unity/Assets/Bettr/Runtime/Plugin/LobbyCard/vari
 GENERATED_BACKGROUND_IMAGES_DIR := $(PWD)/../../bettr-infrastructure/bettr-infrastructure/tools/pipelines/game-gpt/pipelines/gpt-generated-files/splash-images
 
 GENERATED_LOBBY_PREVIEW_DIR := $(PWD)/../../bettr-infrastructure/bettr-infrastructure/tools/pipelines/game-gpt/pipelines/gpt-generated-files/preview
+GENERATED_LOBBY_DATA_DIR := $(PWD)/../../bettr-infrastructure/bettr-infrastructure/tools/publish-data/published_lobby_data
 LOBBY_CARD_PREVIEW_DIR := $(PWD)/Unity/Assets/Bettr/Runtime/Plugin/LobbyCard/variants/v0_1_0/
 
 S3_BUCKET := bettr-casino-assets
@@ -230,7 +231,7 @@ build-main-lobby-assets-webgl: prepare-project
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "mainlobbyv0_1_0" -assetSubLabel "control" -buildTarget WebGL; \
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "mainlobbyv0_1_0_scenes" -assetSubLabel "control" -buildTarget WebGL; \
 
-build-lobby-assets-webgl: build-main-lobby-assets-webgl build-lobby-cards-webgl
+build-lobby-assets-webgl: build-main-lobby-assets-webgl build-lobbycard-assets-webgl build-lobby-cards-webgl
 
 build-lobbycard-assets-webgl: prepare-project
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildIndividualLobbyCardAssetBundle -assetSubLabel "control" -buildTarget WebGL
@@ -366,6 +367,29 @@ sync-lobby-preview: prepare-project
 				cp "$${VARIANT_PREVIEW}" "$${LOBBY_CARD_PREVIEW_VARIANT_DIR}/$${MACHINE_NAME}/LobbyCard/Text/$${LOBBY_CARD_PREVIEW}"; \
 			else \
 				echo "Skipping directory: $${GENERATED_LOBBY_PREVIEW} (does not match Game<NNN> pattern)"; \
+			fi; \
+		done; \
+	done;
+
+
+sync-lobby-data: prepare-project
+	@echo "Running sync-lobby-data..."
+	GENERATED_LOBBY_DATA_DIR="${GENERATED_LOBBY_DATA_DIR}"; \
+	LOBBY_CARD_PREVIEW_DIR="${LOBBY_CARD_PREVIEW_DIR}"; \
+	echo "Copying files from GENERATED_LOBBY_DATA_DIR=$${GENERATED_LOBBY_DATA_DIR} to LOBBY_CARD_PREVIEW_DIR=$${LOBBY_CARD_PREVIEW_DIR}"; \
+	for VARIANT_DIR in "$${GENERATED_LOBBY_DATA_DIR}/"*/; do \
+		VARIANT=$$(basename "$${VARIANT_DIR}"); \
+		LOBBY_CARD_PREVIEW_VARIANT_DIR="$${LOBBY_CARD_PREVIEW_DIR}/$${VARIANT}/Runtime/Asset/"; \
+		echo "Processing VARIANT: $${VARIANT} VARIANT_DIR: $${VARIANT_DIR} LOBBY_CARD_PREVIEW_DIR: $${LOBBY_CARD_PREVIEW_DIR}"; \
+		for VARIANT_PREVIEW in "$${VARIANT_DIR}"*; do \
+			GENERATED_LOBBY_DATA=$$(basename "$${VARIANT_PREVIEW}"); \
+			if [[ "$${GENERATED_LOBBY_DATA}" =~ ^Game[0-9]{3}.*\.txt$$ ]]; then \
+				echo "Processing GENERATED_LOBBY_DATA: $${GENERATED_LOBBY_DATA} VARIANT_PREVIEW: $${VARIANT_PREVIEW}"; \
+				MACHINE_NAME=$$(echo "$${GENERATED_LOBBY_DATA}" | sed -E 's/(Game[0-9]{3}).*/\1/'); \
+				mkdir -p "$${LOBBY_CARD_PREVIEW_VARIANT_DIR}/$${MACHINE_NAME}/LobbyCard/Text"; \
+				cp "$${VARIANT_PREVIEW}" "$${LOBBY_CARD_PREVIEW_VARIANT_DIR}/$${MACHINE_NAME}/LobbyCard/Text/$${GENERATED_LOBBY_DATA}"; \
+			else \
+				echo "Skipping directory: $${GENERATED_LOBBY_DATA} (does not match Game<NNN> pattern)"; \
 			fi; \
 		done; \
 	done;

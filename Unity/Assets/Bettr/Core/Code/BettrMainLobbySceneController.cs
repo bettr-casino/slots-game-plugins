@@ -8,6 +8,7 @@ using CrayonScript.Code;
 using CrayonScript.Interpreter;
 using CrayonScript.Interpreter.Execution.VM;
 using Newtonsoft.Json;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
@@ -480,6 +481,8 @@ namespace Bettr.Core
             // split the textureName which is of the form Game<NNN>__<Variant>__LobbyCard into Game<NNN><Variant>
             var textAssetName = textureName.Replace("__LobbyCard", "").Replace("__", "");
             var textAsset = cachedAssetBundle.LoadAsset<TextAsset>(textAssetName);
+            var textMechanicsAssetName = $"{textAssetName}__Mechanics";
+            var textMechanicsAsset = cachedAssetBundle.LoadAsset<TextAsset>(textMechanicsAssetName);
             // get the Details GameObject which has the TextMeshPro input field which is read only
             var detailsGameObject = FindChildRecursive(gameDetails.GameObject, "Details");
             if (detailsGameObject == null)
@@ -488,16 +491,18 @@ namespace Bettr.Core
                 yield break;
             }
             // set the text of the TextMeshPro input field
-            var textMeshPro = detailsGameObject.GetComponent<TMPro.TMP_InputField>();
-            if (textMeshPro == null)
+            var tmpInputField = detailsGameObject.GetComponent<TMPro.TMP_InputField>();
+            if (tmpInputField == null)
             {
                 Debug.LogError("LoadLobbySideBar detailsGameObject textMeshPro is null lobbyCardName={lobbyCardName}");
                 yield break;
             }
             // set the rich text to true
-            textMeshPro.richText = true;
+            tmpInputField.richText = true;
             // set the text to the textAsset text
-            textMeshPro.text = textAsset.text;
+            tmpInputField.text = textAsset.text;
+            tmpInputField.text += "\n\n";
+            tmpInputField.text += textMechanicsAsset.text;
             
             var (machineBundleName, machineBundleVariant) = GetMachineBundleDetails(lobbyCardName);
 
