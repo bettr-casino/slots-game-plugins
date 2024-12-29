@@ -32,7 +32,19 @@ function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:StartEngines(reel, 
 end
 
 function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:OnOutcomeReceived(reel)
+    local thisReelID = reel.ReelID
+    local topSymbolCount = {{machineName}}BaseGameReelState[thisReelID].First.TopSymbolCount
     local outcomeReelStopIndex = reel.BettrReelController.SpinOutcomeTable["OutcomeReelStopIndex"];
-    reel.BettrReelController.ReplaceSymbolForSpin(outcomeReelStopIndex, "BN1")
+    local matrix = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, "{{mechanicName}}")
+    for i = 1, #matrix do
+        local row = matrix[i]
+        local reelID = row["ReelID"]
+        if reelID == thisReelID then
+            local rowIndex = row["RowIndex"]
+            local symbol = row["Symbol"]
+            local reelStopIndex = outcomeReelStopIndex + rowIndex - topSymbolCount
+            reel.BettrReelController.ReplaceSymbolForSpin(reelStopIndex, symbol)
+        end
+    end
 end
 

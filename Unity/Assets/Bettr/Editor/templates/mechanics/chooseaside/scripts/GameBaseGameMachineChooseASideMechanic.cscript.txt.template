@@ -185,11 +185,9 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_SetupMechanic(m
             BettrVisualsController.TweenGameObject(machine.{{mechanicName}}MechanicSliderPointer.GameObject, middleSliderSlot.GameObject, startSliderSlot.GameObject, 1, true, true)
             startSliderText.SetText("YOU WIN")
             System.WaitForSeconds(1)
-            startSliderText.SetText(startSliderTextOriginal)
             BettrVisualsController.TweenGameObject(machine.{{mechanicName}}MechanicSliderPointer.GameObject, startSliderSlot.GameObject, endSliderSlot.GameObject, 2, true, true)
             endSliderText.SetText("YOU LOSE")
             System.WaitForSeconds(1)
-            endSliderText.SetText(endSliderTextOriginal)
             
             machine.{{mechanicName}}MechanicGoodPayout.GameObject.SetActive(true)
             machine.{{mechanicName}}MechanicEvilPayout.GameObject.SetActive(true)
@@ -225,6 +223,9 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                 machine:OnBaseGameSpinCompleted()
                 return
             end
+            local goodSymbol = BettrMathController.GetBaseGameMechanicDataRow(self.Config.Machine, "{{mechanicName}}", "Side", "Good")["Symbol"]
+            local evilSymbol = BettrMathController.GetBaseGameMechanicDataRow(self.Config.Machine, "{{mechanicName}}", "Side", "Evil")["Symbol"]
+            System.Print("{{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCompleted goodSymbol={0} evilSymbol={1}", goodSymbol, evilSymbol)
             local increment = {{machineName}}BaseGame{{mechanicName}}.{{mechanicName}}.First.Increment
             local sliderOffset = self.State.MechanicsTable.summary.sliderOffset
             local newSliderOffset = sliderOffset + increment
@@ -246,12 +247,22 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             end
             local side = summary.Side
             side = string.upper(side)
+            local symbol = goodSymbol
+            if side == "EVIL" then
+                symbol = evilSymbol
+            end
             local userChoice = self.State.MechanicsTable.summary.choice
             userChoice = string.upper(userChoice)
             local sliderPointerGameObject = machine.{{mechanicName}}MechanicSliderPointer.GameObject
-            BettrVisualsController.FireballMoveTo(nil, sliderPointerGameObject, 0, 1, false)
             local sliderGroup = machine.{{mechanicName}}MechanicSliderSlots
-            local sliderSlot = sliderGroup["SliderSlot" .. sliderIndex]                       
+            local sliderSlot = sliderGroup["SliderSlot" .. sliderIndex]
+            local reelCount = {{machineName}}BaseGameLayout.ReelCount.First.Value
+            local symbolGameObjects = BettrMechanicsController.GetSymbolMatrixGameObjects(self.Config.Machine, reelCount, symbol)
+            for i = 1, #symbolGameObjects parallel do
+                local symbolGameObject = symbolGameObjects[i]
+                BettrVisualsController.FireballMoveTo(symbolGameObject, sliderPointerGameObject, 0, 1, true)
+            end                                   
+            BettrVisualsController.FireballMoveTo(nil, sliderPointerGameObject, 0, 1, false)
             BettrVisualsController.TweenGameObject(sliderPointerGameObject, nil, sliderSlot.GameObject, 1, true, true)        
             local payoutText = machine.{{mechanicName}}MechanicGoodPayout
             if side == "EVIL" then
@@ -324,11 +335,7 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             self:_HandleWin(machine, wonSide, userChoice)
             self:_HandleLoss(machine, wonSide, userChoice)
             
-            machine:OnBaseGameSpinCompleted()
-            
-            self:_ResetMechanic(machine)            
-            self:_StartMechanic(machine)
-            self:_ShowMachine(machine)
+            machine:OnBaseGameSpinCompleted()            
         end
     end
 end
@@ -436,6 +443,10 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_HandleWin(machi
             local sliderGroup = machine.{{mechanicName}}MechanicSliderSlots
             local sliderSlot = sliderGroup["SliderSlot" .. sliderIndex]                       
             BettrVisualsController.TweenGameObject(sliderPointerGameObject, nil, sliderSlot.GameObject, 1, true, true)    
+            
+            self:_ResetMechanic(machine)            
+            self:_StartMechanic(machine)
+            self:_ShowMachine(machine)
         end
     end
 end
@@ -491,8 +502,11 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_HandleLoss(mach
             local sliderPointerGameObject = machine.{{mechanicName}}MechanicSliderPointer.GameObject
             local sliderGroup = machine.{{mechanicName}}MechanicSliderSlots
             local sliderSlot = sliderGroup["SliderSlot" .. sliderIndex]                       
-            BettrVisualsController.TweenGameObject(sliderPointerGameObject, nil, sliderSlot.GameObject, 1, true, true)                         
+            BettrVisualsController.TweenGameObject(sliderPointerGameObject, nil, sliderSlot.GameObject, 1, true, true)
             
+            self:_ResetMechanic(machine)            
+            self:_StartMechanic(machine)
+            self:_ShowMachine(machine)                       
         end
     end
 end

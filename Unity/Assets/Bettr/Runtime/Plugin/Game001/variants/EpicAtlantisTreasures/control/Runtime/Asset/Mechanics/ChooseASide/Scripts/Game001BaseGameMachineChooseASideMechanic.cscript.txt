@@ -185,11 +185,9 @@ function Game001BaseGameMachineChooseASideMechanic:_SetupMechanic(machine)
             BettrVisualsController.TweenGameObject(machine.ChooseASideMechanicSliderPointer.GameObject, middleSliderSlot.GameObject, startSliderSlot.GameObject, 1, true, true)
             startSliderText.SetText("YOU WIN")
             System.WaitForSeconds(1)
-            startSliderText.SetText(startSliderTextOriginal)
             BettrVisualsController.TweenGameObject(machine.ChooseASideMechanicSliderPointer.GameObject, startSliderSlot.GameObject, endSliderSlot.GameObject, 2, true, true)
             endSliderText.SetText("YOU LOSE")
             System.WaitForSeconds(1)
-            endSliderText.SetText(endSliderTextOriginal)
             
             machine.ChooseASideMechanicGoodPayout.GameObject.SetActive(true)
             machine.ChooseASideMechanicEvilPayout.GameObject.SetActive(true)
@@ -256,16 +254,15 @@ function Game001BaseGameMachineChooseASideMechanic:OnBaseGameSpinCompleted(machi
             local userChoice = self.State.MechanicsTable.summary.choice
             userChoice = string.upper(userChoice)
             local sliderPointerGameObject = machine.ChooseASideMechanicSliderPointer.GameObject
-            BettrVisualsController.FireballMoveTo(nil, sliderPointerGameObject, 0, 1, false)
             local sliderGroup = machine.ChooseASideMechanicSliderSlots
             local sliderSlot = sliderGroup["SliderSlot" .. sliderIndex]
             local reelCount = Game001BaseGameLayout.ReelCount.First.Value
-            local symbolGameObjects = BettrMechanicsController.GetSymbolMatrixGameObjects(self.Config.Machine, reelCount, "BN1")
+            local symbolGameObjects = BettrMechanicsController.GetSymbolMatrixGameObjects(self.Config.Machine, reelCount, symbol)
             for i = 1, #symbolGameObjects parallel do
                 local symbolGameObject = symbolGameObjects[i]
                 BettrVisualsController.FireballMoveTo(symbolGameObject, sliderPointerGameObject, 0, 1, true)
-            end
-                                   
+            end                                   
+            BettrVisualsController.FireballMoveTo(nil, sliderPointerGameObject, 0, 1, false)
             BettrVisualsController.TweenGameObject(sliderPointerGameObject, nil, sliderSlot.GameObject, 1, true, true)        
             local payoutText = machine.ChooseASideMechanicGoodPayout
             if side == "EVIL" then
@@ -338,11 +335,7 @@ function Game001BaseGameMachineChooseASideMechanic:OnBaseGameSpinCompleted(machi
             self:_HandleWin(machine, wonSide, userChoice)
             self:_HandleLoss(machine, wonSide, userChoice)
             
-            machine:OnBaseGameSpinCompleted()
-            
-            self:_ResetMechanic(machine)            
-            self:_StartMechanic(machine)
-            self:_ShowMachine(machine)
+            machine:OnBaseGameSpinCompleted()            
         end
     end
 end
@@ -450,6 +443,10 @@ function Game001BaseGameMachineChooseASideMechanic:_HandleWin(machine, wonSide, 
             local sliderGroup = machine.ChooseASideMechanicSliderSlots
             local sliderSlot = sliderGroup["SliderSlot" .. sliderIndex]                       
             BettrVisualsController.TweenGameObject(sliderPointerGameObject, nil, sliderSlot.GameObject, 1, true, true)    
+            
+            self:_ResetMechanic(machine)            
+            self:_StartMechanic(machine)
+            self:_ShowMachine(machine)
         end
     end
 end
@@ -505,8 +502,11 @@ function Game001BaseGameMachineChooseASideMechanic:_HandleLoss(machine, wonSide,
             local sliderPointerGameObject = machine.ChooseASideMechanicSliderPointer.GameObject
             local sliderGroup = machine.ChooseASideMechanicSliderSlots
             local sliderSlot = sliderGroup["SliderSlot" .. sliderIndex]                       
-            BettrVisualsController.TweenGameObject(sliderPointerGameObject, nil, sliderSlot.GameObject, 1, true, true)                         
+            BettrVisualsController.TweenGameObject(sliderPointerGameObject, nil, sliderSlot.GameObject, 1, true, true)
             
+            self:_ResetMechanic(machine)            
+            self:_StartMechanic(machine)
+            self:_ShowMachine(machine)                       
         end
     end
 end
