@@ -11,6 +11,8 @@ require "Core"
     State = {
         MechanicsPrefab = nil,
         MechanicsTable = nil,
+        SliderTextGood = nil,
+        SliderTextEvil = nil,
     }
 }
 
@@ -63,6 +65,10 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_StartMechanic(m
      do
         self.State.MechanicsPrefab.SetActive(true)        
         System.WaitForFrame(1)
+        local goodSliderText = machine.{{mechanicName}}MechanicGoodText.Text
+        local evilSliderText = machine.{{mechanicName}}MechanicEvilText.Text
+        self.State.SliderTextGood = goodSliderText
+        self.State.SliderTextEvil = evilSliderText
         local sliderOffset = 0
         local result = ""
         if self.State.MechanicsTable ~= nil then
@@ -120,12 +126,28 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_ShowMechanic(ma
     machine.{{mechanicName}}MechanicSliderPointer.GameObject.SetActive(true)
     machine.{{mechanicName}}MechanicSliderParent.SetActive(true)
     
+    local payoutText = machine.{{mechanicName}}MechanicGoodPayout
+    local otherPayoutText = machine.{{mechanicName}}MechanicEvilPayout
+    local currentPayout = self.State.MechanicsTable.summary.goodPayout  
+    
+    local userChoice = self.State.MechanicsTable.summary.choice
+    userChoice = string.upper(userChoice)  
+    if userChoice == "EVIL" then
+        payoutText = machine.{{mechanicName}}MechanicEvilPayout
+        otherPayoutText = machine.{{mechanicName}}MechanicGoodPayout
+        currentPayout = self.State.MechanicsTable.summary.evilPayout
+    end
+    
     local sliderIndex = self:_GetSliderIndex(machine)
     System.Print("{{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_ShowMechanic sliderIndex={0}", sliderIndex)
     local sliderPointerGameObject = machine.{{mechanicName}}MechanicSliderPointer.GameObject
     local sliderGroup = machine.{{mechanicName}}MechanicSliderSlots
     local sliderSlot = sliderGroup["SliderSlot" .. sliderIndex]                       
     BettrVisualsController.TweenGameObject(sliderPointerGameObject, nil, sliderSlot.GameObject, 1, true, true)
+    
+    payoutText.SetActive(true)
+    otherPayoutText.SetActive(false)    
+    BettrVisualsController.RollUpCounterAndWait(payoutText, 0, currentPayout, 1)    
 end
 
 function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_SetupMechanic(machine)
@@ -136,6 +158,8 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_SetupMechanic(m
             machine.{{mechanicName}}MechanicEvilParent.SetActive(false)
             machine.{{mechanicName}}MechanicGoodParent.SetActive(false)
             machine.{{mechanicName}}MechanicSliderParent.SetActive(false)
+            machine.{{mechanicName}}MechanicGoodPayout.SetActive(false)
+            machine.{{mechanicName}}MechanicEvilPayout.SetActive(false)
             if self.State.MechanicsTable ~= nil then
                 result = self.State.MechanicsTable.summary.choice
             end
@@ -145,7 +169,8 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_SetupMechanic(m
                 machine.{{mechanicName}}MechanicEvilParent.SetActive(true)
                 machine.{{mechanicName}}MechanicGoodParent.SetActive(true)
                 return result
-            end
+            end                       
+            
             machine.{{mechanicName}}MechanicDialogParent.SetActive(true)
             result = BettrDialogController.WaitForDialogAction(self.State.MechanicsPrefab)
             machine.{{mechanicName}}MechanicSliderParent.SetActive(true)
@@ -187,10 +212,7 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_SetupMechanic(m
             System.WaitForSeconds(1)
             BettrVisualsController.TweenGameObject(machine.{{mechanicName}}MechanicSliderPointer.GameObject, startSliderSlot.GameObject, endSliderSlot.GameObject, 2, true, true)
             endSliderText.SetText("YOU LOSE")
-            System.WaitForSeconds(1)
-            
-            machine.{{mechanicName}}MechanicGoodPayout.GameObject.SetActive(true)
-            machine.{{mechanicName}}MechanicEvilPayout.GameObject.SetActive(true)
+            System.WaitForSeconds(1)            
         end
     end
     return result    
@@ -253,6 +275,7 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             end
             local userChoice = self.State.MechanicsTable.summary.choice
             userChoice = string.upper(userChoice)
+            
             local sliderPointerGameObject = machine.{{mechanicName}}MechanicSliderPointer.GameObject
             local sliderGroup = machine.{{mechanicName}}MechanicSliderSlots
             local sliderSlot = sliderGroup["SliderSlot" .. sliderIndex]
@@ -261,76 +284,81 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             for i = 1, #symbolGameObjects parallel do
                 local symbolGameObject = symbolGameObjects[i]
                 BettrVisualsController.FireballMoveTo(symbolGameObject, sliderPointerGameObject, 0, 1, true)
-            end                                   
+            end                                                           
             BettrVisualsController.FireballMoveTo(nil, sliderPointerGameObject, 0, 1, false)
-            BettrVisualsController.TweenGameObject(sliderPointerGameObject, nil, sliderSlot.GameObject, 1, true, true)        
-            local payoutText = machine.{{mechanicName}}MechanicGoodPayout
-            if side == "EVIL" then
-                payoutText = machine.{{mechanicName}}MechanicEvilPayout
-            end
-            BettrVisualsController.FireballMoveTo(nil, machine.BetText.GameObject, 0, 1, false)
-            BettrVisualsController.FireballMoveTo(machine.BetText.GameObject, sliderPointerGameObject, 0, 1, true)
-            local bet = BettrMathController.GetBaseGameBet(self.Config.Machine)
-            local contribution = bet * contributionPercent / 100
-            local increment = mechanicTable[1].Increment
-            if increment < 0 then
-                increment = -increment
-            end
-            local totalContribution = contribution * increment
+            BettrVisualsController.TweenGameObject(sliderPointerGameObject, nil, sliderSlot.GameObject, 1, true, true)
             
-            local clonedBetText = BettrVisualsController.CloneAndOverlayText(machine.BetText)
-            BettrVisualsController.OverlayFirstOverSecond(clonedBetText.GameObject, sliderPointerGameObject)
-            clonedBetText.SetText("+" .. contribution)
-            
-            BettrVisualsController.TweenScaleGameObject(clonedBetText.GameObject, 3, 3, 1)
-            clonedBetText.FontSize = 24
-            BettrVisualsController.TweenScaleGameObject(clonedBetText.GameObject, 0, 0, 1)
-            clonedBetText.FontSize = 0
-            
-            System.WaitForSeconds(1.0)
-            
-            local clonedBetText2 = BettrVisualsController.CloneAndOverlayText(machine.BetText)
-            BettrVisualsController.OverlayFirstOverSecond(clonedBetText2.GameObject, sliderPointerGameObject)
-            clonedBetText2.SetText("x" .. increment)
-            
-            System.WaitForSeconds(1.0)
-            
-            BettrVisualsController.TweenScaleGameObject(clonedBetText2.GameObject, 3, 3, 1)
-            clonedBetText2.FontSize = 24
-            BettrVisualsController.TweenScaleGameObject(clonedBetText2.GameObject, 0, 0, 1)
-            clonedBetText2.FontSize = 0
-            
-            clonedBetText.SetText("+" .. totalContribution)
-            
-            BettrVisualsController.DestroyGameObject(clonedBetText2.GameObject)
-            
-            local currentPayout = self.State.MechanicsTable.summary.goodPayout
-            if side == "EVIL" then
-                currentPayout = self.State.MechanicsTable.summary.evilPayout
-            end
-            
-            local newPayout = currentPayout + totalContribution
-            if side == "EVIL" then
-                self.State.MechanicsTable.summary.evilPayout = newPayout
-            else
-                self.State.MechanicsTable.summary.goodPayout = newPayout
-            end
-            
-            BettrVisualsController.FireballMoveTo(nil, sliderPointerGameObject, 0, 1, false)
-            
-            parallel
-                do
-                    BettrVisualsController.TweenGameObject(clonedBetText.GameObject, sliderPointerGameObject, payoutText.GameObject, 1, true, true)
+            local hasPayout = userChoice == side        
+            if hasPayout then            
+                local payoutText = machine.{{mechanicName}}MechanicGoodPayout
+                if side == "EVIL" then
+                    payoutText = machine.{{mechanicName}}MechanicEvilPayout
                 end
-                do
-                    BettrVisualsController.FireballMoveTo(sliderPointerGameObject, payoutText.GameObject, 0, 1, true)
+                BettrVisualsController.FireballMoveTo(nil, machine.BetText.GameObject, 0, 1, false)
+                BettrVisualsController.FireballMoveTo(machine.BetText.GameObject, sliderPointerGameObject, 0, 1, true)
+                local bet = BettrMathController.GetBaseGameBet(self.Config.Machine)
+                local contribution = bet * contributionPercent / 100
+                local increment = mechanicTable[1].Increment
+                if increment < 0 then
+                    increment = -increment
                 end
-            end
+                local totalContribution = contribution * increment
+                
+                local clonedBetText = BettrVisualsController.CloneAndOverlayText(machine.BetText)
+                BettrVisualsController.OverlayFirstOverSecond(clonedBetText.GameObject, sliderPointerGameObject)
+                clonedBetText.SetText("+" .. contribution)
+                
+                BettrVisualsController.TweenScaleGameObject(clonedBetText.GameObject, 3, 3, 1)
+                clonedBetText.FontSize = 24
+                BettrVisualsController.TweenScaleGameObject(clonedBetText.GameObject, 0, 0, 1)
+                clonedBetText.FontSize = 0
+                
+                System.WaitForSeconds(1.0)
+                
+                local clonedBetText2 = BettrVisualsController.CloneAndOverlayText(machine.BetText)
+                BettrVisualsController.OverlayFirstOverSecond(clonedBetText2.GameObject, sliderPointerGameObject)
+                clonedBetText2.SetText("x" .. increment)
+                
+                System.WaitForSeconds(1.0)
+                
+                BettrVisualsController.TweenScaleGameObject(clonedBetText2.GameObject, 3, 3, 1)
+                clonedBetText2.FontSize = 24
+                BettrVisualsController.TweenScaleGameObject(clonedBetText2.GameObject, 0, 0, 1)
+                clonedBetText2.FontSize = 0
+                
+                clonedBetText.SetText("+" .. totalContribution)
+                
+                BettrVisualsController.DestroyGameObject(clonedBetText2.GameObject)
+                
+                local currentPayout = self.State.MechanicsTable.summary.goodPayout
+                if side == "EVIL" then
+                    currentPayout = self.State.MechanicsTable.summary.evilPayout
+                end
+                
+                local newPayout = currentPayout + totalContribution
+                if side == "EVIL" then
+                    self.State.MechanicsTable.summary.evilPayout = newPayout
+                else
+                    self.State.MechanicsTable.summary.goodPayout = newPayout
+                end
+                
+                BettrVisualsController.FireballMoveTo(nil, sliderPointerGameObject, 0, 1, false)
+                
+                parallel
+                    do
+                        BettrVisualsController.TweenGameObject(clonedBetText.GameObject, sliderPointerGameObject, payoutText.GameObject, 1, true, true)
+                    end
+                    do
+                        BettrVisualsController.FireballMoveTo(sliderPointerGameObject, payoutText.GameObject, 0, 1, true)
+                    end
+                end
+                
+                payoutText.GameObject.SetActive(true)
+                BettrVisualsController.DestroyGameObject(clonedBetText.GameObject)
+                BettrVisualsController.RollUpCounter(payoutText, currentPayout, newPayout, 1)
+                System.WaitForSeconds(1)            
             
-            payoutText.GameObject.SetActive(true)
-            BettrVisualsController.DestroyGameObject(clonedBetText.GameObject)
-            BettrVisualsController.RollUpCounter(payoutText, currentPayout, newPayout, 1)
-            System.WaitForSeconds(1)
+            end
             
             self:_HandleWin(machine, wonSide, userChoice)
             self:_HandleLoss(machine, wonSide, userChoice)
@@ -357,6 +385,12 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_ResetMechanic(m
     machine.{{mechanicName}}MechanicSliderPointer.GameObject.SetActive(false)
     machine.{{mechanicName}}MechanicSliderParent.SetActive(false)
     machine.{{mechanicName}}MechanicSliderBar.SetActive(false) 
+    machine.{{mechanicName}}MechanicGoodPayout.SetActive(false)
+    machine.{{mechanicName}}MechanicEvilPayout.SetActive(false)
+   
+    machine.{{mechanicName}}MechanicEvilText.SetText(self.State.SliderTextEvil)
+    machine.{{mechanicName}}MechanicGoodText.SetText(self.State.SliderTextGood)
+   
     local machineParent = machine.MachineParent
     machineParent.SetActive(false)
 end
@@ -385,23 +419,34 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_HandleWin(machi
             local payoutTextGood = machine.{{mechanicName}}MechanicGoodPayout
             local payoutTextEvil = machine.{{mechanicName}}MechanicEvilPayout
             
+            local payoutText = payoutTextGood
+            local otherPayoutText = payoutTextEvil
+            if wonSide == "EVIL" then
+                payoutText = payoutTextEvil
+                otherPayoutText = payoutTextGood
+            end
+            
             local currentPayoutEvil = self.State.MechanicsTable.summary.evilPayout
             local currentPayoutGood = self.State.MechanicsTable.summary.goodPayout
-            local newPayoutEvil = 0
-            local newPayoutGood = 0      
             
-            local wonPayout = currentPayoutEvil + currentPayoutGood 
-            
-            BettrUser.SpinCoins = BettrUser.SpinCoins + wonPayout            
-            
-            parallel
-                do
-                    BettrVisualsController.FireballMoveTo(payoutTextGood.GameObject, wonText.GameObject, 0, 1, true)
-                end
-                do
-                    BettrVisualsController.FireballMoveTo(payoutTextEvil.GameObject, wonText.GameObject, 0, 1, true)
-                end
+            local currentPayout = currentPayoutGood
+            if wonSide == "EVIL" then
+                currentPayout = currentPayoutEvil
             end
+            
+            local newPayoutEvil = 0
+            local newPayoutGood = 0    
+            
+            local newPayout = newPayoutGood
+            if wonSide == "EVIL" then
+                newPayout = newPayoutEvil
+            end  
+            
+            local wonPayout = currentPayout
+            
+            BettrUser.SpinCoins = BettrUser.SpinCoins + wonPayout    
+            
+            BettrVisualsController.FireballMoveTo(payoutText.GameObject, wonText.GameObject, 0, 1, true)        
             
             parallel
                 do
@@ -409,10 +454,7 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_HandleWin(machi
                     BettrVisualsController.RollUpCounterAndWait(wonText, 0, wonPayout, 1)                        
                 end
                 do
-                    BettrVisualsController.RollUpCounter(payoutTextGood, currentPayoutGood, newPayoutGood, 1)
-                end
-                do
-                    BettrVisualsController.RollUpCounter(payoutTextEvil, currentPayoutEvil, newPayoutEvil, 1)
+                    BettrVisualsController.RollUpCounter(payoutText, currentPayout, newPayout, 1)
                 end
             end
             
@@ -454,8 +496,8 @@ end
 function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_HandleLoss(machine, wonSide, userChoice)
     series
         do
-            wonSide = string.lower(wonSide)
-            userChoice = string.lower(userChoice)
+            wonSide = string.upper(wonSide)
+            userChoice = string.upper(userChoice)
             if wonSide == "" then
                 return
             end
@@ -474,21 +516,31 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_HandleLoss(mach
             
             local currentPayoutEvil = self.State.MechanicsTable.summary.evilPayout
             local currentPayoutGood = self.State.MechanicsTable.summary.goodPayout
-            local newPayoutEvil = 0
-            local newPayoutGood = 0                                   
                         
-            parallel
-                do
-                    BettrVisualsController.FireballMoveTo(machine.{{mechanicName}}MechanicLostText.GameObject, payoutTextGood.GameObject, 0, 1, true)
-                end
-                do
-                    BettrVisualsController.FireballMoveTo(machine.{{mechanicName}}MechanicLostText.GameObject, payoutTextEvil.GameObject, 0, 1, true)
-                end
-                do                    
-                    BettrVisualsController.RollUpCounter(payoutTextGood, currentPayoutGood, newPayoutGood, 1)
-                    BettrVisualsController.RollUpCounter(payoutTextEvil, currentPayoutEvil, newPayoutEvil, 1)
-                end
+            local currentPayout = currentPayoutGood
+            if userChoice == "EVIL" then
+                currentPayout = currentPayoutEvil
             end
+            
+            local newPayoutEvil = 0
+            local newPayoutGood = 0    
+            
+            local newPayout = newPayoutGood
+            if userChoice == "EVIL" then
+                newPayout = newPayoutEvil
+            end   
+            
+            local payoutText = payoutTextGood
+            local otherPayoutText = payoutTextEvil
+            if userChoice == "EVIL" then
+                payoutText = payoutTextEvil
+                otherPayoutText = payoutTextGood
+            end      
+            
+            if currentPayout > 0 then
+                BettrVisualsController.FireballMoveTo(machine.{{mechanicName}}MechanicLostText.GameObject, payoutText.GameObject, 0, 1, true)
+                BettrVisualsController.RollUpCounter(payoutText, currentPayout, newPayout, 1)
+            end                        
             
             self.State.MechanicsTable.summary.evilPayout = newPayoutEvil
             self.State.MechanicsTable.summary.goodPayout = newPayoutGood
