@@ -47,7 +47,7 @@ namespace Bettr.Core
                     Debug.LogError($"Error loading user game blob: {error}");
                     return;
                 }
-                string result = Encoding.UTF8.GetString(payload.value);
+                string result = payload.value;
                 userGameScriptText = result;
             });
             
@@ -58,7 +58,8 @@ namespace Bettr.Core
                     Debug.LogError($"Error loading user JSON: {error}");
                     return;
                 }
-                string result = Encoding.UTF8.GetString(payload.value);
+
+                string result = payload.value;
                 userGameScriptText = $"\n\n{result}\n\n\n\n\n\n{userGameScriptText}";
             });
 
@@ -78,10 +79,11 @@ namespace Bettr.Core
             if (www.result == UnityWebRequest.Result.Success)
             {
                 byte[] bytes = www.downloadHandler.data;
+                string value = Encoding.UTF8.GetString(bytes);
                 StorageResponse response = new StorageResponse()
                 {
                     cas = null,
-                    value = bytes,
+                    value = value,
                 };
                 storageCallback(assetBundleURL, response, true, null);
             }

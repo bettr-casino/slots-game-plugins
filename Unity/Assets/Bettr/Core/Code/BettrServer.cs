@@ -40,7 +40,7 @@ namespace Bettr.Core
     public class StorageResponse
     {
         [JsonProperty("value")]
-        public byte[] value;
+        public string value;
         
         [JsonProperty("cas")]
         public string cas;
@@ -227,10 +227,10 @@ namespace Bettr.Core
                 string localFilePath = Path.Combine(fileSystemLocalStorageBaseURL, "users", $"default.json");
                 if (File.Exists(localFilePath))
                 {
-                    var bytes = File.ReadAllBytes(localFilePath);
+                    var value = File.ReadAllText(localFilePath);
                     StorageResponse storageResponse = new StorageResponse()
                     {
-                        value = bytes,
+                        value = value,
                         cas = "local",
                     };
                     storageCallback(localFilePath, storageResponse, true, null);
@@ -268,10 +268,10 @@ namespace Bettr.Core
                 string localFilePath = Path.Combine(fileSystemLocalStorageBaseURL, "users", $"{userGameFileName}");
                 if (File.Exists(localFilePath))
                 {
-                    var bytes = File.ReadAllBytes(localFilePath);
+                    var value = File.ReadAllText(localFilePath);
                     StorageResponse storageResponse = new StorageResponse()
                     {
-                        value = bytes,
+                        value = value,
                         cas = "local",
                     };
                     storageCallback(localFilePath, storageResponse, true, null);

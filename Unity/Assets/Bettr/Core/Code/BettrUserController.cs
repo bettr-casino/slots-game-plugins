@@ -143,7 +143,7 @@ namespace Bettr.Core
                         Debug.LogError($"Error loading user blob: {error}");
                         return;
                     }
-                    string result = Encoding.UTF8.GetString(payload.value);
+                    string result = payload.value;
                     var userBlob = JsonConvert.DeserializeObject<BettrUserConfig>(result);
                     BettrUserConfig = userBlob;
                 });
@@ -158,7 +158,7 @@ namespace Bettr.Core
                             Debug.LogError($"Error loading user JSON: {error}");
                             return;
                         }
-                        string result = Encoding.UTF8.GetString(payload.value);
+                        string result = payload.value;
                         var user = JsonConvert.DeserializeObject<BettrUserConfig>(result);
                         user.UserId = userId; // device id
                         BettrUserConfig = user;
@@ -195,10 +195,12 @@ namespace Bettr.Core
             if (www.result == UnityWebRequest.Result.Success)
             {
                 byte[] bytes = www.downloadHandler.data;
+                // convert to string
+                string value = Encoding.UTF8.GetString(bytes);
                 StorageResponse response = new StorageResponse()
                 {
                     cas = null,
-                    value = bytes,
+                    value = value,
                 };
                 storageCallback(assetBundleURL, response, true, null);
             }
