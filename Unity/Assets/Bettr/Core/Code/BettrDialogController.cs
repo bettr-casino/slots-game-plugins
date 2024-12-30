@@ -28,12 +28,6 @@ namespace Bettr.Core
         
         public IEnumerator WaitForDialogAction(CrayonScriptContext context, GameObject dialog)
         {
-            if (_dialogLocked)
-            {
-                context.StringResult = "__locked";
-                yield break;
-            }
-            
             _dialogLocked = true;
             _result = null;
             _waitingForClick = true;
