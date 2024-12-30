@@ -248,7 +248,7 @@ build-game001-assets-webgl: prepare-project build-lobby-cards-webgl
 	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "game001epicancientadventures" -assetSubLabel "variant1" -buildTarget WebGL; \
 	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "game001epicancientadventures_scenes" -assetSubLabel "variant1" -buildTarget WebGL;
 
-build-epicancientadventures-assets-webgl: build-game001-assets-webgl
+build-epicancientadventures-assets-webgl: build-game001-assets-webgl build-lobby-cards-webgl
 
 build-game001-2-assets-webgl: prepare-project build-lobby-cards-webgl
 	@echo "Building WebGL game001 variant game001epicatlantistreasures asset bundles..."
@@ -257,7 +257,7 @@ build-game001-2-assets-webgl: prepare-project build-lobby-cards-webgl
 	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "game001epicatlantistreasures" -assetSubLabel "variant1" -buildTarget WebGL; \
 	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "game001epicatlantistreasures_scenes" -assetSubLabel "variant1" -buildTarget WebGL;
 
-build-epicatlantistreasures-assets-webgl: build-game001-2-assets-webgl
+build-epicatlantistreasures-assets-webgl: build-game001-2-assets-webgl build-lobby-cards-webgl
 
 build-game001-3-assets-webgl: prepare-project build-lobby-cards-webgl
 	@echo "Building WebGL game001 variant game001epicclockworkchronicles asset bundles..."
@@ -265,6 +265,8 @@ build-game001-3-assets-webgl: prepare-project build-lobby-cards-webgl
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "game001epicclockworkchronicles_scenes" -assetSubLabel "control" -buildTarget WebGL; \
 	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "game001epicclockworkchronicles" -assetSubLabel "variant1" -buildTarget WebGL; \
 	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "game001epicclockworkchronicles_scenes" -assetSubLabel "variant1" -buildTarget WebGL;
+
+build-epicclockworkchronicles-assets-webgl: build-game001-3-assets-webgl build-lobby-cards-webgl
 
 build-game003-2-assets-webgl: prepare-project build-lobby-cards-webgl
 	@echo "Building WebGL game003 variant game003highstakescascadingcash asset bundles..."
