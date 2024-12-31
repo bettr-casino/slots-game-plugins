@@ -38,10 +38,24 @@ namespace Bettr.Editor.generators
 
             return material;
         }
+
+        public static Material CreateOrLoadMaterial(string materialName, string shaderName, string textureName,
+            string hexColor, float alpha, string runtimeAssetPath)
+        {
+            return CreateOrLoadMaterial(materialName, shaderName, textureName, hexColor, alpha, runtimeAssetPath, false, null);
+        }
         
-        public static Material CreateOrLoadMaterial(string materialName, string shaderName, string textureName, string hexColor, float alpha, string runtimeAssetPath)
+        public static Material CreateOrLoadMaterial(string materialName, string shaderName, string textureName, string hexColor, float alpha, string runtimeAssetPath, bool createTextureIfNotExists = false, string sourceTexture = null)
         {
             AssetDatabase.Refresh();
+            
+            Debug.Log($"CreateOrLoadMaterial materialName={materialName} shaderName={shaderName} textureName={textureName} hexColor={hexColor} alpha={alpha} sourceTexture={sourceTexture}");
+            
+            // if sourceTexture is null, use "default.png"
+            if (string.IsNullOrEmpty(sourceTexture))
+            {
+                sourceTexture = "default.png";
+            }
             
             var shader = LoadShader(shaderName, runtimeAssetPath);
             var materialFilename = $"{materialName}.mat";
@@ -78,6 +92,26 @@ namespace Bettr.Editor.generators
                     sourcePath += extension;
                     destPath += extension;
                 }
+                // check if its in the path
+                if (!File.Exists(sourcePath))
+                {
+                    if (createTextureIfNotExists)
+                    {
+                        Debug.Log($"Creating texture for {textureName} at {sourcePath}");
+                        Texture2D newTexture = new Texture2D(1, 1);
+                        byte[] bytes = File.ReadAllBytes(Path.Combine("Assets", "Bettr", "Editor", "textures", sourceTexture));
+                        newTexture.LoadImage(bytes);
+                        File.WriteAllBytes(sourcePath, newTexture.EncodeToPNG());
+                        
+                        // add to the asset database
+                        AssetDatabase.Refresh();
+                    }
+                    else
+                    {
+                        throw new Exception($"{textureName} texture not found.");
+                    }
+                }
+                
                 ImportTexture2D( sourcePath, destPath);
                 AssetDatabase.Refresh();
                 Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(destPath);
@@ -103,9 +137,12 @@ namespace Bettr.Editor.generators
             {
                 if (!string.IsNullOrEmpty(textureName) || !string.IsNullOrEmpty(hexColor))
                 {
-                    Color color = material.GetColor((int) Color);
-                    color.a = alpha;
-                    material.SetColor((int) Color, color);
+                    if (material.HasColor((int) Color))
+                    {
+                        Color color = material.GetColor((int) Color);
+                        color.a = alpha;
+                        material.SetColor((int) Color, color);
+                    }
                 }
             }
             

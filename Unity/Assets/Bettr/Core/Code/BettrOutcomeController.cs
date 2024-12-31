@@ -56,6 +56,9 @@ namespace Bettr.Core
         [NonSerialized]  public bool UseFileSystemOutcomes = true;
         
         [NonSerialized]  public string FileSystemOutcomesBaseURL = "Assets/Bettr/LocalStore/LocalOutcomes";
+
+        [NonSerialized] public string GeneratedOutcomesServerBaseURL =
+            "https://bettr-casino-generated-outcomes.s3.us-west-2.amazonaws.com";
         
         // ReSharper disable once UnassignedField.Global
         [NonSerialized]  public string WebOutcomesBaseURL;
@@ -71,7 +74,7 @@ namespace Bettr.Core
         public BettrUserController BettrUserController { get; private set; }
         
         public BettrExperimentController BettrExperimentController { get; private set; }
-
+        
         public BettrOutcomeController(BettrAssetScriptsController bettrAssetScriptsController, BettrUserController bettrUserController, BettrExperimentController experimentController, string hashKey)
         {
             TileController.RegisterType<BettrOutcomeController>("BettrOutcomeController");
@@ -82,7 +85,22 @@ namespace Bettr.Core
             this.BettrExperimentController = experimentController;
             this.HashKey = hashKey;
         }
-        
+
+        public IEnumerator WaitForApplyOutcomeDelay(double outcomeDelayInMs)
+        {
+            var timeElapsedInMs = 0.0;
+            while (timeElapsedInMs < outcomeDelayInMs)
+            {
+                timeElapsedInMs += Time.deltaTime * 1000;
+                // check if user has Slam Stopped the button
+                if (BettrUserController.UserInSlamStopMode)
+                {
+                    yield break;
+                }
+                yield return null;
+            }
+        }
+
         public IEnumerator LoadServerOutcome(string gameId, string gameVariantId)
         {
             // Load the Outcomes
@@ -99,8 +117,35 @@ namespace Bettr.Core
         // TODO: FIXME: Include the variant 
         IEnumerator LoadWebOutcome(string gameId, string gameVariantId)
         {
-            // check the experiment "Outcomes"
-            var useGeneratedOutcomes = BettrExperimentController.UseGeneratedOutcomes();
+            var useGeneratedOutcomes = !BettrUserController.Instance.UserInPreviewMode;
+
+            if (OutcomeNumber > 0)
+            {
+                if (BettrUserController.UserInDevMode)
+                {
+                    var devOutcomeClassName = $"{gameId}Outcome{OutcomeNumber:000000000}.cscript.txt";
+                    
+                    string outcomeURL = $"{GeneratedOutcomesServerBaseURL}/latest/Outcomes/{gameId}/{gameVariantId}/{devOutcomeClassName}";
+                    using UnityWebRequest wwws3 = UnityWebRequest.Get(outcomeURL);
+                    yield return wwws3.SendWebRequest();
+
+                    if (wwws3.result == UnityWebRequest.Result.Success)
+                    {
+                        var script = wwws3.downloadHandler.text;
+                
+                        BettrAssetScriptsController.AddScript(devOutcomeClassName, script);
+                    }
+                    else
+                    {
+                        var error = $"Error loading Outcome={devOutcomeClassName} from server: {wwws3.error}";
+                        Debug.LogError(error);
+                    }
+
+                    OutcomeNumber = 0;
+                        
+                    yield break;
+                }
+            }
             
             var bettrOutcomeRequestPayload = new BettrOutcomeRequestPayload()
             {

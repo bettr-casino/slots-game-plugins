@@ -1,13 +1,14 @@
 require "math"
 require "Core"
-
 require "Game006BaseGameReelWaysMechanic"
 
-
 Game006BaseGameReelMechanics = {
-
+    Config = {
+        Machine = "Game006",
+        Variant = "WheelsIndustrialRevolution",
+        Experiment = "variant1",
+    },
     WaysMechanic = nil,
-
 }
 
 function Game006BaseGameReelMechanics:new(o)
@@ -18,9 +19,42 @@ function Game006BaseGameReelMechanics:new(o)
 end
 
 function Game006BaseGameReelMechanics:Initialize(reel)
-
     self.WaysMechanic = Game006BaseGameReelWaysMechanic:new()
     self.WaysMechanic:Initialize(reel)
-
 end
+
+function Game006BaseGameReelMechanics:SpinReelSpinStartedRollBack(reel)
+end
+
+function Game006BaseGameReelMechanics:SpinReelSpinStartedRollForward(reel)
+end
+
+function Game006BaseGameReelMechanics:SpinReelSpinEndingRollBack(reel)
+end
+
+function Game006BaseGameReelMechanics:SpinReelSpinEndingRollForward(reel)
+end
+
+function Game006BaseGameReelMechanics:SpinReelReachedOutcomeStopIndex(reel)
+end
+
+function Game006BaseGameReelMechanics:OnSpinReelsStopped(reel)
+end
+
+function Game006BaseGameReelMechanics:StartEngines(reel, machine)
+    if self.ChooseASideMechanic then
+        self.ChooseASideMechanic:StartEngines(reel, machine)
+    end
+end
+
+function Game006BaseGameReelMechanics:OnOutcomeReceived(reel)
+    if self.ChooseASideMechanic then
+        self.ChooseASideMechanic:OnOutcomeReceived(reel)
+    end
+end
+
+function Game006BaseGameReelMechanics:SpinEngines(reel)
+end
+
+
 

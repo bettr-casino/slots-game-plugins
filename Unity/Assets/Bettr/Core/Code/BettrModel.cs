@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using CrayonScript.Code;
+using CrayonScript.Interpreter;
 using Newtonsoft.Json;
 
 // ReSharper disable once CheckNamespace
@@ -44,6 +45,17 @@ namespace Bettr.Core
         public string BundleVersion { get; set; }
         public string MaterialName { get; set; }
         public string Format { get; set; }
+        
+        public string MachineBundleId => $"{MachineBundleName}.{MachineBundleVariant}";
+        public string LobbyCardBundleId => $"lobbycard{MachineBundleId}";
+        
+        public string GetMachineVariant()
+        {
+            var partial = MachineSceneName.Substring(MachineName.Length);
+            // remove the "Scene" suffix
+            return partial.Substring(0, partial.Length - 5);
+        }
+
     }
     
     [Serializable]
@@ -69,6 +81,34 @@ namespace Bettr.Core
             }
         }
 
+        private long _spinCoins = 0;
+        public long SpinCoins
+        {
+            get
+            {
+                // ReSharper disable once ArrangeAccessorOwnerBody
+                return _spinCoins;
+            }
+            set
+            {
+                _spinCoins = value;
+                if (_spinCoins < 0)
+                {
+                    _spinCoins = 0;
+                }
+            }
+        }
+
+        public void InitSpinCoins()
+        {
+            SpinCoins = Coins;
+        }
+        
+        public void ApplySpinCoins()
+        {
+            Coins = SpinCoins;
+        }
+        
         // ReSharper disable once InconsistentNaming
         public long XP { get; set; }
         public long Level { get; set; }
@@ -76,7 +116,12 @@ namespace Bettr.Core
         public BettrBundleConfig LobbyScene { get; set; }
         public List<BettrLobbyCardGroupConfig> LobbyCardGroups { get; set; }
         public List<BettrLobbyCardConfig> LobbyCards { get; set; }
+        
+        [JsonIgnore]
         public int LobbyCardIndex { get; set; } = -1;
+        
+        [JsonIgnore]
+        public string LobbyCardName { get; set; }
 
         public int FindLobbyCardIndexById(string lobbyCardId)
         {

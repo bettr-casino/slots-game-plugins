@@ -2,6 +2,12 @@ require "math"
 require "Core"
 
 Game005BaseGameBackground = {
+    Config = {
+        Machine = "Game005",
+        Variant = "FortunesManekiNeko",
+        Experiment = "control",
+    },
+    Mechanics = nil,
 }
 
 function Game005BaseGameBackground:new(o)
@@ -21,13 +27,14 @@ end
 
 function Game005BaseGameBackground:Awake()
 	System.Print("Game005BaseGameBackground Awake tile id={0}", self.id)
+	self.Mechanics = Game005BaseGameBackgroundMechanics:new()
 end
 
 function Game005BaseGameBackground:StartBackground()
     series
         do
 	        local animatorProperty = self["start"]
-            BettrVisualsController.PlayAnimatorProperty(animatorProperty)        
+            BettrVisualsController.PlayAnimatorProperty(animatorProperty) 
         end
     end
 end

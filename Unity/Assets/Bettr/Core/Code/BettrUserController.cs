@@ -18,12 +18,23 @@ namespace Bettr.Core
         
         public BettrUserConfig BettrUserConfig { get; private set; }
         
+        public BettrUserConfig BettrPreviewUserConfig { get; private set; }
+        
+        
         public static BettrUserController Instance { get; private set; }
         
         public bool UserIsLoggedIn { get; private set; }
         
-        const string ErrorBlobDoesNotExist = "HTTP/1.1 404 Not Found";
+        public bool UserInDevMode { get; private set; }
 
+        public bool UserInPreviewMode { get; private set; }
+        
+        public bool UserInSlamStopMode { get; private set; }
+        
+        public int UserPreviewModeSpins { get; private set; }
+
+        const string ErrorBlobDoesNotExist = "HTTP/1.1 404 Not Found";
+        
         public BettrUserController()
         {
             TileController.RegisterType<BettrUserController>("BettrUserController");
@@ -42,13 +53,73 @@ namespace Bettr.Core
             var uniqueId = $"{deviceId}";
             return uniqueId;            
         }
+        
+        public void DisableUserPreviewMode()
+        {
+            UserInPreviewMode = false;
+            UserPreviewModeSpins = 0;
+            TileController.AddToGlobals("BettrUser", BettrUserConfig);
+            BettrPreviewUserConfig.Coins = 0;
+        }
+
+        public void EnableUserPreviewMode()
+        {
+            UserInPreviewMode = true;
+            UserPreviewModeSpins = 5; // TODO: FIXME: hardcoded spins for preview mode
+            TileController.AddToGlobals("BettrUser", BettrPreviewUserConfig);
+            // reset the BettrPreviewUserConfig Coins to 1000000
+            BettrPreviewUserConfig.Coins = 1000000; // TODO: FIXME: hardcoded coins for preview mode
+        }
+        
+        public void InitUserInSlamStopMode()
+        {
+            UserInSlamStopMode = false;
+        }
+        
+        public void EnableUserInSlamStopMode()
+        {
+            UserInSlamStopMode = true;
+        }
+        
+        public void DisableUserInSlamStopMode()
+        {
+            UserInSlamStopMode = false;
+        }
+        
+        public IEnumerator SetUserDevMode()
+        {
+            UserInDevMode = false;
+            
+            var userId = GetUserId();
+            
+            string webAssetName = $"users/default/devs/{userId}.json";
+            string assetURL = $"{configData.AssetsServerBaseURL}/{webAssetName}";
+            using UnityWebRequest www = UnityWebRequest.Get(assetURL);
+            yield return www.SendWebRequest();
+
+            if (www.result == UnityWebRequest.Result.Success)
+            {
+                byte[] jsonBytes = www.downloadHandler.data;
+                if (jsonBytes != null && jsonBytes.Length > 0)
+                {
+                    UserInDevMode = true;
+                }
+            }
+            else
+            {
+                var error = $"Error loading user JSON from server: {www.error}";
+                Debug.LogError(error);
+            }
+            Debug.Log($"UserId={userId} UserInDevMode={UserInDevMode}");
+        }
 
         public IEnumerator Login()
         {
-            bool replaceBlob = true;
+            bool insertUserBlob = true;
             Debug.Log($"Starting User Login");
             
             BettrUserConfig = null;
+            BettrPreviewUserConfig = null;
             UserIsLoggedIn = false;
 
             var userId = GetUserId();
@@ -64,7 +135,7 @@ namespace Bettr.Core
                 {
                     if (error == ErrorBlobDoesNotExist)
                     {
-                        replaceBlob = true;
+                        insertUserBlob = true;
                         return;
                     }
                     if (!success)
@@ -72,21 +143,23 @@ namespace Bettr.Core
                         Debug.LogError($"Error loading user blob: {error}");
                         return;
                     }
-                    var userBlob = JsonConvert.DeserializeObject<BettrUserConfig>(payload.value);
+                    string result = payload.value;
+                    var userBlob = JsonConvert.DeserializeObject<BettrUserConfig>(result);
                     BettrUserConfig = userBlob;
                 });
             
                 // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-                if (replaceBlob)
+                if (insertUserBlob)
                 {
-                    yield return LoadUserJsonFromWebAssets((_, payload, success, error) =>
+                    yield return LoadDefaultUserJsonFromWebAssets((_, payload, success, error) =>
                     {
                         if (!success)
                         {
                             Debug.LogError($"Error loading user JSON: {error}");
                             return;
                         }
-                        var user = JsonConvert.DeserializeObject<BettrUserConfig>(payload.value);
+                        string result = payload.value;
+                        var user = JsonConvert.DeserializeObject<BettrUserConfig>(result);
                         user.UserId = userId; // device id
                         BettrUserConfig = user;
                     });
@@ -101,10 +174,18 @@ namespace Bettr.Core
                     });
                 }
             }
+             // Create the BettrPreviewUserConfig
+             this.BettrPreviewUserConfig = new BettrUserConfig()
+             {
+                 UserId = "PreviewUser",
+                 Coins = 0,
+                 // TODO: FIXME adjust Level and XP as needed
+             };
+             
             TileController.AddToGlobals("BettrUser", BettrUserConfig);
         }
         
-        public IEnumerator LoadUserJsonFromWebAssets(GetStorageCallback storageCallback)
+        public IEnumerator LoadDefaultUserJsonFromWebAssets(GetStorageCallback storageCallback)
         {
             string webAssetName = "users/default/user.json";
             string assetBundleURL = $"{configData.AssetsServerBaseURL}/{webAssetName}";
@@ -113,12 +194,13 @@ namespace Bettr.Core
 
             if (www.result == UnityWebRequest.Result.Success)
             {
-                byte[] jsonBytes = www.downloadHandler.data;
-                string jsonData = Encoding.UTF8.GetString(jsonBytes);
+                byte[] bytes = www.downloadHandler.data;
+                // convert to string
+                string value = Encoding.UTF8.GetString(bytes);
                 StorageResponse response = new StorageResponse()
                 {
                     cas = null,
-                    value = jsonData,
+                    value = value,
                 };
                 storageCallback(assetBundleURL, response, true, null);
             }

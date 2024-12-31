@@ -65,7 +65,13 @@ namespace Bettr.Core
 
     [RequireComponent(typeof(Tile))]
     [Serializable]
-    public class TilePropertyTweens : MonoBehaviour, ITileProperty
+    public class TilePropertyTweens : TilePropertyTweensBase
+    {
+        
+    }
+
+    [Serializable]
+    public class TilePropertyTweensBase : MonoBehaviour, ITileProperty
     {
         public List<TilePropertyTween> tileTweenProperties;
 

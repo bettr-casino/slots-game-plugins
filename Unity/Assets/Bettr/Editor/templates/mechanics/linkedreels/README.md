@@ -1,43 +1,41 @@
-# Infinity Reels Mechanic
+# Linked Reels Mechanic
 
-The **Infinity Reels** mechanic is an innovative slot feature where the number of reels can expand infinitely, creating limitless potential for forming winning combinations. This mechanic adds new reels to the grid each time a winning combination is formed, allowing players to extend the reels endlessly as long as they continue landing wins. This mechanic provides players with a dynamic and ever-growing reel set, increasing the excitement and win potential with every spin.
+The **Linked Reels** mechanic is a feature in slot games where two or more reels are "linked" or synchronized, meaning that they spin together and display identical or nearly identical symbols, increasing the chances of forming winning combinations. This mechanic enhances the player's winning potential by effectively duplicating certain reels, making it easier to land matching symbols across multiple paylines.
 
 ## Key Features
 
-- **Infinite Reel Expansion**: With the Infinity Reels mechanic, additional reels are added to the right side of the grid whenever a winning combination is formed. Each new reel increases the number of ways to win, as the grid keeps expanding with more symbols.
+- **Synchronized Reels**: In the Linked Reels mechanic, two or more adjacent reels are linked together. When the reels spin, they display the same or similar symbols in the same order, dramatically increasing the chances of forming winning combinations.
 
-- **Reel Addition with Wins**: The mechanic is activated when a winning combination is formed. Instead of the game ending after the spin, a new reel is added, and the process continues as long as new wins are formed with the added reels.
+- **Triggered by Specific Symbols or Conditions**: Unlike some slot games where Linked Reels are triggered randomly, this design triggers the feature when **two or more Wild symbols land on adjacent reels**. Once the triggering symbols land and the payout is calculated, the affected reels become linked and spin together in the next spin.
 
-- **Multiplier Increase**: In many Infinity Reels games, a win multiplier increases with each new reel added, leading to larger payouts as the reels expand. The multiplier can grow indefinitely as more reels are added, further enhancing the win potential.
+- **High Win Potential**: By having multiple reels showing the same symbols, players have a much higher chance of landing winning combinations across the reels, especially if high-value symbols or wilds appear on the linked reels.
 
-- **Limitless Win Potential**: Since the reels can theoretically expand infinitely, the win potential is also limitless. As long as new reels continue to land matching symbols or extend winning combinations, the player can continue accumulating wins.
-
-- **Bonus Integration**: The Infinity Reels mechanic often interacts with bonus rounds or free spins features. In some cases, expanding reels can trigger free spins or unlock special rewards, adding even more excitement to the mechanic.
+- **Bonus Round Enhancements**: In many games, the Linked Reels mechanic becomes more prominent during bonus rounds, where additional reels may link together, creating even more opportunities for large payouts.
 
 ## How It Works
 
-1. **Initial Spin**: The player spins the reels, which start with a standard number of reels (typically three). 
+1. **Triggering the Feature**: The Linked Reels mechanic is activated when **two or more Wild symbols land on adjacent reels** during a base game spin. After the payout for that spin, the affected reels become linked for the next spin.
 
-2. **Reel Expansion**: When a winning combination is formed, an additional reel is added to the right of the grid. The new reel can continue the winning combination, and if it does, another reel is added.
+2. **Linked Reels Spin Together**: In the following spin, the linked reels spin simultaneously, displaying the same or nearly identical symbols. As they land, the linked reels show the same sequence of symbols, increasing the chances of matching symbols across multiple paylines.
 
-3. **Continued Expansion**: The reels keep expanding as long as new winning symbols land on the newly added reels. The more reels that are added, the larger the number of ways to win, and in some games, the win multiplier increases with each reel expansion.
+3. **Winning Combinations**: Once the reels stop, the game evaluates the winning combinations based on the linked reels. Since the reels display the same symbols, the likelihood of hitting large winning combinations is significantly higher.
 
-4. **End of Expansion**: The expansion continues until no new winning symbols land on the added reel. At this point, the reels reset back to the original number, and the player is awarded their total payout.
+4. **Bonus Round Interaction**: In some games, the Linked Reels mechanic expands during free spins or bonus rounds, where more than two reels can become linked, providing even greater chances for massive wins.
 
 ## Example
 
-In a slot featuring the **Infinity Reels** mechanic:
-- The player starts with a 3-reel grid.
-- A winning combination of symbols lands, and a new reel is added to the right.
-- The new reel continues the win by adding matching symbols, and another reel is added.
-- This process repeats, with each new reel increasing the win multiplier, until no new matching symbols land.
-- The player receives a payout based on the number of reels expanded and the accumulated multiplier.
+In a game featuring the **Linked Reels** mechanic:
+- Two Wild symbols land on Reels 2 and 3, triggering the feature.
+- After the payout for that spin, Reels 2 and 3 are linked for the next spin.
+- During the following spin, both linked reels show the same symbols, helping the player form multiple winning combinations across the paylines.
+- If additional reels link during a bonus round, the win potential increases even further, leading to larger payouts.
 
 ## Example Games
 
-- **El Dorado Infinity Reels** by ReelPlay: One of the first games to feature this mechanic, with additional reels being added after each win and an increasing multiplier for each new reel.
-- **Gods of Gold Infinity Reels** by NetEnt: Expands the reel set with each win and features an infinite multiplier, making the win potential limitless.
+- **Custom Slot Design**: In this specific implementation, the Linked Reels mechanic is triggered when Wild symbols land on adjacent reels, linking those reels for the next spin.
+- **Twin Spin** by NetEnt: A classic example of the Linked Reels mechanic, where at least two adjacent reels are linked on every spin, with the possibility of more reels becoming linked for bigger wins.
+- **Twin Spin Megaways** by NetEnt: An enhanced version of the original Twin Spin with a Megaways twist, where the linked reels mechanic remains a central feature, offering high win potential.
 
 ## Conclusion
 
-The **Infinity Reels** mechanic adds an exciting and dynamic element to slot gameplay by offering limitless reel expansion and win potential. With the possibility of adding new reels indefinitely, players can extend winning combinations across an ever-growing grid, often with increasing multipliers to boost payouts. This mechanic offers a unique and thrilling gaming experience, as each spin has the potential to unlock endless reels and massive wins.
+The **Linked Reels** mechanic adds a dynamic and exciting twist to slot gameplay by synchronizing adjacent reels after specific triggering conditions, such as two Wild symbols landing on adjacent reels. Whether triggered by symbols or during bonus rounds, linked reels create thrilling moments and offer significant win potential, especially when multiple reels are linked. This mechanic keeps gameplay engaging and rewarding for players looking for bigger payouts.

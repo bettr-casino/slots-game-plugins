@@ -1,0 +1,37 @@
+require "math"
+require "Core"
+
+Game001BaseGameBackgroundMechanics = {
+    Config = {
+        Machine = "Game001",
+        Variant = "EpicDragonsHoard",
+        Experiment = "variant1",
+    },
+    WaysMechanic = nil,
+}
+
+function Game001BaseGameBackgroundMechanics:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game001BaseGameBackgroundMechanics:destroy()
+	System.Print("Game001BaseGameBackgroundMechanics destroy tile id={0}", self.id)
+end
+
+function Game001BaseGameBackgroundMechanics:OnError(callStack)
+	System.Error("Game001BaseGameBackgroundMechanics Error CallStack: {0}", callStack)
+end
+
+function Game001BaseGameBackgroundMechanics:Awake()
+	System.Print("Game001BaseGameBackgroundMechanics Awake tile id={0}", self.id)
+end
+
+function Game001BaseGameBackgroundMechanics:Initialize(background)
+     self.WaysMechanic = Game001BaseGameBackgroundWaysMechanic:new()
+     self.WaysMechanic:Initialize(background)
+end
+
+return Game001BaseGameBackgroundMechanics:new()

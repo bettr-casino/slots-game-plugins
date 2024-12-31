@@ -1,0 +1,50 @@
+require "math"
+require "Core"
+
+Game001BaseGameReelChooseASideMechanic = {
+    Config = {
+        Machine = "Game001",
+        Variant = "EpicAtlantisTreasures",
+        Experiment = "variant1",
+    },
+    State = {
+        ReelSymbolGroups = nil,
+    },
+}
+
+function Game001BaseGameReelChooseASideMechanic:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game001BaseGameReelChooseASideMechanic:destroy()
+	System.Print("Game001BaseGameReelChooseASideMechanic destroy tile id={0}", self.id)
+end
+
+function Game001BaseGameReelChooseASideMechanic:Initialize(reel)
+end
+
+function Game001BaseGameReelChooseASideMechanic:StartEngines(reel, machine)
+    local source = machine.ChooseASideMechanicSymbolGroup
+    self.State.ReelSymbolGroups = BettrMechanicsController.AddSymbolsToReelSymbolGroups("ChooseASide", reel.BettrReelController, source)
+end
+
+function Game001BaseGameReelChooseASideMechanic:OnOutcomeReceived(reel)
+    local thisReelID = reel.ReelID
+    local topSymbolCount = Game001BaseGameReelState[thisReelID].First.TopSymbolCount
+    local outcomeReelStopIndex = reel.BettrReelController.SpinOutcomeTable["OutcomeReelStopIndex"];
+    local matrix = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, "ChooseASide")
+    for i = 1, #matrix do
+        local row = matrix[i]
+        local reelID = row["ReelID"]
+        if reelID == thisReelID then
+            local rowIndex = row["RowIndex"]
+            local symbol = row["Symbol"]
+            local reelStopIndex = outcomeReelStopIndex + rowIndex - topSymbolCount
+            reel.BettrReelController.ReplaceSymbolForSpin(reelStopIndex, symbol)
+        end
+    end
+end
+

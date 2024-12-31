@@ -1,0 +1,37 @@
+require "math"
+require "Core"
+
+Game009BaseGameBackgroundMechanics = {
+    Config = {
+        Machine = "Game009",
+        Variant = "SpaceInvadersCosmicRaiders",
+        Experiment = "control",
+    },
+    PaylinesMechanic = nil,
+}
+
+function Game009BaseGameBackgroundMechanics:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game009BaseGameBackgroundMechanics:destroy()
+	System.Print("Game009BaseGameBackgroundMechanics destroy tile id={0}", self.id)
+end
+
+function Game009BaseGameBackgroundMechanics:OnError(callStack)
+	System.Error("Game009BaseGameBackgroundMechanics Error CallStack: {0}", callStack)
+end
+
+function Game009BaseGameBackgroundMechanics:Awake()
+	System.Print("Game009BaseGameBackgroundMechanics Awake tile id={0}", self.id)
+end
+
+function Game009BaseGameBackgroundMechanics:Initialize(background)
+     self.PaylinesMechanic = Game009BaseGameBackgroundPaylinesMechanic:new()
+     self.PaylinesMechanic:Initialize(background)
+end
+
+return Game009BaseGameBackgroundMechanics:new()

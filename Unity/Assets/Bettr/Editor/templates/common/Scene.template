@@ -82,21 +82,6 @@
             ]
           },
           {
-            "Name": "Camera_Transition",
-            "Id": "transitionCamera",
-            "Layer": "SLOT_TRANSITION",
-            "Position": {
-                "X": 0,
-                "Y": 0,
-                "Z": -30
-            },
-            "Components": [
-              {
-                "ComponentType": "TransitionCamera"
-              }
-            ]
-          },
-          {
             "Name": "UI Camera",
             "Id": "uiCamera",
             "Layer": "UI",
@@ -118,6 +103,14 @@
       ]
     },
     {
+        "Name": "Directional Light",
+        "Components": [
+            {
+                "ComponentType": "DirectionalLight"
+            }
+        ]
+    },
+    {
       "Name": "Game",
       "Children": [
         {
@@ -132,7 +125,14 @@
                 "Active": false,
                 "Child": {
                     "Name": "Pivot",
-                    "Active": true
+                    "Active": true,
+                    "Children": [
+                        {
+                            "Name": "{{ machine }}BaseGameMachine",
+                            "IsPrefab": true,
+                            "PrefabName": "{{ machine }}BaseGameMachine"
+                        }
+                    ]
                 }
               }{{ if !for.last }},{{ end }}
             {{ end }}
@@ -149,7 +149,15 @@
                 "Name": "{{ machine }}BackgroundParent",
                 "Id": "{{ machine }}BackgroundParent",
                 "Child": {
-                    "Name": "Pivot"
+                    "Name": "Pivot",
+                    "Active": true,
+                    "Children": [
+                        {
+                            "Name": "{{ machine }}BaseGameBackground",
+                            "IsPrefab": true,
+                            "PrefabName": "{{ machine }}BaseGameBackground"
+                        }
+                    ]
                 }
               }{{ if !for.last }},{{ end }}
             {{ end }}

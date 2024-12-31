@@ -1,0 +1,37 @@
+require "math"
+require "Core"
+
+Game007BaseGameBackgroundMechanics = {
+    Config = {
+        Machine = "Game007",
+        Variant = "TrueVegasDiamondDazzle",
+        Experiment = "variant1",
+    },
+    PaylinesMechanic = nil,
+}
+
+function Game007BaseGameBackgroundMechanics:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game007BaseGameBackgroundMechanics:destroy()
+	System.Print("Game007BaseGameBackgroundMechanics destroy tile id={0}", self.id)
+end
+
+function Game007BaseGameBackgroundMechanics:OnError(callStack)
+	System.Error("Game007BaseGameBackgroundMechanics Error CallStack: {0}", callStack)
+end
+
+function Game007BaseGameBackgroundMechanics:Awake()
+	System.Print("Game007BaseGameBackgroundMechanics Awake tile id={0}", self.id)
+end
+
+function Game007BaseGameBackgroundMechanics:Initialize(background)
+     self.PaylinesMechanic = Game007BaseGameBackgroundPaylinesMechanic:new()
+     self.PaylinesMechanic:Initialize(background)
+end
+
+return Game007BaseGameBackgroundMechanics:new()

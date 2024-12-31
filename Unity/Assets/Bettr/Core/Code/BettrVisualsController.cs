@@ -1,10 +1,12 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
 using CrayonScript.Interpreter.Execution.VM;
 using PathCreation;
+using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -14,10 +16,163 @@ using Object = UnityEngine.Object;
 namespace Bettr.Core
 {
     public delegate void RollupText(long value);
+
+    public class LayerToCameraMap
+    {
+        private static Dictionary<string, string> _layerIDToCameraNamesMap = new Dictionary<string, string>()
+        {
+            {"UI", "Camera_UI"},
+            {"SLOT_BACKGROUND", "Camera_Background"},
+            {"SLOT_REELS", "Camera_Reels"},
+            {"SLOT_FRAME", "Camera_Frame"},
+            {"SLOT_OVERLAY", "Camera_Overlay"},
+            {"SLOT_REELS_OVERLAY", "Camera_Reels_Overlay"},
+            {"SLOT_TRANSITION", "Camera_Transition"},
+            {"Default", "Main Camera"},
+        };
+        
+        Dictionary<string, Camera> _layerToCamera = new Dictionary<string, Camera>();
+
+        public void Reset()
+        {
+            _layerToCamera.Clear();
+        }
+        
+        public Camera GetCameraForLayer(string layerName)
+        {
+            if (_layerToCamera.TryGetValue(layerName, out var layer))
+            {
+                return layer;
+            }
+            // find the camera for the layer and if not exists throw an exception
+            if (_layerIDToCameraNamesMap.TryGetValue(layerName, out var cameraName))
+            {
+                var camera = GameObject.Find(cameraName)?.GetComponent<Camera>();
+                if (camera == null)
+                {
+                    throw new ScriptRuntimeException($"Camera not found for layer {layerName}");
+                }
+                _layerToCamera[layerName] = camera;
+                return camera;
+            }
+            throw new ScriptRuntimeException($"Camera not found for layer {layerName}");
+        }
+    }
+
+    [Serializable]
+    internal class FireballObject
+    {
+        private GameObject _fireball;
+        private ParticleSystem _particleSystem;
+        
+        private LayerToCameraMap _layerToCameraMap = new LayerToCameraMap();
+
+        public GameObject Fireball
+        {
+            get => _fireball;
+            set
+            {
+                _fireball = value;
+
+                if (_fireball == null)
+                {
+                    _particleSystem = null;
+                    return;
+                }
+
+                var ball = _fireball.transform.Find("ball")?.gameObject;
+                if (ball == null)
+                {
+                    Debug.LogWarning("Fireball does not contain a 'ball' child object.");
+                    return;
+                }
+
+                _particleSystem = ball.GetComponent<ParticleSystem>();
+                if (_particleSystem != null)
+                {
+                    var main = _particleSystem.main;
+                    main.startSpeed = 0;
+                    main.duration = 0;
+                    main.loop = true;
+                    main.playOnAwake = false;
+                    main.simulationSpeed = 1;
+                }
+
+                _fireball.SetActive(false);
+            }
+        }
+        
+        public ParticleSystem ParticleSystem => _particleSystem;
+
+        public FireballObject(GameObject seed)
+        {
+            // clone seed
+            Fireball = Object.Instantiate(seed);
+        }
+    }
+
+    [Serializable]
+    internal class FireballObjectsCache
+    {
+        private ParticleSystem _particleSystem;
+        
+        // list of fireballs created
+        private readonly List<FireballObject> _freeList;
+
+        private readonly GameObject _seed;
+        
+        public FireballObjectsCache(GameObject seed)
+        {
+            _seed = seed;
+            _freeList = new List<FireballObject>();
+        }
+
+        public FireballObject Acquire()
+        {
+            if (_freeList.Count == 0)
+            {
+                return new FireballObject(this._seed);
+            }
+            var fireball = _freeList[0];
+            _freeList.RemoveAt(0);
+            return fireball;
+        }
+
+        public void Release(FireballObject fireball)
+        {
+            _freeList.Add(fireball);
+        }
+
+        public void Reset()
+        {
+            // release all fireballs back into the _freeList
+            foreach (var fireball in _freeList)
+            {
+                Object.Destroy(fireball.Fireball);
+                fireball.Fireball = null;
+            }
+            _freeList.Clear();
+        }
+    }
     
     public class BettrVisualsController
     {
-        public BettrVisualsController()
+        private static readonly int Color1 = Shader.PropertyToID("_Color");
+
+        private LayerToCameraMap _layerToCameraMap = new LayerToCameraMap();
+
+        private FireballObjectsCache _fireballObjectsCache;
+
+        public void InitFireballs(GameObject fireball)
+        {
+            _fireballObjectsCache = new FireballObjectsCache(fireball);
+        }
+
+        public BettrUserController BettrUserController { get; private set; }
+        
+        public static BettrVisualsController Instance { get; private set; }
+        
+        public BettrVisualsController(BettrUserController bettrUserController)
         {
             TileController.RegisterType<BettrVisualsController>("BettrVisualsController");
             TileController.AddToGlobals("BettrVisualsController", this);
@@ -37,8 +192,234 @@ namespace Bettr.Core
 
             TileController.RegisterType<iTween>("iTween");
             TileController.RegisterType<iTween.EaseType>("iTween.EaseType");
+            
+            _layerToCameraMap.Reset();
+            
+            BettrUserController = bettrUserController;
+            
+            Instance = this;
+        }
+
+        public void Reset()
+        {
+            if (_layerToCameraMap != null)
+            {
+                _layerToCameraMap.Reset();
+            }
         }
         
+        private Vector3? CalculatePosition(GameObject obj, Camera referenceCamera, float offsetY = 0)
+        {
+            if (obj == null) return null;
+
+            // Retrieve the camera associated with the object's layer
+            string layerName = LayerMask.LayerToName(obj.layer);
+            Camera objCamera = _layerToCameraMap.GetCameraForLayer(layerName);
+
+            if (objCamera == null)
+            {
+                Debug.LogError($"No camera found for layer {layerName}");
+                return null;
+            }
+
+            // If objCamera and referenceCamera are the same, no need to convert
+            if (objCamera == referenceCamera)
+            {
+                Vector3 adjustedPosition = obj.transform.position;
+                adjustedPosition.y += offsetY; // Apply the offset
+                return adjustedPosition;
+            }
+
+            // Convert the object's position from objCamera to referenceCamera
+            Vector3 screenPos = objCamera.WorldToScreenPoint(obj.transform.position);
+
+            return referenceCamera.ScreenToWorldPoint(new Vector3(
+                screenPos.x,
+                screenPos.y + offsetY, // Apply the offset
+                screenPos.z // Preserve the object's depth
+            ));
+        }
+
+
+        private bool _tweenComplete = false;
+        
+        public IEnumerator TweenGameObject(
+            CrayonScriptContext context, GameObject tweenThisGameObject, GameObject tweenFromThisGameObject, GameObject tweenToThisGameObject, float duration = 1.0f, bool tween = false, bool preserveLocalZ = false)
+        {
+            var originalLocalPosition = tweenThisGameObject.transform.localPosition;
+            
+            string layerName = LayerMask.LayerToName(tweenThisGameObject.layer);
+            Camera tweenCamera = _layerToCameraMap.GetCameraForLayer(layerName);
+            if (tweenCamera == null)
+            {
+                throw new ScriptRuntimeException($"No camera found for layer '{layerName}'");
+            }
+            iTween.Stop(tweenThisGameObject);
+            Vector3 startWorldPosition = CalculatePosition(tweenFromThisGameObject, tweenCamera) ?? tweenThisGameObject.transform.position;
+            Vector3 targetWorldPosition = CalculatePosition(tweenToThisGameObject, tweenCamera) ?? tweenThisGameObject.transform.position;
+            tweenThisGameObject.transform.position = startWorldPosition;
+            if (tween)
+            {
+                _tweenComplete = false;
+                iTween.MoveTo(tweenThisGameObject, iTween.Hash(
+                    "position", targetWorldPosition,
+                    "time", duration,
+                    "easetype", iTween.EaseType.linear,
+                    "oncomplete", "OnTweenComplete",
+                    "oncompletetarget", tweenThisGameObject
+                ));
+                var elapsedTime = 0f;
+                while (!_tweenComplete && elapsedTime < duration + 0.1f)
+                {
+                    elapsedTime += Time.deltaTime;
+                    yield return null;
+                }
+            }
+            else
+            {
+                tweenThisGameObject.transform.position = targetWorldPosition;
+                yield return new WaitForSeconds(duration);
+            }
+
+            if (preserveLocalZ)
+            {
+                var localPosition = tweenThisGameObject.transform.localPosition;
+                localPosition.z = originalLocalPosition.z;
+                tweenThisGameObject.transform.localPosition = localPosition;
+            }
+        }
+        
+        public IEnumerator CloneAndTweenGameObject(
+            CrayonScriptContext context, GameObject tweenFromThisGameObject, GameObject tweenToThisGameObject, float duration = 1.0f, bool tween = false)
+        {
+            bool destroyAfter = true;
+            // clone this tweenThisGameObject
+            var tweenThisGameObject = Object.Instantiate(tweenFromThisGameObject, tweenFromThisGameObject.transform.parent);
+            // ensure this is an overlay over the original object
+            OverlayFirstOverSecond(tweenThisGameObject, tweenFromThisGameObject);
+            
+            string layerName = LayerMask.LayerToName(tweenThisGameObject.layer);
+            Camera tweenCamera = _layerToCameraMap.GetCameraForLayer(layerName);
+            if (tweenCamera == null)
+            {
+                throw new ScriptRuntimeException($"No camera found for layer '{layerName}'");
+            }
+            iTween.Stop(tweenThisGameObject);
+            Vector3 startWorldPosition = CalculatePosition(tweenFromThisGameObject, tweenCamera) ?? tweenFromThisGameObject.transform.position;
+            Vector3 targetWorldPosition = CalculatePosition(tweenToThisGameObject, tweenCamera) ?? tweenToThisGameObject.transform.position;
+            tweenThisGameObject.transform.position = startWorldPosition;
+            if (tween)
+            {
+                _tweenComplete = false;
+                iTween.MoveTo(tweenThisGameObject, iTween.Hash(
+                    "position", targetWorldPosition,
+                    "time", duration,
+                    "easetype", iTween.EaseType.linear,
+                    "oncomplete", "OnTweenComplete",
+                    "oncompletetarget", tweenThisGameObject
+                ));
+                var elapsedTime = 0f;
+                while (!_tweenComplete && elapsedTime < duration + 0.1f)
+                {
+                    elapsedTime += Time.deltaTime;
+                    yield return null;
+                }
+                if (destroyAfter)
+                {
+                    Object.Destroy(tweenThisGameObject);
+                }
+            }
+            else
+            {
+                tweenThisGameObject.transform.position = targetWorldPosition;
+                yield return new WaitForSeconds(duration);
+                if (destroyAfter)
+                {
+                    Object.Destroy(tweenThisGameObject);
+                }
+            }
+        }
+        
+        public IEnumerator FireballMoveTo(CrayonScriptContext context, GameObject from, GameObject to, float offsetY = 10, float duration = 1.0f, bool tween = false)
+        {
+            Camera fireballCamera = _layerToCameraMap.GetCameraForLayer("SLOT_TRANSITION");
+            if (fireballCamera == null)
+            {
+                throw new ScriptRuntimeException("No camera found for SLOT_TRANSITION");
+            }
+            
+            // acquire a fireball object
+            var fireballObject = _fireballObjectsCache.Acquire();
+            
+            var fireball = fireballObject.Fireball;
+            var particleSystem = fireballObject.ParticleSystem;
+
+            particleSystem.Stop();
+            fireball.SetActive(false);
+
+            // Make sure any existing tweens are stopped
+            iTween.Stop(fireball);
+
+            // Calculate positions
+            Vector3 startWorldPosition = CalculatePosition(from, fireballCamera) ?? fireball.transform.position;
+            Vector3 targetWorldPosition = CalculatePosition(to, fireballCamera, offsetY) ?? fireball.transform.position;
+
+            // Debug log positions
+            Debug.Log($"Start Position: {startWorldPosition}");
+            Debug.Log($"Target Position: {targetWorldPosition}");
+
+            // Set initial position and activate
+            fireball.transform.position = startWorldPosition;
+            fireball.SetActive(true);
+            particleSystem.Play();
+
+            if (tween)
+            {
+                _tweenComplete = false;
+                iTween.MoveTo(fireball, iTween.Hash(
+                    "position", targetWorldPosition,
+                    "time", duration,
+                    "easetype", iTween.EaseType.linear,
+                    "oncomplete", "OnFireballTweenComplete",
+                    "oncompletetarget", fireball
+                ));
+
+                var elapsedTime = 0f;
+                while (!_tweenComplete && elapsedTime < duration + 0.1f)
+                {
+                    elapsedTime += Time.deltaTime;
+                    yield return null;
+                }
+            }
+            else
+            {
+                fireball.transform.position = targetWorldPosition;
+                yield return new WaitForSeconds(duration);
+            }
+
+            particleSystem.Stop();
+            fireball.SetActive(false);
+            
+            // release the fireball object
+            _fireballObjectsCache.Release(fireballObject);
+        }
+
+        private void OnFireballTweenComplete()
+        {
+            _tweenComplete = true;
+        }
+        
+        private void OnTweenComplete()
+        {
+            _tweenComplete = true;
+        }
+
+        public IEnumerator RollUpCounterAndWait(CrayonScriptContext context, PropertyTextMeshPro counterTextProperty, long start, long end, float duration)
+        {
+            RollUpCounter(counterTextProperty, start, end, duration);
+            yield return new WaitForSeconds(duration);
+        }
+
         public void RollUpCounter(PropertyTextMeshPro counterTextProperty, long start, long end, float duration)
         {
             if (counterTextProperty == null)
@@ -77,10 +458,27 @@ namespace Bettr.Core
             // While the elapsed time is less than the intended duration
             while (elapsed < duration)
             {
+                var isSlamStopped = BettrUserController.UserInSlamStopMode;
+                if (isSlamStopped)
+                {
+                    break;
+                }
+                
                 elapsed += Time.deltaTime;
 
                 // Update the current value
-                currentValue += (isRollingUp ? 1 : -1) * speed * Time.deltaTime;
+                currentValue += speed * Time.deltaTime;
+                
+                // if rollingUp and currentValue drops above end, set it to end
+                if (isRollingUp && currentValue > end)
+                {
+                    currentValue = end;
+                }
+                // if rollingDown and currentValue goes below end, set it to end
+                else if (!isRollingUp && currentValue < end)
+                {
+                    currentValue = end;
+                }
 
                 // Update the text and wait for the next frame
                 rollupText(Mathf.RoundToInt(currentValue));
@@ -198,6 +596,26 @@ namespace Bettr.Core
             }
         }
         
+        public IEnumerator TweenScaleGameObject(GameObject objectToScale, float scaleX, float scaleY, float duration = 1.0f)
+        {
+            var propertyTween = new PropertyTween
+            {
+                useScale = true,
+                scaleTo = new Vector3(scaleX, scaleY),
+                tweenDuration = duration,
+                tweenDelay = 0,
+                easeType = iTween.EaseType.linear
+            };
+            
+            TweenScaleTo(objectToScale, propertyTween);
+
+            if (duration > 0)
+            {
+                yield return new WaitForSeconds(duration);
+            }
+        }
+
+
         public void TweenScaleTo(GameObject objectToScale, PropertyTween propertyTween)
         {
             if (propertyTween == null)
@@ -296,10 +714,38 @@ namespace Bettr.Core
                 yield break;
             }
             
+            if (animatorProperty.GameObject == null)
+            {
+                context.SetError(new ScriptRuntimeException(new NullReferenceException($"null game object {animatorProperty.animationStateName}")));
+                yield break;
+            }
+            
+            var isSlamStopped = BettrUserController.UserInSlamStopMode;
+            if (isSlamStopped)
+            {
+                yield break;
+            }
+            
             var delayBeforeAnimationStart = animatorProperty.delayBeforeAnimationStart;
             if (delayBeforeAnimationStart > 0)
             {
-                yield return new WaitForSeconds(delayBeforeAnimationStart);
+                // use yield null so that slam stop can be detected
+                var timeElapsedInMilliseconds = 0.0f;
+                while (timeElapsedInMilliseconds < delayBeforeAnimationStart)
+                {
+                    timeElapsedInMilliseconds += Time.deltaTime;
+                    isSlamStopped = BettrUserController.UserInSlamStopMode;
+                    if (isSlamStopped)
+                    {
+                        yield break;
+                    }
+                    yield return null;
+                }
+            }
+            if (animatorProperty.GameObject == null)
+            {
+                // this is possible if the GameObject has been destroyed
+                yield break;
             }
             var animator = animatorProperty.animator;
             var normalizedTime = 0.0f;
@@ -327,7 +773,18 @@ namespace Bettr.Core
             var waitForAnimationComplete = animatorProperty.waitForAnimationComplete;
             if (waitForAnimationComplete)
             {
-                yield return new WaitForSeconds(animationDuration);
+                var timeElapsedInMilliseconds = 0.0f;
+                while (timeElapsedInMilliseconds < animationDuration)
+                {
+                    timeElapsedInMilliseconds += Time.deltaTime;
+                    isSlamStopped = BettrUserController.UserInSlamStopMode;
+                    if (isSlamStopped)
+                    {
+                        animator.Play(animationStateName, -1, 0f);
+                        yield break;
+                    }
+                    yield return null;
+                }
             }
             context.FloatResult = animationDuration;
         }
@@ -393,14 +850,135 @@ namespace Bettr.Core
             particleSystem.Stop();
         }
 
+        public TilePropertyGameObjectGroup CloneGameObjectGroup(TilePropertyGameObjectGroup group)
+        {
+            var groupClone = new TilePropertyGameObjectGroup
+            {
+                groupKey = group.groupKey,
+                gameObjectProperties = new List<TilePropertyGameObject>()
+            };
+            foreach (var property in group.gameObjectProperties)
+            {
+                var value = property.value;
+                value = Clone(value);
+                
+                var propertyClone = new TilePropertyGameObject
+                {
+                    key = property.key,
+                    value = value
+                };
+                groupClone.gameObjectProperties.Add(propertyClone);
+            }
+            
+            return groupClone;
+        }
+
+        public PropertyGameObject Clone(PropertyGameObject gameObjectProperty)
+        {
+            var clonedGameObject = Object.Instantiate(gameObjectProperty.GameObject, gameObjectProperty.GameObject.transform.parent);
+            clonedGameObject.name = gameObjectProperty.GameObject.name;
+            var clonedGameObjectProperty = new PropertyGameObject()
+            {
+                gameObject = clonedGameObject,
+            };
+            return clonedGameObjectProperty;
+        }
+        
+        public PropertyGameObject CloneAndOverlay(PropertyGameObject gameObjectProperty)
+        {
+            var clonedGameObject = Object.Instantiate(gameObjectProperty.GameObject, gameObjectProperty.GameObject.transform.parent);
+            clonedGameObject.name = gameObjectProperty.GameObject.name;
+            // ensure this is an overlay over the original object
+            OverlayFirstOverSecond(clonedGameObject, gameObjectProperty.GameObject);
+            var clonedGameObjectProperty = new PropertyGameObject()
+            {
+                gameObject = clonedGameObject,
+            };
+            return clonedGameObjectProperty;
+        }
+        
+        public PropertyTextMeshPro CloneAndOverlayText(PropertyTextMeshPro textProperty)
+        {
+            var text = textProperty.textMeshPro;
+            var gameObject = text.gameObject;
+            var clonedGameObject = Object.Instantiate(gameObject, gameObject.transform.parent);
+            // ensure this is an overlay over the original object
+            OverlayFirstOverSecond(clonedGameObject, gameObject);
+            var clonedText = clonedGameObject.GetComponent<TMP_Text>();
+            var tmPro = new PropertyTextMeshPro()
+            {
+                textMeshPro = clonedText,
+            };
+            return tmPro;
+        }
+
+        public void OverlayFirstOverSecond(PropertyGameObject firstGameObjectProperty, PropertyGameObject secondGameObjectProperty)
+        {
+            OverlayFirstOverSecond(firstGameObjectProperty.gameObject, secondGameObjectProperty.gameObject);
+        }
+
         public void OverlayFirstOverSecond(GameObject firstGameObject, GameObject secondGameObject)
         {
-            firstGameObject.transform.position = secondGameObject.transform.position;
+            // Get the layer names
+            string firstLayerName = LayerMask.LayerToName(firstGameObject.layer);
+            string secondLayerName = LayerMask.LayerToName(secondGameObject.layer);
+
+            // Retrieve the cameras associated with the layers
+            Camera firstCamera = _layerToCameraMap.GetCameraForLayer(firstLayerName);
+            Camera secondCamera = _layerToCameraMap.GetCameraForLayer(secondLayerName);
+
+            if (firstCamera == null || secondCamera == null)
+            {
+                Debug.LogWarning($"Camera not found for layers {firstLayerName} or {secondLayerName}");
+                return;
+            }
+
+            // Convert second object's world position to the first object's camera view
+            Vector3 secondObjectScreenPosition = secondCamera.WorldToScreenPoint(secondGameObject.transform.position);
+            Vector3 worldPositionForFirstObject = firstCamera.ScreenToWorldPoint(
+                new Vector3(secondObjectScreenPosition.x, secondObjectScreenPosition.y, firstCamera.nearClipPlane)
+            );
+
+            // Align the first object to the second object's position based on cameras
+            firstGameObject.transform.position = worldPositionForFirstObject;
         }
         
         public void DestroyGameObject(GameObject gameObject)
         {
             Object.Destroy(gameObject);
+        }
+        
+        public void DestroyGameObject(PropertyGameObject gameObjectProperty)
+        {
+            Object.Destroy(gameObjectProperty.GameObject);
+        }
+        
+        public void DestroyGameObject(TilePropertyGameObjectGroup gameObjectGroupProperty)
+        {
+            foreach (var gameObjectProperty in gameObjectGroupProperty.gameObjectProperties)
+            {
+                DestroyGameObject(gameObjectProperty.value);
+            }
+        }
+
+        public void SetMaterialAlpha(GameObject go, float alpha)
+        {
+            var meshRenderer = go.GetComponent<MeshRenderer>();
+            if (meshRenderer == null)
+            {
+                Debug.LogWarning($"MeshRenderer not found for {go.name}");
+                return;
+            }
+            var material = meshRenderer.material;
+            // Verify material has color property
+            if (!material.HasProperty(Color1))
+            {
+                Debug.LogWarning($"Material {material.name} does not have _Color property");
+                return;
+            }
+            var color = material.color;
+            color.a = alpha;
+            material.color = color;
         }
 
         public static void SwitchOrientationToPortrait()

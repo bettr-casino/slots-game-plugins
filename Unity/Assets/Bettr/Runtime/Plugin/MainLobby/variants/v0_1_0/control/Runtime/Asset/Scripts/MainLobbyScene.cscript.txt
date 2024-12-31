@@ -6,6 +6,7 @@ MainLobbyScene = {
     State = {
         ScrollSpeed = 0.003,
         PreviousMousePosition = Vector3.zero,
+        SelectedLobbyCardName = nil,
     }
 }
 
@@ -28,18 +29,28 @@ function MainLobbyScene:Start()
     series
         do
             System.Print("MainLobbyScene Starting...")
-            self:InitUserConfig()
-            self:LoadLobbyCards()
+            self:InitParticleEffects()
+            self:InitLoading()
+            self:LoadTopPanelLobbyCards()
         end
     end
 end
 
-function MainLobbyScene:InitUserConfig()
+function MainLobbyScene:InitParticleEffects()
+    BettrVisualsController.InitFireballs(self.Fireball.GameObject)
+end
+
+function MainLobbyScene:InitLoading()
+    self.LoadingText.SetText("Preparing Your Lobby, Please Wait...")
+    self.Loading.SetActive(false)
+    self.Lobby.SetActive(true)
+end
+
+function MainLobbyScene:LoadTopPanelLobbyCards()
+    System.Print("LoadTopPanelLobbyCards invoked")          
     series
         do
-            self.LevelText.SetText(BettrUser.Level)                    
-            self.XPText.SetText(BettrUser.XP)
-            self.UserCoinsText.SetText(BettrUser.Coins)            
+            BettrMainLobbySceneController.LoadTopPanelLobbyCards(self)
         end
     end
 end
@@ -48,9 +59,94 @@ function MainLobbyScene:LoadLobbyCards()
     System.Print("LoadLobbyCards invoked")          
     series
         do
-            BettrMainLobbySceneController.LoadLobbyCards(self)           
+            BettrMainLobbySceneController.LoadLobbyCards(self)
+        end
+        do
+            self.Loading.SetActive(false)
+        end
+        do
+            self.Lobby.SetActive(true)
+        end
+        do
+            BettrMainLobbySceneController.SetSelector(self, nil)
         end
     end
+end
+
+function MainLobbyScene:SetSelector(gameLobbyCard)
+    BettrMainLobbySceneController.SetSelector(self, gameLobbyCard)
+end
+
+function MainLobbyScene:LoadMachineScene(lobbyCardName)
+    self.SelectedLobbyCardName = lobbyCardName
+    System.StartCoroutine(self, "LoadLobbySideBar")           
+end
+
+function MainLobbyScene:LoadLobbySideBar()
+    series
+        do
+            BettrMainLobbySceneController.LoadLobbySideBar(self, self.SelectedLobbyCardName)
+        end
+    end
+end
+
+function MainLobbyScene:OnPointerClick1Param(param)
+	System.Print("MainLobbyScene OnPointerClick1Param param={0} tile id={1}", param, self.id)
+	if param == "PreviewPlay" then
+	    BettrAudioController.StopAudio()
+        System.Print("MainLobbyScene OnPointerClick1Param PreviewPlay")
+        System.StartCoroutine(self, "LoadLobbyCardMachine")
+    elseif param == "PreviewPreview" then
+        BettrAudioController.StopAudio()
+        System.Print("MainLobbyScene OnPointerClick1Param PreviewPreview")
+        System.StartCoroutine(self, "LoadLobbyCardMachinePreview")
+    elseif param == "PreviewClose" then
+        BettrAudioController.StopAudio()
+        System.Print("MainLobbyScene OnPointerClick1Param PreviewClose")
+        self.SideBar["GameDetails"].SetActive(false)   
+    elseif param == "Volume" then
+        System.Print("MainLobbyScene OnPointerClick1Param Volume")
+        BettrMainLobbySceneController.ToggleVolume(self)
+    elseif string.find(param, "TopPanel__", 1, true) == 1 then
+        System.StartCoroutine(self, "OnTopPanelClick", param)
+    elseif string.find(param, "Settings__", 1, true) == 1 then
+        System.StartCoroutine(self, "OnSettingsClick", param)        
+    end
+end
+
+function MainLobbyScene:OnTopPanelClick(param)
+    series
+        do
+            BettrMainLobbySceneController.OnTopPanelClick(self, param)
+        end
+    end
+end
+
+function MainLobbyScene:OnSettingsClick(param)
+    series
+        do
+            BettrMainLobbySceneController.OnSettingsClick(self, param)
+        end
+    end
+end
+
+function MainLobbyScene:LoadLobbyCardMachine()
+    series
+        do
+            BettrMainLobbySceneController.LoadLobbyCardMachine(self)
+        end
+    end
+end
+
+function MainLobbyScene:LoadLobbyCardMachinePreview()
+    series
+        do
+            BettrMainLobbySceneController.LoadLobbyCardMachinePreview(self)
+        end
+    end
+end
+
+function MainLobbyScene:HideSideBar()
 end
 
 function MainLobbyScene:SetCommitHash(commitHash)

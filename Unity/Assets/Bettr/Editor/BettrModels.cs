@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 using Bettr.Core;
 using Bettr.Editor.generators;
@@ -11,6 +12,7 @@ using UnityEditor;
 using UnityEditor.Animations;
 using UnityEditor.Events;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
@@ -42,6 +44,8 @@ namespace Bettr.Editor
         
         public bool IsPrefab { get; set; }
         
+        public bool IsMainLobbyPrefab { get; set; }
+        
         public string ModelName { get; set; }
         
         public bool IsModel { get; set; }
@@ -51,6 +55,10 @@ namespace Bettr.Editor
         public string PrimitiveShader { get; set; }
         
         public string PrimitiveTexture { get; set; }
+        
+        public bool PrimitiveTextureCreate { get; set; }
+        
+        public string PrimitiveTextureCreateSource { get; set; }
         
         public string PrimitiveColor { get; set; }
         
@@ -260,10 +268,25 @@ namespace Bettr.Editor
                         }
                     }
                 }
+                else if (IsMainLobbyPrefab)
+                {
+                    Debug.Log($"loading prefab from path: {InstanceComponent.MainLobbyPath}/Prefabs/{PrefabName}.prefab");
+                    var prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{InstanceComponent.MainLobbyPath}/Prefabs/{PrefabName}.prefab");
+                    var prefabGameObject = new PrefabGameObject(prefab, Name);
+                    _go = prefabGameObject.GameObject;
+                    if (PrefabIds != null)
+                    {
+                        foreach (var prefabId in PrefabIds)
+                        {
+                            var referencedGameObject = prefabGameObject.FindReferencedId(prefabId.Id, prefabId.Index);
+                            InstanceGameObject.IdGameObjects[$"{prefabId.Prefix}{prefabId.Id}"] = new InstanceGameObject(referencedGameObject);
+                        }
+                    }
+                }
                 else if (IsPrimitive)
                 {
                     var primitiveGameObject = GameObject.CreatePrimitive(Enum.GetValues(typeof(PrimitiveType)).GetValue(Primitive) as PrimitiveType? ?? PrimitiveType.Quad);
-                    var primitiveMaterial = BettrMaterialGenerator.CreateOrLoadMaterial(PrimitiveMaterial, PrimitiveShader, PrimitiveTexture, PrimitiveColor, PrimitiveAlpha, InstanceComponent.RuntimeAssetPath);
+                    var primitiveMaterial = BettrMaterialGenerator.CreateOrLoadMaterial(PrimitiveMaterial, PrimitiveShader, PrimitiveTexture, PrimitiveColor, PrimitiveAlpha, InstanceComponent.RuntimeAssetPath, PrimitiveTextureCreate, PrimitiveTextureCreateSource);
                     
                     var primitiveMeshRenderer = primitiveGameObject.GetComponent<MeshRenderer>();
                     primitiveMeshRenderer.material = primitiveMaterial;
@@ -396,6 +419,7 @@ namespace Bettr.Editor
     {
         public static string RuntimeAssetPath;
         public static string CorePath;
+        public static string MainLobbyPath;
         
         public string Name { get; set; }
         
@@ -537,9 +561,30 @@ namespace Bettr.Editor
                     var eventSystemComponent = new EventSystemComponent();
                     eventSystemComponent.AddComponent(gameObject);
                     break;
+                case "BettrEventListener":
+                    var eventListener = gameObject.GetComponent<BettrEventListener>();
+                    if (eventListener == null)
+                    {
+                        eventListener = gameObject.AddComponent<BettrEventListener>();
+                    }
+                    foreach (var eventTrigger in EventTriggers)
+                    {
+                        var eventTriggerComponent = new EventTriggerComponent(eventListener, eventTrigger.ReferenceId, eventTrigger.Params);
+                        eventTriggerComponent.AddComponent(gameObject);
+                        
+                    }
+                    break;
                 case "MonoBehaviour":
                     var monoBehaviourComponent = new MonoBehaviourComponent(Name);
                     monoBehaviourComponent.AddComponent(gameObject);
+                    break;
+                case "AudioSource":
+                    var audioComponent = new AudioComponent(Name);
+                    audioComponent.AddComponent(gameObject);
+                    break;
+                case "DirectionalLight":
+                    var directionalLightComponent = new DirectionalLightComponent();
+                    directionalLightComponent.AddComponent(gameObject);
                     break;
                 case "Tile":
                 {
@@ -577,10 +622,22 @@ namespace Bettr.Editor
                 }
                     break;
                 case "TilePropertyTextMeshPros":
+                case "TilePropertyTextMeshProsInjected":
                     var tileTextMeshProProperties = new List<TilePropertyTextMeshPro>();
                     var tileTextMeshProGroupProperties = new List<TilePropertyTextMeshProGroup>();
-                    var tilePropertyTextMeshProsComponent = new TilePropertyTextMeshProsComponent(tileTextMeshProProperties, tileTextMeshProGroupProperties);
-                    tilePropertyTextMeshProsComponent.AddComponent(gameObject);
+                    if (ComponentType == "TilePropertyTextMeshProsInjected")
+                    {
+                        var tilePropertyTextMeshProsComponent = new TilePropertyTextMeshProsInjectedComponent(tileTextMeshProProperties, tileTextMeshProGroupProperties);
+                        tilePropertyTextMeshProsComponent.AddComponent(gameObject);
+                    }
+                    else
+                    {
+                        var tilePropertyTextMeshProsComponent =
+                            new TilePropertyTextMeshProsComponent(tileTextMeshProProperties,
+                                tileTextMeshProGroupProperties);
+                        tilePropertyTextMeshProsComponent.AddComponent(gameObject);
+                    }
+
                     foreach (var kvPair in TextMeshProsProperty)
                     {
                         InstanceGameObject.IdGameObjects.TryGetValue(kvPair.Id, out var referenceGameObject);
@@ -614,10 +671,19 @@ namespace Bettr.Editor
                     }
                     break;
                 case "TilePropertyGameObjects":
+                case "TilePropertyGameObjectsInjected":
                     var tileGameObjectProperties = new List<TilePropertyGameObject>();
                     var tileGameObjectGroupProperties = new List<TilePropertyGameObjectGroup>();
-                    var tilePropertyGameObjectsComponent = new TilePropertyGameObjectsComponent(tileGameObjectProperties, tileGameObjectGroupProperties);
-                    tilePropertyGameObjectsComponent.AddComponent(gameObject);
+                    if (ComponentType == "TilePropertyGameObjectsInjected")
+                    {
+                        var tilePropertyGameObjectsComponent = new TilePropertyGameObjectsInjectedComponent(tileGameObjectProperties, tileGameObjectGroupProperties);
+                        tilePropertyGameObjectsComponent.AddComponent(gameObject);
+                    }
+                    else
+                    {
+                        var tilePropertyGameObjectsComponent = new TilePropertyGameObjectsComponent(tileGameObjectProperties, tileGameObjectGroupProperties);
+                        tilePropertyGameObjectsComponent.AddComponent(gameObject);
+                    }
                     if (GameObjectsProperty != null)
                     {
                         foreach (var kvPair in GameObjectsProperty)
@@ -655,10 +721,19 @@ namespace Bettr.Editor
                     }
                     break;
                 case "TilePropertyAnimators":
+                case "TilePropertyAnimatorsInjected":
                     var properties = new List<TilePropertyAnimator>();
                     var groupProperties = new List<TilePropertyAnimatorGroup>();
-                    var tilePropertyAnimatorsComponent = new TilePropertyAnimatorsComponent(properties, groupProperties);
-                    tilePropertyAnimatorsComponent.AddComponent(gameObject);
+                    if (ComponentType == "TilePropertyAnimatorsInjected")
+                    {
+                        var tilePropertyAnimatorsComponent = new TilePropertyAnimatorsInjectedComponent(properties, groupProperties);
+                        tilePropertyAnimatorsComponent.AddComponent(gameObject);
+                    }
+                    else
+                    {
+                        var tilePropertyAnimatorsComponent = new TilePropertyAnimatorsComponent(properties, groupProperties);
+                        tilePropertyAnimatorsComponent.AddComponent(gameObject);
+                    }
                     foreach (var kvPair in AnimatorsProperty)
                     {
                         InstanceGameObject.IdGameObjects.TryGetValue(kvPair.Id, out var referenceGameObject);
@@ -713,10 +788,20 @@ namespace Bettr.Editor
                     }
                     break;
                 case "TilePropertyInts":
+                case "TilePropertyIntsInjected":
                     var tileIntProperties = new List<TilePropertyInt>();
                     var tileIntGroupProperties = new List<TilePropertyIntGroup>();
-                    var tilePropertyIntsComponent = new TilePropertyIntsComponent(tileIntProperties, tileIntGroupProperties);
-                    tilePropertyIntsComponent.AddComponent(gameObject);
+                    if (ComponentType == "TilePropertyIntsInjected")
+                    {
+                        var tilePropertyIntsComponent = new TilePropertyIntsInjectedComponent(tileIntProperties, tileIntGroupProperties);
+                        tilePropertyIntsComponent.AddComponent(gameObject);
+                    }
+                    else
+                    {
+                        var tilePropertyIntsComponent = new TilePropertyIntsComponent(tileIntProperties, tileIntGroupProperties);
+                        tilePropertyIntsComponent.AddComponent(gameObject);
+                    }
+                    
                     if (IntsProperty != null)
                     {
                         foreach (var kvPair in IntsProperty)
@@ -752,10 +837,21 @@ namespace Bettr.Editor
                     }
                     break;                
                 case "TilePropertyStrings":
+                case "TilePropertyStringsInjected":
                     var tileStringProperties = new List<TilePropertyString>();
                     var tileStringGroupProperties = new List<TilePropertyStringGroup>();
-                    var tilePropertyStringsComponent = new TilePropertyStringsComponent(tileStringProperties, tileStringGroupProperties);
-                    tilePropertyStringsComponent.AddComponent(gameObject);
+                    if (ComponentType == "TilePropertyStringsInjected")
+                    {
+                        var tilePropertyStringsComponent = new TilePropertyStringsInjectedComponent(tileStringProperties, tileStringGroupProperties);
+                        tilePropertyStringsComponent.AddComponent(gameObject);
+                    }
+                    else
+                    {
+                        var tilePropertyStringsComponent =
+                            new TilePropertyStringsComponent(tileStringProperties, tileStringGroupProperties);
+                        tilePropertyStringsComponent.AddComponent(gameObject);
+                    }
+
                     if (StringsProperty != null)
                     {
                         foreach (var kvPair in StringsProperty)
@@ -864,6 +960,99 @@ namespace Bettr.Editor
             gameObject.AddComponent(_scriptType);
         }
     }
+    
+    [Serializable]
+    public class DirectionalLightComponent : IComponent
+    {
+        public DirectionalLightComponent()
+        {
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            var light = gameObject.AddComponent<Light>();
+            // Set the Light Type to Directional
+            light.type = LightType.Directional;
+            // Set the Light Color to white
+            light.color = Color.white;
+            // Set the Light Intensity to 1.0
+            light.intensity = 1.0f;
+            // Set the Light Rotation to 45, 45, 0
+            light.transform.rotation = Quaternion.Euler(50, -30, 0);
+            // Set the Light Position to 0, 0, 0
+            light.transform.position = new Vector3(0, 0, 0);
+            // no shadows
+            light.shadows = LightShadows.None;
+            
+            string scenesDirectory = Path.Combine(InstanceComponent.RuntimeAssetPath, "Scenes");
+            
+            string lightingSettingsPath = $"{scenesDirectory}/LightingSettings.asset";
+            
+            LightingSettings existingSettings = AssetDatabase.LoadAssetAtPath<LightingSettings>(lightingSettingsPath);
+            if (existingSettings != null)
+            {
+                Debug.Log($"LightingSettings asset already exists: {lightingSettingsPath}");
+                Lightmapping.lightingSettings = existingSettings; // Assign existing settings
+                return; // Skip creating a new asset
+            }
+            
+            LightingSettings lightingSettings = new LightingSettings();
+            AssetDatabase.CreateAsset(lightingSettings, lightingSettingsPath);
+            Lightmapping.lightingSettings = lightingSettings;
+        }
+    }
+
+    
+    [Serializable]
+    public class AudioComponent : IComponent
+    {
+        private readonly string _audioSourceFilename;
+        
+        private const string AUDIO_FORMAT = ".wav";
+        
+        public AudioComponent(string audioFileName)
+        {
+            string audioDirectory = Path.Combine(InstanceComponent.CorePath, "Audio");
+            // get the audio files under the audio directory
+            string[] audioFiles = Directory.GetFiles(audioDirectory, $"*{AUDIO_FORMAT}", SearchOption.AllDirectories);
+            foreach (var audioFile in audioFiles)
+            {
+                var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(audioFile);
+                if (fileNameWithoutExtension == audioFileName)
+                {
+                    _audioSourceFilename = audioFile;
+                    break;
+                }
+            }
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            if (_audioSourceFilename == null)
+            {
+                Debug.LogError($"Failed to find audio file with name: {_audioSourceFilename}");
+                return;
+            }
+            // load the audio clip
+            AudioClip audioClip = AssetDatabase.LoadAssetAtPath<AudioClip>(_audioSourceFilename);
+            if (audioClip == null)
+            {
+                Debug.LogError($"Failed to load audio clip: {_audioSourceFilename}");
+                return;
+            }
+                            
+            // add an audio source to the top level game object of the machine prefab
+            AudioSource audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.clip = audioClip;
+            audioSource.playOnAwake = false;
+            audioSource.loop = true;
+            audioSource.pitch = 1;
+            audioSource.priority = 128;
+            audioSource.spatialBlend = 0; // 0 = 2D
+            audioSource.volume = 1; // can turn off using Key "V"
+            audioSource.panStereo = 0; // -1 = left, 1 = right
+        }
+    }
 
     [Serializable]
     public class AnimatorProperty
@@ -896,6 +1085,26 @@ namespace Bettr.Editor
         public string GroupKey;
 
         public List<AnimatorProperty> Group;
+    }
+    
+    [Serializable]
+    public class TilePropertyAnimatorsInjectedComponent : IComponent
+    {
+        public List<TilePropertyAnimator> tileAnimatorProperties;
+        public List<TilePropertyAnimatorGroup> tileAnimatorGroupProperties;
+        
+        public TilePropertyAnimatorsInjectedComponent(List<TilePropertyAnimator> tileAnimatorProperties, List<TilePropertyAnimatorGroup> tileAnimatorGroupProperties)
+        {
+            this.tileAnimatorProperties = tileAnimatorProperties;
+            this.tileAnimatorGroupProperties = tileAnimatorGroupProperties;
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            var component = gameObject.AddComponent<TilePropertyAnimatorsInjected>();
+            component.tileAnimatorProperties = tileAnimatorProperties;
+            component.tileAnimatorGroupProperties = tileAnimatorGroupProperties;
+        }
     }
     
     
@@ -933,6 +1142,26 @@ namespace Bettr.Editor
         public string GroupKey;
 
         public List<GameObjectProperty> Group;
+    }
+    
+    [Serializable]
+    public class TilePropertyGameObjectsInjectedComponent : IComponent
+    {
+        private readonly List<TilePropertyGameObject> _tileGameObjectProperties;
+        private readonly List<TilePropertyGameObjectGroup> _tileGameObjectGroupProperties;
+        
+        public TilePropertyGameObjectsInjectedComponent(List<TilePropertyGameObject> tileGameObjectProperties, List<TilePropertyGameObjectGroup> tileGameObjectGroupProperties)
+        {
+            this._tileGameObjectProperties = tileGameObjectProperties;
+            this._tileGameObjectGroupProperties = tileGameObjectGroupProperties;
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            var component = gameObject.AddComponent<TilePropertyGameObjectsInjected>();
+            component.tileGameObjectProperties = _tileGameObjectProperties;
+            component.tileGameObjectGroupProperties = _tileGameObjectGroupProperties;
+        }
     }
     
     [Serializable]
@@ -976,6 +1205,26 @@ namespace Bettr.Editor
 
         // ReSharper disable once InconsistentNaming
         public List<TextMeshProProperty> Group;
+    }
+    
+    [Serializable]
+    public class TilePropertyTextMeshProsInjectedComponent : IComponent
+    {
+        private readonly List<TilePropertyTextMeshPro> _tileTextMeshProProperties;
+        private readonly List<TilePropertyTextMeshProGroup> _tileTextMeshProGroupProperties;
+        
+        public TilePropertyTextMeshProsInjectedComponent(List<TilePropertyTextMeshPro> properties, List<TilePropertyTextMeshProGroup> groupProperties)
+        {
+            this._tileTextMeshProProperties = properties;
+            this._tileTextMeshProGroupProperties = groupProperties;
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            var component = gameObject.AddComponent<TilePropertyTextMeshProsInjected>();
+            component.tileTextMeshProProperties = _tileTextMeshProProperties;
+            component.tileTextMeshProGroupProperties = _tileTextMeshProGroupProperties;
+        }
     }
     
     [Serializable]
@@ -1066,6 +1315,26 @@ namespace Bettr.Editor
     }
     
     [Serializable]
+    public class TilePropertyIntsInjectedComponent : IComponent
+    {
+        private readonly List<TilePropertyInt> _tileIntProperties;
+        private readonly List<TilePropertyIntGroup> _tileIntGroupProperties;
+        
+        public TilePropertyIntsInjectedComponent(List<TilePropertyInt> properties, List<TilePropertyIntGroup> groupProperties)
+        {
+            this._tileIntProperties = properties;
+            this._tileIntGroupProperties = groupProperties;
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            var component = gameObject.AddComponent<TilePropertyIntsInjected>();
+            component.tileGameIntProperties = _tileIntProperties;
+            component.tileGameIntGroupProperties = _tileIntGroupProperties;
+        }
+    }
+    
+    [Serializable]
     public class TilePropertyIntsComponent : IComponent
     {
         private readonly List<TilePropertyInt> _tileIntProperties;
@@ -1101,6 +1370,26 @@ namespace Bettr.Editor
         public string GroupKey;
 
         public List<StringProperty> Group;
+    }
+    
+    [Serializable]
+    public class TilePropertyStringsInjectedComponent : IComponent
+    {
+        private readonly List<TilePropertyString> _tileStringProperties;
+        private readonly List<TilePropertyStringGroup> _tileStringGroupProperties;
+        
+        public TilePropertyStringsInjectedComponent(List<TilePropertyString> properties, List<TilePropertyStringGroup> groupProperties)
+        {
+            this._tileStringProperties = properties;
+            this._tileStringGroupProperties = groupProperties;
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            var component = gameObject.AddComponent<TilePropertyStringsInjected>();
+            component.tileGameStringProperties = _tileStringProperties;
+            component.tileGameStringGroupProperties = _tileStringGroupProperties;
+        }
     }
     
     [Serializable]
@@ -2000,8 +2289,10 @@ namespace Bettr.Editor
     public class EventTriggerComponent : IComponent
     {
         private readonly Tile _tile;
+        private readonly BettrEventListener _eventListener;
         private readonly int _paramCount;
         private readonly string _param;
+        private readonly string _referenceId;
         
         public EventTriggerComponent(Tile tile, params string[] param)
         {
@@ -2011,7 +2302,19 @@ namespace Bettr.Editor
             _paramCount = (int)param?.Length;
             if (_paramCount > 1)
             {
-                throw new ArgumentOutOfRangeException("param", "EventTriggerComponent only supports 0 or 1 parameters");
+                throw new ArgumentOutOfRangeException(nameof(param), "EventTriggerComponent only supports 0 or 1 parameters");
+            }
+        }
+        
+        public EventTriggerComponent(BettrEventListener eventListener, string referenceId, params string[] param)
+        {
+            _eventListener = eventListener;
+            param ??= Array.Empty<string>();
+            _param = param.Length > 0 ? $"{referenceId}__{param[0]}" : referenceId;
+            _paramCount = (int)param?.Length;
+            if (_paramCount > 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(param), "EventTriggerComponent only supports 0 or 1 parameters");
             }
         }
         
@@ -2032,7 +2335,18 @@ namespace Bettr.Editor
             EventTrigger eventTrigger =gameObject.AddComponent<EventTrigger>();
             EventTrigger.Entry entry = new EventTrigger.Entry { eventID = EventTriggerType.PointerClick };
             var triggerEvent = entry.callback;
-            UnityEventTools.AddVoidPersistentListener(triggerEvent, _tile.OnPointerClick);
+            if (_tile != null)
+            {
+                UnityEventTools.AddVoidPersistentListener(triggerEvent, _tile.OnPointerClick);
+            } 
+            else if (_eventListener != null)
+            {
+                UnityEventTools.AddVoidPersistentListener(triggerEvent, _eventListener.OnPointerClick);
+            }
+            else
+            {
+                throw new ArgumentNullException(nameof(_tile), "Tile or Type must be provided");
+            }
             eventTrigger.triggers.Add(entry);
         }
         
@@ -2041,7 +2355,18 @@ namespace Bettr.Editor
             EventTrigger eventTrigger =gameObject.AddComponent<EventTrigger>();
             EventTrigger.Entry entry = new EventTrigger.Entry { eventID = EventTriggerType.PointerClick };
             var triggerEvent = entry.callback;
-            UnityEventTools.AddStringPersistentListener(triggerEvent, _tile.OnPointerClick, _param);
+            if (_tile != null)
+            {
+                UnityEventTools.AddStringPersistentListener(triggerEvent, _tile.OnPointerClick, _param);
+            } 
+            else if (_eventListener != null)
+            {
+                UnityEventTools.AddStringPersistentListener(triggerEvent, _eventListener.OnPointerClick, _param);
+            } 
+            else
+            {
+                throw new ArgumentNullException(nameof(_tile), "Tile or Type must be provided");
+            }
             eventTrigger.triggers.Add(entry);
         }
     }

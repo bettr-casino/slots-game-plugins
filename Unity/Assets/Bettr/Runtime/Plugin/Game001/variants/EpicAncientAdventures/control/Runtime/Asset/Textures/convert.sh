@@ -1,0 +1,12 @@
+magick M1.webp M1.png
+magick M2.webp M2.png
+magick M3.webp M3.png
+magick M4.webp M4.png
+magick F5.webp F5.png
+magick F6.webp F6.png
+magick F7.webp F7.png
+magick F8.webp F8.png
+magick F9.webp F9.png
+magick F10.webp F10.png
+magick WD.webp WD.png
+magick SC.webp SC.png

@@ -7,16 +7,27 @@ using System.Text;
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
 using CrayonScript.Interpreter.Execution.VM;
+using Newtonsoft.Json;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using Object = UnityEngine.Object;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
+
 // ReSharper disable once CheckNamespace
 namespace Bettr.Core
 {
+    public delegate void MultiByteAssetLoadCompleteCallback(BettrAssetMultiByteRange manifest, string assetBundleName, string assetBundleVersion,
+        AssetBundle assetBundle, BettrAssetBundleManifest assetBundleManifest, bool success,
+        bool previouslyLoaded, string error);
     public delegate void AssetLoadCompleteCallback(string assetBundleName, string assetBundleVersion,
         AssetBundle assetBundle, BettrAssetBundleManifest assetBundleManifest, bool success,
         bool previouslyLoaded, string error);
@@ -49,8 +60,14 @@ namespace Bettr.Core
                 "Bettr/LobbyMask",
                 "Bettr/ReelMask",
                 "Bettr/Symbol",
+                "Bettr/Shimmer",
+                "Bettr/UIImage",
                 "Unlit/Texture",
                 "Unlit/Color",
+                "Legacy Shaders/Particles/Additive",
+                "Legacy Shaders/Particles/Alpha Blended Premultiply",
+                "Standard",
+                
             };
             
             // load the shaders into the cache
@@ -85,6 +102,239 @@ namespace Bettr.Core
     }
 
     [Serializable]
+    public class BettrAssetMultiByteRange
+    {
+        [JsonProperty("bundle")]
+        public BettrMultiByteRange Bundle { get; set; }
+        
+        [JsonProperty("manifest")]
+        public BettrMultiByteRange Manifest { get; set; }
+    }
+    
+    [Serializable]
+    public class BettrMultiByteRange
+    {
+        [JsonProperty("file_name")]
+        public string FileName { get; set; }
+        
+        [JsonProperty("file_type")]
+        public string FileType { get; set; }
+        
+        [JsonProperty("byte_start")]
+        public int ByteStart { get; set; }
+
+        [JsonProperty("byte_length")]
+        public int ByteLength { get; set; }
+
+        [JsonProperty("bundle_name")]
+        public string BundleName { get; set; }
+        
+        [JsonProperty("bundle_version")]
+        public string BundleVersion { get; set; }
+        
+        [NonSerialized] public byte[] Data = null;
+
+        public string BundleId => $"{BundleName}.{BundleVersion}";
+    }
+
+    public class BettrMainLobbyManifests
+    {
+        [JsonProperty("manifests")]
+        public List<BettrAssetMultiByteRange> Manifests { get; set; }
+
+        public BettrAssetMultiByteRange FindManifest(string machineBundleName, string machineBundleVariant)
+        {
+            return Manifests.Find(m => m.Bundle.BundleName == machineBundleName && m.Bundle.BundleVersion == machineBundleVariant);
+        }
+    }
+
+    [Serializable]
+    public class BettrMultiByteRangeAssetBundleController
+    {
+        [NonSerialized] private BettrAssetController _bettrAssetController;
+        
+        public BettrMultiByteRangeAssetBundleController(BettrAssetController bettrAssetController)
+        {
+            _bettrAssetController = bettrAssetController;
+        }
+        
+        private IEnumerator FetchAssetByteRange(string url, BettrMultiByteRange range, Action<BettrMultiByteRange> onComplete)
+        {
+            // Set up UnityWebRequest with the range header
+            UnityWebRequest request = UnityWebRequest.Get(url);
+            request.SetRequestHeader("Range", $"bytes={range.ByteStart}-{range.ByteStart + range.ByteLength - 1}");
+        
+            // Send request
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success && request.responseCode == 206)
+            {
+                byte[] content = request.downloadHandler.data;
+                if (content != null && content.Length > 0)
+                {
+                    // Process the data if available
+                    range.Data = content;
+                    onComplete?.Invoke(range);
+                }
+                else
+                {
+                    Debug.LogError($"The response did not contain any content. url={url}");
+                    onComplete?.Invoke(null);
+                }
+            }
+            else
+            {
+                Debug.LogError($"Error: {request.result} | Status Code: {request.responseCode} url={url}");
+                onComplete?.Invoke(null);
+            }
+        }
+
+        public IEnumerator LoadMultiByteRangeAsset(string url, BettrAssetMultiByteRange manifest, MultiByteAssetLoadCompleteCallback callback)
+        {
+            var bettrAssetBundleName = manifest.Bundle.BundleName;
+            var bettrAssetBundleVersion = manifest.Bundle.BundleVersion;
+
+            int retries = 0;
+            int retryIndex = 0;
+
+            BettrAssetBundleManifest assetBundleManifest = null;
+
+            while (true)
+            {
+                // Fetch manifest byte range
+                yield return FetchAssetByteRange(url, manifest.Manifest, fetchedManifest =>
+                {
+                    if (fetchedManifest == null)
+                    {
+                        return;
+                    }
+                    manifest.Manifest = fetchedManifest;
+                    var assetBundleText = Encoding.ASCII.GetString(fetchedManifest.Data);
+                    var deserializer = new DeserializerBuilder().WithNamingConvention(PascalCaseNamingConvention.Instance).Build();
+                    assetBundleManifest = deserializer.Deserialize<BettrAssetBundleManifest>(assetBundleText);
+                    assetBundleManifest.AssetBundleName = bettrAssetBundleName;
+                    assetBundleManifest.AssetBundleVersion = bettrAssetBundleVersion;
+                });
+
+                if (assetBundleManifest != null)
+                {
+                    break;
+                }
+                
+                retryIndex++;
+
+                if (retryIndex >= retries)
+                {
+                    break;
+                }
+                
+                yield return new WaitForSeconds(0.1f);
+            }
+            
+            if (assetBundleManifest == null)
+            {
+                string error = $"Failed to download BettrAssetBundleManifest. AssetBundleName={bettrAssetBundleName} AssetBundleVersion={bettrAssetBundleVersion}";
+                Debug.LogError(error);
+                callback(manifest, bettrAssetBundleName, bettrAssetBundleVersion, null, null, false, false, $"error fetching multi byte range AssetManifest manifest url={url}");
+                yield break;
+            }
+
+            retryIndex = 0;
+
+            AssetBundle downloadedAssetBundle = null;
+            
+            downloadedAssetBundle = AssetBundle.GetAllLoadedAssetBundles()
+                .FirstOrDefault(bundle => bundle.name == manifest.Bundle.BundleId);
+
+            if (downloadedAssetBundle != null)
+            {
+                callback(manifest, bettrAssetBundleName, bettrAssetBundleVersion, downloadedAssetBundle, assetBundleManifest, true, false, null);
+                
+                yield break;
+            }
+
+            while (true)
+            {
+                // Fetch asset bundle byte range
+                yield return FetchAssetByteRange(url, manifest.Bundle, fetchedBundle =>
+                {
+                    if (fetchedBundle == null)
+                    {
+                        string error = $"Failed to fetch bundle byte range. AssetBundleName={bettrAssetBundleName} AssetBundleVersion={bettrAssetBundleVersion}";
+                        Debug.LogError(error);
+                        return;
+                    }
+                
+                    downloadedAssetBundle = AssetBundle.GetAllLoadedAssetBundles()
+                        .FirstOrDefault(bundle => bundle.name == manifest.Bundle.FileName);
+
+                    if (downloadedAssetBundle == null)
+                    {
+                        try
+                        {
+                            downloadedAssetBundle = AssetBundle.LoadFromMemory(fetchedBundle.Data);                    
+                        }
+                        catch (Exception e)
+                        {
+                            string error = $"Failed to load AssetBundle from memory. AssetBundleName={bettrAssetBundleName} AssetBundleVersion={bettrAssetBundleVersion} error={e.Message}";
+                            Debug.LogError(error);    
+                        }
+                    }
+                });
+                
+                if (downloadedAssetBundle != null)
+                {
+                    break;
+                }
+                
+                retryIndex++;
+
+                if (retryIndex >= retries)
+                {
+                    break;
+                }
+
+                yield return new WaitForSeconds(0.1f);
+            }
+            
+            if (downloadedAssetBundle == null)
+            {
+                string error = $"Failed to download AssetBundle. AssetBundleName={bettrAssetBundleName} AssetBundleVersion={bettrAssetBundleVersion}";
+                Debug.LogError(error);
+                callback(manifest, bettrAssetBundleName, bettrAssetBundleVersion, null, assetBundleManifest, false, false, error);
+                yield break;
+            }
+            
+            callback(manifest, bettrAssetBundleName, bettrAssetBundleVersion, downloadedAssetBundle, assetBundleManifest, true, false, null);
+        }
+
+        public void LoadMultiByteRangeAssets(string binaryFileName, List<BettrAssetMultiByteRange> manifests, MultiByteAssetLoadCompleteCallback callback)
+        {
+            var webAssetBaseURL = _bettrAssetController.webAssetBaseURL;
+            var binaryAssetURL = $"{webAssetBaseURL}/{binaryFileName}";
+            
+            foreach (var manifest in manifests)
+            {
+                var bettrAssetBundleName = manifest.Bundle.BundleName;
+                var bettrAssetBundleVersion = manifest.Bundle.BundleVersion;
+                var lobbyCardAssetBundleName = $"lobbycard{bettrAssetBundleName}";
+
+                // Check if this asset bundle is already loaded into memory
+                AssetBundle previouslyLoadedAssetBundle = _bettrAssetController.GetLoadedAssetBundle(lobbyCardAssetBundleName, bettrAssetBundleVersion);
+                if (previouslyLoadedAssetBundle != null)
+                {
+                    // If already loaded, invoke callback immediately
+                    callback(manifest, bettrAssetBundleName, bettrAssetBundleVersion, previouslyLoadedAssetBundle, null, true, true, null);
+                    continue;
+                }
+
+                // Start fetching byte ranges for the asset
+                BettrRoutineRunner.Instance.StartCoroutine(LoadMultiByteRangeAsset(binaryAssetURL, manifest, callback));
+            }
+        }
+    }
+
+    [Serializable]
     public class BettrAssetPackageController
     {
         [NonSerialized] private BettrAssetController _bettrAssetController;
@@ -94,9 +344,6 @@ namespace Bettr.Core
             BettrAssetController bettrAssetController,
             BettrAssetScriptsController bettrAssetScriptsController)
         {
-            // TileController.RegisterType<BettrAssetPackageController>("BettrAssetPackageController");
-            // TileController.AddToGlobals("BettrAssetPackageController", this);
-
             _bettrAssetController = bettrAssetController;
             _bettrAssetScriptsController = bettrAssetScriptsController;
         }
@@ -148,9 +395,6 @@ namespace Bettr.Core
             BettrAssetController bettrAssetController,
             BettrAssetPackageController bettrAssetPackageController)
         {
-            // TileController.RegisterType<BettrAssetPrefabsController>("BettrPrefabsController");
-            // TileController.AddToGlobals("BettrPrefabsController", this);
-
             _bettrAssetController = bettrAssetController;
             _bettrAssetPackageController = bettrAssetPackageController;
         }
@@ -160,7 +404,7 @@ namespace Bettr.Core
         {
             yield return _bettrAssetPackageController.LoadPackage(bettrAssetBundleName, bettrAssetBundleVersion, false);
             
-            var assetBundle = _bettrAssetController.GetCachedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);
+            var assetBundle = _bettrAssetController.GetLoadedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);
             
             var prefab = assetBundle.LoadAsset<GameObject>(prefabName);
             if (prefab == null)
@@ -188,15 +432,31 @@ namespace Bettr.Core
             if (string.IsNullOrWhiteSpace(prefabName))
             {
                 Debug.LogError($"Prefab name is null or empty for asset bundle={bettrAssetBundleName} version={bettrAssetBundleVersion}");
-                context.SetError(new ScriptRuntimeException($"Prefab name is null or empty for asset bundle={bettrAssetBundleName} version={bettrAssetBundleVersion}"));
+                context?.SetError(new ScriptRuntimeException($"Prefab name is null or empty for asset bundle={bettrAssetBundleName} version={bettrAssetBundleVersion}"));
                 yield break;
             }
             
             yield return _bettrAssetPackageController.LoadPackage(bettrAssetBundleName, bettrAssetBundleVersion, false);
             
-            var assetBundle = _bettrAssetController.GetCachedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);
+            var assetBundle = _bettrAssetController.GetLoadedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);
+
+            GameObject prefab = null;
             
-            var prefab = assetBundle.LoadAsset<GameObject>(prefabName);
+#if UNITY_EDITOR            
+            
+            // find the prefabName from the assetBundle
+            string prefabPath = assetBundle.GetAllAssetNames()
+                .FirstOrDefault(s => s.EndsWith($"{prefabName}.prefab", System.StringComparison.OrdinalIgnoreCase));
+            if (prefabPath != null)
+            {
+                prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            }
+#endif
+            if (prefab == null)
+            {
+                prefab = assetBundle.LoadAsset<GameObject>(prefabName);
+            }
+            
             if (prefab == null)
             {
                 Debug.LogError(
@@ -209,6 +469,7 @@ namespace Bettr.Core
             {
                 foreach (Material mat in renderer.sharedMaterials)
                 {
+                    if (mat == null) continue;
                     if (ShaderCaches.ShaderCache.TryGetValue(mat.shader.name, out Shader bettrShader))
                     {
                         mat.shader = bettrShader;
@@ -217,9 +478,23 @@ namespace Bettr.Core
             }
             
             // update the TextMeshProUI shaders
-            var textMeshProUGUIs = prefab.GetComponentsInChildren<TMPro.TextMeshProUGUI>(true);
+            var textMeshProUGUIs = prefab.GetComponentsInChildren<TextMeshProUGUI>(true);
             foreach (var textMeshProUGUI in textMeshProUGUIs)
             {
+                // check if the shader is in the cache
+                if (textMeshProUGUI == null)
+                {
+                    Debug.LogWarning($"TextMeshProUGUI fontMaterial is null for prefab={prefabName} textMeshProUGUI=null");
+                    continue;
+                }
+                
+                // check if the shader is in the cache
+                if (textMeshProUGUI.fontMaterial == null)
+                {
+                    Debug.LogWarning($"TextMeshProUGUI fontMaterial is null for prefab={prefabName} textMeshProUGUI={textMeshProUGUI.name}");
+                    continue;
+                }
+                
                 // check if the shader is in the cache
                 if (ShaderCaches.TmProShaderCache.TryGetValue(textMeshProUGUI.fontMaterial.shader.name, out Shader bettrShader))
                 {
@@ -227,17 +502,47 @@ namespace Bettr.Core
                 }
             }
             // similarly for TextMeshPro shaders
-            var textMeshPros = prefab.GetComponentsInChildren<TMPro.TextMeshPro>(true);
+            var textMeshPros = prefab.GetComponentsInChildren<TextMeshPro>(true);
             foreach (var textMeshPro in textMeshPros)
             {
                 // check if the shader is in the cache
+                if (textMeshPro == null)
+                {
+                    Debug.LogWarning($"TextMeshPro fontMaterial is null for prefab={prefabName} textMeshPro=null");
+                    continue;
+                }
+                
+                // check if the shader is in the cache
+                if (textMeshPro.fontMaterial == null)
+                {
+                    Debug.LogWarning($"TextMeshPro fontMaterial is null for prefab={prefabName} textMeshPro={textMeshPro.name}");
+                    continue;
+                }
+
                 if (ShaderCaches.TmProShaderCache.TryGetValue(textMeshPro.fontMaterial.shader.name, out Shader bettrShader))
                 {
                     textMeshPro.fontMaterial.shader = bettrShader;
                 }
             }
             
-            Object.Instantiate(prefab, parent == null ? null : parent.transform);
+            // Update shaders for all Image components that are using a Material which could be null
+            var images = prefab.GetComponentsInChildren<Image>(true);
+            foreach (var image in images)
+            {
+                if (image.material != null)
+                {
+                    if (ShaderCaches.ShaderCache.TryGetValue(image.material.shader.name, out Shader bettrShader))
+                    {
+                        image.material.shader = bettrShader;
+                    }
+                }
+            }
+            
+            var instance = Object.Instantiate(prefab, parent == null ? null : parent.transform);
+            if (context != null)
+            {
+                context.GameObjectResult = instance;
+            }
         }
     }
     
@@ -251,9 +556,6 @@ namespace Bettr.Core
             BettrAssetController bettrAssetController,
             BettrAssetPackageController bettrAssetPackageController)
         {
-            // TileController.RegisterType<BettrAssetPrefabsController>("BettrPrefabsController");
-            // TileController.AddToGlobals("BettrPrefabsController", this);
-
             _bettrAssetController = bettrAssetController;
             _bettrAssetPackageController = bettrAssetPackageController;
         }
@@ -261,22 +563,46 @@ namespace Bettr.Core
         public IEnumerator LoadMaterial(string bettrAssetBundleName, string bettrAssetBundleVersion, string materialName,
             GameObject targetGameObject)
         {
-            var assetBundle = _bettrAssetController.GetCachedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);
+            var assetBundle = _bettrAssetController.GetLoadedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);
+
+            Material material = null;
             
-            var material = assetBundle.LoadAsset<Material>(materialName);
+#if UNITY_EDITOR            
+            
+            // find the prefabName from the assetBundle
+            string materialPath = assetBundle.GetAllAssetNames()
+                .FirstOrDefault(s => s.EndsWith($"{materialName}.mat", System.StringComparison.OrdinalIgnoreCase));
+            if (materialPath != null)
+            {
+                material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+            }
+#endif
+            if (material == null)
+            {
+                material = assetBundle.LoadAsset<Material>(materialName);
+            }
             if (material == null)
             {
                 Debug.LogError(
                     $"Failed to load material={materialName} from asset bundle={bettrAssetBundleName} version={bettrAssetBundleVersion}");
                 yield break;
             }
-
+            
             if (targetGameObject != null)
             {
                 var meshRenderer = targetGameObject.GetComponent<MeshRenderer>();
                 if (meshRenderer != null)
                 {
                     meshRenderer.material = material;
+                    
+                    foreach (Material mat in meshRenderer.sharedMaterials)
+                    {
+                        if (mat == null) continue;
+                        if (ShaderCaches.ShaderCache.TryGetValue(mat.shader.name, out Shader bettrShader))
+                        {
+                            mat.shader = bettrShader;
+                        }
+                    }
                 }
                 else
                 {
@@ -300,26 +626,28 @@ namespace Bettr.Core
             BettrAssetController bettrAssetController,
             BettrAssetPackageController bettrAssetPackageController)
         {
-            // TileController.RegisterType<BettrAssetScenesController>("BettrAssetScenesController");
-            // TileController.AddToGlobals("BettrAssetScenesController", this);
-
             _bettrAssetController = bettrAssetController;
             _bettrAssetPackageController = bettrAssetPackageController;
         }
 
-        public IEnumerator LoadScene(string bettrAssetBundleName, string bettrAssetBundleVersion, string bettrSceneName)
+        public IEnumerator LoadScene(string bettrAssetBundleName, string bettrAssetBundleVersion, string bettrSceneName, bool loadSingle = true)
         {
             yield return _bettrAssetPackageController.LoadPackage(bettrAssetBundleName, bettrAssetBundleVersion, true);
             
-            var assetBundle = _bettrAssetController.GetCachedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion, true);
+            var assetBundle = _bettrAssetController.GetLoadedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion, true);
             
             var allScenePaths = assetBundle.GetAllScenePaths();
             var scenePath = string.IsNullOrWhiteSpace(bettrSceneName)
                 ? allScenePaths[0]
                 : allScenePaths.First(s => Path.GetFileNameWithoutExtension(s).Equals(bettrSceneName));
             
-            AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(scenePath, LoadSceneMode.Single);
-    
+            AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(scenePath, loadSingle ? LoadSceneMode.Single : LoadSceneMode.Additive);
+            if (asyncLoad == null)
+            {
+                Debug.Log($"failed to load scene={scenePath} bettrAssetBundleName={bettrAssetBundleName} bettrAssetBundleVersion={bettrAssetBundleVersion} allowSceneActivation={loadSingle}");
+                yield break;
+            }
+            
             // Wait until the scene has fully loaded
             while (!asyncLoad.isDone)
             {
@@ -341,7 +669,7 @@ namespace Bettr.Core
 
             // Update shaders for all active and inactive TextMeshProUGUI components in the scene
             // ReSharper disable once InconsistentNaming
-            var textMeshProUGUIs = Object.FindObjectsOfType<TMPro.TextMeshProUGUI>(true);
+            var textMeshProUGUIs = Object.FindObjectsOfType<TextMeshProUGUI>(true);
             foreach (var textMeshProUGUI in textMeshProUGUIs)
             {
                 if (ShaderCaches.TmProShaderCache.TryGetValue(textMeshProUGUI.fontMaterial.shader.name, out Shader bettrShader))
@@ -351,12 +679,25 @@ namespace Bettr.Core
             }
 
             // Update shaders for all active and inactive TextMeshPro components in the scene
-            var textMeshPros = Object.FindObjectsOfType<TMPro.TextMeshPro>(true);
+            var textMeshPros = Object.FindObjectsOfType<TextMeshPro>(true);
             foreach (var textMeshPro in textMeshPros)
             {
                 if (ShaderCaches.TmProShaderCache.TryGetValue(textMeshPro.fontMaterial.shader.name, out Shader bettrShader))
                 {
                     textMeshPro.fontMaterial.shader = bettrShader;
+                }
+            }
+            
+            // Update shaders for all Image components that are using a Material which could be null
+            var images = Object.FindObjectsOfType<Image>(true);
+            foreach (var image in images)
+            {
+                if (image.material != null)
+                {
+                    if (ShaderCaches.ShaderCache.TryGetValue(image.material.shader.name, out Shader bettrShader))
+                    {
+                        image.material.shader = bettrShader;
+                    }
                 }
             }
         }
@@ -370,9 +711,6 @@ namespace Bettr.Core
 
         public BettrAssetScriptsController(BettrAssetController bettrAssetController)
         {
-            // TileController.RegisterType<BettrAssetScriptsController>("BettrAssetScriptsController");
-            // TileController.AddToGlobals("BettrAssetScriptsController", this);
-
             _bettrAssetController = bettrAssetController;
 
             ScriptsTables = new Dictionary<string, Table>();
@@ -419,18 +757,40 @@ namespace Bettr.Core
             var scriptAssetNames = assetNames.Where(name => name.EndsWith(".cscript.txt")).ToArray();
             foreach (var scriptAssetName in scriptAssetNames)
             {
-                var textAsset = assetBundle.LoadAsset<TextAsset>(scriptAssetName);
-                var script = textAsset.text;
-                var className = Path.GetFileNameWithoutExtension(scriptAssetName);
-                try
+#if UNITY_EDITOR
+                // Load from the Local Asset
                 {
-                    className = Path.GetFileNameWithoutExtension(className);
-                    TileController.LoadScript(className, script);
+                    var textAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(scriptAssetName);
+                    var script = textAsset.text;
+                    var className = Path.GetFileNameWithoutExtension(scriptAssetName);
+                    try
+                    {
+                        className = Path.GetFileNameWithoutExtension(className);
+                        TileController.LoadScript(className, script);
+
+                        continue;
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError($"error loading script{scriptAssetName} class={className} error={e.Message}");
+                        throw;
+                    }
                 }
-                catch (Exception e)
+#endif
                 {
-                    Debug.LogError($"error loading script{scriptAssetName} class={className} error={e.Message}");
-                    throw;
+                    var textAsset = assetBundle.LoadAsset<TextAsset>(scriptAssetName);
+                    var script = textAsset.text;
+                    var className = Path.GetFileNameWithoutExtension(scriptAssetName);
+                    try
+                    {
+                        className = Path.GetFileNameWithoutExtension(className);
+                        TileController.LoadScript(className, script);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError($"error loading script{scriptAssetName} class={className} error={e.Message}");
+                        throw;
+                    }
                 }
             }
 
@@ -515,6 +875,8 @@ namespace Bettr.Core
         public BettrAssetScriptsController BettrAssetScriptsController { get; private set; }
         public BettrAssetPrefabsController BettrAssetPrefabsController { get; private set; }
         
+        public BettrMultiByteRangeAssetBundleController BettrMultiByteRangeAssetController { get; private set; }
+        
         public BettrAssetMaterialsController BettrAssetMaterialsController { get; private set; }
         public BettrAssetPackageController BettrAssetPackageController { get; private set; }
         public BettrAssetScenesController BettrAssetScenesController { get; private set; }
@@ -534,12 +896,13 @@ namespace Bettr.Core
             BettrAssetPackageController = new BettrAssetPackageController(this, BettrAssetScriptsController);
             BettrAssetScenesController = new BettrAssetScenesController(this, BettrAssetPackageController);
             BettrAssetPrefabsController = new BettrAssetPrefabsController(this, BettrAssetPackageController);
+            BettrMultiByteRangeAssetController = new BettrMultiByteRangeAssetBundleController(this);
             BettrAssetMaterialsController = new BettrAssetMaterialsController(this, BettrAssetPackageController);
             
             Instance = this;
         }
         
-        private string GetAssetBundleName(string bundleName, string bundleVariant, bool isScene)
+        public string GetAssetBundleName(string bundleName, string bundleVariant, bool isScene)
         {
             return isScene ? $"{bundleName}_scenes.{bundleVariant}" : $"{bundleName}.{bundleVariant}";
         }
@@ -548,15 +911,20 @@ namespace Bettr.Core
         {
             return isScene ? $"{bundleName}_scenes.{bundleVariant}.manifest" : $"{bundleName}.{bundleVariant}.manifest";
         }
+        
+        public void LoadMultiByteRangeAssets(string binaryFileName, List<BettrAssetMultiByteRange> byteRanges, MultiByteAssetLoadCompleteCallback callback)
+        {
+            BettrMultiByteRangeAssetController.LoadMultiByteRangeAssets(binaryFileName, byteRanges, callback);
+        }
 
         public IEnumerator LoadPackage(string packageName, string packageVersion, bool loadScenes)
         {
             yield return BettrAssetPackageController.LoadPackage(packageName, packageVersion, loadScenes);
         }
 
-        public IEnumerator LoadScene(string bettrAssetBundleName, string bettrAssetBundleVersion, string bettrSceneName)
+        public IEnumerator LoadScene(string bettrAssetBundleName, string bettrAssetBundleVersion, string bettrSceneName, bool loadSingle = true)
         {
-            yield return BettrAssetScenesController.LoadScene(bettrAssetBundleName, bettrAssetBundleVersion, bettrSceneName);
+            yield return BettrAssetScenesController.LoadScene(bettrAssetBundleName, bettrAssetBundleVersion, bettrSceneName, loadSingle);
         }
         
         public IEnumerator LoadPrefab(CrayonScriptContext context, string bettrAssetBundleName, string bettrAssetBundleVersion, string prefabName,
@@ -577,7 +945,7 @@ namespace Bettr.Core
             yield return BettrAssetMaterialsController.LoadMaterial(bettrAssetBundleName, bettrAssetBundleVersion, materialName, targetGameObject);
         }
 
-        public AssetBundle GetCachedAssetBundle(string bettrAssetBundleName, string bettrAssetBundleVersion, bool isScene = false)
+        public AssetBundle GetLoadedAssetBundle(string bettrAssetBundleName, string bettrAssetBundleVersion, bool isScene = false)
         {
             var assetBundleName = GetAssetBundleName(bettrAssetBundleName, bettrAssetBundleVersion, isScene);
             
@@ -586,7 +954,7 @@ namespace Bettr.Core
             var loadedBundles = AssetBundle.GetAllLoadedAssetBundles();
             foreach (var bundle in loadedBundles)
             {
-                if (bundle.name == cachedAssetBundleName)
+                if (string.Equals(bundle.name, cachedAssetBundleName, StringComparison.OrdinalIgnoreCase))
                 {
                     return bundle;
                 }
@@ -597,16 +965,24 @@ namespace Bettr.Core
 
         public IEnumerator UnloadCachedAssetBundle(string bettrAssetBundleName, string bettrAssetBundleVersion)
         {
-            var assetBundle = GetCachedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);
-            if (assetBundle == null)
+            var sceneAssetBundle = GetLoadedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion, isScene:true);
+            if (sceneAssetBundle != null)
             {
-                yield break;
+                AsyncOperation asyncOperation = sceneAssetBundle.UnloadAsync(true);
+                while (!asyncOperation.isDone)
+                {
+                    yield return null;
+                }
             }
-
-            AsyncOperation asyncOperation = assetBundle.UnloadAsync(true);
-            while (!asyncOperation.isDone)
+            
+            var assetBundle = GetLoadedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion, isScene:false);
+            if (assetBundle != null)
             {
-                yield return null;
+                AsyncOperation asyncOperation = assetBundle.UnloadAsync(true);
+                while (!asyncOperation.isDone)
+                {
+                    yield return null;
+                }
             }
         }
 
@@ -681,7 +1057,7 @@ namespace Bettr.Core
                 {
                     yield return null;
                 }
-                previouslyDownloadedAssetBundle = GetCachedAssetBundle(assetBundleManifest.AssetBundleName,
+                previouslyDownloadedAssetBundle = GetLoadedAssetBundle(assetBundleManifest.AssetBundleName,
                     assetBundleManifest.AssetBundleVersion);
                 callback(assetBundleName, previouslyDownloadedAssetBundle, true, true, null);
                 yield break;
@@ -690,7 +1066,7 @@ namespace Bettr.Core
             //
             // Check if the current bundle is already loaded
             //
-            previouslyDownloadedAssetBundle = GetCachedAssetBundle(assetBundleManifest.AssetBundleName,
+            previouslyDownloadedAssetBundle = GetLoadedAssetBundle(assetBundleManifest.AssetBundleName,
                 assetBundleManifest.AssetBundleVersion);
             if (previouslyDownloadedAssetBundle != null)
             {
@@ -765,7 +1141,7 @@ namespace Bettr.Core
                 {
                     yield return null;
                 }
-                previouslyDownloadedAssetBundle = GetCachedAssetBundle(assetBundleManifest.AssetBundleName,
+                previouslyDownloadedAssetBundle = GetLoadedAssetBundle(assetBundleManifest.AssetBundleName,
                     assetBundleManifest.AssetBundleVersion);
                 callback(assetBundleName, previouslyDownloadedAssetBundle, true, true, null);
                 yield break;
@@ -774,7 +1150,7 @@ namespace Bettr.Core
             //
             // Check if the current bundle is already loaded
             //
-            previouslyDownloadedAssetBundle = GetCachedAssetBundle(assetBundleManifest.AssetBundleName,
+            previouslyDownloadedAssetBundle = GetLoadedAssetBundle(assetBundleManifest.AssetBundleName,
                 assetBundleManifest.AssetBundleVersion);
             if (previouslyDownloadedAssetBundle != null)
             {

@@ -1,37 +1,21 @@
 require "math"
 require "Core"
 
-{{machineName}}GameBaseGameReelRandomMultiplierWildsMechanic = {
+{{machineName}}BaseGameReelRandomMultiplierWildsMechanic = {
+    Config = {
+        Machine = "{{machineName}}",
+        Variant = "{{machineVariant}}",
+        Experiment = "{{experimentVariant}}",
+    },
 }
 
-function {{machineName}}GameBaseGameReelRandomMultiplierWildsMechanic:new(o)
+function {{machineName}}BaseGameReelRandomMultiplierWildsMechanic:new(o)
 	o = o or {}
 	setmetatable(o, self)
 	self.__index = self
 	return o
 end
 
-function {{machineName}}GameBaseGameReelRandomMultiplierWildsMechanic:Initialize(reel)
+function {{machineName}}BaseGameReelRandomMultiplierWildsMechanic:Initialize(reel)
 end
 
-function {{machineName}}GameBaseGameReelRandomMultiplierWildsMechanic:DisplayPaylines(reel, paylineSymbol, paylineId, paylineMatrix, paylineSymbolCount, duration)
-    for i=1,paylineSymbolCount parallel do
-        local reelID = paylineMatrix[i].ReelID
-        local matrixPaylineId = paylineMatrix[i].PaylineId
-        if reelID == reel.ReelID and matrixPaylineId == paylineId then
-           local rowIndex = paylineMatrix[i].RowIndex
-           local luaRowIndex = rowIndex + 1
-           local animatorGroupProperty = reel["SymbolPaylinesWinAnimatorGroup" .. luaRowIndex]
-           local symbolGroupProperty = reel["SymbolGroup" .. luaRowIndex]
-           local currentKey = symbolGroupProperty.CurrentKey
-           local animatorProperty = animatorGroupProperty[currentKey]
-           animatorProperty.overrideAnimationDuration = true
-           animatorProperty.animationDuration = duration
-           BettrVisualsController.PlayAnimatorProperty(animatorProperty)
-           -- Core.Animator:PlayAnimatorProperty(currentKey, animatorProperty)
-       end
-    end    
-end
-
-function {{machineName}}GameBaseGameReelRandomMultiplierWildsMechanic:HidePaylines(reel, paylineSymbol, paylineId, paylineMatrix, paylineSymbolCount, duration)    
-end

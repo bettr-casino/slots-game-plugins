@@ -2,6 +2,11 @@ require "math"
 require "Core"
 
 {{machineName}}BaseGameReelSplitSymbolsMechanic = {
+    Config = {
+        Machine = "{{machineName}}",
+        Variant = "{{machineVariant}}",
+        Experiment = "{{experimentVariant}}",
+    },
 }
 
 function {{machineName}}BaseGameReelSplitSymbolsMechanic:new(o)
@@ -13,27 +18,4 @@ end
 
 function {{machineName}}BaseGameReelSplitSymbolsMechanic:Initialize(reel)
 end
-
-function {{machineName}}BaseGameReelSplitSymbolsMechanic:DisplayWays(reel, waySymbol, wayMatrix, waySymbolCount, duration)
-    for i=1,waySymbolCount parallel do
-        local wayReelID = wayMatrix[i].ReelID
-       if wayReelID == reel.ReelID then
-           local rowIndex = wayMatrix[i].RowIndex
-           local luaRowIndex = rowIndex + 1
-           local animatorGroupProperty = reel["SymbolWaysWinAnimatorGroup" .. luaRowIndex]
-           local symbolGroupProperty = reel["SymbolGroup" .. luaRowIndex]
-           local currentKey = symbolGroupProperty.CurrentKey
-           local animatorProperty = animatorGroupProperty[currentKey]
-           animatorProperty.overrideAnimationDuration = true
-           animatorProperty.animationDuration = duration
-           BettrVisualsController.PlayAnimatorProperty(animatorProperty)
-           -- Core.Animator:PlayAnimatorProperty(currentKey, animatorProperty)
-       end
-    end
-end
-
-function {{machineName}}BaseGameReelSplitSymbolsMechanic:HideWays(reel, waySymbol, wayMatrix, wayMatrixCount)
-    -- nothing to do here
-end
-
 

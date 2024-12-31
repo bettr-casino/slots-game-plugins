@@ -15,17 +15,25 @@ namespace Bettr.Core
         public string AssetsVersion { get; set; }
         
         public string AssetsServerBaseURL { get; set; }
+        
+        public string AudioServerBaseURL { get; set; }
+        
+        public string VideoServerBaseURL { get; set; }
         public string OutcomesServerBaseURL { get; set; }
         
         public string ServerBaseURL { get; set; }
         
         public bool UseFileSystemAssetBundles { get; set; }
         
+        public bool UseFileSystemAudio { get; set; }
+        
         public bool UseFileSystemOutcomes { get; set; }
         
         public bool UseLocalServer { get; set; }
         
         public string TaskCode => PlayerPrefs.GetString(TaskCodeKey, DefaultTaskCode);
+        
+// Begin WebAssetsBaseURL       
         
 #if UNITY_IOS
         public string WebAssetsBaseURL => $"{AssetsServerBaseURL}/assets/{AssetsVersion}/iOS";
@@ -39,6 +47,9 @@ namespace Bettr.Core
 #if UNITY_STANDALONE_OSX
         public string WebAssetsBaseURL => $"{AssetsServerBaseURL}/assets/{AssetsVersion}/OSX";
 #endif
+        
+// End WebAssetsBaseURL        
+        
         
         public string WebOutcomesBaseURL => $"{OutcomesServerBaseURL}";
     }

@@ -1,6 +1,7 @@
 // ReSharper disable All
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
 using UnityEngine;
@@ -16,19 +17,26 @@ namespace Bettr.Core
         [NonSerialized] private string MachineID;
         [NonSerialized] private string MachineVariantID;
         
-        [NonSerialized] private Table ReelTable;
-        [NonSerialized] private Table ReelStateTable;
-        [NonSerialized] private Table ReelSpinStateTable;
-        [NonSerialized] private Table SpinOutcomeTable;
-        [NonSerialized] private Table ReelSymbolsStateTable;
-        [NonSerialized] private Table ReelSymbolsTable;
+        public Table ReelTable { get; private set; }
+        public Table ReelStateTable { get; private set; }
+        public Table ReelSpinStateTable { get; private set; }
+        public Table SpinOutcomeTable { get; private set; }
+        public Table ReelSymbolsStateTable { get; private set; }
+        public Table ReelSymbolsTable { get; private set; }
         
         // TODO: FIXME move this to ReelStateTable
-        [NonSerialized] private bool ShouldSpliceReel; 
+        [NonSerialized] private bool ShouldSpliceReel;
         
+        [NonSerialized] private BettrUserController BettrUserController;
+        [NonSerialized] private BettrMathController BettrMathController;
+
+        [NonSerialized] private List<string> ReelSymbolsForThisSpin;
+
         private void Awake()
         {
             ReelTile = GetComponent<TileWithUpdate>();
+            BettrUserController = BettrUserController.Instance;
+            BettrMathController = BettrMathController.Instance;
         }
         
         private IEnumerator Start()
@@ -39,47 +47,17 @@ namespace Bettr.Core
             this.MachineID = ReelTile.GetProperty<string>("MachineID");
             this.MachineVariantID = ReelTile.GetProperty<string>("MachineVariantID");
 
-            this.ReelTable = GetGlobalTable(ReelTile.globalTileId);
-            this.ReelStateTable = GetTableFirst("BaseGameReelState", this.MachineID, this.ReelID);
-            this.ReelSpinStateTable = GetTableFirst("BaseGameReelSpinState", this.MachineID, this.ReelID);
-            this.SpinOutcomeTable = GetTableFirst("BaseGameReelSpinOutcome", this.MachineID, this.ReelID);
-            this.ReelSymbolsStateTable = GetTableArray("BaseGameReelSymbolsState", this.MachineID, this.ReelID);
-            this.ReelSymbolsTable = GetTableArray("BaseGameReelSet", this.MachineID, this.ReelID);
+            this.ReelTable = BettrMathController.GetGlobalTable(ReelTile.globalTileId);
+            this.ReelStateTable = BettrMathController.GetTableFirst("BaseGameReelState", this.MachineID, this.ReelID);
+            this.ReelSpinStateTable = BettrMathController.GetTableFirst("BaseGameReelSpinState", this.MachineID, this.ReelID);
+            this.SpinOutcomeTable = BettrMathController.GetTableFirst("BaseGameReelSpinOutcome", this.MachineID, this.ReelID);
+            this.ReelSymbolsStateTable = BettrMathController.GetTableArray("BaseGameReelSymbolsState", this.MachineID, this.ReelID);
+            this.ReelSymbolsTable = BettrMathController.GetTableArray("BaseGameReelSet", this.MachineID, this.ReelID);
             
             // add this to the ReelTile properties
             this.ReelTable["BettrReelController"] = this;
             
             yield break;
-        }
-        
-        private Table GetGlobalTable(string tableName)
-        {
-            var globalTable = (Table) TileController.LuaScript.Globals[tableName];
-            return globalTable;
-        }
-
-        private Table GetTableFirst(string tableName, string machineID, string reelID)
-        {
-            var machineTable = (Table) TileController.LuaScript.Globals[$"{machineID}{tableName}"];
-            var reelTable = (Table) machineTable[reelID];
-            var reelStateTable = (Table) reelTable["First"];
-            return reelStateTable;
-        }
-
-        private Table GetTableArray(string tableName, string machineID, string reelID)
-        {
-            var machineTable = (Table) TileController.LuaScript.Globals[$"{machineID}{tableName}"];
-            var reelTable = (Table) machineTable[reelID];
-            var reelStateTable = (Table) reelTable["Array"];
-            return reelStateTable;
-        }
-        
-        private int GetTableCount(string tableName, string machineID, string reelID)
-        {
-            var machineTable = (Table) TileController.LuaScript.Globals[$"{machineID}{tableName}"];
-            var reelTable = (Table) machineTable[reelID];
-            var reelTableCount = (int) (double) reelTable["Count"];
-            return reelTableCount;
         }
         
         public IEnumerator StartEngines()
@@ -106,12 +84,15 @@ namespace Bettr.Core
             }
             yield break;
         }
-        
+
         public IEnumerator OnOutcomeReceived()
         {
-            this.SpinOutcomeTable = GetTableFirst("BaseGameReelSpinOutcome", this.MachineID, this.ReelID);
+            this.SpinOutcomeTable = BettrMathController.GetTableFirst("BaseGameReelSpinOutcome", this.MachineID, this.ReelID);
             float delayInSeconds = (float) (double) this.ReelStateTable["ReelStopDelayInSeconds"];
-            yield return new WaitForSeconds(delayInSeconds);
+            if (!BettrUserController.UserInSlamStopMode)
+            {
+                yield return new WaitForSeconds(delayInSeconds);
+            }
             this.ShouldSpliceReel = true;
             this.ReelStateTable["OutcomeReceived"] = true;
         }
@@ -121,11 +102,41 @@ namespace Bettr.Core
             this.ReelSpinStateTable["ReelSpinState"] = "SpinStartedRollBack";
             this.ReelStateTable["OutcomeReceived"] = false;
             this.ShouldSpliceReel = false;
+
+            this.SetupReelSymbolsForSpin();
+        }
+
+        public string ReplaceSymbolForSpin(int zeroIndex, string newSymbol)
+        {
+            var reelSymbolCount = (int) (double) this.ReelStateTable["ReelSymbolCount"];
+            int oneIndexed = 1 +zeroIndex % reelSymbolCount;
+            var oldSymbol = this.ReelSymbolsForThisSpin[oneIndexed];
+            this.ReelSymbolsForThisSpin[oneIndexed] = newSymbol;
+            return oldSymbol;
+        }
+
+        public void SetupReelSymbolsForSpin()
+        {
+            // create a copy of the ReelSymbolsTable
+            if (this.ReelSymbolsForThisSpin == null)
+            {
+                this.ReelSymbolsForThisSpin = new List<string>();
+            }
+            this.ReelSymbolsForThisSpin.Clear();
+            this.ReelSymbolsForThisSpin.Add("Blank");
+
+            var length = this.ReelSymbolsTable.Length;
+            for (int i = 0; i < length; i++)
+            {
+                // 1 indexed
+                this.ReelSymbolsForThisSpin.Add((string) ((Table) this.ReelSymbolsTable[i + 1])["ReelSymbol"]);
+            }
         }
         
         public void SpinReelSpinStartedRollBack()
         {
-            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = this.ReelStateTable["SpinStartedRollBackSpeedInSymbolUnitsPerSecond"];
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 1;
+            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = (double) this.ReelStateTable["SpinStartedRollBackSpeedInSymbolUnitsPerSecond"] * speed;
             var reelSpinDirection = (string) this.ReelSpinStateTable["ReelSpinDirection"];
             var spinDirectionIsDown = reelSpinDirection == "Down";
             var slideDistanceThresholdInSymbolUnits = (float) (double) this.ReelStateTable["SpinStartedRollBackDistanceInSymbolUnits"];
@@ -158,7 +169,8 @@ namespace Bettr.Core
         
         public void SpinReelSpinStartedRollForward()
         {
-            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = this.ReelStateTable["SpinStartedRollForwardSpeedInSymbolUnitsPerSecond"];
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 1;
+            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = (double) this.ReelStateTable["SpinStartedRollForwardSpeedInSymbolUnitsPerSecond"] * speed;
             var reelSpinDirection = (string) this.ReelSpinStateTable["ReelSpinDirection"];
             var spinDirectionIsDown = reelSpinDirection == "Down";
             var slideDistanceInSymbolUnits = CalculateSlideDistanceInSymbolUnits();
@@ -194,7 +206,8 @@ namespace Bettr.Core
             StartCoroutine(this.ReelTile.CallAction("PlaySpinReelSpinEndingRollBackAnimation"));
             
             var reelStopIndex = (int) (double) this.ReelSpinStateTable["ReelStopIndex"];
-            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = this.ReelStateTable["SpinEndingRollBackSpeedInSymbolUnitsPerSecond"];
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 1;
+            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = (double) this.ReelStateTable["SpinEndingRollBackSpeedInSymbolUnitsPerSecond"] * speed;
             var reelSpinDirection = (string) this.ReelSpinStateTable["ReelSpinDirection"];
             var spinDirectionIsDown = reelSpinDirection == "Down";
             var slideDistanceInSymbolUnits = CalculateSlideDistanceInSymbolUnits();
@@ -226,7 +239,8 @@ namespace Bettr.Core
         
         public void SpinReelSpinEndingRollForward()
         {
-            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = this.ReelStateTable["SpinEndingRollForwardSpeedInSymbolUnitsPerSecond"];
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 1;
+            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = (double) this.ReelStateTable["SpinEndingRollForwardSpeedInSymbolUnitsPerSecond"] * speed;
             var reelSpinDirection = (string) this.ReelSpinStateTable["ReelSpinDirection"];
             var spinDirectionIsDown = reelSpinDirection == "Down";
             var slideDistanceThresholdInSymbolUnits = (float) (double) this.ReelStateTable["SpinEndingRollForwardDistanceInSymbolUnits"];
@@ -259,7 +273,8 @@ namespace Bettr.Core
         
         public bool SpinReelSpinning()
         {
-            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = (double) this.ReelStateTable["SpinSpeedInSymbolUnitsPerSecond"] * 2;
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 2;
+            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = (double) this.ReelStateTable["SpinSpeedInSymbolUnitsPerSecond"] * speed;
             float slideDistanceInSymbolUnits = AdvanceReel();
             SlideReelSymbols(slideDistanceInSymbolUnits);
             return true;
@@ -315,6 +330,36 @@ namespace Bettr.Core
             }
         }
 
+        public List<TilePropertyGameObject> GetReelMatrixSymbols(params string[] symbols)
+        {
+            var reelMatrixSymbols = new List<TilePropertyGameObject>();
+            var symbolCount = (int) (double) this.ReelStateTable["SymbolCount"];
+            for (var symbolIndex = 1; symbolIndex <= symbolCount; symbolIndex++)
+            {
+                var symbolGroupProperty = (TilePropertyGameObjectGroup) this.ReelTable[$"SymbolGroup{symbolIndex}"];
+                var currentKey = symbolGroupProperty.CurrentKey;
+                // find the corresponding TilePropertyGameObject in the symbolGroupProperty.GameObjectProperties
+                var symbolProperty = symbolGroupProperty.gameObjectProperties.Find(x => x.key == currentKey);
+                if (symbolProperty != null)
+                {
+                    // if symbols is not null, then the symbol should be in the symbols array to be added 
+                    // to the reelMatrixSymbols list else add it by default
+                    if (symbols != null)
+                    {
+                        if (Array.Exists(symbols, symbol => symbol == currentKey))
+                        {
+                            reelMatrixSymbols.Add(symbolProperty);
+                        }
+                    }
+                    else
+                    {
+                        reelMatrixSymbols.Add(symbolProperty);
+                    }
+                }
+            }
+            return reelMatrixSymbols;
+        }
+
         public void UpdateReelSymbolForSpin(int symbolIndex)
         {
             var symbolState = (Table) this.ReelSymbolsStateTable[symbolIndex];
@@ -329,7 +374,7 @@ namespace Bettr.Core
             var reelSymbolCount = (int) (double) this.ReelStateTable["ReelSymbolCount"];
             var reelPosition = (int) (double) symbolState["ReelPosition"];
             var symbolStopIndex = 1 + (reelSymbolCount + reelStopIndex + reelPosition) % reelSymbolCount;
-            var reelSymbol = (string) ((Table) this.ReelSymbolsTable[symbolStopIndex])["ReelSymbol"];
+            var reelSymbol = this.ReelSymbolsForThisSpin[symbolStopIndex]; //(string) ((Table) this.ReelSymbolsTable[symbolStopIndex])["ReelSymbol"];
             var symbolGroupProperty = (TilePropertyGameObjectGroup) this.ReelTable[$"SymbolGroup{symbolIndex}"];
             if (symbolGroupProperty.Current != null)
             {
@@ -396,6 +441,115 @@ namespace Bettr.Core
             }
             // Set the SlideDistanceInSymbolUnits for the reel spin state
             this.ReelSpinStateTable["SlideDistanceInSymbolUnits"] = slideDistanceInSymbolUnits;
+        }
+
+        public GameObject FindSymbolQuad(TilePropertyGameObjectGroup symbolGroupProperty)
+        {
+            var pivotGameObject = symbolGroupProperty.Current["Pivot"];
+            var childCount = pivotGameObject.transform.childCount;
+            for (int i = 0; i < childCount; i++)
+            {
+                var child = pivotGameObject.transform.GetChild(i);
+                if (child.name == "Quad")
+                {
+                    return child.gameObject;
+                }
+            }
+
+            return null;
+        }
+        
+        public IEnumerator SymbolRemovalAction(TilePropertyGameObjectGroup symbolGroupProperty)
+        {
+            var symbolQuad = FindSymbolQuad(symbolGroupProperty);
+            var symbolMeshRenderer = symbolQuad.GetComponent<MeshRenderer>();
+            var originalMaterial = symbolMeshRenderer.material;
+    
+            float dissolveTime = 0.4f;
+            float elapsedTime = 0.0f;
+
+            // Get the original color of the material
+            Color originalColor = originalMaterial.color;
+            var originalAlpha = originalMaterial.color.a;
+
+            while (elapsedTime < dissolveTime)
+            {
+                // Calculate the new alpha value based on elapsed time
+                float alpha = Mathf.Lerp(originalAlpha, 0.0f, elapsedTime / dissolveTime);
+        
+                // Set the material's color with the new alpha
+                originalMaterial.color = new Color(originalColor.r, originalColor.g, originalColor.b, alpha);
+
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+
+            // Reset the material's alpha to 1.0f
+            originalMaterial.color = new Color(originalColor.r, originalColor.g, originalColor.b, originalColor.a);
+
+            // Hide the object by setting it inactive
+            symbolGroupProperty.SetAllInactive();
+
+            // Restore the original material or perform any final actions as needed
+            symbolMeshRenderer.material = originalMaterial;
+        }
+
+        public IEnumerator SymbolCascadeAction(int fromSymbolIndex, int cascadeDistance, string cascadeSymbol)
+        {
+            var slideDistance = -cascadeDistance;
+            float duration = 0.4f;
+            float elapsedTime = 0f;
+            
+            float verticalSpacing = (float) (double) this.ReelStateTable["SymbolVerticalSpacing"];
+            float symbolOffsetY = (float) (double) this.ReelStateTable["SymbolOffsetY"];
+            
+            int toSymbolIndex = fromSymbolIndex + cascadeDistance;
+
+            var fromSymbolState = (Table) this.ReelSymbolsStateTable[fromSymbolIndex];
+            var fromSymbolIsLocked = (bool) fromSymbolState["SymbolIsLocked"];
+            var fromSymbolProperty = (PropertyGameObject) this.ReelTable[$"Symbol{fromSymbolIndex}"];
+            float fromSymbolPosition = (float) (double) fromSymbolState["SymbolPosition"];
+            var fromSymbolGroupProperty = (TilePropertyGameObjectGroup) this.ReelTable[$"SymbolGroup{fromSymbolIndex}"];
+            var fromSymbolLocalPosition = fromSymbolProperty.gameObject.transform.localPosition;
+            // set the fromSymbolGroupProperty.CurrentKey to cascadeSymbol
+            fromSymbolGroupProperty.SetCurrentActive(cascadeSymbol);
+            
+            var toSymbolState = (Table) this.ReelSymbolsStateTable[toSymbolIndex];
+            var toSymbolProperty = (PropertyGameObject) this.ReelTable[$"Symbol{toSymbolIndex}"];
+            float toSymbolPosition = (float) (double) toSymbolState["SymbolPosition"];
+            var toSymbolGroupProperty = (TilePropertyGameObjectGroup) this.ReelTable[$"SymbolGroup{toSymbolIndex}"];
+            
+            if (fromSymbolIsLocked)
+            {
+                yield break;
+            }
+            
+            float yLocalPosition = verticalSpacing * fromSymbolPosition;
+            
+            while (elapsedTime < duration)
+            {
+                float slideDistanceInSymbolUnits = (slideDistance / duration) * Time.deltaTime;
+                yLocalPosition = yLocalPosition + verticalSpacing * slideDistanceInSymbolUnits + symbolOffsetY;
+                Vector3 localPosition = fromSymbolProperty.gameObject.transform.localPosition;
+                localPosition = new Vector3(localPosition.x, yLocalPosition, localPosition.z);
+                fromSymbolProperty.gameObject.transform.localPosition = localPosition;
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+            
+            // swap symbols out
+            // from symbol property will be hidden and localPosition reset to the original localPosition
+            // to symbol property will be visible and its symbol set to the from symbol
+
+            {
+                // hide the fromSymbolGroupProperty.Current
+                fromSymbolGroupProperty.Current.SetActive(false);
+                // reset fromSymbolProperty localPosition
+                fromSymbolProperty.gameObject.transform.localPosition = fromSymbolLocalPosition;
+                
+                toSymbolGroupProperty.SetCurrentActive(fromSymbolGroupProperty.CurrentKey);
+            }
+            
         }
         
         public void SlideSymbol(int symbolIndex, float slideDistanceInSymbolUnits)

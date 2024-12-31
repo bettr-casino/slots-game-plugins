@@ -4,6 +4,11 @@ require "Utils"
 require "Game005BaseGameReelMechanics"
 
 Game005BaseGameReel = {
+    Config = {
+        Machine = "Game005",
+        Variant = "FortunesLuckyCharms",
+        Experiment = "control",
+    },
     Mechanics = nil,
 }
 
@@ -28,10 +33,11 @@ function Game005BaseGameReel:Awake()
 	self.Mechanics:Initialize(self)
 end
 
-function Game005BaseGameReel:StartEngines()
+function Game005BaseGameReel:StartEngines(machine)
     series
         do
-            self.BettrReelController.StartEngines()                          
+            self.BettrReelController.StartEngines()
+            self.Mechanics:StartEngines(self, machine)                          
         end
     end
 end
@@ -40,12 +46,14 @@ function Game005BaseGameReel:OnOutcomeReceived()
     series
         do
             self.BettrReelController.OnOutcomeReceived()
+            self.Mechanics:OnOutcomeReceived(self)
         end
     end
 end
 
 function Game005BaseGameReel:SpinEngines()
     self.BettrReelController.SpinEngines()
+    self.Mechanics.SpinEngines(self)
 end
 
 function Game005BaseGameReel:Update()
@@ -60,25 +68,30 @@ function Game005BaseGameReel:Update()
 end
 
 function Game005BaseGameReel:SpinReelSpinStartedRollBack()
-    self.BettrReelController.SpinReelSpinStartedRollBack()    
+    self.BettrReelController.SpinReelSpinStartedRollBack()
+    self.Mechanics:SpinReelSpinStartedRollBack(self)    
 end
 
 function Game005BaseGameReel:SpinReelSpinStartedRollForward()
-    self.BettrReelController.SpinReelSpinStartedRollForward()    
+    self.BettrReelController.SpinReelSpinStartedRollForward()
+    self.Mechanics:SpinReelSpinStartedRollForward(self)    
 end
 
 function Game005BaseGameReel:SpinReelSpinEndingRollBack()    
-    self.BettrReelController.SpinReelSpinEndingRollBack()    
+    self.BettrReelController.SpinReelSpinEndingRollBack()
+    self.Mechanics:SpinReelSpinEndingRollBack(self)    
 end
 
 function Game005BaseGameReel:SpinReelSpinEndingRollForward()
-    self.BettrReelController.SpinReelSpinEndingRollForward()    
+    self.BettrReelController.SpinReelSpinEndingRollForward()
+    self.Mechanics:SpinReelSpinEndingRollForward(self)    
 end
 
 function Game005BaseGameReel:SpinReelReachedOutcomeStopIndex()
     BettrAudioController.PlayAudioOnce("reelstop")
     local reelSpinState = Game005BaseGameReelSpinState[self.ReelID].First
     reelSpinState.ReelSpinState = "SpinEndingRollForward"
+    self.Mechanics:SpinReelReachedOutcomeStopIndex(self)
 end
 
 function Game005BaseGameReel:SpinReelStopped()
@@ -86,10 +99,11 @@ function Game005BaseGameReel:SpinReelStopped()
     local lastReeID = "Reel" .. reelCount
     if self.ReelID == lastReeID then
         Game005BaseGameMachine:OnSpinReelsStopped()
+        self.Mechanics:OnSpinReelsStopped(self)
     end 
 end
 
-function Game005BaseGameReel:SpinReelWaiting()
+function Game005BaseGameReel:SpinReelWaiting()    
 end
 
 function Game005BaseGameReel:SpinReelSpinning()

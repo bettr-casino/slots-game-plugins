@@ -4,7 +4,7 @@ The **Shifting Reels** mechanic is a slot feature where reels move horizontally 
 
 ## Key Features
 
-- **Reel Movement After Wins**: After a winning combination is formed, the reels shift horizontally or vertically, usually by one position. This movement allows new symbols to enter the reels, potentially creating new winning combinations without requiring an additional spin.
+- **Reel Movement After Wins**: After a winning combination is formed, the reels shift horizontally or vertically, usually by one position. This movement occurs in **unison**, where all reels shift simultaneously, allowing new symbols to enter and potentially create more winning combinations without requiring an additional spin.
 
 - **Consecutive Wins**: With each shift, new symbols replace the old ones, and the game reevaluates for new winning combinations. The shifting can continue as long as new wins are created, providing a chain reaction of consecutive wins.
 
@@ -16,9 +16,9 @@ The **Shifting Reels** mechanic is a slot feature where reels move horizontally 
 
 1. **Initial Spin**: The player spins the reels normally, and if a winning combination is formed, the shifting reels mechanic is triggered.
 
-2. **Reel Shift**: After the initial win, the reels shift horizontally or vertically, moving all symbols by one position. New symbols fill the empty spaces, creating the potential for more wins.
+2. **Reel Shift in Unison**: After the initial win, the reels shift **in unison**, where all reels move horizontally (or vertically) by one position at the same time. New symbols fill the empty spaces, usually entering from the left (for horizontal shifts) or top (for vertical shifts), creating the potential for more wins.
 
-3. **New Winning Combinations**: The game checks for new winning combinations formed by the shifted reels. If another win is created, the process repeats, and the reels continue to shift. Each new shift may also increase the win multiplier.
+3. **New Winning Combinations**: The game checks for new winning combinations formed by the shifted reels. If another win is created, the process repeats, and the reels continue to shift in unison. Each new shift may also increase the win multiplier, enhancing payouts for consecutive wins.
 
 4. **End of Shifts**: The shifting reels mechanic continues until no new winning combinations are formed. The player then receives their final payout, including any accumulated multipliers.
 
@@ -26,7 +26,7 @@ The **Shifting Reels** mechanic is a slot feature where reels move horizontally 
 
 In a game featuring the **Shifting Reels** mechanic:
 - The player lands a winning combination on reels 1, 2, and 3.
-- After the win, the reels shift one position to the right, and new symbols appear on reel 1.
+- After the win, the reels shift **in unison**, moving all symbols to the right by one position, and new symbols appear on reel 1.
 - The player lands another winning combination with the new symbols, and the reels shift again, with the win multiplier increasing to 2x.
 - This process continues until no further winning combinations are formed.
 
@@ -37,4 +37,4 @@ In a game featuring the **Shifting Reels** mechanic:
 
 ## Conclusion
 
-The **Shifting Reels** mechanic adds an engaging and rewarding element to slot gameplay by allowing reels to move after a win, giving players the chance to land consecutive wins from a single spin. When combined with increasing multipliers and bonus features, the shifting reels mechanic can lead to extended win sequences and significantly boosted payouts, making it a favorite feature among slot enthusiasts.
+The **Shifting Reels** mechanic adds an engaging and rewarding element to slot gameplay by allowing reels to move in unison after a win, giving players the chance to land consecutive wins from a single spin. When combined with increasing multipliers and bonus features, the shifting reels mechanic can lead to extended win sequences and significantly boosted payouts, making it a favorite feature among slot enthusiasts.

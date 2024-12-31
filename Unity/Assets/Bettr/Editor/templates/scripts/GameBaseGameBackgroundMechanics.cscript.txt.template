@@ -1,0 +1,41 @@
+require "math"
+require "Core"
+
+{{machineName}}BaseGameBackgroundMechanics = {
+    Config = {
+        Machine = "{{machineName}}",
+        Variant = "{{machineVariant}}",
+        Experiment = "{{experimentVariant}}",
+    },
+{{- for baseGameMechanic in baseGameMechanics }}
+    {{baseGameMechanic}}Mechanic = nil,
+{{- end }}
+}
+
+function {{machineName}}BaseGameBackgroundMechanics:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function {{machineName}}BaseGameBackgroundMechanics:destroy()
+	System.Print("{{machineName}}BaseGameBackgroundMechanics destroy tile id={0}", self.id)
+end
+
+function {{machineName}}BaseGameBackgroundMechanics:OnError(callStack)
+	System.Error("{{machineName}}BaseGameBackgroundMechanics Error CallStack: {0}", callStack)
+end
+
+function {{machineName}}BaseGameBackgroundMechanics:Awake()
+	System.Print("{{machineName}}BaseGameBackgroundMechanics Awake tile id={0}", self.id)
+end
+
+function {{machineName}}BaseGameBackgroundMechanics:Initialize(background)
+ {{- for baseGameMechanic in baseGameMechanics }}
+     self.{{baseGameMechanic}}Mechanic = {{machineName}}BaseGameBackground{{baseGameMechanic}}Mechanic:new()
+     self.{{baseGameMechanic}}Mechanic:Initialize(background)
+ {{- end }}
+end
+
+return {{machineName}}BaseGameBackgroundMechanics:new()

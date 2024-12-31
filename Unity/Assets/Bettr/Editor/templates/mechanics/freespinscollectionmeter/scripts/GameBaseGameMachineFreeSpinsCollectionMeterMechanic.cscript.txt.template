@@ -2,6 +2,11 @@ require "math"
 require "Core"
 
 {{machineName}}BaseGameMachineFreeSpinsCollectionMeterMechanic = {
+    Config = {
+        Machine = "{{machineName}}",
+        Variant = "{{machineVariant}}",
+        Experiment = "{{experimentVariant}}",
+    },
 }
 
 function {{machineName}}BaseGameMachineFreeSpinsCollectionMeterMechanic:new(o)
@@ -12,22 +17,9 @@ function {{machineName}}BaseGameMachineFreeSpinsCollectionMeterMechanic:new(o)
 end
 
 function {{machineName}}BaseGameMachineFreeSpinsCollectionMeterMechanic:Initialize(machine)
-    System.Print("{{machineName}}BaseGameMachineFreeSpinsCollectionMeterMechanic:Initialize")
 end
 
-function {{machineName}}BaseGameMachineFreeSpinsCollectionMeterMechanic:BaseGamePayout(machine)
-    series
-        do
-            System.Print("{{machineName}}BaseGameMachineFreeSpinsCollectionMeterMechanic:BaseGamePayout")
-        end
-    end
+function {{machineName}}BaseGameMachineFreeSpinsCollectionMeterMechanic:TryPaying(machine)
 end
 
-function {{machineName}}BaseGameMachineFreeSpinsCollectionMeterMechanic:OnSpinButtonClicked(machine)
-    series
-        do
-            System.Print("{{machineName}}BaseGameMachineFreeSpinsCollectionMeterMechanic:OnSpinButtonClicked")
-        end
-    end
-end
 

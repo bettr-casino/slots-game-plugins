@@ -1,0 +1,37 @@
+require "math"
+require "Core"
+
+Game002BaseGameBackgroundMechanics = {
+    Config = {
+        Machine = "Game002",
+        Variant = "BuffaloMoonlitMagic",
+        Experiment = "variant1",
+    },
+    WaysMechanic = nil,
+}
+
+function Game002BaseGameBackgroundMechanics:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game002BaseGameBackgroundMechanics:destroy()
+	System.Print("Game002BaseGameBackgroundMechanics destroy tile id={0}", self.id)
+end
+
+function Game002BaseGameBackgroundMechanics:OnError(callStack)
+	System.Error("Game002BaseGameBackgroundMechanics Error CallStack: {0}", callStack)
+end
+
+function Game002BaseGameBackgroundMechanics:Awake()
+	System.Print("Game002BaseGameBackgroundMechanics Awake tile id={0}", self.id)
+end
+
+function Game002BaseGameBackgroundMechanics:Initialize(background)
+     self.WaysMechanic = Game002BaseGameBackgroundWaysMechanic:new()
+     self.WaysMechanic:Initialize(background)
+end
+
+return Game002BaseGameBackgroundMechanics:new()

@@ -1,13 +1,18 @@
 require "math"
 require "Core"
-
 require "Game001BaseGameMachineWaysMechanic"
-
+require "Game001BaseGameMachineCascadingReelsMechanic"
+require "Game001BaseGameMachineCascadingReelsMultiplierMechanic"
 
 Game001BaseGameMachineMechanics = {
-
+    Config = {
+        Machine = "Game001",
+        Variant = "EpicAncientAdventures",
+        Experiment = "variant1",
+    },
     WaysMechanic = nil,
-
+    CascadingReelsMechanic = nil,
+    CascadingReelsMultiplierMechanic = nil,
 }
 
 function Game001BaseGameMachineMechanics:new(o)
@@ -17,33 +22,82 @@ function Game001BaseGameMachineMechanics:new(o)
 	return o
 end
 
+function Game001BaseGameMachineMechanics:OnError(callStack)
+	System.Error("BaseGameMachineMechanics Error CallStack: {0}", callStack)
+end
+
 function Game001BaseGameMachineMechanics:Initialize(machine)
+     self.WaysMechanic = Game001BaseGameMachineWaysMechanic:new()
+     self.WaysMechanic:Initialize(machine)
+     self.CascadingReelsMechanic = Game001BaseGameMachineCascadingReelsMechanic:new()
+     self.CascadingReelsMechanic:Initialize(machine)
+     self.CascadingReelsMultiplierMechanic = Game001BaseGameMachineCascadingReelsMultiplierMechanic:new()
+     self.CascadingReelsMultiplierMechanic:Initialize(machine)
+end
 
-    self.WaysMechanic = Game001BaseGameMachineWaysMechanic:new()
-    self.WaysMechanic:Initialize(machine)
-
+function Game001BaseGameMachineMechanics:StartMachine(machine)
+    if self.ChooseASideMechanic ~= nil then
+        self.ChooseASideMechanic:StartMachine(machine)
+    else
+        machine:StartMachine()
+    end
 end
 
 function Game001BaseGameMachineMechanics:BaseGamePayout(machine)
     -- this is hardcoded
     -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
-    if self.CascadingReelsMechanic ~= nil then
-       self.CascadingReelsMechanic:BaseGamePayout(machine)
-    elseif self.WaysMechanic ~= nil then
+    if self.WaysMechanic ~= nil then
        self.WaysMechanic:BaseGamePayout(machine)
+    elseif self.CascadingReelsMechanic ~= nil then
+       self.CascadingReelsMechanic:BaseGamePayout(machine)
     elseif self.PaylinesMechanic ~= nil then
        self.PaylinesMechanic:BaseGamePayout(machine)
     end
 end
 
-function Game001BaseGameMachineMechanics:OnSpinButtonClicked(machine)
+function Game001BaseGameMachineMechanics:TryPaying(machine)
     -- this is hardcoded
     -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
-    if self.CascadingReelsMechanic ~= nil then
-       self.CascadingReelsMechanic:OnSpinButtonClicked(machine)
-    elseif self.WaysMechanic ~= nil then
-       self.WaysMechanic:OnSpinButtonClicked(machine)
+    if self.WaysMechanic ~= nil then
+       return self.WaysMechanic:TryPaying(machine)
     elseif self.PaylinesMechanic ~= nil then
-       self.PaylinesMechanic:OnSpinButtonClicked(machine)
+       return self.PaylinesMechanic:TryPaying(machine)
     end
+    return 0
+end
+
+function Game001BaseGameMachineMechanics:OnPayingCompleted(machine)
+    -- this is hardcoded
+    -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
+    if self.WaysMechanic ~= nil then
+       self.WaysMechanic:OnPayingCompleted(machine)
+    elseif self.PaylinesMechanic ~= nil then
+       self.PaylinesMechanic:OnPayingCompleted(machine)
+    end
+end
+
+function Game001BaseGameMachineMechanics:RollupCredits(machine)
+    -- this is hardcoded
+    -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
+    if self.WaysMechanic ~= nil then
+       self.WaysMechanic:RollupCredits(machine)
+    elseif self.PaylinesMechanic ~= nil then
+       self.PaylinesMechanic:RollupCredits(machine)
+    end
+end
+
+function Game001BaseGameMachineMechanics:OnBaseGameSpinCompleted(machine)
+    series
+        do
+            if self.ChooseASideMechanic ~= nil then
+                self.ChooseASideMechanic:OnBaseGameSpinCompleted(machine)            
+            else
+                machine:OnBaseGameSpinCompleted()
+            end
+        end
+    end
+end
+
+function Game001BaseGameMachineMechanics:CanSpin(machine, canSpin)
+    return canSpin
 end

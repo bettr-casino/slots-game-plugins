@@ -32,7 +32,8 @@ end
 function DefaultLobbyCard:LoadMachineScene()
     series
         do
-            BettrMainLobbySceneController.LoadLobbyCardMachine(self.gameObject.name)
+            MainLobbyScene:SetSelector(self.gameObject)
+            MainLobbyScene:LoadMachineScene(self.gameObject.name)
         end
     end
 end

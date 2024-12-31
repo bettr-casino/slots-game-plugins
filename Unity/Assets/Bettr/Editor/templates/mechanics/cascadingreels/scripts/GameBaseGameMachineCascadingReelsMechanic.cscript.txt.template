@@ -2,6 +2,11 @@ require "math"
 require "Core"
 
 {{machineName}}BaseGameMachineCascadingReelsMechanic = {
+    Config = {
+        Machine = "{{machineName}}",
+        Variant = "{{machineVariant}}",
+        Experiment = "{{experimentVariant}}",
+    },
 }
 
 function {{machineName}}BaseGameMachineCascadingReelsMechanic:new(o)
@@ -11,23 +16,238 @@ function {{machineName}}BaseGameMachineCascadingReelsMechanic:new(o)
 	return o
 end
 
+function {{machineName}}BaseGameMachineCascadingReelsMechanic:OnError(callStack)
+	System.Error("BaseGameMachineCascadingReelsMechanic Error CallStack: {0}", callStack)
+end
+
 function {{machineName}}BaseGameMachineCascadingReelsMechanic:Initialize(machine)
-    System.Print("{{machineName}}BaseGameMachineCascadingReelsMechanic:Initialize")
 end
 
-function {{machineName}}BaseGameMachineCascadingReelsMechanic:BaseGamePayout(machine)
-    series
-        do
-            System.Print("{{machineName}}BaseGameMachineCascadingReelsMechanic:BaseGamePayout")
+function {{machineName}}BaseGameMachineCascadingReelsMechanic:HasCascade(machine)
+    if {{machineName}}BaseGameCascadingReelsSummary == nil then
+        return false
+    end
+    if {{machineName}}BaseGameCascadingReelsSummary.CascadingReels == nil then
+        return false
+    end
+    local cascadeCount = {{machineName}}BaseGameCascadingReelsSummary.CascadingReels.First.CascadeCount
+    return cascadeCount > 0
+end
+
+function {{machineName}}BaseGameMachineCascadingReelsMechanic:StartCascade(machine)
+    local counterIndex = 1
+    local cascadeCount = {{machineName}}BaseGameCascadingReelsSummary.CascadingReels.First.CascadeCount
+    local cascades = {{machineName}}BaseGameCascadingReels.CascadingReels.Array
+    local cascadesMatrix = {{machineName}}BaseGameCascadingReelsMatrix
+
+    while counterIndex <= cascadeCount do
+        local cascade = cascades[counterIndex]
+        local cascadeID = cascade.Cascade
+        local cascadeAction = cascade.Action
+
+        local cascadeMatrix = nil
+        local cascadeMatrixCount = 0
+        if cascadeAction ~= "SymbolWays" then
+            cascadeMatrix = cascadesMatrix[cascadeID] and cascadesMatrix[cascadeID].Array or {}
+            cascadeMatrixCount = cascadesMatrix[cascadeID] and cascadesMatrix[cascadeID].Count or 0
+        end
+
+        if cascadeAction == "SymbolRemoval" then
+            System.Print("cascadeID={0}, SymbolRemovalActions", cascadeID)
+            self:SymbolRemovalActions(cascadeMatrix, cascadeMatrixCount, cascadeAction)
+            counterIndex = counterIndex + 1
+
+            while counterIndex <= cascadeCount and cascades[counterIndex].Action == "SymbolCascade" do
+                local cascade = cascades[counterIndex]
+                local cascadeID = cascade.Cascade
+                local cascadeAction = cascade.Action
+
+                cascadeMatrix = cascadesMatrix[cascadeID] and cascadesMatrix[cascadeID].Array or {}
+                cascadeMatrixCount = cascadesMatrix[cascadeID] and cascadesMatrix[cascadeID].Count or 0
+
+                System.Print("cascadeID={0}, SymbolCascadeActions", cascadeID)
+                self:SymbolCascadeActions(cascadeMatrix, cascadeMatrixCount, cascadeAction)
+                counterIndex = counterIndex + 1
+            end
+        elseif cascadeAction == "SymbolWays" then
+            System.Print("cascadeID={0}, SymbolWaysActions", cascadeID)
+            self:SymbolWaysActions(machine, cascadeID)
+            counterIndex = counterIndex + 1
+
+            if counterIndex <= cascadeCount and cascades[counterIndex].Action == "SymbolRemoval" then
+                local cascade = cascades[counterIndex]
+                local cascadeID = cascade.Cascade
+                local cascadeAction = cascade.Action
+
+                cascadeMatrix = cascadesMatrix[cascadeID] and cascadesMatrix[cascadeID].Array or {}
+                cascadeMatrixCount = cascadesMatrix[cascadeID] and cascadesMatrix[cascadeID].Count or 0
+
+                System.Print("cascadeID={0}, SymbolRemovalActions", cascadeID)
+                self:SymbolRemovalActions(cascadeMatrix, cascadeMatrixCount, cascadeAction)
+                counterIndex = counterIndex + 1
+
+                while counterIndex <= cascadeCount and cascades[counterIndex].Action == "SymbolCascade" do
+                    local cascade = cascades[counterIndex]
+                    local cascadeID = cascade.Cascade
+                    local cascadeAction = cascade.Action
+
+                    cascadeMatrix = cascadesMatrix[cascadeID] and cascadesMatrix[cascadeID].Array or {}
+                    cascadeMatrixCount = cascadesMatrix[cascadeID] and cascadesMatrix[cascadeID].Count or 0
+
+                    System.Print("cascadeID={0}, SymbolCascadeActions", cascadeID)
+                    self:SymbolCascadeActions(cascadeMatrix, cascadeMatrixCount, cascadeAction)
+                    counterIndex = counterIndex + 1
+                end
+            end
+        else
+            System.Print("Unhandled cascade action type: {0}", cascadeAction)
+            counterIndex = counterIndex + 1
         end
     end
 end
 
-function {{machineName}}BaseGameMachineCascadingReelsMechanic:OnSpinButtonClicked(machine)
+function {{machineName}}BaseGameMachineCascadingReelsMechanic:SymbolWaysActions(machine, cascadeID)
     series
+        do  
+            local filteredWaysSummary = {}
+            for _, summary in ipairs({{machineName}}BaseGameCascadingReelsWaysSummary.Ways.Array) do
+                if summary.Cascade == cascadeID then
+                    filteredWaysSummary = {
+                        WaysCount = summary.WaysCount,
+                        DisplayLoopDuration = summary.DisplayLoopDuration,
+                        DisplayLoopStartDelay = summary.DisplayLoopStartDelay,
+                        DisplayLoopEndDelay = summary.DisplayLoopEndDelay,
+                        Pays = summary.Pays
+                    }
+                    break
+                end
+            end
+
+            local filteredWays = {}
+            for _, way in ipairs({{machineName}}BaseGameCascadingReelsWays.Ways.Array) do
+                if way.Cascade == cascadeID then
+                    table.insert(filteredWays, {
+                        Symbol = way.Symbol,
+                        ReelCount = way.ReelCount,
+                        SymbolCount = way.SymbolCount,
+                        Multiplier = way.Multiplier,
+                        Pay = way.Pay,
+                        Pays = way.Pays
+                    })
+                end
+            end
+
+            local filteredWaysMatrix = {}
+            for symbol, symbolData in pairs({{machineName}}BaseGameCascadingReelsWaysMatrix) do
+                local matchingRows = {} -- Temporary table to store matching rows for the current symbol
+            
+                -- Loop through the Array of rows for the current symbol
+                for _, matrixRow in ipairs(symbolData.Array) do
+                    if matrixRow.Cascade == cascadeID then
+                        table.insert(matchingRows, matrixRow)
+                    end
+                end
+            
+                -- Only include the symbol if there are matching rows
+                if #matchingRows > 0 then
+                    filteredWaysMatrix[symbol] = {
+                        Array = matchingRows
+                    }
+                end
+                                
+            end
+
+            local filteredWaysState = {}
+            if {{machineName}}BaseGameCascadingReelsWaysState and {{machineName}}BaseGameCascadingReelsWaysState.Ways then
+                local waysArray = {{machineName}}BaseGameCascadingReelsWaysState.Ways.Array
+                if waysArray then
+                    for _, state in ipairs(waysArray) do
+                        if state.Cascade == cascadeID then
+                            filteredWaysState = state
+                            break
+                        end
+                    end
+                end
+            end
+
+            {{machineName}}BaseGameWaysSummary = {
+                Ways = {
+                    First = filteredWaysSummary
+                }
+            }
+            {{machineName}}BaseGameWays = {
+                Ways = {
+                    Array = filteredWays
+                }
+            }
+            {{machineName}}BaseGameWaysMatrix = filteredWaysMatrix
+            {{machineName}}BaseGameWaysState = {
+                Ways = {
+                    First = filteredWaysState
+                }
+            }
+                                    
+        end
         do
-            System.Print("{{machineName}}BaseGameMachineCascadingReelsMechanic:OnSpinButtonClicked")
+            BettrUser.InitSpinCoins()
+            machine.Mechanics.WaysMechanic:TryPaying(machine)
+        end
+        do
+            machine.Mechanics.WaysMechanic:BaseGamePayout(machine)
+        end
+        do
+            if machine.Mechanics.CascadingReelsMultiplierMechanic ~= nil then
+                machine.Mechanics.CascadingReelsMultiplierMechanic:BaseGamePayout(machine, cascadeID)
+                BettrAudioController.StopAudio()
+                BettrUserController.DisableUserInSlamStopMode()
+                machine:RollupOnlyCreditsText()
+                System.WaitForSeconds(1.0)
+                machine.WinText.SetText("0")  
+            else
+                BettrAudioController.StopAudio()
+                BettrUserController.DisableUserInSlamStopMode()
+                machine:RollupCredits()
+                System.WaitForSeconds(1.3)
+            end
         end
     end
 end
 
+function {{machineName}}BaseGameMachineCascadingReelsMechanic:SymbolRemovalActions(cascadeMatrix, cascadeMatrixCount, cascadeAction)
+    for matrixIndex = 1, cascadeMatrixCount parallel do
+        local cascadeMatrixRow = cascadeMatrix[matrixIndex]
+        local cascadeReelID = cascadeMatrixRow.ReelID
+        local cascadeRowIndex = cascadeMatrixRow.RowIndex 
+        self:SymbolRemovalAction(cascadeReelID, cascadeRowIndex)
+    end
+end
+
+function {{machineName}}BaseGameMachineCascadingReelsMechanic:SymbolRemovalAction(reelID, rowIndex)
+    local reel = _G["{{machineName}}BaseGame" .. reelID]
+    local luaRowIndex = rowIndex + 1
+    local symbolGroupProperty = reel["SymbolGroup" .. luaRowIndex]
+    reel.BettrReelController.SymbolRemovalAction(symbolGroupProperty)
+end
+
+function {{machineName}}BaseGameMachineCascadingReelsMechanic:SymbolCascadeActions(cascadeMatrix, cascadeMatrixCount, cascadeAction)
+    for matrixIndex = 1, cascadeMatrixCount parallel do
+        local cascadeMatrixRow = cascadeMatrix[matrixIndex]
+        local cascadeReelID = cascadeMatrixRow.ReelID
+        local rowIndex = cascadeMatrixRow.RowIndex
+        local cascadeDistance = cascadeMatrixRow.CascadeDistance 
+        local cascadeSymbol = cascadeMatrixRow.Symbol
+        self:SymbolCascadeAction(cascadeReelID, rowIndex, cascadeDistance, cascadeSymbol)
+    end
+end
+
+function {{machineName}}BaseGameMachineCascadingReelsMechanic:SymbolCascadeAction(reelID, rowIndex, cascadeDistance, cascadeSymbol)
+    series
+        do
+            local luaRowIndex = rowIndex + 1
+            local reel = _G["{{machineName}}BaseGame" .. reelID]
+            local symbolGroupProperty = reel["SymbolGroup" .. luaRowIndex]
+            symbolGroupProperty.Current.SetActive(true)
+            reel.BettrReelController.SymbolCascadeAction(luaRowIndex, cascadeDistance, cascadeSymbol)
+        end
+    end
+end

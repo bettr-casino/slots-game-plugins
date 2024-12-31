@@ -27,12 +27,16 @@ namespace Bettr.Core
         [NonSerialized] private BettrAssetController _bettrAssetController;
         [NonSerialized] private BettrAssetScriptsController _bettrAssetScriptsController;
         [NonSerialized] private BettrUserController _bettrUserController;
+        [NonSerialized] private BettrUserGameController _bettrUserGameController;
         [NonSerialized] private BettrExperimentController _bettrExperimentController;
         // ReSharper disable once NotAccessedField.Local
         [NonSerialized] private BettrVisualsController _bettrVisualsController;
         // ReSharper disable once NotAccessedField.Local
         [NonSerialized] private BettrOutcomeController _bettrOutcomeController;
-
+        [NonSerialized] private BettrDialogController _bettrDialogController;
+        [NonSerialized] private BettrMechanicsController _bettrMechanicsController;
+        [NonSerialized] private BettrMathController _bettrMathController;
+        
         private bool _oneTimeSetUpComplete;
 
         public void StartApp()
@@ -45,48 +49,51 @@ namespace Bettr.Core
         {
             yield return OneTimeSetup();
 
-            DevTools.Instance.Enable();
-            
-            DevTools.Instance.OnKeyPressed.AddListener(() =>
+            if (BettrUserController.Instance.UserInDevMode)
             {
-                // Check for Backspace or Delete key press
-                if (Input.GetKeyDown(KeyCode.P))
-                {
-                    StartCoroutine(LoadPreviousMachine());
-                    return;
-                }
-                if (Input.GetKeyDown(KeyCode.N))
-                {
-                    StartCoroutine(LoadNextMachine());
-                    return;
-                }
-                if (Input.GetKeyDown(KeyCode.L))
-                {
-                    StartCoroutine(LoadMainLobby());
-                    return;
-                }
-                if (Input.GetKeyDown(KeyCode.V))
-                {
-                    TurnOffVolume();
-                    return;
-                }
-                // Find the SpinImage GameObject
-                var spinImage = GameObject.Find("SpinImage");
-                if (spinImage != null)
-                {
-                    _bettrOutcomeController.OutcomeNumber = DevTools.Instance.ValidCombination;
-                    
-                    // Use Unity's EventSystem to simulate a click event
-                    var eventData = new PointerEventData(EventSystem.current);
-                    ExecuteEvents.Execute(spinImage, eventData, ExecuteEvents.pointerClickHandler);
-                }
-                else
-                {
-                    Debug.LogWarning("SpinImage GameObject not found.");
-                }
-            });
+                DevTools.Instance.Enable();
             
-            yield return LoadMachine();
+                DevTools.Instance.OnKeyPressed.AddListener(() =>
+                {
+                    // Check for Backspace or Delete key press
+                    if (Input.GetKeyDown(KeyCode.P))
+                    {
+                        StartCoroutine(LoadPreviousMachine());
+                        return;
+                    }
+                    if (Input.GetKeyDown(KeyCode.N))
+                    {
+                        StartCoroutine(LoadNextMachine());
+                        return;
+                    }
+                    if (Input.GetKeyDown(KeyCode.L))
+                    {
+                        StartCoroutine(LoadMainLobby());
+                        return;
+                    }
+                    if (Input.GetKeyDown(KeyCode.V))
+                    {
+                        TurnOffVolume();
+                        return;
+                    }
+                    // Find the SpinImage GameObject
+                    var spinImage = GameObject.Find("SpinImage");
+                    if (spinImage != null)
+                    {
+                        _bettrOutcomeController.OutcomeNumber = DevTools.Instance.ValidCombination;
+                    
+                        // Use Unity's EventSystem to simulate a click event
+                        var eventData = new PointerEventData(EventSystem.current);
+                        ExecuteEvents.Execute(spinImage, eventData, ExecuteEvents.pointerClickHandler);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("SpinImage GameObject not found.");
+                    }
+                });
+            }
+
+            yield return EnterMainLobby();
         }
 
         private IEnumerator OneTimeSetup()
@@ -141,6 +148,10 @@ namespace Bettr.Core
             };
             
             var userId = _bettrUserController.GetUserId();
+
+            yield return _bettrUserController.SetUserDevMode();
+            
+            // check if the user is running in dev mode
             
             var assetVersion = "latest";
 
@@ -150,18 +161,33 @@ namespace Bettr.Core
             
             BettrModel.Init();
             
+            BettrAudioController.UseFileSystemAudio = _configData.UseFileSystemAudio;
+            BettrAudioController.AudioServerBaseURL = _configData.AudioServerBaseURL;
             TileController.RegisterType<BettrAudioController>("BettrAudioController");
             TileController.AddToGlobals("BettrAudioController", BettrAudioController.Instance);
 
-            _bettrMainLobbySceneController = new BettrMainLobbySceneController(_bettrExperimentController);
+            BettrVideoController.VideoServerBaseURL = _configData.VideoServerBaseURL;
+            TileController.RegisterType<BettrVideoController>("BettrVideoController");
+            TileController.AddToGlobals("BettrVideoController", BettrVideoController.Instance);
+            
+            _bettrMathController = new BettrMathController();
+            
+            _bettrDialogController = new BettrDialogController();
+            
+            _bettrMechanicsController = new BettrMechanicsController();
+
+            _bettrMainLobbySceneController = new BettrMainLobbySceneController(_bettrExperimentController)
+            {
+                webAssetBaseURL = _configData.WebAssetsBaseURL
+            };
 
             _bettrAssetController = new BettrAssetController
             {
                 webAssetBaseURL = _configData.WebAssetsBaseURL,
                 useFileSystemAssetBundles = _configData.UseFileSystemAssetBundles,
             };
-            
-            _bettrVisualsController = new BettrVisualsController();
+
+            _bettrVisualsController = new BettrVisualsController(_bettrUserController);
             
             _bettrAssetScriptsController = _bettrAssetController.BettrAssetScriptsController;
             
@@ -171,6 +197,12 @@ namespace Bettr.Core
                     UseFileSystemOutcomes = _configData.UseFileSystemOutcomes,
                 };
 
+            _bettrUserGameController = new BettrUserGameController(_bettrAssetScriptsController)
+            {
+                bettrServer = _bettrServer,
+                configData = _configData,
+            };
+            
             // Register the specialized performance controllers
             TileController.RegisterType<BettrReelController>("BettrReelController");
 
@@ -179,21 +211,12 @@ namespace Bettr.Core
             if (_oneTimeSetUpComplete) yield break;
             
             yield return LoginUser();
+            
+            yield return LoadUserGameTables();
 
-            var bettrUser = BettrUserController.Instance.BettrUserConfig;
-            
+            yield return LoadManifests();
+
             yield return _bettrExperimentController.GetUserExperiments();
-            
-            yield return _bettrAssetController.LoadScene(bettrUser.Main.BundleName, bettrUser.Main.BundleVersion, "Main"); 
-            
-            yield return _bettrAssetController.LoadPackage(bettrUser.Main.BundleName, bettrUser.Main.BundleVersion, false);
-            
-            ScriptRunner.Initialize();
-            
-            var mainTable = _bettrAssetScriptsController.GetScript("Main");
-            var scriptRunner = ScriptRunner.Acquire(mainTable);
-            yield return scriptRunner.CallAsyncAction("Init");
-            ScriptRunner.Release(scriptRunner);
             
             Debug.Log("OneTimeSetup ended");
             
@@ -204,6 +227,16 @@ namespace Bettr.Core
         {
             yield return BettrUserController.Instance.Login();
         }
+        
+        private IEnumerator LoadUserGameTables()
+        {
+            yield return BettrUserGameController.Instance.LoadUserGameTables();
+        }
+        
+        private IEnumerator LoadManifests()
+        {
+            yield return _bettrMainLobbySceneController.LoadManifests();
+        }
 
         private IEnumerator LoadMachine()
         {
@@ -213,6 +246,23 @@ namespace Bettr.Core
             ScriptRunner.Release(scriptRunner);
 
             // yield return UpdateCommitHash();
+        }
+
+        private IEnumerator EnterMainLobby()
+        {
+            while (!_oneTimeSetUpComplete) { yield return null; }
+            
+            var bettrUser = BettrUserController.Instance.BettrUserConfig;
+            
+            yield return _bettrAssetController.LoadScene(bettrUser.Main.BundleName, bettrUser.Main.BundleVersion, "Main"); 
+            yield return _bettrAssetController.LoadPackage(bettrUser.Main.BundleName, bettrUser.Main.BundleVersion, false);
+            ScriptRunner.Initialize();
+            var mainTable = _bettrAssetScriptsController.GetScript("Main");
+            var scriptRunner = ScriptRunner.Acquire(mainTable);
+            yield return scriptRunner.CallAsyncAction("Init");
+            ScriptRunner.Release(scriptRunner);
+
+            yield return LoadMainLobby();
         }
         
         private IEnumerator LoadNextMachine()
@@ -247,7 +297,7 @@ namespace Bettr.Core
 
         private void TurnOffVolume()
         {
-            BettrAudioController.Instance.IsVolumeMuted = !BettrAudioController.Instance.IsVolumeMuted;
+            BettrAudioController.Instance.ToggleVolume();
         }
         
         private IEnumerator UpdateCommitHash()

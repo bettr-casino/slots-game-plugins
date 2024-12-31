@@ -2,6 +2,11 @@ require "math"
 require "Core"
 
 {{machineName}}BaseGameReelWildsGenerationMechanic = {
+    Config = {
+        Machine = "{{machineName}}",
+        Variant = "{{machineVariant}}",
+        Experiment = "{{experimentVariant}}",
+    },
 }
 
 function {{machineName}}BaseGameReelWildsGenerationMechanic:new(o)
@@ -14,24 +19,3 @@ end
 function {{machineName}}BaseGameReelWildsGenerationMechanic:Initialize(reel)
 end
 
-function {{machineName}}BaseGameReelWildsGenerationMechanic:DisplayPaylines(reel, paylineSymbol, paylineId, paylineMatrix, paylineSymbolCount, duration)
-    for i=1,paylineSymbolCount parallel do
-        local reelID = paylineMatrix[i].ReelID
-        local matrixPaylineId = paylineMatrix[i].PaylineId
-        if reelID == reel.ReelID and matrixPaylineId == paylineId then
-           local rowIndex = paylineMatrix[i].RowIndex
-           local luaRowIndex = rowIndex + 1
-           local animatorGroupProperty = reel["SymbolPaylinesWinAnimatorGroup" .. luaRowIndex]
-           local symbolGroupProperty = reel["SymbolGroup" .. luaRowIndex]
-           local currentKey = symbolGroupProperty.CurrentKey
-           local animatorProperty = animatorGroupProperty[currentKey]
-           animatorProperty.overrideAnimationDuration = true
-           animatorProperty.animationDuration = duration
-           BettrVisualsController.PlayAnimatorProperty(animatorProperty)
-           -- Core.Animator:PlayAnimatorProperty(currentKey, animatorProperty)
-       end
-    end    
-end
-
-function {{machineName}}BaseGameReelWildsGenerationMechanic:HidePaylines(reel, paylineSymbol, paylineId, paylineMatrix, paylineSymbolCount, duration)    
-end

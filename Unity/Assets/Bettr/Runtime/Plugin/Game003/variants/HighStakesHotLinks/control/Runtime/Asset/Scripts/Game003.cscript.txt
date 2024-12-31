@@ -2,6 +2,11 @@ require "math"
 require "Core"
 
 Game003 = {
+    Config = {
+        Machine = "Game003",
+        Variant = "HighStakesHotLinks",
+        Experiment = "control",
+    },
     Manifest = {        
         BundleName = "game003highstakeshotlinks",
         BundleVersion = "control",
@@ -35,48 +40,70 @@ function Game003:Start()
             BettrVisualsController.SwitchOrientationToLandscape()
         end
         do
-            System.Print("Game003:Start tile id={0}", self.id)
-            self:LoadBaseGameBackgroundPrefab()
-            self:LoadBaseGamePrefab()
-        end
-        do
             Game003BaseGameBackground:StartBackground()
-            self:SetBaseGameActive(true)
         end
+-- NOTE: Commented out: UNTIL WE HAVE BETTER AUDIO        
+--        do
+--            BettrAudioController.LoadBackgroundAudio("Game003HighStakesHotLinks")
+--        end
+--        do
+--            BettrAudioController.PlayGameAudioLoop("Game003HighStakesHotLinks", "control", "Game003HighStakesHotLinksBackgroundMusic")
+--        end
+-- NOTE: Commented out: Will be controlled by the BettrMainLobbySceneController
+--        do
+--            BettrVideoController.LoadBackgroundVideo(Game003BaseGameBackground, "Game003", "HighStakesHotLinks", "control")
+--        end        
+--        do
+--            BettrVideoController.PlayBackgroundVideo(Game003BaseGameBackground, "Game003", "HighStakesHotLinks", "control")
+--        end
+-- NOTE: Commented out: Will be preloaded into the Scene
+--        do
+--            System.Print("Game003:Start Load Machine Prefabs tile id={0}", self.id)
+--
+--            self:LoadBaseGamePrefab()
+--
+--        end
+-- NOTE: Commented out: Will be controlled by the BettrMainLobbySceneController        
+--        do
+--            self:SetBaseGameActive(true)
+--        end
     end
 end
 
-function Game003:LoadBaseGameBackgroundPrefab()
-    series
-        do
-            System.Print("Game003:LoadBaseGameBackgroundPrefab tile id={0}", self.id)
-            local manifest = self.Manifest
-            local backgroundParentProperty = self.BaseGameBackgroundParent
-            local backgroundParent = backgroundParentProperty["Pivot"]                        
-            BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, manifest.BaseGameBackgroundPrefabName, backgroundParent)
-        end
-    end
-end
+-- NOTE: Commented out: Will be preloaded into the Scene
+-- function Game003:LoadBaseGameBackgroundPrefab()
+--     series
+--         do
+--             System.Print("Game003:LoadBaseGameBackgroundPrefab tile id={0}", self.id)
+--             local manifest = self.Manifest
+--             local backgroundParentProperty = self.BaseGameBackgroundParent
+--             local backgroundParent = backgroundParentProperty["Pivot"]                        
+--             BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, manifest.BaseGameBackgroundPrefabName, backgroundParent)
+--         end
+--     end
+-- end
 
-function Game003:LoadBaseGamePrefab()
-    series
-        do            
-            local manifest = self.Manifest
-            local baseGameMachineParentProperty = self.BaseGameMachineParent
-            local baseGameMachineParent = baseGameMachineParentProperty["Pivot"]
-            BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, manifest.BaseGameMachinePrefabName, baseGameMachineParent)
-        end
-    end
-end
+-- NOTE: Commented out: Will be preloaded into the Scene
+-- function Game003:LoadBaseGamePrefab()
+--    series
+--         do            
+--             local manifest = self.Manifest
+--             local baseGameMachineParentProperty = self.BaseGameMachineParent
+--             local baseGameMachineParent = baseGameMachineParentProperty["Pivot"]
+--             BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, manifest.BaseGameMachinePrefabName, baseGameMachineParent)
+--         end
+--     end
+-- end
 
-function Game003:SetBaseGameActive(active)
-    if active then
-        self.BaseGameMachineParent.SetActive(true)
-        Game003MachineState.Current.First.ActiveGame = "BaseGame"
-    else
-        self.BaseGameMachineParent.SetActive(false)
-    end
-end
+-- NOTE: Commented out: Will be preloaded into the Scene
+-- function Game003:SetBaseGameActive(active)
+--     if active then
+--         self.BaseGameMachineParent.SetActive(true)
+--         Game003MachineState.Current.First.ActiveGame = "BaseGame"
+--     else
+--         self.BaseGameMachineParent.SetActive(false)
+--     end
+-- end
 
 function Game003:ActiveGame()
     return Game003MachineState.Current.First.ActiveGame

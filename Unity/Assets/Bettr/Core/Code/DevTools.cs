@@ -57,9 +57,6 @@ namespace Bettr.Core
             WaitingForSecondKey
         }
 
-        private State currentState = State.WaitingForFirstKey;
-        private KeyCode firstKey;
-
         public int ValidCombination { get; set; } = -1;
 
         private void Awake()
@@ -74,84 +71,52 @@ namespace Bettr.Core
         
         void LateUpdate()
         {
-            if (currentState == State.WaitingForFirstKey)
+            if (
+                Input.GetKeyDown(KeyCode.Escape))
             {
-                // Handle Backspace and Delete keys
-                if (
-                    Input.GetKeyDown(KeyCode.Backspace) 
-                    || Input.GetKeyDown(KeyCode.Delete)
-                    || Input.GetKeyDown(KeyCode.Return))
-                {
-                    OnKeyPressed.Invoke();
-                    ResetState();
-                    return;
-                }
-                // Handle Lobby, Previous and Next Keys
-                if (
-                    Input.GetKeyDown(KeyCode.L) 
-                    || Input.GetKeyDown(KeyCode.P)
-                    || Input.GetKeyDown(KeyCode.N)
-                    || Input.GetKeyDown(KeyCode.V))
-                {
-                    OnKeyPressed.Invoke();
-                    ResetState();
-                    return;
-                }
+                ResetState();
+                return;
+            }
+            // Handle Backspace and Delete keys
+            if (
+                Input.GetKeyDown(KeyCode.Backspace) 
+                || Input.GetKeyDown(KeyCode.Delete)
+                || Input.GetKeyDown(KeyCode.Return))
+            {
+                OnKeyPressed.Invoke();
+                ResetState();
+                return;
+            }
+            // Handle Lobby, Previous and Next Keys
+            if (
+                Input.GetKeyDown(KeyCode.L) 
+                || Input.GetKeyDown(KeyCode.P)
+                || Input.GetKeyDown(KeyCode.N)
+                || Input.GetKeyDown(KeyCode.V))
+            {
+                OnKeyPressed.Invoke();
+                ResetState();
+                return;
+            }
                 
-                // Check for specific key presses from '1' to '9' and 'A' to 'Z'
-                for (int i = 0; i <= 9; i++)
-                {
-                    KeyCode key = (KeyCode)System.Enum.Parse(typeof(KeyCode), "Alpha" + i);
-                    if (Input.GetKeyDown(key))
-                    {
-                        HandleKey(key);
-                        ResetState();
-                        return; 
-                    }
-                }
-
-                for (char c = 'A'; c <= 'Z'; c++)
-                {
-                    KeyCode key = (KeyCode)Enum.Parse(typeof(KeyCode), c.ToString());
-                    if (Input.GetKeyDown(key))
-                    {
-                        firstKey = key;
-                        currentState = State.WaitingForSecondKey;
-                        Debug.Log($"First key '{c}' pressed. Waiting for second key...");
-                        return; // Exit the method once a key is detected
-                    }
-                }
-            }
-            else if (currentState == State.WaitingForSecondKey)
+            for (int i = 0; i <= 9; i++)
             {
-                // Check for numeric keys (1-9)
-                for (int i = 0; i <= 9; i++)
+                KeyCode key = (KeyCode)System.Enum.Parse(typeof(KeyCode), "Alpha" + i);
+                if (Input.GetKeyDown(key))
                 {
-                    KeyCode key = (KeyCode)System.Enum.Parse(typeof(KeyCode), "Alpha" + i);
-                    if (Input.GetKeyDown(key))
+                    if (ValidCombination == -1)
                     {
-                        HandleKeyCombination(firstKey, key);
-                        ResetState();
-                        return; // Exit the method once a key is detected
+                        ValidCombination = i;
                     }
+                    else
+                    {
+                        ValidCombination = ValidCombination * 10 + i;
+                    }
+                    return;
                 }
             }
         }
-        
-        private void HandleKey(KeyCode firstKeyCode)
-        {
-            ValidCombination = TranslateKeyToValue(firstKeyCode);
-            Debug.Log("ValidCombination: " + ValidCombination);
-            OnKeyPressed.Invoke();
-        }
-        
-        private void HandleKeyCombination(KeyCode firstKeyCode, KeyCode secondKeyCode)
-        {
-            ValidCombination = TranslateToInteger(firstKeyCode, secondKeyCode);
-            Debug.Log("ValidCombination: " + ValidCombination);
-            OnKeyPressed.Invoke();
-        }
-        
+
         private int TranslateToInteger(KeyCode firstKey, KeyCode secondKey)
         {
             int firstValue = TranslateKeyToValue(firstKey);
@@ -182,8 +147,7 @@ namespace Bettr.Core
 
         private void ResetState()
         {
-            // Reset the state to wait for the first key again
-            currentState = State.WaitingForFirstKey;
+            ValidCombination = -1;
         }
 
         public IEnumerator CaptureSceneState()

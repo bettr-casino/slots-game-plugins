@@ -1,0 +1,89 @@
+{
+  "Name": "BaseGameCascadingReelsMultiplierMechanic",
+  "Id": "BaseGameCascadingReelsMultiplierMechanic",
+  "Layer": "SLOT_REELS_OVERLAY",
+  "Position": {
+    "X": 0,
+    "Y": 0,
+    "Z": 0
+  },
+  "Child": {
+    "Name": "Pivot",
+    "Id": "Pivot",
+    "Layer": "SLOT_REELS_OVERLAY",
+    "Children": [
+      {
+        "Name": "Quad",
+        "Layer": "SLOT_REELS_OVERLAY",
+        "Active": true,
+        "IsPrimitive": true,
+        "Primitive": 5,
+        "PrimitiveMaterial": "BaseGameCascadingReelsMultiplier",
+        "PrimitiveShader": "Unlit/Texture",
+        "PrimitiveTexture": "BaseGameCascadingReelsMultiplier",
+        "PrimitiveTextureCreate": true,
+        "Position": {
+            "X": 0,
+            "Y": 1,
+            "Z": 0
+        },
+        "Scale": {
+            "X": 6.4,
+            "Y": 4,
+            "Z": 1
+        }
+      },
+      {
+          "Name": "Text",
+          "Id": "BaseGameCascadingReelsMultiplierText",
+          "Layer": "SLOT_REELS_OVERLAY",
+          "Active": true,
+          "Position": {
+              "X": 0,
+              "Y": 1,
+              "Z": 0
+          },
+          "Scale": {
+              "X": 1,
+              "Y": 1,
+              "Z": 1
+          },
+          "Components": [
+            {
+                "ComponentType": "RectTransform",
+                "Rect": {
+                    "X": 0,
+                    "Y": 0,
+                    "Width": 6,
+                    "Height": 1.5
+                }
+            },
+            {
+                "ComponentType": "TextMeshPro",
+                "Text": "0",
+                "Font": "LiberationSans SDF",
+                "FontSize": 4,
+                "HorizontalAlignment": "Center",
+                "VerticalAlignment": "Middle",
+                "Color": "#FFFFFF"          
+            },
+            {
+              "ComponentType": "TilePropertyTextMeshProsInjected",
+              "TextMeshProsProperty": [
+                {
+                    "Key": "BaseGameCascadingReelsMultiplierText",
+                    "Id": "BaseGameCascadingReelsMultiplierText"
+                }
+              ],
+              "TextMeshProGroupsProperty": [                        
+              ]
+            }
+          ]
+      }
+    ],
+    "Components": [
+    ]
+  },
+  "Components": [        
+  ]
+}
