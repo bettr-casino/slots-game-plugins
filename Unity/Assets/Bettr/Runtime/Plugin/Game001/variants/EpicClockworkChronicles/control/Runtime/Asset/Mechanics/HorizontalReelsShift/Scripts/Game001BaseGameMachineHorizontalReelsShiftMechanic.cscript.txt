@@ -58,7 +58,6 @@ function Game001BaseGameMachineHorizontalReelsShiftMechanic:_StartMechanic(machi
    series
       do
          self.State.MechanicsPrefab.SetActive(true)
-         BettrVisualsController.FireballMoveTo(nil, self.State.MechanicsPrefab, 20, 1, false)
       end
    end
 end
@@ -66,6 +65,20 @@ end
 function Game001BaseGameMachineHorizontalReelsShiftMechanic:_ShowMechanicPreview(machine)
    series
       do
+         local reelCount = Game001BaseGameLayout.ReelCount.First.Value
+         local firstReel = _G["Game001BaseGameReel1"]
+         local lastReel = _G["Game001BaseGameReel" .. reelCount]
+         BettrVisualsController.FireballMoveTo(nil, self.State.MechanicsPrefab, 20, 1, false) 
+         parallel
+             do
+                BettrVisualsController.FireballMoveTo(self.State.MechanicsPrefab, firstReel.gameObject, 20, 1, true) 
+                BettrVisualsController.FireballMoveTo(nil, firstReel.gameObject, 20, 1, false) 
+             end
+             do
+                BettrVisualsController.FireballMoveTo(self.State.MechanicsPrefab, lastReel.gameObject, 20, 1, true)
+                BettrVisualsController.FireballMoveTo(nil, lastReel.gameObject, 20, 1, false) 
+             end
+         end     
       end
    end
 end

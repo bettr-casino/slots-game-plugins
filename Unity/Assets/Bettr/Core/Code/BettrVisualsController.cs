@@ -155,6 +155,102 @@ namespace Bettr.Core
         }
     }
     
+    [Serializable]
+    internal class FireTornadoObject
+    {
+        private GameObject _fireTornado;
+        private ParticleSystem _particleSystem;
+        
+        private LayerToCameraMap _layerToCameraMap = new LayerToCameraMap();
+
+        public GameObject FireTornado
+        {
+            get => _fireTornado;
+            set
+            {
+                _fireTornado = value;
+
+                if (_fireTornado == null)
+                {
+                    _particleSystem = null;
+                    return;
+                }
+
+                var particleSystemGameObject = _fireTornado.transform.Find("base")?.gameObject;
+                if (particleSystemGameObject == null)
+                {
+                    Debug.LogWarning("FireTornado does not contain a 'base' child object.");
+                    return;
+                }
+
+                _particleSystem = particleSystemGameObject.GetComponent<ParticleSystem>();
+                if (_particleSystem != null)
+                {
+                    var main = _particleSystem.main;
+                    main.startSpeed = 0;
+                    main.duration = 0;
+                    main.loop = true;
+                    main.playOnAwake = false;
+                    main.simulationSpeed = 1;
+                }
+
+                _fireTornado.SetActive(false);
+            }
+        }
+        
+        public ParticleSystem ParticleSystem => _particleSystem;
+
+        public FireTornadoObject(GameObject seed)
+        {
+            // clone seed
+            FireTornado = Object.Instantiate(seed);
+        }
+    }
+
+    [Serializable]
+    internal class FireTornadoObjectsCache
+    {
+        private ParticleSystem _particleSystem;
+        
+        // list of fireballs created
+        private readonly List<FireTornadoObject> _freeList;
+
+        private readonly GameObject _seed;
+        
+        public FireTornadoObjectsCache(GameObject seed)
+        {
+            _seed = seed;
+            _freeList = new List<FireTornadoObject>();
+        }
+
+        public FireTornadoObject Acquire()
+        {
+            if (_freeList.Count == 0)
+            {
+                return new FireTornadoObject(this._seed);
+            }
+            var fireball = _freeList[0];
+            _freeList.RemoveAt(0);
+            return fireball;
+        }
+
+        public void Release(FireTornadoObject fireball)
+        {
+            _freeList.Add(fireball);
+        }
+
+        public void Reset()
+        {
+            // release all fireballs back into the _freeList
+            foreach (var fireTornado in _freeList)
+            {
+                Object.Destroy(fireTornado.FireTornado);
+                fireTornado.FireTornado = null;
+            }
+            _freeList.Clear();
+        }
+    }
+    
     public class BettrVisualsController
     {
         private static readonly int Color1 = Shader.PropertyToID("_Color");
@@ -162,10 +258,13 @@ namespace Bettr.Core
         private LayerToCameraMap _layerToCameraMap = new LayerToCameraMap();
 
         private FireballObjectsCache _fireballObjectsCache;
+        
+        private FireTornadoObjectsCache _fireTornadoObjectsCache;
 
         public void InitFireballs(GameObject fireball)
         {
             _fireballObjectsCache = new FireballObjectsCache(fireball);
+            _fireTornadoObjectsCache = new FireTornadoObjectsCache(fireball);
         }
 
         public BettrUserController BettrUserController { get; private set; }
@@ -338,6 +437,45 @@ namespace Bettr.Core
                     Object.Destroy(tweenThisGameObject);
                 }
             }
+        }
+        
+        public IEnumerator FireballTornadoAt(CrayonScriptContext context, GameObject at, float offsetY = 10, float duration = 1.0f)
+        {
+            Camera fireTornadoCamera = _layerToCameraMap.GetCameraForLayer("SLOT_TRANSITION");
+            if (fireTornadoCamera == null)
+            {
+                throw new ScriptRuntimeException("No camera found for SLOT_TRANSITION");
+            }
+            
+            // acquire a fireTornado object
+            var fireTornadoObject = _fireTornadoObjectsCache.Acquire();
+            
+            var fireTornado = fireTornadoObject.FireTornado;
+            var particleSystem = fireTornadoObject.ParticleSystem;
+
+            particleSystem.Stop();
+            fireTornado.SetActive(false);
+
+            // Calculate positions
+            Vector3 startWorldPosition = fireTornado.transform.position;
+            Vector3 targetWorldPosition = CalculatePosition(at, fireTornadoCamera, offsetY) ?? fireTornado.transform.position;
+
+            // Debug log positions
+            Debug.Log($"Target Position: {targetWorldPosition}");
+
+            // Set initial position and activate
+            fireTornado.transform.position = startWorldPosition;
+            fireTornado.SetActive(true);
+            particleSystem.Play();
+
+            fireTornado.transform.position = targetWorldPosition;
+            yield return new WaitForSeconds(duration);
+
+            particleSystem.Stop();
+            fireTornado.SetActive(false);
+            
+            // release the fireball object
+            _fireTornadoObjectsCache.Release(fireTornadoObject);
         }
         
         public IEnumerator FireballMoveTo(CrayonScriptContext context, GameObject from, GameObject to, float offsetY = 10, float duration = 1.0f, bool tween = false)
