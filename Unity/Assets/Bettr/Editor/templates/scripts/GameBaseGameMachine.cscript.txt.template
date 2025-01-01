@@ -119,6 +119,23 @@ function {{machineName}}BaseGameMachine:ConfigureSettings()
     self.BetText.SetText(bet) 
 end
 
+function {{machineName}}BaseGameMachine:ShowSettings(mainLobbyScene)
+    series
+        do
+            self.Mechanics:ShowSettings(self, mainLobbyScene)
+        end
+    end
+end
+
+function {{machineName}}BaseGameMachine:ShowSettingsDefault(mainLobbyScene)
+    series
+        do
+            System.WaitForSeconds(1.0)
+            mainLobbyScene.MachineControls.SetActive(true)
+        end
+    end
+end
+
 function {{machineName}}BaseGameMachine:ResetSettings()
     self.WinText.SetText("0")
 end

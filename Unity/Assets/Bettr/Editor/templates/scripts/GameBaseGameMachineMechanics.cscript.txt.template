@@ -43,6 +43,14 @@ function {{machineName}}BaseGameMachineMechanics:StartMachine(machine)
     end
 end
 
+function {{machineName}}BaseGameMachineMechanics:ShowSettings(machine, mainLobbyScene)
+    series
+        do
+            machine:ShowSettingsDefault(mainLobbyScene)
+        end
+    end
+end
+
 function {{machineName}}BaseGameMachineMechanics:BaseGamePayout(machine)
     -- this is hardcoded
     -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
