@@ -30,6 +30,8 @@ end
 function Game009BaseGameMachineMechanics:StartMachine(machine)
     if self.ChooseASideMechanic ~= nil then
         self.ChooseASideMechanic:StartMachine(machine)
+    elseif self.HorizontalReelsShiftMechanic ~= nil then
+        self.HorizontalReelsShiftMechanic:StartMachine(machine)
     else
         machine:StartMachine()
     end
