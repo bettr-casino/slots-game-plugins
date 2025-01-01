@@ -9,6 +9,7 @@ require "Core"
     },
     State = {
         MechanicsPrefab = nil,
+        MainLobbyScene = nil,
     }
 }
 
@@ -42,6 +43,8 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:StartMachine(mac
             self:_ShowMachine(machine)
             machine:StartMachine()
             self:_StartMechanic(machine)
+            self:_ShowMechanicPreview(machine)
+            self:ShowSettingsDefault(machine, self.State.MainLobbyScene)
         end
     end
 end
@@ -60,12 +63,22 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_StartMechanic(m
    end
 end
 
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_ShowMechanicPreview(machine)
+   series
+      do
+      end
+   end
+end
+
 function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:ShowSettings(machine, mainLobbyScene)
-    series
-        do
-            machine:ShowSettingsDefault(mainLobbyScene)
-        end
-    end
+-- will call machine.ShowSettingsDefault once mechanic preview is done
+    self.State.MainLobbyScene = mainLobbyScene
+end
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:ShowSettingsDefault(machine, mainLobbyScene)
+    local mainLobbyScene = self.State.MainLobbyScene
+    machine:ShowSettingsDefault(mainLobbyScene)
+    self.State.MainLobbyScene = nil
 end
 
 function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:TryPaying(machine)

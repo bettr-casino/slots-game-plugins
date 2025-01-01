@@ -9,6 +9,7 @@ Game001BaseGameMachineHorizontalReelsShiftMechanic = {
     },
     State = {
         MechanicsPrefab = nil,
+        MainLobbyScene = nil,
     }
 }
 
@@ -42,6 +43,8 @@ function Game001BaseGameMachineHorizontalReelsShiftMechanic:StartMachine(machine
             self:_ShowMachine(machine)
             machine:StartMachine()
             self:_StartMechanic(machine)
+            self:_ShowMechanicPreview(machine)
+            self:ShowSettingsDefault(machine, self.State.MainLobbyScene)
         end
     end
 end
@@ -60,12 +63,22 @@ function Game001BaseGameMachineHorizontalReelsShiftMechanic:_StartMechanic(machi
    end
 end
 
+function Game001BaseGameMachineHorizontalReelsShiftMechanic:_ShowMechanicPreview(machine)
+   series
+      do
+      end
+   end
+end
+
 function Game001BaseGameMachineHorizontalReelsShiftMechanic:ShowSettings(machine, mainLobbyScene)
-    series
-        do
-            machine:ShowSettingsDefault(mainLobbyScene)
-        end
-    end
+-- will call machine.ShowSettingsDefault once mechanic preview is done
+    self.State.MainLobbyScene = mainLobbyScene
+end
+
+function Game001BaseGameMachineHorizontalReelsShiftMechanic:ShowSettingsDefault(machine, mainLobbyScene)
+    local mainLobbyScene = self.State.MainLobbyScene
+    machine:ShowSettingsDefault(mainLobbyScene)
+    self.State.MainLobbyScene = nil
 end
 
 function Game001BaseGameMachineHorizontalReelsShiftMechanic:TryPaying(machine)
