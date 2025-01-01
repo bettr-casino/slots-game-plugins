@@ -30,8 +30,18 @@ end
 function Game004BaseGameMachineMechanics:StartMachine(machine)
     if self.ChooseASideMechanic ~= nil then
         self.ChooseASideMechanic:StartMachine(machine)
+    elseif self.HorizontalReelsShiftMechanic ~= nil then
+        self.HorizontalReelsShiftMechanic:StartMachine(machine)
     else
         machine:StartMachine()
+    end
+end
+
+function Game004BaseGameMachineMechanics:StartEngines(machine)
+    if self.HorizontalReelsShiftMechanic ~= nil then
+        self.HorizontalReelsShiftMechanic:StartEngines(machine)
+    else
+        machine:StartEngines(self)
     end
 end
 

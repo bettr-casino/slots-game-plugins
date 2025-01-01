@@ -7,6 +7,9 @@ Game001BaseGameMachineHorizontalReelsShiftMechanic = {
         Variant = "EpicClockworkChronicles",
         Experiment = "control",
     },
+    State = {
+        MechanicsPrefab = nil,
+    }
 }
 
 function Game001BaseGameMachineHorizontalReelsShiftMechanic:new(o)
@@ -17,6 +20,44 @@ function Game001BaseGameMachineHorizontalReelsShiftMechanic:new(o)
 end
 
 function Game001BaseGameMachineHorizontalReelsShiftMechanic:Initialize(machine)
+    series
+        do
+            local manifest = Game001.Manifest
+            local prefabName = "BaseGameMachineHorizontalReelsShift"
+            local machineParent = machine.MachineParent
+            machineParent.SetActive(false)
+            local mechanicsParent = machine.MechanicsParent
+            mechanicsParent.SetActive(true)
+            local mechanicsPrefab = BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, prefabName, mechanicsParent.GameObject)
+            self.State.MechanicsPrefab = mechanicsPrefab
+            self.State.MechanicsPrefab.SetActive(false)
+            System.Print("Game001BaseGameMachineHorizontalReelsShiftMechanic:Initialize mechanicsPrefab={0}", self.State.MechanicsPrefab.name)
+        end
+    end
+end
+
+function Game001BaseGameMachineHorizontalReelsShiftMechanic:StartMachine(machine)
+    series
+        do
+            self:_ShowMachine(machine)
+            machine:StartMachine()
+            self:_StartMechanic(machine)
+        end
+    end
+end
+
+function Game001BaseGameMachineHorizontalReelsShiftMechanic:_ShowMachine(machine)
+    local machineParent = machine.MachineParent
+    machineParent.SetActive(true)
+end
+
+function Game001BaseGameMachineHorizontalReelsShiftMechanic:_StartMechanic(machine)
+   series
+      do
+         self.State.MechanicsPrefab.SetActive(true)
+         BettrVisualsController.FireballMoveTo(nil, self.State.MechanicsPrefab, 20, 1, false)
+      end
+   end
 end
 
 function Game001BaseGameMachineHorizontalReelsShiftMechanic:TryPaying(machine)

@@ -1,25 +1,66 @@
 require "math"
 require "Core"
 
-{{machineName}}BaseGameMachineHorizontalReelsShiftMechanic = {
+{{machineName}}BaseGameMachine{{mechanicName}}Mechanic = {
     Config = {
         Machine = "{{machineName}}",
         Variant = "{{machineVariant}}",
         Experiment = "{{experimentVariant}}",
     },
+    State = {
+        MechanicsPrefab = nil,
+    }
 }
 
-function {{machineName}}BaseGameMachineHorizontalReelsShiftMechanic:new(o)
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:new(o)
 	o = o or {}
 	setmetatable(o, self)
 	self.__index = self
 	return o
 end
 
-function {{machineName}}BaseGameMachineHorizontalReelsShiftMechanic:Initialize(machine)
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:Initialize(machine)
+    series
+        do
+            local manifest = {{machineName}}.Manifest
+            local prefabName = "BaseGameMachine{{mechanicName}}"
+            local machineParent = machine.MachineParent
+            machineParent.SetActive(false)
+            local mechanicsParent = machine.MechanicsParent
+            mechanicsParent.SetActive(true)
+            local mechanicsPrefab = BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, prefabName, mechanicsParent.GameObject)
+            self.State.MechanicsPrefab = mechanicsPrefab
+            self.State.MechanicsPrefab.SetActive(false)
+            System.Print("{{machineName}}BaseGameMachine{{mechanicName}}Mechanic:Initialize mechanicsPrefab={0}", self.State.MechanicsPrefab.name)
+        end
+    end
 end
 
-function {{machineName}}BaseGameMachineHorizontalReelsShiftMechanic:TryPaying(machine)
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:StartMachine(machine)
+    series
+        do
+            self:_ShowMachine(machine)
+            machine:StartMachine()
+            self:_StartMechanic(machine)
+        end
+    end
+end
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_ShowMachine(machine)
+    local machineParent = machine.MachineParent
+    machineParent.SetActive(true)
+end
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_StartMechanic(machine)
+   series
+      do
+         self.State.MechanicsPrefab.SetActive(true)
+         BettrVisualsController.FireballMoveTo(nil, self.State.MechanicsPrefab, 20, 1, false)
+      end
+   end
+end
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:TryPaying(machine)
 end
 
 

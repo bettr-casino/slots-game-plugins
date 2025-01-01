@@ -175,11 +175,30 @@ namespace Bettr.Editor
                 $"Processing horizontal reels mechanic for {machineName} {machineVariant} {experimentVariant} {machineModelPath}");
         }
 
-        public static void ProcessHorizontalReelShiftMechanic(string machineName, string machineVariant,
+        public static void ProcessHorizontalReelsShiftMechanic(string machineName, string machineVariant,
             string experimentVariant, string machineModelPath)
         {
             Debug.Log(
-                $"Processing horizontal reel shift mechanic for {machineName} {machineVariant} {experimentVariant} {machineModelPath}");
+                $"Processing horizontal reels shift mechanic for {machineName} {machineVariant} {experimentVariant} {machineModelPath}");
+            
+            var mechanicName = "HorizontalReelsShift";
+            
+            var templateName = $"BaseGame{mechanicName}Mechanic";
+            var prefabName = $"BaseGameMachine{mechanicName}";
+            var runtimeAssetPath = BettrMechanics.RuntimeAssetPath;
+            
+            BettrMaterialGenerator.MachineName = machineName;
+            BettrMaterialGenerator.MachineVariant = machineVariant;
+            
+            var model = new Dictionary<string, object>
+            {
+                { "machineName", machineName },
+                { "machineVariant", machineVariant },
+            };
+            
+            BettrMechanicsHelpers.ProcessBaseGameMechanic(
+                runtimeAssetPath, model,
+                templateName, prefabName, mechanicName);
         }
 
         public static void ProcessHotReelsMechanic(string machineName, string machineVariant, string experimentVariant,

@@ -1,8 +1,35 @@
 {
-  "Name": "HorizontalReelShift",
-  "Layer": "SLOT_REELS",
+  "Name": "BaseGameHorizontalReelsShiftMechanic",
+  "Id": "BaseGameHorizontalReelsShiftMechanic",
+  "Layer": "SLOT_REELS_OVERLAY",
+  "Position": {
+      "X": 0,
+      "Y": -3.2,
+      "Z": 0
+  },
   "Components": [
   ],
-  "Children": [
-  ]
+  "Child": {
+      "Name": "Pivot",
+      "Id": "Pivot",
+      "Layer": "SLOT_REELS_OVERLAY",
+      "Children": [
+        {
+          "Name": "Quad",
+          "Layer": "SLOT_REELS_OVERLAY",
+          "IsPrimitive": true,
+          "Primitive": 5,
+          "PrimitiveMaterial": "BaseGameHorizontalReelsShiftMagicWand",
+          "PrimitiveShader": "Bettr/Symbol",
+          "PrimitiveTexture": "BaseGameHorizontalReelsShiftMagicWand",
+          "PrimitiveTextureCreate": true,
+          "PrimitiveTextureCreateSource": "default.png",                        
+          "Scale": {
+            "X": 0.15,
+            "Y": 0.75,
+            "Z": 1
+          }
+        }
+      ]
+  }
 }
