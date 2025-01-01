@@ -44,7 +44,11 @@ end
 function Game001BaseGameMachineMechanics:ShowSettings(machine, mainLobbyScene)
     series
         do
-            machine:ShowSettingsDefault(mainLobbyScene)
+            if self.HorizontalReelsShiftMechanic ~= nil then
+                self.HorizontalReelsShiftMechanic:ShowSettings(machine, mainLobbyScene)
+            else
+                machine:ShowSettingsDefault(mainLobbyScene)
+            end
         end
     end
 end

@@ -1219,7 +1219,8 @@ namespace Bettr.Editor
             if (specificMachineVariants.Length > 0)
             {
                 var todoFilePath = Path.Combine(PluginRootDirectory, "TODO.txt");
-                File.AppendAllText(todoFilePath, "NeedsSyncGameScripts\n");
+                // include the date and time in readable ISO format in the TODO.txt file
+                File.AppendAllText(todoFilePath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} NeedsSyncGameScripts\n");
             }
             
             // Walk the entire directory tree under the plugin root directory
