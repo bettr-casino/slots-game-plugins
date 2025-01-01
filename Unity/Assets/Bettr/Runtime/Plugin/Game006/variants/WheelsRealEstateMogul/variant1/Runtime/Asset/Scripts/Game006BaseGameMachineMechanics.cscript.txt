@@ -37,14 +37,6 @@ function Game006BaseGameMachineMechanics:StartMachine(machine)
     end
 end
 
-function Game006BaseGameMachineMechanics:StartEngines(machine)
-    if self.HorizontalReelsShiftMechanic ~= nil then
-        self.HorizontalReelsShiftMechanic:StartEngines(machine)
-    else
-        machine:StartEngines(self)
-    end
-end
-
 function Game006BaseGameMachineMechanics:BaseGamePayout(machine)
     -- this is hardcoded
     -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
