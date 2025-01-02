@@ -264,7 +264,11 @@ namespace Bettr.Core
         public void InitFireballs(GameObject fireball)
         {
             _fireballObjectsCache = new FireballObjectsCache(fireball);
-            _fireTornadoObjectsCache = new FireTornadoObjectsCache(fireball);
+        }
+        
+        public void InitFireTornados(GameObject fireTornado)
+        {
+            _fireTornadoObjectsCache = new FireTornadoObjectsCache(fireTornado);
         }
 
         public BettrUserController BettrUserController { get; private set; }
@@ -471,6 +475,45 @@ namespace Bettr.Core
 
             // Create and return a Rect with the bounds in screen space
             return new Rect(bottomScreen.x, bottomScreen.y, Mathf.Abs(topScreen.x - bottomScreen.x), Mathf.Abs(topScreen.y - bottomScreen.y));
+        }
+        
+        public IEnumerator FireballTornadoAt(CrayonScriptContext context, GameObject at, float offsetY = 10, float duration = 1.0f)
+        {
+            Camera fireTornadoCamera = _layerToCameraMap.GetCameraForLayer("SLOT_TRANSITION");
+            if (fireTornadoCamera == null)
+            {
+                throw new ScriptRuntimeException("No camera found for SLOT_TRANSITION");
+            }
+            
+            // acquire a fireTornado object
+            var fireTornadoObject = _fireTornadoObjectsCache.Acquire();
+            
+            var fireTornado = fireTornadoObject.FireTornado;
+            var particleSystem = fireTornadoObject.ParticleSystem;
+
+            particleSystem.Stop();
+            fireTornado.SetActive(false);
+
+            // Calculate positions
+            Vector3 startWorldPosition = fireTornado.transform.position;
+            Vector3 targetWorldPosition = CalculatePosition(at, fireTornadoCamera, offsetY) ?? fireTornado.transform.position;
+
+            // Debug log positions
+            Debug.Log($"Target Position: {targetWorldPosition}");
+
+            // Set initial position and activate
+            fireTornado.transform.position = startWorldPosition;
+            fireTornado.SetActive(true);
+            particleSystem.Play();
+
+            fireTornado.transform.position = targetWorldPosition;
+            yield return new WaitForSeconds(duration);
+
+            particleSystem.Stop();
+            fireTornado.SetActive(false);
+            
+            // release the fireball object
+            _fireTornadoObjectsCache.Release(fireTornadoObject);
         }
         
         public IEnumerator FireballMoveTo(CrayonScriptContext context, GameObject from, GameObject to, float offsetY = 10, float duration = 1.0f, bool tween = false)
