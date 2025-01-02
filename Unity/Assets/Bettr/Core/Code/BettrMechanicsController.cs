@@ -29,22 +29,37 @@ namespace Bettr.Core
             var table = (Table) TileController.LuaScript.Globals[tableName];
             return table;
         }
+        
+        public int GetReelVisibleSymbolCount(string machineName, int reelIndex)
+        {
+            var globals = TileController.LuaScript.Globals;
+            var globalKey = $"{machineName}BaseGameReel{reelIndex + 1}";
+            var reelTable = (Table) globals[globalKey];
+            var reelController = (BettrReelController) reelTable["BettrReelController"];
+            var visibleSymbolCount = reelController.GetReelVisibleSymbolCount();
+            return visibleSymbolCount;
+        }
+        
+        public GameObject GetReelVisibleSymbol(string machineName, int reelIndex, int offset)
+        {
+            var reelSymbolMatrix = GetReelSymbolMatrix(machineName, reelIndex);
+            if (offset < 0)
+            {
+                offset = reelSymbolMatrix.Count + offset;
+            }
+            var visibleSymbol = reelSymbolMatrix[offset];
+            var visibleQuad = FindSymbolQuad(visibleSymbol);
+            return visibleQuad;
+        }
 
         public GameObject GetReelTopVisibleSymbol(string machineName, int reelIndex)
         {
-            var reelSymbolMatrix = GetReelSymbolMatrix(machineName, reelIndex);
-            var topVisibleSymbol = reelSymbolMatrix[0];
-            var topVisibleQuad = FindSymbolQuad(topVisibleSymbol);
-            return topVisibleQuad;
+            return GetReelVisibleSymbol(machineName, reelIndex, -1);
         }
         
         public GameObject GetReelBottomVisibleSymbol(string machineName, int reelIndex)
         {
-            var reelSymbolMatrix = GetReelSymbolMatrix(machineName, reelIndex);
-            var bottomVisibleSymbol = reelSymbolMatrix[^1];
-            var bottomVisibleSymbolGameObject = bottomVisibleSymbol.value.GameObject;
-            var bottomSymbolQuad = FindSymbolQuad(bottomVisibleSymbol);
-            return bottomSymbolQuad;
+            return GetReelVisibleSymbol(machineName, reelIndex, -0);
         }
 
         public Rect GetReelBounds(string machineName, int reelIndex)

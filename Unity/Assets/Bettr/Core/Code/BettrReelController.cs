@@ -329,6 +329,11 @@ namespace Bettr.Core
                 UpdateReelSymbolForSpin(i);
             }
         }
+        
+        public int GetReelVisibleSymbolCount()
+        {
+            return (int) (double) this.ReelStateTable["VisibleSymbolCount"];
+        }
 
         public List<TilePropertyGameObject> GetReelMatrixVisibleSymbols(params string[] symbols)
         {
