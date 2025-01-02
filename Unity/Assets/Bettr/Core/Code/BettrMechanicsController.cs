@@ -40,6 +40,17 @@ namespace Bettr.Core
             return visibleSymbolCount;
         }
         
+        public TilePropertyGameObjectGroup GetReelVisibleSymbolGroup(string machineName, int reelIndex, int offset)
+        {
+            var reelSymbolMatrixGroups = GetReelSymbolMatrixGroups(machineName, reelIndex);
+            if (offset < 0)
+            {
+                offset = reelSymbolMatrixGroups.Count + offset;
+            }
+            var visibleSymbolGroup = reelSymbolMatrixGroups[offset];
+            return visibleSymbolGroup;
+        }
+        
         public GameObject GetReelVisibleSymbol(string machineName, int reelIndex, int offset)
         {
             var reelSymbolMatrix = GetReelSymbolMatrix(machineName, reelIndex);
@@ -102,17 +113,37 @@ namespace Bettr.Core
             }
             return symbolMatrixGameObjects;
         }
+        
+        public List<List<TilePropertyGameObjectGroup>> GetSymbolMatrixGroups(string machineName, int reelCount, params string[] symbols)
+        {
+            var symbolMatrixSymbolsGroups = new List<List<TilePropertyGameObjectGroup>>();
+            for (var i = 0; i < reelCount; i++)
+            {
+                var reelMatrixSymbolsGroups = GetReelSymbolMatrixGroups(machineName, i, symbols);
+                symbolMatrixSymbolsGroups.Add(reelMatrixSymbolsGroups);
+            }
+            return symbolMatrixSymbolsGroups;
+        }
 
         public List<List<TilePropertyGameObject>> GetSymbolMatrix(string machineName, int reelCount, params string[] symbols)
         {
             var symbolMatrixSymbols = new List<List<TilePropertyGameObject>>();
-            var globals = TileController.LuaScript.Globals;
             for (var i = 0; i < reelCount; i++)
             {
                 var reelMatrixSymbols = GetReelSymbolMatrix(machineName, i, symbols);
                 symbolMatrixSymbols.Add(reelMatrixSymbols);
             }
             return symbolMatrixSymbols;
+        }
+        
+        public List<TilePropertyGameObjectGroup> GetReelSymbolMatrixGroups(string machineName, int reelIndex, params string[] symbols)
+        {
+            var globals = TileController.LuaScript.Globals;
+            var globalKey = $"{machineName}BaseGameReel{reelIndex + 1}";
+            var reelTable = (Table) globals[globalKey];
+            var reelController = (BettrReelController) reelTable["BettrReelController"];
+            var reelMatrixSymbols = reelController.GetReelMatrixVisibleSymbolsGroups(symbols);
+            return reelMatrixSymbols;
         }
         
         public List<TilePropertyGameObject> GetReelSymbolMatrix(string machineName, int reelIndex, params string[] symbols)

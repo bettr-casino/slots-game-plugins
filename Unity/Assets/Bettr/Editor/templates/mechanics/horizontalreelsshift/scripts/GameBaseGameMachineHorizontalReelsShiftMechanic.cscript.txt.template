@@ -70,7 +70,11 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_ShowMechanicPre
          local visibleSymbolCount = BettrMechanicsController.GetReelVisibleSymbolCount(self.Config.Machine, 0)
          for i = 0, visibleSymbolCount-1 parallel do
              local symbol = BettrMechanicsController.GetReelVisibleSymbol(self.Config.Machine, 0, i)
+             local symbolGroup = BettrMechanicsController.GetReelVisibleSymbolGroup(self.Config.Machine, 0, i)
+             local symbolCurrentKey = symbolGroup.CurrentKey
              local otherSymbol = BettrMechanicsController.GetReelVisibleSymbol(self.Config.Machine, reelCount-1, i)
+             local otherSymbolGroup = BettrMechanicsController.GetReelVisibleSymbolGroup(self.Config.Machine, reelCount-1, i)
+             local otherSymbolCurrentKey = otherSymbolGroup.CurrentKey
              parallel
                 do
                      BettrVisualsController.FireballMoveTo(self.State.MechanicsPrefab, symbol.gameObject, 50, 1, true)
@@ -84,9 +88,11 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_ShowMechanicPre
              parallel
                  do
                      BettrVisualsController.CloneAndTweenGameObject(symbol.gameObject, otherSymbol.gameObject, 2, true, -10)
+                     symbolGroup.SetCurrentActive(otherSymbolCurrentKey)
                  end
                  do
                      BettrVisualsController.CloneAndTweenGameObject(otherSymbol.gameObject, symbol.gameObject, 2, true, -20)
+                     otherSymbolGroup.SetCurrentActive(symbolCurrentKey)
                  end
              end
          end

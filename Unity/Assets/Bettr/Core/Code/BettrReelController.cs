@@ -334,10 +334,10 @@ namespace Bettr.Core
         {
             return (int) (double) this.ReelStateTable["VisibleSymbolCount"];
         }
-
-        public List<TilePropertyGameObject> GetReelMatrixVisibleSymbols(params string[] symbols)
+        
+        public List<TilePropertyGameObjectGroup> GetReelMatrixVisibleSymbolsGroups(params string[] symbols)
         {
-            var reelMatrixSymbols = new List<TilePropertyGameObject>();
+            var reelMatrixSymbolGroups = new List<TilePropertyGameObjectGroup>();
             var topSymbolCount = (int) (double) this.ReelStateTable["TopSymbolCount"];
             var bottomSymbolCount = (int) (double) this.ReelStateTable["BottomSymbolCount"];
             var visibleSymbolCount = (int) (double) this.ReelStateTable["VisibleSymbolCount"];
@@ -347,6 +347,17 @@ namespace Bettr.Core
             for (var symbolIndex = startSymbolIndexOneIndexed; symbolIndex <= endSymbolIndexOneIndexed; symbolIndex++)
             {
                 var symbolGroupProperty = (TilePropertyGameObjectGroup) this.ReelTable[$"SymbolGroup{symbolIndex}"];
+                reelMatrixSymbolGroups.Add(symbolGroupProperty);
+            }
+            return reelMatrixSymbolGroups;
+        }
+
+        public List<TilePropertyGameObject> GetReelMatrixVisibleSymbols(params string[] symbols)
+        {
+            var reelMatrixSymbols = new List<TilePropertyGameObject>();
+            var reelMatrixSymbolGroups = GetReelMatrixVisibleSymbolsGroups(symbols);
+            foreach (var symbolGroupProperty in reelMatrixSymbolGroups)
+            {
                 var currentKey = symbolGroupProperty.CurrentKey;
                 // find the corresponding TilePropertyGameObject in the symbolGroupProperty.GameObjectProperties
                 var symbolProperty = symbolGroupProperty.gameObjectProperties.Find(x => x.key == currentKey);
