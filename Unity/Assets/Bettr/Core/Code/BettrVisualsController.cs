@@ -439,43 +439,38 @@ namespace Bettr.Core
             }
         }
         
-        public IEnumerator FireballTornadoAt(CrayonScriptContext context, GameObject at, float offsetY = 10, float duration = 1.0f)
+        public Rect GetQuadBounds(GameObject quad)
         {
-            Camera fireTornadoCamera = _layerToCameraMap.GetCameraForLayer("SLOT_TRANSITION");
-            if (fireTornadoCamera == null)
+            // Get layer for quad
+            string layerName = LayerMask.LayerToName(quad.layer);
+            // Retrieve the camera
+            Camera camera = _layerToCameraMap.GetCameraForLayer(layerName);
+            if (camera == null)
             {
-                throw new ScriptRuntimeException("No camera found for SLOT_TRANSITION");
+                throw new ScriptRuntimeException($"No camera found for {layerName}");
             }
-            
-            // acquire a fireTornado object
-            var fireTornadoObject = _fireTornadoObjectsCache.Acquire();
-            
-            var fireTornado = fireTornadoObject.FireTornado;
-            var particleSystem = fireTornadoObject.ParticleSystem;
 
-            particleSystem.Stop();
-            fireTornado.SetActive(false);
+            // Get the renderer of the quad
+            Renderer quadRenderer = quad.GetComponent<Renderer>();
+            if (quadRenderer == null)
+            {
+                Debug.LogError("Quad object does not have a Renderer component.");
+                return new Rect();
+            }
 
-            // Calculate positions
-            Vector3 startWorldPosition = fireTornado.transform.position;
-            Vector3 targetWorldPosition = CalculatePosition(at, fireTornadoCamera, offsetY) ?? fireTornado.transform.position;
+            // Get the bounds of the quad in world space
+            Bounds bounds = quadRenderer.bounds;
 
-            // Debug log positions
-            Debug.Log($"Target Position: {targetWorldPosition}");
+            // Convert the bottom and top bounds to screen space
+            Vector3 bottomWorld = new Vector3(bounds.min.x, bounds.min.y, bounds.center.z); // Bottom center point
+            Vector3 topWorld = new Vector3(bounds.max.x, bounds.max.y, bounds.center.z);    // Top center point
 
-            // Set initial position and activate
-            fireTornado.transform.position = startWorldPosition;
-            fireTornado.SetActive(true);
-            particleSystem.Play();
+            // Convert to screen space
+            Vector3 bottomScreen = camera.WorldToScreenPoint(bottomWorld);
+            Vector3 topScreen = camera.WorldToScreenPoint(topWorld);
 
-            fireTornado.transform.position = targetWorldPosition;
-            yield return new WaitForSeconds(duration);
-
-            particleSystem.Stop();
-            fireTornado.SetActive(false);
-            
-            // release the fireball object
-            _fireTornadoObjectsCache.Release(fireTornadoObject);
+            // Create and return a Rect with the bounds in screen space
+            return new Rect(bottomScreen.x, bottomScreen.y, Mathf.Abs(topScreen.x - bottomScreen.x), Mathf.Abs(topScreen.y - bottomScreen.y));
         }
         
         public IEnumerator FireballMoveTo(CrayonScriptContext context, GameObject from, GameObject to, float offsetY = 10, float duration = 1.0f, bool tween = false)

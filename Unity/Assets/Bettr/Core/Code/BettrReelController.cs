@@ -330,11 +330,16 @@ namespace Bettr.Core
             }
         }
 
-        public List<TilePropertyGameObject> GetReelMatrixSymbols(params string[] symbols)
+        public List<TilePropertyGameObject> GetReelMatrixVisibleSymbols(params string[] symbols)
         {
             var reelMatrixSymbols = new List<TilePropertyGameObject>();
+            var topSymbolCount = (int) (double) this.ReelStateTable["TopSymbolCount"];
+            var bottomSymbolCount = (int) (double) this.ReelStateTable["BottomSymbolCount"];
+            var visibleSymbolCount = (int) (double) this.ReelStateTable["VisibleSymbolCount"];
             var symbolCount = (int) (double) this.ReelStateTable["SymbolCount"];
-            for (var symbolIndex = 1; symbolIndex <= symbolCount; symbolIndex++)
+            var startSymbolIndexOneIndexed = 1 + topSymbolCount;
+            var endSymbolIndexOneIndexed = symbolCount - bottomSymbolCount;
+            for (var symbolIndex = startSymbolIndexOneIndexed; symbolIndex <= endSymbolIndexOneIndexed; symbolIndex++)
             {
                 var symbolGroupProperty = (TilePropertyGameObjectGroup) this.ReelTable[$"SymbolGroup{symbolIndex}"];
                 var currentKey = symbolGroupProperty.CurrentKey;
@@ -344,7 +349,7 @@ namespace Bettr.Core
                 {
                     // if symbols is not null, then the symbol should be in the symbols array to be added 
                     // to the reelMatrixSymbols list else add it by default
-                    if (symbols != null)
+                    if (symbols != null && symbols.Length > 0)
                     {
                         if (Array.Exists(symbols, symbol => symbol == currentKey))
                         {

@@ -58,7 +58,6 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_StartMechanic(m
    series
       do
          self.State.MechanicsPrefab.SetActive(true)
-         BettrVisualsController.FireballMoveTo(nil, self.State.MechanicsPrefab, 20, 1, false)
       end
    end
 end
@@ -66,6 +65,22 @@ end
 function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_ShowMechanicPreview(machine)
    series
       do
+         local reelCount = {{machineName}}BaseGameLayout.ReelCount.First.Value
+         local firstReel = _G["{{machineName}}BaseGameReel1"]
+         local lastReel = _G["{{machineName}}BaseGameReel" .. reelCount]
+         local firstReelBottomSymbol = BettrMechanicsController.GetReelBottomVisibleSymbol(self.Config.Machine, 0)
+         local lastReelBottomSymbol = BettrMechanicsController.GetReelBottomVisibleSymbol(self.Config.Machine, reelCount - 1)
+         BettrVisualsController.FireballMoveTo(nil, self.State.MechanicsPrefab, 20, 1, false) 
+         parallel
+             do
+                BettrVisualsController.FireballMoveTo(self.State.MechanicsPrefab, firstReelBottomSymbol.gameObject, -50, 1, true) 
+                BettrVisualsController.FireballMoveTo(nil, firstReelBottomSymbol.gameObject, -50, 1, false) 
+             end
+             do
+                BettrVisualsController.FireballMoveTo(self.State.MechanicsPrefab, lastReelBottomSymbol.gameObject, -50, 1, true)
+                BettrVisualsController.FireballMoveTo(nil, lastReelBottomSymbol.gameObject, -50, 1, false) 
+             end
+         end     
       end
    end
 end
