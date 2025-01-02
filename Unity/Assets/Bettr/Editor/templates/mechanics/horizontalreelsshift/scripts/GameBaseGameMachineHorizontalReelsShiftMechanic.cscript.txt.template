@@ -69,16 +69,34 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_ShowMechanicPre
          local firstReel = _G["{{machineName}}BaseGameReel1"]
          local lastReel = _G["{{machineName}}BaseGameReel" .. reelCount]
          local firstReelBottomSymbol = BettrMechanicsController.GetReelBottomVisibleSymbol(self.Config.Machine, 0)
+         local firstReelTopSymbol = BettrMechanicsController.GetReelTopVisibleSymbol(self.Config.Machine, 0)
          local lastReelBottomSymbol = BettrMechanicsController.GetReelBottomVisibleSymbol(self.Config.Machine, reelCount - 1)
+         local lastReelTopSymbol = BettrMechanicsController.GetReelTopVisibleSymbol(self.Config.Machine, reelCount - 1)
          BettrVisualsController.FireballMoveTo(nil, self.State.MechanicsPrefab, 20, 1, false) 
          parallel
              do
                 BettrVisualsController.FireballMoveTo(self.State.MechanicsPrefab, firstReelBottomSymbol.gameObject, -50, 1, true) 
-                BettrVisualsController.FireballMoveTo(nil, firstReelBottomSymbol.gameObject, -50, 1, false) 
+                local runningKey = BettrVisualsController.FireballMoveTo(nil, firstReelBottomSymbol.gameObject, 50, 1, false, true)
+                System.WaitForSeconds(10)
+                BettrVisualsController.FireballStop(runningKey)
+             end
+             do
+                BettrVisualsController.FireballMoveTo(self.State.MechanicsPrefab, firstReelTopSymbol.gameObject, 50, 1, true) 
+                local runningKey = BettrVisualsController.FireballMoveTo(nil, firstReelTopSymbol.gameObject, 50, 1, false, true)
+                System.WaitForSeconds(10)
+                BettrVisualsController.FireballStop(runningKey)
              end
              do
                 BettrVisualsController.FireballMoveTo(self.State.MechanicsPrefab, lastReelBottomSymbol.gameObject, -50, 1, true)
-                BettrVisualsController.FireballMoveTo(nil, lastReelBottomSymbol.gameObject, -50, 1, false)
+                local runningKey = BettrVisualsController.FireballMoveTo(nil, lastReelBottomSymbol.gameObject, 50, 1, false, true)
+                System.WaitForSeconds(10)
+                BettrVisualsController.FireballStop(runningKey)
+             end
+             do
+                BettrVisualsController.FireballMoveTo(self.State.MechanicsPrefab, lastReelTopSymbol.gameObject, 50, 1, true)
+                local runningKey = BettrVisualsController.FireballMoveTo(nil, lastReelTopSymbol.gameObject, 50, 1, false, true)
+                System.WaitForSeconds(10)
+                BettrVisualsController.FireballStop(runningKey)
              end
          end
       end

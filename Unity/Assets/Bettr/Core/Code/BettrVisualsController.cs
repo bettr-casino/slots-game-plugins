@@ -109,6 +109,11 @@ namespace Bettr.Core
             // clone seed
             Fireball = Object.Instantiate(seed);
         }
+
+        public void SetActive(bool active)
+        {
+            this._fireball.SetActive(active);
+        }
     }
 
     [Serializable]
@@ -120,11 +125,14 @@ namespace Bettr.Core
         private readonly List<FireballObject> _freeList;
 
         private readonly GameObject _seed;
+
+        private readonly List<FireballObjectRunningKey> _runningKeys;
         
         public FireballObjectsCache(GameObject seed)
         {
             _seed = seed;
             _freeList = new List<FireballObject>();
+            _runningKeys = new List<FireballObjectRunningKey>();
         }
 
         public FireballObject Acquire()
@@ -143,6 +151,23 @@ namespace Bettr.Core
             _freeList.Add(fireball);
         }
 
+        public void HoldRunningKey(FireballObjectRunningKey runningKey)
+        {
+            this._runningKeys.Add(runningKey);
+        }
+        
+        public void StopRunningKey(string runningKeyID)
+        {
+            var runningKey = this._runningKeys.Find(key => key.ID == runningKeyID);
+            if (runningKey != null)
+            {
+                runningKey.Stop();
+                this._runningKeys.Remove(runningKey);   
+                // release the fireball object
+                this.Release(runningKey.FireballObject);
+            }
+        }
+
         public void Reset()
         {
             // release all fireballs back into the _freeList
@@ -152,6 +177,40 @@ namespace Bettr.Core
                 fireball.Fireball = null;
             }
             _freeList.Clear();
+            if (_runningKeys != null)
+            {
+                foreach (var runningKey in _runningKeys)
+                {
+                    runningKey.Stop();
+                }
+                _runningKeys.Clear();
+            }
+        }
+    }
+    
+    [Serializable]
+    public class FireballObjectRunningKey
+    {
+        internal FireballObject FireballObject { get; private set; }
+        internal ParticleSystem ParticleSystem { get; private set; }
+        
+        internal string ID { get; private set; }
+        
+        internal FireballObjectRunningKey(FireballObject fireballObject, ParticleSystem particleSystem)
+        {
+            this.ParticleSystem = particleSystem;
+            this.FireballObject = fireballObject;
+            this.ID = Guid.NewGuid().ToString();
+        }
+        
+        public void Stop()
+        {
+            this.ParticleSystem.Stop();
+            this.FireballObject.SetActive(false);
+            
+            // null all
+            this.ParticleSystem = null;
+            this.FireballObject = null;
         }
     }
     
@@ -205,6 +264,12 @@ namespace Bettr.Core
             // clone seed
             FireTornado = Object.Instantiate(seed);
         }
+    }
+
+    [Serializable]
+    public class FireTornadoObjectRunningKey
+    {
+        
     }
 
     [Serializable]
@@ -295,6 +360,9 @@ namespace Bettr.Core
 
             TileController.RegisterType<iTween>("iTween");
             TileController.RegisterType<iTween.EaseType>("iTween.EaseType");
+
+            TileController.RegisterType<FireballObjectRunningKey>("FireballObjectRunningKey");
+            TileController.RegisterType<FireTornadoObjectRunningKey>("FireballObjectRunningKey");
             
             _layerToCameraMap.Reset();
             
@@ -516,7 +584,18 @@ namespace Bettr.Core
             _fireTornadoObjectsCache.Release(fireTornadoObject);
         }
         
-        public IEnumerator FireballMoveTo(CrayonScriptContext context, GameObject from, GameObject to, float offsetY = 10, float duration = 1.0f, bool tween = false)
+        public void FireballStop(string runningKeyID)
+        {
+            _fireballObjectsCache.StopRunningKey(runningKeyID);
+        }
+
+        public IEnumerator FireballMoveTo(CrayonScriptContext context, GameObject from, GameObject to,
+            float offsetY = 10, float duration = 1.0f, bool tween = false)
+        {
+            yield return FireballMoveTo(context, from, to, offsetY, duration, tween, false);
+        }
+        
+        public IEnumerator FireballMoveTo(CrayonScriptContext context, GameObject from, GameObject to, float offsetY = 10, float duration = 1.0f, bool tween = false, bool wait = false)
         {
             Camera fireballCamera = _layerToCameraMap.GetCameraForLayer("SLOT_TRANSITION");
             if (fireballCamera == null)
@@ -573,11 +652,21 @@ namespace Bettr.Core
                 yield return new WaitForSeconds(duration);
             }
 
-            particleSystem.Stop();
-            fireball.SetActive(false);
+            if (wait)
+            {
+                var fireballRunningKey = new FireballObjectRunningKey(fireballObject, particleSystem);
+                _fireballObjectsCache.HoldRunningKey(fireballRunningKey);
+                
+                context.StringResult = fireballRunningKey.ID;
+            }
+            else
+            {
+                particleSystem.Stop();
+                fireball.SetActive(false);
             
-            // release the fireball object
-            _fireballObjectsCache.Release(fireballObject);
+                // release the fireball object
+                _fireballObjectsCache.Release(fireballObject);
+            }
         }
 
         private void OnFireballTweenComplete()
