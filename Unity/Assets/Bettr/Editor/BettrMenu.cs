@@ -1211,7 +1211,7 @@ namespace Bettr.Editor
         {
             var specificMachineVariants = new string[] 
             {
-                "EpicClockworkChronicles",
+                // "EpicClockworkChronicles",
             };
             
             // if specificMachineVariants is not null, place a TODO.txt file in the root directory
@@ -1221,6 +1221,16 @@ namespace Bettr.Editor
                 var todoFilePath = Path.Combine(PluginRootDirectory, "TODO.txt");
                 // include the date and time in readable ISO format in the TODO.txt file
                 File.AppendAllText(todoFilePath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} NeedsSyncGameScripts\n");
+            }
+            else
+            {
+                // open the file and remove the NeedsSyncGameScripts text lines
+                var todoFilePath = Path.Combine(PluginRootDirectory, "TODO.txt");
+                if (File.Exists(todoFilePath))
+                {
+                    var lines = File.ReadAllLines(todoFilePath).Where(line => !line.Contains("NeedsSyncGameScripts"));
+                    File.WriteAllLines(todoFilePath, lines);
+                }
             }
             
             // Walk the entire directory tree under the plugin root directory

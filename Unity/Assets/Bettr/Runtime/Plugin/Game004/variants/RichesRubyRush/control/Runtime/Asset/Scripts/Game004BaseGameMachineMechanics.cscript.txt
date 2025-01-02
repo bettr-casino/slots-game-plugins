@@ -37,6 +37,18 @@ function Game004BaseGameMachineMechanics:StartMachine(machine)
     end
 end
 
+function Game004BaseGameMachineMechanics:ShowSettings(machine, mainLobbyScene)
+    series
+        do
+            if self.HorizontalReelsShiftMechanic ~= nil then
+                self.HorizontalReelsShiftMechanic:ShowSettings(machine, mainLobbyScene)
+            else
+                machine:ShowSettingsDefault(mainLobbyScene)
+            end
+        end
+    end
+end
+
 function Game004BaseGameMachineMechanics:BaseGamePayout(machine)
     -- this is hardcoded
     -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
@@ -52,7 +64,9 @@ end
 function Game004BaseGameMachineMechanics:TryPaying(machine)
     -- this is hardcoded
     -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
-    if self.WaysMechanic ~= nil then
+    if self.HorizontalReelsShiftMechanic ~= nil then
+       return self.HorizontalReelsShiftMechanic:TryPaying(machine)
+    elseif self.WaysMechanic ~= nil then
        return self.WaysMechanic:TryPaying(machine)
     elseif self.PaylinesMechanic ~= nil then
        return self.PaylinesMechanic:TryPaying(machine)
