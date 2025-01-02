@@ -19,3 +19,10 @@ end
 function Game001BaseGameReelHorizontalReelsShiftMechanic:Initialize(reel)
 end
 
+function Game001BaseGameReelHorizontalReelsShiftMechanic:OnOutcomeReceived(reel)
+    local thisReelID = reel.ReelID
+    local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, "HorizontalReelsShift")
+    local data = BettrMathController.GetBaseGameMechanicData(self.Config.Machine, "HorizontalReelsShift")
+    local matrix = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, "HorizontalReelsShift")
+end
+

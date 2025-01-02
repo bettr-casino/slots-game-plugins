@@ -19,3 +19,29 @@ end
 function Game001BaseGameReelHorizontalReelsShiftMechanic:Initialize(reel)
 end
 
+function Game001BaseGameReelHorizontalReelsShiftMechanic:OnOutcomeReceived(reel)
+    local thisReelID = reel.ReelID
+    local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, "HorizontalReelsShift")
+    local numShifts = summary.NumShifts
+    System.Print("Game001BaseGameReelHorizontalReelsShiftMechanic:OnOutcomeReceived reelID={0} numShifts={1}", thisReelID, numShifts)
+    local otherReelID = nil
+    if numShifts > 0 then
+        for i=1,numShifts do
+            if otherReelID ~= nil then
+                break
+            end
+            local matrix = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, "Shift" .. i)
+            for j=1,#matrix do
+                local matrixRow = stateMatrix[j]
+                if matrixRow.ReelID1 == thisReelID then
+                    otherReelID = matrixRow.ReelID2
+                    break
+                end
+            end
+        end
+    end
+    if otherReelID ~= nil then
+        self.BettrReelController.SwapReels(thisReelID, otherReelID)
+    end
+end
+

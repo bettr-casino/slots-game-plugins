@@ -68,7 +68,9 @@ end
 function Game001BaseGameMachineMechanics:TryPaying(machine)
     -- this is hardcoded
     -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
-    if self.WaysMechanic ~= nil then
+    if self.HorizontalReelsShiftMechanic ~= nil then
+       return self.HorizontalReelsShiftMechanic:TryPaying(machine)
+    elseif self.WaysMechanic ~= nil then
        return self.WaysMechanic:TryPaying(machine)
     elseif self.PaylinesMechanic ~= nil then
        return self.PaylinesMechanic:TryPaying(machine)

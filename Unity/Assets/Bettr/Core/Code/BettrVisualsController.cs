@@ -512,17 +512,21 @@ namespace Bettr.Core
             CrayonScriptContext context, GameObject tweenFromThisGameObject, GameObject tweenToThisGameObject,
             float duration = 1.0f, bool tween = false)
         {
-            yield return CloneAndTweenGameObject(context, tweenFromThisGameObject, tweenToThisGameObject, duration, tween, 0.0f);
+            yield return CloneAndTweenGameObject(context, tweenFromThisGameObject, tweenToThisGameObject, duration, tween, 0.0f, false);
         }
         
         public IEnumerator CloneAndTweenGameObject(
-            CrayonScriptContext context, GameObject tweenFromThisGameObject, GameObject tweenToThisGameObject, float duration = 1.0f, bool tween = false, float offsetZ = 0.0f)
+            CrayonScriptContext context, GameObject tweenFromThisGameObject, GameObject tweenToThisGameObject, float duration = 1.0f, bool tween = false, float offsetZ = 0.0f, bool hideOriginal = false)
         {
             bool destroyAfter = true;
             // clone this tweenThisGameObject
             var tweenThisGameObject = Object.Instantiate(tweenFromThisGameObject, tweenFromThisGameObject.transform.parent);
             // ensure this is an overlay over the original object
             OverlayFirstOverSecond(tweenThisGameObject, tweenFromThisGameObject);
+            if (hideOriginal)
+            {
+                tweenFromThisGameObject.SetActive(false);
+            }
             
             string layerName = LayerMask.LayerToName(tweenThisGameObject.layer);
             Camera tweenCamera = _layerToCameraMap.GetCameraForLayer(layerName);
@@ -567,6 +571,11 @@ namespace Bettr.Core
                 {
                     Object.Destroy(tweenThisGameObject);
                 }
+            }
+
+            if (hideOriginal)
+            {
+                tweenFromThisGameObject.SetActive(true);
             }
         }
         
