@@ -413,9 +413,53 @@ namespace Bettr.Core
 
 
         private bool _tweenComplete = false;
+
+        public IEnumerator TweenRotateGameObject(CrayonScriptContext context, GameObject tweenThisGameObject, int numberOfRotations = 1, float duration = 1.0f)
+        {
+            if (tweenThisGameObject == null)
+            {
+                throw new ArgumentNullException(nameof(tweenThisGameObject));
+            }
+
+            string layerName = LayerMask.LayerToName(tweenThisGameObject.layer);
+            Camera tweenCamera = _layerToCameraMap.GetCameraForLayer(layerName);
+    
+            if (tweenCamera == null)
+            {
+                throw new ScriptRuntimeException($"No camera found for layer '{layerName}'");
+            }
+
+            iTween.Stop(tweenThisGameObject);
+            _tweenComplete = false;
+            
+            var rotationAmount = new Vector3(0, numberOfRotations, 0);
+
+            iTween.RotateBy(tweenThisGameObject, iTween.Hash(
+                "amount", rotationAmount,      // Changed "position" to "amount" for rotation
+                "time", duration,
+                "easetype", iTween.EaseType.linear,
+                "oncomplete", "OnTweenComplete",
+                "oncompletetarget", tweenThisGameObject // Changed to reference the component's gameObject
+            ));
+
+            float elapsedTime = 0f;
+            while (!_tweenComplete && elapsedTime < duration + 0.1f)
+            {
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+        }
+
+        public IEnumerator TweenGameObject(
+            CrayonScriptContext context, GameObject tweenThisGameObject, GameObject tweenFromThisGameObject,
+            GameObject tweenToThisGameObject, float duration = 1.0f, bool tween = false, bool preserveLocalZ = false)
+
+        {
+            yield return TweenGameObject(context, tweenThisGameObject, tweenFromThisGameObject, tweenToThisGameObject, duration, tween, preserveLocalZ, 0.0f);
+        }
         
         public IEnumerator TweenGameObject(
-            CrayonScriptContext context, GameObject tweenThisGameObject, GameObject tweenFromThisGameObject, GameObject tweenToThisGameObject, float duration = 1.0f, bool tween = false, bool preserveLocalZ = false)
+            CrayonScriptContext context, GameObject tweenThisGameObject, GameObject tweenFromThisGameObject, GameObject tweenToThisGameObject, float duration = 1.0f, bool tween = false, bool preserveLocalZ = false, float offsetZ = 0.0f)
         {
             var originalLocalPosition = tweenThisGameObject.transform.localPosition;
             
@@ -429,6 +473,10 @@ namespace Bettr.Core
             Vector3 startWorldPosition = CalculatePosition(tweenFromThisGameObject, tweenCamera) ?? tweenThisGameObject.transform.position;
             Vector3 targetWorldPosition = CalculatePosition(tweenToThisGameObject, tweenCamera) ?? tweenThisGameObject.transform.position;
             tweenThisGameObject.transform.position = startWorldPosition;
+            
+            // add the offsetZ to the targetWorldPosition
+            targetWorldPosition.z += offsetZ;
+            
             if (tween)
             {
                 _tweenComplete = false;
@@ -459,9 +507,16 @@ namespace Bettr.Core
                 tweenThisGameObject.transform.localPosition = localPosition;
             }
         }
+
+        public IEnumerator CloneAndTweenGameObject(
+            CrayonScriptContext context, GameObject tweenFromThisGameObject, GameObject tweenToThisGameObject,
+            float duration = 1.0f, bool tween = false)
+        {
+            yield return CloneAndTweenGameObject(context, tweenFromThisGameObject, tweenToThisGameObject, duration, tween, 0.0f);
+        }
         
         public IEnumerator CloneAndTweenGameObject(
-            CrayonScriptContext context, GameObject tweenFromThisGameObject, GameObject tweenToThisGameObject, float duration = 1.0f, bool tween = false)
+            CrayonScriptContext context, GameObject tweenFromThisGameObject, GameObject tweenToThisGameObject, float duration = 1.0f, bool tween = false, float offsetZ = 0.0f)
         {
             bool destroyAfter = true;
             // clone this tweenThisGameObject
@@ -479,6 +534,10 @@ namespace Bettr.Core
             Vector3 startWorldPosition = CalculatePosition(tweenFromThisGameObject, tweenCamera) ?? tweenFromThisGameObject.transform.position;
             Vector3 targetWorldPosition = CalculatePosition(tweenToThisGameObject, tweenCamera) ?? tweenToThisGameObject.transform.position;
             tweenThisGameObject.transform.position = startWorldPosition;
+            
+            // add the offsetZ to the targetWorldPosition
+            targetWorldPosition.z += offsetZ;
+            
             if (tween)
             {
                 _tweenComplete = false;
