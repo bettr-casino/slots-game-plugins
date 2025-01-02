@@ -96,11 +96,11 @@ function Game001BaseGameMachineHorizontalReelsShiftMechanic:PlayMechanic(machine
              end
              parallel
                  do
-                     BettrVisualsController.CloneAndTweenGameObject(symbol.gameObject, otherSymbol.gameObject, 2, true, -10)
+                     BettrVisualsController.CloneAndTweenGameObject(symbol.gameObject, otherSymbol.gameObject, 2, true, -10, true)
                      symbolGroup.SetCurrentActive(otherSymbolCurrentKey)
                  end
                  do
-                     BettrVisualsController.CloneAndTweenGameObject(otherSymbol.gameObject, symbol.gameObject, 2, true, -20)
+                     BettrVisualsController.CloneAndTweenGameObject(otherSymbol.gameObject, symbol.gameObject, 2, true, -20, true)
                      otherSymbolGroup.SetCurrentActive(symbolCurrentKey)
                  end
              end
@@ -121,6 +121,7 @@ function Game001BaseGameMachineHorizontalReelsShiftMechanic:ShowSettingsDefault(
 end
 
 function Game001BaseGameMachineHorizontalReelsShiftMechanic:TryPaying(machine)
+    return 0
 end
 
 
