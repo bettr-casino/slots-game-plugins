@@ -63,17 +63,26 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_StartMechanic(m
 end
 
 function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_ShowMechanicPreview(machine)
+    series
+        do
+            local reelCount = {{machineName}}BaseGameLayout.ReelCount.First.Value
+            self:PlayMechanic(machine, 0, reelCount-1)
+        end
+    end
+end
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:PlayMechanic(machine, reelIndex1, reelIndex2)
    series
       do
          local reelCount = {{machineName}}BaseGameLayout.ReelCount.First.Value
          BettrVisualsController.FireballMoveTo(nil, self.State.MechanicsPrefab, 20, 1, false)
-         local visibleSymbolCount = BettrMechanicsController.GetReelVisibleSymbolCount(self.Config.Machine, 0)
+         local visibleSymbolCount = BettrMechanicsController.GetReelVisibleSymbolCount(self.Config.Machine, reelIndex1)
          for i = 0, visibleSymbolCount-1 parallel do
-             local symbol = BettrMechanicsController.GetReelVisibleSymbol(self.Config.Machine, 0, i)
-             local symbolGroup = BettrMechanicsController.GetReelVisibleSymbolGroup(self.Config.Machine, 0, i)
+             local symbol = BettrMechanicsController.GetReelVisibleSymbol(self.Config.Machine, reelIndex1, i)
+             local symbolGroup = BettrMechanicsController.GetReelVisibleSymbolGroup(self.Config.Machine, reelIndex1, i)
              local symbolCurrentKey = symbolGroup.CurrentKey
-             local otherSymbol = BettrMechanicsController.GetReelVisibleSymbol(self.Config.Machine, reelCount-1, i)
-             local otherSymbolGroup = BettrMechanicsController.GetReelVisibleSymbolGroup(self.Config.Machine, reelCount-1, i)
+             local otherSymbol = BettrMechanicsController.GetReelVisibleSymbol(self.Config.Machine, reelIndex2, i)
+             local otherSymbolGroup = BettrMechanicsController.GetReelVisibleSymbolGroup(self.Config.Machine, reelIndex2, i)
              local otherSymbolCurrentKey = otherSymbolGroup.CurrentKey
              parallel
                 do
