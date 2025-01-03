@@ -11,6 +11,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
+using Random = UnityEngine.Random;
 
 // ReSharper disable once CheckNamespace
 namespace Bettr.Core
@@ -449,41 +450,15 @@ namespace Bettr.Core
                 yield return null;
             }
         }
-        
-        public IEnumerator JiggleAlongNegativeZAxis(
-            CrayonScriptContext context, GameObject tweenThisGameObject, float amplitude = 0.5f, int jiggleCount = 3, float durationPerJiggle = 0.2f, bool preserveLocalZ = true)
+
+        public IEnumerator TweenAlongXAxis(
+            CrayonScriptContext context, GameObject tweenThisGameObject, float distance)
         {
-            if (amplitude <= 0 || jiggleCount <= 0 || durationPerJiggle <= 0)
-            {
-                throw new ArgumentException("Amplitude, jiggleCount, and durationPerJiggle must be greater than zero.");
-            }
-
-            var originalLocalPosition = tweenThisGameObject.transform.localPosition;
-            Vector3 startPosition = tweenThisGameObject.transform.position;
-
-            for (int i = 0; i < jiggleCount; i++)
-            {
-                // Move to the negative Z direction
-                Vector3 jiggleBack = startPosition + new Vector3(0, 0, -amplitude);
-                Vector3[] pathBack = new Vector3[] { startPosition, jiggleBack };
-                yield return TweenGameObject(context, tweenThisGameObject, pathBack, durationPerJiggle, true, preserveLocalZ, 0.0f);
-
-                // Move back to the original position
-                Vector3[] pathForward = new Vector3[] { jiggleBack, startPosition };
-                yield return TweenGameObject(context, tweenThisGameObject, pathForward, durationPerJiggle, true, preserveLocalZ, 0.0f);
-            }
-
-            // Restore the original local Z position if needed
-            if (preserveLocalZ)
-            {
-                var localPosition = tweenThisGameObject.transform.localPosition;
-                localPosition.z = originalLocalPosition.z;
-                tweenThisGameObject.transform.localPosition = localPosition;
-            }
+            yield return TweenAlongXAxis(context, tweenThisGameObject, distance, 1.0f, true, false, false, 0.0f);
         }
         
         public IEnumerator TweenAlongXAxis(
-            CrayonScriptContext context, GameObject tweenThisGameObject, float distance, float duration = 1.0f, bool movePositive = true, bool tween = false, bool preserveLocalZ = false, float offsetZ = 0.0f)
+            CrayonScriptContext context, GameObject tweenThisGameObject, float distance, float duration, bool movePositive, bool tween, bool preserveLocalZ, float offsetZ)
         {
             if (distance <= 0)
             {
