@@ -99,6 +99,8 @@ function Game009BaseGameMachineMechanics:OnBaseGameSpinCompleted(machine)
         do
             if self.ChooseASideMechanic ~= nil then
                 self.ChooseASideMechanic:OnBaseGameSpinCompleted(machine)            
+            elseif self.HorizontalReelsShiftMechanic ~= nil then
+                self.HorizontalReelsShiftMechanic:OnBaseGameSpinCompleted(machine)            
             else
                 machine:OnBaseGameSpinCompleted()
             end

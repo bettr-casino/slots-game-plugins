@@ -67,24 +67,26 @@ function Game001BaseGameMachineHorizontalReelsShiftMechanic:_ShowMechanicPreview
     series
         do
             local reelCount = Game001BaseGameLayout.ReelCount.First.Value
-            self:_PlayMechanic(machine, 0, reelCount-1)
+            local firstReelID = "Reel1"
+            local lastReelID = "Reel" .. reelCount
+            self:_PlayMechanic(firstReelID, lastReelID)
         end
     end
 end
 
-function Game001BaseGameMachineHorizontalReelsShiftMechanic:_PlayMechanic(machine, reelIndex1, reelIndex2)
+function Game001BaseGameMachineHorizontalReelsShiftMechanic:_PlayMechanic(reelID1, reelID2)
    series
       do
          self.State.MechanicsPrefab.SetActive(true)
          local reelCount = Game001BaseGameLayout.ReelCount.First.Value
          BettrVisualsController.FireballMoveTo(nil, self.State.MechanicsPrefab, 20, 1, false)
-         local visibleSymbolCount = BettrMechanicsController.GetReelVisibleSymbolCount(self.Config.Machine, reelIndex1)
+         local visibleSymbolCount = BettrMechanicsController.GetReelVisibleSymbolCount(self.Config.Machine, reelID1)
          for i = 0, visibleSymbolCount-1 parallel do
-             local symbol = BettrMechanicsController.GetReelVisibleSymbol(self.Config.Machine, reelIndex1, i)
-             local symbolGroup = BettrMechanicsController.GetReelVisibleSymbolGroup(self.Config.Machine, reelIndex1, i)
+             local symbol = BettrMechanicsController.GetReelVisibleSymbol(self.Config.Machine, reelID1, i)
+             local symbolGroup = BettrMechanicsController.GetReelVisibleSymbolGroup(self.Config.Machine, reelID1, i)
              local symbolCurrentKey = symbolGroup.CurrentKey
-             local otherSymbol = BettrMechanicsController.GetReelVisibleSymbol(self.Config.Machine, reelIndex2, i)
-             local otherSymbolGroup = BettrMechanicsController.GetReelVisibleSymbolGroup(self.Config.Machine, reelIndex2, i)
+             local otherSymbol = BettrMechanicsController.GetReelVisibleSymbol(self.Config.Machine, reelID2, i)
+             local otherSymbolGroup = BettrMechanicsController.GetReelVisibleSymbolGroup(self.Config.Machine, reelID2, i)
              local otherSymbolCurrentKey = otherSymbolGroup.CurrentKey
              BettrVisualsController.FireballMoveTo(self.State.MechanicsPrefab, otherSymbol.gameObject, 20, 1, true)
              parallel
@@ -148,11 +150,53 @@ function Game001BaseGameMachineHorizontalReelsShiftMechanic:OnBaseGameSpinComple
     series
         do
             if self:_IsMechanicActive(machine) then
-                local reelCount = Game001BaseGameLayout.ReelCount.First.Value
-                self:_PlayMechanic(machine, 0, reelCount-1)
+                self:_PlayMechanics()
+                local coinsPaid = machine.Mechanics.WaysMechanic:TryPaying(machine)
+                if coinsPaid > 0 then
+                    BettrVisualsController.FireballTornadoAt(self.State.MechanicsPrefab, 20, 4)
+                    machine.Mechanics:BaseGamePayout(machine)
+                    machine:OnPayingCompleted()
+                    if machine.Mechanics.CascadingReelsMechanic ~= nil and machine.Mechanics.CascadingReelsMechanic:HasCascade(machine) then
+                        machine.Mechanics.CascadingReelsMechanic:StartCascade(machine)
+                    end
+                end
+                self:_ResetMechanics()
+                machine:OnBaseGameSpinCompleted()
             end
         end
     end
 end
 
+function Game001BaseGameMachineHorizontalReelsShiftMechanic:_PlayMechanics()
+    local reelCount = Game001BaseGameLayout.ReelCount.First.Value
+    local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
+    local numShifts = summary.NumShifts
+    if numShifts > 0 then
+        for i=1,numShifts do
+            local matrix = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, self.Config.Mechanic, "Shift" .. i)
+            for j=1,#matrix do
+                local matrixRow = matrix[j]
+                self:_PlayMechanic(matrixRow.ReelID2, matrixRow.ReelID1)
+            end
+        end
+    end
+end
+
+function Game001BaseGameMachineHorizontalReelsShiftMechanic:_ResetMechanics()
+    local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
+    local numShifts = summary.NumShifts
+    if numShifts > 0 then
+        for i=1,numShifts do
+            local matrix = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, self.Config.Mechanic, "Shift" .. i)
+            for j=1,#matrix do
+                local matrixRow = matrix[j]
+                local reelID1 = matrixRow.ReelID1
+                local reelID2 = matrixRow.ReelID2
+                local reel1 = _G["Game001BaseGame" .. reelID1]
+                local reel2 = _G["Game001BaseGame" .. reelID2]
+                BettrMechanicsController.SwapReelsForSpin(reel1, reel2)
+            end
+        end
+    end
+end
 
