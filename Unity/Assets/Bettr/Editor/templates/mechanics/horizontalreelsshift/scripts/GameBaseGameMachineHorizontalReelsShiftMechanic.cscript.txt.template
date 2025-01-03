@@ -150,6 +150,15 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             if self:_IsMechanicActive(machine) then
                 local reelCount = {{machineName}}BaseGameLayout.ReelCount.First.Value
                 self:_PlayMechanic(machine, 0, reelCount-1)
+                local coinsPaid = machine.Mechanics.WaysMechanic:TryPaying(machine)
+                if coinsPaid > 0 then
+                    machine.Mechanics:BaseGamePayout(machine)
+                    machine:OnPayingCompleted()
+                    if machine.Mechanics.CascadingReelsMechanic ~= nil and machine.Mechanics.CascadingReelsMechanic:HasCascade(machine) then
+                        machine.Mechanics.CascadingReelsMechanic:StartCascade(machine)
+                    end
+                end
+                machine:OnBaseGameSpinCompleted()
             end
         end
     end
