@@ -63,8 +63,14 @@ namespace Bettr.Core
 
         public int GetReelVisibleSymbolCount(string machineName, int reelIndex)
         {
+            var reelID = $"Reel{reelIndex + 1}";
+            return GetReelVisibleSymbolCount(machineName, reelID);
+        }
+
+        public int GetReelVisibleSymbolCount(string machineName, string reelID)
+        {
             var globals = TileController.LuaScript.Globals;
-            var globalKey = $"{machineName}BaseGameReel{reelIndex + 1}";
+            var globalKey = $"{machineName}BaseGame{reelID}";
             var reelTable = (Table) globals[globalKey];
             var reelController = (BettrReelController) reelTable["BettrReelController"];
             var visibleSymbolCount = reelController.GetReelVisibleSymbolCount();
@@ -73,7 +79,13 @@ namespace Bettr.Core
 
         public TilePropertyGameObjectGroup GetReelVisibleSymbolGroup(string machineName, int reelIndex, int offset)
         {
-            var reelSymbolMatrixGroups = GetReelSymbolMatrixGroups(machineName, reelIndex);
+            var reelID = $"Reel{reelIndex + 1}";
+            return GetReelVisibleSymbolGroup(machineName, reelID, offset);
+        }
+
+        public TilePropertyGameObjectGroup GetReelVisibleSymbolGroup(string machineName, string reelID, int offset)
+        {
+            var reelSymbolMatrixGroups = GetReelSymbolMatrixGroups(machineName, reelID);
             if (offset < 0)
             {
                 offset = reelSymbolMatrixGroups.Count + offset;
@@ -85,7 +97,13 @@ namespace Bettr.Core
 
         public GameObject GetReelVisibleSymbol(string machineName, int reelIndex, int offset)
         {
-            var reelSymbolMatrix = GetReelSymbolMatrix(machineName, reelIndex);
+            var reelID = $"Reel{reelIndex + 1}";
+            return GetReelVisibleSymbol(machineName, reelID, offset);
+        }
+
+        public GameObject GetReelVisibleSymbol(string machineName, string reelID, int offset)
+        {
+            var reelSymbolMatrix = GetReelSymbolMatrix(machineName, reelID);
             if (offset < 0)
             {
                 offset = reelSymbolMatrix.Count + offset;
@@ -98,17 +116,35 @@ namespace Bettr.Core
 
         public GameObject GetReelBottomVisibleSymbol(string machineName, int reelIndex)
         {
-            return GetReelVisibleSymbol(machineName, reelIndex, -1);
+            var reelID = $"Reel{reelIndex + 1}";
+            return GetReelBottomVisibleSymbol(machineName, reelID);
+        }
+
+        public GameObject GetReelBottomVisibleSymbol(string machineName, string reelID)
+        {
+            return GetReelVisibleSymbol(machineName, reelID, -1);
         }
 
         public GameObject GetReelTopVisibleSymbol(string machineName, int reelIndex)
         {
-            return GetReelVisibleSymbol(machineName, reelIndex, 0);
+            var reelID = $"Reel{reelIndex + 1}";
+            return GetReelTopVisibleSymbol(machineName, reelID);
+        }
+
+        public GameObject GetReelTopVisibleSymbol(string machineName, string reelID)
+        {
+            return GetReelVisibleSymbol(machineName, reelID, 0);
         }
 
         public Rect GetReelBounds(string machineName, int reelIndex)
         {
-            var reelSymbolMatrix = GetReelSymbolMatrix(machineName, reelIndex);
+            var reelID = $"Reel{reelIndex + 1}";
+            return GetReelBounds(machineName, reelID);
+        }
+
+        public Rect GetReelBounds(string machineName, string reelID)
+        {
+            var reelSymbolMatrix = GetReelSymbolMatrix(machineName, reelID);
             // first visible symbol matrix
             var topVisibleSymbol = reelSymbolMatrix[0];
             // last visible symbol matrix
@@ -174,19 +210,33 @@ namespace Bettr.Core
         public List<TilePropertyGameObjectGroup> GetReelSymbolMatrixGroups(string machineName, int reelIndex,
             params string[] symbols)
         {
+            var reelID = $"Reel{reelIndex + 1}";
+            return GetReelSymbolMatrixGroups(machineName, reelID, symbols);
+        }
+
+        public List<TilePropertyGameObjectGroup> GetReelSymbolMatrixGroups(string machineName, string reelID,
+            params string[] symbols)
+        {
             var globals = TileController.LuaScript.Globals;
-            var globalKey = $"{machineName}BaseGameReel{reelIndex + 1}";
+            var globalKey = $"{machineName}BaseGame{reelID}";
             var reelTable = (Table) globals[globalKey];
             var reelController = (BettrReelController) reelTable["BettrReelController"];
             var reelMatrixSymbols = reelController.GetReelMatrixVisibleSymbolsGroups(symbols);
             return reelMatrixSymbols;
         }
-
+        
         public List<TilePropertyGameObject> GetReelSymbolMatrix(string machineName, int reelIndex,
             params string[] symbols)
         {
+            var reelID = $"Reel{reelIndex + 1}";
+            return GetReelSymbolMatrix(machineName, reelID, symbols);
+        }
+
+        public List<TilePropertyGameObject> GetReelSymbolMatrix(string machineName, string reelID,
+            params string[] symbols)
+        {
             var globals = TileController.LuaScript.Globals;
-            var globalKey = $"{machineName}BaseGameReel{reelIndex + 1}";
+            var globalKey = $"{machineName}BaseGame{reelID}";
             var reelTable = (Table) globals[globalKey];
             var reelController = (BettrReelController) reelTable["BettrReelController"];
             var reelMatrixSymbols = reelController.GetReelMatrixVisibleSymbols(symbols);

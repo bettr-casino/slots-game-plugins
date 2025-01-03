@@ -613,8 +613,8 @@ namespace Bettr.Core
             // Create and return a Rect with the bounds in screen space
             return new Rect(bottomScreen.x, bottomScreen.y, Mathf.Abs(topScreen.x - bottomScreen.x), Mathf.Abs(topScreen.y - bottomScreen.y));
         }
-        
-        public IEnumerator FireballTornadoAt(CrayonScriptContext context, GameObject at, float offsetY = 10, float duration = 1.0f)
+
+        public IEnumerator FireballTornadoAt(CrayonScriptContext context, GameObject at, float offsetY, float duration)
         {
             Camera fireTornadoCamera = _layerToCameraMap.GetCameraForLayer("SLOT_TRANSITION");
             if (fireTornadoCamera == null)
