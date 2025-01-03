@@ -1211,7 +1211,7 @@ namespace Bettr.Editor
         {
             var specificMachineVariants = new string[] 
             {
-                // "EpicClockworkChronicles",
+                "EpicClockworkChronicles",
             };
             
             // if specificMachineVariants is not null, place a TODO.txt file in the root directory

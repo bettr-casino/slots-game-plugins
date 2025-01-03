@@ -22,7 +22,7 @@ end
 
 function Game001BaseGameReelHorizontalReelsShiftMechanic:OnOutcomeReceived(reel)
     local thisReelID = reel.ReelID
-    local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, "HorizontalReelsShift")
+    local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
     local numShifts = summary.NumShifts
     System.Print("Game001BaseGameReelHorizontalReelsShiftMechanic:OnOutcomeReceived reelID={0} numShifts={1}", thisReelID, numShifts)
     local otherReelID = nil
@@ -31,7 +31,7 @@ function Game001BaseGameReelHorizontalReelsShiftMechanic:OnOutcomeReceived(reel)
             if otherReelID ~= nil then
                 break
             end
-            local matrix = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, "Shift" .. i)
+            local matrix = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, self.Config.Mechanic, "Shift" .. i)
             for j=1,#matrix do
                 local matrixRow = stateMatrix[j]
                 if matrixRow.ReelID1 == thisReelID then
