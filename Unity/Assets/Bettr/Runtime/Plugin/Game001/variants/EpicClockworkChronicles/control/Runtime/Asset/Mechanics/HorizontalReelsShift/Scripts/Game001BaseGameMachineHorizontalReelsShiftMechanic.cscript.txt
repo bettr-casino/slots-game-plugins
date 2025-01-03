@@ -128,7 +128,17 @@ function Game001BaseGameMachineHorizontalReelsShiftMechanic:ShowSettingsDefault(
 end
 
 function Game001BaseGameMachineHorizontalReelsShiftMechanic:TryPaying(machine)
+-- TryPaying flow will be resumed after mechanic visual is done
+    if self:_IsMechanicActive(machine) then
+        return 0
+    end
     return machine.Mechanics.WaysMechanic:TryPaying()
+end
+
+function Game001BaseGameMachineHorizontalReelsShiftMechanic:_IsMechanicActive(machine)
+    local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
+    local numShifts = summary.NumShifts
+    return numShifts > 0
 end
 
 

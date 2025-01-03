@@ -128,7 +128,17 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:ShowSettingsDefa
 end
 
 function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:TryPaying(machine)
+-- TryPaying flow will be resumed after mechanic visual is done
+    if self:_IsMechanicActive(machine) then
+        return 0
+    end
     return machine.Mechanics.WaysMechanic:TryPaying()
+end
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_IsMechanicActive(machine)
+    local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
+    local numShifts = summary.NumShifts
+    return numShifts > 0
 end
 
 
