@@ -78,6 +78,7 @@ function Game002BaseGameMachine:OnSpinButtonClicked()
                 self:WaitForApplyOutcomeDelay()
                 self:LoadServerOutcome()
                 self:OnOutcomeReceived()
+                self:ApplyOutcomeReceived()
             end
         end
     end
@@ -347,6 +348,34 @@ function Game002BaseGameMachine:OnOutcomeReceived()
         end
         do
             Game002BaseGameReel5:OnOutcomeReceived()
+        end
+    end
+end
+
+function Game002BaseGameMachine:ApplyOutcomeReceived()
+    series
+        do
+            self.Mechanics:ApplyOutcomeReceived(self)
+        end
+    end
+end
+
+function Game002BaseGameMachine:OnApplyOutcomeReceived()
+    parallel
+        do
+            Game002BaseGameReel1:OnApplyOutcomeReceived()
+        end
+        do
+            Game002BaseGameReel2:OnApplyOutcomeReceived()
+        end
+        do
+            Game002BaseGameReel3:OnApplyOutcomeReceived()
+        end
+        do
+            Game002BaseGameReel4:OnApplyOutcomeReceived()
+        end
+        do
+            Game002BaseGameReel5:OnApplyOutcomeReceived()
         end
     end
 end

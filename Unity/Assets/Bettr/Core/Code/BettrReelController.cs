@@ -88,6 +88,11 @@ namespace Bettr.Core
         public IEnumerator OnOutcomeReceived()
         {
             this.SpinOutcomeTable = BettrMathController.GetTableFirst("BaseGameReelSpinOutcome", this.MachineID, this.ReelID);
+            yield break;
+        }
+
+        public IEnumerator OnApplyOutcomeReceived()
+        {
             float delayInSeconds = (float) (double) this.ReelStateTable["ReelStopDelayInSeconds"];
             if (!BettrUserController.UserInSlamStopMode)
             {

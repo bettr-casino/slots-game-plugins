@@ -111,3 +111,15 @@ end
 function Game007BaseGameMachineMechanics:CanSpin(machine, canSpin)
     return canSpin
 end
+
+function Game007BaseGameMachineMechanics:ApplyOutcomeReceived(machine)
+    series
+        do
+            if self.HorizontalReelsShiftMechanic ~= nil then
+                self.HorizontalReelsShiftMechanic:ApplyOutcomeReceived(machine)
+            else
+                machine:OnApplyOutcomeReceived()
+            end
+        end
+    end
+end

@@ -19,31 +19,3 @@ end
 
 function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:Initialize(reel)
 end
-
-function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:OnOutcomeReceived(reel)
-    local thisReelID = reel.ReelID
-    local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
-    local numShifts = summary.NumShifts
-    System.Print("{{machineName}}BaseGameReel{{mechanicName}}Mechanic:OnOutcomeReceived reelID={0} numShifts={1}", thisReelID, numShifts)
-    local otherReelID = nil
-    if numShifts > 0 then
-        for i=1,numShifts do
-            if otherReelID ~= nil then
-                break
-            end
-            local matrix = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, self.Config.Mechanic, "Shift" .. i)
-            for j=1,#matrix do
-                local matrixRow = matrix[j]
-                if matrixRow.ReelID2 == thisReelID then
-                    otherReelID = matrixRow.ReelID1
-                    break
-                end
-            end
-        end
-    end
-    if otherReelID ~= nil then
-        local otherReel = _G["{{machineName}}BaseGame" .. otherReelID]
-        BettrMechanicsController.SwapReelsForSpin(reel, otherReel)
-    end
-end
-

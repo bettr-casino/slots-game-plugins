@@ -162,6 +162,8 @@ function Game001BaseGameMachineHorizontalReelsShiftMechanic:OnBaseGameSpinComple
                 end
                 self:_ResetMechanics()
                 machine:OnBaseGameSpinCompleted()
+            else
+                machine:OnBaseGameSpinCompleted()
             end
         end
     end
@@ -196,6 +198,34 @@ function Game001BaseGameMachineHorizontalReelsShiftMechanic:_ResetMechanics()
                 local reel2 = _G["Game001BaseGame" .. reelID2]
                 BettrMechanicsController.SwapReelsForSpin(reel1, reel2)
             end
+        end
+    end
+end
+
+function Game001BaseGameMachineHorizontalReelsShiftMechanic:ApplyOutcomeReceived(machine)
+    series
+        do        
+            local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
+            local numShifts = summary.NumShifts
+            System.Print("Game001BaseGameReelHorizontalReelsShiftMechanic:OnOutcomeReceived reelID={0} numShifts={1}", thisReelID, numShifts)
+            if numShifts > 0 then
+                for i=1,numShifts do
+                    if otherReelID ~= nil then
+                        break
+                    end
+                    local matrix = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, self.Config.Mechanic, "Shift" .. i)
+                    for j=1,#matrix do
+                        local matrixRow = matrix[j]
+                        local matrixRow = matrix[j]
+                        local reelID1 = matrixRow.ReelID1
+                        local reelID2 = matrixRow.ReelID2
+                        local reel1 = _G["Game001BaseGame" .. reelID1]
+                        local reel2 = _G["Game001BaseGame" .. reelID2]
+                        BettrMechanicsController.SwapReelsForSpin(reel, otherReel)
+                    end
+                end
+            end
+            machine:OnApplyOutcomeReceived()
         end
     end
 end
