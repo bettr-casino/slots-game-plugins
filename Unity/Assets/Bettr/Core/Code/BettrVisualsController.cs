@@ -1218,6 +1218,15 @@ namespace Bettr.Core
             return clonedGameObjectProperty;
         }
         
+        public GameObject CloneAndOverlayGameObject(GameObject gameObject)
+        {
+            var clonedGameObject = Object.Instantiate(gameObject, gameObject.transform.parent);
+            clonedGameObject.name = gameObject.name;
+            // ensure this is an overlay over the original object
+            OverlayFirstOverSecond(clonedGameObject, gameObject);
+            return clonedGameObject;
+        }
+        
         public PropertyGameObject CloneAndOverlay(PropertyGameObject gameObjectProperty)
         {
             var clonedGameObject = Object.Instantiate(gameObjectProperty.GameObject, gameObjectProperty.GameObject.transform.parent);
