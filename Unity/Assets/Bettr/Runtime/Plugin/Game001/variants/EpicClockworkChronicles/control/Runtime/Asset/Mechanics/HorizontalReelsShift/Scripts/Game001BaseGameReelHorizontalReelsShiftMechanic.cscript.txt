@@ -34,8 +34,8 @@ function Game001BaseGameReelHorizontalReelsShiftMechanic:OnOutcomeReceived(reel)
             local matrix = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, self.Config.Mechanic, "Shift" .. i)
             for j=1,#matrix do
                 local matrixRow = matrix[j]
-                if matrixRow.ReelID1 == thisReelID then
-                    otherReelID = matrixRow.ReelID2
+                if matrixRow.ReelID2 == thisReelID then
+                    otherReelID = matrixRow.ReelID1
                     break
                 end
             end
