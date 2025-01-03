@@ -67,12 +67,12 @@ function Game001BaseGameMachineHorizontalReelsShiftMechanic:_ShowMechanicPreview
     series
         do
             local reelCount = Game001BaseGameLayout.ReelCount.First.Value
-            self:PlayMechanic(machine, 0, reelCount-1)
+            self:_PlayMechanic(machine, 0, reelCount-1)
         end
     end
 end
 
-function Game001BaseGameMachineHorizontalReelsShiftMechanic:PlayMechanic(machine, reelIndex1, reelIndex2)
+function Game001BaseGameMachineHorizontalReelsShiftMechanic:_PlayMechanic(machine, reelIndex1, reelIndex2)
    series
       do
          self.State.MechanicsPrefab.SetActive(true)
@@ -98,8 +98,10 @@ function Game001BaseGameMachineHorizontalReelsShiftMechanic:PlayMechanic(machine
                     BettrVisualsController.FireballMoveTo(self.State.MechanicsPrefab, symbol.gameObject, 20, 1, true)
                 end
              end
-             self.State.MechanicsPrefab.SetActive(false)
              parallel
+                 do
+                    BettrVisualsController.FireballMoveTo(nil, self.State.MechanicsPrefab, 20, 3, false)
+                 end
                  do
                      BettrVisualsController.FireballMoveTo(nil, symbol.gameObject, 20, 1, false)
                      BettrVisualsController.CloneAndTweenGameObject(symbol.gameObject, otherSymbol.gameObject, 2, true, -10, true)
@@ -112,6 +114,7 @@ function Game001BaseGameMachineHorizontalReelsShiftMechanic:PlayMechanic(machine
                  end
              end
          end
+         self.State.MechanicsPrefab.SetActive(false)
       end
    end
 end
@@ -139,6 +142,17 @@ function Game001BaseGameMachineHorizontalReelsShiftMechanic:_IsMechanicActive(ma
     local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
     local numShifts = summary.NumShifts
     return numShifts > 0
+end
+
+function Game001BaseGameMachineHorizontalReelsShiftMechanic:OnBaseGameSpinCompleted(machine)
+    series
+        do
+            if self:_IsMechanicActive(machine) then
+                local reelCount = Game001BaseGameLayout.ReelCount.First.Value
+                self:_PlayMechanic(machine, 0, reelCount-1)
+            end
+        end
+    end
 end
 
 
