@@ -207,7 +207,7 @@ function Game001BaseGameMachineHorizontalReelsShiftMechanic:ApplyOutcomeReceived
         do        
             local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
             local numShifts = summary.NumShifts
-            System.Print("Game001BaseGameReelHorizontalReelsShiftMechanic:OnOutcomeReceived reelID={0} numShifts={1}", thisReelID, numShifts)
+            System.Print("Game001BaseGameReelHorizontalReelsShiftMechanic:OnOutcomeReceived numShifts={0}", numShifts)
             if numShifts > 0 then
                 for i=1,numShifts do
                     if otherReelID ~= nil then
