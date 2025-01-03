@@ -30,7 +30,7 @@ namespace Bettr.Core
         [NonSerialized] private BettrUserController BettrUserController;
         [NonSerialized] private BettrMathController BettrMathController;
 
-        [NonSerialized] private List<string> ReelSymbolsForThisSpin;
+        public List<string> ReelStripSymbolsForThisSpin { get; private set; }
 
         private void Awake()
         {
@@ -103,33 +103,43 @@ namespace Bettr.Core
             this.ReelStateTable["OutcomeReceived"] = false;
             this.ShouldSpliceReel = false;
 
-            this.SetupReelSymbolsForSpin();
+            this.SetupReelStripSymbolsForSpin();
         }
 
         public string ReplaceSymbolForSpin(int zeroIndex, string newSymbol)
         {
             var reelSymbolCount = (int) (double) this.ReelStateTable["ReelSymbolCount"];
             int oneIndexed = 1 +zeroIndex % reelSymbolCount;
-            var oldSymbol = this.ReelSymbolsForThisSpin[oneIndexed];
-            this.ReelSymbolsForThisSpin[oneIndexed] = newSymbol;
+            var oldSymbol = this.ReelStripSymbolsForThisSpin[oneIndexed];
+            this.ReelStripSymbolsForThisSpin[oneIndexed] = newSymbol;
             return oldSymbol;
         }
 
-        public void SetupReelSymbolsForSpin()
+        public void SwapInReelStripSymbolsForSpin(List<string> reelStripSymbolsForSpin)
+        {
+            this.ReelStripSymbolsForThisSpin = reelStripSymbolsForSpin;
+        }
+        
+        public void SwapInReelSpinOutcomeTableForSpin(Table spinOutcomeTable)
+        {
+            this.SpinOutcomeTable = spinOutcomeTable;
+        }
+        
+        public void SetupReelStripSymbolsForSpin()
         {
             // create a copy of the ReelSymbolsTable
-            if (this.ReelSymbolsForThisSpin == null)
+            if (this.ReelStripSymbolsForThisSpin == null)
             {
-                this.ReelSymbolsForThisSpin = new List<string>();
+                this.ReelStripSymbolsForThisSpin = new List<string>();
             }
-            this.ReelSymbolsForThisSpin.Clear();
-            this.ReelSymbolsForThisSpin.Add("Blank");
+            this.ReelStripSymbolsForThisSpin.Clear();
+            this.ReelStripSymbolsForThisSpin.Add("Blank");
 
             var length = this.ReelSymbolsTable.Length;
             for (int i = 0; i < length; i++)
             {
                 // 1 indexed
-                this.ReelSymbolsForThisSpin.Add((string) ((Table) this.ReelSymbolsTable[i + 1])["ReelSymbol"]);
+                this.ReelStripSymbolsForThisSpin.Add((string) ((Table) this.ReelSymbolsTable[i + 1])["ReelSymbol"]);
             }
         }
         
@@ -395,7 +405,7 @@ namespace Bettr.Core
             var reelSymbolCount = (int) (double) this.ReelStateTable["ReelSymbolCount"];
             var reelPosition = (int) (double) symbolState["ReelPosition"];
             var symbolStopIndex = 1 + (reelSymbolCount + reelStopIndex + reelPosition) % reelSymbolCount;
-            var reelSymbol = this.ReelSymbolsForThisSpin[symbolStopIndex]; //(string) ((Table) this.ReelSymbolsTable[symbolStopIndex])["ReelSymbol"];
+            var reelSymbol = this.ReelStripSymbolsForThisSpin[symbolStopIndex]; //(string) ((Table) this.ReelSymbolsTable[symbolStopIndex])["ReelSymbol"];
             var symbolGroupProperty = (TilePropertyGameObjectGroup) this.ReelTable[$"SymbolGroup{symbolIndex}"];
             if (symbolGroupProperty.Current != null)
             {

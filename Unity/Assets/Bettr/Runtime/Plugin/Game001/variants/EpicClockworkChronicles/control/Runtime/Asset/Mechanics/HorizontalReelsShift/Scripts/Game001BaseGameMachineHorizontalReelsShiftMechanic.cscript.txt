@@ -75,6 +75,7 @@ end
 function Game001BaseGameMachineHorizontalReelsShiftMechanic:PlayMechanic(machine, reelIndex1, reelIndex2)
    series
       do
+         self.State.MechanicsPrefab.SetActive(true)
          local reelCount = Game001BaseGameLayout.ReelCount.First.Value
          BettrVisualsController.FireballMoveTo(nil, self.State.MechanicsPrefab, 20, 1, false)
          local visibleSymbolCount = BettrMechanicsController.GetReelVisibleSymbolCount(self.Config.Machine, reelIndex1)
@@ -85,27 +86,27 @@ function Game001BaseGameMachineHorizontalReelsShiftMechanic:PlayMechanic(machine
              local otherSymbol = BettrMechanicsController.GetReelVisibleSymbol(self.Config.Machine, reelIndex2, i)
              local otherSymbolGroup = BettrMechanicsController.GetReelVisibleSymbolGroup(self.Config.Machine, reelIndex2, i)
              local otherSymbolCurrentKey = otherSymbolGroup.CurrentKey
-             BettrVisualsController.FireballMoveTo(self.State.MechanicsPrefab, otherSymbol.gameObject, 50, 1, true)
+             BettrVisualsController.FireballMoveTo(self.State.MechanicsPrefab, otherSymbol.gameObject, 20, 1, true)
              parallel
                 do
                     BettrVisualsController.FireballMoveTo(nil, self.State.MechanicsPrefab, 20, 1, false)
                 end
                 do
-                    BettrVisualsController.FireballMoveTo(nil, otherSymbol.gameObject, 50, 1, false)
+                    BettrVisualsController.FireballMoveTo(nil, otherSymbol.gameObject, 20, 1, false)
                 end
                 do
-                    BettrVisualsController.FireballMoveTo(self.State.MechanicsPrefab, symbol.gameObject, 50, 1, true)
+                    BettrVisualsController.FireballMoveTo(self.State.MechanicsPrefab, symbol.gameObject, 20, 1, true)
                 end
              end
              self.State.MechanicsPrefab.SetActive(false)
              parallel
                  do
-                     BettrVisualsController.FireballMoveTo(nil, symbol.gameObject, 50, 1, false)
+                     BettrVisualsController.FireballMoveTo(nil, symbol.gameObject, 20, 1, false)
                      BettrVisualsController.CloneAndTweenGameObject(symbol.gameObject, otherSymbol.gameObject, 2, true, -10, true)
                      symbolGroup.SetCurrentActive(otherSymbolCurrentKey)
                  end
                  do
-                     BettrVisualsController.FireballMoveTo(nil, otherSymbol.gameObject, 50, 1, false)
+                     BettrVisualsController.FireballMoveTo(nil, otherSymbol.gameObject, 20, 1, false)
                      BettrVisualsController.CloneAndTweenGameObject(otherSymbol.gameObject, symbol.gameObject, 2, true, -20, true)
                      otherSymbolGroup.SetCurrentActive(symbolCurrentKey)
                  end

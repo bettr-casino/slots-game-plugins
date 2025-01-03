@@ -22,6 +22,10 @@ namespace Bettr.Core
             // Set the singleton instance
             Instance = this;
         }
+        
+        //
+        // Mechanics API
+        //
 
         public Table LoadUserMechanicsTable(string mechanicName, object machine, object variant)
         {
@@ -30,6 +34,33 @@ namespace Bettr.Core
             return table;
         }
         
+        //
+        // Reel APIs
+        //
+        public void SwapReelsForSpin(Table reel1, Table reel2)
+        {
+            var reel1Controller = (BettrReelController) reel1["BettrReelController"];
+            var reel2Controller = (BettrReelController) reel2["BettrReelController"];
+            // reel1Strips
+            var reel1ReelStripSymbols = reel1Controller.ReelStripSymbolsForThisSpin;
+            // reel2Strips
+            var reel2ReelStripSymbols = reel2Controller.ReelStripSymbolsForThisSpin;
+            // swap reel1Strips with reel2Strips
+            reel1Controller.SwapInReelStripSymbolsForSpin(reel2ReelStripSymbols);
+            reel2Controller.SwapInReelStripSymbolsForSpin(reel1ReelStripSymbols);
+            // reel1 SpinOutcomeTable
+            var reel1OutcomeTable = reel1Controller.SpinOutcomeTable;
+            // reel2 SpinOutcomeTable
+            var reel2OutcomeTable = reel2Controller.SpinOutcomeTable;
+            // swap reel1 SpinOutcomeTable with reel2 SpinOutcomeTable
+            reel1Controller.SwapInReelSpinOutcomeTableForSpin(reel2OutcomeTable);
+            reel2Controller.SwapInReelSpinOutcomeTableForSpin(reel1OutcomeTable);
+        }
+
+        //
+        // Reel SymbolMatrix APIs
+        //
+
         public int GetReelVisibleSymbolCount(string machineName, int reelIndex)
         {
             var globals = TileController.LuaScript.Globals;
@@ -39,7 +70,7 @@ namespace Bettr.Core
             var visibleSymbolCount = reelController.GetReelVisibleSymbolCount();
             return visibleSymbolCount;
         }
-        
+
         public TilePropertyGameObjectGroup GetReelVisibleSymbolGroup(string machineName, int reelIndex, int offset)
         {
             var reelSymbolMatrixGroups = GetReelSymbolMatrixGroups(machineName, reelIndex);
@@ -47,10 +78,11 @@ namespace Bettr.Core
             {
                 offset = reelSymbolMatrixGroups.Count + offset;
             }
+
             var visibleSymbolGroup = reelSymbolMatrixGroups[offset];
             return visibleSymbolGroup;
         }
-        
+
         public GameObject GetReelVisibleSymbol(string machineName, int reelIndex, int offset)
         {
             var reelSymbolMatrix = GetReelSymbolMatrix(machineName, reelIndex);
@@ -58,6 +90,7 @@ namespace Bettr.Core
             {
                 offset = reelSymbolMatrix.Count + offset;
             }
+
             var visibleSymbol = reelSymbolMatrix[offset];
             var visibleQuad = FindSymbolQuad(visibleSymbol);
             return visibleQuad;
@@ -67,7 +100,7 @@ namespace Bettr.Core
         {
             return GetReelVisibleSymbol(machineName, reelIndex, -1);
         }
-        
+
         public GameObject GetReelTopVisibleSymbol(string machineName, int reelIndex)
         {
             return GetReelVisibleSymbol(machineName, reelIndex, 0);
@@ -80,23 +113,20 @@ namespace Bettr.Core
             var topVisibleSymbol = reelSymbolMatrix[0];
             // last visible symbol matrix
             var bottomVisibleSymbol = reelSymbolMatrix[^1];
-            var topVisibleSymbolGameObject  = topVisibleSymbol.value.GameObject;
+            var topVisibleSymbolGameObject = topVisibleSymbol.value.GameObject;
             var topVisibleQuad = FindSymbolQuad(topVisibleSymbol);
             var bottomVisibleSymbolGameObject = bottomVisibleSymbol.value.GameObject;
             var bottomSymbolQuad = FindSymbolQuad(bottomVisibleSymbol);
             var topQuadBounds = BettrVisualsController.Instance.GetQuadBounds(topVisibleQuad);
             var bottomQuadBounds = BettrVisualsController.Instance.GetQuadBounds(bottomSymbolQuad);
-            return new Rect(bottomQuadBounds.x, bottomQuadBounds.y, topQuadBounds.width, topQuadBounds.y - bottomQuadBounds.y + topQuadBounds.height);
+            return new Rect(bottomQuadBounds.x, bottomQuadBounds.y, topQuadBounds.width,
+                topQuadBounds.y - bottomQuadBounds.y + topQuadBounds.height);
         }
 
-        public GameObject FindSymbolQuad(TilePropertyGameObject symbol)
-        {
-            var gameObject = symbol.value.GameObject;
-            // get the Quad game object within this gameObject
-            var quadGameObject = gameObject.transform.Find("Pivot").Find("Quad").gameObject;
-            return quadGameObject;
-        }
-
+        //
+        // SymbolMatrix APIs
+        //
+        
         public List<GameObject> GetSymbolMatrixGameObjects(string machineName, int reelCount, params string[] symbols)
         {
             var symbolMatrixGameObjects = new List<GameObject>();
@@ -111,10 +141,12 @@ namespace Bettr.Core
                     symbolMatrixGameObjects.Add(quadGameObject);
                 }
             }
+
             return symbolMatrixGameObjects;
         }
-        
-        public List<List<TilePropertyGameObjectGroup>> GetSymbolMatrixGroups(string machineName, int reelCount, params string[] symbols)
+
+        public List<List<TilePropertyGameObjectGroup>> GetSymbolMatrixGroups(string machineName, int reelCount,
+            params string[] symbols)
         {
             var symbolMatrixSymbolsGroups = new List<List<TilePropertyGameObjectGroup>>();
             for (var i = 0; i < reelCount; i++)
@@ -122,10 +154,12 @@ namespace Bettr.Core
                 var reelMatrixSymbolsGroups = GetReelSymbolMatrixGroups(machineName, i, symbols);
                 symbolMatrixSymbolsGroups.Add(reelMatrixSymbolsGroups);
             }
+
             return symbolMatrixSymbolsGroups;
         }
 
-        public List<List<TilePropertyGameObject>> GetSymbolMatrix(string machineName, int reelCount, params string[] symbols)
+        public List<List<TilePropertyGameObject>> GetSymbolMatrix(string machineName, int reelCount,
+            params string[] symbols)
         {
             var symbolMatrixSymbols = new List<List<TilePropertyGameObject>>();
             for (var i = 0; i < reelCount; i++)
@@ -133,10 +167,12 @@ namespace Bettr.Core
                 var reelMatrixSymbols = GetReelSymbolMatrix(machineName, i, symbols);
                 symbolMatrixSymbols.Add(reelMatrixSymbols);
             }
+
             return symbolMatrixSymbols;
         }
-        
-        public List<TilePropertyGameObjectGroup> GetReelSymbolMatrixGroups(string machineName, int reelIndex, params string[] symbols)
+
+        public List<TilePropertyGameObjectGroup> GetReelSymbolMatrixGroups(string machineName, int reelIndex,
+            params string[] symbols)
         {
             var globals = TileController.LuaScript.Globals;
             var globalKey = $"{machineName}BaseGameReel{reelIndex + 1}";
@@ -145,8 +181,9 @@ namespace Bettr.Core
             var reelMatrixSymbols = reelController.GetReelMatrixVisibleSymbolsGroups(symbols);
             return reelMatrixSymbols;
         }
-        
-        public List<TilePropertyGameObject> GetReelSymbolMatrix(string machineName, int reelIndex, params string[] symbols)
+
+        public List<TilePropertyGameObject> GetReelSymbolMatrix(string machineName, int reelIndex,
+            params string[] symbols)
         {
             var globals = TileController.LuaScript.Globals;
             var globalKey = $"{machineName}BaseGameReel{reelIndex + 1}";
@@ -156,7 +193,12 @@ namespace Bettr.Core
             return reelMatrixSymbols;
         }
 
-        public List<TilePropertyGameObjectGroup> AddSymbolsToReelSymbolGroups(string mechanicName, BettrReelController reelController, TilePropertyGameObjectGroup symbolPropertiesGroup)
+        //
+        // SymbolGroup APIs
+        //
+        
+        public List<TilePropertyGameObjectGroup> AddSymbolsToReelSymbolGroups(string mechanicName,
+            BettrReelController reelController, TilePropertyGameObjectGroup symbolPropertiesGroup)
         {
             var newSymbolPropertiesGroups = new List<TilePropertyGameObjectGroup>();
             var symbolCount = (int) (double) reelController.ReelStateTable["SymbolCount"];
@@ -168,11 +210,13 @@ namespace Bettr.Core
                 {
                     throw new System.Exception($"SymbolGroup{symbolIndex} is null");
                 }
+
                 // at least one symbol should exist in symbolGroupProperty
                 if (symbolGroupProperty.gameObjectProperties.Count == 0)
                 {
                     throw new System.Exception($"SymbolGroup{symbolIndex} gameObjectProperties.Count == 0");
                 }
+
                 // get the 1st symbol
                 var firstSymbolProperty = symbolGroupProperty.gameObjectProperties[0];
                 var firstSymbolGameObject = firstSymbolProperty.value.GameObject;
@@ -184,16 +228,18 @@ namespace Bettr.Core
                 foreach (var newSymbolProperty in newSymbolPropertiesGroup.gameObjectProperties)
                 {
                     var newSymbolGameObject = newSymbolProperty.value.GameObject;
-                    symbolGroupProperty.gameObjectProperties.Add(newSymbolProperty); 
+                    symbolGroupProperty.gameObjectProperties.Add(newSymbolProperty);
                     newSymbolGameObject.transform.SetParent(parent, false);
                 }
+
                 newSymbolPropertiesGroups.Add(newSymbolPropertiesGroup);
             }
 
             return newSymbolPropertiesGroups;
         }
 
-        public void RemoveSymbolsFromReelSymbolGroups(string mechanicName, BettrReelController reelController, List<TilePropertyGameObjectGroup> newSymbolPropertiesGroups)
+        public void RemoveSymbolsFromReelSymbolGroups(string mechanicName, BettrReelController reelController,
+            List<TilePropertyGameObjectGroup> newSymbolPropertiesGroups)
         {
             var symbolCount = (int) (double) reelController.ReelStateTable["SymbolCount"];
             for (var symbolIndex = 1; symbolIndex <= symbolCount; symbolIndex++)
@@ -204,6 +250,7 @@ namespace Bettr.Core
                 {
                     throw new System.Exception($"SymbolGroup{symbolIndex} is null");
                 }
+
                 var newSymbolPropertiesGroup = newSymbolPropertiesGroups[symbolIndex - 1];
                 var newSymbolProperties = newSymbolPropertiesGroup.gameObjectProperties;
                 // remove symbolGroupProperty.gameObjectProperties entries if the key matches a  newSymbolProperties
@@ -216,8 +263,24 @@ namespace Bettr.Core
                 }
             }
         }
-        
 
+        
+        //
+        // Symbol APIs
+        //
+        
+        public GameObject FindSymbolQuad(TilePropertyGameObject symbol)
+        {
+            var gameObject = symbol.value.GameObject;
+            // get the Quad game object within this gameObject
+            var quadGameObject = gameObject.transform.Find("Pivot").Find("Quad").gameObject;
+            return quadGameObject;
+        }
+
+        //
+        // Helper Methods
+        //
+        
         // Function to print the table with recursion for nested tables using StringBuilder
         public void PrintTable(Table table, int indent = 2)
         {
