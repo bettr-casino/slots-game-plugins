@@ -63,14 +63,14 @@ namespace Bettr.Core
             return visibleQuad;
         }
 
-        public GameObject GetReelTopVisibleSymbol(string machineName, int reelIndex)
+        public GameObject GetReelBottomVisibleSymbol(string machineName, int reelIndex)
         {
             return GetReelVisibleSymbol(machineName, reelIndex, -1);
         }
         
-        public GameObject GetReelBottomVisibleSymbol(string machineName, int reelIndex)
+        public GameObject GetReelTopVisibleSymbol(string machineName, int reelIndex)
         {
-            return GetReelVisibleSymbol(machineName, reelIndex, -0);
+            return GetReelVisibleSymbol(machineName, reelIndex, 0);
         }
 
         public Rect GetReelBounds(string machineName, int reelIndex)
