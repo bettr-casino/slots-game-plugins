@@ -178,7 +178,9 @@ function Game001BaseGameMachineHorizontalReelsShiftMechanic:_PlayMechanics()
             local matrix = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, self.Config.Mechanic, "Shift" .. i)
             for j=1,#matrix do
                 local matrixRow = matrix[j]
-                self:_PlayMechanic(matrixRow.ReelID2, matrixRow.ReelID1)
+                local minReelID = BettrMechanicsController.GetMinReelID(matrixRow.ReelID1, matrixRow.ReelID2)
+                local maxReelID = BettrMechanicsController.GetMaxReelID(matrixRow.ReelID1, matrixRow.ReelID2)
+                self:_PlayMechanic(minReelID, maxReelID)
             end
         end
     end

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
@@ -57,6 +58,40 @@ namespace Bettr.Core
             reel2Controller.SwapInReelSpinOutcomeTableForSpin(reel1OutcomeTable);
         }
 
+        public string GetMinReelID(params string[] reels)
+        {
+            var minReel = reels[0];
+            var minReelNumber = int.Parse(minReel.Substring(4));
+
+            foreach (var reel in reels.Skip(1))
+            {
+                var reelNumber = int.Parse(reel.Substring(4));
+                if (reelNumber < minReelNumber)
+                {
+                    minReel = reel;
+                    minReelNumber = reelNumber;
+                }
+            }
+            return minReel;
+        }
+
+        public string GetMaxReelID(params string[] reels)
+        {
+            var maxReel = reels[0];
+            var maxReelNumber = int.Parse(maxReel.Substring(4));
+
+            foreach (var reel in reels.Skip(1))
+            {
+                var reelNumber = int.Parse(reel.Substring(4));
+                if (reelNumber > maxReelNumber)
+                {
+                    maxReel = reel;
+                    maxReelNumber = reelNumber;
+                }
+            }
+            return maxReel;
+        }
+        
         //
         // Reel SymbolMatrix APIs
         //

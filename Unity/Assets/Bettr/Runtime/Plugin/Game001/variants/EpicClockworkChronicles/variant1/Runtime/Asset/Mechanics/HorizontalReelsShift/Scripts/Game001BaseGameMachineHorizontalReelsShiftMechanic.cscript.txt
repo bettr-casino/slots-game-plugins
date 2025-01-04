@@ -178,7 +178,9 @@ function Game001BaseGameMachineHorizontalReelsShiftMechanic:_PlayMechanics()
             local matrix = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, self.Config.Mechanic, "Shift" .. i)
             for j=1,#matrix do
                 local matrixRow = matrix[j]
-                self:_PlayMechanic(matrixRow.ReelID2, matrixRow.ReelID1)
+                local minReelID = BettrMechanicsController.GetMinReelID(matrixRow.ReelID1, matrixRow.ReelID2)
+                local maxReelID = BettrMechanicsController.GetMaxReelID(matrixRow.ReelID1, matrixRow.ReelID2)
+                self:_PlayMechanic(minReelID, maxReelID)
             end
         end
     end
@@ -207,7 +209,7 @@ function Game001BaseGameMachineHorizontalReelsShiftMechanic:ApplyOutcomeReceived
         do        
             local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
             local numShifts = summary.NumShifts
-            System.Print("Game001BaseGameReelHorizontalReelsShiftMechanic:OnOutcomeReceived numShifts={0}", numShifts)
+            System.Print("Game001BaseGameReelHorizontalReelsShiftMechanic:OnOutcomeReceived reelID={0} numShifts={1}", thisReelID, numShifts)
             if numShifts > 0 then
                 for i=1,numShifts do
                     if otherReelID ~= nil then
@@ -221,7 +223,7 @@ function Game001BaseGameMachineHorizontalReelsShiftMechanic:ApplyOutcomeReceived
                         local reelID2 = matrixRow.ReelID2
                         local reel1 = _G["Game001BaseGame" .. reelID1]
                         local reel2 = _G["Game001BaseGame" .. reelID2]
-                        BettrMechanicsController.SwapReelsForSpin(reel, otherReel)
+                        BettrMechanicsController.SwapReelsForSpin(reel1, reel2)
                     end
                 end
             end

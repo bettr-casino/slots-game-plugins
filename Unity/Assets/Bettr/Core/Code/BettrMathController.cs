@@ -1,5 +1,6 @@
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
+using UnityEngine;
 
 // ReSharper disable once CheckNamespace
 namespace Bettr.Core
@@ -227,10 +228,15 @@ namespace Bettr.Core
             return reelStateTable;
         }
 
-        public Table GetTableArray(string tableName, string machineID, string reelID)
+        public Table GetTableArray(string tableName, string machineID, string pk)
         {
             var machineTable = (Table) TileController.LuaScript.Globals[$"{machineID}{tableName}"];
-            var reelTable = (Table) machineTable[reelID];
+            var reelTable = (Table) machineTable[pk];
+            if (reelTable == null)
+            {
+                Debug.LogWarning($"null reelTable for {machineID}{tableName}[{pk}]");
+                return null;
+            }
             var reelStateTable = (Table) reelTable["Array"];
             return reelStateTable;
         }
