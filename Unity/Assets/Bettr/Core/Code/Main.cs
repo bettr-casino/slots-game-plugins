@@ -55,6 +55,8 @@ namespace Bettr.Core
             
                 DevTools.Instance.OnKeyPressed.AddListener(() =>
                 {
+                    
+#if UNITY_EDITOR                    
                     // Check for Backspace or Delete key press
                     if (Input.GetKeyDown(KeyCode.P))
                     {
@@ -90,6 +92,8 @@ namespace Bettr.Core
                     {
                         Debug.LogWarning("SpinImage GameObject not found.");
                     }
+#endif
+                    
                 });
             }
 

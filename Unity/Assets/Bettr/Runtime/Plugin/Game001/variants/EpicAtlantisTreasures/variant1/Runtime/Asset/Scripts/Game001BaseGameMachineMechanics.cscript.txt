@@ -34,8 +34,22 @@ end
 function Game001BaseGameMachineMechanics:StartMachine(machine)
     if self.ChooseASideMechanic ~= nil then
         self.ChooseASideMechanic:StartMachine(machine)
+    elseif self.HorizontalReelsShiftMechanic ~= nil then
+        self.HorizontalReelsShiftMechanic:StartMachine(machine)
     else
         machine:StartMachine()
+    end
+end
+
+function Game001BaseGameMachineMechanics:ShowSettings(machine, mainLobbyScene)
+    series
+        do
+            if self.HorizontalReelsShiftMechanic ~= nil then
+                self.HorizontalReelsShiftMechanic:ShowSettings(machine, mainLobbyScene)
+            else
+                machine:ShowSettingsDefault(mainLobbyScene)
+            end
+        end
     end
 end
 
@@ -54,7 +68,9 @@ end
 function Game001BaseGameMachineMechanics:TryPaying(machine)
     -- this is hardcoded
     -- the highest priority mechanic will take precedence and take the role of the mediator for orchestrating this function
-    if self.WaysMechanic ~= nil then
+    if self.HorizontalReelsShiftMechanic ~= nil then
+       return self.HorizontalReelsShiftMechanic:TryPaying(machine)
+    elseif self.WaysMechanic ~= nil then
        return self.WaysMechanic:TryPaying(machine)
     elseif self.PaylinesMechanic ~= nil then
        return self.PaylinesMechanic:TryPaying(machine)
@@ -87,6 +103,8 @@ function Game001BaseGameMachineMechanics:OnBaseGameSpinCompleted(machine)
         do
             if self.ChooseASideMechanic ~= nil then
                 self.ChooseASideMechanic:OnBaseGameSpinCompleted(machine)            
+            elseif self.HorizontalReelsShiftMechanic ~= nil then
+                self.HorizontalReelsShiftMechanic:OnBaseGameSpinCompleted(machine)            
             else
                 machine:OnBaseGameSpinCompleted()
             end
@@ -96,4 +114,16 @@ end
 
 function Game001BaseGameMachineMechanics:CanSpin(machine, canSpin)
     return canSpin
+end
+
+function Game001BaseGameMachineMechanics:ApplyOutcomeReceived(machine)
+    series
+        do
+            if self.HorizontalReelsShiftMechanic ~= nil then
+                self.HorizontalReelsShiftMechanic:ApplyOutcomeReceived(machine)
+            else
+                machine:OnApplyOutcomeReceived()
+            end
+        end
+    end
 end

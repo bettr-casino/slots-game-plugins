@@ -11,6 +11,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
+using Random = UnityEngine.Random;
 
 // ReSharper disable once CheckNamespace
 namespace Bettr.Core
@@ -109,6 +110,11 @@ namespace Bettr.Core
             // clone seed
             Fireball = Object.Instantiate(seed);
         }
+
+        public void SetActive(bool active)
+        {
+            this._fireball.SetActive(active);
+        }
     }
 
     [Serializable]
@@ -120,11 +126,14 @@ namespace Bettr.Core
         private readonly List<FireballObject> _freeList;
 
         private readonly GameObject _seed;
+
+        private readonly List<FireballObjectRunningKey> _runningKeys;
         
         public FireballObjectsCache(GameObject seed)
         {
             _seed = seed;
             _freeList = new List<FireballObject>();
+            _runningKeys = new List<FireballObjectRunningKey>();
         }
 
         public FireballObject Acquire()
@@ -143,6 +152,23 @@ namespace Bettr.Core
             _freeList.Add(fireball);
         }
 
+        public void HoldRunningKey(FireballObjectRunningKey runningKey)
+        {
+            this._runningKeys.Add(runningKey);
+        }
+        
+        public void StopRunningKey(string runningKeyID)
+        {
+            var runningKey = this._runningKeys.Find(key => key.ID == runningKeyID);
+            if (runningKey != null)
+            {
+                runningKey.Stop();
+                this._runningKeys.Remove(runningKey);   
+                // release the fireball object
+                this.Release(runningKey.FireballObject);
+            }
+        }
+
         public void Reset()
         {
             // release all fireballs back into the _freeList
@@ -150,6 +176,142 @@ namespace Bettr.Core
             {
                 Object.Destroy(fireball.Fireball);
                 fireball.Fireball = null;
+            }
+            _freeList.Clear();
+            if (_runningKeys != null)
+            {
+                foreach (var runningKey in _runningKeys)
+                {
+                    runningKey.Stop();
+                }
+                _runningKeys.Clear();
+            }
+        }
+    }
+    
+    [Serializable]
+    public class FireballObjectRunningKey
+    {
+        internal FireballObject FireballObject { get; private set; }
+        internal ParticleSystem ParticleSystem { get; private set; }
+        
+        internal string ID { get; private set; }
+        
+        internal FireballObjectRunningKey(FireballObject fireballObject, ParticleSystem particleSystem)
+        {
+            this.ParticleSystem = particleSystem;
+            this.FireballObject = fireballObject;
+            this.ID = Guid.NewGuid().ToString();
+        }
+        
+        public void Stop()
+        {
+            this.ParticleSystem.Stop();
+            this.FireballObject.SetActive(false);
+            
+            // null all
+            this.ParticleSystem = null;
+            this.FireballObject = null;
+        }
+    }
+    
+    [Serializable]
+    internal class FireTornadoObject
+    {
+        private GameObject _fireTornado;
+        private ParticleSystem _particleSystem;
+        
+        private LayerToCameraMap _layerToCameraMap = new LayerToCameraMap();
+
+        public GameObject FireTornado
+        {
+            get => _fireTornado;
+            set
+            {
+                _fireTornado = value;
+
+                if (_fireTornado == null)
+                {
+                    _particleSystem = null;
+                    return;
+                }
+
+                var particleSystemGameObject = _fireTornado.transform.Find("base")?.gameObject;
+                if (particleSystemGameObject == null)
+                {
+                    Debug.LogWarning("FireTornado does not contain a 'base' child object.");
+                    return;
+                }
+
+                _particleSystem = particleSystemGameObject.GetComponent<ParticleSystem>();
+                if (_particleSystem != null)
+                {
+                    var main = _particleSystem.main;
+                    main.startSpeed = 0;
+                    main.duration = 0;
+                    main.loop = true;
+                    main.playOnAwake = false;
+                    main.simulationSpeed = 1;
+                }
+
+                _fireTornado.SetActive(false);
+            }
+        }
+        
+        public ParticleSystem ParticleSystem => _particleSystem;
+
+        public FireTornadoObject(GameObject seed)
+        {
+            // clone seed
+            FireTornado = Object.Instantiate(seed);
+        }
+    }
+
+    [Serializable]
+    public class FireTornadoObjectRunningKey
+    {
+        
+    }
+
+    [Serializable]
+    internal class FireTornadoObjectsCache
+    {
+        private ParticleSystem _particleSystem;
+        
+        // list of fireballs created
+        private readonly List<FireTornadoObject> _freeList;
+
+        private readonly GameObject _seed;
+        
+        public FireTornadoObjectsCache(GameObject seed)
+        {
+            _seed = seed;
+            _freeList = new List<FireTornadoObject>();
+        }
+
+        public FireTornadoObject Acquire()
+        {
+            if (_freeList.Count == 0)
+            {
+                return new FireTornadoObject(this._seed);
+            }
+            var fireball = _freeList[0];
+            _freeList.RemoveAt(0);
+            return fireball;
+        }
+
+        public void Release(FireTornadoObject fireball)
+        {
+            _freeList.Add(fireball);
+        }
+
+        public void Reset()
+        {
+            // release all fireballs back into the _freeList
+            foreach (var fireTornado in _freeList)
+            {
+                Object.Destroy(fireTornado.FireTornado);
+                fireTornado.FireTornado = null;
             }
             _freeList.Clear();
         }
@@ -162,10 +324,17 @@ namespace Bettr.Core
         private LayerToCameraMap _layerToCameraMap = new LayerToCameraMap();
 
         private FireballObjectsCache _fireballObjectsCache;
+        
+        private FireTornadoObjectsCache _fireTornadoObjectsCache;
 
         public void InitFireballs(GameObject fireball)
         {
             _fireballObjectsCache = new FireballObjectsCache(fireball);
+        }
+        
+        public void InitFireTornados(GameObject fireTornado)
+        {
+            _fireTornadoObjectsCache = new FireTornadoObjectsCache(fireTornado);
         }
 
         public BettrUserController BettrUserController { get; private set; }
@@ -192,6 +361,9 @@ namespace Bettr.Core
 
             TileController.RegisterType<iTween>("iTween");
             TileController.RegisterType<iTween.EaseType>("iTween.EaseType");
+
+            TileController.RegisterType<FireballObjectRunningKey>("FireballObjectRunningKey");
+            TileController.RegisterType<FireTornadoObjectRunningKey>("FireballObjectRunningKey");
             
             _layerToCameraMap.Reset();
             
@@ -242,9 +414,53 @@ namespace Bettr.Core
 
 
         private bool _tweenComplete = false;
+
+        public IEnumerator TweenRotateGameObject(CrayonScriptContext context, GameObject tweenThisGameObject, int numberOfRotations = 1, float duration = 1.0f)
+        {
+            if (tweenThisGameObject == null)
+            {
+                throw new ArgumentNullException(nameof(tweenThisGameObject));
+            }
+
+            string layerName = LayerMask.LayerToName(tweenThisGameObject.layer);
+            Camera tweenCamera = _layerToCameraMap.GetCameraForLayer(layerName);
+    
+            if (tweenCamera == null)
+            {
+                throw new ScriptRuntimeException($"No camera found for layer '{layerName}'");
+            }
+
+            iTween.Stop(tweenThisGameObject);
+            _tweenComplete = false;
+            
+            var rotationAmount = new Vector3(0, numberOfRotations, 0);
+
+            iTween.RotateBy(tweenThisGameObject, iTween.Hash(
+                "amount", rotationAmount,      // Changed "position" to "amount" for rotation
+                "time", duration,
+                "easetype", iTween.EaseType.linear,
+                "oncomplete", "OnTweenComplete",
+                "oncompletetarget", tweenThisGameObject // Changed to reference the component's gameObject
+            ));
+
+            float elapsedTime = 0f;
+            while (!_tweenComplete && elapsedTime < duration + 0.1f)
+            {
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+        }
+
+        public IEnumerator TweenGameObject(
+            CrayonScriptContext context, GameObject tweenThisGameObject, GameObject tweenFromThisGameObject,
+            GameObject tweenToThisGameObject, float duration = 1.0f, bool tween = false, bool preserveLocalZ = false)
+
+        {
+            yield return TweenGameObject(context, tweenThisGameObject, tweenFromThisGameObject, tweenToThisGameObject, duration, tween, preserveLocalZ, 0.0f);
+        }
         
         public IEnumerator TweenGameObject(
-            CrayonScriptContext context, GameObject tweenThisGameObject, GameObject tweenFromThisGameObject, GameObject tweenToThisGameObject, float duration = 1.0f, bool tween = false, bool preserveLocalZ = false)
+            CrayonScriptContext context, GameObject tweenThisGameObject, GameObject tweenFromThisGameObject, GameObject tweenToThisGameObject, float duration = 1.0f, bool tween = false, bool preserveLocalZ = false, float offsetZ = 0.0f)
         {
             var originalLocalPosition = tweenThisGameObject.transform.localPosition;
             
@@ -258,6 +474,10 @@ namespace Bettr.Core
             Vector3 startWorldPosition = CalculatePosition(tweenFromThisGameObject, tweenCamera) ?? tweenThisGameObject.transform.position;
             Vector3 targetWorldPosition = CalculatePosition(tweenToThisGameObject, tweenCamera) ?? tweenThisGameObject.transform.position;
             tweenThisGameObject.transform.position = startWorldPosition;
+            
+            // add the offsetZ to the targetWorldPosition
+            targetWorldPosition.z += offsetZ;
+            
             if (tween)
             {
                 _tweenComplete = false;
@@ -288,15 +508,26 @@ namespace Bettr.Core
                 tweenThisGameObject.transform.localPosition = localPosition;
             }
         }
+
+        public IEnumerator CloneAndTweenGameObject(
+            CrayonScriptContext context, GameObject tweenFromThisGameObject, GameObject tweenToThisGameObject,
+            float duration = 1.0f, bool tween = false)
+        {
+            yield return CloneAndTweenGameObject(context, tweenFromThisGameObject, tweenToThisGameObject, duration, tween, 0.0f, false);
+        }
         
         public IEnumerator CloneAndTweenGameObject(
-            CrayonScriptContext context, GameObject tweenFromThisGameObject, GameObject tweenToThisGameObject, float duration = 1.0f, bool tween = false)
+            CrayonScriptContext context, GameObject tweenFromThisGameObject, GameObject tweenToThisGameObject, float duration = 1.0f, bool tween = false, float offsetZ = 0.0f, bool hideOriginal = false)
         {
             bool destroyAfter = true;
             // clone this tweenThisGameObject
             var tweenThisGameObject = Object.Instantiate(tweenFromThisGameObject, tweenFromThisGameObject.transform.parent);
             // ensure this is an overlay over the original object
             OverlayFirstOverSecond(tweenThisGameObject, tweenFromThisGameObject);
+            if (hideOriginal)
+            {
+                tweenFromThisGameObject.SetActive(false);
+            }
             
             string layerName = LayerMask.LayerToName(tweenThisGameObject.layer);
             Camera tweenCamera = _layerToCameraMap.GetCameraForLayer(layerName);
@@ -308,6 +539,10 @@ namespace Bettr.Core
             Vector3 startWorldPosition = CalculatePosition(tweenFromThisGameObject, tweenCamera) ?? tweenFromThisGameObject.transform.position;
             Vector3 targetWorldPosition = CalculatePosition(tweenToThisGameObject, tweenCamera) ?? tweenToThisGameObject.transform.position;
             tweenThisGameObject.transform.position = startWorldPosition;
+            
+            // add the offsetZ to the targetWorldPosition
+            targetWorldPosition.z += offsetZ;
+            
             if (tween)
             {
                 _tweenComplete = false;
@@ -338,9 +573,98 @@ namespace Bettr.Core
                     Object.Destroy(tweenThisGameObject);
                 }
             }
+
+            if (hideOriginal)
+            {
+                tweenFromThisGameObject.SetActive(true);
+            }
         }
         
-        public IEnumerator FireballMoveTo(CrayonScriptContext context, GameObject from, GameObject to, float offsetY = 10, float duration = 1.0f, bool tween = false)
+        public Rect GetQuadBounds(GameObject quad)
+        {
+            // Get layer for quad
+            string layerName = LayerMask.LayerToName(quad.layer);
+            // Retrieve the camera
+            Camera camera = _layerToCameraMap.GetCameraForLayer(layerName);
+            if (camera == null)
+            {
+                throw new ScriptRuntimeException($"No camera found for {layerName}");
+            }
+
+            // Get the renderer of the quad
+            Renderer quadRenderer = quad.GetComponent<Renderer>();
+            if (quadRenderer == null)
+            {
+                Debug.LogError("Quad object does not have a Renderer component.");
+                return new Rect();
+            }
+
+            // Get the bounds of the quad in world space
+            Bounds bounds = quadRenderer.bounds;
+
+            // Convert the bottom and top bounds to screen space
+            Vector3 bottomWorld = new Vector3(bounds.min.x, bounds.min.y, bounds.center.z); // Bottom center point
+            Vector3 topWorld = new Vector3(bounds.max.x, bounds.max.y, bounds.center.z);    // Top center point
+
+            // Convert to screen space
+            Vector3 bottomScreen = camera.WorldToScreenPoint(bottomWorld);
+            Vector3 topScreen = camera.WorldToScreenPoint(topWorld);
+
+            // Create and return a Rect with the bounds in screen space
+            return new Rect(bottomScreen.x, bottomScreen.y, Mathf.Abs(topScreen.x - bottomScreen.x), Mathf.Abs(topScreen.y - bottomScreen.y));
+        }
+
+        public IEnumerator FireballTornadoAt(CrayonScriptContext context, GameObject at, float offsetY, float duration)
+        {
+            Camera fireTornadoCamera = _layerToCameraMap.GetCameraForLayer("SLOT_TRANSITION");
+            if (fireTornadoCamera == null)
+            {
+                throw new ScriptRuntimeException("No camera found for SLOT_TRANSITION");
+            }
+            
+            // acquire a fireTornado object
+            var fireTornadoObject = _fireTornadoObjectsCache.Acquire();
+            
+            var fireTornado = fireTornadoObject.FireTornado;
+            var particleSystem = fireTornadoObject.ParticleSystem;
+
+            particleSystem.Stop();
+            fireTornado.SetActive(false);
+
+            // Calculate positions
+            Vector3 startWorldPosition = fireTornado.transform.position;
+            Vector3 targetWorldPosition = CalculatePosition(at, fireTornadoCamera, offsetY) ?? fireTornado.transform.position;
+
+            // Debug log positions
+            Debug.Log($"Target Position: {targetWorldPosition}");
+
+            // Set initial position and activate
+            fireTornado.transform.position = startWorldPosition;
+            fireTornado.SetActive(true);
+            particleSystem.Play();
+
+            fireTornado.transform.position = targetWorldPosition;
+            yield return new WaitForSeconds(duration);
+
+            particleSystem.Stop();
+            fireTornado.SetActive(false);
+            
+            // release the fireball object
+            _fireTornadoObjectsCache.Release(fireTornadoObject);
+        }
+        
+        public void FireballStop(string runningKeyID)
+        {
+            _fireballObjectsCache.StopRunningKey(runningKeyID);
+        }
+
+        public IEnumerator FireballMoveTo(CrayonScriptContext context, GameObject from, GameObject to,
+            float offsetY = 10, float duration = 1.0f, bool tween = false)
+        {
+            yield return FireballMoveTo(context, from, to, offsetY, duration, tween, false);
+        }
+        
+        public IEnumerator FireballMoveTo(CrayonScriptContext context, GameObject from, GameObject to, float offsetY = 10, float duration = 1.0f, bool tween = false, bool wait = false)
         {
             Camera fireballCamera = _layerToCameraMap.GetCameraForLayer("SLOT_TRANSITION");
             if (fireballCamera == null)
@@ -397,11 +721,21 @@ namespace Bettr.Core
                 yield return new WaitForSeconds(duration);
             }
 
-            particleSystem.Stop();
-            fireball.SetActive(false);
+            if (wait)
+            {
+                var fireballRunningKey = new FireballObjectRunningKey(fireballObject, particleSystem);
+                _fireballObjectsCache.HoldRunningKey(fireballRunningKey);
+                
+                context.StringResult = fireballRunningKey.ID;
+            }
+            else
+            {
+                particleSystem.Stop();
+                fireball.SetActive(false);
             
-            // release the fireball object
-            _fireballObjectsCache.Release(fireballObject);
+                // release the fireball object
+                _fireballObjectsCache.Release(fireballObject);
+            }
         }
 
         private void OnFireballTweenComplete()
@@ -882,6 +1216,15 @@ namespace Bettr.Core
                 gameObject = clonedGameObject,
             };
             return clonedGameObjectProperty;
+        }
+        
+        public GameObject CloneAndOverlayGameObject(GameObject gameObject)
+        {
+            var clonedGameObject = Object.Instantiate(gameObject, gameObject.transform.parent);
+            clonedGameObject.name = gameObject.name;
+            // ensure this is an overlay over the original object
+            OverlayFirstOverSecond(clonedGameObject, gameObject);
+            return clonedGameObject;
         }
         
         public PropertyGameObject CloneAndOverlay(PropertyGameObject gameObjectProperty)

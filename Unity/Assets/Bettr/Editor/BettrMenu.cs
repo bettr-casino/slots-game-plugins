@@ -246,38 +246,14 @@ namespace Bettr.Editor
             TileController.LuaScript.Call(dynValue);
         }
         
-        [MenuItem("Bettr/Tools/Apply Mechanics/CascadingReelsMultiplier")]
-        static void ApplyMechanicCascadingReelsMultiplier()
+        [MenuItem("Bettr/Tools/Apply Mechanics/HorizontalReelsShift/Game001EpicClockworkChronicles")]
+        static void ApplyMechanicMachine()
         {
-            var mechanic = "CascadingReelsMultiplier";
-            ApplyMechanicDelegate(mechanic, BettrMechanics.ProcessCascadingReelsMultiplierMechanic);
-        }
-        
-        [MenuItem("Bettr/Tools/Apply Mechanics/CascadingReelsMultiplier/Game001EpicAncientAdventures")]
-        static void ApplyMechanicCascadingReelsMultiplierGame001()
-        {
-            var mechanic = "CascadingReelsMultiplier";
+            var mechanic = "HorizontalReelsShift";
             var machineName = "Game001";
-            var machineVariant = "EpicAncientAdventures";
+            var machineVariant = "EpicClockworkChronicles";
             var experimentVariant = "control";
-            ApplyMechanicDelegate(mechanic, BettrMechanics.ProcessCascadingReelsMultiplierMechanic, machineName, machineVariant, experimentVariant);
-        }
-        
-        [MenuItem("Bettr/Tools/Apply Mechanics/ChooseASide")]
-        static void ApplyMechanicChooseASide()
-        {
-            var mechanic = "ChooseASide";
-            ApplyMechanicDelegate(mechanic, BettrMechanics.ProcessChooseASideMechanic);
-        }
-        
-        [MenuItem("Bettr/Tools/Apply Mechanics/ChooseASide/Game001EpicAtlantisTreasures")]
-        static void ApplyMechanicChooseASideGame001()
-        {
-            var mechanic = "ChooseASide";
-            var machineName = "Game001";
-            var machineVariant = "EpicAtlantisTreasures";
-            var experimentVariant = "control";
-            ApplyMechanicDelegate(mechanic, BettrMechanics.ProcessChooseASideMechanic, machineName, machineVariant, experimentVariant);
+            ApplyMechanicDelegate(mechanic, BettrMechanics.ProcessHorizontalReelsShiftMechanic, machineName, machineVariant, experimentVariant);
         }
         
         [MenuItem("Tools/Update Prefab References")]
@@ -1235,7 +1211,27 @@ namespace Bettr.Editor
         {
             var specificMachineVariants = new string[] 
             {
+                // "EpicClockworkChronicles",
             };
+            
+            // if specificMachineVariants is not null, place a TODO.txt file in the root directory
+            // and add a new line to it with NeedsSyncGameScripts text
+            if (specificMachineVariants.Length > 0)
+            {
+                var todoFilePath = Path.Combine(PluginRootDirectory, "TODO.txt");
+                // include the date and time in readable ISO format in the TODO.txt file
+                File.AppendAllText(todoFilePath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} NeedsSyncGameScripts\n");
+            }
+            else
+            {
+                // open the file and remove the NeedsSyncGameScripts text lines
+                var todoFilePath = Path.Combine(PluginRootDirectory, "TODO.txt");
+                if (File.Exists(todoFilePath))
+                {
+                    var lines = File.ReadAllLines(todoFilePath).Where(line => !line.Contains("NeedsSyncGameScripts"));
+                    File.WriteAllLines(todoFilePath, lines);
+                }
+            }
             
             // Walk the entire directory tree under the plugin root directory
             var processCount = 0;
@@ -3449,7 +3445,7 @@ namespace Bettr.Editor
                 { "flipreels", BettrMechanics.ProcessFlipReelsMechanic },
                 { "freespinscollectionmeter", BettrMechanics.ProcessFreeSpinsCollectionMeterMechanic },
                 { "horizontalreels", BettrMechanics.ProcessHorizontalReelsMechanic },
-                { "horizontalreelshift", BettrMechanics.ProcessHorizontalReelShiftMechanic },
+                { "horizontalreelshift", BettrMechanics.ProcessHorizontalReelsShiftMechanic },
                 { "hotreels", BettrMechanics.ProcessHotReelsMechanic },
                 { "infinityreels", BettrMechanics.ProcessInfinityReelsMechanic },
                 { "linkedreels", BettrMechanics.ProcessLinkedReelsMechanic },

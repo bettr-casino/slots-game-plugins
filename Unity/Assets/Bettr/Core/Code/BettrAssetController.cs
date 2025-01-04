@@ -464,7 +464,9 @@ namespace Bettr.Core
                 yield break;
             }
             
-            Renderer[] renderers = prefab.GetComponentsInChildren<Renderer>(true);
+            var instance = Object.Instantiate(prefab, parent == null ? null : parent.transform);
+            
+            Renderer[] renderers = instance.GetComponentsInChildren<Renderer>(true);
             foreach (Renderer renderer in renderers)
             {
                 foreach (Material mat in renderer.sharedMaterials)
@@ -478,7 +480,8 @@ namespace Bettr.Core
             }
             
             // update the TextMeshProUI shaders
-            var textMeshProUGUIs = prefab.GetComponentsInChildren<TextMeshProUGUI>(true);
+            // ReSharper disable once InconsistentNaming
+            var textMeshProUGUIs = instance.GetComponentsInChildren<TextMeshProUGUI>(true);
             foreach (var textMeshProUGUI in textMeshProUGUIs)
             {
                 // check if the shader is in the cache
@@ -502,7 +505,7 @@ namespace Bettr.Core
                 }
             }
             // similarly for TextMeshPro shaders
-            var textMeshPros = prefab.GetComponentsInChildren<TextMeshPro>(true);
+            var textMeshPros = instance.GetComponentsInChildren<TextMeshPro>(true);
             foreach (var textMeshPro in textMeshPros)
             {
                 // check if the shader is in the cache
@@ -526,7 +529,7 @@ namespace Bettr.Core
             }
             
             // Update shaders for all Image components that are using a Material which could be null
-            var images = prefab.GetComponentsInChildren<Image>(true);
+            var images = instance.GetComponentsInChildren<Image>(true);
             foreach (var image in images)
             {
                 if (image.material != null)
@@ -538,7 +541,6 @@ namespace Bettr.Core
                 }
             }
             
-            var instance = Object.Instantiate(prefab, parent == null ? null : parent.transform);
             if (context != null)
             {
                 context.GameObjectResult = instance;

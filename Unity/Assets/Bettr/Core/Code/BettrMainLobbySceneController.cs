@@ -394,14 +394,13 @@ namespace Bettr.Core
                 var propValue = self[p];
                 BaseGameMachineTile?.SetProperty(p, propValue);
             }
+            
+            // yield return null to wait for start to be called
+            yield return null;
                 
             BaseGameMachineTile?.Call("ConfigureSettings");
-                
-            // wait for 1 second
-            yield return new WaitForSeconds(1.0f);
-                
-            // update the MachineControls
-            machineControlsProperty.SetActive(true);
+            
+            yield return BaseGameMachineTile?.CallAction("ShowSettings", self);
         }
 
         public IEnumerator HideLobbySideBar(Table self)

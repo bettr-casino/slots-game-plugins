@@ -51,6 +51,14 @@ function Game003BaseGameReel:OnOutcomeReceived()
     end
 end
 
+function Game003BaseGameReel:OnApplyOutcomeReceived()
+    series
+        do
+            self.BettrReelController.OnApplyOutcomeReceived()
+        end
+    end
+end
+
 function Game003BaseGameReel:SpinEngines()
     self.BettrReelController.SpinEngines()
     self.Mechanics.SpinEngines(self)

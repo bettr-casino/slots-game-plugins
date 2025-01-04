@@ -6,7 +6,12 @@ Game001BaseGameMachineHorizontalReelsShiftMechanic = {
         Machine = "Game001",
         Variant = "EpicClockworkChronicles",
         Experiment = "control",
+        Mechanic = "HorizontalReelsShift",
     },
+    State = {
+        MechanicsPrefab = nil,
+        MainLobbyScene = nil,
+    }
 }
 
 function Game001BaseGameMachineHorizontalReelsShiftMechanic:new(o)
@@ -17,9 +22,213 @@ function Game001BaseGameMachineHorizontalReelsShiftMechanic:new(o)
 end
 
 function Game001BaseGameMachineHorizontalReelsShiftMechanic:Initialize(machine)
+    series
+        do
+            local manifest = Game001.Manifest
+            local prefabName = "BaseGameMachineHorizontalReelsShift"
+            local machineParent = machine.MachineParent
+            machineParent.SetActive(false)
+            local mechanicsParent = machine.MechanicsParent
+            mechanicsParent.SetActive(true)
+            local mechanicsPrefab = BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, prefabName, mechanicsParent.GameObject)
+            self.State.MechanicsPrefab = mechanicsPrefab
+            self.State.MechanicsPrefab.SetActive(false)
+            System.Print("Game001BaseGameMachineHorizontalReelsShiftMechanic:Initialize mechanicsPrefab={0}", self.State.MechanicsPrefab.name)
+        end
+    end
+end
+
+function Game001BaseGameMachineHorizontalReelsShiftMechanic:StartMachine(machine)
+    series
+        do
+            self:_ShowMachine(machine)
+            machine:StartMachine()
+            self:_StartMechanic(machine)
+            self:_ShowMechanicPreview(machine)
+            self:ShowSettingsDefault(machine, self.State.MainLobbyScene)
+        end
+    end
+end
+
+function Game001BaseGameMachineHorizontalReelsShiftMechanic:_ShowMachine(machine)
+    local machineParent = machine.MachineParent
+    machineParent.SetActive(true)
+end
+
+function Game001BaseGameMachineHorizontalReelsShiftMechanic:_StartMechanic(machine)
+   series
+      do
+         self.State.MechanicsPrefab.SetActive(true)
+      end
+   end
+end
+
+function Game001BaseGameMachineHorizontalReelsShiftMechanic:_ShowMechanicPreview(machine)
+    series
+        do
+            local reelCount = Game001BaseGameLayout.ReelCount.First.Value
+            local firstReelID = "Reel1"
+            local lastReelID = "Reel" .. reelCount
+            self:_PlayMechanic(firstReelID, lastReelID)
+        end
+    end
+end
+
+function Game001BaseGameMachineHorizontalReelsShiftMechanic:_PlayMechanic(reelID1, reelID2)
+   series
+      do
+         self.State.MechanicsPrefab.SetActive(true)
+         local reelCount = Game001BaseGameLayout.ReelCount.First.Value
+         BettrVisualsController.FireballMoveTo(nil, self.State.MechanicsPrefab, 20, 1, false)
+         local visibleSymbolCount = BettrMechanicsController.GetReelVisibleSymbolCount(self.Config.Machine, reelID1)
+         for i = 0, visibleSymbolCount-1 parallel do
+             local symbol = BettrMechanicsController.GetReelVisibleSymbol(self.Config.Machine, reelID1, i)
+             local symbolGroup = BettrMechanicsController.GetReelVisibleSymbolGroup(self.Config.Machine, reelID1, i)
+             local symbolCurrentKey = symbolGroup.CurrentKey
+             local otherSymbol = BettrMechanicsController.GetReelVisibleSymbol(self.Config.Machine, reelID2, i)
+             local otherSymbolGroup = BettrMechanicsController.GetReelVisibleSymbolGroup(self.Config.Machine, reelID2, i)
+             local otherSymbolCurrentKey = otherSymbolGroup.CurrentKey
+             BettrVisualsController.FireballMoveTo(self.State.MechanicsPrefab, otherSymbol.gameObject, 20, 1, true)
+             parallel
+                do
+                    BettrVisualsController.FireballMoveTo(nil, self.State.MechanicsPrefab, 20, 1, false)
+                end
+                do
+                    BettrVisualsController.FireballMoveTo(nil, otherSymbol.gameObject, 20, 1, false)
+                end
+                do
+                    BettrVisualsController.FireballMoveTo(self.State.MechanicsPrefab, symbol.gameObject, 20, 1, true)
+                end
+             end
+             parallel
+                 do
+                    BettrVisualsController.FireballMoveTo(nil, self.State.MechanicsPrefab, 20, 4, false)
+                 end
+                 do
+                     BettrVisualsController.FireballMoveTo(nil, symbol.gameObject, 20, 1, false)
+                     BettrVisualsController.CloneAndTweenGameObject(symbol.gameObject, otherSymbol.gameObject, 2, true, -10, true)
+                     symbolGroup.SetCurrentActive(otherSymbolCurrentKey)
+                 end
+                 do
+                     BettrVisualsController.FireballMoveTo(nil, otherSymbol.gameObject, 20, 1, false)
+                     BettrVisualsController.CloneAndTweenGameObject(otherSymbol.gameObject, symbol.gameObject, 2, true, -20, true)
+                     otherSymbolGroup.SetCurrentActive(symbolCurrentKey)
+                 end
+             end
+         end
+         self.State.MechanicsPrefab.SetActive(false)
+      end
+   end
+end
+
+function Game001BaseGameMachineHorizontalReelsShiftMechanic:ShowSettings(machine, mainLobbyScene)
+-- will call machine.ShowSettingsDefault once mechanic preview is done
+    self.State.MainLobbyScene = mainLobbyScene
+end
+
+function Game001BaseGameMachineHorizontalReelsShiftMechanic:ShowSettingsDefault(machine, mainLobbyScene)
+    local mainLobbyScene = self.State.MainLobbyScene
+    machine:ShowSettingsDefault(mainLobbyScene)
+    self.State.MainLobbyScene = nil
 end
 
 function Game001BaseGameMachineHorizontalReelsShiftMechanic:TryPaying(machine)
+-- TryPaying flow will be resumed after mechanic visual is done
+    if self:_IsMechanicActive(machine) then
+        return 0
+    end
+    return machine.Mechanics.WaysMechanic:TryPaying()
 end
 
+function Game001BaseGameMachineHorizontalReelsShiftMechanic:_IsMechanicActive(machine)
+    local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
+    local numShifts = summary.NumShifts
+    return numShifts > 0
+end
+
+function Game001BaseGameMachineHorizontalReelsShiftMechanic:OnBaseGameSpinCompleted(machine)
+    series
+        do
+            if self:_IsMechanicActive(machine) then
+                self:_PlayMechanics()
+                local coinsPaid = machine.Mechanics.WaysMechanic:TryPaying(machine)
+                if coinsPaid > 0 then
+                    BettrVisualsController.FireballTornadoAt(self.State.MechanicsPrefab, 20, 4)
+                    machine.Mechanics:BaseGamePayout(machine)
+                    machine:OnPayingCompleted()
+                    if machine.Mechanics.CascadingReelsMechanic ~= nil and machine.Mechanics.CascadingReelsMechanic:HasCascade(machine) then
+                        machine.Mechanics.CascadingReelsMechanic:StartCascade(machine)
+                    end
+                end
+                self:_ResetMechanics()
+                machine:OnBaseGameSpinCompleted()
+            else
+                machine:OnBaseGameSpinCompleted()
+            end
+        end
+    end
+end
+
+function Game001BaseGameMachineHorizontalReelsShiftMechanic:_PlayMechanics()
+    local reelCount = Game001BaseGameLayout.ReelCount.First.Value
+    local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
+    local numShifts = summary.NumShifts
+    if numShifts > 0 then
+        for i=1,numShifts do
+            local matrix = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, self.Config.Mechanic, "Shift" .. i)
+            for j=1,#matrix do
+                local matrixRow = matrix[j]
+                local minReelID = BettrMechanicsController.GetMinReelID(matrixRow.ReelID1, matrixRow.ReelID2)
+                local maxReelID = BettrMechanicsController.GetMaxReelID(matrixRow.ReelID1, matrixRow.ReelID2)
+                self:_PlayMechanic(minReelID, maxReelID)
+            end
+        end
+    end
+end
+
+function Game001BaseGameMachineHorizontalReelsShiftMechanic:_ResetMechanics()
+    local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
+    local numShifts = summary.NumShifts
+    if numShifts > 0 then
+        for i=1,numShifts do
+            local matrix = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, self.Config.Mechanic, "Shift" .. i)
+            for j=1,#matrix do
+                local matrixRow = matrix[j]
+                local reelID1 = matrixRow.ReelID1
+                local reelID2 = matrixRow.ReelID2
+                local reel1 = _G["Game001BaseGame" .. reelID1]
+                local reel2 = _G["Game001BaseGame" .. reelID2]
+                BettrMechanicsController.SwapReelsForSpin(reel1, reel2)
+            end
+        end
+    end
+end
+
+function Game001BaseGameMachineHorizontalReelsShiftMechanic:ApplyOutcomeReceived(machine)
+    series
+        do        
+            local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
+            local numShifts = summary.NumShifts
+            System.Print("Game001BaseGameReelHorizontalReelsShiftMechanic:OnOutcomeReceived reelID={0} numShifts={1}", thisReelID, numShifts)
+            if numShifts > 0 then
+                for i=1,numShifts do
+                    if otherReelID ~= nil then
+                        break
+                    end
+                    local matrix = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, self.Config.Mechanic, "Shift" .. i)
+                    for j=1,#matrix do
+                        local matrixRow = matrix[j]
+                        local matrixRow = matrix[j]
+                        local reelID1 = matrixRow.ReelID1
+                        local reelID2 = matrixRow.ReelID2
+                        local reel1 = _G["Game001BaseGame" .. reelID1]
+                        local reel2 = _G["Game001BaseGame" .. reelID2]
+                        BettrMechanicsController.SwapReelsForSpin(reel1, reel2)
+                    end
+                end
+            end
+            machine:OnApplyOutcomeReceived()
+        end
+    end
+end
 

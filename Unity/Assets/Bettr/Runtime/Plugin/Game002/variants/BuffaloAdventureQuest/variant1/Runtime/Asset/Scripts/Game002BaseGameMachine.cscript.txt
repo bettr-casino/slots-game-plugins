@@ -51,7 +51,7 @@ function Game002BaseGameMachine:StartMachine()
             self:ConfigureSpinCoins()
             self:ConfigureSlamStopped()
 	        self:PlayStartAnimations()
-	        self:StartEngines()
+	        self.StartEngines()
         end
     end
 end
@@ -78,6 +78,7 @@ function Game002BaseGameMachine:OnSpinButtonClicked()
                 self:WaitForApplyOutcomeDelay()
                 self:LoadServerOutcome()
                 self:OnOutcomeReceived()
+                self:ApplyOutcomeReceived()
             end
         end
     end
@@ -117,6 +118,23 @@ function Game002BaseGameMachine:ConfigureSettings()
     local betMultiplier = Game002BetMultiplierState.Current.First.BetMultiplier
     local bet = baseWager * betMultiplier
     self.BetText.SetText(bet) 
+end
+
+function Game002BaseGameMachine:ShowSettings(mainLobbyScene)
+    series
+        do
+            self.Mechanics:ShowSettings(self, mainLobbyScene)
+        end
+    end
+end
+
+function Game002BaseGameMachine:ShowSettingsDefault(mainLobbyScene)
+    series
+        do
+            System.WaitForSeconds(1.0)
+            mainLobbyScene.MachineControls.SetActive(true)
+        end
+    end
 end
 
 function Game002BaseGameMachine:ResetSettings()
@@ -330,6 +348,34 @@ function Game002BaseGameMachine:OnOutcomeReceived()
         end
         do
             Game002BaseGameReel5:OnOutcomeReceived()
+        end
+    end
+end
+
+function Game002BaseGameMachine:ApplyOutcomeReceived()
+    series
+        do
+            self.Mechanics:ApplyOutcomeReceived(self)
+        end
+    end
+end
+
+function Game002BaseGameMachine:OnApplyOutcomeReceived()
+    parallel
+        do
+            Game002BaseGameReel1:OnApplyOutcomeReceived()
+        end
+        do
+            Game002BaseGameReel2:OnApplyOutcomeReceived()
+        end
+        do
+            Game002BaseGameReel3:OnApplyOutcomeReceived()
+        end
+        do
+            Game002BaseGameReel4:OnApplyOutcomeReceived()
+        end
+        do
+            Game002BaseGameReel5:OnApplyOutcomeReceived()
         end
     end
 end
