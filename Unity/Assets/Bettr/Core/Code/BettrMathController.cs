@@ -47,11 +47,11 @@ namespace Bettr.Core
 
         public Table GetBaseGameMechanicDataRow(string machineID, string mechanicName, params string[] kvPairs)
         {
-            return GetBaseGameMechanicDataRow(machineID, mechanicName, null, kvPairs);
+            return GetBaseGameMechanicDataRow(machineID, mechanicName, null, 0, kvPairs);
         }
         
 
-        public Table GetBaseGameMechanicDataRow(string machineID, string mechanicName, string pk, params string[] kvPairs)
+        public Table GetBaseGameMechanicDataRow(string machineID, string mechanicName, string pk, int placeholder, params string[] kvPairs)
         {
             // get the table
             var table = GetBaseGameMechanicData(machineID, mechanicName, pk);
@@ -120,10 +120,10 @@ namespace Bettr.Core
 
         public Table GetBaseGameMechanicRow(string machineID, string mechanicName, params string[] kvPairs)
         {
-            return GetBaseGameMechanicRow(machineID, mechanicName, null, kvPairs);
+            return GetBaseGameMechanicRow(machineID, mechanicName, null, 0, kvPairs);
         }
         
-        public Table GetBaseGameMechanicRow(string machineID, string mechanicName, string pk, params string[] kvPairs)
+        public Table GetBaseGameMechanicRow(string machineID, string mechanicName, string pk, int placeholder, params string[] kvPairs)
         {
             // get the table
             var table = GetBaseGameMechanic(machineID, mechanicName, pk);
@@ -161,13 +161,13 @@ namespace Bettr.Core
             var table = GetTableArray(tableName, machineID, pk);
             return table;
         }
-        
+
         public Table GetBaseGameMechanicMatrixRow(string machineID, string mechanicName, params string[] kvPairs)
         {
-            return GetBaseGameMechanicMatrixRow(machineID, mechanicName, null, kvPairs);
+            return GetBaseGameMechanicMatrixRow(machineID, mechanicName, null, 0, kvPairs);
         }
         
-        public Table GetBaseGameMechanicMatrixRow(string machineID, string mechanicName, string pk, params string[] kvPairs)
+        public Table GetBaseGameMechanicMatrixRow(string machineID, string mechanicName, string pk, int placeholder, params string[] kvPairs)
         {
             // get the table
             var table = GetBaseGameMechanicMatrix(machineID, mechanicName, pk);
