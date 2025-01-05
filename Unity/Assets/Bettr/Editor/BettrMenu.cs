@@ -246,14 +246,14 @@ namespace Bettr.Editor
             TileController.LuaScript.Call(dynValue);
         }
         
-        [MenuItem("Bettr/Tools/Apply Mechanics/HorizontalReelsShift/Game001EpicClockworkChronicles")]
+        [MenuItem("Bettr/Tools/Apply Mechanics/Scatters/Game001EpicCosmicVoyages")]
         static void ApplyMechanicMachine()
         {
-            var mechanic = "HorizontalReelsShift";
+            var mechanic = "Scatters";
             var machineName = "Game001";
-            var machineVariant = "EpicClockworkChronicles";
+            var machineVariant = "EpicCosmicVoyages";
             var experimentVariant = "control";
-            ApplyMechanicDelegate(mechanic, BettrMechanics.ProcessHorizontalReelsShiftMechanic, machineName, machineVariant, experimentVariant);
+            ApplyMechanicDelegate(mechanic, BettrMechanics.ProcessScattersMechanic, machineName, machineVariant, experimentVariant);
         }
         
         [MenuItem("Tools/Update Prefab References")]
@@ -1212,6 +1212,7 @@ namespace Bettr.Editor
             var specificMachineVariants = new string[] 
             {
                 // "EpicClockworkChronicles",
+                "EpicCosmicVoyage",
             };
             
             // if specificMachineVariants is not null, place a TODO.txt file in the root directory
@@ -3465,6 +3466,7 @@ namespace Bettr.Editor
                 { "reelrush", BettrMechanics.ProcessReelRushMechanic },
                 { "reelsplitter", BettrMechanics.ProcessReelSplitterMechanic },
                 { "reelswap", BettrMechanics.ProcessReelSwapMechanic },
+                { "scatters", BettrMechanics.ProcessScattersMechanic },
                 { "scatterbonusfreespins", BettrMechanics.ProcessScatterBonusFreeSpinsMechanic },
                 { "scatterrespins", BettrMechanics.ProcessScatterRespinsMechanic },
                 { "shiftingreels", BettrMechanics.ProcessShiftingReelsMechanic },

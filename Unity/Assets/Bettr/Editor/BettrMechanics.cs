@@ -333,6 +333,32 @@ namespace Bettr.Editor
             Debug.Log(
                 $"Processing reel swap mechanic for {machineName} {machineVariant} {experimentVariant} {machineModelPath}");
         }
+        
+        public static void ProcessScattersMechanic(string machineName, string machineVariant,
+            string experimentVariant, string machineModelPath)
+        {
+            Debug.Log(
+                $"Processing scatters mechanic for {machineName} {machineVariant} {experimentVariant} {machineModelPath}");
+            
+            var mechanicName = "Scatters";
+            
+            var templateName = $"BaseGame{mechanicName}Mechanic";
+            var prefabName = $"BaseGameMachine{mechanicName}";
+            var runtimeAssetPath = BettrMechanics.RuntimeAssetPath;
+            
+            BettrMaterialGenerator.MachineName = machineName;
+            BettrMaterialGenerator.MachineVariant = machineVariant;
+            
+            var model = new Dictionary<string, object>
+            {
+                { "machineName", machineName },
+                { "machineVariant", machineVariant },
+            };
+            
+            BettrMechanicsHelpers.ProcessBaseGameMechanic(
+                runtimeAssetPath, model,
+                templateName, prefabName, mechanicName);
+        }
 
         public static void ProcessScatterBonusFreeSpinsMechanic(string machineName, string machineVariant,
             string experimentVariant, string machineModelPath)
