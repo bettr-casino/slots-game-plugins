@@ -58,6 +58,9 @@ function {{machineName}}BaseGameReelMechanics:OnOutcomeReceived(reel)
     if self.ChooseASideMechanic then
         self.ChooseASideMechanic:OnOutcomeReceived(reel)
     end
+    if self.ScattersMechanic then
+       self.ScattersMechanic:OnOutcomeReceived(reel)
+    end
 end
 
 function {{machineName}}BaseGameReelMechanics:SpinEngines(reel)
