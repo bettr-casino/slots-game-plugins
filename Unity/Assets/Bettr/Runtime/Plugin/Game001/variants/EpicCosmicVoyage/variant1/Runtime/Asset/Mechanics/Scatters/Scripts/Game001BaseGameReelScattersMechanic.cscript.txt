@@ -42,7 +42,7 @@ function Game001BaseGameReelScattersMechanic:OnOutcomeReceived(reel)
         local reelID = row["ReelID"]
         if reelID == thisReelID then
             local rowIndex = row["RowIndex"]
-            local symbol = row["Symbol"]
+            local symbol = row["ScatterSymbol"]
             local reelStopIndex = outcomeReelStopIndex + rowIndex - topSymbolCount
             reel.BettrReelController.ReplaceSymbolForSpin(reelStopIndex, symbol)
         end
