@@ -246,12 +246,12 @@ namespace Bettr.Editor
             TileController.LuaScript.Call(dynValue);
         }
         
-        [MenuItem("Bettr/Tools/Apply Mechanics/Scatters/Game001EpicCosmicVoyages")]
+        [MenuItem("Bettr/Tools/Apply Mechanics/Scatters/Game001EpicCosmicVoyage")]
         static void ApplyMechanicMachine()
         {
             var mechanic = "Scatters";
             var machineName = "Game001";
-            var machineVariant = "EpicCosmicVoyages";
+            var machineVariant = "EpicCosmicVoyage";
             var experimentVariant = "control";
             ApplyMechanicDelegate(mechanic, BettrMechanics.ProcessScattersMechanic, machineName, machineVariant, experimentVariant);
         }
@@ -5434,7 +5434,7 @@ namespace Bettr.Editor
             return table.Pairs.Select(pair => pair.Key.String).ToList(); 
         }
         
-        private static List<Dictionary<string, T>> GetTableArray<T>(Table table)
+        public static List<Dictionary<string, T>> GetTableArray<T>(Table table)
         {
             var list = new List<Dictionary<string, T>>();
             foreach (var pair in table.Pairs)
@@ -5449,7 +5449,7 @@ namespace Bettr.Editor
             return list;
         }
         
-        private static List<T> GetTableArray<T>(Table table, string pk, string key)
+        public static List<T> GetTableArray<T>(Table table, string pk, string key)
         {
             Table valueTable = table;
             if (!string.IsNullOrEmpty(pk) && table[pk] is Table pkTable)

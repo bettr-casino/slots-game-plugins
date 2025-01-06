@@ -1,6 +1,7 @@
 require "math"
 require "Core"
 require "Game001BaseGameMachineWaysMechanic"
+require "Game001BaseGameMachineScattersMechanic"
 
 Game001BaseGameMachineMechanics = {
     Config = {
@@ -9,6 +10,7 @@ Game001BaseGameMachineMechanics = {
         Experiment = "variant1",
     },
     WaysMechanic = nil,
+    ScattersMechanic = nil,
 }
 
 function Game001BaseGameMachineMechanics:new(o)
@@ -25,6 +27,8 @@ end
 function Game001BaseGameMachineMechanics:Initialize(machine)
      self.WaysMechanic = Game001BaseGameMachineWaysMechanic:new()
      self.WaysMechanic:Initialize(machine)
+     self.ScattersMechanic = Game001BaseGameMachineScattersMechanic:new()
+     self.ScattersMechanic:Initialize(machine)
 end
 
 function Game001BaseGameMachineMechanics:StartMachine(machine)

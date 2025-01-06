@@ -349,10 +349,17 @@ namespace Bettr.Editor
             BettrMaterialGenerator.MachineName = machineName;
             BettrMaterialGenerator.MachineVariant = machineVariant;
             
+            var data2Summary = BettrMenu.GetTable($"{machineName}BaseGameScattersData2");
+            var scatterSymbols = BettrMenu.GetTableArray<string>(data2Summary, "Scatters", "ScatterSymbol");
+            
+            // convert scatterSymbols to array
+            var scatterSymbolNames = scatterSymbols.ToArray();
+            
             var model = new Dictionary<string, object>
             {
                 { "machineName", machineName },
                 { "machineVariant", machineVariant },
+                { "symbolNames", scatterSymbolNames }
             };
             
             BettrMechanicsHelpers.ProcessBaseGameMechanic(

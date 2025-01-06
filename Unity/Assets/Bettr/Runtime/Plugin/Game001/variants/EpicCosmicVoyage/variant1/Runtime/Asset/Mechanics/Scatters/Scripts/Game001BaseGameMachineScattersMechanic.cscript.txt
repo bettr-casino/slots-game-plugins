@@ -1,0 +1,137 @@
+require "math"
+require "Core"
+
+Game001BaseGameMachineScattersMechanic = {
+    Config = {
+        Machine = "Game001",
+        Variant = "EpicCosmicVoyage",
+        Experiment = "variant1",
+        Mechanic = "Scatters",
+    },
+    State = {
+        MechanicsPrefab = nil,
+        MainLobbyScene = nil,
+    }
+}
+
+function Game001BaseGameMachineScattersMechanic:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game001BaseGameMachineScattersMechanic:Initialize(machine)
+    series
+        do
+            local manifest = Game001.Manifest
+            local prefabName = "BaseGameMachineScatters"
+            local machineParent = machine.MachineParent
+            local mechanicsParent = machine.MechanicsParent
+            local mechanicsPrefab = BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, prefabName, mechanicsParent.GameObject)
+            self.State.MechanicsPrefab = mechanicsPrefab
+            System.Print("Game001BaseGameMachineScattersMechanic:Initialize mechanicsPrefab={0}", self.State.MechanicsPrefab.name)
+        end
+    end
+end
+
+function Game001BaseGameMachineScattersMechanic:TryPaying(machine)
+-- TryPaying flow will be resumed after mechanic visual is done
+    if self:_IsMechanicActive(machine) then
+        return 0
+    end
+    return machine.Mechanics.WaysMechanic:TryPaying()
+end
+
+function Game001BaseGameMachineScattersMechanic:_IsMechanicActive(machine)
+    local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
+    local numScatters = summary.NumScatters
+    return numShifts > 0
+end
+
+function Game001BaseGameMachineScattersMechanic:OnBaseGameSpinCompleted(machine)
+    series
+        do
+            if self:_IsMechanicActive(machine) then
+                self:_PlayMechanics()
+                local coinsPaid = machine.Mechanics.WaysMechanic:TryPaying(machine)
+                if coinsPaid > 0 then
+                    BettrVisualsController.FireballTornadoAt(self.State.MechanicsPrefab, 20, 4)
+                    machine.Mechanics:BaseGamePayout(machine)
+                    machine:OnPayingCompleted()
+                    if machine.Mechanics.CascadingReelsMechanic ~= nil and machine.Mechanics.CascadingReelsMechanic:HasCascade(machine) then
+                        machine.Mechanics.CascadingReelsMechanic:StartCascade(machine)
+                    end
+                end
+                self:_ResetMechanics()
+                machine:OnBaseGameSpinCompleted()
+            else
+                machine:OnBaseGameSpinCompleted()
+            end
+        end
+    end
+end
+
+function Game001BaseGameMachineScattersMechanic:_PlayMechanics()
+    local reelCount = Game001BaseGameLayout.ReelCount.First.Value
+    local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
+    local numShifts = summary.NumShifts
+    if numShifts > 0 then
+        for i=1,numShifts do
+            local matrix = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, self.Config.Mechanic, "Shift" .. i)
+            for j=1,#matrix do
+                local matrixRow = matrix[j]
+                local minReelID = BettrMechanicsController.GetMinReelID(matrixRow.ReelID1, matrixRow.ReelID2)
+                local maxReelID = BettrMechanicsController.GetMaxReelID(matrixRow.ReelID1, matrixRow.ReelID2)
+                self:_PlayMechanic(minReelID, maxReelID)
+            end
+        end
+    end
+end
+
+function Game001BaseGameMachineScattersMechanic:_ResetMechanics()
+    local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
+    local numShifts = summary.NumShifts
+    if numShifts > 0 then
+        for i=1,numShifts do
+            local matrix = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, self.Config.Mechanic, "Shift" .. i)
+            for j=1,#matrix do
+                local matrixRow = matrix[j]
+                local reelID1 = matrixRow.ReelID1
+                local reelID2 = matrixRow.ReelID2
+                local reel1 = _G["Game001BaseGame" .. reelID1]
+                local reel2 = _G["Game001BaseGame" .. reelID2]
+                BettrMechanicsController.SwapReelsForSpin(reel1, reel2)
+            end
+        end
+    end
+end
+
+function Game001BaseGameMachineScattersMechanic:ApplyOutcomeReceived(machine)
+    series
+        do        
+            local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
+            local numShifts = summary.NumShifts
+            System.Print("Game001BaseGameReelScattersMechanic:OnOutcomeReceived reelID={0} numShifts={1}", thisReelID, numShifts)
+            if numShifts > 0 then
+                for i=1,numShifts do
+                    if otherReelID ~= nil then
+                        break
+                    end
+                    local matrix = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, self.Config.Mechanic, "Shift" .. i)
+                    for j=1,#matrix do
+                        local matrixRow = matrix[j]
+                        local matrixRow = matrix[j]
+                        local reelID1 = matrixRow.ReelID1
+                        local reelID2 = matrixRow.ReelID2
+                        local reel1 = _G["Game001BaseGame" .. reelID1]
+                        local reel2 = _G["Game001BaseGame" .. reelID2]
+                        BettrMechanicsController.SwapReelsForSpin(reel1, reel2)
+                    end
+                end
+            end
+            machine:OnApplyOutcomeReceived()
+        end
+    end
+end
+

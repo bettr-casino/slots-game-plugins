@@ -1,0 +1,21 @@
+require "math"
+require "Core"
+
+Game001BaseGameReelScattersMechanic = {
+    Config = {
+        Machine = "Game001",
+        Variant = "EpicCosmicVoyage",
+        Experiment = "control",
+        Mechanic = "Scatters",
+    },
+}
+
+function Game001BaseGameReelScattersMechanic:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game001BaseGameReelScattersMechanic:Initialize(reel)
+end
