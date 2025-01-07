@@ -312,6 +312,7 @@ function Game009BaseGameMachine:OnRollupCredits(oldCoins, newCoins, pays, rollup
             end
             local creditsTextProperty = self.CreditsText   
             if pays ~= 0 then
+                BettrVisualsController.FireballMoveTo(self.WinText.GameObject, self.CreditsText.GameObject, 0, 1, true)
                 if pays > 0 then
                     BettrAudioController.PlayAudioLoop("rollupcoins")            
                 end

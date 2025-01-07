@@ -53,11 +53,17 @@ function Game001BaseGameReelMechanics:StartEngines(reel, machine)
     if self.ChooseASideMechanic then
         self.ChooseASideMechanic:StartEngines(reel, machine)
     end
+    if self.ScattersMechanic then
+       self.ScattersMechanic:StartEngines(reel, machine)
+    end
 end
 
 function Game001BaseGameReelMechanics:OnOutcomeReceived(reel)
     if self.ChooseASideMechanic then
         self.ChooseASideMechanic:OnOutcomeReceived(reel)
+    end
+    if self.ScattersMechanic then
+       self.ScattersMechanic:OnOutcomeReceived(reel)
     end
 end
 

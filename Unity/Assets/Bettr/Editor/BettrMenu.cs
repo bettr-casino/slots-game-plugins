@@ -1212,7 +1212,7 @@ namespace Bettr.Editor
             var specificMachineVariants = new string[] 
             {
                 // "EpicClockworkChronicles",
-                "EpicCosmicVoyage",
+                // "EpicCosmicVoyage",
             };
             
             // if specificMachineVariants is not null, place a TODO.txt file in the root directory
@@ -1286,6 +1286,10 @@ namespace Bettr.Editor
                         
                         // Load and run the Model file
                         var modelTextAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(modelDestinationPath);
+                        if (modelTextAsset == null)
+                        {
+                            Debug.LogError($"invalid modelDestinationPath={modelDestinationPath}");
+                        }
                         var machineModelScript = modelTextAsset.text;
                         TileController.StaticInit();
                         DynValue dynValue = TileController.LuaScript.LoadString(machineModelScript, codeFriendlyName: machineModelName);

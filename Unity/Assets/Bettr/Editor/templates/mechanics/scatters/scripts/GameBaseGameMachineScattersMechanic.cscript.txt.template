@@ -35,102 +35,39 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:Initialize(machi
     end
 end
 
-function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:TryPaying(machine)
--- TryPaying flow will be resumed after mechanic visual is done
-    if self:_IsMechanicActive(machine) then
-        return 0
-    end
-    return machine.Mechanics.WaysMechanic:TryPaying()
-end
-
-function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_IsMechanicActive(machine)
-    local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
-    local num{{mechanicName}} = summary.Num{{mechanicName}}
-    return numShifts > 0
-end
-
 function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCompleted(machine)
     series
         do
-            if self:_IsMechanicActive(machine) then
-                self:_PlayMechanics()
-                local coinsPaid = machine.Mechanics.WaysMechanic:TryPaying(machine)
-                if coinsPaid > 0 then
-                    BettrVisualsController.FireballTornadoAt(self.State.MechanicsPrefab, 20, 4)
-                    machine.Mechanics:BaseGamePayout(machine)
-                    machine:OnPayingCompleted()
-                    if machine.Mechanics.CascadingReelsMechanic ~= nil and machine.Mechanics.CascadingReelsMechanic:HasCascade(machine) then
-                        machine.Mechanics.CascadingReelsMechanic:StartCascade(machine)
-                    end
-                end
-                self:_ResetMechanics()
+            local scattersSummary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
+            local num{{mechanicName}} = scattersSummary.Num{{mechanicName}}
+            System.Print("{{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCompleted num{{mechanicName}}={0}", num{{mechanicName}})
+            if num{{mechanicName}} == 0 then
                 machine:OnBaseGameSpinCompleted()
-            else
+                return
+            end
+            local payout = scattersSummary.Payout
+            if payout <= 0 then
                 machine:OnBaseGameSpinCompleted()
+                return
             end
-        end
-    end
-end
-
-function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_PlayMechanics()
-    local reelCount = {{machineName}}BaseGameLayout.ReelCount.First.Value
-    local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
-    local numShifts = summary.NumShifts
-    if numShifts > 0 then
-        for i=1,numShifts do
-            local matrix = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, self.Config.Mechanic, "Shift" .. i)
-            for j=1,#matrix do
-                local matrixRow = matrix[j]
-                local minReelID = BettrMechanicsController.GetMinReelID(matrixRow.ReelID1, matrixRow.ReelID2)
-                local maxReelID = BettrMechanicsController.GetMaxReelID(matrixRow.ReelID1, matrixRow.ReelID2)
-                self:_PlayMechanic(minReelID, maxReelID)
-            end
-        end
-    end
-end
-
-function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_ResetMechanics()
-    local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
-    local numShifts = summary.NumShifts
-    if numShifts > 0 then
-        for i=1,numShifts do
-            local matrix = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, self.Config.Mechanic, "Shift" .. i)
-            for j=1,#matrix do
-                local matrixRow = matrix[j]
-                local reelID1 = matrixRow.ReelID1
-                local reelID2 = matrixRow.ReelID2
-                local reel1 = _G["{{machineName}}BaseGame" .. reelID1]
-                local reel2 = _G["{{machineName}}BaseGame" .. reelID2]
-                BettrMechanicsController.SwapReelsForSpin(reel1, reel2)
-            end
-        end
-    end
-end
-
-function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:ApplyOutcomeReceived(machine)
-    series
-        do        
-            local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
-            local numShifts = summary.NumShifts
-            System.Print("{{machineName}}BaseGameReel{{mechanicName}}Mechanic:OnOutcomeReceived reelID={0} numShifts={1}", thisReelID, numShifts)
-            if numShifts > 0 then
-                for i=1,numShifts do
-                    if otherReelID ~= nil then
-                        break
-                    end
-                    local matrix = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, self.Config.Mechanic, "Shift" .. i)
-                    for j=1,#matrix do
-                        local matrixRow = matrix[j]
-                        local matrixRow = matrix[j]
-                        local reelID1 = matrixRow.ReelID1
-                        local reelID2 = matrixRow.ReelID2
-                        local reel1 = _G["{{machineName}}BaseGame" .. reelID1]
-                        local reel2 = _G["{{machineName}}BaseGame" .. reelID2]
-                        BettrMechanicsController.SwapReelsForSpin(reel1, reel2)
-                    end
+            local reelCount = {{machineName}}BaseGameLayout.ReelCount.First.Value
+            local scatters = BettrMathController.GetBaseGameMechanic(self.Config.Machine, self.Config.Mechanic)
+            for i=1,#scatters do
+                local row = scatters[i]
+                local symbol = row.ScatterSymbol
+                local symbolGameObjects = BettrMechanicsController.GetSymbolMatrixGameObjects(self.Config.Machine, reelCount, symbol)
+                local symbolGameObjectsCount = #symbolGameObjects
+                System.Print("{{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCompleted symbol={0} symbolGameObjectsCount={1}", symbol, symbolGameObjectsCount)
+                for j=1,#symbolGameObjects parallel do
+                    local symbolGameObject = symbolGameObjects[j]
+                    BettrVisualsController.FireballMoveTo(nil, symbolGameObject, 0, 1, false)
+                    BettrVisualsController.FireballMoveTo(symbolGameObject, machine.WinText.GameObject, 0, 1, true)
                 end
-            end
-            machine:OnApplyOutcomeReceived()
+            end    
+            BettrUser.SpinCoins = BettrUser.SpinCoins + payout                            
+            machine:RollupCredits()
+            System.WaitForSeconds(1)            
+            machine:OnBaseGameSpinCompleted()            
         end
     end
 end
