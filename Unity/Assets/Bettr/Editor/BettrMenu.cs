@@ -246,14 +246,14 @@ namespace Bettr.Editor
             TileController.LuaScript.Call(dynValue);
         }
         
-        [MenuItem("Bettr/Tools/Apply Mechanics/HorizontalReelsShift/Game001EpicClockworkChronicles")]
+        [MenuItem("Bettr/Tools/Apply Mechanics/Scatters/Game001EpicCosmicVoyage")]
         static void ApplyMechanicMachine()
         {
-            var mechanic = "HorizontalReelsShift";
+            var mechanic = "Scatters";
             var machineName = "Game001";
-            var machineVariant = "EpicClockworkChronicles";
+            var machineVariant = "EpicCosmicVoyage";
             var experimentVariant = "control";
-            ApplyMechanicDelegate(mechanic, BettrMechanics.ProcessHorizontalReelsShiftMechanic, machineName, machineVariant, experimentVariant);
+            ApplyMechanicDelegate(mechanic, BettrMechanics.ProcessScattersMechanic, machineName, machineVariant, experimentVariant);
         }
         
         [MenuItem("Tools/Update Prefab References")]
@@ -1212,6 +1212,7 @@ namespace Bettr.Editor
             var specificMachineVariants = new string[] 
             {
                 // "EpicClockworkChronicles",
+                // "EpicCosmicVoyage",
             };
             
             // if specificMachineVariants is not null, place a TODO.txt file in the root directory
@@ -1285,6 +1286,10 @@ namespace Bettr.Editor
                         
                         // Load and run the Model file
                         var modelTextAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(modelDestinationPath);
+                        if (modelTextAsset == null)
+                        {
+                            Debug.LogError($"invalid modelDestinationPath={modelDestinationPath}");
+                        }
                         var machineModelScript = modelTextAsset.text;
                         TileController.StaticInit();
                         DynValue dynValue = TileController.LuaScript.LoadString(machineModelScript, codeFriendlyName: machineModelName);
@@ -3465,6 +3470,7 @@ namespace Bettr.Editor
                 { "reelrush", BettrMechanics.ProcessReelRushMechanic },
                 { "reelsplitter", BettrMechanics.ProcessReelSplitterMechanic },
                 { "reelswap", BettrMechanics.ProcessReelSwapMechanic },
+                { "scatters", BettrMechanics.ProcessScattersMechanic },
                 { "scatterbonusfreespins", BettrMechanics.ProcessScatterBonusFreeSpinsMechanic },
                 { "scatterrespins", BettrMechanics.ProcessScatterRespinsMechanic },
                 { "shiftingreels", BettrMechanics.ProcessShiftingReelsMechanic },
@@ -5432,7 +5438,7 @@ namespace Bettr.Editor
             return table.Pairs.Select(pair => pair.Key.String).ToList(); 
         }
         
-        private static List<Dictionary<string, T>> GetTableArray<T>(Table table)
+        public static List<Dictionary<string, T>> GetTableArray<T>(Table table)
         {
             var list = new List<Dictionary<string, T>>();
             foreach (var pair in table.Pairs)
@@ -5447,7 +5453,7 @@ namespace Bettr.Editor
             return list;
         }
         
-        private static List<T> GetTableArray<T>(Table table, string pk, string key)
+        public static List<T> GetTableArray<T>(Table table, string pk, string key)
         {
             Table valueTable = table;
             if (!string.IsNullOrEmpty(pk) && table[pk] is Table pkTable)

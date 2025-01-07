@@ -1,0 +1,51 @@
+require "math"
+require "Core"
+
+{{machineName}}BaseGameReel{{mechanicName}}Mechanic = {
+    Config = {
+        Machine = "{{machineName}}",
+        Variant = "{{machineVariant}}",
+        Experiment = "{{experimentVariant}}",
+        Mechanic = "{{mechanicName}}",
+    },
+    State = {
+        ReelSymbolGroups = nil,
+    },
+}
+
+function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:destroy()
+	System.Print("{{machineName}}BaseGameReel{{mechanicName}}Mechanic destroy tile id={0}", self.id)
+end
+
+function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:Initialize(reel)
+end
+
+function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:StartEngines(reel, machine)
+    local source = machine.{{mechanicName}}MechanicSymbolGroup
+    self.State.ReelSymbolGroups = BettrMechanicsController.AddSymbolsToReelSymbolGroups("{{mechanicName}}", reel.BettrReelController, source)
+end
+
+function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:OnOutcomeReceived(reel)
+    local thisReelID = reel.ReelID
+    local topSymbolCount = {{machineName}}BaseGameReelState[thisReelID].First.TopSymbolCount
+    local outcomeReelStopIndex = reel.BettrReelController.SpinOutcomeTable["OutcomeReelStopIndex"];
+    local matrix = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, "{{mechanicName}}")
+    for i = 1, #matrix do
+        local row = matrix[i]
+        local reelID = row["ReelID"]
+        if reelID == thisReelID then
+            local rowIndex = row["RowIndex"]
+            local symbol = row["ScatterSymbol"]
+            local reelStopIndex = outcomeReelStopIndex + rowIndex - topSymbolCount
+            reel.BettrReelController.ReplaceSymbolForSpin(reelStopIndex, symbol)
+        end
+    end
+end
+
