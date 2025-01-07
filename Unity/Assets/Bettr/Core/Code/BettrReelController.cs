@@ -29,6 +29,8 @@ namespace Bettr.Core
         
         [NonSerialized] private BettrUserController BettrUserController;
         [NonSerialized] private BettrMathController BettrMathController;
+        
+        [NonSerialized] private float timerEndTime;
 
         public List<string> ReelStripSymbolsForThisSpin { get; private set; }
 
@@ -94,12 +96,11 @@ namespace Bettr.Core
         public IEnumerator OnApplyOutcomeReceived()
         {
             float delayInSeconds = (float) (double) this.ReelStateTable["ReelStopDelayInSeconds"];
-            if (!BettrUserController.UserInSlamStopMode)
-            {
-                yield return new WaitForSeconds(delayInSeconds);
-            }
             this.ShouldSpliceReel = true;
             this.ReelStateTable["OutcomeReceived"] = true;
+            var timeNow = Time.time;
+            timerEndTime = timeNow + delayInSeconds;
+            yield break;
         }
         
         public void SpinEngines()
@@ -447,6 +448,12 @@ namespace Bettr.Core
             }
             if (this.ShouldSpliceReel)
             {
+                // start the timer
+                var timeNow = Time.time;
+                if (timeNow < timerEndTime)
+                {
+                    return;
+                }
                 SpliceReel();
                 this.ShouldSpliceReel = false;
             }
