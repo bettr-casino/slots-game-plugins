@@ -157,7 +157,8 @@ namespace Bettr.Core
         public IEnumerator OnOutcomeReceived()
         {
             this.SpinOutcomeTable = BettrMathController.GetTableFirst("BaseGameReelSpinOutcome", this.MachineID, this.ReelID);
-            ReelOutcomeDelays[this.ReelIndex].SetReelStopDelayInSeconds(0.250f);
+            float delayInSeconds = (float) (double) this.ReelStateTable["ReelStopDelayInSeconds"];
+            ReelOutcomeDelays[this.ReelIndex].SetReelStopDelayInSeconds(delayInSeconds);
             yield break;
         }
 

@@ -201,12 +201,15 @@ namespace Bettr.Core
 
             BettrAssetScriptsController.AddScript(className, script);
             
+            OutcomeNumber = 0;
+            
             yield break;
         }
 
         private int GetRandomOutcomeNumber(string gameId, string gameVariantId)
         {
-            if (OutcomeCounts.TryGetValue(gameId, out var count))
+            var key = $"{gameId}{gameVariantId}";
+            if (OutcomeCounts.TryGetValue(key, out var count))
             {
                 if (count > 0)
                 {
@@ -220,7 +223,7 @@ namespace Bettr.Core
             var filteredFiles = files.Where(file => regex.IsMatch(Path.GetFileName(file))).ToArray();
             var outcomeCount = filteredFiles.Length;
             
-            OutcomeCounts[gameId] = outcomeCount;
+            OutcomeCounts[key] = outcomeCount;
             
             return outcomeCount > 0 ? Random.Range(1, outcomeCount + 1) : 0;
         }
