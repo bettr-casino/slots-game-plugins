@@ -45,7 +45,7 @@ namespace Bettr.Core
             this.IsTimerStartedForSpin = true;
             this.TimerEndTimeForSpin = Time.time + this.ReelStopDelayInSecondsForSpin;
             
-            Debug.Log($"ReelIndex: {this.ReelIndex} Time.time={Time.time} TimerEndTimeForSpin: {this.TimerEndTimeForSpin}");
+            // Debug.Log($"ReelIndex: {this.ReelIndex} Time.time={Time.time} TimerEndTimeForSpin: {this.TimerEndTimeForSpin}");
         }
 
         public void SetReelStopDelayInSeconds(float delayInSeconds)
@@ -166,7 +166,7 @@ namespace Bettr.Core
         {
             this.ShouldSpliceReel = true;
             this.ReelStateTable["OutcomeReceived"] = true;
-            Debug.Log($"OnApplyOutcomeReceived ReelIndex: {this.ReelIndex} time: {Time.time}");
+            // Debug.Log($"OnApplyOutcomeReceived ReelIndex: {this.ReelIndex} time: {Time.time}");
             yield break;
         }
         
