@@ -62,6 +62,48 @@ namespace Bettr.Core
         }
     }
     
+    public class SwapInReelStripSymbolsCommand
+    {
+        private List<string> reelStripSymbolsForSpin;
+        private bool _undoCompleted;
+
+        public SwapInReelStripSymbolsCommand(List<string> reelStripSymbolsForSpin)
+        {
+            this.reelStripSymbolsForSpin = reelStripSymbolsForSpin;
+            this._undoCompleted = false;
+        }
+
+        public void Undo(BettrReelController reelController)
+        {
+            if (!_undoCompleted)
+            {
+                reelController.ReelStripSymbolsForThisSpin = reelStripSymbolsForSpin;
+                _undoCompleted = true;
+            }
+        }
+    }
+    
+    public class SwapInSpinOutcomeTableCommand
+    {
+        private Table _spinOutcomeTable;
+        private bool _undoCompleted;
+
+        public SwapInSpinOutcomeTableCommand(Table spinOutcomeTable)
+        {
+            this._spinOutcomeTable = spinOutcomeTable;
+            this._undoCompleted = false;
+        }
+
+        public void Undo(BettrReelController reelController)
+        {
+            if (!_undoCompleted)
+            {
+                reelController.SpinOutcomeTable = _spinOutcomeTable;
+                _undoCompleted = true;
+            }
+        }
+    }
+    
     
     [Serializable]
     public class BettrReelController : MonoBehaviour
@@ -74,10 +116,13 @@ namespace Bettr.Core
         [NonSerialized] private string MachineID;
         [NonSerialized] private string MachineVariantID;
         
+        [NonSerialized] private SwapInReelStripSymbolsCommand _swapInReelStripSymbolsCommand;
+        [NonSerialized] private SwapInSpinOutcomeTableCommand _swapInSpinOutcomeTableCommand;
+        
         public Table ReelTable { get; private set; }
         public Table ReelStateTable { get; private set; }
         public Table ReelSpinStateTable { get; private set; }
-        public Table SpinOutcomeTable { get; private set; }
+        public Table SpinOutcomeTable { get; internal set; }
         public Table ReelSymbolsStateTable { get; private set; }
         public Table ReelSymbolsTable { get; private set; }
         
@@ -87,7 +132,7 @@ namespace Bettr.Core
         [NonSerialized] private BettrUserController BettrUserController;
         [NonSerialized] private BettrMathController BettrMathController;
         
-        public List<string> ReelStripSymbolsForThisSpin { get; private set; }
+        public List<string> ReelStripSymbolsForThisSpin { get; internal set; }
         
         public static ReelOutcomeDelay[] ReelOutcomeDelays { get; private set; }
 
@@ -191,12 +236,30 @@ namespace Bettr.Core
 
         public void SwapInReelStripSymbolsForSpin(List<string> reelStripSymbolsForSpin)
         {
+            this._swapInReelStripSymbolsCommand = new SwapInReelStripSymbolsCommand(this.ReelStripSymbolsForThisSpin);
             this.ReelStripSymbolsForThisSpin = reelStripSymbolsForSpin;
+        }
+        
+        public void UndoSwapInReelStripSymbolsForSpin()
+        {
+            if (this._swapInReelStripSymbolsCommand != null)
+            {
+                this._swapInReelStripSymbolsCommand.Undo(this);
+            }
         }
         
         public void SwapInReelSpinOutcomeTableForSpin(Table spinOutcomeTable)
         {
+            this._swapInSpinOutcomeTableCommand = new SwapInSpinOutcomeTableCommand(this.SpinOutcomeTable);
             this.SpinOutcomeTable = spinOutcomeTable;
+        }
+        
+        public void UndoSwapInReelSpinOutcomeTableForSpin()
+        {
+            if (this._swapInSpinOutcomeTableCommand != null)
+            {
+                this._swapInSpinOutcomeTableCommand.Undo(this);
+            }
         }
         
         public void SetupReelStripSymbolsForSpin()

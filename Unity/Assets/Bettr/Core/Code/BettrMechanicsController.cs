@@ -57,6 +57,21 @@ namespace Bettr.Core
             reel1Controller.SwapInReelSpinOutcomeTableForSpin(reel2OutcomeTable);
             reel2Controller.SwapInReelSpinOutcomeTableForSpin(reel1OutcomeTable);
         }
+        
+        //
+        // Reel APIs
+        //
+        public void UndoSwapReelsForSpin(Table reel1, Table reel2)
+        {
+            var reel1Controller = (BettrReelController) reel1["BettrReelController"];
+            var reel2Controller = (BettrReelController) reel2["BettrReelController"];
+            // undo swap ReelStrips
+            reel1Controller.UndoSwapInReelStripSymbolsForSpin();
+            reel2Controller.UndoSwapInReelStripSymbolsForSpin();
+            // undo swap SpinOutcomeTable
+            reel1Controller.UndoSwapInReelSpinOutcomeTableForSpin();
+            reel2Controller.UndoSwapInReelSpinOutcomeTableForSpin();
+        }
 
         public string GetMinReelID(params string[] reels)
         {
