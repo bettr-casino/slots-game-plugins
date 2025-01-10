@@ -1,0 +1,103 @@
+{
+  "Name": "BaseGameScattersMechanic",
+  "Id": "BaseGameScattersMechanic",
+  "Position": {
+    "X": 0,
+    "Y": -4.7,
+    "Z": 0
+  },
+  "Scale": {
+    "X": 0.25,
+    "Y": 0.4,
+    "Z": 1
+  },
+  "Child": {
+    "Name": "Pivot",
+    "Id": "Pivot",
+    "Position": {
+      "X": 0,
+      "Y": 3.2,
+      "Z": 0
+    },
+    "Scale": {
+      "X": 0.8,
+      "Y": 0.8,
+      "Z": 1
+    },
+    "Children": [   
+      {
+        "Name": "BaseGameScattersSymbolGroup",
+        "Id": "BaseGameScattersSymbolGroup",
+        "Layer": "SLOT_REELS",
+        "Active": true,
+        "Children": [
+          {{- for symbolName in symbolNames }}            
+          {
+            "Name": "{{symbolName}}",
+            "Id": "{{symbolName}}",
+            "Active": false,
+            "Components": [
+              {
+                "ComponentType": "AnimatorController",
+                "Filename": "BaseGameScattersSymbol{{symbolPrefabName}}",
+                "AnimationStates": [
+                  {
+                    "Name": "noop",
+                    "Speed": 1,
+                    "IsLoop": false,
+                    "IsDefault": true
+                  }
+                ],
+                "AnimatorStateTransitions": []
+              }
+            ],
+            "Child": {
+              "Name": "Pivot",
+              "Layer": "SLOT_REELS",
+              "Children": [
+                {
+                  "Name": "Quad",
+                  "Layer": "SLOT_REELS",
+                  "IsPrimitive": true,
+                  "Primitive": 5,
+                  "PrimitiveMaterial": "BaseGameScattersSymbol{{symbolName}}",
+                  "PrimitiveShader": "Bettr/Symbol",
+                  "PrimitiveTexture": "BaseGameScattersSymbol{{symbolName}}",
+                  "PrimitiveTextureCreate": true,
+                  "PrimitiveTextureCreateSource": "default.png",                        
+                  "PrimitiveAlpha": 0.7,
+                  "Scale": {
+                    "X": 1,
+                    "Y": 1,
+                    "Z": 1
+                  }
+                }
+              ]
+            }
+          }            
+          {{ if !for.last }},{{ end }}{{ end }}                            
+        ]
+      }
+    ]
+  },
+  "Components": [
+    {
+       "ComponentType": "TilePropertyGameObjectsInjected",
+       "GameObjectsProperty": [         
+       ],
+       "GameObjectGroupsProperty": [
+          {
+            "GroupKey": "ScattersMechanicSymbolGroup",
+            "Group": [
+              {{ for symbolName in symbolNames }}
+              {
+                  "Key": "{{symbolName}}",
+                  "Id": "{{symbolName}}"
+              }
+              {{ if !for.last }},{{ end }}{{ end }}
+            ]
+          }
+       ]
+    }
+  ]
+}

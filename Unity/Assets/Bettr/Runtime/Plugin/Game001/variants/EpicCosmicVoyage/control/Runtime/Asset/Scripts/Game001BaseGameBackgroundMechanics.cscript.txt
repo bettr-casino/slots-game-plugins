@@ -9,6 +9,7 @@ Game001BaseGameBackgroundMechanics = {
     },
     WaysMechanic = nil,
     ScattersMechanic = nil,
+    ReelAnticipationMechanic = nil,
 }
 
 function Game001BaseGameBackgroundMechanics:new(o)
@@ -35,6 +36,8 @@ function Game001BaseGameBackgroundMechanics:Initialize(background)
      self.WaysMechanic:Initialize(background)
      self.ScattersMechanic = Game001BaseGameBackgroundScattersMechanic:new()
      self.ScattersMechanic:Initialize(background)
+     self.ReelAnticipationMechanic = Game001BaseGameBackgroundReelAnticipationMechanic:new()
+     self.ReelAnticipationMechanic:Initialize(background)
 end
 
 return Game001BaseGameBackgroundMechanics:new()

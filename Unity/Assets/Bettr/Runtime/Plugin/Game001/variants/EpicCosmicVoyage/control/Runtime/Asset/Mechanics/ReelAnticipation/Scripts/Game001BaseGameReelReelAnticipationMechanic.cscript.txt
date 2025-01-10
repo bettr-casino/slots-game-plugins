@@ -1,0 +1,30 @@
+require "math"
+require "Core"
+
+Game001BaseGameReelReelAnticipationMechanic = {
+    Config = {
+        Machine = "Game001",
+        Variant = "EpicCosmicVoyage",
+        Experiment = "control",
+        Mechanic = "ReelAnticipation",
+    },
+    State = {
+        ReelSymbolGroups = nil,
+    },
+}
+
+function Game001BaseGameReelReelAnticipationMechanic:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game001BaseGameReelReelAnticipationMechanic:destroy()
+	System.Print("Game001BaseGameReelReelAnticipationMechanic destroy tile id={0}", self.id)
+end
+
+function Game001BaseGameReelReelAnticipationMechanic:Initialize(reel)
+end
+
+

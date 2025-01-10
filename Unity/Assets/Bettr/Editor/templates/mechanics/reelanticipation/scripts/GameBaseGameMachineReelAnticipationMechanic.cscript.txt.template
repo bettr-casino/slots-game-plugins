@@ -1,0 +1,26 @@
+require "math"
+require "Core"
+
+{{machineName}}BaseGameMachine{{mechanicName}}Mechanic = {
+    Config = {
+        Machine = "{{machineName}}",
+        Variant = "{{machineVariant}}",
+        Experiment = "{{experimentVariant}}",
+        Mechanic = "{{mechanicName}}",
+    },
+    State = {
+        MechanicsPrefab = nil,
+        MainLobbyScene = nil,
+    }
+}
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:Initialize(machine)
+end
+

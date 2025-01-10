@@ -246,14 +246,14 @@ namespace Bettr.Editor
             TileController.LuaScript.Call(dynValue);
         }
         
-        [MenuItem("Bettr/Tools/Apply Mechanics/Scatters/Game001EpicCosmicVoyage")]
+        [MenuItem("Bettr/Tools/Apply Mechanics/ReelAnticipation/Game001EpicCosmicVoyage")]
         static void ApplyMechanicMachine()
         {
-            var mechanic = "Scatters";
+            var mechanic = "ReelAnticipation";
             var machineName = "Game001";
             var machineVariant = "EpicCosmicVoyage";
             var experimentVariant = "control";
-            ApplyMechanicDelegate(mechanic, BettrMechanics.ProcessScattersMechanic, machineName, machineVariant, experimentVariant);
+            ApplyMechanicDelegate(mechanic, BettrMechanics.ProcessReelAnticipationMechanic, machineName, machineVariant, experimentVariant);
         }
         
         [MenuItem("Tools/Update Prefab References")]
@@ -3466,6 +3466,7 @@ namespace Bettr.Editor
                 { "randommultipliers", BettrMechanics.ProcessRandomMultipliersMechanic },
                 { "randommultiplierwilds", BettrMechanics.ProcessRandomMultiplierWildsMechanic },
                 { "randomwilds", BettrMechanics.ProcessRandomWildsMechanic },
+                { "reelanticipation", BettrMechanics.ProcessReelAnticipationMechanic },
                 { "reelburst", BettrMechanics.ProcessReelBurstMechanic },
                 { "reelrush", BettrMechanics.ProcessReelRushMechanic },
                 { "reelsplitter", BettrMechanics.ProcessReelSplitterMechanic },

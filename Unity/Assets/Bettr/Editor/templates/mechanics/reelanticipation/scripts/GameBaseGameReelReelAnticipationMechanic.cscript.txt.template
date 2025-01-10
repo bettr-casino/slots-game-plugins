@@ -1,0 +1,30 @@
+require "math"
+require "Core"
+
+{{machineName}}BaseGameReel{{mechanicName}}Mechanic = {
+    Config = {
+        Machine = "{{machineName}}",
+        Variant = "{{machineVariant}}",
+        Experiment = "{{experimentVariant}}",
+        Mechanic = "{{mechanicName}}",
+    },
+    State = {
+        ReelSymbolGroups = nil,
+    },
+}
+
+function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:destroy()
+	System.Print("{{machineName}}BaseGameReel{{mechanicName}}Mechanic destroy tile id={0}", self.id)
+end
+
+function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:Initialize(reel)
+end
+
+
