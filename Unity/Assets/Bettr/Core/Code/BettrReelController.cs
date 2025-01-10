@@ -394,6 +394,10 @@ namespace Bettr.Core
                 UpdateReelStopIndexes();
                 ApplySpinReelStop();
                 slideDistanceInSymbolUnits += slideDistanceOffsetInSymbolUnits;
+                if (ReelOutcomeDelays[this.ReelIndex].IsStoppedForSpin)
+                {
+                    break;
+                }
             }
 
             var spinState = (string) this.ReelSpinStateTable["ReelSpinState"];
