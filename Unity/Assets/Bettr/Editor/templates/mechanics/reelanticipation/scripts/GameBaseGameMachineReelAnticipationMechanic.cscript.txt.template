@@ -29,6 +29,7 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:Initialize(machi
             local mechanicsParent = machine.MechanicsParent
             local mechanicsPrefab = BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, prefabName, mechanicsParent.GameObject)
             mechanicsPrefab.SetActive(false)
+            mechanicsPrefab.name = self.Config.Mechanic
             self.State.MechanicsPrefab = mechanicsPrefab            
             System.Print("{{machineName}}BaseGameMachineScattersMechanic:Initialize mechanicsPrefab={0}", self.State.MechanicsPrefab.name)
         end

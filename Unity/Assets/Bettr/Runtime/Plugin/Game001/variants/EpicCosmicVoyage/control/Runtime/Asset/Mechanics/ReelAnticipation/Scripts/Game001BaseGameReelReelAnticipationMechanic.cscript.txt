@@ -28,7 +28,10 @@ function Game001BaseGameReelReelAnticipationMechanic:Initialize(reel)
 end
 
 function Game001BaseGameReelReelAnticipationMechanic:StartEngines(reel, machine)
-    self.State.MechanicsPrefab = BettrVisualsController.CloneAndOverlayGameObject(machine.Mechanics.ReelAnticipationMechanic.State.MechanicsPrefab)
+    local mechanicPrefab = machine.Mechanics.ReelAnticipationMechanic.State.MechanicsPrefab
+    local clonedMechanicPrefab = BettrVisualsController.CloneAndOverlayGameObject(mechanicPrefab)
+    clonedMechanicPrefab.name = mechanicPrefab.name .. reel.ReelID
+    self.State.MechanicsPrefab = clonedMechanicPrefab
 end
 
 function Game001BaseGameReelReelAnticipationMechanic:OnApplyOutcomeReceived(reel)    

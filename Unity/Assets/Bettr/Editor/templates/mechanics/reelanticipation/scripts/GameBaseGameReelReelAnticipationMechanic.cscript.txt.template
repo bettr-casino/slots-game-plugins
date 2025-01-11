@@ -28,7 +28,10 @@ function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:Initialize(reel)
 end
 
 function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:StartEngines(reel, machine)
-    self.State.MechanicsPrefab = BettrVisualsController.CloneAndOverlayGameObject(machine.Mechanics.{{mechanicName}}Mechanic.State.MechanicsPrefab)
+    local mechanicPrefab = machine.Mechanics.{{mechanicName}}Mechanic.State.MechanicsPrefab
+    local clonedMechanicPrefab = BettrVisualsController.CloneAndOverlayGameObject(mechanicPrefab)
+    clonedMechanicPrefab.name = mechanicPrefab.name .. reel.ReelID
+    self.State.MechanicsPrefab = clonedMechanicPrefab
 end
 
 function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:OnApplyOutcomeReceived(reel)    
