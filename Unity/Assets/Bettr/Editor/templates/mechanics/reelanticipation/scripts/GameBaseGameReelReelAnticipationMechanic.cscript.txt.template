@@ -8,9 +8,6 @@ require "Core"
         Experiment = "{{experimentVariant}}",
         Mechanic = "{{mechanicName}}",
     },
-    State = {
-        MechanicsPrefab = nil,
-    },
 }
 
 function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:new(o)
@@ -25,6 +22,9 @@ function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:destroy()
 end
 
 function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:Initialize(reel)
+    self.State = {
+        MechanicsPrefab = nil,
+    }
 end
 
 function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:StartEngines(reel, machine)
@@ -34,7 +34,10 @@ function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:StartEngines(reel, 
     self.State.MechanicsPrefab = clonedMechanicPrefab
 end
 
-function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:OnApplyOutcomeReceived(reel)    
+function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:OnApplyOutcomeReceived(reel) 
+    local mechanicsPrefab = self.State.MechanicsPrefab
+    BettrVisualsController.OverlayFirstOverSecond(mechanicsPrefab, reel.gameObject)
+    BettrVisualsController.ScaleFirstToSecond(mechanicsPrefab, reel.gameObject)
     reel.BettrReelController.OnApplyOutcomeReceived()
 end
 

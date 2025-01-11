@@ -8,9 +8,6 @@ Game001BaseGameReelReelAnticipationMechanic = {
         Experiment = "control",
         Mechanic = "ReelAnticipation",
     },
-    State = {
-        MechanicsPrefab = nil,
-    },
 }
 
 function Game001BaseGameReelReelAnticipationMechanic:new(o)
@@ -25,6 +22,9 @@ function Game001BaseGameReelReelAnticipationMechanic:destroy()
 end
 
 function Game001BaseGameReelReelAnticipationMechanic:Initialize(reel)
+    self.State = {
+        MechanicsPrefab = nil,
+    }
 end
 
 function Game001BaseGameReelReelAnticipationMechanic:StartEngines(reel, machine)
@@ -34,7 +34,10 @@ function Game001BaseGameReelReelAnticipationMechanic:StartEngines(reel, machine)
     self.State.MechanicsPrefab = clonedMechanicPrefab
 end
 
-function Game001BaseGameReelReelAnticipationMechanic:OnApplyOutcomeReceived(reel)    
+function Game001BaseGameReelReelAnticipationMechanic:OnApplyOutcomeReceived(reel) 
+    local mechanicsPrefab = self.State.MechanicsPrefab
+    BettrVisualsController.OverlayFirstOverSecond(mechanicsPrefab, reel.gameObject)
+    BettrVisualsController.ScaleFirstToSecond(mechanicsPrefab, reel.gameObject)
     reel.BettrReelController.OnApplyOutcomeReceived()
 end
 
