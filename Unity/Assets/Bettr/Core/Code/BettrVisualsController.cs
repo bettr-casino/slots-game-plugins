@@ -1210,6 +1210,13 @@ namespace Bettr.Core
             var particleSystem = particleSystemProperty.particleSystem;
             particleSystem.Stop();
         }
+        
+        public void SetZeroZPosition(GameObject gameObject)
+        {
+            var position = gameObject.transform.position;
+            position.z = 0;
+            gameObject.transform.position = position;
+        }
 
         public TilePropertyGameObjectGroup CloneGameObjectGroup(TilePropertyGameObjectGroup group)
         {
@@ -1281,7 +1288,7 @@ namespace Bettr.Core
             };
             return tmPro;
         }
-
+        
         public void OverlayFirstOverSecond(PropertyGameObject firstGameObjectProperty, PropertyGameObject secondGameObjectProperty)
         {
             OverlayFirstOverSecond(firstGameObjectProperty.gameObject, secondGameObjectProperty.gameObject);
