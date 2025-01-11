@@ -220,6 +220,16 @@ namespace Bettr.Core
             this.ReelSpinStateTable["ReelSpinState"] = "SpinStartedRollBack";
             this.ReelStateTable["OutcomeReceived"] = false;
             this.ShouldSpliceReel = false;
+            
+            // undo any swap in reel strip symbols or spin outcome table
+            if (this._swapInReelStripSymbolsCommand != null)
+            {
+                this._swapInReelStripSymbolsCommand.Undo(this);
+            }
+            if (this._swapInSpinOutcomeTableCommand != null)
+            {
+                this._swapInSpinOutcomeTableCommand.Undo(this);
+            }
 
             this.SetupReelStripSymbolsForSpin();
             ReelOutcomeDelays[this.ReelIndex].Reset();
