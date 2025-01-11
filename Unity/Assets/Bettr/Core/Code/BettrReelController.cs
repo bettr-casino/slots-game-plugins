@@ -430,7 +430,7 @@ namespace Bettr.Core
         
         public bool SpinReelSpinning()
         {
-            var speed = BettrUserController.UserInSlamStopMode ? 8 : 8;
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 4;
             this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = (double) this.ReelStateTable["SpinSpeedInSymbolUnitsPerSecond"] * speed;
             float slideDistanceInSymbolUnits = AdvanceReel();
             SlideReelSymbols(slideDistanceInSymbolUnits);
