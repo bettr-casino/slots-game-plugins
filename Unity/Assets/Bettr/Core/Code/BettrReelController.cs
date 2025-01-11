@@ -292,7 +292,7 @@ namespace Bettr.Core
         
         public void SpinReelSpinStartedRollBack()
         {
-            var speed = BettrUserController.UserInSlamStopMode ? 4 : 1;
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 4;
             this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = (double) this.ReelStateTable["SpinStartedRollBackSpeedInSymbolUnitsPerSecond"] * speed;
             var reelSpinDirection = (string) this.ReelSpinStateTable["ReelSpinDirection"];
             var spinDirectionIsDown = reelSpinDirection == "Down";

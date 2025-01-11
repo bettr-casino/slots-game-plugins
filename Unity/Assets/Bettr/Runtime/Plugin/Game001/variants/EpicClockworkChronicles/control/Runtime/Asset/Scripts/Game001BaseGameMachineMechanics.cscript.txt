@@ -123,8 +123,6 @@ function Game001BaseGameMachineMechanics:ApplyOutcomeReceived(machine)
         do
             if self.HorizontalReelsShiftMechanic ~= nil then
                 self.HorizontalReelsShiftMechanic:ApplyOutcomeReceived(machine)
-            elseif self.ReelAnticipationMechanic ~= nil then
-                self.ReelAnticipationMechanic:ApplyOutcomeReceived(machine)
             else
                 machine:OnApplyOutcomeReceived()
             end
