@@ -48,6 +48,9 @@ function Game009BaseGameReelMechanics:StartEngines(reel, machine)
     if self.ScattersMechanic then
        self.ScattersMechanic:StartEngines(reel, machine)
     end
+    if self.ReelAnticipationMechanic then
+       self.ReelAnticipationMechanic:StartEngines(reel, machine)
+    end
 end
 
 function Game009BaseGameReelMechanics:OnOutcomeReceived(reel)
@@ -60,7 +63,11 @@ function Game009BaseGameReelMechanics:OnOutcomeReceived(reel)
 end
 
 function Game009BaseGameReelMechanics:OnApplyOutcomeReceived(reel)
-    reel.BettrReelController.OnApplyOutcomeReceived()
+    if self.ReelAnticipationMechanic then
+        self.ReelAnticipationMechanic:OnApplyOutcomeReceived(reel)
+    else
+        reel.BettrReelController.OnApplyOutcomeReceived(reel)
+    end
 end
 
 function Game009BaseGameReelMechanics:SpinEngines(reel)

@@ -9,7 +9,7 @@ require "Core"
         Mechanic = "{{mechanicName}}",
     },
     State = {
-        ReelSymbolGroups = nil,
+        MechanicsPrefab = nil,
     },
 }
 
@@ -25,6 +25,14 @@ function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:destroy()
 end
 
 function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:Initialize(reel)
+end
+
+function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:StartEngines(reel, machine)
+    self.State.MechanicsPrefab = BettrVisualsController(machine.State.MechanicsPrefab)
+end
+
+function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:OnApplyOutcomeReceived(reel)
+    reel.BettrReelController.OnApplyOutcomeReceived()
 end
 
 

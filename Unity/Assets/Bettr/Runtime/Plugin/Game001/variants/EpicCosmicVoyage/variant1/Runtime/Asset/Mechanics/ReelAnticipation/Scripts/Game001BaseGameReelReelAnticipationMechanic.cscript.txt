@@ -9,7 +9,7 @@ Game001BaseGameReelReelAnticipationMechanic = {
         Mechanic = "ReelAnticipation",
     },
     State = {
-        ReelSymbolGroups = nil,
+        MechanicsPrefab = nil,
     },
 }
 
@@ -25,6 +25,14 @@ function Game001BaseGameReelReelAnticipationMechanic:destroy()
 end
 
 function Game001BaseGameReelReelAnticipationMechanic:Initialize(reel)
+end
+
+function Game001BaseGameReelReelAnticipationMechanic:StartEngines(reel, machine)
+    self.State.MechanicsPrefab = BettrVisualsController(machine.State.MechanicsPrefab)
+end
+
+function Game001BaseGameReelReelAnticipationMechanic:OnApplyOutcomeReceived(reel)
+    reel.BettrReelController.OnApplyOutcomeReceived()
 end
 
 
