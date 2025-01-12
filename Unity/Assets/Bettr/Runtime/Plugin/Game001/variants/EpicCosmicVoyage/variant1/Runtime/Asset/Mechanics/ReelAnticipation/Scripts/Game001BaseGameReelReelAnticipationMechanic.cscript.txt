@@ -43,12 +43,12 @@ end
 
 function Game001BaseGameReelReelAnticipationMechanic:OnApplyOutcomeReceived(reel) 
     local dataSummary = BettrMathController.GetBaseGameMechanicDataSummary(self.Config.Machine, self.Config.Mechanic)
-    local row = BettrMathController.GetBaseGameMechanicRow(self.Config.Machine, self.Config.Mechanic, self.Config.Mechanic, "ScatterReelAnticipation")
+    local row = BettrMathController.GetBaseGameMechanicRow(self.Config.Machine, self.Config.Mechanic, "ReelAnticipationID", "ScatterReelAnticipation")
     self.State.AnticipationSpeed = dataSummary.AnticipationSpeed
     self.State.AnticipationDuration = dataSummary.AnticipationDuration
-    local numAnticipations = row.NumAnticipations
-    System.Print("Game001BaseGameReelReelAnticipationMechanic:OnApplyOutcomeReceived reelID={0} numAnticipations={1}", reel.ReelID, numAnticipations)
-    if numAnticipations > 0 then
+    local numReelAnticipation = row.NumReelAnticipation
+    self.State.AnticipateReelID = nil
+    if numReelAnticipation > 0 then
         local matrixRow = BettrMathController.GetBaseGameMechanicMatrixRow(self.Config.Machine, self.Config.Mechanic, "ScatterReelAnticipation", 0, "LandedReelID", reel.ReelID)
         if matrixRow then
             local anticipateReelID = matrixRow.ReelID
