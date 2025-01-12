@@ -151,6 +151,7 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
         do
             if self:_IsMechanicActive(machine) then
                 self:_PlayMechanics()
+                self:_ResetMechanics()
                 local coinsPaid = machine.Mechanics.WaysMechanic:TryPaying(machine)
                 if coinsPaid > 0 then
                     BettrVisualsController.FireballTornadoAt(self.State.MechanicsPrefab, 20, 4)
@@ -160,7 +161,6 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                         machine.Mechanics.CascadingReelsMechanic:StartCascade(machine)
                     end
                 end
-                self:_ResetMechanics()
                 machine:OnBaseGameSpinCompleted()
             else
                 machine:OnBaseGameSpinCompleted()
@@ -198,7 +198,7 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:_ResetMechanics(
                 local reelID2 = matrixRow.ReelID2
                 local reel1 = _G["{{machineName}}BaseGame" .. reelID1]
                 local reel2 = _G["{{machineName}}BaseGame" .. reelID2]
-                BettrMechanicsController.SwapReelsForSpin(reel1, reel2)
+                BettrMechanicsController.UndoSwapReelsForSpin(reel1, reel2)
             end
         end
     end

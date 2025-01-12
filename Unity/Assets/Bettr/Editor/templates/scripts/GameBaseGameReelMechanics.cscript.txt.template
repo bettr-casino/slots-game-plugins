@@ -45,7 +45,10 @@ end
 function {{machineName}}BaseGameReelMechanics:SpinReelReachedOutcomeStopIndex(reel)
 end
 
-function {{machineName}}BaseGameReelMechanics:OnSpinReelsStopped(reel)
+function {{machineName}}BaseGameReelMechanics:OnSpinReelStopped(reel)
+    if self.ReelAnticipationMechanic then
+        self.ReelAnticipationMechanic:OnSpinReelStopped(reel)
+    end
 end
 
 function {{machineName}}BaseGameReelMechanics:StartEngines(reel, machine)
@@ -55,6 +58,9 @@ function {{machineName}}BaseGameReelMechanics:StartEngines(reel, machine)
     if self.ScattersMechanic then
        self.ScattersMechanic:StartEngines(reel, machine)
     end
+    if self.ReelAnticipationMechanic then
+       self.ReelAnticipationMechanic:StartEngines(reel, machine)
+    end
 end
 
 function {{machineName}}BaseGameReelMechanics:OnOutcomeReceived(reel)
@@ -63,6 +69,14 @@ function {{machineName}}BaseGameReelMechanics:OnOutcomeReceived(reel)
     end
     if self.ScattersMechanic then
        self.ScattersMechanic:OnOutcomeReceived(reel)
+    end
+end
+
+function {{machineName}}BaseGameReelMechanics:OnApplyOutcomeReceived(reel)
+    if self.ReelAnticipationMechanic then
+        self.ReelAnticipationMechanic:OnApplyOutcomeReceived(reel)
+    else
+        reel.BettrReelController.OnApplyOutcomeReceived()
     end
 end
 

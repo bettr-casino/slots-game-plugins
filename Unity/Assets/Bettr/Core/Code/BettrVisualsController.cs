@@ -593,25 +593,52 @@ namespace Bettr.Core
 
             // Get the renderer of the quad
             Renderer quadRenderer = quad.GetComponent<Renderer>();
+            
+            // If no renderer found on the main object, check children
             if (quadRenderer == null)
             {
-                Debug.LogError("Quad object does not have a Renderer component.");
-                return new Rect();
+                // Get all child renderers
+                Renderer[] childRenderers = quad.GetComponentsInChildren<Renderer>();
+                
+                if (childRenderers.Length == 0)
+                {
+                    Debug.LogError("Neither the quad object nor its children have a Renderer component.");
+                    return new Rect();
+                }
+
+                // Calculate combined bounds of all child renderers
+                Bounds bounds = childRenderers[0].bounds;
+                for (int i = 1; i < childRenderers.Length; i++)
+                {
+                    bounds.Encapsulate(childRenderers[i].bounds);
+                }
+
+                // Convert the bounds to screen space
+                Vector3 bottomWorld = new Vector3(bounds.min.x, bounds.min.y, bounds.center.z);
+                Vector3 topWorld = new Vector3(bounds.max.x, bounds.max.y, bounds.center.z);
+
+                Vector3 bottomScreen = camera.WorldToScreenPoint(bottomWorld);
+                Vector3 topScreen = camera.WorldToScreenPoint(topWorld);
+
+                return new Rect(bottomScreen.x, bottomScreen.y, 
+                               Mathf.Abs(topScreen.x - bottomScreen.x), 
+                               Mathf.Abs(topScreen.y - bottomScreen.y));
             }
+            else
+            {
+                // Original code for when the main object has a renderer
+                Bounds bounds = quadRenderer.bounds;
 
-            // Get the bounds of the quad in world space
-            Bounds bounds = quadRenderer.bounds;
+                Vector3 bottomWorld = new Vector3(bounds.min.x, bounds.min.y, bounds.center.z);
+                Vector3 topWorld = new Vector3(bounds.max.x, bounds.max.y, bounds.center.z);
 
-            // Convert the bottom and top bounds to screen space
-            Vector3 bottomWorld = new Vector3(bounds.min.x, bounds.min.y, bounds.center.z); // Bottom center point
-            Vector3 topWorld = new Vector3(bounds.max.x, bounds.max.y, bounds.center.z);    // Top center point
+                Vector3 bottomScreen = camera.WorldToScreenPoint(bottomWorld);
+                Vector3 topScreen = camera.WorldToScreenPoint(topWorld);
 
-            // Convert to screen space
-            Vector3 bottomScreen = camera.WorldToScreenPoint(bottomWorld);
-            Vector3 topScreen = camera.WorldToScreenPoint(topWorld);
-
-            // Create and return a Rect with the bounds in screen space
-            return new Rect(bottomScreen.x, bottomScreen.y, Mathf.Abs(topScreen.x - bottomScreen.x), Mathf.Abs(topScreen.y - bottomScreen.y));
+                return new Rect(bottomScreen.x, bottomScreen.y, 
+                               Mathf.Abs(topScreen.x - bottomScreen.x), 
+                               Mathf.Abs(topScreen.y - bottomScreen.y));
+            }
         }
 
         public IEnumerator FireballTornadoAt(CrayonScriptContext context, GameObject at, float offsetY, float duration)
@@ -1183,6 +1210,13 @@ namespace Bettr.Core
             var particleSystem = particleSystemProperty.particleSystem;
             particleSystem.Stop();
         }
+        
+        public void SetZeroZPosition(GameObject gameObject)
+        {
+            var position = gameObject.transform.position;
+            position.z = 0;
+            gameObject.transform.position = position;
+        }
 
         public TilePropertyGameObjectGroup CloneGameObjectGroup(TilePropertyGameObjectGroup group)
         {
@@ -1254,7 +1288,7 @@ namespace Bettr.Core
             };
             return tmPro;
         }
-
+        
         public void OverlayFirstOverSecond(PropertyGameObject firstGameObjectProperty, PropertyGameObject secondGameObjectProperty)
         {
             OverlayFirstOverSecond(firstGameObjectProperty.gameObject, secondGameObjectProperty.gameObject);
@@ -1284,6 +1318,33 @@ namespace Bettr.Core
 
             // Align the first object to the second object's position based on cameras
             firstGameObject.transform.position = worldPositionForFirstObject;
+        }
+        
+        public void ScaleFirstToSecond(GameObject firstGameObject, GameObject secondGameObject)
+        {
+            try
+            {
+                // Get the bounds in screen space using GetQuadBounds
+                Rect firstBounds = GetQuadBounds(firstGameObject);
+                Rect secondBounds = GetQuadBounds(secondGameObject);
+
+                // Calculate scale factors based on the screen space bounds
+                Vector3 scaleFactors = new Vector3(
+                    secondBounds.width / firstBounds.width,
+                    secondBounds.height / firstBounds.height,
+                    1.0f
+                );
+
+                // Apply the scale to the first object
+                firstGameObject.transform.localScale = Vector3.Scale(
+                    firstGameObject.transform.localScale,
+                    scaleFactors
+                );
+            }
+            catch (ScriptRuntimeException e)
+            {
+                Debug.LogError($"Error scaling objects: {e.Message}");
+            }
         }
         
         public void DestroyGameObject(GameObject gameObject)

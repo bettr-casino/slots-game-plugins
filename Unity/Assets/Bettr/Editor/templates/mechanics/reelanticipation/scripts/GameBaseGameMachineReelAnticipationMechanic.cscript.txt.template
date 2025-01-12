@@ -1,0 +1,38 @@
+require "math"
+require "Core"
+
+{{machineName}}BaseGameMachine{{mechanicName}}Mechanic = {
+    Config = {
+        Machine = "{{machineName}}",
+        Variant = "{{machineVariant}}",
+        Experiment = "{{experimentVariant}}",
+        Mechanic = "{{mechanicName}}",
+    },
+    State = {
+        MechanicsPrefab = nil,
+    }
+}
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:Initialize(machine)
+    series
+        do
+            local manifest = {{machineName}}.Manifest
+            local prefabName = "BaseGameMachine{{mechanicName}}"
+            local machineParent = machine.MachineParent
+            local mechanicsParent = machine.MechanicsParent
+            local mechanicsPrefab = BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, prefabName, mechanicsParent.GameObject)
+            mechanicsPrefab.SetActive(false)
+            mechanicsPrefab.name = self.Config.Mechanic
+            self.State.MechanicsPrefab = mechanicsPrefab            
+            System.Print("{{machineName}}BaseGameMachineScattersMechanic:Initialize mechanicsPrefab={0}", self.State.MechanicsPrefab.name)
+        end
+    end
+end
+

@@ -88,17 +88,19 @@ namespace Bettr.Core
 
         public IEnumerator WaitForApplyOutcomeDelay(double outcomeDelayInMs)
         {
-            var timeElapsedInMs = 0.0;
-            while (timeElapsedInMs < outcomeDelayInMs)
-            {
-                timeElapsedInMs += Time.deltaTime * 1000;
-                // check if user has Slam Stopped the button
-                if (BettrUserController.UserInSlamStopMode)
-                {
-                    yield break;
-                }
-                yield return null;
-            }
+            // TODO: FIXME: reenable once we cache outcomes on the client
+            // var timeElapsedInMs = 0.0;
+            // while (timeElapsedInMs < outcomeDelayInMs)
+            // {
+            //     timeElapsedInMs += Time.deltaTime * 1000;
+            //     // check if user has Slam Stopped the button
+            //     if (BettrUserController.UserInSlamStopMode)
+            //     {
+            //         yield break;
+            //     }
+            //     yield return null;
+            // }
+            yield break;
         }
 
         public IEnumerator LoadServerOutcome(string gameId, string gameVariantId)

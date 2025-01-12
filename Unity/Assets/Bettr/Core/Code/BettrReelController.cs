@@ -43,9 +43,14 @@ namespace Bettr.Core
         public void StartTimer()
         {
             this.IsTimerStartedForSpin = true;
-            this.TimerEndTimeForSpin = Time.time + this.ReelStopDelayInSecondsForSpin;
+            this.TimerEndTimeForSpin += Time.time + this.ReelStopDelayInSecondsForSpin;
             
-            Debug.Log($"ReelIndex: {this.ReelIndex} Time.time={Time.time} TimerEndTimeForSpin: {this.TimerEndTimeForSpin}");
+            // Debug.Log($"ReelIndex: {this.ReelIndex} Time.time={Time.time} TimerEndTimeForSpin: {this.TimerEndTimeForSpin}");
+        }
+        
+        public void ExtendTimer(float durationInSeconds)
+        {
+            this.TimerEndTimeForSpin += durationInSeconds;
         }
 
         public void SetReelStopDelayInSeconds(float delayInSeconds)
@@ -62,6 +67,48 @@ namespace Bettr.Core
         }
     }
     
+    public class SwapInReelStripSymbolsCommand
+    {
+        private List<string> reelStripSymbolsForSpin;
+        private bool _undoCompleted;
+
+        public SwapInReelStripSymbolsCommand(List<string> reelStripSymbolsForSpin)
+        {
+            this.reelStripSymbolsForSpin = reelStripSymbolsForSpin;
+            this._undoCompleted = false;
+        }
+
+        public void Undo(BettrReelController reelController)
+        {
+            if (!_undoCompleted)
+            {
+                reelController.ReelStripSymbolsForThisSpin = reelStripSymbolsForSpin;
+                _undoCompleted = true;
+            }
+        }
+    }
+    
+    public class SwapInSpinOutcomeTableCommand
+    {
+        private Table _spinOutcomeTable;
+        private bool _undoCompleted;
+
+        public SwapInSpinOutcomeTableCommand(Table spinOutcomeTable)
+        {
+            this._spinOutcomeTable = spinOutcomeTable;
+            this._undoCompleted = false;
+        }
+
+        public void Undo(BettrReelController reelController)
+        {
+            if (!_undoCompleted)
+            {
+                reelController.SpinOutcomeTable = _spinOutcomeTable;
+                _undoCompleted = true;
+            }
+        }
+    }
+    
     
     [Serializable]
     public class BettrReelController : MonoBehaviour
@@ -74,10 +121,13 @@ namespace Bettr.Core
         [NonSerialized] private string MachineID;
         [NonSerialized] private string MachineVariantID;
         
+        [NonSerialized] private SwapInReelStripSymbolsCommand _swapInReelStripSymbolsCommand;
+        [NonSerialized] private SwapInSpinOutcomeTableCommand _swapInSpinOutcomeTableCommand;
+        
         public Table ReelTable { get; private set; }
         public Table ReelStateTable { get; private set; }
         public Table ReelSpinStateTable { get; private set; }
-        public Table SpinOutcomeTable { get; private set; }
+        public Table SpinOutcomeTable { get; internal set; }
         public Table ReelSymbolsStateTable { get; private set; }
         public Table ReelSymbolsTable { get; private set; }
         
@@ -87,7 +137,7 @@ namespace Bettr.Core
         [NonSerialized] private BettrUserController BettrUserController;
         [NonSerialized] private BettrMathController BettrMathController;
         
-        public List<string> ReelStripSymbolsForThisSpin { get; private set; }
+        public List<string> ReelStripSymbolsForThisSpin { get; internal set; }
         
         public static ReelOutcomeDelay[] ReelOutcomeDelays { get; private set; }
 
@@ -166,7 +216,7 @@ namespace Bettr.Core
         {
             this.ShouldSpliceReel = true;
             this.ReelStateTable["OutcomeReceived"] = true;
-            Debug.Log($"OnApplyOutcomeReceived ReelIndex: {this.ReelIndex} time: {Time.time}");
+            // Debug.Log($"OnApplyOutcomeReceived ReelIndex: {this.ReelIndex} time: {Time.time}");
             yield break;
         }
         
@@ -175,6 +225,16 @@ namespace Bettr.Core
             this.ReelSpinStateTable["ReelSpinState"] = "SpinStartedRollBack";
             this.ReelStateTable["OutcomeReceived"] = false;
             this.ShouldSpliceReel = false;
+            
+            // undo any swap in reel strip symbols or spin outcome table
+            if (this._swapInReelStripSymbolsCommand != null)
+            {
+                this._swapInReelStripSymbolsCommand.Undo(this);
+            }
+            if (this._swapInSpinOutcomeTableCommand != null)
+            {
+                this._swapInSpinOutcomeTableCommand.Undo(this);
+            }
 
             this.SetupReelStripSymbolsForSpin();
             ReelOutcomeDelays[this.ReelIndex].Reset();
@@ -191,12 +251,30 @@ namespace Bettr.Core
 
         public void SwapInReelStripSymbolsForSpin(List<string> reelStripSymbolsForSpin)
         {
+            this._swapInReelStripSymbolsCommand = new SwapInReelStripSymbolsCommand(this.ReelStripSymbolsForThisSpin);
             this.ReelStripSymbolsForThisSpin = reelStripSymbolsForSpin;
+        }
+        
+        public void UndoSwapInReelStripSymbolsForSpin()
+        {
+            if (this._swapInReelStripSymbolsCommand != null)
+            {
+                this._swapInReelStripSymbolsCommand.Undo(this);
+            }
         }
         
         public void SwapInReelSpinOutcomeTableForSpin(Table spinOutcomeTable)
         {
+            this._swapInSpinOutcomeTableCommand = new SwapInSpinOutcomeTableCommand(this.SpinOutcomeTable);
             this.SpinOutcomeTable = spinOutcomeTable;
+        }
+        
+        public void UndoSwapInReelSpinOutcomeTableForSpin()
+        {
+            if (this._swapInSpinOutcomeTableCommand != null)
+            {
+                this._swapInSpinOutcomeTableCommand.Undo(this);
+            }
         }
         
         public void SetupReelStripSymbolsForSpin()
@@ -219,7 +297,7 @@ namespace Bettr.Core
         
         public void SpinReelSpinStartedRollBack()
         {
-            var speed = BettrUserController.UserInSlamStopMode ? 4 : 1;
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 4;
             this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = (double) this.ReelStateTable["SpinStartedRollBackSpeedInSymbolUnitsPerSecond"] * speed;
             var reelSpinDirection = (string) this.ReelSpinStateTable["ReelSpinDirection"];
             var spinDirectionIsDown = reelSpinDirection == "Down";
@@ -357,7 +435,7 @@ namespace Bettr.Core
         
         public bool SpinReelSpinning()
         {
-            var speed = BettrUserController.UserInSlamStopMode ? 8 : 8;
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 4;
             this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = (double) this.ReelStateTable["SpinSpeedInSymbolUnitsPerSecond"] * speed;
             float slideDistanceInSymbolUnits = AdvanceReel();
             SlideReelSymbols(slideDistanceInSymbolUnits);
@@ -394,6 +472,10 @@ namespace Bettr.Core
                 UpdateReelStopIndexes();
                 ApplySpinReelStop();
                 slideDistanceInSymbolUnits += slideDistanceOffsetInSymbolUnits;
+                if (ReelOutcomeDelays[this.ReelIndex].IsStoppedForSpin)
+                {
+                    break;
+                }
             }
 
             var spinState = (string) this.ReelSpinStateTable["ReelSpinState"];
@@ -751,7 +833,14 @@ namespace Bettr.Core
                 return inBottomSpliceBand;
             }
         }
-        
+
+        public void StartReelAnticipation(float anticipationSpeed, float anticipationDuration)
+        {
+            Debug.Log($"StartReelAnticipation reelID={this.ReelID} reelIndex={this.ReelIndex} anticipationSpeed={anticipationSpeed} anticipationDuration={anticipationDuration}");
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 4;
+            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = (double) this.ReelStateTable["SpinStartedRollBackSpeedInSymbolUnitsPerSecond"] * speed;
+            ReelOutcomeDelays[this.ReelIndex].ExtendTimer(anticipationDuration);
+        }
         
     }
 }

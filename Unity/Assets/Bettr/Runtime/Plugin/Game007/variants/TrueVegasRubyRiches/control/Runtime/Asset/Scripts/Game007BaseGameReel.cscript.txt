@@ -54,7 +54,7 @@ end
 function Game007BaseGameReel:OnApplyOutcomeReceived()
     series
         do
-            self.BettrReelController.OnApplyOutcomeReceived()
+            self.Mechanics:OnApplyOutcomeReceived(self)
         end
     end
 end
@@ -104,11 +104,16 @@ end
 
 function Game007BaseGameReel:SpinReelStopped()
     local reelCount = Game007BaseGameLayout.ReelCount.First.Value
-    local lastReeID = "Reel" .. reelCount
-    if self.ReelID == lastReeID then
+    local lastReelID = "Reel" .. reelCount
+    self.Mechanics:OnSpinReelStopped(self)
+    if self.ReelID == lastReelID then
         Game007BaseGameMachine:OnSpinReelsStopped()
-        self.Mechanics:OnSpinReelsStopped(self)
-    end 
+    end
+    local reelSpinState = Game007BaseGameReelSpinState[self.ReelID].First
+    reelSpinState.ReelSpinState = "StoppedWaiting"
+end
+
+function Game007BaseGameReel:SpinReelStoppedWaiting()    
 end
 
 function Game007BaseGameReel:SpinReelWaiting()    
@@ -199,6 +204,7 @@ Game007BaseGameReel.ReelSpinStateDispatchTable = {
     Waiting = Game007BaseGameReel.SpinReelWaiting,
     Spinning = Game007BaseGameReel.SpinReelSpinning,
     Stopped = Game007BaseGameReel.SpinReelStopped,
+    StoppedWaiting = Game007BaseGameReel.SpinReelStoppedWaiting,
     ReachedOutcomeStopIndex = Game007BaseGameReel.SpinReelReachedOutcomeStopIndex,
     SpinStartedRollBack = Game007BaseGameReel.SpinReelSpinStartedRollBack,
     SpinStartedRollForward = Game007BaseGameReel.SpinReelSpinStartedRollForward,

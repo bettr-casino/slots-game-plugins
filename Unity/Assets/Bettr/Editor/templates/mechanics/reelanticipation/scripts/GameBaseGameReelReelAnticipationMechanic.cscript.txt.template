@@ -1,0 +1,79 @@
+require "math"
+require "Core"
+
+{{machineName}}BaseGameReel{{mechanicName}}Mechanic = {
+    Config = {
+        Machine = "{{machineName}}",
+        Variant = "{{machineVariant}}",
+        Experiment = "{{experimentVariant}}",
+        Mechanic = "{{mechanicName}}",
+    },
+}
+
+function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:destroy()
+	System.Print("{{machineName}}BaseGameReel{{mechanicName}}Mechanic destroy tile id={0}", self.id)
+end
+
+function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:Initialize(reel)
+    self.State = {
+        MechanicsPrefab = nil,
+        AnticipationSpeed = 0,
+        AnticipationDuration = 0,
+        AnticipateReelID = nil,        
+        IsAnticipating = false,
+    }
+end
+
+function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:StartEngines(reel, machine)
+    local mechanicPrefab = machine.Mechanics.{{mechanicName}}Mechanic.State.MechanicsPrefab
+    local clonedMechanicPrefab = BettrVisualsController.CloneAndOverlayGameObject(mechanicPrefab)
+    clonedMechanicPrefab.name = mechanicPrefab.name .. reel.ReelID
+    BettrVisualsController.OverlayFirstOverSecond(clonedMechanicPrefab, reel.gameObject)
+    BettrVisualsController.ScaleFirstToSecond(clonedMechanicPrefab, reel.gameObject)
+    BettrVisualsController.SetZeroZPosition(clonedMechanicPrefab)
+    self.State.MechanicsPrefab = clonedMechanicPrefab
+end
+
+function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:OnApplyOutcomeReceived(reel) 
+    local dataSummary = BettrMathController.GetBaseGameMechanicDataSummary(self.Config.Machine, self.Config.Mechanic)
+    local row = BettrMathController.GetBaseGameMechanicRow(self.Config.Machine, self.Config.Mechanic, "{{mechanicName}}ID", "Scatter{{mechanicName}}")
+    self.State.AnticipationSpeed = dataSummary.AnticipationSpeed
+    self.State.AnticipationDuration = dataSummary.AnticipationDuration
+    local num{{mechanicName}} = row.Num{{mechanicName}}
+    self.State.AnticipateReelID = nil
+    if num{{mechanicName}} > 0 then
+        local matrixRow = BettrMathController.GetBaseGameMechanicMatrixRow(self.Config.Machine, self.Config.Mechanic, "Scatter{{mechanicName}}", 0, "LandedReelID", reel.ReelID)
+        if matrixRow then
+            local anticipateReelID = matrixRow.ReelID
+            self.State.AnticipateReelID = anticipateReelID
+        end
+    end
+    reel.BettrReelController.OnApplyOutcomeReceived()
+end
+
+function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:OnSpinReelStopped(reel)
+    if self.State.IsAnticipating then
+        self.State.MechanicsPrefab.SetActive(false)
+        self.State.IsAnticipating = false
+    end
+    local anticipateReelID = self.State.AnticipateReelID
+    if anticipateReelID then
+        local anticipateReel = _G["{{machineName}}BaseGame" .. anticipateReelID]
+        if anticipateReel then
+            anticipateReel.Mechanics.{{mechanicName}}Mechanic:Start{{mechanicName}}(anticipateReel, self)
+        end
+    end
+end
+
+function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:Start{{mechanicName}}(reel, landedReel)
+    self.State.MechanicsPrefab.SetActive(true)
+    reel.BettrReelController.Start{{mechanicName}}(self.State.AnticipationSpeed, self.State.AnticipationDuration)
+    self.State.IsAnticipating = true
+end
