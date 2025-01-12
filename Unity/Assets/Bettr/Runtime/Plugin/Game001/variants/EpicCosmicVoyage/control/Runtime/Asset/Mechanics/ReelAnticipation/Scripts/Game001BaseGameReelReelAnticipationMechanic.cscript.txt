@@ -25,6 +25,7 @@ function Game001BaseGameReelReelAnticipationMechanic:Initialize(reel)
     self.State = {
         MechanicsPrefab = nil,
         AnticipationSpeed = 0,
+        AnticipationDuration = 0,
         IsAnticipating = false,
     }
 end
@@ -43,6 +44,8 @@ function Game001BaseGameReelReelAnticipationMechanic:OnApplyOutcomeReceived(reel
     local summary = BettrMathController.GetBaseGameMechanicDataSummary(self.Config.Machine, self.Config.Mechanic)
     local speed = summary.AnticipationSpeed
     self.State.AnticipationSpeed = speed
+    local durationInSecs = summary.Duration / 1000
+    self.State.AnticipationDuration = durationInSecs
     reel.BettrReelController.OnApplyOutcomeReceived()
 end
 
@@ -56,13 +59,13 @@ function Game001BaseGameReelReelAnticipationMechanic:OnSpinReelStopped(reel)
         local anticipateReelID = row.ReelID
         local anticipateReel = _G["Game001BaseGame" .. anticipateReelID]
         if anticipateReel then
-            anticipateReel.Mechanics.ReelAnticipationMechanic:StartReelAnticipation(reel, self)
+            anticipateReel.Mechanics.ReelAnticipationMechanic:StartReelAnticipation(anticipateReel, self)
         end
     end
 end
 
 function Game001BaseGameReelReelAnticipationMechanic:StartReelAnticipation(reel, landedReel)
     self.State.MechanicsPrefab.SetActive(true)
-    reel.BettrReelController.StartReelAnticipation(self.State.AnticipationSpeed)
+    reel.BettrReelController.StartReelAnticipation(self.State.AnticipationSpeed, self.State.AnticipationDuration)
     self.State.IsAnticipating = true
 end

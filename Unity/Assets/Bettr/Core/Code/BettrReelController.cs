@@ -43,9 +43,14 @@ namespace Bettr.Core
         public void StartTimer()
         {
             this.IsTimerStartedForSpin = true;
-            this.TimerEndTimeForSpin = Time.time + this.ReelStopDelayInSecondsForSpin;
+            this.TimerEndTimeForSpin += Time.time + this.ReelStopDelayInSecondsForSpin;
             
             // Debug.Log($"ReelIndex: {this.ReelIndex} Time.time={Time.time} TimerEndTimeForSpin: {this.TimerEndTimeForSpin}");
+        }
+        
+        public void ExtendTimer(float durationInSeconds)
+        {
+            this.TimerEndTimeForSpin += durationInSeconds;
         }
 
         public void SetReelStopDelayInSeconds(float delayInSeconds)
@@ -829,11 +834,12 @@ namespace Bettr.Core
             }
         }
 
-        public void StartReelAnticipation(float anticipationSpeed)
+        public void StartReelAnticipation(float anticipationSpeed, float anticipationDuration)
         {
-            Debug.Log($"StartReelAnticipation reelID={this.ReelID} reelIndex={this.ReelIndex} anticipationSpeed={anticipationSpeed}");
+            Debug.Log($"StartReelAnticipation reelID={this.ReelID} reelIndex={this.ReelIndex} anticipationSpeed={anticipationSpeed} anticipationDuration={anticipationDuration}");
             var speed = BettrUserController.UserInSlamStopMode ? 4 : 4;
             this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = (double) this.ReelStateTable["SpinStartedRollBackSpeedInSymbolUnitsPerSecond"] * speed;
+            ReelOutcomeDelays[this.ReelIndex].ExtendTimer(anticipationDuration);
         }
         
     }
