@@ -104,11 +104,15 @@ end
 
 function Game006BaseGameReel:SpinReelStopped()
     local reelCount = Game006BaseGameLayout.ReelCount.First.Value
-    local lastReeID = "Reel" .. reelCount
-    if self.ReelID == lastReeID then
+    local lastReelID = "Reel" .. reelCount
+    self.Mechanics:OnSpinReelStopped(self)
+    if self.ReelID == lastReelID then
         Game006BaseGameMachine:OnSpinReelsStopped()
-        self.Mechanics:OnSpinReelsStopped(self)
     end 
+    reelSpinState.ReelSpinState = "StoppedWaiting"
+end
+
+function Game006BaseGameReel:SpinReelStoppedWaiting()    
 end
 
 function Game006BaseGameReel:SpinReelWaiting()    
@@ -199,6 +203,7 @@ Game006BaseGameReel.ReelSpinStateDispatchTable = {
     Waiting = Game006BaseGameReel.SpinReelWaiting,
     Spinning = Game006BaseGameReel.SpinReelSpinning,
     Stopped = Game006BaseGameReel.SpinReelStopped,
+    StoppedWaiting = Game006BaseGameReel.SpinReelStoppedWaiting,
     ReachedOutcomeStopIndex = Game006BaseGameReel.SpinReelReachedOutcomeStopIndex,
     SpinStartedRollBack = Game006BaseGameReel.SpinReelSpinStartedRollBack,
     SpinStartedRollForward = Game006BaseGameReel.SpinReelSpinStartedRollForward,

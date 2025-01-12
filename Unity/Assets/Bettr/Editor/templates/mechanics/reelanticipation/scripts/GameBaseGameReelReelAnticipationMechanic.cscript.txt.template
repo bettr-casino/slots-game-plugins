@@ -24,6 +24,8 @@ end
 function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:Initialize(reel)
     self.State = {
         MechanicsPrefab = nil,
+        AnticipationSpeed = 0,
+        IsAnticipating = false,
     }
 end
 
@@ -38,9 +40,29 @@ function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:StartEngines(reel, 
 end
 
 function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:OnApplyOutcomeReceived(reel) 
-    local mechanicsPrefab = self.State.MechanicsPrefab
-    mechanicsPrefab.SetActive(true)
+    local summary = BettrMathController.GetBaseGameMechanicDataSummary(self.Config.Machine, self.Config.Mechanic)
+    local speed = summary.AnticipationSpeed
+    self.State.AnticipationSpeed = speed
     reel.BettrReelController.OnApplyOutcomeReceived()
 end
 
+function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:OnSpinReelStopped(reel)
+    if self.State.IsAnticipating then
+        self.State.MechanicsPrefab.SetActive(false)
+        self.State.IsAnticipating = false
+    end
+    local row = BettrMathController.GetBaseGameMechanicMatrixRow(self.Config.Machine, self.Config.Mechanic, "Scatter{{mechanicName}}", 0, "LandedReelID", reel.ReelID)
+    if row then
+        local anticipateReelID = row.ReelID
+        local anticipateReel = _G["{{machineName}}BaseGame" .. anticipateReelID]
+        if anticipateReel then
+            anticipateReel.Mechanics.{{mechanicName}}Mechanic:Start{{mechanicName}}(reel, self)
+        end
+    end
+end
 
+function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:Start{{mechanicName}}(reel, landedReel)
+    self.State.MechanicsPrefab.SetActive(true)
+    reel.BettrReelController.Start{{mechanicName}}(self.State.AnticipationSpeed)
+    self.State.IsAnticipating = true
+end

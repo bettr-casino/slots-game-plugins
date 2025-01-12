@@ -24,6 +24,7 @@ end
 function Game001BaseGameReelReelAnticipationMechanic:Initialize(reel)
     self.State = {
         MechanicsPrefab = nil,
+        AnticipationSpeed = 0,
     }
 end
 
@@ -38,9 +39,24 @@ function Game001BaseGameReelReelAnticipationMechanic:StartEngines(reel, machine)
 end
 
 function Game001BaseGameReelReelAnticipationMechanic:OnApplyOutcomeReceived(reel) 
-    local mechanicsPrefab = self.State.MechanicsPrefab
-    mechanicsPrefab.SetActive(true)
+    local summary = BettrMathController.GetBaseGameMechanicDataSummary(self.Config.Machine, self.Config.Mechanic)
+    local speed = summary.AnticipationSpeed
+    self.State.AnticipationSpeed = speed
     reel.BettrReelController.OnApplyOutcomeReceived()
 end
 
+function Game001BaseGameReelReelAnticipationMechanic:OnSpinReelStopped(reel)
+    local row = BettrMathController.GetBaseGameMechanicMatrixRow(self.Config.Machine, self.Config.Mechanic, "ScatterReelAnticipation", 0, "LandedReelID", reel.ReelID)
+    if row then
+        local anticipateReelID = row.ReelID
+        local anticipateReel = _G["Game001BaseGame" .. anticipateReelID]
+        if anticipateReel then
+            anticipateReel.Mechanics.ReelAnticipationMechanic:StartReelAnticipation(reel, self)
+        end
+    end
+end
 
+function Game001BaseGameReelReelAnticipationMechanic:StartReelAnticipation(reel, landedReel)
+    self.State.MechanicsPrefab.SetActive(true)
+    reel.BettrReelController.StartReelAnticipation(self.State.AnticipationSpeed)
+end

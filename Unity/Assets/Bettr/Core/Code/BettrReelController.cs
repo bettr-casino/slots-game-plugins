@@ -828,7 +828,13 @@ namespace Bettr.Core
                 return inBottomSpliceBand;
             }
         }
-        
+
+        public void StartReelAnticipation(float anticipationSpeed)
+        {
+            Debug.Log($"StartReelAnticipation reelID={this.ReelID} reelIndex={this.ReelIndex} anticipationSpeed={anticipationSpeed}");
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 4;
+            this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = (double) this.ReelStateTable["SpinStartedRollBackSpeedInSymbolUnitsPerSecond"] * speed;
+        }
         
     }
 }

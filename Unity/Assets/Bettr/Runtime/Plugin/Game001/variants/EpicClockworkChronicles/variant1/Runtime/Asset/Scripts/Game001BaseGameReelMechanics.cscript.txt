@@ -42,7 +42,10 @@ end
 function Game001BaseGameReelMechanics:SpinReelReachedOutcomeStopIndex(reel)
 end
 
-function Game001BaseGameReelMechanics:OnSpinReelsStopped(reel)
+function Game001BaseGameReelMechanics:OnSpinReelStopped(reel)
+    if self.ReelAnticipationMechanic then
+        self.ReelAnticipationMechanic:OnSpinReelStopped(reel)
+    end
 end
 
 function Game001BaseGameReelMechanics:StartEngines(reel, machine)
