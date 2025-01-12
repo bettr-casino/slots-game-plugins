@@ -26,6 +26,7 @@ function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:Initialize(reel)
         MechanicsPrefab = nil,
         AnticipationSpeed = 0,
         AnticipationDuration = 0,
+        AnticipateReelID = nil,        
         IsAnticipating = false,
     }
 end
@@ -41,11 +42,19 @@ function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:StartEngines(reel, 
 end
 
 function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:OnApplyOutcomeReceived(reel) 
-    local summary = BettrMathController.GetBaseGameMechanicDataSummary(self.Config.Machine, self.Config.Mechanic)
-    local speed = summary.AnticipationSpeed
-    self.State.AnticipationSpeed = speed
-    local durationInSecs = summary.Duration / 1000
-    self.State.AnticipationDuration = durationInSecs
+    local dataSummary = BettrMathController.GetBaseGameMechanicDataSummary(self.Config.Machine, self.Config.Mechanic)
+    local row = BettrMathController.GetBaseGameMechanicRow(self.Config.Machine, self.Config.Mechanic, "{{mechanicName}}ID", "Scatter{{mechanicName}}")
+    self.State.AnticipationSpeed = dataSummary.AnticipationSpeed
+    self.State.AnticipationDuration = dataSummary.AnticipationDuration
+    local num{{mechanicName}} = row.Num{{mechanicName}}
+    self.State.AnticipateReelID = nil
+    if num{{mechanicName}} > 0 then
+        local matrixRow = BettrMathController.GetBaseGameMechanicMatrixRow(self.Config.Machine, self.Config.Mechanic, "Scatter{{mechanicName}}", 0, "LandedReelID", reel.ReelID)
+        if matrixRow then
+            local anticipateReelID = matrixRow.ReelID
+            self.State.AnticipateReelID = anticipateReelID
+        end
+    end
     reel.BettrReelController.OnApplyOutcomeReceived()
 end
 
@@ -54,9 +63,8 @@ function {{machineName}}BaseGameReel{{mechanicName}}Mechanic:OnSpinReelStopped(r
         self.State.MechanicsPrefab.SetActive(false)
         self.State.IsAnticipating = false
     end
-    local row = BettrMathController.GetBaseGameMechanicMatrixRow(self.Config.Machine, self.Config.Mechanic, "Scatter{{mechanicName}}", 0, "LandedReelID", reel.ReelID)
-    if row then
-        local anticipateReelID = row.ReelID
+    local anticipateReelID = self.State.AnticipateReelID
+    if anticipateReelID then
         local anticipateReel = _G["{{machineName}}BaseGame" .. anticipateReelID]
         if anticipateReel then
             anticipateReel.Mechanics.{{mechanicName}}Mechanic:Start{{mechanicName}}(anticipateReel, self)
