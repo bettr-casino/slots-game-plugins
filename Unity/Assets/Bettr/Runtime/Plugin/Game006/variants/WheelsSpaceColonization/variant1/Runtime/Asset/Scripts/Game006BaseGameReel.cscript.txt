@@ -108,7 +108,8 @@ function Game006BaseGameReel:SpinReelStopped()
     self.Mechanics:OnSpinReelStopped(self)
     if self.ReelID == lastReelID then
         Game006BaseGameMachine:OnSpinReelsStopped()
-    end 
+    end
+    local reelSpinState = Game006BaseGameReelSpinState[self.ReelID].First
     reelSpinState.ReelSpinState = "StoppedWaiting"
 end
 

@@ -25,6 +25,9 @@ function Game001BaseGameReelReelAnticipationMechanic:Initialize(reel)
     self.State = {
         MechanicsPrefab = nil,
         AnticipationSpeed = 0,
+        AnticipationDuration = 0,
+        AnticipateReelID = nil,        
+        IsAnticipating = false,
     }
 end
 
@@ -39,24 +42,38 @@ function Game001BaseGameReelReelAnticipationMechanic:StartEngines(reel, machine)
 end
 
 function Game001BaseGameReelReelAnticipationMechanic:OnApplyOutcomeReceived(reel) 
-    local summary = BettrMathController.GetBaseGameMechanicDataSummary(self.Config.Machine, self.Config.Mechanic)
-    local speed = summary.AnticipationSpeed
-    self.State.AnticipationSpeed = speed
+    local dataSummary = BettrMathController.GetBaseGameMechanicDataSummary(self.Config.Machine, self.Config.Mechanic)
+    local row = BettrMathController.GetBaseGameMechanicRow(self.Config.Machine, self.Config.Mechanic, self.Config.Mechanic, "ScatterReelAnticipation")
+    self.State.AnticipationSpeed = dataSummary.AnticipationSpeed
+    self.State.AnticipationDuration = dataSummary.AnticipationDuration
+    local numAnticipations = row.NumAnticipations
+    System.Print("Game001BaseGameReelReelAnticipationMechanic:OnApplyOutcomeReceived reelID={0} numAnticipations={1}", reel.ReelID, numAnticipations)
+    if numAnticipations > 0 then
+        local matrixRow = BettrMathController.GetBaseGameMechanicMatrixRow(self.Config.Machine, self.Config.Mechanic, "ScatterReelAnticipation", 0, "LandedReelID", reel.ReelID)
+        if matrixRow then
+            local anticipateReelID = matrixRow.ReelID
+            self.State.AnticipateReelID = anticipateReelID
+        end
+    end
     reel.BettrReelController.OnApplyOutcomeReceived()
 end
 
 function Game001BaseGameReelReelAnticipationMechanic:OnSpinReelStopped(reel)
-    local row = BettrMathController.GetBaseGameMechanicMatrixRow(self.Config.Machine, self.Config.Mechanic, "ScatterReelAnticipation", 0, "LandedReelID", reel.ReelID)
-    if row then
-        local anticipateReelID = row.ReelID
+    if self.State.IsAnticipating then
+        self.State.MechanicsPrefab.SetActive(false)
+        self.State.IsAnticipating = false
+    end
+    local anticipateReelID = self.State.AnticipateReelID
+    if anticipateReelID then
         local anticipateReel = _G["Game001BaseGame" .. anticipateReelID]
         if anticipateReel then
-            anticipateReel.Mechanics.ReelAnticipationMechanic:StartReelAnticipation(reel, self)
+            anticipateReel.Mechanics.ReelAnticipationMechanic:StartReelAnticipation(anticipateReel, self)
         end
     end
 end
 
 function Game001BaseGameReelReelAnticipationMechanic:StartReelAnticipation(reel, landedReel)
     self.State.MechanicsPrefab.SetActive(true)
-    reel.BettrReelController.StartReelAnticipation(self.State.AnticipationSpeed)
+    reel.BettrReelController.StartReelAnticipation(self.State.AnticipationSpeed, self.State.AnticipationDuration)
+    self.State.IsAnticipating = true
 end
