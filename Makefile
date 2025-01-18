@@ -277,6 +277,15 @@ build-game001-4-assets-webgl: prepare-project build-lobby-cards-webgl
 
 build-epiccosmicvoyage-assets-webgl: build-game001-4-assets-webgl build-lobby-cards-webgl
 
+build-game001-5-assets-webgl: prepare-project build-lobby-cards-webgl
+	@echo "Building WebGL game001 variant game001epicdragonshoard asset bundles..."
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "game001epicdragonshoard" -assetSubLabel "control" -buildTarget WebGL; \
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "game001epicdragonshoard" -assetSubLabel "control" -buildTarget WebGL; \
+	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "game001epicdragonshoard" -assetSubLabel "variant1" -buildTarget WebGL; \
+	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "game001epicdragonshoard" -assetSubLabel "variant1" -buildTarget WebGL;
+
+build-epicdragonshoard-assets-webgl: build-game001-5-assets-webgl build-lobby-cards-webgl
+
 build-game003-2-assets-webgl: prepare-project build-lobby-cards-webgl
 	@echo "Building WebGL game003 variant game003highstakescascadingcash asset bundles..."
 	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "game003highstakescascadingcash" -assetSubLabel "control" -buildTarget WebGL; \
