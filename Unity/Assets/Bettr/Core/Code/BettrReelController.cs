@@ -109,19 +109,21 @@ namespace Bettr.Core
         }
     }
     
-    public class SwapInReelMatrixSwitchCommand
+    public class SwitchToReelMatrixCommand
     {
         private bool _undoCompleted;
 
-        public SwapInReelMatrixSwitchCommand(BettrReelController reelController)
+        public SwitchToReelMatrixCommand(BettrReelController reelController)
         {
             this._undoCompleted = false;
+            reelController.ShouldSwitchToReelMatrix = true;
         }
 
         public void Undo(BettrReelController reelController)
         {
             if (!_undoCompleted)
             {
+                reelController.ShouldSwitchToReelMatrix = false;
                 _undoCompleted = true;
             }
         }
@@ -141,6 +143,7 @@ namespace Bettr.Core
         
         [NonSerialized] private SwapInReelStripSymbolsCommand _swapInReelStripSymbolsCommand;
         [NonSerialized] private SwapInSpinOutcomeTableCommand _swapInSpinOutcomeTableCommand;
+        [NonSerialized] private SwitchToReelMatrixCommand _switchToReelMatrixCommand;
         
         public Table ReelTable { get; private set; }
         public Table ReelStateTable { get; private set; }
@@ -151,6 +154,8 @@ namespace Bettr.Core
         
         // TODO: FIXME move this to ReelStateTable
         [NonSerialized] private bool ShouldSpliceReel;
+        
+        [NonSerialized] internal bool ShouldSwitchToReelMatrix;
         
         [NonSerialized] private BettrUserController BettrUserController;
         [NonSerialized] private BettrMathController BettrMathController;
@@ -309,6 +314,19 @@ namespace Bettr.Core
             if (this._swapInSpinOutcomeTableCommand != null)
             {
                 this._swapInSpinOutcomeTableCommand.Undo(this);
+            }
+        }
+        
+        public void SwapInReelMatrixSwitch()
+        {
+            this._switchToReelMatrixCommand = new SwitchToReelMatrixCommand(this);
+        }
+        
+        public void UndoSwapInReelMatrixSwitch()
+        {
+            if (this._switchToReelMatrixCommand != null)
+            {
+                this._switchToReelMatrixCommand.Undo(this);
             }
         }
         
