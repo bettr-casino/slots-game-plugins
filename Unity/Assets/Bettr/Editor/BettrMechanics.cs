@@ -207,6 +207,35 @@ namespace Bettr.Editor
             Debug.Log(
                 $"Processing hot reels mechanic for {machineName} {machineVariant} {experimentVariant} {machineModelPath}");
         }
+        
+        public static void ProcessIndependentReelsMechanic(string machineName, string machineVariant, string experimentVariant,
+            string machineModelPath)
+        {
+            Debug.Log(
+                $"Processing independent reels mechanic for {machineName} {machineVariant} {experimentVariant} {machineModelPath}");
+            
+            var mechanicName = "IndependentReels";
+            
+            var templateName = $"BaseGame{mechanicName}Mechanic";
+            var prefabName = $"BaseGameMachine{mechanicName}";
+            var runtimeAssetPath = BettrMechanics.RuntimeAssetPath;
+            
+            BettrMaterialGenerator.MachineName = machineName;
+            BettrMaterialGenerator.MachineVariant = machineVariant;
+            
+            var dataSummary = BettrMenu.GetTable($"{machineName}BaseGameIndependentReelsDataSummary");
+            
+            // get the model
+            var model = new Dictionary<string, object>
+            {
+                { "machineName", machineName },
+                { "machineVariant", machineVariant },
+            };
+            
+            BettrMechanicsHelpers.ProcessBaseGameMechanic(
+                runtimeAssetPath, model,
+                templateName, prefabName, mechanicName);
+        }
 
         public static void ProcessInfinityReelsMechanic(string machineName, string machineVariant,
             string experimentVariant, string machineModelPath)

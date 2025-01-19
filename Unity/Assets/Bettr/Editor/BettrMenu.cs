@@ -246,14 +246,14 @@ namespace Bettr.Editor
             TileController.LuaScript.Call(dynValue);
         }
         
-        [MenuItem("Bettr/Tools/Apply Mechanics/ReelAnticipation/Game001EpicCosmicVoyage")]
+        [MenuItem("Bettr/Tools/Apply Mechanics/IndependentReels/Game001EpicDragonsHoard")]
         static void ApplyMechanicMachine()
         {
-            var mechanic = "ReelAnticipation";
+            var mechanic = "IndependentReels";
             var machineName = "Game001";
-            var machineVariant = "EpicCosmicVoyage";
+            var machineVariant = "EpicDragonsHoard";
             var experimentVariant = "control";
-            ApplyMechanicDelegate(mechanic, BettrMechanics.ProcessReelAnticipationMechanic, machineName, machineVariant, experimentVariant);
+            ApplyMechanicDelegate(mechanic, BettrMechanics.ProcessIndependentReelsMechanic, machineName, machineVariant, experimentVariant);
         }
         
         [MenuItem("Tools/Update Prefab References")]
@@ -3452,6 +3452,7 @@ namespace Bettr.Editor
                 { "horizontalreels", BettrMechanics.ProcessHorizontalReelsMechanic },
                 { "horizontalreelshift", BettrMechanics.ProcessHorizontalReelsShiftMechanic },
                 { "hotreels", BettrMechanics.ProcessHotReelsMechanic },
+                { "independentreels", BettrMechanics.ProcessHotReelsMechanic },
                 { "infinityreels", BettrMechanics.ProcessInfinityReelsMechanic },
                 { "linkedreels", BettrMechanics.ProcessLinkedReelsMechanic },
                 { "lockedreels", BettrMechanics.ProcessLockedReelsMechanic },

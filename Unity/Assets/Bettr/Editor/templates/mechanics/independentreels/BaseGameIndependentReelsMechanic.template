@@ -1,0 +1,17 @@
+{
+  "Name": "BaseGameIndependentReelsMechanic",
+  "Id": "BaseGameIndependentReelsMechanic",
+  "Child": {
+      "Name": "Pivot",
+      "Id": "Pivot",
+      "Children": [   
+{{- for reelMatrix in reelMatrixList }}
+        {
+            "Name": "{{machineName}}BaseGame{{reelMatrix.reelID}}",
+            "Id": "BaseGameChooseASideSymbolGroup",
+            "Layer": "SLOT_REELS"
+        }
+{{ if !for.last }},{{ end }}{{ end }}
+       ]
+  }
+}
