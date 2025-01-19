@@ -350,7 +350,7 @@ namespace Bettr.Editor
                             // If any materials were changed, update the renderer
                             if (materialsChanged)
                             {
-                                renderer.materials = materials;
+                                renderer.sharedMaterials = materials;
                                 EditorUtility.SetDirty(renderer);
                                 EditorUtility.SetDirty(_go);
                             }
