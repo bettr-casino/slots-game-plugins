@@ -63,7 +63,7 @@ namespace Bettr.Editor.generators.mechanics
                 var prefabPath =
                     $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{tilePropertyAnimator.PrefabName}.prefab";
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                var prefabGameObject = new PrefabGameObject(prefab, tilePropertyAnimator.PrefabName);
+                var prefabGameObject = new PrefabGameObject(prefab, tilePropertyAnimator.PrefabName, false);
                 if (tilePropertyAnimator.PrefabIds != null)
                 {
                     foreach (var prefabId in tilePropertyAnimator.PrefabIds)

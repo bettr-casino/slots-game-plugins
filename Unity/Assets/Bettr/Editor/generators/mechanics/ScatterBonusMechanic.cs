@@ -65,7 +65,7 @@ namespace Bettr.Editor.generators.mechanics
                 var prefabPath =
                     $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{tilePropertyAnimator.PrefabName}.prefab";
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                var prefabGameObject = new PrefabGameObject(prefab, tilePropertyAnimator.PrefabName);
+                var prefabGameObject = new PrefabGameObject(prefab, tilePropertyAnimator.PrefabName, false);
                 if (tilePropertyAnimator.PrefabIds != null)
                 {
                     foreach (var prefabId in tilePropertyAnimator.PrefabIds)
@@ -149,7 +149,7 @@ namespace Bettr.Editor.generators.mechanics
                 var prefabPath =
                     $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{modifiedPrefab.PrefabName}.prefab";
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                var prefabGameObject = new PrefabGameObject(prefab, modifiedPrefab.PrefabName);
+                var prefabGameObject = new PrefabGameObject(prefab, modifiedPrefab.PrefabName, false);
                 if (modifiedPrefab.PrefabIds != null)
                 {
                     foreach (var prefabId in modifiedPrefab.PrefabIds)
@@ -176,7 +176,7 @@ namespace Bettr.Editor.generators.mechanics
                 var prefabPath =
                     $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{mechanicParticleSystem.PrefabName}.prefab";
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                var prefabGameObject = new PrefabGameObject(prefab, mechanicParticleSystem.PrefabName);
+                var prefabGameObject = new PrefabGameObject(prefab, mechanicParticleSystem.PrefabName, false);
                 if (mechanicParticleSystem.PrefabIds != null)
                 {
                     foreach (var prefabId in mechanicParticleSystem.PrefabIds)
@@ -307,7 +307,7 @@ namespace Bettr.Editor.generators.mechanics
                 var prefabPath =
                     $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{tilePropertyParticleSystem.PrefabName}.prefab";
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                var prefabGameObject = new PrefabGameObject(prefab, tilePropertyParticleSystem.PrefabName);
+                var prefabGameObject = new PrefabGameObject(prefab, tilePropertyParticleSystem.PrefabName, false);
                 if (tilePropertyParticleSystem.PrefabIds != null)
                 {
                     foreach (var prefabId in tilePropertyParticleSystem.PrefabIds)

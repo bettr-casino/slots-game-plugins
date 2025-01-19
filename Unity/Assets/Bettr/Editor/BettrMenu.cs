@@ -5076,7 +5076,7 @@ namespace Bettr.Editor
             pivotInstance.SetParent(symbolInstance.GameObject);
             
             var symbolGroupPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameSymbolGroup.prefab");
-            var prefabGameObject = new PrefabGameObject(symbolGroupPrefab, "SymbolGroup");
+            var prefabGameObject = new PrefabGameObject(symbolGroupPrefab, "SymbolGroup", false);
             prefabGameObject.SetParent(pivotInstance.GameObject);
 
             return symbolInstance;

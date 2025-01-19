@@ -42,6 +42,10 @@ namespace Bettr.Editor
         
         public string PrefabName { get; set; }
         
+        public bool PrefabUnpacked { get; set; }
+        
+        public string PrefabShader { get; set; }
+        
         public bool IsPrefab { get; set; }
         
         public bool IsMainLobbyPrefab { get; set; }
@@ -250,18 +254,22 @@ namespace Bettr.Editor
                     AssetDatabase.Refresh();
                     string prefabPath = Path.Combine(InstanceComponent.RuntimeAssetPath, "Prefabs",  $"{PrefabName}.prefab");
                     GameObject modelAsPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                    var modelGameObject = new PrefabGameObject(modelAsPrefab, Name);
+                    var modelGameObject = new PrefabGameObject(modelAsPrefab, Name, false);
                     _go = modelGameObject.GameObject;
                 }
                 else if (IsPrefab)
                 {
                     Debug.Log($"loading prefab from path: {InstanceComponent.RuntimeAssetPath}/Prefabs/{PrefabName}.prefab");
-                    var prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{InstanceComponent.RuntimeAssetPath}/Prefabs/{PrefabName}.prefab");
+                    GameObject prefab = null;
+                    string prefabPath = $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{PrefabName}.prefab";
+                    prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
                     if (prefab == null)
                     {
-                        prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{InstanceComponent.DefaultRuntimeAssetPath}/Prefabs/{PrefabName}.prefab");
+                        prefabPath = $"{InstanceComponent.DefaultRuntimeAssetPath}/Prefabs/{PrefabName}.prefab";
+                        prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
                     }
-                    var prefabGameObject = new PrefabGameObject(prefab, Name);
+                    
+                    var prefabGameObject = new PrefabGameObject(prefab, Name, PrefabUnpacked);
                     _go = prefabGameObject.GameObject;
                     if (PrefabIds != null)
                     {
@@ -276,7 +284,7 @@ namespace Bettr.Editor
                 {
                     Debug.Log($"loading prefab from path: {InstanceComponent.MainLobbyPath}/Prefabs/{PrefabName}.prefab");
                     var prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{InstanceComponent.MainLobbyPath}/Prefabs/{PrefabName}.prefab");
-                    var prefabGameObject = new PrefabGameObject(prefab, Name);
+                    var prefabGameObject = new PrefabGameObject(prefab, Name, false);
                     _go = prefabGameObject.GameObject;
                     if (PrefabIds != null)
                     {
@@ -362,12 +370,17 @@ namespace Bettr.Editor
         public GameObject GameObject => _go;
         public bool Active { get; set; } = true;
         
-        public PrefabGameObject(GameObject prefab, string name)
+        public PrefabGameObject(GameObject prefab, string name, bool unpack)
         {
             _prefab = prefab;
             _name = name;
             _go = (GameObject)PrefabUtility.InstantiatePrefab(_prefab);
             _go.name = _name;
+
+            if (unpack)
+            {
+                PrefabUtility.UnpackPrefabInstance(_go, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
+            }
         }
         
         public void SetParent(GameObject parentGo)
@@ -2513,7 +2526,7 @@ namespace Bettr.Editor
                     var prefabPath =
                         $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{instanceGameObject.PrefabName}.prefab";
                     var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                    var prefabGameObject = new PrefabGameObject(prefab, instanceGameObject.PrefabName);
+                    var prefabGameObject = new PrefabGameObject(prefab, instanceGameObject.PrefabName, false);
                     if (instanceGameObject.PrefabIds != null)
                     {
                         foreach (var prefabId in instanceGameObject.PrefabIds)
@@ -2576,7 +2589,7 @@ namespace Bettr.Editor
                     var prefabPath =
                         $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{tilePropertyTextMeshPro.PrefabName}.prefab";
                     var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                    var prefabGameObject = new PrefabGameObject(prefab, tilePropertyTextMeshPro.PrefabName);
+                    var prefabGameObject = new PrefabGameObject(prefab, tilePropertyTextMeshPro.PrefabName, false);
                     if (tilePropertyTextMeshPro.PrefabIds != null)
                     {
                         foreach (var prefabId in tilePropertyTextMeshPro.PrefabIds)
