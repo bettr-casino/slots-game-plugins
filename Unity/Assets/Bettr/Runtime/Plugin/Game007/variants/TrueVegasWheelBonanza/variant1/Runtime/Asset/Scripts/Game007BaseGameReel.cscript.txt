@@ -36,7 +36,7 @@ end
 function Game007BaseGameReel:StartEngines(machine)
     series
         do
-            self.BettrReelController.StartEngines()
+            self.BettrReelStripController.StartEngines()
             self.Mechanics:StartEngines(self, machine)                          
         end
     end
@@ -45,7 +45,7 @@ end
 function Game007BaseGameReel:OnOutcomeReceived()
     series
         do
-            self.BettrReelController.OnOutcomeReceived()
+            self.BettrReelStripController.OnOutcomeReceived()
             self.Mechanics:OnOutcomeReceived(self)
         end
     end
@@ -60,7 +60,7 @@ function Game007BaseGameReel:OnApplyOutcomeReceived()
 end
 
 function Game007BaseGameReel:SpinEngines()
-    self.BettrReelController.SpinEngines()
+    self.BettrReelStripController.SpinEngines()
     self.Mechanics.SpinEngines(self)
 end
 
@@ -76,22 +76,22 @@ function Game007BaseGameReel:Update()
 end
 
 function Game007BaseGameReel:SpinReelSpinStartedRollBack()
-    self.BettrReelController.SpinReelSpinStartedRollBack()
+    self.BettrReelStripController.SpinReelSpinStartedRollBack()
     self.Mechanics:SpinReelSpinStartedRollBack(self)    
 end
 
 function Game007BaseGameReel:SpinReelSpinStartedRollForward()
-    self.BettrReelController.SpinReelSpinStartedRollForward()
+    self.BettrReelStripController.SpinReelSpinStartedRollForward()
     self.Mechanics:SpinReelSpinStartedRollForward(self)    
 end
 
 function Game007BaseGameReel:SpinReelSpinEndingRollBack()    
-    self.BettrReelController.SpinReelSpinEndingRollBack()
+    self.BettrReelStripController.SpinReelSpinEndingRollBack()
     self.Mechanics:SpinReelSpinEndingRollBack(self)    
 end
 
 function Game007BaseGameReel:SpinReelSpinEndingRollForward()
-    self.BettrReelController.SpinReelSpinEndingRollForward()
+    self.BettrReelStripController.SpinReelSpinEndingRollForward()
     self.Mechanics:SpinReelSpinEndingRollForward(self)    
 end
 
@@ -120,7 +120,7 @@ function Game007BaseGameReel:SpinReelWaiting()
 end
 
 function Game007BaseGameReel:SpinReelSpinning()
-    return self.BettrReelController.SpinReelSpinning()    
+    return self.BettrReelStripController.SpinReelSpinning()    
 end
 
 function Game007BaseGameReel:PlaySpinReelSpinEndingRollBackAnimation()

@@ -51,6 +51,10 @@ namespace Bettr.Editor
         
         public string PrefabShaderNew { get; set; }
         
+        public string PrefabMaterialNewPrefix { get; set; }
+        
+        public string PrefabTextureNewPrefix { get; set; }
+        
         public bool IsPrefab { get; set; }
         
         public bool IsMainLobbyPrefab { get; set; }
@@ -310,21 +314,23 @@ namespace Bettr.Editor
                                     }
                                     else
                                     {
-                                        // Get the main texture name if it exists
-                                        string textureName = material.mainTexture != null ? material.mainTexture.name : "";
-                    
                                         // Convert color to hex string
                                         string hexColor = $"#{ColorUtility.ToHtmlStringRGBA(material.color)}";
-                    
+
+                                        string materialName = $"{PrefabMaterialNewPrefix}{material.name}";
+                                        // Get the main texture name if it exists
+                                        string textureName = material.mainTexture != null ? material.mainTexture.name : "";
+                                        textureName = $"{PrefabTextureNewPrefix}{textureName}";
+
                                         // Save the material using BettrMaterialGenerator
                                         var savedMaterial = BettrMaterialGenerator.CreateOrLoadMaterial(
-                                            material.name,           // materialName
+                                            materialName,           // materialName
                                             PrefabShaderNew,         // shaderName
                                             textureName,             // textureName
                                             hexColor,                // hexColor
                                             material.color.a,        // alpha
                                             InstanceComponent.RuntimeAssetPath,  // runtimeAssetPath
-                                            false,                   // createTextureIfNotExists
+                                            true,                   // createTextureIfNotExists
                                             null                     // sourceTexture
                                         );
                                         

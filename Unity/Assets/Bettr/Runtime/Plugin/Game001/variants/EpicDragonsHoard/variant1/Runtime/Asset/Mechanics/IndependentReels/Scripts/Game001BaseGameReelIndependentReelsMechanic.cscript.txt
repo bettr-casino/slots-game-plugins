@@ -1,0 +1,22 @@
+require "math"
+require "Core"
+
+Game001BaseGameReelIndependentReelsMechanic = {
+    Config = {
+        Machine = "Game001",
+        Variant = "EpicDragonsHoard",
+        Experiment = "variant1",
+        Mechanic = "IndependentReels",
+    },
+}
+
+function Game001BaseGameReelIndependentReelsMechanic:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game001BaseGameReelIndependentReelsMechanic:Initialize(reel)
+end
+
