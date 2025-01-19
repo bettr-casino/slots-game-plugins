@@ -1,9 +1,11 @@
 {
   "Name": "BaseGameIndependentReelsMechanic",
   "Id": "BaseGameIndependentReelsMechanic",
+  "Layer": "SLOT_REELS",
   "Child": {
       "Name": "Pivot",
       "Id": "Pivot",
+      "Layer": "SLOT_REELS",
       "Children": [   
 {{- for columnIndex in 1..columnCount }}
 {{- for rowIndex in 1..rowCount }}
@@ -12,11 +14,38 @@
             "Layer": "SLOT_REELS",
             "Child": {
                 "Name": "Pivot",
-                "Child": {
-                    "Name": "SymbolGroup",
-                    "IsPrefab": true,
-                    "PrefabName": "{{machineName}}BaseGameSymbolGroup"
-                }
+                "Layer": "SLOT_REELS",
+                "Children": [
+                    {
+                      "Name": "SymbolStencilMask",
+                      "Layer": "SLOT_REELS",
+                      "Child": {
+                        "Name": "Pivot",
+                        "Layer": "SLOT_REELS",
+                        "Children": [
+                          {
+                            "Name": "Quad",
+                            "Layer": "SLOT_REELS",
+                            "IsPrimitive": true,
+                            "Primitive": 5,
+                            "PrimitiveMaterial": "{{machineName}}SymbolStencilMask",
+                            "PrimitiveShader": "Bettr/StencilMask",
+                            "PrimitiveTexture": "{{machineName}}SymbolStencilMask",
+                            "PrimitiveTextureCreate": true,
+                            "PrimitiveTextureCreateSource": "default.png",
+                            "PrimitiveAlpha": 1
+                          }
+                        ]
+                      }
+                    },                    
+                    {
+                        "Name": "SymbolGroup",
+                        "IsPrefab": true,
+                        "PrefabName": "{{machineName}}BaseGameSymbolGroup",
+                        "PrefabUnpacked": true,
+                        "PrefabShader": "Bettr/SymbolStencil",
+                    }
+                ]
             }
         }
 {{ if !for.last }},{{ end }}{{ end }}
