@@ -208,7 +208,8 @@ namespace Bettr.Core
             };
             
             // Register the specialized performance controllers
-            TileController.RegisterType<BettrReelController>("BettrReelController");
+            TileController.RegisterType<BettrReelStripController>("BettrReelStripController");
+            TileController.RegisterType<BettrReelMatrixController>("BettrReelMatrixController");
 
             BettrVisualsController.SwitchOrientationToLandscape();
             

@@ -78,7 +78,7 @@ namespace Bettr.Core
             this._undoCompleted = false;
         }
 
-        public void Undo(BettrReelStripController reelController)
+        internal void Undo(BettrReelStripController reelController)
         {
             if (!_undoCompleted)
             {
@@ -99,7 +99,7 @@ namespace Bettr.Core
             this._undoCompleted = false;
         }
 
-        public void Undo(BettrReelStripController reelController)
+        internal void Undo(BettrReelStripController reelController)
         {
             if (!_undoCompleted)
             {
@@ -121,23 +121,17 @@ namespace Bettr.Core
         [NonSerialized] private string MachineID;
         [NonSerialized] private string MachineVariantID;
 
-        [NonSerialized] internal bool IsReelMatrixEnabled;
-        
         [NonSerialized] private BettrUserController BettrUserController;
         [NonSerialized] private BettrMathController BettrMathController;
-        
-        public BettrReelMatrixController BettrReelMatrixController { get; private set; }
-        public BettrReelStripController BettrReelStripController { get; private set; }
+
+        internal BettrReelMatrixController BettrReelMatrixController { get; private set; }
+        internal BettrReelStripController BettrReelStripController { get; private set; }
 
         private void Awake()
         {
             ReelTile = GetComponent<TileWithUpdate>();
             BettrUserController = BettrUserController.Instance;
             BettrMathController = BettrMathController.Instance;
-            
-            IsReelMatrixEnabled = false;
-
-            IsReelMatrixEnabled = true;
         }
         
         private IEnumerator Start()
@@ -149,218 +143,13 @@ namespace Bettr.Core
             this.MachineVariantID = ReelTile.GetProperty<string>("MachineVariantID");
             var reelTable = BettrMathController.GetGlobalTable(ReelTile.globalTileId);
             var reelStateTable = BettrMathController.GetTableFirst("BaseGameReelState", this.MachineID, this.ReelID);
-
-            reelTable["BettrReelController"] = this;
             
             this.BettrReelStripController = new BettrReelStripController(ReelTile, BettrUserController, BettrMathController);
-            reelTable["BettrReelStripController"] = this;
-            
             this.BettrReelMatrixController = new BettrReelMatrixController(ReelTile, BettrUserController, BettrMathController);
             
             yield break;
         }
         
-        public IEnumerator StartEngines()
-        {
-            if (IsReelMatrixEnabled)
-            {
-                yield return this.BettrReelMatrixController.StartEngines();
-            }
-            else
-            {
-                yield return this.BettrReelStripController.StartEngines();
-            }
-        }
-
-        public IEnumerator OnOutcomeReceived()
-        {
-            if (IsReelMatrixEnabled)
-            {
-                yield return this.BettrReelMatrixController.OnOutcomeReceived();
-            }
-            else
-            {
-                yield return this.BettrReelStripController.OnOutcomeReceived();
-            }
-        }
-
-        public IEnumerator OnApplyOutcomeReceived()
-        {
-            if (IsReelMatrixEnabled)
-            {
-                yield return this.BettrReelMatrixController.OnApplyOutcomeReceived();
-            }
-            else
-            {
-                yield return this.BettrReelStripController.OnApplyOutcomeReceived();
-            }
-        }
-        
-        public void SpinEngines()
-        {
-            if (IsReelMatrixEnabled)
-            {
-                this.BettrReelMatrixController.SpinEngines();
-            }
-            else
-            {
-                this.BettrReelStripController.SpinEngines();
-            }
-        }
-
-        public string ReplaceSymbolForSpin(int zeroIndex, string newSymbol)
-        {
-            if (IsReelMatrixEnabled)
-            {
-                return this.BettrReelMatrixController.ReplaceSymbolForSpin(zeroIndex, newSymbol);
-            }
-            else
-            {
-                return this.BettrReelStripController.ReplaceSymbolForSpin(zeroIndex, newSymbol);
-            }
-        }
-
-        public void SwapInReelStripSymbolsForSpin(params List<string>[] reelStripSymbolsForSpins)
-        {
-            if (IsReelMatrixEnabled)
-            {
-                this.BettrReelStripController.SwapInReelStripSymbolsForSpin(reelStripSymbolsForSpins);
-            }
-            else
-            {
-                this.BettrReelStripController.SwapInReelStripSymbolsForSpin(reelStripSymbolsForSpins);
-            }
-        }
-        
-        public void UndoSwapInReelStripSymbolsForSpin()
-        {
-            if (IsReelMatrixEnabled)
-            {
-                this.BettrReelMatrixController.UndoSwapInReelStripSymbolsForSpin();
-            }
-            else
-            {
-                this.BettrReelStripController.UndoSwapInReelStripSymbolsForSpin();
-            }
-        }
-        
-        public void SwapInReelSpinOutcomeTableForSpin(params Table[] spinOutcomeTables)
-        {
-            if (IsReelMatrixEnabled)
-            {
-                this.BettrReelMatrixController.SwapInReelSpinOutcomeTableForSpin(spinOutcomeTables);
-            }
-            else
-            {
-                this.BettrReelStripController.SwapInReelSpinOutcomeTableForSpin(spinOutcomeTables);
-            }
-        }
-        
-        public void UndoSwapInReelSpinOutcomeTableForSpin()
-        {
-            if (IsReelMatrixEnabled)
-            {
-                this.BettrReelMatrixController.UndoSwapInReelSpinOutcomeTableForSpin();
-            }
-            else
-            {
-                this.BettrReelStripController.UndoSwapInReelSpinOutcomeTableForSpin();
-            }
-        }
-        
-        public void SwitchToReelMatrix()
-        {
-            this.IsReelMatrixEnabled = true;
-        }
-        
-        public void SwitchToReelStrip()
-        {
-            this.IsReelMatrixEnabled = false;
-        }
-        
-        public void SetupReelStripSymbolsForSpin()
-        {
-            if (IsReelMatrixEnabled)
-            {
-                this.BettrReelMatrixController.SetupReelStripSymbolsForSpin();
-            }
-            else
-            {
-                this.BettrReelStripController.SetupReelStripSymbolsForSpin();
-            }
-        }
-        
-        public void SpinReelSpinStartedRollBack()
-        {
-            if (IsReelMatrixEnabled)
-            {
-                this.BettrReelMatrixController.SpinReelSpinStartedRollBack();
-            }
-            else
-            {
-                this.BettrReelStripController.SpinReelSpinStartedRollBack();
-            }
-        }
-        
-        public void SpinReelSpinStartedRollForward()
-        {
-            if (IsReelMatrixEnabled)
-            {
-                this.BettrReelMatrixController.SpinReelSpinStartedRollForward();                
-            }
-            else
-            {
-                this.BettrReelStripController.SpinReelSpinStartedRollForward();
-            }
-        }
-        
-        public void SpinReelSpinEndingRollBack()
-        {
-            if (IsReelMatrixEnabled)
-            {
-                this.BettrReelMatrixController.SpinReelSpinEndingRollBack();
-            }
-            else
-            {
-                this.BettrReelStripController.SpinReelSpinEndingRollBack();
-            }
-        }
-        
-        public void SpinReelSpinEndingRollForward()
-        {
-            if (IsReelMatrixEnabled)
-            {
-                this.BettrReelMatrixController.SpinReelSpinEndingRollForward();
-            }
-            else
-            {
-                this.BettrReelStripController.SpinReelSpinEndingRollForward();
-            }
-        }
-        
-        public bool SpinReelSpinning()
-        {
-            if (IsReelMatrixEnabled)
-            {
-                return this.BettrReelMatrixController.SpinReelSpinning();
-            }
-            else
-            {
-                return this.BettrReelStripController.SpinReelSpinning();
-            }
-        }
-        
-        private float CalculateSlideDistanceInSymbolUnits()
-        {
-            if (IsReelMatrixEnabled)
-            {
-                return this.BettrReelMatrixController.CalculateSlideDistanceInSymbolUnits();
-            }
-            else
-            {
-                return this.BettrReelStripController.CalculateSlideDistanceInSymbolUnits();
-            }
-        }
     }
     
     [Serializable]
@@ -377,22 +166,20 @@ namespace Bettr.Core
         [NonSerialized] private ReelStripSwapInSymbolsCommand _reelStripSwapInSymbolsCommand;
         [NonSerialized] private ReelStripSwapInSpinOutcomeTableCommand _reelStripSwapInSpinOutcomeTableCommand;
         
-        public Table ReelTable { get; private set; }
-        public Table ReelStateTable { get; private set; }
-        public Table ReelSpinStateTable { get; private set; }
+        public Table ReelTable { get; internal set; }
+        public Table ReelStateTable { get; internal set; }
+        public Table ReelSpinStateTable { get; internal set; }
         public Table SpinOutcomeTable { get; internal set; }
-        public Table ReelSymbolsStateTable { get; private set; }
-        public Table ReelSymbolsTable { get; private set; }
+        public Table ReelSymbolsStateTable { get; internal set; }
+        public Table ReelSymbolsTable { get; internal set; }
         
         // TODO: FIXME move this to ReelStateTable
         [NonSerialized] private bool ShouldSpliceReel;
         
-        [NonSerialized] internal bool ShouldSwitchToReelMatrix;
-        
         [NonSerialized] private BettrUserController BettrUserController;
         [NonSerialized] private BettrMathController BettrMathController;
         
-        public List<string> ReelStripSymbolsForThisSpin { get; internal set; }
+        public List<string> ReelStripSymbolsForThisSpin { get; set; }
         
         public static ReelStripOutcomeDelay[] ReelOutcomeDelays { get; private set; }
         
@@ -423,7 +210,9 @@ namespace Bettr.Core
             this.ReelSpinStateTable = BettrMathController.GetTableFirst("BaseGameReelSpinState", this.MachineID, this.ReelID);
             this.SpinOutcomeTable = BettrMathController.GetTableFirst("BaseGameReelSpinOutcome", this.MachineID, this.ReelID);
             this.ReelSymbolsStateTable = BettrMathController.GetTableArray("BaseGameReelSymbolsState", this.MachineID, this.ReelID);
-            this.ReelSymbolsTable = BettrMathController.GetTableArray("BaseGameReelSet", this.MachineID, this.ReelID);            
+            this.ReelSymbolsTable = BettrMathController.GetTableArray("BaseGameReelSet", this.MachineID, this.ReelID);    
+            
+            this.ReelTable["BettrReelStripController"] = this;
         }
         
         public IEnumerator StartEngines()
@@ -684,7 +473,7 @@ namespace Bettr.Core
         {
             var speed = BettrUserController.UserInSlamStopMode ? 4 : 4;
             this.ReelSpinStateTable["SpeedInSymbolUnitsPerSecond"] = (double) this.ReelStateTable["SpinSpeedInSymbolUnitsPerSecond"] * speed;
-            float slideDistanceInSymbolUnits = _AdvanceReel();
+            float slideDistanceInSymbolUnits = AdvanceReel();
             _SlideReelSymbols(slideDistanceInSymbolUnits);
             return true;
         }
@@ -706,7 +495,7 @@ namespace Bettr.Core
             return slideDistanceInSymbolUnits;
         }
         
-        private float _AdvanceReel()
+        public float AdvanceReel()
         {
             var reelSpinDirection = (string) this.ReelSpinStateTable["ReelSpinDirection"];
             bool spinDirectionIsDown = reelSpinDirection == "Down";
@@ -715,9 +504,9 @@ namespace Bettr.Core
 
             while ((spinDirectionIsDown && slideDistanceInSymbolUnits < -1) || (!spinDirectionIsDown && slideDistanceInSymbolUnits > 1))
             {
-                _AdvanceSymbols();
-                _UpdateReelStopIndexes();
-                _ApplySpinReelStop();
+                AdvanceSymbols();
+                UpdateReelStopIndexes();
+                ApplySpinReelStop();
                 slideDistanceInSymbolUnits += slideDistanceOffsetInSymbolUnits;
                 if (ReelOutcomeDelays[this.ReelIndex].IsStoppedForSpin)
                 {
@@ -734,12 +523,12 @@ namespace Bettr.Core
             return slideDistanceInSymbolUnits;
         }
 
-        private void _AdvanceSymbols()
+        public void AdvanceSymbols()
         {
             var symbolCount = (int) (double) this.ReelStateTable["SymbolCount"];
             for (var i = 1; i <= symbolCount; i++)
             {
-                _UpdateReelSymbolForSpin(i);
+                UpdateReelSymbolForSpin(i);
             }
         }
         
@@ -748,7 +537,7 @@ namespace Bettr.Core
             return (int) (double) this.ReelStateTable["VisibleSymbolCount"];
         }
         
-        private int _GetReelTopSymbolCount()
+        public int GetReelTopSymbolCount()
         {
             return (int) (double) this.ReelStateTable["TopSymbolCount"];
         }
@@ -799,7 +588,7 @@ namespace Bettr.Core
             return reelMatrixSymbols;
         }
 
-        private void _UpdateReelSymbolForSpin(int symbolIndex)
+        public void UpdateReelSymbolForSpin(int symbolIndex)
         {
             var symbolState = (Table) this.ReelSymbolsStateTable[symbolIndex];
             var symbolIsLocked = (bool) symbolState["SymbolIsLocked"];
@@ -827,7 +616,7 @@ namespace Bettr.Core
             symbolGroupProperty.CurrentKey = reelSymbol;
         }
         
-        private void _UpdateReelStopIndexes()
+        public void UpdateReelStopIndexes()
         {
             var reelSymbolCount = (int) (double) this.ReelStateTable["ReelSymbolCount"];
             // Get the current stop index and advance offset
@@ -841,7 +630,7 @@ namespace Bettr.Core
             this.ReelSpinStateTable["ReelStopIndex"] = reelStopIndex;
         }
         
-        private void _ApplySpinReelStop()
+        public void ApplySpinReelStop()
         {
             // Check if the outcome has been received
             if (!(bool) this.ReelStateTable["OutcomeReceived"])
@@ -864,7 +653,7 @@ namespace Bettr.Core
                 {
                     return;
                 }
-                _SpliceReel();
+                SpliceReel();
                 this.ShouldSpliceReel = false;
             }
             // Get the current stop index and outcome-related values
@@ -892,13 +681,13 @@ namespace Bettr.Core
             // Iterate through each symbol and apply the slide distance
             for (int i = 1; i <= symbolCount; i++)
             {
-                _SlideSymbol(i, slideDistanceInSymbolUnits);
+                SlideSymbol(i, slideDistanceInSymbolUnits);
             }
             // Set the SlideDistanceInSymbolUnits for the reel spin state
             this.ReelSpinStateTable["SlideDistanceInSymbolUnits"] = slideDistanceInSymbolUnits;
         }
 
-        private GameObject _FindSymbolQuad(TilePropertyGameObjectGroup symbolGroupProperty)
+        public GameObject FindSymbolQuad(TilePropertyGameObjectGroup symbolGroupProperty)
         {
             var pivotGameObject = symbolGroupProperty.Current["Pivot"];
             var childCount = pivotGameObject.transform.childCount;
@@ -914,9 +703,9 @@ namespace Bettr.Core
             return null;
         }
         
-        private IEnumerator _SymbolRemovalAction(TilePropertyGameObjectGroup symbolGroupProperty)
+        public IEnumerator SymbolRemovalAction(TilePropertyGameObjectGroup symbolGroupProperty)
         {
-            var symbolQuad = _FindSymbolQuad(symbolGroupProperty);
+            var symbolQuad = FindSymbolQuad(symbolGroupProperty);
             var symbolMeshRenderer = symbolQuad.GetComponent<MeshRenderer>();
             var originalMaterial = symbolMeshRenderer.material;
     
@@ -949,7 +738,7 @@ namespace Bettr.Core
             symbolMeshRenderer.material = originalMaterial;
         }
 
-        private IEnumerator _SymbolCascadeAction(int fromSymbolIndex, int cascadeDistance, string cascadeSymbol)
+        public IEnumerator SymbolCascadeAction(int fromSymbolIndex, int cascadeDistance, string cascadeSymbol)
         {
             var slideDistance = -cascadeDistance;
             float duration = 0.4f;
@@ -1007,7 +796,7 @@ namespace Bettr.Core
             
         }
         
-        private void _SlideSymbol(int symbolIndex, float slideDistanceInSymbolUnits)
+        public void SlideSymbol(int symbolIndex, float slideDistanceInSymbolUnits)
         {
             // Get the state of the current symbol
             var symbolState = (Table) this.ReelSymbolsStateTable[symbolIndex];
@@ -1034,7 +823,7 @@ namespace Bettr.Core
             symbolProperty.gameObject.transform.localPosition = localPosition;
         }
         
-        private void _SpliceReel()
+        public void SpliceReel()
         {
             var outcomeReelStopIndex = (int) (double) this.SpinOutcomeTable["OutcomeReelStopIndex"];
             var spliceDistance = (int) (double) this.ReelStateTable["SpliceDistance"];
@@ -1042,7 +831,7 @@ namespace Bettr.Core
             var spinDirectionIsDown = (string) this.ReelSpinStateTable["ReelSpinDirection"] == "Down";
 
             // Check if splicing should be skipped
-            bool skipSplice = _SkipSpliceReel(spliceDistance, outcomeReelStopIndex, spinDirectionIsDown);
+            bool skipSplice = SkipSpliceReel(spliceDistance, outcomeReelStopIndex, spinDirectionIsDown);
     
             // Perform splicing if it shouldn't be skipped
             if (spinDirectionIsDown)
@@ -1063,7 +852,7 @@ namespace Bettr.Core
             }
         }
         
-        private bool _SkipSpliceReel(int spliceDistance, int outcomeReelStopIndex, bool spinDirectionIsDown)
+        public bool SkipSpliceReel(int spliceDistance, int outcomeReelStopIndex, bool spinDirectionIsDown)
         {
             var reelStopIndex = (int) (double) this.ReelSpinStateTable["ReelStopIndex"];
             
@@ -1086,7 +875,7 @@ namespace Bettr.Core
             }
         }
 
-        private void _StartReelAnticipation(float anticipationSpeed, float anticipationDuration)
+        public void StartReelAnticipation(float anticipationSpeed, float anticipationDuration)
         {
             Debug.Log($"StartReelAnticipation reelID={this.ReelID} reelIndex={this.ReelIndex} anticipationSpeed={anticipationSpeed} anticipationDuration={anticipationDuration}");
             var speed = BettrUserController.UserInSlamStopMode ? 4 : 4;
@@ -1107,12 +896,12 @@ namespace Bettr.Core
         [NonSerialized] private string MachineID;
         [NonSerialized] private string MachineVariantID;
         
-        public Table ReelTable { get; private set; }
-        public Table ReelStateTable { get; private set; }
-        public Table ReelSpinStateTable { get; private set; }
+        public Table ReelTable { get; internal set; }
+        public Table ReelStateTable { get; internal set; }
+        public Table ReelSpinStateTable { get; internal set; }
         public Table SpinOutcomeTable { get; internal set; }
-        public Table ReelSymbolsStateTable { get; private set; }
-        public Table ReelSymbolsTable { get; private set; }
+        public Table ReelSymbolsStateTable { get; internal set; }
+        public Table ReelSymbolsTable { get; internal set; }
         
         // TODO: FIXME move this to ReelStateTable
         [NonSerialized] private bool ShouldSpliceReel;
@@ -1152,6 +941,8 @@ namespace Bettr.Core
             this.SpinOutcomeTable = BettrMathController.GetTableFirst("BaseGameReelSpinOutcome", this.MachineID, this.ReelID);
             this.ReelSymbolsStateTable = BettrMathController.GetTableArray("BaseGameReelSymbolsState", this.MachineID, this.ReelID);
             this.ReelSymbolsTable = BettrMathController.GetTableArray("BaseGameReelSet", this.MachineID, this.ReelID);
+            
+            this.ReelTable["BettrReelMatrixController"] = this;
         }
         
         public IEnumerator StartEngines()
@@ -1583,7 +1374,7 @@ namespace Bettr.Core
             this.ReelSpinStateTable["SlideDistanceInSymbolUnits"] = slideDistanceInSymbolUnits;
         }
 
-        public GameObject FindSymbolQuad(TilePropertyGameObjectGroup symbolGroupProperty)
+        public GameObject _FindSymbolQuad(TilePropertyGameObjectGroup symbolGroupProperty)
         {
             var pivotGameObject = symbolGroupProperty.Current["Pivot"];
             var childCount = pivotGameObject.transform.childCount;
@@ -1601,7 +1392,7 @@ namespace Bettr.Core
         
         public IEnumerator SymbolRemovalAction(TilePropertyGameObjectGroup symbolGroupProperty)
         {
-            var symbolQuad = FindSymbolQuad(symbolGroupProperty);
+            var symbolQuad = _FindSymbolQuad(symbolGroupProperty);
             var symbolMeshRenderer = symbolQuad.GetComponent<MeshRenderer>();
             var originalMaterial = symbolMeshRenderer.material;
     

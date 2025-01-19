@@ -29,13 +29,13 @@ end
 
 function Game001BaseGameReelChooseASideMechanic:StartEngines(reel, machine)
     local source = machine.ChooseASideMechanicSymbolGroup
-    self.State.ReelSymbolGroups = BettrMechanicsController.AddSymbolsToReelSymbolGroups("ChooseASide", reel.BettrReelController, source)
+    self.State.ReelSymbolGroups = BettrMechanicsController.AddSymbolsToReelSymbolGroups("ChooseASide", reel.BettrReelStripController, source)
 end
 
 function Game001BaseGameReelChooseASideMechanic:OnOutcomeReceived(reel)
     local thisReelID = reel.ReelID
     local topSymbolCount = Game001BaseGameReelState[thisReelID].First.TopSymbolCount
-    local outcomeReelStopIndex = reel.BettrReelController.SpinOutcomeTable["OutcomeReelStopIndex"];
+    local outcomeReelStopIndex = reel.BettrReelStripController.SpinOutcomeTable["OutcomeReelStopIndex"];
     local matrix = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, "ChooseASide")
     for i = 1, #matrix do
         local row = matrix[i]
@@ -44,7 +44,7 @@ function Game001BaseGameReelChooseASideMechanic:OnOutcomeReceived(reel)
             local rowIndex = row["RowIndex"]
             local symbol = row["Symbol"]
             local reelStopIndex = outcomeReelStopIndex + rowIndex - topSymbolCount
-            reel.BettrReelController.ReplaceSymbolForSpin(reelStopIndex, symbol)
+            reel.BettrReelStripController.ReplaceSymbolForSpin(reelStopIndex, symbol)
         end
     end
 end

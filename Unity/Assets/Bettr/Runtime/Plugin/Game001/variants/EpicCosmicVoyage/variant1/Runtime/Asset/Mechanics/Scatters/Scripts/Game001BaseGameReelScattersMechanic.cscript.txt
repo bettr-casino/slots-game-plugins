@@ -29,13 +29,13 @@ end
 
 function Game001BaseGameReelScattersMechanic:StartEngines(reel, machine)
     local source = machine.ScattersMechanicSymbolGroup
-    self.State.ReelSymbolGroups = BettrMechanicsController.AddSymbolsToReelSymbolGroups("Scatters", reel.BettrReelController, source)
+    self.State.ReelSymbolGroups = BettrMechanicsController.AddSymbolsToReelSymbolGroups("Scatters", reel.BettrReelStripController, source)
 end
 
 function Game001BaseGameReelScattersMechanic:OnOutcomeReceived(reel)
     local thisReelID = reel.ReelID
     local topSymbolCount = Game001BaseGameReelState[thisReelID].First.TopSymbolCount
-    local outcomeReelStopIndex = reel.BettrReelController.SpinOutcomeTable["OutcomeReelStopIndex"];
+    local outcomeReelStopIndex = reel.BettrReelStripController.SpinOutcomeTable["OutcomeReelStopIndex"];
     local matrix = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, "Scatters")
     for i = 1, #matrix do
         local row = matrix[i]
@@ -44,7 +44,7 @@ function Game001BaseGameReelScattersMechanic:OnOutcomeReceived(reel)
             local rowIndex = row["RowIndex"]
             local symbol = row["ScatterSymbol"]
             local reelStopIndex = outcomeReelStopIndex + rowIndex - topSymbolCount
-            reel.BettrReelController.ReplaceSymbolForSpin(reelStopIndex, symbol)
+            reel.BettrReelStripController.ReplaceSymbolForSpin(reelStopIndex, symbol)
         end
     end
 end

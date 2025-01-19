@@ -1,0 +1,26 @@
+require "math"
+require "Core"
+
+{{machineName}}BaseGameMachineIndependentReelsMechanic = {
+    Config = {
+        Machine = "{{machineName}}",
+        Variant = "{{machineVariant}}",
+        Experiment = "{{experimentVariant}}",
+        Mechanic = "{{mechanicName}}",
+    },
+}
+
+function {{machineName}}BaseGameMachineIndependentReelsMechanic:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function {{machineName}}BaseGameMachineIndependentReelsMechanic:Initialize(machine)
+end
+
+function {{machineName}}BaseGameMachineIndependentReelsMechanic:TryPaying(machine)
+end
+
+

@@ -40,8 +40,8 @@ namespace Bettr.Core
         //
         public void SwapReelsForSpin(Table reel1, Table reel2)
         {
-            var reel1Controller = (BettrReelStripController) reel1["BettrReelController"];
-            var reel2Controller = (BettrReelStripController) reel2["BettrReelController"];
+            var reel1Controller = (BettrReelStripController) reel1["BettrReelStripController"];
+            var reel2Controller = (BettrReelStripController) reel2["BettrReelStripController"];
             // reel1Strips
             var reel1ReelStripSymbols = reel1Controller.ReelStripSymbolsForThisSpin;
             // reel2Strips
@@ -63,8 +63,8 @@ namespace Bettr.Core
         //
         public void UndoSwapReelsForSpin(Table reel1, Table reel2)
         {
-            var reel1Controller = (BettrReelController) reel1["BettrReelController"];
-            var reel2Controller = (BettrReelController) reel2["BettrReelController"];
+            var reel1Controller = (BettrReelStripController) reel1["BettrReelStripController"];
+            var reel2Controller = (BettrReelStripController) reel2["BettrReelStripController"];
             // undo swap ReelStrips
             reel1Controller.UndoSwapInReelStripSymbolsForSpin();
             reel2Controller.UndoSwapInReelStripSymbolsForSpin();
@@ -122,7 +122,7 @@ namespace Bettr.Core
             var globals = TileController.LuaScript.Globals;
             var globalKey = $"{machineName}BaseGame{reelID}";
             var reelTable = (Table) globals[globalKey];
-            var reelController = (BettrReelStripController) reelTable["BettrReelController"];
+            var reelController = (BettrReelStripController) reelTable["BettrReelStripController"];
             var visibleSymbolCount = reelController.GetReelVisibleSymbolCount();
             return visibleSymbolCount;
         }
@@ -270,7 +270,7 @@ namespace Bettr.Core
             var globals = TileController.LuaScript.Globals;
             var globalKey = $"{machineName}BaseGame{reelID}";
             var reelTable = (Table) globals[globalKey];
-            var reelController = (BettrReelStripController) reelTable["BettrReelController"];
+            var reelController = (BettrReelStripController) reelTable["BettrReelStripController"];
             var reelMatrixSymbols = reelController.GetReelMatrixVisibleSymbolsGroups(symbols);
             return reelMatrixSymbols;
         }
@@ -288,7 +288,7 @@ namespace Bettr.Core
             var globals = TileController.LuaScript.Globals;
             var globalKey = $"{machineName}BaseGame{reelID}";
             var reelTable = (Table) globals[globalKey];
-            var reelController = (BettrReelStripController) reelTable["BettrReelController"];
+            var reelController = (BettrReelStripController) reelTable["BettrReelStripController"];
             var reelMatrixSymbols = reelController.GetReelMatrixVisibleSymbols(symbols);
             return reelMatrixSymbols;
         }

@@ -55,7 +55,7 @@ function Game001BaseGameReelReelAnticipationMechanic:OnApplyOutcomeReceived(reel
             self.State.AnticipateReelID = anticipateReelID
         end
     end
-    reel.BettrReelController.OnApplyOutcomeReceived()
+    reel.BettrReelStripController.OnApplyOutcomeReceived()
 end
 
 function Game001BaseGameReelReelAnticipationMechanic:OnSpinReelStopped(reel)
@@ -74,6 +74,6 @@ end
 
 function Game001BaseGameReelReelAnticipationMechanic:StartReelAnticipation(reel, landedReel)
     self.State.MechanicsPrefab.SetActive(true)
-    reel.BettrReelController.StartReelAnticipation(self.State.AnticipationSpeed, self.State.AnticipationDuration)
+    reel.BettrReelStripController.StartReelAnticipation(self.State.AnticipationSpeed, self.State.AnticipationDuration)
     self.State.IsAnticipating = true
 end
