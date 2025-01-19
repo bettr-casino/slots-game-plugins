@@ -49,7 +49,7 @@ namespace Bettr.Editor
             EnsureMechanicsDirectory(mechanicRuntimeAssetPath);
             
             var json = scribanTemplate.Render(model);
-            Console.WriteLine(json);
+            Debug.Log(json);
             
             InstanceComponent.RuntimeAssetPath = mechanicRuntimeAssetPath;
             InstanceGameObject.IdGameObjects.Clear();
@@ -226,6 +226,8 @@ namespace Bettr.Editor
             var dataSummary = BettrMenu.GetTable($"{machineName}BaseGameIndependentReelsDataSummary");
             var rowCount = BettrMenu.GetTableValue<int>(dataSummary, "IndependentReels", "RowCount", 0);
             var columnCount = BettrMenu.GetTableValue<int>(dataSummary, "IndependentReels", "ColumnCount", 0);
+            
+            Debug.Log($"rowCount={rowCount} columnCount={columnCount}");
             
             Debug.Log($"ProcessIndependentReelsMechanic rowCount: {rowCount} columnCount: {columnCount}");
             

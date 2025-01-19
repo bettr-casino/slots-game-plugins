@@ -1,6 +1,5 @@
 require "math"
 require "Core"
-require "Game001BaseGameMachineWaysMechanic"
 
 Game001BaseGameMachineMechanics = {
     Config = {
@@ -8,7 +7,6 @@ Game001BaseGameMachineMechanics = {
         Variant = "EpicDragonsHoard",
         Experiment = "control",
     },
-    WaysMechanic = nil,
 }
 
 function Game001BaseGameMachineMechanics:new(o)
@@ -23,8 +21,6 @@ function Game001BaseGameMachineMechanics:OnError(callStack)
 end
 
 function Game001BaseGameMachineMechanics:Initialize(machine)
-     self.WaysMechanic = Game001BaseGameMachineWaysMechanic:new()
-     self.WaysMechanic:Initialize(machine)
 end
 
 function Game001BaseGameMachineMechanics:StartMachine(machine)

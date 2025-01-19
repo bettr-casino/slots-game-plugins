@@ -5,15 +5,15 @@
       "Name": "Pivot",
       "Id": "Pivot",
       "Children": [   
-{{- for rowIndex in 0..rowCount }}
-{{- for columnIndex in 0..columnCount }}
+{{- for columnIndex in 1..columnCount }}
+{{- for rowIndex in 1..rowCount }}
         {
-            "Name": "{{machineName}}BaseGameRow{{rowIndex}}Col{{columnIndex}}",
+            "Name": "Reel{{columnIndex}}Symbol{{rowIndex}}",
             "Id": "BaseGameChooseASideSymbolGroup",
             "Layer": "SLOT_REELS"
         }
 {{ if !for.last }},{{ end }}{{ end }}
-{{- end }}
+{{ if !for.last }},{{ end }}{{ end }}
        ]
   }
 }

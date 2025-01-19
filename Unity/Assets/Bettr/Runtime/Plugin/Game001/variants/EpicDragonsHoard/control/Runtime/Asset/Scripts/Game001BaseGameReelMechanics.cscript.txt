@@ -1,6 +1,5 @@
 require "math"
 require "Core"
-require "Game001BaseGameReelWaysMechanic"
 
 Game001BaseGameReelMechanics = {
     Config = {
@@ -8,7 +7,6 @@ Game001BaseGameReelMechanics = {
         Variant = "EpicDragonsHoard",
         Experiment = "control",
     },
-    WaysMechanic = nil,
 }
 
 function Game001BaseGameReelMechanics:new(o)
@@ -19,8 +17,6 @@ function Game001BaseGameReelMechanics:new(o)
 end
 
 function Game001BaseGameReelMechanics:Initialize(reel)
-    self.WaysMechanic = Game001BaseGameReelWaysMechanic:new()
-    self.WaysMechanic:Initialize(reel)
 end
 
 function Game001BaseGameReelMechanics:SpinReelSpinStartedRollBack(reel)

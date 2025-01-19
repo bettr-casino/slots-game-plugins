@@ -206,6 +206,7 @@ namespace Bettr.Editor
             var machineModelName =$"{machineName}Models";
             
             string modelDestinationPath = Path.Combine(runtimeAssetPath, "Models",  $"{machineModelName}.cscript.txt");
+            Debug.Log($"modelDestinationPath={modelDestinationPath}");
             
             // Load and run the Model file
             var modelTextAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(modelDestinationPath);
@@ -220,6 +221,7 @@ namespace Bettr.Editor
             foreach (var pk in pkArray)
             {
                 var activeMechanics = GetTableArray<string>(mechanicsTable, pk, "Mechanic");
+                Debug.Log($"activeMechanics={string.Join(",", activeMechanics)}");
                 var isMechanicActive = activeMechanics.Contains(mechanic);
                 if (!isMechanicActive)
                 {
