@@ -51,6 +51,7 @@ namespace Bettr.Editor
             var json = scribanTemplate.Render(model);
             Debug.Log(json);
             
+            InstanceComponent.DefaultRuntimeAssetPath = runtimeAssetPath;
             InstanceComponent.RuntimeAssetPath = mechanicRuntimeAssetPath;
             InstanceGameObject.IdGameObjects.Clear();
             
@@ -240,7 +241,7 @@ namespace Bettr.Editor
                 { "columnCount", columnCount },
             };
             
-            BettrMechanicsHelpers.ProcessBaseGameMechanic(
+                BettrMechanicsHelpers.ProcessBaseGameMechanic(
                 runtimeAssetPath, model,
                 templateName, prefabName, mechanicName);
         }

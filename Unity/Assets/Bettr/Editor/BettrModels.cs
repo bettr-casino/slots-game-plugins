@@ -257,6 +257,10 @@ namespace Bettr.Editor
                 {
                     Debug.Log($"loading prefab from path: {InstanceComponent.RuntimeAssetPath}/Prefabs/{PrefabName}.prefab");
                     var prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{InstanceComponent.RuntimeAssetPath}/Prefabs/{PrefabName}.prefab");
+                    if (prefab == null)
+                    {
+                        prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{InstanceComponent.DefaultRuntimeAssetPath}/Prefabs/{PrefabName}.prefab");
+                    }
                     var prefabGameObject = new PrefabGameObject(prefab, Name);
                     _go = prefabGameObject.GameObject;
                     if (PrefabIds != null)
@@ -417,6 +421,7 @@ namespace Bettr.Editor
     [Serializable]
     public class InstanceComponent : IComponent
     {
+        public static string DefaultRuntimeAssetPath;
         public static string RuntimeAssetPath;
         public static string CorePath;
         public static string MainLobbyPath;

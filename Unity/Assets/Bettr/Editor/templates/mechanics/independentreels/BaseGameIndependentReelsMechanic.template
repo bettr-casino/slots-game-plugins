@@ -9,8 +9,15 @@
 {{- for rowIndex in 1..rowCount }}
         {
             "Name": "Reel{{columnIndex}}Symbol{{rowIndex}}",
-            "Id": "BaseGameChooseASideSymbolGroup",
-            "Layer": "SLOT_REELS"
+            "Layer": "SLOT_REELS",
+            "Child": {
+                "Name": "Pivot",
+                "Child": {
+                    "Name": "SymbolGroup",
+                    "IsPrefab": true,
+                    "PrefabName": "{{machineName}}BaseGameSymbolGroup"
+                }
+            }
         }
 {{ if !for.last }},{{ end }}{{ end }}
 {{ if !for.last }},{{ end }}{{ end }}
