@@ -224,12 +224,18 @@ namespace Bettr.Editor
             BettrMaterialGenerator.MachineVariant = machineVariant;
             
             var dataSummary = BettrMenu.GetTable($"{machineName}BaseGameIndependentReelsDataSummary");
+            var rowCount = BettrMenu.GetTableValue<int>(dataSummary, "IndependentReels", "RowCount", 0);
+            var columnCount = BettrMenu.GetTableValue<int>(dataSummary, "IndependentReels", "ColumnCount", 0);
+            
+            Debug.Log($"ProcessIndependentReelsMechanic rowCount: {rowCount} columnCount: {columnCount}");
             
             // get the model
             var model = new Dictionary<string, object>
             {
                 { "machineName", machineName },
                 { "machineVariant", machineVariant },
+                { "rowCount", rowCount },
+                { "columnCount", columnCount },
             };
             
             BettrMechanicsHelpers.ProcessBaseGameMechanic(
