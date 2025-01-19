@@ -33,6 +33,9 @@ namespace Bettr.Editor
     {
         public static Dictionary<string, InstanceGameObject> IdGameObjects = new Dictionary<string, InstanceGameObject>();
         
+        // Cache to store processed materials
+        public static Dictionary<string, Material> SymbolMaterialCache = new Dictionary<string, Material>();
+        
         private GameObject _go;
         public string Name { get; set; }
         
@@ -44,7 +47,9 @@ namespace Bettr.Editor
         
         public bool PrefabUnpacked { get; set; }
         
-        public string PrefabShader { get; set; }
+        public string PrefabShaderOld { get; set; }
+        
+        public string PrefabShaderNew { get; set; }
         
         public bool IsPrefab { get; set; }
         
@@ -271,6 +276,90 @@ namespace Bettr.Editor
                     
                     var prefabGameObject = new PrefabGameObject(prefab, Name, PrefabUnpacked);
                     _go = prefabGameObject.GameObject;
+                    
+                    // START - update Prefab Shaders
+                    
+                    // Replace the shader if required
+                    if (!string.IsNullOrEmpty(PrefabShaderOld) && !string.IsNullOrEmpty(PrefabShaderNew))
+                    {
+                        // Get all renderers in the GameObject and its children
+                        var renderers = _go.GetComponentsInChildren<Renderer>(true);
+                        Debug.Log($"Updating shaders for {renderers.Length} renderers in {Name}");
+                    
+                        foreach (var renderer in renderers)
+                        {
+                            Debug.Log($"Updating renderer for {renderer.name} renderers in {Name}");
+
+                            var materials = renderer.sharedMaterials.ToArray();
+                            bool materialsChanged = false;
+                    
+                            for (int i = 0; i < materials.Length; i++)
+                            {
+                                var material = materials[i];
+                    
+                                // Check if the material uses the old shader
+                                if (material != null && material.shader.name == PrefabShaderOld)
+                                {
+                                    // Check if the material is already in the cache
+                                    if (SymbolMaterialCache.TryGetValue(material.name, out Material cachedMaterial))
+                                    {
+                                        // Use the cached material
+                                        Debug.Log($"Using the cached material for {material.name}");
+                                        materials[i] = cachedMaterial;
+                                        materialsChanged = true;
+                                    }
+                                    else
+                                    {
+                                        // Get the main texture name if it exists
+                                        string textureName = material.mainTexture != null ? material.mainTexture.name : "";
+                    
+                                        // Convert color to hex string
+                                        string hexColor = $"#{ColorUtility.ToHtmlStringRGBA(material.color)}";
+                    
+                                        // Save the material using BettrMaterialGenerator
+                                        var savedMaterial = BettrMaterialGenerator.CreateOrLoadMaterial(
+                                            material.name,           // materialName
+                                            PrefabShaderNew,         // shaderName
+                                            textureName,             // textureName
+                                            hexColor,                // hexColor
+                                            material.color.a,        // alpha
+                                            InstanceComponent.RuntimeAssetPath,  // runtimeAssetPath
+                                            false,                   // createTextureIfNotExists
+                                            null                     // sourceTexture
+                                        );
+                                        
+                                        Debug.Log($"Creating a new saved material for {material.name}");
+                    
+                                        if (savedMaterial != null)
+                                        {
+                                            // Cache the created material
+                                            SymbolMaterialCache[material.name] = savedMaterial;
+                    
+                                            // Update the material in the materials array
+                                            materials[i] = savedMaterial;
+                                            materialsChanged = true;
+                                        }
+                                        else
+                                        {
+                                            Debug.LogWarning($"Failed to create/load material for: {material.name}");
+                                        }
+                                    }
+                                }
+                            }
+                    
+                            // If any materials were changed, update the renderer
+                            if (materialsChanged)
+                            {
+                                renderer.materials = materials;
+                                EditorUtility.SetDirty(renderer);
+                                EditorUtility.SetDirty(_go);
+                            }
+                        }
+                    }
+                    
+                    
+                    // - END - Prefab Shader Update
+                    
                     if (PrefabIds != null)
                     {
                         foreach (var prefabId in PrefabIds)

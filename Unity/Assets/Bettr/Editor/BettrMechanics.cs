@@ -54,6 +54,7 @@ namespace Bettr.Editor
             InstanceComponent.DefaultRuntimeAssetPath = runtimeAssetPath;
             InstanceComponent.RuntimeAssetPath = mechanicRuntimeAssetPath;
             InstanceGameObject.IdGameObjects.Clear();
+            InstanceGameObject.SymbolMaterialCache.Clear();
             
             InstanceGameObject hierarchyInstance = JsonConvert.DeserializeObject<InstanceGameObject>(json);
             hierarchyInstance.SetParent((GameObject) null);
