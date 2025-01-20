@@ -8,6 +8,9 @@ Game001BaseGameMachineIndependentReelsMechanic = {
         Experiment = "control",
         Mechanic = "IndependentReels",
     },
+    State = {
+        MechanicsPrefab = nil,
+    }
 }
 
 function Game001BaseGameMachineIndependentReelsMechanic:new(o)
@@ -18,6 +21,19 @@ function Game001BaseGameMachineIndependentReelsMechanic:new(o)
 end
 
 function Game001BaseGameMachineIndependentReelsMechanic:Initialize(machine)
+    series
+        do
+            local manifest = Game001.Manifest
+            local prefabName = "BaseGameMachineIndependentReels"
+            local machineParent = machine.MachineParent
+            local mechanicsParent = machine.MechanicsParent
+            local mechanicsPrefab = BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, prefabName, mechanicsParent.GameObject)
+            mechanicsPrefab.SetActive(false)
+            mechanicsPrefab.name = self.Config.Mechanic
+            self.State.MechanicsPrefab = mechanicsPrefab            
+            System.Print("Game001BaseGameMachineScattersMechanic:Initialize mechanicsPrefab={0}", self.State.MechanicsPrefab.name)
+        end
+    end
 end
 
 function Game001BaseGameMachineIndependentReelsMechanic:TryPaying(machine)
