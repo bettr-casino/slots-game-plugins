@@ -10,7 +10,7 @@
 {{- for columnIndex in 1..columnCount }}
 {{- for rowIndex in 1..rowCount }}
         {
-            "Name": "CellCol{{columnIndex}}Row{{rowIndex}}",
+            "Name": "Reel{{columnIndex}}Row{{rowIndex}}",
             "Layer": "SLOT_REELS",
             "Child": {
                 "Name": "Pivot",
@@ -55,16 +55,53 @@
                         "Child": {
                             "Name": "Pivot",
                             "Child": {
-                                 "Name": "{{machineName}}BaseGameSymbolGroup",
+                                 "Name": "{{machineName}}SymbolGroup",
                                  "Children": [
-                                     {{ for symbolKey in symbolKeys }}
-                                     {
-                                         "Name": "{{symbolKey}}",
-                                         "Active": false,
-                                         "IsPrefab": true,
-                                         "PrefabName": "{{machineName}}BaseGameSymbol{{symbolKey}}"
-                                     }
-                                     {{ if !for.last }},{{ end }}{{ end }}
+                            {{ for symbolKey in symbolKeys }}                                    
+                                    {
+                                      "Name": "{{symbolKey}}",
+                                      "Layer": "SLOT_REELS",
+                                      "Components": [
+                                        {
+                                          "ComponentType": "AnimatorController",
+                                          "Filename": "{{symbolKey}}",
+                                          "AnimationStates": [
+                                            {
+                                              "Name": "noop",
+                                              "Speed": 1,
+                                              "IsLoop": false,
+                                              "IsDefault": true
+                                            }
+                                          ],
+                                          "AnimatorStateTransitions": [
+                                          ]
+                                        }
+                                      ],
+                                      "Child": {
+                                        "Name": "Pivot",
+                                        "Layer": "SLOT_REELS",
+                                        "Children": [
+                                          {
+                                            "Name": "Quad",
+                                            "Layer": "SLOT_REELS",
+                                            "IsPrimitive": true,
+                                            "Primitive": 5,
+                                            "PrimitiveMaterial": "{{symbolKey}}",
+                                            "PrimitiveShader": "Bettr/SymbolStencil",
+                                            "PrimitiveTexture": "{{symbolKey}}",
+                                            "PrimitiveTextureCreate": true,
+                                            "PrimitiveTextureSource": "default.png",
+                                            "PrimitiveAlpha": 0.7,
+                                            "Scale": {
+                                              "X": 1,
+                                              "Y": 1,
+                                              "Z": 1
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }                                    
+                            {{ if !for.last }},{{ end }}{{ end }}
                                  ]
                             }
                         }
