@@ -229,7 +229,27 @@ namespace Bettr.Editor
             var rowCount = BettrMenu.GetTableValue<int>(dataSummary, "IndependentReels", "RowCount", 0);
             var columnCount = BettrMenu.GetTableValue<int>(dataSummary, "IndependentReels", "ColumnCount", 0);
             
-            Debug.Log($"rowCount={rowCount} columnCount={columnCount}");
+            // var data3 = BettrMenu.GetTable($"{machineName}BaseGameIndependentReelsDataMatrix3");
+            // var topSymbolOffset = BettrMenu.GetTableValue<int>(data3, "LayoutProperties", "TopSymbolOffset", 0);
+            // var bottomSymbolOffset = BettrMenu.GetTableValue<int>(data3, "LayoutProperties", "BottomSymbolOffset", 0);
+            // var visibleSymbolOffset = BettrMenu.GetTableValue<int>(data3, "LayoutProperties", "VisibleSymbolOffset", 0);
+
+            // TODO: replace with actual values
+            var totalSymbolCount = 3; // topSymbolOffset + bottomSymbolOffset + visibleSymbolOffset;
+
+            // TODO: replace with actual values
+            // var matrix = BettrMenu.GetTable($"{machineName}BaseGameIndependentReelsMatrix");
+            var symbolScaleX = 2; //BettrMenu.GetTableValue<int>(dataSummary, "IndependentReels", "SymbolScaleX", 1);
+            var symbolScaleY = 2; //BettrMenu.GetTableValue<int>(dataSummary, "IndependentReels", "SymbolScaleY", 1);
+            
+            var dataMatrix = BettrMenu.GetTable($"{machineName}BaseGameIndependentReelsDataMatrix");
+            var symbols = BettrMenu.GetTableArray<string>(dataMatrix, "Symbols", "Symbol");
+            
+            var reelSymbolStates = GetTable($"{machineName}BaseGameReelSymbolsState");
+            var symbolPositions = GetTableArray<double>(reelSymbolStates, $"Reel{reelIndex}", "SymbolPosition");
+            return symbolPositions.Select(d => (int)d).ToList();
+            
+            Debug.Log($"rowCount={rowCount} columnCount={columnCount} totalSymbolCount={totalSymbolCount}");
             
             Debug.Log($"ProcessIndependentReelsMechanic rowCount: {rowCount} columnCount: {columnCount}");
             
@@ -240,9 +260,11 @@ namespace Bettr.Editor
                 { "machineVariant", machineVariant },
                 { "rowCount", rowCount },
                 { "columnCount", columnCount },
+                { "totalSymbolCount", totalSymbolCount },
+                { "symbolKeys", symbols },
             };
             
-                BettrMechanicsHelpers.ProcessBaseGameMechanic(
+            BettrMechanicsHelpers.ProcessBaseGameMechanic(
                 runtimeAssetPath, model,
                 templateName, prefabName, mechanicName);
         }

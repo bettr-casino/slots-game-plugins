@@ -10,7 +10,7 @@
 {{- for columnIndex in 1..columnCount }}
 {{- for rowIndex in 1..rowCount }}
         {
-            "Name": "Reel{{columnIndex}}Symbol{{rowIndex}}",
+            "Name": "CellCol{{columnIndex}}Row{{rowIndex}}",
             "Layer": "SLOT_REELS",
             "Child": {
                 "Name": "Pivot",
@@ -37,17 +37,40 @@
                           }
                         ]
                       }
-                    },                    
+                    }, 
+{{- for symbolIndex in 1..totalSymbolCount }}                    
                     {
-                        "Name": "SymbolGroup",
-                        "IsPrefab": true,
-                        "PrefabName": "{{machineName}}BaseGameSymbolGroup",
-                        "PrefabUnpacked": true,
-                        "PrefabShaderOld": "Bettr/Symbol",
-                        "PrefabShaderNew": "Bettr/SymbolStencil",
-                        "PrefabMaterialNewPrefix": "IndependentReels",
-                        "PrefabTextureNewPrefix": "IndependentReels",
-                    }
+                        "Name": "Symbol{{symbolIndex}}",
+                        "Id": "Symbol{{symbolIndex}}",
+                        "Position": {
+                            "X": 0,
+                            "Y": {{yPositions[symbolIndex] + symbolOffsetY}},
+                            "Z": 0
+                        },
+                        "Scale": {
+                            "X": {{symbolScaleX}},
+                            "Y": {{symbolScaleY}},
+                            "Z": 1
+                        },
+                        "Child": {
+                            "Name": "Pivot",
+                            "Child": {
+                                 "Name": "{{machineName}}BaseGameSymbolGroup",
+                                 "Children": [
+                                     {{ for symbolKey in symbolKeys }}
+                                     {
+                                         "Name": "{{symbolKey}}",
+                                         "Active": false,
+                                         "IsPrefab": true,
+                                         "PrefabName": "{{machineName}}BaseGameSymbol{{symbolKey}}"
+                                     }
+                                     {{ if !for.last }},{{ end }}{{ end }}
+                                 ]
+                            }
+                        }
+                    }                   
+                    
+{{ if !for.last }},{{ end }}{{ end }}                    
                 ]
             }
         }
