@@ -263,7 +263,6 @@ namespace Bettr.Editor
                 {
                     Debug.Log($"loading model from path: {InstanceComponent.RuntimeAssetPath}/Models/{ModelName}.fbx");
                     BettrModelController.ImportModelAsPrefab(ModelName, PrefabName, InstanceComponent.RuntimeAssetPath);
-                    AssetDatabase.Refresh();
                     string prefabPath = Path.Combine(InstanceComponent.RuntimeAssetPath, "Prefabs",  $"{PrefabName}.prefab");
                     GameObject modelAsPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
                     var modelGameObject = new PrefabGameObject(modelAsPrefab, Name, false);
@@ -1812,8 +1811,6 @@ namespace Bettr.Editor
 
         private void BuildParticleSystem(GameObject gameObject)
         {
-            AssetDatabase.Refresh();
-
             var particleSystem = BettrParticleSystem.AddOrGetParticleSystem(gameObject);
             _particleSystem = particleSystem;
         }
@@ -1918,8 +1915,6 @@ namespace Bettr.Editor
 
         private void BuildAnimatorController(GameObject gameObject)
         {
-            AssetDatabase.Refresh();
-            
             var runtimeAnimatorController = BettrAnimatorController.CreateOrLoadAnimatorController(_fileName, _animationStates, _animationTransitions, _runtimeAssetPath);
             _animatorController = runtimeAnimatorController;
         }
@@ -2291,7 +2286,6 @@ namespace Bettr.Editor
                     destPath += extension;
                 }
                 BettrMaterialGenerator.ImportTexture2D(sourcePath, destPath);
-                AssetDatabase.Refresh();
                 var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(destPath);
                 image.sprite = sprite;
                 image.type = Image.Type.Simple;
@@ -2630,15 +2624,11 @@ namespace Bettr.Editor
 
         private void ProcessModifiedPrefabs()
         {
-            AssetDatabase.Refresh();
-            
             // Modified Prefabs
             if (this.Prefabs != null)
             {
                 foreach (var instanceGameObject in this.Prefabs)
                 {
-                    AssetDatabase.Refresh();
-
                     var prefabPath =
                         $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{instanceGameObject.PrefabName}.prefab";
                     var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
@@ -2690,14 +2680,10 @@ namespace Bettr.Editor
                     }
                 }
             }
-            
-            AssetDatabase.Refresh();
         }
 
         private void ProcessTextMeshPros()
         {
-            AssetDatabase.Refresh();
-            
             if (TilePropertyTextMeshPros != null)
             {
                 foreach (var tilePropertyTextMeshPro in this.TilePropertyTextMeshPros)
@@ -2772,8 +2758,6 @@ namespace Bettr.Editor
                     PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
                 }
             }
-            
-            AssetDatabase.Refresh();
         }
     }
 }

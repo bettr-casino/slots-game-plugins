@@ -8,8 +8,6 @@ namespace Bettr.Editor.generators
     {
         public static GameObject ProcessPrefab(string prefabName, IGameObject rootGameObject, string runtimeAssetPath, bool force = false)
         {
-            AssetDatabase.Refresh();
-            
             var prefabPath = $"{runtimeAssetPath}/Prefabs/{prefabName}.prefab";
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
 
@@ -19,8 +17,6 @@ namespace Bettr.Editor.generators
                 PrefabUtility.SaveAsPrefabAsset(prefab, prefabPath);
             }
             
-            AssetDatabase.Refresh();
-            
             prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
             
             return prefab;
@@ -28,8 +24,6 @@ namespace Bettr.Editor.generators
         
         public static GameObject ProcessPrefab(string prefabName, List<IComponent> components, List<IGameObject> gameObjects, string runtimeAssetPath)
         {
-            AssetDatabase.Refresh();
-            
             var prefabPath = $"{runtimeAssetPath}/Prefabs/{prefabName}.prefab";
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
 
@@ -50,7 +44,6 @@ namespace Bettr.Editor.generators
             }
             
             AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
             
             prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
             

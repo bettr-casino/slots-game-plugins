@@ -14,8 +14,6 @@ namespace Bettr.Editor.generators.mechanics
     {
         private static void ProcessBaseGameScatterBonusFreeSpinsMechanic(string machineName, string machineVariant, string runtimeAssetPath)
         {
-            AssetDatabase.Refresh();
-            
             var reelCount = BettrMenu.GetReelCount(machineName);
             
             var scatterSymbolIndexesByReel = new Dictionary<string, List<int>>();
@@ -144,8 +142,6 @@ namespace Bettr.Editor.generators.mechanics
             // Modified Prefabs
             foreach (var modifiedPrefab in mechanic.Prefabs)
             {
-                AssetDatabase.Refresh();
-                
                 var prefabPath =
                     $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{modifiedPrefab.PrefabName}.prefab";
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
@@ -168,8 +164,6 @@ namespace Bettr.Editor.generators.mechanics
                 PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
             }
             
-            AssetDatabase.Refresh();
-
             // Anticipation animation
             foreach (var mechanicParticleSystem in mechanic.ParticleSystems)
             {
@@ -300,8 +294,6 @@ namespace Bettr.Editor.generators.mechanics
             // save the changes
             AssetDatabase.SaveAssets();
             
-            AssetDatabase.Refresh();
-            
             foreach (var tilePropertyParticleSystem in mechanic.TilePropertyParticleSystems)
             {
                 var prefabPath =
@@ -356,8 +348,6 @@ namespace Bettr.Editor.generators.mechanics
             
             // save the changes
             AssetDatabase.SaveAssets();
-            
-            AssetDatabase.Refresh();
         }
     }
 }

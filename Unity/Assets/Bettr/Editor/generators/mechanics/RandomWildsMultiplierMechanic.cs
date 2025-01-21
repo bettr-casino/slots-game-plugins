@@ -12,8 +12,6 @@ namespace Bettr.Editor.generators.mechanics
     {
         public static void ProcessBaseGameRandomMultiplierWildsMechanic(string machineName, string machineVariant, string runtimeAssetPath)
         {
-            AssetDatabase.Refresh();
-            
             var reelCount = BettrMenu.GetReelCount(machineName);
             
             var symbolIndexesByReel = new Dictionary<string, List<int>>();
