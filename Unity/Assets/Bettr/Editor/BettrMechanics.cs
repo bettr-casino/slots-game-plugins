@@ -50,7 +50,7 @@ namespace Bettr.Editor
             EnsureMechanicsDirectory(mechanicRuntimeAssetPath);
             
             var json = scribanTemplate.Render(model);
-            Debug.Log(json);
+            SplitJsonIntoChunks(json);
             
             InstanceComponent.DefaultRuntimeAssetPath = runtimeAssetPath;
             InstanceComponent.RuntimeAssetPath = mechanicRuntimeAssetPath;
@@ -63,6 +63,22 @@ namespace Bettr.Editor
             BettrPrefabController.ProcessPrefab(prefabName, 
                 hierarchyInstance, 
                 mechanicRuntimeAssetPath, force:true);
+        }
+        
+        public static void SplitJsonIntoChunks(string json, int linesPerChunk = 300)
+        {
+            string[] lines = json.Split('\n'); // Split JSON by lines
+            int totalLines = lines.Length;
+            int chunkCount = Mathf.CeilToInt((float)totalLines / linesPerChunk);
+
+            for (int chunkIndex = 0; chunkIndex < chunkCount; chunkIndex++)
+            {
+                int startLine = chunkIndex * linesPerChunk;
+                int endLine = Mathf.Min(startLine + linesPerChunk, totalLines);
+                string chunk = string.Join("\n", lines, startLine, endLine - startLine);
+
+                Debug.Log($"Chunk {chunkIndex + 1}/{chunkCount}:\n{chunk}");
+            }
         }
     }
     
@@ -231,25 +247,36 @@ namespace Bettr.Editor
             var columnCount = BettrMenu.GetTableValue<int>(dataSummary, "IndependentReels", "ColumnCount", 0);
             
             var data3 = BettrMenu.GetTable($"{machineName}BaseGameIndependentReelsDataMatrix3");
-            var topSymbolOffset = BettrMenu.GetTableValue<int>(data3, "LayoutProperties", "TopSymbolOffset", 0);
-            var bottomSymbolOffset = BettrMenu.GetTableValue<int>(data3, "LayoutProperties", "BottomSymbolOffset", 0);
-            var visibleSymbolOffset = BettrMenu.GetTableValue<int>(data3, "LayoutProperties", "VisibleSymbolOffset", 0);
+            var topSymbolCount = BettrMenu.GetTableValue<int>(data3, "LayoutProperties", "TopSymbolCount", 0);
+            var bottomSymbolOffset = BettrMenu.GetTableValue<int>(data3, "LayoutProperties", "BottomSymbolCount", 0);
+            var visibleSymbolOffset = BettrMenu.GetTableValue<int>(data3, "LayoutProperties", "VisibleSymbolCount", 0);
 
             // TODO: replace with actual values
-            var totalSymbolCount = topSymbolOffset + bottomSymbolOffset + visibleSymbolOffset;
+            var totalSymbolCount = topSymbolCount + bottomSymbolOffset + visibleSymbolOffset;
 
             // TODO: replace with actual values
-            var matrix = BettrMenu.GetTable($"{machineName}BaseGameIndependentReelsMatrix");
-            var symbolScaleX = BettrMenu.GetTableValue<int>(dataSummary, "IndependentReels", "SymbolScaleX", 1);
-            var symbolScaleY = BettrMenu.GetTableValue<int>(dataSummary, "IndependentReels", "SymbolScaleY", 1);
-            var symbolOffsetY = BettrMenu.GetTableValue<float>(matrix, "IndependentReels", "SymbolOffsetY");
+            var table = BettrMenu.GetTable($"{machineName}BaseGameIndependentReels");
+            var symbolScaleX = BettrMenu.GetTableValue<int>(table, "IndependentReels", "SymbolScaleX", 1);
+            var symbolScaleY = BettrMenu.GetTableValue<int>(table, "IndependentReels", "SymbolScaleY", 1);
+            var symbolOffsetY = BettrMenu.GetTableValue<float>(table, "IndependentReels", "SymbolOffsetY", 0.0f);
             
             var dataMatrix = BettrMenu.GetTable($"{machineName}BaseGameIndependentReelsDataMatrix");
             var symbols = BettrMenu.GetTableArray<string>(dataMatrix, "Symbols", "Symbol");
             
+            var table2 = BettrMenu.GetTable($"{machineName}BaseGameIndependentReels2");
+            var horizontalReelPositions = new float[columnCount];
+            for (int i = 0; i < columnCount; i++)
+            {
+                horizontalReelPositions[i] = BettrMenu.GetTableValue<float, string>(table2, "IndependentReels", "ReelID", $"Reel{i + 1}", "HorizontalPosition", 0.0f);
+            }
+            
+            var matrix = BettrMenu.GetTable($"{machineName}BaseGameIndependentReelsMatrix");
+            var symbolPositions = BettrMenu.GetTableArray<double>(matrix, $"IndependentReels", "SymbolPosition");
+            var symbolYPositions = symbolPositions.Select(d => (int)d).ToList();
+            
             var matrix2 = BettrMenu.GetTable($"{machineName}BaseGameIndependentReelsMatrix2");
-            var symbolPositions = BettrMenu.GetTableArray<double>(matrix2, $"IndependentReels", "SymbolPosition");
-            var yPositions = symbolPositions.Select(d => (int)d).ToList();
+            var symbolMaskPositions = BettrMenu.GetTableArray<double>(matrix2, $"IndependentReels", "SymbolMaskPosition");
+            var symbolMaskYPositions = symbolMaskPositions.Select(d => (int)d).ToList();
             
             Debug.Log($"rowCount={rowCount} columnCount={columnCount} totalSymbolCount={totalSymbolCount}");
             
@@ -264,13 +291,15 @@ namespace Bettr.Editor
                 { "columnCount", columnCount },
                 { "totalSymbolCount", totalSymbolCount },
                 { "symbolKeys", symbols },
-                { "yPositions", yPositions },
+                { "symbolYPositions", symbolYPositions },
+                { "symbolMaskYPositions", symbolMaskYPositions },
                 { "symbolScaleX", symbolScaleX },
                 { "symbolScaleY", symbolScaleY },
-                { "topSymbolOffset", topSymbolOffset },
+                { "topSymbolOffset", topSymbolCount },
                 { "bottomSymbolOffset", bottomSymbolOffset },
                 { "visibleSymbolOffset", visibleSymbolOffset },
                 { "symbolOffsetY", symbolOffsetY },
+                { "horizontalReelPositions", horizontalReelPositions }
             };
             
             BettrMechanicsHelpers.ProcessBaseGameMechanic(

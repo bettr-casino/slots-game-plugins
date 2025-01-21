@@ -61,19 +61,21 @@ namespace Bettr.Editor.generators
             var materialFilename = $"{materialName}.mat";
             var materialFilepath = $"{runtimeAssetPath}/Materials/{materialFilename}";
             var material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
-            if (material == null)
+            if (material != null)
             {
-                Debug.Log($"Creating material for {materialName} at {materialFilepath}");
-                try
-                {
-                    material = new Material(shader);
-                    AssetDatabase.CreateAsset(material, materialFilepath);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError(e);
-                    throw new Exception($"Shader {shaderName} not found.", e);
-                }
+                return material;
+            }
+            
+            Debug.Log($"Creating material for {materialName} at {materialFilepath}");
+            try
+            {
+                material = new Material(shader);
+                AssetDatabase.CreateAsset(material, materialFilepath);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e);
+                throw new Exception($"Shader {shaderName} not found.", e);
             }
             
             AssetDatabase.Refresh();

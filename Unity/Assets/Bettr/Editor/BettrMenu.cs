@@ -5468,6 +5468,34 @@ namespace Bettr.Editor
             return valueTable?.Pairs.Select(pair => pair.Value.Table[key]).ToList().Cast<T>().ToList();
         }
         
+        public static T GetTableValue<T, TU>(Table table, string pk, string referenceKey, TU referenceValue, string key, T d = default(T)) where TU : class
+        {
+            Table valueTable = table;
+            if (!string.IsNullOrEmpty(pk) && table[pk] is Table pkTable)
+            {
+                valueTable = pkTable["Array"] as Table;
+            }
+
+            var pairs = valueTable?.Pairs;
+            if (pairs != null)
+            {
+                foreach (var pair in pairs)
+                {
+                    var value = pair.Value.Table[referenceKey] as TU;
+                    if (value == null && referenceValue == null)
+                    {
+                        return (T)Convert.ChangeType(pair.Value.Table[key], typeof(T));
+                    }
+                    else if (value != null && value.Equals(referenceValue))
+                    {
+                        return (T)Convert.ChangeType(pair.Value.Table[key], typeof(T));
+                    }
+                }                
+            }
+
+            return default(T);
+        }
+        
         public static T GetTableValue<T>(Table table, string pk, string key, T d = default(T))
         {
             var valueTable = table;

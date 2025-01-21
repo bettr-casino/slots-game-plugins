@@ -12,6 +12,11 @@
         {
             "Name": "Reel{{columnIndex}}Row{{rowIndex}}",
             "Layer": "SLOT_REELS",
+            "Position": {
+                "X": {{horizontalReelPositions[columnIndex-1]}},
+                "Y": 0,
+                "Z": 0
+            },
             "Child": {
                 "Name": "Pivot",
                 "Layer": "SLOT_REELS",
@@ -19,6 +24,16 @@
                     {
                       "Name": "SymbolStencilMask",
                       "Layer": "SLOT_REELS",
+                      "Position": {
+                        "X": 0,
+                        "Y": {{symbolMaskYPositions[rowIndex-1] + symbolOffsetY}},
+                        "Z": 0
+                      },
+                      "Scale": {
+                        "X": {{symbolScaleX}},
+                        "Y": {{symbolScaleY}},
+                        "Z": 1
+                      },
                       "Child": {
                         "Name": "Pivot",
                         "Layer": "SLOT_REELS",
@@ -44,7 +59,7 @@
                         "Id": "Symbol{{symbolIndex}}",
                         "Position": {
                             "X": 0,
-                            "Y": {{yPositions[symbolIndex] + symbolOffsetY}},
+                            "Y": {{symbolYPositions[symbolIndex] + symbolOffsetY}},
                             "Z": 0
                         },
                         "Scale": {
@@ -61,6 +76,7 @@
                                     {
                                       "Name": "{{symbolKey}}",
                                       "Layer": "SLOT_REELS",
+                                      "Active": false,
                                       "Components": [
                                         {
                                           "ComponentType": "AnimatorController",
