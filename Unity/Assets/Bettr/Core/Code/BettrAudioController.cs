@@ -187,11 +187,12 @@ namespace Bettr.Core
         
         public void PlayGamePreviewAudioLoop(string bundleName, string bundleVariant, string audioClipName)
         {
-            if (ClipExists(audioClipName))
-            {
-                PlayAudioLoop(audioClipName);
-                return;
-            }
+            // TODO: FIXME turn ai auto clip off
+            // if (ClipExists(audioClipName))
+            // {
+            //     PlayAudioLoop(audioClipName);
+            //     return;
+            // }
             
             var genreKey = $"{bundleName}{bundleVariant}";
             
@@ -207,7 +208,7 @@ namespace Bettr.Core
                 "Game008Gods", 
                 "Game009SpaceInvaders"
             };
-
+            
             foreach (var genre in genres)
             {
                 if (genreKey.StartsWith(genre, StringComparison.InvariantCultureIgnoreCase))
@@ -223,11 +224,12 @@ namespace Bettr.Core
         
         public void PlayGameAudioLoop(string bundleName, string bundleVariant, string audioClipName)
         {
-            if (ClipExists(audioClipName))
-            {
-                PlayAudioLoop(audioClipName);
-                return;
-            }
+            // TODO: FIXME turn ai auto clip off
+            // if (ClipExists(audioClipName))
+            // {
+            //     PlayAudioLoop(audioClipName);
+            //     return;
+            // }
             
             var genreKey = $"{bundleName}{bundleVariant}";
             
