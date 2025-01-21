@@ -1,5 +1,10 @@
 Shader "Bettr/StencilMask"
 {
+    Properties
+    {
+        _StencilRef ("Stencil Ref", Float) = 0 // Expose _StencilRef as a property
+    }
+
     SubShader
     {
         Tags { "Queue" = "Geometry+1" }

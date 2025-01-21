@@ -17,6 +17,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
+using PrimitiveType = UnityEngine.PrimitiveType;
 
 namespace Bettr.Editor
 {
@@ -80,6 +81,8 @@ namespace Bettr.Editor
         public int Primitive { get; set; }
         
         public bool IsPrimitive { get; set; }
+        
+        public Dictionary<string, float> ShaderProperties { get; set; }
         
         public bool Active { get; set; }
         
@@ -394,6 +397,24 @@ namespace Bettr.Editor
                 {
                     var primitiveGameObject = GameObject.CreatePrimitive(Enum.GetValues(typeof(PrimitiveType)).GetValue(Primitive) as PrimitiveType? ?? PrimitiveType.Quad);
                     var primitiveMaterial = BettrMaterialGenerator.CreateOrLoadMaterial(PrimitiveMaterial, PrimitiveShader, PrimitiveTexture, PrimitiveColor, PrimitiveAlpha, InstanceComponent.RuntimeAssetPath, PrimitiveTextureCreate, PrimitiveTextureCreateSource);
+                    // update the shader properties
+                    if (ShaderProperties != null && ShaderProperties.Count > 0)
+                    {
+                        foreach (var shaderPropertyPair in ShaderProperties)
+                        {
+                            var shaderProperty = shaderPropertyPair.Key;
+                            var shaderValue = shaderPropertyPair.Value;
+                            var abs = Math.Abs(shaderValue - (int) shaderValue);
+                            if (abs < 0.000001)
+                            {
+                                primitiveMaterial.SetInt(shaderProperty, (int) shaderValue);
+                            }
+                            else
+                            {
+                                primitiveMaterial.SetFloat(shaderProperty, shaderValue);
+                            }
+                        }
+                    }
                     
                     var primitiveMeshRenderer = primitiveGameObject.GetComponent<MeshRenderer>();
                     primitiveMeshRenderer.material = primitiveMaterial;
