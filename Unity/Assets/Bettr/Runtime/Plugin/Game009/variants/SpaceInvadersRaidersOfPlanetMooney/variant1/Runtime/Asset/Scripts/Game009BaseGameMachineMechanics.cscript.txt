@@ -102,7 +102,10 @@ function Game009BaseGameMachineMechanics:OnBaseGameSpinCompleted(machine)
             elseif self.HorizontalReelsShiftMechanic ~= nil then
                 self.HorizontalReelsShiftMechanic:OnBaseGameSpinCompleted(machine)            
             elseif self.ScattersMechanic ~= nil then
-                self.ScattersMechanic:OnBaseGameSpinCompleted(machine)            
+                self.ScattersMechanic:OnBaseGameSpinCompleted(machine)
+                if self.IndependentReelsMechanic ~= nil then
+                    self.IndependentReelsMechanic:OnBaseGameSpinCompleted(machine)            
+                end
             else
                 machine:OnBaseGameSpinCompleted()
             end
