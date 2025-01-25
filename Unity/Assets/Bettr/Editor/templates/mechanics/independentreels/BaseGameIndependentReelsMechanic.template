@@ -5,6 +5,16 @@
   "Child": {
       "Name": "Pivot",
       "Id": "Pivot",
+      "Position": {
+        "X": -0.15,
+        "Y": 0.08,
+        "Z": 0
+      },
+      "Scale": {
+        "X": 0.87,
+        "Y": 0.75,
+        "Z": 1
+      },
       "Layer": "SLOT_REELS",
       "Children": [   
 {{- for columnIndex in 1..columnCount }}
@@ -20,6 +30,11 @@
             "Child": {
                 "Name": "Pivot",
                 "Layer": "SLOT_REELS",
+                "Position": {
+                    "X": {{ columnIndex*0.06 }},
+                    "Y": {{ -rowIndex*0.06 }},
+                    "Z": 0
+                },
                 "Children": [
                     {
                       "Name": "SymbolStencilMask",

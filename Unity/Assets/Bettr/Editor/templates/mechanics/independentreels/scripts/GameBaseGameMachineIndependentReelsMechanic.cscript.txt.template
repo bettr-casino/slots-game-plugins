@@ -1,26 +1,42 @@
 require "math"
 require "Core"
 
-{{machineName}}BaseGameMachineIndependentReelsMechanic = {
+{{machineName}}BaseGameMachine{{mechanicName}}Mechanic = {
     Config = {
         Machine = "{{machineName}}",
         Variant = "{{machineVariant}}",
         Experiment = "{{experimentVariant}}",
         Mechanic = "{{mechanicName}}",
     },
+    State = {
+        MechanicsPrefab = nil,
+    }
 }
 
-function {{machineName}}BaseGameMachineIndependentReelsMechanic:new(o)
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:new(o)
 	o = o or {}
 	setmetatable(o, self)
 	self.__index = self
 	return o
 end
 
-function {{machineName}}BaseGameMachineIndependentReelsMechanic:Initialize(machine)
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:Initialize(machine)
+    series
+        do
+            local manifest = {{machineName}}.Manifest
+            local prefabName = "BaseGameMachine{{mechanicName}}"
+            local machineParent = machine.MachineParent
+            local mechanicsParent = machine.MechanicsParent
+            local mechanicsPrefab = BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, prefabName, mechanicsParent.GameObject)
+            mechanicsPrefab.SetActive(true)
+            mechanicsPrefab.name = self.Config.Mechanic
+            self.State.MechanicsPrefab = mechanicsPrefab            
+            System.Print("{{machineName}}BaseGameMachine{{mechanicName}}Mechanic:Initialize mechanicsPrefab={0}", self.State.MechanicsPrefab.name)
+        end
+    end
 end
 
-function {{machineName}}BaseGameMachineIndependentReelsMechanic:TryPaying(machine)
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:TryPaying(machine)
 end
 
 
