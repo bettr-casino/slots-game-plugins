@@ -248,14 +248,26 @@ namespace Bettr.Editor
             TileController.LuaScript.Call(dynValue);
         }
         
-        [MenuItem("Bettr/Tools/Apply Mechanics/IndependentReels/Game001EpicDragonsHoard")]
+        [MenuItem("Bettr/Tools/Apply Mechanics/Game001EpicDragonsHoard")]
         static void ApplyMechanicMachine()
         {
-            var mechanic = "IndependentReels";
+            var map = new Dictionary<string, ProcessMechanic>()
+            {
+                {"Scatters", BettrMechanics.ProcessScattersMechanic},
+                {"ReelAnticipation", BettrMechanics.ProcessReelAnticipationMechanic},
+                {"IndependentReels", BettrMechanics.ProcessIndependentReelsMechanic},
+            };
+
             var machineName = "Game001";
             var machineVariant = "EpicDragonsHoard";
             var experimentVariant = "control";
-            ApplyMechanicDelegate(mechanic, BettrMechanics.ProcessIndependentReelsMechanic, machineName, machineVariant, experimentVariant);
+            
+            foreach (var kvPair in map)
+            {
+                var mechanic = kvPair.Key;
+                var processMechanic = kvPair.Value;
+                ApplyMechanicDelegate(mechanic, processMechanic, machineName, machineVariant, experimentVariant);
+            }
         }
         
         [MenuItem("Tools/Update Prefab References")]

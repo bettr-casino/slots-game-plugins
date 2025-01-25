@@ -11,6 +11,7 @@ namespace Bettr.Editor
 {
     public static class BettrMechanicsHelpers
     {
+        
         public static void EnsureMechanicsDirectory(string runtimeAssetPath)
         {
             if (!Directory.Exists(runtimeAssetPath))

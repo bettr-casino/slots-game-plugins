@@ -1,6 +1,8 @@
 require "math"
 require "Core"
 require "Game001BaseGameReelWaysMechanic"
+require "Game001BaseGameReelScattersMechanic"
+require "Game001BaseGameReelReelAnticipationMechanic"
 require "Game001BaseGameReelIndependentReelsMechanic"
 
 Game001BaseGameReelMechanics = {
@@ -10,6 +12,8 @@ Game001BaseGameReelMechanics = {
         Experiment = "control",
     },
     WaysMechanic = nil,
+    ScattersMechanic = nil,
+    ReelAnticipationMechanic = nil,
     IndependentReelsMechanic = nil,
 }
 
@@ -23,6 +27,10 @@ end
 function Game001BaseGameReelMechanics:Initialize(reel)
     self.WaysMechanic = Game001BaseGameReelWaysMechanic:new()
     self.WaysMechanic:Initialize(reel)
+    self.ScattersMechanic = Game001BaseGameReelScattersMechanic:new()
+    self.ScattersMechanic:Initialize(reel)
+    self.ReelAnticipationMechanic = Game001BaseGameReelReelAnticipationMechanic:new()
+    self.ReelAnticipationMechanic:Initialize(reel)
     self.IndependentReelsMechanic = Game001BaseGameReelIndependentReelsMechanic:new()
     self.IndependentReelsMechanic:Initialize(reel)
 end

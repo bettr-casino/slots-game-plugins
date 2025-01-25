@@ -6,7 +6,139 @@ require "math"
 
 Game001Models = {}
 
-Game001BaseGameSpinEndingRollBackAnimation = {
+Game001BaseGameScatters = {
+    Scatters = 
+        {
+			Array = {
+				{ScatterSymbol = "BN1", NumScatters = 0, Payout = 0}
+			},
+			First = {ScatterSymbol = "BN1", NumScatters = 0, Payout = 0},
+			Last = {ScatterSymbol = "BN1", NumScatters = 0, Payout = 0},
+			Count = 1
+		},
+  }
+
+Game001BaseGameProperties = {
+    BaseWager = 
+        {
+			Array = {
+				{Value = 100}
+			},
+			First = {Value = 100},
+			Last = {Value = 100},
+			Count = 1
+		},
+  }
+
+Game001BaseGameWaysState = {
+    Ways = 
+        {
+			Array = {
+				{PaysRollup = 0, WaysIndex = 0, AnimationsState = "Idle", IsDisplayActive = false}
+			},
+			First = {PaysRollup = 0, WaysIndex = 0, AnimationsState = "Idle", IsDisplayActive = false},
+			Last = {PaysRollup = 0, WaysIndex = 0, AnimationsState = "Idle", IsDisplayActive = false},
+			Count = 1
+		},
+  }
+
+Game001BaseGameIndependentReelsMatrix2 = {
+    IndependentReels = 
+        {
+			Array = {
+				{Row = "Row1", SymbolMaskPosition = 2},
+				{Row = "Row2", SymbolMaskPosition = 1},
+				{Row = "Row3", SymbolMaskPosition = 0},
+				{Row = "Row4", SymbolMaskPosition = -1}
+			},
+			First = {Row = "Row1", SymbolMaskPosition = 2},
+			Last = {Row = "Row4", SymbolMaskPosition = -1},
+			Count = 4
+		},
+  }
+
+Game001BaseGameIndependentReelsData = {
+    IndependentReels = 
+        {
+			Array = {
+				{ApplyOutcomeDelay = 250, NextSpinStartDelay = 0}
+			},
+			First = {ApplyOutcomeDelay = 250, NextSpinStartDelay = 0},
+			Last = {ApplyOutcomeDelay = 250, NextSpinStartDelay = 0},
+			Count = 1
+		},
+  }
+
+Game001BaseGameReelAnticipationData = {
+    ReelAnticipation = 
+        {
+			Array = {
+				{ReelAnticipationID = "ScatterReelAnticipation"}
+			},
+			First = {ReelAnticipationID = "ScatterReelAnticipation"},
+			Last = {ReelAnticipationID = "ScatterReelAnticipation"},
+			Count = 1
+		},
+  }
+
+Game001BaseGameState = {
+    SpinState = 
+        {
+			Array = {
+				{State = "Waiting"}
+			},
+			First = {State = "Waiting"},
+			Last = {State = "Waiting"},
+			Count = 1
+		},
+    DisplayState = 
+        {
+			Array = {
+				{State = "Idle"}
+			},
+			First = {State = "Idle"},
+			Last = {State = "Idle"},
+			Count = 1
+		},
+  }
+
+Game001BaseGameSpinProperties = {
+    ApplyOutcomeDelay = 
+        {
+			Array = {
+				{Value = 250}
+			},
+			First = {Value = 250},
+			Last = {Value = 250},
+			Count = 1
+		},
+    NextSpinStartDelay = 
+        {
+			Array = {
+				{Value = 0}
+			},
+			First = {Value = 0},
+			Last = {Value = 0},
+			Count = 1
+		},
+  }
+
+Game001Mechanics = {
+    BaseGame = 
+        {
+			Array = {
+				{Mechanic = "Ways"},
+				{Mechanic = "Scatters"},
+				{Mechanic = "ReelAnticipation"},
+				{Mechanic = "IndependentReels"}
+			},
+			First = {Mechanic = "Ways"},
+			Last = {Mechanic = "IndependentReels"},
+			Count = 4
+		},
+  }
+
+Game001BaseGameSpinSymbolAnimation = {
   }
 
 Game001BaseGameWays = {
@@ -114,160 +246,38 @@ Game001BaseGameReelsLayout = {
 		},
   }
 
-Game001BaseGameSpinProperties = {
-    ApplyOutcomeDelay = 
+Game001BaseGameReelAnticipationDataSummary = {
+    ReelAnticipation = 
         {
 			Array = {
-				{Value = 250}
+				{AnticipationDuration = 3, AnticipationSpeed = -60}
 			},
-			First = {Value = 250},
-			Last = {Value = 250},
-			Count = 1
-		},
-    NextSpinStartDelay = 
-        {
-			Array = {
-				{Value = 0}
-			},
-			First = {Value = 0},
-			Last = {Value = 0},
+			First = {AnticipationDuration = 3, AnticipationSpeed = -60},
+			Last = {AnticipationDuration = 3, AnticipationSpeed = -60},
 			Count = 1
 		},
   }
 
-Game001BaseGameReelSymbolsState = {
-    Reel1 = 
-        {
-			Array = {
-				{RowIndex = 0, RowVisible = false, SymbolIsLocked = false, ReelPosition = -2, SymbolPosition = 4},
-				{RowIndex = 1, RowVisible = false, SymbolIsLocked = false, ReelPosition = -1, SymbolPosition = 3},
-				{RowIndex = 2, RowVisible = true, SymbolIsLocked = false, ReelPosition = 0, SymbolPosition = 2},
-				{RowIndex = 3, RowVisible = true, SymbolIsLocked = false, ReelPosition = 1, SymbolPosition = 1},
-				{RowIndex = 4, RowVisible = true, SymbolIsLocked = false, ReelPosition = 2, SymbolPosition = 0},
-				{RowIndex = 5, RowVisible = true, SymbolIsLocked = false, ReelPosition = 3, SymbolPosition = -1},
-				{RowIndex = 6, RowVisible = false, SymbolIsLocked = false, ReelPosition = 4, SymbolPosition = -2},
-				{RowIndex = 7, RowVisible = false, SymbolIsLocked = false, ReelPosition = 5, SymbolPosition = -3}
-			},
-			First = {RowIndex = 0, RowVisible = false, SymbolIsLocked = false, ReelPosition = -2, SymbolPosition = 4},
-			Last = {RowIndex = 7, RowVisible = false, SymbolIsLocked = false, ReelPosition = 5, SymbolPosition = -3},
-			Count = 8
-		},
-    Reel2 = 
-        {
-			Array = {
-				{RowIndex = 0, RowVisible = false, SymbolIsLocked = false, ReelPosition = -2, SymbolPosition = 4},
-				{RowIndex = 1, RowVisible = false, SymbolIsLocked = false, ReelPosition = -1, SymbolPosition = 3},
-				{RowIndex = 2, RowVisible = true, SymbolIsLocked = false, ReelPosition = 0, SymbolPosition = 2},
-				{RowIndex = 3, RowVisible = true, SymbolIsLocked = false, ReelPosition = 1, SymbolPosition = 1},
-				{RowIndex = 4, RowVisible = true, SymbolIsLocked = false, ReelPosition = 2, SymbolPosition = 0},
-				{RowIndex = 5, RowVisible = true, SymbolIsLocked = false, ReelPosition = 3, SymbolPosition = -1},
-				{RowIndex = 6, RowVisible = false, SymbolIsLocked = false, ReelPosition = 4, SymbolPosition = -2},
-				{RowIndex = 7, RowVisible = false, SymbolIsLocked = false, ReelPosition = 5, SymbolPosition = -3}
-			},
-			First = {RowIndex = 0, RowVisible = false, SymbolIsLocked = false, ReelPosition = -2, SymbolPosition = 4},
-			Last = {RowIndex = 7, RowVisible = false, SymbolIsLocked = false, ReelPosition = 5, SymbolPosition = -3},
-			Count = 8
-		},
+Game001BaseGameReelAnticipationDataMatrix = {
     Reel3 = 
         {
 			Array = {
-				{RowIndex = 0, RowVisible = false, SymbolIsLocked = false, ReelPosition = -2, SymbolPosition = 4},
-				{RowIndex = 1, RowVisible = false, SymbolIsLocked = false, ReelPosition = -1, SymbolPosition = 3},
-				{RowIndex = 2, RowVisible = true, SymbolIsLocked = false, ReelPosition = 0, SymbolPosition = 2},
-				{RowIndex = 3, RowVisible = true, SymbolIsLocked = false, ReelPosition = 1, SymbolPosition = 1},
-				{RowIndex = 4, RowVisible = true, SymbolIsLocked = false, ReelPosition = 2, SymbolPosition = 0},
-				{RowIndex = 5, RowVisible = true, SymbolIsLocked = false, ReelPosition = 3, SymbolPosition = -1},
-				{RowIndex = 6, RowVisible = false, SymbolIsLocked = false, ReelPosition = 4, SymbolPosition = -2},
-				{RowIndex = 7, RowVisible = false, SymbolIsLocked = false, ReelPosition = 5, SymbolPosition = -3}
+				{LandedReelID = "Reel1", ReelAnticipationID = "ScatterReelAnticipation"}
 			},
-			First = {RowIndex = 0, RowVisible = false, SymbolIsLocked = false, ReelPosition = -2, SymbolPosition = 4},
-			Last = {RowIndex = 7, RowVisible = false, SymbolIsLocked = false, ReelPosition = 5, SymbolPosition = -3},
-			Count = 8
-		},
-    Reel4 = 
-        {
-			Array = {
-				{RowIndex = 0, RowVisible = false, SymbolIsLocked = false, ReelPosition = -2, SymbolPosition = 4},
-				{RowIndex = 1, RowVisible = false, SymbolIsLocked = false, ReelPosition = -1, SymbolPosition = 3},
-				{RowIndex = 2, RowVisible = true, SymbolIsLocked = false, ReelPosition = 0, SymbolPosition = 2},
-				{RowIndex = 3, RowVisible = true, SymbolIsLocked = false, ReelPosition = 1, SymbolPosition = 1},
-				{RowIndex = 4, RowVisible = true, SymbolIsLocked = false, ReelPosition = 2, SymbolPosition = 0},
-				{RowIndex = 5, RowVisible = true, SymbolIsLocked = false, ReelPosition = 3, SymbolPosition = -1},
-				{RowIndex = 6, RowVisible = false, SymbolIsLocked = false, ReelPosition = 4, SymbolPosition = -2},
-				{RowIndex = 7, RowVisible = false, SymbolIsLocked = false, ReelPosition = 5, SymbolPosition = -3}
-			},
-			First = {RowIndex = 0, RowVisible = false, SymbolIsLocked = false, ReelPosition = -2, SymbolPosition = 4},
-			Last = {RowIndex = 7, RowVisible = false, SymbolIsLocked = false, ReelPosition = 5, SymbolPosition = -3},
-			Count = 8
-		},
-    Reel5 = 
-        {
-			Array = {
-				{RowIndex = 0, RowVisible = false, SymbolIsLocked = false, ReelPosition = -2, SymbolPosition = 4},
-				{RowIndex = 1, RowVisible = false, SymbolIsLocked = false, ReelPosition = -1, SymbolPosition = 3},
-				{RowIndex = 2, RowVisible = true, SymbolIsLocked = false, ReelPosition = 0, SymbolPosition = 2},
-				{RowIndex = 3, RowVisible = true, SymbolIsLocked = false, ReelPosition = 1, SymbolPosition = 1},
-				{RowIndex = 4, RowVisible = true, SymbolIsLocked = false, ReelPosition = 2, SymbolPosition = 0},
-				{RowIndex = 5, RowVisible = true, SymbolIsLocked = false, ReelPosition = 3, SymbolPosition = -1},
-				{RowIndex = 6, RowVisible = false, SymbolIsLocked = false, ReelPosition = 4, SymbolPosition = -2},
-				{RowIndex = 7, RowVisible = false, SymbolIsLocked = false, ReelPosition = 5, SymbolPosition = -3}
-			},
-			First = {RowIndex = 0, RowVisible = false, SymbolIsLocked = false, ReelPosition = -2, SymbolPosition = 4},
-			Last = {RowIndex = 7, RowVisible = false, SymbolIsLocked = false, ReelPosition = 5, SymbolPosition = -3},
-			Count = 8
-		},
-  }
-
-Game001BaseGameReelSpinOutcome = {
-    Reel1 = 
-        {
-			Array = {
-				{ReelIndex = 0, OutcomeReelStopIndex = -1}
-			},
-			First = {ReelIndex = 0, OutcomeReelStopIndex = -1},
-			Last = {ReelIndex = 0, OutcomeReelStopIndex = -1},
-			Count = 1
-		},
-    Reel2 = 
-        {
-			Array = {
-				{ReelIndex = 1, OutcomeReelStopIndex = -1}
-			},
-			First = {ReelIndex = 1, OutcomeReelStopIndex = -1},
-			Last = {ReelIndex = 1, OutcomeReelStopIndex = -1},
-			Count = 1
-		},
-    Reel3 = 
-        {
-			Array = {
-				{ReelIndex = 2, OutcomeReelStopIndex = -1}
-			},
-			First = {ReelIndex = 2, OutcomeReelStopIndex = -1},
-			Last = {ReelIndex = 2, OutcomeReelStopIndex = -1},
-			Count = 1
-		},
-    Reel4 = 
-        {
-			Array = {
-				{ReelIndex = 3, OutcomeReelStopIndex = -1}
-			},
-			First = {ReelIndex = 3, OutcomeReelStopIndex = -1},
-			Last = {ReelIndex = 3, OutcomeReelStopIndex = -1},
+			First = {LandedReelID = "Reel1", ReelAnticipationID = "ScatterReelAnticipation"},
+			Last = {LandedReelID = "Reel1", ReelAnticipationID = "ScatterReelAnticipation"},
 			Count = 1
 		},
     Reel5 = 
         {
 			Array = {
-				{ReelIndex = 4, OutcomeReelStopIndex = -1}
+				{LandedReelID = "Reel1", ReelAnticipationID = "ScatterReelAnticipation"},
+				{LandedReelID = "Reel3", ReelAnticipationID = "ScatterReelAnticipation"}
 			},
-			First = {ReelIndex = 4, OutcomeReelStopIndex = -1},
-			Last = {ReelIndex = 4, OutcomeReelStopIndex = -1},
-			Count = 1
+			First = {LandedReelID = "Reel1", ReelAnticipationID = "ScatterReelAnticipation"},
+			Last = {LandedReelID = "Reel3", ReelAnticipationID = "ScatterReelAnticipation"},
+			Count = 2
 		},
-  }
-
-Game001Machines = {
-    {Name = "BaseGame", Id = "BaseGame", IsBase = true, IsBonus = false, IsFreeSpins = false, IsWheel = false, TransitionFrom = "default", TransitionTo = "default"},
   }
 
 Game001BaseGameReelState = {
@@ -318,62 +328,109 @@ Game001BaseGameReelState = {
 		},
   }
 
-Game001BaseGameIndependentReels = {
+Game001BaseGameReelAnticipationMatrix = {
+    ScatterReelAnticipation = 
+        {
+			Array = {
+				{LandedReelID = "Reel1", ReelID = "Reel3"}
+			},
+			First = {LandedReelID = "Reel1", ReelID = "Reel3"},
+			Last = {LandedReelID = "Reel1", ReelID = "Reel3"},
+			Count = 1
+		},
+  }
+
+Game001BaseGameIndependentReelsMatrix = {
     IndependentReels = 
         {
 			Array = {
-				{ReelIndex = 0, ReelSymbolCount = 20, TopSymbolCount = 1, BottomSymbolCount = 1, VisibleSymbolCount = 1, SymbolCount = 3, ReelIsVisible = true, ReelStopDelayInSeconds = 0.25, SpliceDistance = 8, ReelStopIndexAdvanceOffset = -1, SpinStartedRollBackDistanceInSymbolUnits = 0.3, SpinEndingRollForwardDistanceInSymbolUnits = -0.3, SpinStartedRollBackSpeedInSymbolUnitsPerSecond = 1, SpinStartedRollForwardSpeedInSymbolUnitsPerSecond = -3, SpinSpeedInSymbolUnitsPerSecond = -12, SpinEndingRollBackSpeedInSymbolUnitsPerSecond = 3, SpinEndingRollForwardSpeedInSymbolUnitsPerSecond = -3, SymbolVerticalSpacing = 2, SymbolScaleX = 2, SymbolScaleY = 2, SymbolOffsetY = 0, HorizontalPosition = -4, OutcomeReceived = false, ShouldSpliceReel = false}
+				{Row = "Row1", SymbolGroup = "SymbolGroup1", Visible = false, SymbolIsLocked = false, ReelPosition = -1, SymbolPosition = 3},
+				{Row = "Row1", SymbolGroup = "SymbolGroup2", Visible = true, SymbolIsLocked = false, ReelPosition = 0, SymbolPosition = 2},
+				{Row = "Row1", SymbolGroup = "SymbolGroup3", Visible = false, SymbolIsLocked = false, ReelPosition = 1, SymbolPosition = 1},
+				{Row = "Row2", SymbolGroup = "SymbolGroup1", Visible = false, SymbolIsLocked = false, ReelPosition = -1, SymbolPosition = 2},
+				{Row = "Row2", SymbolGroup = "SymbolGroup2", Visible = true, SymbolIsLocked = false, ReelPosition = 0, SymbolPosition = 1},
+				{Row = "Row2", SymbolGroup = "SymbolGroup3", Visible = false, SymbolIsLocked = false, ReelPosition = 1, SymbolPosition = 0},
+				{Row = "Row3", SymbolGroup = "SymbolGroup1", Visible = false, SymbolIsLocked = false, ReelPosition = -1, SymbolPosition = 1},
+				{Row = "Row3", SymbolGroup = "SymbolGroup2", Visible = true, SymbolIsLocked = false, ReelPosition = 0, SymbolPosition = 0},
+				{Row = "Row3", SymbolGroup = "SymbolGroup3", Visible = false, SymbolIsLocked = false, ReelPosition = 1, SymbolPosition = -1},
+				{Row = "Row4", SymbolGroup = "SymbolGroup1", Visible = false, SymbolIsLocked = false, ReelPosition = -1, SymbolPosition = 0},
+				{Row = "Row4", SymbolGroup = "SymbolGroup2", Visible = true, SymbolIsLocked = false, ReelPosition = 0, SymbolPosition = -1},
+				{Row = "Row4", SymbolGroup = "SymbolGroup3", Visible = false, SymbolIsLocked = false, ReelPosition = 1, SymbolPosition = -2}
 			},
-			First = {ReelIndex = 0, ReelSymbolCount = 20, TopSymbolCount = 1, BottomSymbolCount = 1, VisibleSymbolCount = 1, SymbolCount = 3, ReelIsVisible = true, ReelStopDelayInSeconds = 0.25, SpliceDistance = 8, ReelStopIndexAdvanceOffset = -1, SpinStartedRollBackDistanceInSymbolUnits = 0.3, SpinEndingRollForwardDistanceInSymbolUnits = -0.3, SpinStartedRollBackSpeedInSymbolUnitsPerSecond = 1, SpinStartedRollForwardSpeedInSymbolUnitsPerSecond = -3, SpinSpeedInSymbolUnitsPerSecond = -12, SpinEndingRollBackSpeedInSymbolUnitsPerSecond = 3, SpinEndingRollForwardSpeedInSymbolUnitsPerSecond = -3, SymbolVerticalSpacing = 2, SymbolScaleX = 2, SymbolScaleY = 2, SymbolOffsetY = 0, HorizontalPosition = -4, OutcomeReceived = false, ShouldSpliceReel = false},
-			Last = {ReelIndex = 0, ReelSymbolCount = 20, TopSymbolCount = 1, BottomSymbolCount = 1, VisibleSymbolCount = 1, SymbolCount = 3, ReelIsVisible = true, ReelStopDelayInSeconds = 0.25, SpliceDistance = 8, ReelStopIndexAdvanceOffset = -1, SpinStartedRollBackDistanceInSymbolUnits = 0.3, SpinEndingRollForwardDistanceInSymbolUnits = -0.3, SpinStartedRollBackSpeedInSymbolUnitsPerSecond = 1, SpinStartedRollForwardSpeedInSymbolUnitsPerSecond = -3, SpinSpeedInSymbolUnitsPerSecond = -12, SpinEndingRollBackSpeedInSymbolUnitsPerSecond = 3, SpinEndingRollForwardSpeedInSymbolUnitsPerSecond = -3, SymbolVerticalSpacing = 2, SymbolScaleX = 2, SymbolScaleY = 2, SymbolOffsetY = 0, HorizontalPosition = -4, OutcomeReceived = false, ShouldSpliceReel = false},
+			First = {Row = "Row1", SymbolGroup = "SymbolGroup1", Visible = false, SymbolIsLocked = false, ReelPosition = -1, SymbolPosition = 3},
+			Last = {Row = "Row4", SymbolGroup = "SymbolGroup3", Visible = false, SymbolIsLocked = false, ReelPosition = 1, SymbolPosition = -2},
+			Count = 12
+		},
+  }
+
+Game001BaseGameIndependentReelsSummary = {
+    IndependentReels = 
+        {
+			Array = {
+				{RowCount = 4, ColumnCount = 5}
+			},
+			First = {RowCount = 4, ColumnCount = 5},
+			Last = {RowCount = 4, ColumnCount = 5},
 			Count = 1
 		},
   }
 
-Game001BaseGameWaysSummary = {
-    Ways = 
+Game001BaseGameReelSpinState = {
+    Reel1 = 
         {
 			Array = {
-				{WaysCount = 0, DisplayLoopDuration = 1, DisplayLoopStartDelay = 0.1, DisplayLoopEndDelay = 0.2, Pays = 0}
+				{ReelIndex = 0, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0}
 			},
-			First = {WaysCount = 0, DisplayLoopDuration = 1, DisplayLoopStartDelay = 0.1, DisplayLoopEndDelay = 0.2, Pays = 0},
-			Last = {WaysCount = 0, DisplayLoopDuration = 1, DisplayLoopStartDelay = 0.1, DisplayLoopEndDelay = 0.2, Pays = 0},
+			First = {ReelIndex = 0, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0},
+			Last = {ReelIndex = 0, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0},
+			Count = 1
+		},
+    Reel2 = 
+        {
+			Array = {
+				{ReelIndex = 1, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0}
+			},
+			First = {ReelIndex = 1, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0},
+			Last = {ReelIndex = 1, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0},
+			Count = 1
+		},
+    Reel3 = 
+        {
+			Array = {
+				{ReelIndex = 2, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0}
+			},
+			First = {ReelIndex = 2, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0},
+			Last = {ReelIndex = 2, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0},
+			Count = 1
+		},
+    Reel4 = 
+        {
+			Array = {
+				{ReelIndex = 3, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0}
+			},
+			First = {ReelIndex = 3, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0},
+			Last = {ReelIndex = 3, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0},
+			Count = 1
+		},
+    Reel5 = 
+        {
+			Array = {
+				{ReelIndex = 4, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0}
+			},
+			First = {ReelIndex = 4, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0},
+			Last = {ReelIndex = 4, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0},
 			Count = 1
 		},
   }
 
-Game001BaseGameWaysState = {
-    Ways = 
+Game001BaseGameReelAnticipationState = {
+    ReelAnticipation = 
         {
 			Array = {
-				{PaysRollup = 0, WaysIndex = 0, AnimationsState = "Idle", IsDisplayActive = false}
+				{Active = false}
 			},
-			First = {PaysRollup = 0, WaysIndex = 0, AnimationsState = "Idle", IsDisplayActive = false},
-			Last = {PaysRollup = 0, WaysIndex = 0, AnimationsState = "Idle", IsDisplayActive = false},
-			Count = 1
-		},
-  }
-
-Game001BaseGameSpinSymbolAnimation = {
-  }
-
-Game001BaseGameLayout = {
-    ReelMaxOffsetY = 
-        {
-			Array = {
-				{Value = -0.625}
-			},
-			First = {Value = -0.625},
-			Last = {Value = -0.625},
-			Count = 1
-		},
-    ReelCount = 
-        {
-			Array = {
-				{Value = 5}
-			},
-			First = {Value = 5},
-			Last = {Value = 5},
+			First = {Active = false},
+			Last = {Active = false},
 			Count = 1
 		},
   }
@@ -426,153 +483,108 @@ Game001BaseGameReelLayoutProperties = {
 		},
   }
 
-Game001BaseGameIndependentReelsSummary = {
-    IndependentReels = 
+Game001BetMultiplierState = {
+    Current = 
         {
 			Array = {
-				{RowCount = 4, ColumnCount = 5}
+				{BetMultiplier = 1}
 			},
-			First = {RowCount = 4, ColumnCount = 5},
-			Last = {RowCount = 4, ColumnCount = 5},
+			First = {BetMultiplier = 1},
+			Last = {BetMultiplier = 1},
 			Count = 1
 		},
   }
 
-Game001BaseGameIndependentReels2 = {
-    IndependentReels = 
+Game001BaseGameLayout = {
+    ReelMaxOffsetY = 
         {
 			Array = {
-				{ReelID = "Reel1", HorizontalPosition = -4},
-				{ReelID = "Reel2", HorizontalPosition = -2},
-				{ReelID = "Reel3", HorizontalPosition = 0},
-				{ReelID = "Reel4", HorizontalPosition = 2},
-				{ReelID = "Reel5", HorizontalPosition = 4}
+				{Value = -0.625}
 			},
-			First = {ReelID = "Reel1", HorizontalPosition = -4},
-			Last = {ReelID = "Reel5", HorizontalPosition = 4},
-			Count = 5
+			First = {Value = -0.625},
+			Last = {Value = -0.625},
+			Count = 1
 		},
-  }
-
-Game001BaseGameProperties = {
-    BaseWager = 
+    ReelCount = 
         {
 			Array = {
-				{Value = 100}
+				{Value = 5}
 			},
-			First = {Value = 100},
-			Last = {Value = 100},
+			First = {Value = 5},
+			Last = {Value = 5},
 			Count = 1
 		},
   }
 
-Game001BaseGameSymbolTable = {
+Game001BaseGameIndependentReelsState = {
+    IndependentReels = 
+        {
+			Array = {
+				{Active = false}
+			},
+			First = {Active = false},
+			Last = {Active = false},
+			Count = 1
+		},
+  }
+
+Game001BaseGameSymbolMatrixProperties = {
+    {RowIndex = 0, IsVisible = false, StopIndexOffset = -2},
+    {RowIndex = 1, IsVisible = false, StopIndexOffset = -1},
+    {RowIndex = 2, IsVisible = true, StopIndexOffset = 0},
+    {RowIndex = 3, IsVisible = true, StopIndexOffset = 1},
+    {RowIndex = 4, IsVisible = true, StopIndexOffset = 2},
+    {RowIndex = 5, IsVisible = true, StopIndexOffset = 3},
+    {RowIndex = 6, IsVisible = false, StopIndexOffset = 4},
+    {RowIndex = 7, IsVisible = false, StopIndexOffset = 5},
+  }
+
+Game001BaseGameIndependentReelsDataMatrix3 = {
+    LayoutProperties = 
+        {
+			Array = {
+				{ReelLayoutType = "Horizontal", TopSymbolCount = 1, BottomSymbolCount = 1, VisibleSymbolCount = 1, SymbolHeight = 100, SymbolWidth = 100}
+			},
+			First = {ReelLayoutType = "Horizontal", TopSymbolCount = 1, BottomSymbolCount = 1, VisibleSymbolCount = 1, SymbolHeight = 100, SymbolWidth = 100},
+			Last = {ReelLayoutType = "Horizontal", TopSymbolCount = 1, BottomSymbolCount = 1, VisibleSymbolCount = 1, SymbolHeight = 100, SymbolWidth = 100},
+			Count = 1
+		},
+  }
+
+Game001BaseGameScattersDataMatrix = {
+    BN1 = 
+        {
+			Array = {
+				{NumScatters = 1, Payout = 0},
+				{NumScatters = 2, Payout = 0},
+				{NumScatters = 3, Payout = 100}
+			},
+			First = {NumScatters = 1, Payout = 0},
+			Last = {NumScatters = 3, Payout = 100},
+			Count = 3
+		},
+  }
+
+Game001BaseGameIndependentReelsDataMatrix2 = {
+    SpinProperties = 
+        {
+			Array = {
+				{AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100}
+			},
+			First = {AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100},
+			Last = {AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100},
+			Count = 1
+		},
+  }
+
+Game001BaseGameWaysMatrix = {
     M1 = 
         {
 			Array = {
-				{SymbolType = "Major", Desc = "Buffalo", SymbolMultiplier = 1, SymbolIndex = 0}
+				{ReelID = "Reel1", RowIndex = 2, IsWild = false, IsMultiplier = false, Multiplier = 1}
 			},
-			First = {SymbolType = "Major", Desc = "Buffalo", SymbolMultiplier = 1, SymbolIndex = 0},
-			Last = {SymbolType = "Major", Desc = "Buffalo", SymbolMultiplier = 1, SymbolIndex = 0},
-			Count = 1
-		},
-    M2 = 
-        {
-			Array = {
-				{SymbolType = "Major", Desc = "Eagle", SymbolMultiplier = 1, SymbolIndex = 1}
-			},
-			First = {SymbolType = "Major", Desc = "Eagle", SymbolMultiplier = 1, SymbolIndex = 1},
-			Last = {SymbolType = "Major", Desc = "Eagle", SymbolMultiplier = 1, SymbolIndex = 1},
-			Count = 1
-		},
-    M3 = 
-        {
-			Array = {
-				{SymbolType = "Major", Desc = "Wolf", SymbolMultiplier = 1, SymbolIndex = 2}
-			},
-			First = {SymbolType = "Major", Desc = "Wolf", SymbolMultiplier = 1, SymbolIndex = 2},
-			Last = {SymbolType = "Major", Desc = "Wolf", SymbolMultiplier = 1, SymbolIndex = 2},
-			Count = 1
-		},
-    M4 = 
-        {
-			Array = {
-				{SymbolType = "Major", Desc = "Elk", SymbolMultiplier = 1, SymbolIndex = 3}
-			},
-			First = {SymbolType = "Major", Desc = "Elk", SymbolMultiplier = 1, SymbolIndex = 3},
-			Last = {SymbolType = "Major", Desc = "Elk", SymbolMultiplier = 1, SymbolIndex = 3},
-			Count = 1
-		},
-    F5 = 
-        {
-			Array = {
-				{SymbolType = "Minor", Desc = "9", SymbolMultiplier = 1, SymbolIndex = 4}
-			},
-			First = {SymbolType = "Minor", Desc = "9", SymbolMultiplier = 1, SymbolIndex = 4},
-			Last = {SymbolType = "Minor", Desc = "9", SymbolMultiplier = 1, SymbolIndex = 4},
-			Count = 1
-		},
-    F6 = 
-        {
-			Array = {
-				{SymbolType = "Minor", Desc = "10", SymbolMultiplier = 1, SymbolIndex = 5}
-			},
-			First = {SymbolType = "Minor", Desc = "10", SymbolMultiplier = 1, SymbolIndex = 5},
-			Last = {SymbolType = "Minor", Desc = "10", SymbolMultiplier = 1, SymbolIndex = 5},
-			Count = 1
-		},
-    F7 = 
-        {
-			Array = {
-				{SymbolType = "Minor", Desc = "J", SymbolMultiplier = 1, SymbolIndex = 6}
-			},
-			First = {SymbolType = "Minor", Desc = "J", SymbolMultiplier = 1, SymbolIndex = 6},
-			Last = {SymbolType = "Minor", Desc = "J", SymbolMultiplier = 1, SymbolIndex = 6},
-			Count = 1
-		},
-    F8 = 
-        {
-			Array = {
-				{SymbolType = "Minor", Desc = "Q", SymbolMultiplier = 1, SymbolIndex = 7}
-			},
-			First = {SymbolType = "Minor", Desc = "Q", SymbolMultiplier = 1, SymbolIndex = 7},
-			Last = {SymbolType = "Minor", Desc = "Q", SymbolMultiplier = 1, SymbolIndex = 7},
-			Count = 1
-		},
-    F9 = 
-        {
-			Array = {
-				{SymbolType = "Minor", Desc = "K", SymbolMultiplier = 1, SymbolIndex = 8}
-			},
-			First = {SymbolType = "Minor", Desc = "K", SymbolMultiplier = 1, SymbolIndex = 8},
-			Last = {SymbolType = "Minor", Desc = "K", SymbolMultiplier = 1, SymbolIndex = 8},
-			Count = 1
-		},
-    F10 = 
-        {
-			Array = {
-				{SymbolType = "Minor", Desc = "A", SymbolMultiplier = 1, SymbolIndex = 9}
-			},
-			First = {SymbolType = "Minor", Desc = "A", SymbolMultiplier = 1, SymbolIndex = 9},
-			Last = {SymbolType = "Minor", Desc = "A", SymbolMultiplier = 1, SymbolIndex = 9},
-			Count = 1
-		},
-    WD = 
-        {
-			Array = {
-				{SymbolType = "Wild", Desc = "Sunset", SymbolMultiplier = 1, SymbolIndex = 10}
-			},
-			First = {SymbolType = "Wild", Desc = "Sunset", SymbolMultiplier = 1, SymbolIndex = 10},
-			Last = {SymbolType = "Wild", Desc = "Sunset", SymbolMultiplier = 1, SymbolIndex = 10},
-			Count = 1
-		},
-    SC = 
-        {
-			Array = {
-				{SymbolType = "Scatter", Desc = "Gold Coin", SymbolMultiplier = 1, SymbolIndex = 11}
-			},
-			First = {SymbolType = "Scatter", Desc = "Gold Coin", SymbolMultiplier = 1, SymbolIndex = 11},
-			Last = {SymbolType = "Scatter", Desc = "Gold Coin", SymbolMultiplier = 1, SymbolIndex = 11},
+			First = {ReelID = "Reel1", RowIndex = 2, IsWild = false, IsMultiplier = false, Multiplier = 1},
+			Last = {ReelID = "Reel1", RowIndex = 2, IsWild = false, IsMultiplier = false, Multiplier = 1},
 			Count = 1
 		},
   }
@@ -1020,133 +1032,242 @@ Game001BaseGameIndependentReelsDataMatrix4 = {
 		},
   }
 
-Game001BaseGameState = {
-    SpinState = 
+Game001BaseGameSymbolTable = {
+    M1 = 
         {
 			Array = {
-				{State = "Waiting"}
+				{SymbolType = "Major", Desc = "Buffalo", SymbolMultiplier = 1, SymbolIndex = 0}
 			},
-			First = {State = "Waiting"},
-			Last = {State = "Waiting"},
+			First = {SymbolType = "Major", Desc = "Buffalo", SymbolMultiplier = 1, SymbolIndex = 0},
+			Last = {SymbolType = "Major", Desc = "Buffalo", SymbolMultiplier = 1, SymbolIndex = 0},
 			Count = 1
 		},
-    DisplayState = 
+    M2 = 
         {
 			Array = {
-				{State = "Idle"}
+				{SymbolType = "Major", Desc = "Eagle", SymbolMultiplier = 1, SymbolIndex = 1}
 			},
-			First = {State = "Idle"},
-			Last = {State = "Idle"},
+			First = {SymbolType = "Major", Desc = "Eagle", SymbolMultiplier = 1, SymbolIndex = 1},
+			Last = {SymbolType = "Major", Desc = "Eagle", SymbolMultiplier = 1, SymbolIndex = 1},
+			Count = 1
+		},
+    M3 = 
+        {
+			Array = {
+				{SymbolType = "Major", Desc = "Wolf", SymbolMultiplier = 1, SymbolIndex = 2}
+			},
+			First = {SymbolType = "Major", Desc = "Wolf", SymbolMultiplier = 1, SymbolIndex = 2},
+			Last = {SymbolType = "Major", Desc = "Wolf", SymbolMultiplier = 1, SymbolIndex = 2},
+			Count = 1
+		},
+    M4 = 
+        {
+			Array = {
+				{SymbolType = "Major", Desc = "Elk", SymbolMultiplier = 1, SymbolIndex = 3}
+			},
+			First = {SymbolType = "Major", Desc = "Elk", SymbolMultiplier = 1, SymbolIndex = 3},
+			Last = {SymbolType = "Major", Desc = "Elk", SymbolMultiplier = 1, SymbolIndex = 3},
+			Count = 1
+		},
+    F5 = 
+        {
+			Array = {
+				{SymbolType = "Minor", Desc = "9", SymbolMultiplier = 1, SymbolIndex = 4}
+			},
+			First = {SymbolType = "Minor", Desc = "9", SymbolMultiplier = 1, SymbolIndex = 4},
+			Last = {SymbolType = "Minor", Desc = "9", SymbolMultiplier = 1, SymbolIndex = 4},
+			Count = 1
+		},
+    F6 = 
+        {
+			Array = {
+				{SymbolType = "Minor", Desc = "10", SymbolMultiplier = 1, SymbolIndex = 5}
+			},
+			First = {SymbolType = "Minor", Desc = "10", SymbolMultiplier = 1, SymbolIndex = 5},
+			Last = {SymbolType = "Minor", Desc = "10", SymbolMultiplier = 1, SymbolIndex = 5},
+			Count = 1
+		},
+    F7 = 
+        {
+			Array = {
+				{SymbolType = "Minor", Desc = "J", SymbolMultiplier = 1, SymbolIndex = 6}
+			},
+			First = {SymbolType = "Minor", Desc = "J", SymbolMultiplier = 1, SymbolIndex = 6},
+			Last = {SymbolType = "Minor", Desc = "J", SymbolMultiplier = 1, SymbolIndex = 6},
+			Count = 1
+		},
+    F8 = 
+        {
+			Array = {
+				{SymbolType = "Minor", Desc = "Q", SymbolMultiplier = 1, SymbolIndex = 7}
+			},
+			First = {SymbolType = "Minor", Desc = "Q", SymbolMultiplier = 1, SymbolIndex = 7},
+			Last = {SymbolType = "Minor", Desc = "Q", SymbolMultiplier = 1, SymbolIndex = 7},
+			Count = 1
+		},
+    F9 = 
+        {
+			Array = {
+				{SymbolType = "Minor", Desc = "K", SymbolMultiplier = 1, SymbolIndex = 8}
+			},
+			First = {SymbolType = "Minor", Desc = "K", SymbolMultiplier = 1, SymbolIndex = 8},
+			Last = {SymbolType = "Minor", Desc = "K", SymbolMultiplier = 1, SymbolIndex = 8},
+			Count = 1
+		},
+    F10 = 
+        {
+			Array = {
+				{SymbolType = "Minor", Desc = "A", SymbolMultiplier = 1, SymbolIndex = 9}
+			},
+			First = {SymbolType = "Minor", Desc = "A", SymbolMultiplier = 1, SymbolIndex = 9},
+			Last = {SymbolType = "Minor", Desc = "A", SymbolMultiplier = 1, SymbolIndex = 9},
+			Count = 1
+		},
+    WD = 
+        {
+			Array = {
+				{SymbolType = "Wild", Desc = "Sunset", SymbolMultiplier = 1, SymbolIndex = 10}
+			},
+			First = {SymbolType = "Wild", Desc = "Sunset", SymbolMultiplier = 1, SymbolIndex = 10},
+			Last = {SymbolType = "Wild", Desc = "Sunset", SymbolMultiplier = 1, SymbolIndex = 10},
+			Count = 1
+		},
+    SC = 
+        {
+			Array = {
+				{SymbolType = "Scatter", Desc = "Gold Coin", SymbolMultiplier = 1, SymbolIndex = 11}
+			},
+			First = {SymbolType = "Scatter", Desc = "Gold Coin", SymbolMultiplier = 1, SymbolIndex = 11},
+			Last = {SymbolType = "Scatter", Desc = "Gold Coin", SymbolMultiplier = 1, SymbolIndex = 11},
 			Count = 1
 		},
   }
 
-Game001BaseGameBetMultiplier = {
-    Denom0 = 
+Game001BaseGameScattersState = {
+    Scatters = 
         {
 			Array = {
-				{BetMultiplier = 1}
+				{Active = false}
 			},
-			First = {BetMultiplier = 1},
-			Last = {BetMultiplier = 1},
-			Count = 1
-		},
-    Denom1 = 
-        {
-			Array = {
-				{BetMultiplier = 5}
-			},
-			First = {BetMultiplier = 5},
-			Last = {BetMultiplier = 5},
-			Count = 1
-		},
-    Denom2 = 
-        {
-			Array = {
-				{BetMultiplier = 25}
-			},
-			First = {BetMultiplier = 25},
-			Last = {BetMultiplier = 25},
+			First = {Active = false},
+			Last = {Active = false},
 			Count = 1
 		},
   }
 
-Game001BaseGameRTP = {
+Game001Machines = {
+    {Name = "BaseGame", Id = "BaseGame", IsBase = true, IsBonus = false, IsFreeSpins = false, IsWheel = false, TransitionFrom = "default", TransitionTo = "default"},
+  }
+
+Game001BaseGameIndependentReels2 = {
+    IndependentReels = 
+        {
+			Array = {
+				{ReelID = "Reel1", HorizontalPosition = -4},
+				{ReelID = "Reel2", HorizontalPosition = -2},
+				{ReelID = "Reel3", HorizontalPosition = 0},
+				{ReelID = "Reel4", HorizontalPosition = 2},
+				{ReelID = "Reel5", HorizontalPosition = 4}
+			},
+			First = {ReelID = "Reel1", HorizontalPosition = -4},
+			Last = {ReelID = "Reel5", HorizontalPosition = 4},
+			Count = 5
+		},
+  }
+
+Game001BaseGameScattersSummary = {
+    Scatters = 
+        {
+			Array = {
+				{NumScatters = 0, Payout = 0}
+			},
+			First = {NumScatters = 0, Payout = 0},
+			Last = {NumScatters = 0, Payout = 0},
+			Count = 1
+		},
+  }
+
+Game001MachineState = {
+    Current = 
+        {
+			Array = {
+				{ActiveGame = "None"}
+			},
+			First = {ActiveGame = "None"},
+			Last = {ActiveGame = "None"},
+			Count = 1
+		},
+  }
+
+Game001BaseGameScattersRTP = {
     RTP = 
         {
 			Array = {
-				{Target = 64, Current = 0}
+				{Target = 10, Current = 0}
 			},
-			First = {Target = 64, Current = 0},
-			Last = {Target = 64, Current = 0},
+			First = {Target = 10, Current = 0},
+			Last = {Target = 10, Current = 0},
 			Count = 1
 		},
   }
 
-Game001BaseGameSpinReelAnimation = {
+Game001BaseGameScattersDataSummary = {
+    Scatters = 
+        {
+			Array = {
+				{Probability = 10, ProbabilityBase = 100}
+			},
+			First = {Probability = 10, ProbabilityBase = 100},
+			Last = {Probability = 10, ProbabilityBase = 100},
+			Count = 1
+		},
   }
 
-Game001BaseGameReelSpinState = {
+Game001BaseGameReelSpinProperties = {
     Reel1 = 
         {
 			Array = {
-				{ReelIndex = 0, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0}
+				{SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100}
 			},
-			First = {ReelIndex = 0, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0},
-			Last = {ReelIndex = 0, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0},
+			First = {SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100},
+			Last = {SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100},
 			Count = 1
 		},
     Reel2 = 
         {
 			Array = {
-				{ReelIndex = 1, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0}
+				{SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100}
 			},
-			First = {ReelIndex = 1, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0},
-			Last = {ReelIndex = 1, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0},
+			First = {SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100},
+			Last = {SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100},
 			Count = 1
 		},
     Reel3 = 
         {
 			Array = {
-				{ReelIndex = 2, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0}
+				{SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100}
 			},
-			First = {ReelIndex = 2, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0},
-			Last = {ReelIndex = 2, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0},
+			First = {SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100},
+			Last = {SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100},
 			Count = 1
 		},
     Reel4 = 
         {
 			Array = {
-				{ReelIndex = 3, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0}
+				{SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100}
 			},
-			First = {ReelIndex = 3, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0},
-			Last = {ReelIndex = 3, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0},
+			First = {SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100},
+			Last = {SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100},
 			Count = 1
 		},
     Reel5 = 
         {
 			Array = {
-				{ReelIndex = 4, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0}
+				{SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100}
 			},
-			First = {ReelIndex = 4, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0},
-			Last = {ReelIndex = 4, ReelStopIndex = 0, ReelSpinState = "Waiting", ReelSpinDirection = "Down", SlideDistanceInSymbolUnits = 0, SpeedInSymbolUnitsPerSecond = 0},
+			First = {SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100},
+			Last = {SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100},
 			Count = 1
-		},
-  }
-
-Game001BaseGameIndependentReelsDataMatrix = {
-    Symbols = 
-        {
-			Array = {
-				{Index = 0, Symbol = "SC1", SymbolType = "Scatter", Desc = 100, Value = 100, Multiplier = 1},
-				{Index = 1, Symbol = "SC2", SymbolType = "Scatter", Desc = 200, Value = 200, Multiplier = 1},
-				{Index = 2, Symbol = "SC3", SymbolType = "Scatter", Desc = 300, Value = 300, Multiplier = 1},
-				{Index = 3, Symbol = "SC4", SymbolType = "Scatter", Desc = 400, Value = 400, Multiplier = 1},
-				{Index = 4, Symbol = "SC5", SymbolType = "Scatter", Desc = 500, Value = 500, Multiplier = 1}
-			},
-			First = {Index = 0, Symbol = "SC1", SymbolType = "Scatter", Desc = 100, Value = 100, Multiplier = 1},
-			Last = {Index = 4, Symbol = "SC5", SymbolType = "Scatter", Desc = 500, Value = 500, Multiplier = 1},
-			Count = 5
 		},
   }
 
@@ -1252,7 +1373,19 @@ Game001BaseGamePayTable = {
 		},
   }
 
-Game001BaseGameIndependentReelsRTP = {
+Game001BaseGameScattersMatrix = {
+    Scatters = 
+        {
+			Array = {
+				{ReelID = "Reel1", RowIndex = 0, ScatterSymbol = "BN1", Payout = 0}
+			},
+			First = {ReelID = "Reel1", RowIndex = 0, ScatterSymbol = "BN1", Payout = 0},
+			Last = {ReelID = "Reel1", RowIndex = 0, ScatterSymbol = "BN1", Payout = 0},
+			Count = 1
+		},
+  }
+
+Game001BaseGameReelAnticipationRTP = {
     RTP = 
         {
 			Array = {
@@ -1260,149 +1393,6 @@ Game001BaseGameIndependentReelsRTP = {
 			},
 			First = {Target = 10, Current = 0},
 			Last = {Target = 10, Current = 0},
-			Count = 1
-		},
-  }
-
-Game001BaseGameReelSpinProperties = {
-    Reel1 = 
-        {
-			Array = {
-				{SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100}
-			},
-			First = {SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100},
-			Last = {SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100},
-			Count = 1
-		},
-    Reel2 = 
-        {
-			Array = {
-				{SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100}
-			},
-			First = {SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100},
-			Last = {SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100},
-			Count = 1
-		},
-    Reel3 = 
-        {
-			Array = {
-				{SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100}
-			},
-			First = {SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100},
-			Last = {SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100},
-			Count = 1
-		},
-    Reel4 = 
-        {
-			Array = {
-				{SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100}
-			},
-			First = {SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100},
-			Last = {SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100},
-			Count = 1
-		},
-    Reel5 = 
-        {
-			Array = {
-				{SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100}
-			},
-			First = {SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100},
-			Last = {SpinSpeed = 100, AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100},
-			Count = 1
-		},
-  }
-
-Game001BaseGameIndependentReelsData = {
-    IndependentReels = 
-        {
-			Array = {
-				{ApplyOutcomeDelay = 250, NextSpinStartDelay = 0}
-			},
-			First = {ApplyOutcomeDelay = 250, NextSpinStartDelay = 0},
-			Last = {ApplyOutcomeDelay = 250, NextSpinStartDelay = 0},
-			Count = 1
-		},
-  }
-
-Game001BaseGameReelAnticipationProperties = {
-    Reel1 = 
-        {
-			Array = {
-				{AnticipationDelay = 100, AnticipationSpeed = 100}
-			},
-			First = {AnticipationDelay = 100, AnticipationSpeed = 100},
-			Last = {AnticipationDelay = 100, AnticipationSpeed = 100},
-			Count = 1
-		},
-    Reel2 = 
-        {
-			Array = {
-				{AnticipationDelay = 100, AnticipationSpeed = 100}
-			},
-			First = {AnticipationDelay = 100, AnticipationSpeed = 100},
-			Last = {AnticipationDelay = 100, AnticipationSpeed = 100},
-			Count = 1
-		},
-    Reel3 = 
-        {
-			Array = {
-				{AnticipationDelay = 100, AnticipationSpeed = 100}
-			},
-			First = {AnticipationDelay = 100, AnticipationSpeed = 100},
-			Last = {AnticipationDelay = 100, AnticipationSpeed = 100},
-			Count = 1
-		},
-    Reel4 = 
-        {
-			Array = {
-				{AnticipationDelay = 100, AnticipationSpeed = 100}
-			},
-			First = {AnticipationDelay = 100, AnticipationSpeed = 100},
-			Last = {AnticipationDelay = 100, AnticipationSpeed = 100},
-			Count = 1
-		},
-    Reel5 = 
-        {
-			Array = {
-				{AnticipationDelay = 100, AnticipationSpeed = 100}
-			},
-			First = {AnticipationDelay = 100, AnticipationSpeed = 100},
-			Last = {AnticipationDelay = 100, AnticipationSpeed = 100},
-			Count = 1
-		},
-  }
-
-Game001BaseGameWaysMatrix = {
-    M1 = 
-        {
-			Array = {
-				{ReelID = "Reel1", RowIndex = 2, IsWild = false, IsMultiplier = false, Multiplier = 1}
-			},
-			First = {ReelID = "Reel1", RowIndex = 2, IsWild = false, IsMultiplier = false, Multiplier = 1},
-			Last = {ReelID = "Reel1", RowIndex = 2, IsWild = false, IsMultiplier = false, Multiplier = 1},
-			Count = 1
-		},
-  }
-
-Game001BaseGameSymbolMatrixProperties = {
-    {RowIndex = 0, IsVisible = false, StopIndexOffset = -2},
-    {RowIndex = 1, IsVisible = false, StopIndexOffset = -1},
-    {RowIndex = 2, IsVisible = true, StopIndexOffset = 0},
-    {RowIndex = 3, IsVisible = true, StopIndexOffset = 1},
-    {RowIndex = 4, IsVisible = true, StopIndexOffset = 2},
-    {RowIndex = 5, IsVisible = true, StopIndexOffset = 3},
-    {RowIndex = 6, IsVisible = false, StopIndexOffset = 4},
-    {RowIndex = 7, IsVisible = false, StopIndexOffset = 5},
-  }
-
-Game001BaseGameIndependentReelsState = {
-    IndependentReels = 
-        {
-			Array = {
-				{Active = false}
-			},
-			First = {Active = false},
-			Last = {Active = false},
 			Count = 1
 		},
   }
@@ -1750,43 +1740,163 @@ Game001BaseGameReelSet = {
 		},
   }
 
-Game001BaseGameIndependentReelsDataMatrix3 = {
-    LayoutProperties = 
+Game001BaseGameIndependentReelsDataSummary = {
+    IndependentReels = 
         {
 			Array = {
-				{ReelLayoutType = "Horizontal", TopSymbolCount = 1, BottomSymbolCount = 1, VisibleSymbolCount = 1, SymbolHeight = 100, SymbolWidth = 100}
+				{RowCount = 4, ColumnCount = 5}
 			},
-			First = {ReelLayoutType = "Horizontal", TopSymbolCount = 1, BottomSymbolCount = 1, VisibleSymbolCount = 1, SymbolHeight = 100, SymbolWidth = 100},
-			Last = {ReelLayoutType = "Horizontal", TopSymbolCount = 1, BottomSymbolCount = 1, VisibleSymbolCount = 1, SymbolHeight = 100, SymbolWidth = 100},
+			First = {RowCount = 4, ColumnCount = 5},
+			Last = {RowCount = 4, ColumnCount = 5},
 			Count = 1
 		},
   }
 
-Game001BaseGameIndependentReelsDataMatrix2 = {
-    SpinProperties = 
+Game001BaseGameReelSpinOutcome = {
+    Reel1 = 
         {
 			Array = {
-				{AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100}
+				{ReelIndex = 0, OutcomeReelStopIndex = -1}
 			},
-			First = {AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100},
-			Last = {AutoSpinSpeed = 100, ReelDelay = 100, ReelLandingInterval = 100, ReelLandingStart = 100, StartRollbackHeight = 100, StartRollbackDuration = 100, StopRollbackHeight = 100, StopRollbackDurationReverse = 100},
+			First = {ReelIndex = 0, OutcomeReelStopIndex = -1},
+			Last = {ReelIndex = 0, OutcomeReelStopIndex = -1},
+			Count = 1
+		},
+    Reel2 = 
+        {
+			Array = {
+				{ReelIndex = 1, OutcomeReelStopIndex = -1}
+			},
+			First = {ReelIndex = 1, OutcomeReelStopIndex = -1},
+			Last = {ReelIndex = 1, OutcomeReelStopIndex = -1},
+			Count = 1
+		},
+    Reel3 = 
+        {
+			Array = {
+				{ReelIndex = 2, OutcomeReelStopIndex = -1}
+			},
+			First = {ReelIndex = 2, OutcomeReelStopIndex = -1},
+			Last = {ReelIndex = 2, OutcomeReelStopIndex = -1},
+			Count = 1
+		},
+    Reel4 = 
+        {
+			Array = {
+				{ReelIndex = 3, OutcomeReelStopIndex = -1}
+			},
+			First = {ReelIndex = 3, OutcomeReelStopIndex = -1},
+			Last = {ReelIndex = 3, OutcomeReelStopIndex = -1},
+			Count = 1
+		},
+    Reel5 = 
+        {
+			Array = {
+				{ReelIndex = 4, OutcomeReelStopIndex = -1}
+			},
+			First = {ReelIndex = 4, OutcomeReelStopIndex = -1},
+			Last = {ReelIndex = 4, OutcomeReelStopIndex = -1},
 			Count = 1
 		},
   }
 
-Game001MachineState = {
-    Current = 
+Game001BaseGameReelAnticipation = {
+    ReelAnticipation = 
         {
 			Array = {
-				{ActiveGame = "None"}
+				{ReelAnticipationID = "ScatterReelAnticipation", NumReelAnticipation = 0}
 			},
-			First = {ActiveGame = "None"},
-			Last = {ActiveGame = "None"},
+			First = {ReelAnticipationID = "ScatterReelAnticipation", NumReelAnticipation = 0},
+			Last = {ReelAnticipationID = "ScatterReelAnticipation", NumReelAnticipation = 0},
 			Count = 1
 		},
   }
 
-Game001BaseGameWaysRTP = {
+Game001BaseGameScattersData2 = {
+    Scatters = 
+        {
+			Array = {
+				{ScatterSymbol = "BN1", Probability = 100, Multiplier = 1}
+			},
+			First = {ScatterSymbol = "BN1", Probability = 100, Multiplier = 1},
+			Last = {ScatterSymbol = "BN1", Probability = 100, Multiplier = 1},
+			Count = 1
+		},
+  }
+
+Game001BaseGameSpinEndingRollBackAnimation = {
+  }
+
+Game001BaseGameReelAnticipationSummary = {
+    ReelAnticipation = 
+        {
+			Array = {
+				{NumReelAnticipation = 0}
+			},
+			First = {NumReelAnticipation = 0},
+			Last = {NumReelAnticipation = 0},
+			Count = 1
+		},
+  }
+
+Game001BaseGameSpinReelAnimation = {
+  }
+
+Game001BaseGameIndependentReels = {
+    IndependentReels = 
+        {
+			Array = {
+				{ReelIndex = 0, ReelSymbolCount = 20, TopSymbolCount = 1, BottomSymbolCount = 1, VisibleSymbolCount = 1, SymbolCount = 3, ReelIsVisible = true, ReelStopDelayInSeconds = 0.25, SpliceDistance = 8, ReelStopIndexAdvanceOffset = -1, SpinStartedRollBackDistanceInSymbolUnits = 0.3, SpinEndingRollForwardDistanceInSymbolUnits = -0.3, SpinStartedRollBackSpeedInSymbolUnitsPerSecond = 1, SpinStartedRollForwardSpeedInSymbolUnitsPerSecond = -3, SpinSpeedInSymbolUnitsPerSecond = -12, SpinEndingRollBackSpeedInSymbolUnitsPerSecond = 3, SpinEndingRollForwardSpeedInSymbolUnitsPerSecond = -3, SymbolVerticalSpacing = 2, SymbolScaleX = 2, SymbolScaleY = 2, SymbolOffsetY = 0, HorizontalPosition = -4, OutcomeReceived = false, ShouldSpliceReel = false}
+			},
+			First = {ReelIndex = 0, ReelSymbolCount = 20, TopSymbolCount = 1, BottomSymbolCount = 1, VisibleSymbolCount = 1, SymbolCount = 3, ReelIsVisible = true, ReelStopDelayInSeconds = 0.25, SpliceDistance = 8, ReelStopIndexAdvanceOffset = -1, SpinStartedRollBackDistanceInSymbolUnits = 0.3, SpinEndingRollForwardDistanceInSymbolUnits = -0.3, SpinStartedRollBackSpeedInSymbolUnitsPerSecond = 1, SpinStartedRollForwardSpeedInSymbolUnitsPerSecond = -3, SpinSpeedInSymbolUnitsPerSecond = -12, SpinEndingRollBackSpeedInSymbolUnitsPerSecond = 3, SpinEndingRollForwardSpeedInSymbolUnitsPerSecond = -3, SymbolVerticalSpacing = 2, SymbolScaleX = 2, SymbolScaleY = 2, SymbolOffsetY = 0, HorizontalPosition = -4, OutcomeReceived = false, ShouldSpliceReel = false},
+			Last = {ReelIndex = 0, ReelSymbolCount = 20, TopSymbolCount = 1, BottomSymbolCount = 1, VisibleSymbolCount = 1, SymbolCount = 3, ReelIsVisible = true, ReelStopDelayInSeconds = 0.25, SpliceDistance = 8, ReelStopIndexAdvanceOffset = -1, SpinStartedRollBackDistanceInSymbolUnits = 0.3, SpinEndingRollForwardDistanceInSymbolUnits = -0.3, SpinStartedRollBackSpeedInSymbolUnitsPerSecond = 1, SpinStartedRollForwardSpeedInSymbolUnitsPerSecond = -3, SpinSpeedInSymbolUnitsPerSecond = -12, SpinEndingRollBackSpeedInSymbolUnitsPerSecond = 3, SpinEndingRollForwardSpeedInSymbolUnitsPerSecond = -3, SymbolVerticalSpacing = 2, SymbolScaleX = 2, SymbolScaleY = 2, SymbolOffsetY = 0, HorizontalPosition = -4, OutcomeReceived = false, ShouldSpliceReel = false},
+			Count = 1
+		},
+  }
+
+Game001BaseGameWaysSummary = {
+    Ways = 
+        {
+			Array = {
+				{WaysCount = 0, DisplayLoopDuration = 1, DisplayLoopStartDelay = 0.1, DisplayLoopEndDelay = 0.2, Pays = 0}
+			},
+			First = {WaysCount = 0, DisplayLoopDuration = 1, DisplayLoopStartDelay = 0.1, DisplayLoopEndDelay = 0.2, Pays = 0},
+			Last = {WaysCount = 0, DisplayLoopDuration = 1, DisplayLoopStartDelay = 0.1, DisplayLoopEndDelay = 0.2, Pays = 0},
+			Count = 1
+		},
+  }
+
+Game001BaseGameScattersDataMatrix2 = {
+    Scatters = 
+        {
+			Array = {
+				{ReelID = "Reel1", Include = true},
+				{ReelID = "Reel2", Include = false},
+				{ReelID = "Reel3", Include = true},
+				{ReelID = "Reel4", Include = false},
+				{ReelID = "Reel5", Include = true}
+			},
+			First = {ReelID = "Reel1", Include = true},
+			Last = {ReelID = "Reel5", Include = true},
+			Count = 5
+		},
+  }
+
+Game001BaseGameScattersData = {
+    Scatters = 
+        {
+			Array = {
+				{NumScatters = 1, Probability = 50},
+				{NumScatters = 2, Probability = 40},
+				{NumScatters = 3, Probability = 10}
+			},
+			First = {NumScatters = 1, Probability = 50},
+			Last = {NumScatters = 3, Probability = 10},
+			Count = 3
+		},
+  }
+
+Game001BaseGameRTP = {
     RTP = 
         {
 			Array = {
@@ -1795,6 +1905,105 @@ Game001BaseGameWaysRTP = {
 			First = {Target = 64, Current = 0},
 			Last = {Target = 64, Current = 0},
 			Count = 1
+		},
+  }
+
+Game001BaseGameIndependentReelsDataMatrix = {
+    Symbols = 
+        {
+			Array = {
+				{Index = 0, Symbol = "SC1", SymbolType = "Scatter", Desc = 100, Value = 100, Multiplier = 1},
+				{Index = 1, Symbol = "SC2", SymbolType = "Scatter", Desc = 200, Value = 200, Multiplier = 1},
+				{Index = 2, Symbol = "SC3", SymbolType = "Scatter", Desc = 300, Value = 300, Multiplier = 1},
+				{Index = 3, Symbol = "SC4", SymbolType = "Scatter", Desc = 400, Value = 400, Multiplier = 1},
+				{Index = 4, Symbol = "SC5", SymbolType = "Scatter", Desc = 500, Value = 500, Multiplier = 1}
+			},
+			First = {Index = 0, Symbol = "SC1", SymbolType = "Scatter", Desc = 100, Value = 100, Multiplier = 1},
+			Last = {Index = 4, Symbol = "SC5", SymbolType = "Scatter", Desc = 500, Value = 500, Multiplier = 1},
+			Count = 5
+		},
+  }
+
+Game001BaseGameReelSymbolsState = {
+    Reel1 = 
+        {
+			Array = {
+				{RowIndex = 0, RowVisible = false, SymbolIsLocked = false, ReelPosition = -2, SymbolPosition = 4},
+				{RowIndex = 1, RowVisible = false, SymbolIsLocked = false, ReelPosition = -1, SymbolPosition = 3},
+				{RowIndex = 2, RowVisible = true, SymbolIsLocked = false, ReelPosition = 0, SymbolPosition = 2},
+				{RowIndex = 3, RowVisible = true, SymbolIsLocked = false, ReelPosition = 1, SymbolPosition = 1},
+				{RowIndex = 4, RowVisible = true, SymbolIsLocked = false, ReelPosition = 2, SymbolPosition = 0},
+				{RowIndex = 5, RowVisible = true, SymbolIsLocked = false, ReelPosition = 3, SymbolPosition = -1},
+				{RowIndex = 6, RowVisible = false, SymbolIsLocked = false, ReelPosition = 4, SymbolPosition = -2},
+				{RowIndex = 7, RowVisible = false, SymbolIsLocked = false, ReelPosition = 5, SymbolPosition = -3}
+			},
+			First = {RowIndex = 0, RowVisible = false, SymbolIsLocked = false, ReelPosition = -2, SymbolPosition = 4},
+			Last = {RowIndex = 7, RowVisible = false, SymbolIsLocked = false, ReelPosition = 5, SymbolPosition = -3},
+			Count = 8
+		},
+    Reel2 = 
+        {
+			Array = {
+				{RowIndex = 0, RowVisible = false, SymbolIsLocked = false, ReelPosition = -2, SymbolPosition = 4},
+				{RowIndex = 1, RowVisible = false, SymbolIsLocked = false, ReelPosition = -1, SymbolPosition = 3},
+				{RowIndex = 2, RowVisible = true, SymbolIsLocked = false, ReelPosition = 0, SymbolPosition = 2},
+				{RowIndex = 3, RowVisible = true, SymbolIsLocked = false, ReelPosition = 1, SymbolPosition = 1},
+				{RowIndex = 4, RowVisible = true, SymbolIsLocked = false, ReelPosition = 2, SymbolPosition = 0},
+				{RowIndex = 5, RowVisible = true, SymbolIsLocked = false, ReelPosition = 3, SymbolPosition = -1},
+				{RowIndex = 6, RowVisible = false, SymbolIsLocked = false, ReelPosition = 4, SymbolPosition = -2},
+				{RowIndex = 7, RowVisible = false, SymbolIsLocked = false, ReelPosition = 5, SymbolPosition = -3}
+			},
+			First = {RowIndex = 0, RowVisible = false, SymbolIsLocked = false, ReelPosition = -2, SymbolPosition = 4},
+			Last = {RowIndex = 7, RowVisible = false, SymbolIsLocked = false, ReelPosition = 5, SymbolPosition = -3},
+			Count = 8
+		},
+    Reel3 = 
+        {
+			Array = {
+				{RowIndex = 0, RowVisible = false, SymbolIsLocked = false, ReelPosition = -2, SymbolPosition = 4},
+				{RowIndex = 1, RowVisible = false, SymbolIsLocked = false, ReelPosition = -1, SymbolPosition = 3},
+				{RowIndex = 2, RowVisible = true, SymbolIsLocked = false, ReelPosition = 0, SymbolPosition = 2},
+				{RowIndex = 3, RowVisible = true, SymbolIsLocked = false, ReelPosition = 1, SymbolPosition = 1},
+				{RowIndex = 4, RowVisible = true, SymbolIsLocked = false, ReelPosition = 2, SymbolPosition = 0},
+				{RowIndex = 5, RowVisible = true, SymbolIsLocked = false, ReelPosition = 3, SymbolPosition = -1},
+				{RowIndex = 6, RowVisible = false, SymbolIsLocked = false, ReelPosition = 4, SymbolPosition = -2},
+				{RowIndex = 7, RowVisible = false, SymbolIsLocked = false, ReelPosition = 5, SymbolPosition = -3}
+			},
+			First = {RowIndex = 0, RowVisible = false, SymbolIsLocked = false, ReelPosition = -2, SymbolPosition = 4},
+			Last = {RowIndex = 7, RowVisible = false, SymbolIsLocked = false, ReelPosition = 5, SymbolPosition = -3},
+			Count = 8
+		},
+    Reel4 = 
+        {
+			Array = {
+				{RowIndex = 0, RowVisible = false, SymbolIsLocked = false, ReelPosition = -2, SymbolPosition = 4},
+				{RowIndex = 1, RowVisible = false, SymbolIsLocked = false, ReelPosition = -1, SymbolPosition = 3},
+				{RowIndex = 2, RowVisible = true, SymbolIsLocked = false, ReelPosition = 0, SymbolPosition = 2},
+				{RowIndex = 3, RowVisible = true, SymbolIsLocked = false, ReelPosition = 1, SymbolPosition = 1},
+				{RowIndex = 4, RowVisible = true, SymbolIsLocked = false, ReelPosition = 2, SymbolPosition = 0},
+				{RowIndex = 5, RowVisible = true, SymbolIsLocked = false, ReelPosition = 3, SymbolPosition = -1},
+				{RowIndex = 6, RowVisible = false, SymbolIsLocked = false, ReelPosition = 4, SymbolPosition = -2},
+				{RowIndex = 7, RowVisible = false, SymbolIsLocked = false, ReelPosition = 5, SymbolPosition = -3}
+			},
+			First = {RowIndex = 0, RowVisible = false, SymbolIsLocked = false, ReelPosition = -2, SymbolPosition = 4},
+			Last = {RowIndex = 7, RowVisible = false, SymbolIsLocked = false, ReelPosition = 5, SymbolPosition = -3},
+			Count = 8
+		},
+    Reel5 = 
+        {
+			Array = {
+				{RowIndex = 0, RowVisible = false, SymbolIsLocked = false, ReelPosition = -2, SymbolPosition = 4},
+				{RowIndex = 1, RowVisible = false, SymbolIsLocked = false, ReelPosition = -1, SymbolPosition = 3},
+				{RowIndex = 2, RowVisible = true, SymbolIsLocked = false, ReelPosition = 0, SymbolPosition = 2},
+				{RowIndex = 3, RowVisible = true, SymbolIsLocked = false, ReelPosition = 1, SymbolPosition = 1},
+				{RowIndex = 4, RowVisible = true, SymbolIsLocked = false, ReelPosition = 2, SymbolPosition = 0},
+				{RowIndex = 5, RowVisible = true, SymbolIsLocked = false, ReelPosition = 3, SymbolPosition = -1},
+				{RowIndex = 6, RowVisible = false, SymbolIsLocked = false, ReelPosition = 4, SymbolPosition = -2},
+				{RowIndex = 7, RowVisible = false, SymbolIsLocked = false, ReelPosition = 5, SymbolPosition = -3}
+			},
+			First = {RowIndex = 0, RowVisible = false, SymbolIsLocked = false, ReelPosition = -2, SymbolPosition = 4},
+			Last = {RowIndex = 7, RowVisible = false, SymbolIsLocked = false, ReelPosition = 5, SymbolPosition = -3},
+			Count = 8
 		},
   }
 
@@ -1824,20 +2033,20 @@ Game001BaseGameReelAnticipationTable = {
 		},
   }
 
-Game001BaseGameIndependentReelsDataSummary = {
-    IndependentReels = 
+Game001BaseGameIndependentReelsRTP = {
+    RTP = 
         {
 			Array = {
-				{RowCount = 4, ColumnCount = 5}
+				{Target = 10, Current = 0}
 			},
-			First = {RowCount = 4, ColumnCount = 5},
-			Last = {RowCount = 4, ColumnCount = 5},
+			First = {Target = 10, Current = 0},
+			Last = {Target = 10, Current = 0},
 			Count = 1
 		},
   }
 
-Game001BetMultiplierState = {
-    Current = 
+Game001BaseGameBetMultiplier = {
+    Denom0 = 
         {
 			Array = {
 				{BetMultiplier = 1}
@@ -1846,55 +2055,82 @@ Game001BetMultiplierState = {
 			Last = {BetMultiplier = 1},
 			Count = 1
 		},
-  }
-
-Game001BaseGameIndependentReelsMatrix = {
-    IndependentReels = 
+    Denom1 = 
         {
 			Array = {
-				{Row = "Row1", SymbolGroup = "SymbolGroup1", Visible = false, SymbolIsLocked = false, ReelPosition = -1, SymbolPosition = 3},
-				{Row = "Row1", SymbolGroup = "SymbolGroup2", Visible = true, SymbolIsLocked = false, ReelPosition = 0, SymbolPosition = 2},
-				{Row = "Row1", SymbolGroup = "SymbolGroup3", Visible = false, SymbolIsLocked = false, ReelPosition = 1, SymbolPosition = 1},
-				{Row = "Row2", SymbolGroup = "SymbolGroup1", Visible = false, SymbolIsLocked = false, ReelPosition = -1, SymbolPosition = 2},
-				{Row = "Row2", SymbolGroup = "SymbolGroup2", Visible = true, SymbolIsLocked = false, ReelPosition = 0, SymbolPosition = 1},
-				{Row = "Row2", SymbolGroup = "SymbolGroup3", Visible = false, SymbolIsLocked = false, ReelPosition = 1, SymbolPosition = 0},
-				{Row = "Row3", SymbolGroup = "SymbolGroup1", Visible = false, SymbolIsLocked = false, ReelPosition = -1, SymbolPosition = 1},
-				{Row = "Row3", SymbolGroup = "SymbolGroup2", Visible = true, SymbolIsLocked = false, ReelPosition = 0, SymbolPosition = 0},
-				{Row = "Row3", SymbolGroup = "SymbolGroup3", Visible = false, SymbolIsLocked = false, ReelPosition = 1, SymbolPosition = -1},
-				{Row = "Row4", SymbolGroup = "SymbolGroup1", Visible = false, SymbolIsLocked = false, ReelPosition = -1, SymbolPosition = 0},
-				{Row = "Row4", SymbolGroup = "SymbolGroup2", Visible = true, SymbolIsLocked = false, ReelPosition = 0, SymbolPosition = -1},
-				{Row = "Row4", SymbolGroup = "SymbolGroup3", Visible = false, SymbolIsLocked = false, ReelPosition = 1, SymbolPosition = -2}
+				{BetMultiplier = 5}
 			},
-			First = {Row = "Row1", SymbolGroup = "SymbolGroup1", Visible = false, SymbolIsLocked = false, ReelPosition = -1, SymbolPosition = 3},
-			Last = {Row = "Row4", SymbolGroup = "SymbolGroup3", Visible = false, SymbolIsLocked = false, ReelPosition = 1, SymbolPosition = -2},
-			Count = 12
+			First = {BetMultiplier = 5},
+			Last = {BetMultiplier = 5},
+			Count = 1
+		},
+    Denom2 = 
+        {
+			Array = {
+				{BetMultiplier = 25}
+			},
+			First = {BetMultiplier = 25},
+			Last = {BetMultiplier = 25},
+			Count = 1
 		},
   }
 
-Game001BaseGameIndependentReelsMatrix2 = {
-    IndependentReels = 
+Game001BaseGameWaysRTP = {
+    RTP = 
         {
 			Array = {
-				{Row = "Row1", SymbolMaskPosition = 2},
-				{Row = "Row2", SymbolMaskPosition = 1},
-				{Row = "Row3", SymbolMaskPosition = 0},
-				{Row = "Row4", SymbolMaskPosition = -1}
+				{Target = 64, Current = 0}
 			},
-			First = {Row = "Row1", SymbolMaskPosition = 2},
-			Last = {Row = "Row4", SymbolMaskPosition = -1},
-			Count = 4
+			First = {Target = 64, Current = 0},
+			Last = {Target = 64, Current = 0},
+			Count = 1
 		},
   }
 
-Game001Mechanics = {
-    BaseGame = 
+Game001BaseGameReelAnticipationProperties = {
+    Reel1 = 
         {
 			Array = {
-				{Mechanic = "Ways"},
-				{Mechanic = "IndependentReels"}
+				{AnticipationDelay = 100, AnticipationSpeed = 100}
 			},
-			First = {Mechanic = "Ways"},
-			Last = {Mechanic = "IndependentReels"},
-			Count = 2
+			First = {AnticipationDelay = 100, AnticipationSpeed = 100},
+			Last = {AnticipationDelay = 100, AnticipationSpeed = 100},
+			Count = 1
+		},
+    Reel2 = 
+        {
+			Array = {
+				{AnticipationDelay = 100, AnticipationSpeed = 100}
+			},
+			First = {AnticipationDelay = 100, AnticipationSpeed = 100},
+			Last = {AnticipationDelay = 100, AnticipationSpeed = 100},
+			Count = 1
+		},
+    Reel3 = 
+        {
+			Array = {
+				{AnticipationDelay = 100, AnticipationSpeed = 100}
+			},
+			First = {AnticipationDelay = 100, AnticipationSpeed = 100},
+			Last = {AnticipationDelay = 100, AnticipationSpeed = 100},
+			Count = 1
+		},
+    Reel4 = 
+        {
+			Array = {
+				{AnticipationDelay = 100, AnticipationSpeed = 100}
+			},
+			First = {AnticipationDelay = 100, AnticipationSpeed = 100},
+			Last = {AnticipationDelay = 100, AnticipationSpeed = 100},
+			Count = 1
+		},
+    Reel5 = 
+        {
+			Array = {
+				{AnticipationDelay = 100, AnticipationSpeed = 100}
+			},
+			First = {AnticipationDelay = 100, AnticipationSpeed = 100},
+			Last = {AnticipationDelay = 100, AnticipationSpeed = 100},
+			Count = 1
 		},
   }
