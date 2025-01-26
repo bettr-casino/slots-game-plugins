@@ -41,9 +41,9 @@ namespace Bettr.Editor.generators
             return CreateOrLoadMaterial(materialName, shaderName, textureName, hexColor, alpha, runtimeAssetPath, false, null);
         }
         
-        public static Material CreateOrLoadMaterial(string materialName, string shaderName, string textureName, string hexColor, float alpha, string runtimeAssetPath, bool createTextureIfNotExists = false, string sourceTexture = null)
+        public static Material CreateOrLoadMaterial(string materialName, string shaderName, string textureName, string hexColor, float alpha, string runtimeAssetPath, bool createTextureIfNotExists = false, string sourceTexture = null, bool textureForceReplace = false)
         {
-            Debug.Log($"CreateOrLoadMaterial materialName={materialName} shaderName={shaderName} textureName={textureName} hexColor={hexColor} alpha={alpha} sourceTexture={sourceTexture}");
+            Debug.Log($"CreateOrLoadMaterial materialName={materialName} shaderName={shaderName} textureName={textureName} hexColor={hexColor} alpha={alpha} sourceTexture={sourceTexture} textureForceReplace={textureForceReplace}");
             
             // if sourceTexture is null, use "default.png"
             if (string.IsNullOrEmpty(sourceTexture))
@@ -57,21 +57,26 @@ namespace Bettr.Editor.generators
             var material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
             if (material != null)
             {
-                return material;
+                if (!textureForceReplace)
+                {
+                    return material;
+                }
             }
-            
-            Debug.Log($"Creating material for {materialName} at {materialFilepath}");
-            try
+
+            if (material == null)
             {
-                material = new Material(shader);
-                AssetDatabase.CreateAsset(material, materialFilepath);
+                Debug.Log($"Creating material for {materialName} at {materialFilepath}");
+                try
+                {
+                    material = new Material(shader);
+                    AssetDatabase.CreateAsset(material, materialFilepath);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e);
+                    throw new Exception($"Shader {shaderName} not found.", e);
+                }
             }
-            catch (Exception e)
-            {
-                Debug.LogError(e);
-                throw new Exception($"Shader {shaderName} not found.", e);
-            }
-            
             
             material = AssetDatabase.LoadAssetAtPath<Material>(materialFilepath);
             material.shader = shader;
