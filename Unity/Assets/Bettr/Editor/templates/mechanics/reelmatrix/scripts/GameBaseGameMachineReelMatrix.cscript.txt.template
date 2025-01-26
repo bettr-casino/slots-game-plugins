@@ -1,0 +1,212 @@
+require "math"
+require "Core"
+require "Utils"
+require "{{machineName}}BaseGameMechanics"
+
+{{machineName}}BaseGameReelMatrix = {
+    Config = {
+        Machine = "{{machineName}}",
+        Variant = "{{machineVariant}}",
+        Experiment = "{{experimentVariant}}",
+    },
+}
+
+function {{machineName}}BaseGameReelMatrix:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function {{machineName}}BaseGameReelMatrix:destroy()
+	System.Print("{{machineName}}BaseGameReelMatrix destroy tile id={0}", self.id)
+end
+
+function {{machineName}}BaseGameReelMatrix:OnError(callStack)
+	System.Error("{{machineName}}BaseGameReelMatrix Error CallStack: {0}", callStack)
+end
+
+function {{machineName}}BaseGameReelMatrix:Awake()
+	System.Print("{{machineName}}BaseGameReelMatrix Awake tile id={0}", self.id)
+end
+
+function {{machineName}}BaseGameReelMatrix:StartEngines(machine)
+    series
+        do
+            self.BettrReelMatrixCellController.StartEngines()
+            machine.Mechanics:StartCellEngines(self, machine)                          
+        end
+    end
+end
+
+function {{machineName}}BaseGameReelMatrix:OnOutcomeReceived()
+    series
+        do
+            self.BettrReelMatrixCellController.OnOutcomeReceived()
+            self.Mechanics:OnOutcomeReceived(self)
+        end
+    end
+end
+
+function {{machineName}}BaseGameReelMatrix:OnApplyOutcomeReceived()
+    series
+        do
+            self.Mechanics:OnApplyOutcomeReceived(self)
+        end
+    end
+end
+
+function {{machineName}}BaseGameReelMatrix:SpinEngines()
+    self.BettrReelMatrixCellController.SpinEngines()
+    self.Mechanics.SpinEngines(self)
+end
+
+function {{machineName}}BaseGameReelMatrix:Update()
+    local reelState = {{machineName}}BaseGameReelMatrixState[self.ReelID].First
+    local reelIsLocked = reelState.ReelIsLocked
+    if reelIsLocked then
+        return
+    end
+    local reelSpinState = {{machineName}}BaseGameReelMatrixSpinState[self.ReelID].First
+    local spinState = reelSpinState.ReelSpinState
+    self.ReelSpinStateDispatchTable[spinState](self)    
+end
+
+function {{machineName}}BaseGameReelMatrix:SpinReelSpinStartedRollBack()
+    self.BettrReelMatrixCellController.SpinReelSpinStartedRollBack()
+    self.Mechanics:SpinReelSpinStartedRollBack(self)    
+end
+
+function {{machineName}}BaseGameReelMatrix:SpinReelSpinStartedRollForward()
+    self.BettrReelMatrixCellController.SpinReelSpinStartedRollForward()
+    self.Mechanics:SpinReelSpinStartedRollForward(self)    
+end
+
+function {{machineName}}BaseGameReelMatrix:SpinReelSpinEndingRollBack()    
+    self.BettrReelMatrixCellController.SpinReelSpinEndingRollBack()
+    self.Mechanics:SpinReelSpinEndingRollBack(self)    
+end
+
+function {{machineName}}BaseGameReelMatrix:SpinReelSpinEndingRollForward()
+    self.BettrReelMatrixCellController.SpinReelSpinEndingRollForward()
+    self.Mechanics:SpinReelSpinEndingRollForward(self)    
+end
+
+function {{machineName}}BaseGameReelMatrix:SpinReelReachedOutcomeStopIndex()
+    BettrAudioController.PlayAudioOnce("reelstop")
+    local reelSpinState = {{machineName}}BaseGameReelMatrixSpinState[self.ReelID].First
+    reelSpinState.ReelSpinState = "SpinEndingRollForward"
+    self.Mechanics:SpinReelReachedOutcomeStopIndex(self)
+end
+
+function {{machineName}}BaseGameReelMatrix:SpinReelStopped()
+    local reelCount = {{machineName}}BaseGameLayout.ReelCount.First.Value
+    local lastReelID = "Reel" .. reelCount
+    self.Mechanics:OnSpinReelStopped(self)
+    if self.ReelID == lastReelID then
+        {{machineName}}BaseGameMachine:OnSpinReelsStopped()
+    end
+    local reelSpinState = {{machineName}}BaseGameReelMatrixSpinState[self.ReelID].First
+    reelSpinState.ReelSpinState = "StoppedWaiting"
+end
+
+function {{machineName}}BaseGameReelMatrix:SpinReelStoppedWaiting()    
+end
+
+function {{machineName}}BaseGameReelMatrix:SpinReelWaiting()    
+end
+
+function {{machineName}}BaseGameReelMatrix:SpinReelSpinning()
+    return self.BettrReelMatrixCellController.SpinReelSpinning()    
+end
+
+function {{machineName}}BaseGameReelMatrix:PlaySpinReelSpinEndingRollBackAnimation()
+    series
+        do        
+            local spinEndingRollbackAnimation = {{machineName}}BaseGameSpinEndingRollBackAnimation[self.ReelID]
+            
+            if spinEndingRollbackAnimation == nil then
+                return
+            end
+                      
+            if spinEndingRollbackAnimation.First.Counter > 0 then
+                return                
+            end               
+            
+            spinEndingRollbackAnimation.First.Counter = 1 
+                                                       
+            local reelState = {{machineName}}BaseGameReelMatrixState[self.ReelID].First
+            local reelSpinState = {{machineName}}BaseGameReelMatrixSpinState[self.ReelID].First
+            local reelSymbolsState = {{machineName}}BaseGameReelMatrixSymbolsState[self.ReelID].Array
+                        
+            local rollbackAnimationArray = spinEndingRollbackAnimation.Array            
+            
+            local animatorGroupPrefix = "SymbolLandWinAnimatorGroup"
+            
+            for i=1,#rollbackAnimationArray do
+                local rowIndex = rollbackAnimationArray[i].RowIndex
+                self:PlaySymbolAnimation(rowIndex, animatorGroupPrefix, false)
+            end
+        end
+    end
+end
+
+function {{machineName}}BaseGameReelMatrix:PlaySymbolAnimation(rowIndex, animatorGroupPrefix, waitForAnimationComplete)
+    local animationDuration = 0.0
+    series
+        do                    
+            if rowIndex >= 0 then
+                local luaIndex = rowIndex + 1       
+                local animatorGroupProperty = self[animatorGroupPrefix .. luaIndex]
+                local symbolGroupProperty = self["SymbolGroup" .. luaIndex]
+                local currentKey = symbolGroupProperty.CurrentKey
+                local animatorProperty = animatorGroupProperty[currentKey]
+                animatorProperty.waitForAnimationComplete = waitForAnimationComplete
+                -- animationDuration = Core.Animator:PlayAnimatorProperty(currentKey, animatorProperty)
+                animationDuration = BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+            end
+        end
+    end
+    return animationDuration
+end
+
+function {{machineName}}BaseGameReelMatrix:CloneAndOverlayCurrentSymbol(rowIndex)
+    local overlaySymbol = nil
+    series
+        do                    
+            overlaySymbol = self:CloneCurrentSymbol(rowIndex)
+            if overlaySymbol ~= nil then
+                BettrVisualsController.SetLayerRecursively(overlaySymbol, Core.Layers.SLOT_REELS_OVERLAY)
+            end
+        end
+    end
+    return overlaySymbol
+end
+
+function {{machineName}}BaseGameReelMatrix:CloneCurrentSymbol(rowIndex)
+    local clonedSymbol = nil
+    series
+        do                    
+            if rowIndex >= 0 then
+                local luaIndex = rowIndex + 1       
+                local symbolGroupProperty = self["SymbolGroup" .. luaIndex] 
+                clonedSymbol = symbolGroupProperty.CloneCurrent                               
+            end
+        end
+    end
+    return clonedSymbol
+end
+
+{{machineName}}BaseGameReelMatrix.ReelSpinStateDispatchTable = {
+    Waiting = {{machineName}}BaseGameReelMatrix.SpinReelWaiting,
+    Spinning = {{machineName}}BaseGameReelMatrix.SpinReelSpinning,
+    Stopped = {{machineName}}BaseGameReelMatrix.SpinReelStopped,
+    StoppedWaiting = {{machineName}}BaseGameReelMatrix.SpinReelStoppedWaiting,
+    ReachedOutcomeStopIndex = {{machineName}}BaseGameReelMatrix.SpinReelReachedOutcomeStopIndex,
+    SpinStartedRollBack = {{machineName}}BaseGameReelMatrix.SpinReelSpinStartedRollBack,
+    SpinStartedRollForward = {{machineName}}BaseGameReelMatrix.SpinReelSpinStartedRollForward,
+    SpinEndingRollForward = {{machineName}}BaseGameReelMatrix.SpinReelSpinEndingRollForward,
+    SpinEndingRollBack = {{machineName}}BaseGameReelMatrix.SpinReelSpinEndingRollBack
+}
+
+return {{machineName}}BaseGameReelMatrix:new()

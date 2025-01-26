@@ -1,0 +1,32 @@
+require "math"
+require "Core"
+require "Utils"
+
+Game001BaseGameReelMatrix = {
+    Config = {
+        Machine = "Game001",
+        Variant = "EpicDragonsHoard",
+        Experiment = "control",
+    },
+}
+
+function Game001BaseGameReelMatrix:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game001BaseGameReelMatrix:destroy()
+	System.Print("Game001BaseGameReelMatrix destroy tile id={0}", self.id)
+end
+
+function Game001BaseGameReelMatrix:OnError(callStack)
+	System.Error("Game001BaseGameReelMatrix Error CallStack: {0}", callStack)
+end
+
+function Game001BaseGameReelMatrix:Awake()
+	System.Print("Game001BaseGameReelMatrix Awake tile id={0}", self.id)
+end
+
+return Game001BaseGameReelMatrix:new()

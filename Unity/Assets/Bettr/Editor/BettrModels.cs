@@ -743,6 +743,10 @@ namespace Bettr.Editor
                 {
                     var globalTileId = string.IsNullOrEmpty(Name) ? Filename : Name;
                     var scriptAsset = BettrScriptGenerator.CreateOrLoadScript(Filename, RuntimeAssetPath);
+                    if (scriptAsset == null)
+                    {
+                        throw new Exception($"Failed to load script asset: Name={Name} Filename={Filename} RuntimeAssetPath={RuntimeAssetPath}");
+                    }
                     var tileComponent = new TileWithUpdateComponent(globalTileId, scriptAsset);
                     tileComponent.AddComponent(gameObject);
                     

@@ -3,7 +3,7 @@ require "Core"
 require "Game001BaseGameMachineWaysMechanic"
 require "Game001BaseGameMachineScattersMechanic"
 require "Game001BaseGameMachineReelAnticipationMechanic"
-require "Game001BaseGameMachineIndependentReelsMechanic"
+require "Game001BaseGameMachineReelMatrixMechanic"
 
 Game001BaseGameMachineMechanics = {
     Config = {
@@ -14,7 +14,7 @@ Game001BaseGameMachineMechanics = {
     WaysMechanic = nil,
     ScattersMechanic = nil,
     ReelAnticipationMechanic = nil,
-    IndependentReelsMechanic = nil,
+    ReelMatrixMechanic = nil,
 }
 
 function Game001BaseGameMachineMechanics:new(o)
@@ -35,8 +35,8 @@ function Game001BaseGameMachineMechanics:Initialize(machine)
      self.ScattersMechanic:Initialize(machine)
      self.ReelAnticipationMechanic = Game001BaseGameMachineReelAnticipationMechanic:new()
      self.ReelAnticipationMechanic:Initialize(machine)
-     self.IndependentReelsMechanic = Game001BaseGameMachineIndependentReelsMechanic:new()
-     self.IndependentReelsMechanic:Initialize(machine)
+     self.ReelMatrixMechanic = Game001BaseGameMachineReelMatrixMechanic:new()
+     self.ReelMatrixMechanic:Initialize(machine)
 end
 
 function Game001BaseGameMachineMechanics:StartMachine(machine)
@@ -139,4 +139,7 @@ function Game001BaseGameMachineMechanics:ApplyOutcomeReceived(machine)
             end
         end
     end
+end
+
+function Game001BaseGameMachineMechanics:SpinEngines(machine)
 end

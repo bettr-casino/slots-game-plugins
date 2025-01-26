@@ -1,0 +1,53 @@
+require "math"
+require "Core"
+
+Game001BaseGameMachineReelMatrixMechanic = {
+    Config = {
+        Machine = "Game001",
+        Variant = "EpicDragonsHoard",
+        Experiment = "control",
+        Mechanic = "ReelMatrix",
+    },
+    State = {
+        MechanicsPrefab = nil,
+    }
+}
+
+function Game001BaseGameMachineReelMatrixMechanic:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game001BaseGameMachineReelMatrixMechanic:Initialize(machine)
+    series
+        do
+            local manifest = Game001.Manifest
+            local prefabName = "BaseGameMachineReelMatrix"
+            local machineParent = machine.MachineParent
+            local mechanicsParent = machine.MechanicsParent
+            local mechanicsPrefab = BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, prefabName, mechanicsParent.GameObject)
+            mechanicsPrefab.SetActive(false)
+            mechanicsPrefab.name = self.Config.Mechanic
+            self.State.MechanicsPrefab = mechanicsPrefab            
+            System.Print("Game001BaseGameMachineReelMatrixMechanic:Initialize mechanicsPrefab={0}", self.State.MechanicsPrefab.name)
+        end
+    end
+end
+
+function Game001BaseGameMachineReelMatrixMechanic:OnBaseGameSpinCompleted(machine)
+    series
+        do
+            System.Print("Game001BaseGameMachineReelMatrixMechanic:Game001BaseGameState.SpinState.First.State={0}", Game001BaseGameState.SpinState.First.State)
+            Game001BaseGameState.SpinState.First.State = "Waiting"
+            local machineParent = machine.MachineParent
+            local mechanicsPrefab = self.State.MechanicsPrefab
+            machineParent.SetActive(false)
+            mechanicsPrefab.SetActive(true)
+        end
+    end
+end
+
+
+

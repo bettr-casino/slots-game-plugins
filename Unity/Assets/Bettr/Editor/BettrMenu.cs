@@ -255,7 +255,7 @@ namespace Bettr.Editor
             {
                 {"Scatters", BettrMechanics.ProcessScattersMechanic},
                 {"ReelAnticipation", BettrMechanics.ProcessReelAnticipationMechanic},
-                {"IndependentReels", BettrMechanics.ProcessIndependentReelsMechanic},
+                {"ReelMatrix", BettrMechanics.ProcessReelMatrixMechanic},
             };
 
             var machineName = "Game001";
@@ -3466,7 +3466,7 @@ namespace Bettr.Editor
                 { "horizontalreels", BettrMechanics.ProcessHorizontalReelsMechanic },
                 { "horizontalreelshift", BettrMechanics.ProcessHorizontalReelsShiftMechanic },
                 { "hotreels", BettrMechanics.ProcessHotReelsMechanic },
-                { "independentreels", BettrMechanics.ProcessHotReelsMechanic },
+                { "ReelMatrix", BettrMechanics.ProcessHotReelsMechanic },
                 { "infinityreels", BettrMechanics.ProcessInfinityReelsMechanic },
                 { "linkedreels", BettrMechanics.ProcessLinkedReelsMechanic },
                 { "lockedreels", BettrMechanics.ProcessLockedReelsMechanic },

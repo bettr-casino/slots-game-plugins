@@ -3,7 +3,7 @@ require "Core"
 require "Game001BaseGameReelWaysMechanic"
 require "Game001BaseGameReelScattersMechanic"
 require "Game001BaseGameReelReelAnticipationMechanic"
-require "Game001BaseGameReelIndependentReelsMechanic"
+require "Game001BaseGameReelReelMatrixMechanic"
 
 Game001BaseGameReelMechanics = {
     Config = {
@@ -14,7 +14,7 @@ Game001BaseGameReelMechanics = {
     WaysMechanic = nil,
     ScattersMechanic = nil,
     ReelAnticipationMechanic = nil,
-    IndependentReelsMechanic = nil,
+    ReelMatrixMechanic = nil,
 }
 
 function Game001BaseGameReelMechanics:new(o)
@@ -31,8 +31,8 @@ function Game001BaseGameReelMechanics:Initialize(reel)
     self.ScattersMechanic:Initialize(reel)
     self.ReelAnticipationMechanic = Game001BaseGameReelReelAnticipationMechanic:new()
     self.ReelAnticipationMechanic:Initialize(reel)
-    self.IndependentReelsMechanic = Game001BaseGameReelIndependentReelsMechanic:new()
-    self.IndependentReelsMechanic:Initialize(reel)
+    self.ReelMatrixMechanic = Game001BaseGameReelReelMatrixMechanic:new()
+    self.ReelMatrixMechanic:Initialize(reel)
 end
 
 function Game001BaseGameReelMechanics:SpinReelSpinStartedRollBack(reel)
