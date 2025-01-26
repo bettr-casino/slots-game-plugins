@@ -288,6 +288,7 @@ namespace Bettr.Editor
             {
                 { "machineName", machineName },
                 { "machineVariant", machineVariant },
+                { "mechanicName", mechanicName },
                 { "rowCount", rowCount },
                 { "columnCount", columnCount },
                 { "totalSymbolCount", totalSymbolCount },
