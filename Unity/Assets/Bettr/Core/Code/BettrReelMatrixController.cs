@@ -104,6 +104,12 @@ namespace Bettr.Core
         {
             SpinStateTable = mathController.GetBaseGameMechanic(2, cellController.MachineID, cellController.MechanicName, "SpinState");
         }
+
+        public string GetReelStopIndex(int rowIndex, int colIndex)
+        {
+            var key = $"Row{rowIndex}Col{colIndex}";
+            return (string) SpinStateTable[key];
+        }
     }
     
     public class BettrReelMatrixState
@@ -260,26 +266,34 @@ namespace Bettr.Core
         
         public IEnumerator StartEngines()
         {
-            // var reelStopIndex = (int) (double) this.ReelSpinStateTable["ReelStopIndex"];
-            // var reelSymbolCount = (int) (double) this.ReelMatrixStateTable["ReelSymbolCount"];
-            // var reelSymbolsCount = this.ReelSymbolsStateTable.Length;
-            // for (int i = 1; i <= reelSymbolsCount; i++)
-            // {
-            //     var symbolStateTable = (Table) this.ReelSymbolsStateTable[i];
-            //     var reelPosition = (int) (double) symbolStateTable["ReelPosition"];
-            //     int symbolStopIndex = 1 + (reelSymbolCount + reelStopIndex + reelPosition) % reelSymbolCount;
-            //     var reelSymbol = (string) ((Table) this.ReelSymbolsTable[symbolStopIndex])["ReelSymbol"];
-            //     var symbolGroupProperty = (TilePropertyGameObjectGroup) this.ReelMatrixDataSummaryTable[$"SymbolGroup{i}"];
-            //     if (symbolGroupProperty.Current != null)
-            //     {
-            //         symbolGroupProperty.Current.SetActive(false);
-            //         symbolGroupProperty.CurrentKey = null;
-            //     }
-            //     var currentValue = (PropertyGameObject) symbolGroupProperty[reelSymbol];
-            //     currentValue.SetActive(true);
-            //     symbolGroupProperty.Current = currentValue;
-            //     symbolGroupProperty.CurrentKey = reelSymbol;
-            // }
+            // loop over all the cells and start the engines
+            for (var rowIndex = 1; rowIndex <= this.RowCount; rowIndex++)
+            {
+                for (var colIndex = 1; colIndex <= this.ColumnCount; colIndex++)
+                {
+                    var reelStopIndex = this.BettrReelMatrixSpinState.GetReelStopIndex(rowIndex, colIndex);
+                    // var reelStopIndex = this.BettrReelMatrixSpinState.ReelStopIndex;
+                    // var reelSymbolCount = (int) (double) this.ReelMatrixStateTable["ReelSymbolCount"];
+                    // var reelSymbolsCount = this.ReelSymbolsStateTable.Length;
+                    // for (int i = 1; i <= reelSymbolsCount; i++)
+                    // {
+                    //     var symbolStateTable = (Table) this.ReelSymbolsStateTable[i];
+                    //     var reelPosition = (int) (double) symbolStateTable["ReelPosition"];
+                    //     int symbolStopIndex = 1 + (reelSymbolCount + reelStopIndex + reelPosition) % reelSymbolCount;
+                    //     var reelSymbol = (string) ((Table) this.ReelSymbolsTable[symbolStopIndex])["ReelSymbol"];
+                    //     var symbolGroupProperty = (TilePropertyGameObjectGroup) this.ReelMatrixDataSummaryTable[$"SymbolGroup{i}"];
+                    //     if (symbolGroupProperty.Current != null)
+                    //     {
+                    //         symbolGroupProperty.Current.SetActive(false);
+                    //         symbolGroupProperty.CurrentKey = null;
+                    //     }
+                    //     var currentValue = (PropertyGameObject) symbolGroupProperty[reelSymbol];
+                    //     currentValue.SetActive(true);
+                    //     symbolGroupProperty.Current = currentValue;
+                    //     symbolGroupProperty.CurrentKey = reelSymbol;
+                    // }
+                }
+            }
             yield break;
         }
     
