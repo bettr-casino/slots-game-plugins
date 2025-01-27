@@ -37,12 +37,18 @@ namespace Bettr.Core
             return GetBaseGameMechanicData(machineID, mechanicName, null);
         }
         
-        public Table GetBaseGameMechanicData(string machineID, string mechanicName, string pk)
+        public Table GetBaseGameMechanicData(int index, string machineID, string mechanicName, string pk)
         {
-            var tableName = $"BaseGame{mechanicName}Data";
+            var indexString = index <= 1 ? "" : index.ToString();
+            var tableName = $"BaseGame{mechanicName}Data{indexString}";
             pk = pk ?? mechanicName;
             var table = GetTableArray(tableName, machineID, pk);
             return table;
+        }
+        
+        public Table GetBaseGameMechanicData(string machineID, string mechanicName, string pk)
+        {
+            return GetBaseGameMechanicData(1, machineID, mechanicName, pk);
         }
 
         public Table GetBaseGameMechanicDataRow(string machineID, string mechanicName, params string[] kvPairs)

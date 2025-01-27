@@ -11,12 +11,10 @@ namespace Bettr.Core
     public class BettrReelMatrixController : MonoBehaviour
     {
         [NonSerialized] private TileWithUpdate ReelMatrixTile;
-        [NonSerialized] private GameObject ReelGo;
         
-        [NonSerialized] private string ReelID;
-        [NonSerialized] private int ReelIndex;
         [NonSerialized] private string MachineID;
         [NonSerialized] private string MachineVariantID;
+        [NonSerialized] private string MechanicName;
 
         [NonSerialized] private BettrUserController BettrUserController;
         [NonSerialized] private BettrMathController BettrMathController;
@@ -32,13 +30,9 @@ namespace Bettr.Core
         
         private IEnumerator Start()
         {
-            this.ReelGo = this.gameObject;
-            this.ReelID = ReelMatrixTile.GetProperty<string>("ReelID");
-            this.ReelIndex = ReelMatrixTile.GetProperty<int>("ReelIndex");
             this.MachineID = ReelMatrixTile.GetProperty<string>("MachineID");
             this.MachineVariantID = ReelMatrixTile.GetProperty<string>("MachineVariantID");
-            var reelTable = BettrMathController.GetGlobalTable(ReelMatrixTile.globalTileId);
-            var reelStateTable = BettrMathController.GetTableFirst("BaseGameReelState", this.MachineID, this.ReelID);
+            this.MechanicName = ReelMatrixTile.GetProperty<string>("MechanicName");
             
             this.BettrReelMatrixCellController = new BettrReelMatrixCellController(ReelMatrixTile, BettrUserController, BettrMathController);
             
@@ -47,21 +41,89 @@ namespace Bettr.Core
         
     }
 
-    public class BetteReelMatrixOutcomes
+    [Serializable]
+    public class BettrReelMatrixOutcomes
     {
         public int RowCount { get; internal set; }
         public int ColumnCount { get; internal set; }
-
-        public BetteReelMatrixOutcomes(BettrReelMatrixCellController cellController)
+        
+        public Dictionary<string, BettrReelMatrixOutcome> BettrReelMatrixOutcome { get; internal set; }
+        
+        public BettrReelMatrixOutcomes(BettrReelMatrixCellController cellController)
         {
             this.RowCount = cellController.RowCount;
             this.ColumnCount = cellController.ColumnCount;
+            
+            var machineID = cellController.MachineID;
+            var tableName = "BaseGameReelMatrixMatrix";
+            var outcomesTable = (Table) TileController.LuaScript.Globals[$"{machineID}{tableName}"];
+            
+            for (var rowIndex = 1; rowIndex <= this.RowCount; rowIndex++)
+            {
+                for (var columnIndex = 1; columnIndex <= this.ColumnCount; columnIndex++)
+                {
+                    var outcome = new BettrReelMatrixOutcome(outcomesTable, rowIndex, columnIndex);
+                    var key = outcome.CellId;
+                    BettrReelMatrixOutcome[key] = outcome;
+                }
+            }
         }
     }
 
+    [Serializable]
     public class BettrReelMatrixOutcome
     {
         
+        public string CellId { get; internal set; }
+        public Table OutcomeTable { get; internal set; }
+        public BettrReelMatrixOutcome(Table outcomesTable, int rowIndex, int colIndex)
+        {
+            var pk = $"Row{rowIndex}Cell{colIndex}";
+            var outcomeTable = (Table) outcomesTable[pk];
+            
+            CellId = pk;
+            OutcomeTable = outcomeTable;
+        }
+    }
+    
+    public class BettrReelMatrixSymbolGroupsData
+    {
+        public Table SymbolGroupsTable { get; internal set; }
+        
+        public BettrReelMatrixSymbolGroupsData(BettrReelMatrixCellController cellController, BettrMathController mathController)
+        {
+            SymbolGroupsTable = mathController.GetBaseGameMechanicData(5, cellController.MachineID, cellController.MechanicName, "SymbolGroups");
+        }
+    }
+    
+    public class BettrReelMatrixSpinState
+    {
+        public Table SpinStateTable { get; internal set; }
+        
+        public BettrReelMatrixSpinState(BettrReelMatrixCellController cellController, BettrMathController mathController)
+        {
+            SpinStateTable = mathController.GetBaseGameMechanic(2, cellController.MachineID, cellController.MechanicName, "SpinState");
+        }
+    }
+    
+    public class BettrReelMatrixState
+    {
+        public Table StateTable { get; internal set; }
+        
+        public BettrReelMatrixState(BettrReelMatrixCellController cellController, BettrMathController mathController)
+        {
+            StateTable = mathController.GetBaseGameMechanic(cellController.MachineID, cellController.MechanicName, "ReelMatrix");
+        }
+    }
+    
+    public class BettrReelMatrixStateSummary
+    {
+        public Table StateSummaryTable { get; internal set; }
+        
+        public BettrReelMatrixStateSummary(BettrReelMatrixCellController cellController, BettrMathController mathController)
+        {
+            StateSummaryTable = mathController.GetBaseGameMechanicSummary(cellController.MachineID, cellController.MechanicName, "ReelMatrix");
+        }
     }
     
     public class BettrReelMatrixReelSet
@@ -98,9 +160,9 @@ namespace Bettr.Core
         
         public Table ReelTable { get; internal set; }
         
-        public BettrReelMatrixReelStrip(Table reelsTable, int rowIndex, int cellIndex)
+        public BettrReelMatrixReelStrip(Table reelsTable, int rowIndex, int colIndex)
         {
-            var pk = $"Row{rowIndex}Cell{cellIndex}";
+            var pk = $"Row{rowIndex}Cell{colIndex}";
             var reelTable = (Table) reelsTable[pk];
             
             CellId = pk;
@@ -117,14 +179,18 @@ namespace Bettr.Core
         
         public TilePropertyGameObjectGroup Cells { get; internal set; }
 
-        public BettrReelMatrixCells(BettrReelMatrixCellController cellController)
+        public BettrReelMatrixCells(BettrReelMatrixCellController cellController, BettrMathController mathController)
         {
+            var reelMatrixDataSummaryTable = mathController.GetBaseGameMechanicDataSummary(cellController.MachineID, cellController.MechanicName, "ReelMatrix");
+            this.RowCount = (int) (double) reelMatrixDataSummaryTable["RowCount"];
+            this.ColumnCount = (int) (double) reelMatrixDataSummaryTable["ColumnCount"];
+            
             // RowCount
-            this.RowCount = (int) (double) cellController.ReelMatrixDataSummaryTable["RowCount"];
+            this.RowCount = cellController.RowCount;
             // ColumnCount
-            this.ColumnCount = (int) (double) cellController.ReelMatrixDataSummaryTable["ColumnCount"];
+            this.ColumnCount = cellController.ColumnCount;
             // Cells
-            this.Cells = cellController.ReelMatrixTile.GetProperty<TilePropertyGameObjectGroup>("Cells");
+            this.Cells = cellController.Tile.GetProperty<TilePropertyGameObjectGroup>("Cells");
         }
         
         public GameObject GetCellGameObject(int row, int column)
@@ -140,36 +206,24 @@ namespace Bettr.Core
     [Serializable]
     public class BettrReelMatrixCellController
     {
-        public TileWithUpdate ReelMatrixTile { get; internal set; }
+        public TileWithUpdate Tile { get; internal set; }
+        public Table TileTable { get; internal set; }
         public BettrReelMatrixCells Cells { get; internal set; }
     
         public string MachineID { get; internal set; }
         public string MachineVariantID { get; internal set; }
         public string MechanicName { get; internal set; }
         
-        // Data Tables
-        public Table ReelMatrixDataSummaryTable { get; internal set; }
-        public Table ReelMatrixDataTable { get; internal set; }
-        public Table ReelMatrixDataMatrixTable { get; internal set; }
-        public Table ReelMatrixDataMatrix2Table { get; internal set; }
-        public Table ReelMatrixDataMatrix3Table { get; internal set; }
-        
-        // State Tables
-        public Table ReelMatrixStateTable { get; internal set; }
-        public Table ReelMatrixSummaryTable { get; internal set; }
-        public Table ReelMatrixTable { get; internal set; }
-        public Table ReelMatrix2Table { get; internal set; }
-        public Table ReelMatrix3Table { get; internal set; }
-        public Table ReelMatrix4Table { get; internal set; }
-        
-        public Table SpinOutcomeTable { get; internal set; }
-        
         public int RowCount { get; internal set; }
         public int ColumnCount { get; internal set; }
         
         public BettrReelMatrixCells BettrReelMatrixCells { get; internal set; }
-        
         public BettrReelMatrixReelSet BettrReelMatrixReelSet { get; internal set; }
+        public BettrReelMatrixSymbolGroupsData BettrReelMatrixSymbolGroupsData { get; internal set; }
+        public BettrReelMatrixSpinState BettrReelMatrixSpinState { get; internal set; }
+        public BettrReelMatrixState BettrReelMatrixState { get; internal set; }
+        public BettrReelMatrixStateSummary BettrReelMatrixStateSummary { get; internal set; }
+        public BettrReelMatrixOutcomes BettrReelMatrixOutcomes { get; internal set; }
         
         // [NonSerialized] private float ReelOutcomeDelay { get; private set; }
         
@@ -180,34 +234,28 @@ namespace Bettr.Core
         
         public BettrReelMatrixCellController(TileWithUpdate reelMatrixTile, BettrUserController userController, BettrMathController mathController)
         {
-            ReelMatrixTile = reelMatrixTile;
+            this.Tile = reelMatrixTile;
+            this.TileTable = BettrMathController.GetGlobalTable(reelMatrixTile.globalTileId);
             BettrUserController = userController;
             BettrMathController = mathController;
             
-            this.MachineID = ReelMatrixTile.GetProperty<string>("MachineID");
-            this.MachineVariantID = ReelMatrixTile.GetProperty<string>("MachineVariantID");
-            this.MechanicName = ReelMatrixTile.GetProperty<string>("MechanicName");
+            this.MachineID = reelMatrixTile.GetProperty<string>("MachineID");
+            this.MachineVariantID = reelMatrixTile.GetProperty<string>("MachineVariantID");
+            this.MechanicName = reelMatrixTile.GetProperty<string>("MechanicName");
             
-            // Data Tables
+            this.BettrReelMatrixCells = new BettrReelMatrixCells(this, BettrMathController);
+            this.RowCount = this.BettrReelMatrixCells.RowCount;
+            this.ColumnCount = this.BettrReelMatrixCells.ColumnCount;
             
-            this.ReelMatrixDataSummaryTable = BettrMathController.GetBaseGameMechanicDataSummary(this.MachineID, this.MechanicName);
-            this.ReelMatrixDataTable = BettrMathController.GetBaseGameMechanicData(this.MachineID, this.MechanicName);
-            this.ReelMatrixDataMatrixTable = BettrMathController.GetBaseGameMechanicDataMatrix(this.MachineID, this.MechanicName, "Symbols");
-            this.ReelMatrixDataMatrix2Table = BettrMathController.GetBaseGameMechanicDataMatrix(2, this.MachineID, this.MechanicName, "SpinProperties");
-            this.ReelMatrixDataMatrix3Table = BettrMathController.GetBaseGameMechanicDataMatrix(3, this.MachineID, this.MechanicName, "LayoutProperties");
-            
-            // State Tables
-            this.ReelMatrixStateTable = BettrMathController.GetBaseGameMechanicSummary(this.MachineID, this.MechanicName);
-            this.ReelMatrixSummaryTable = BettrMathController.GetBaseGameMechanic(this.MachineID, this.MechanicName);
-            this.ReelMatrixTable = BettrMathController.GetBaseGameMechanic(1, this.MachineID, this.MechanicName, "State");
-            this.ReelMatrix2Table = BettrMathController.GetBaseGameMechanic(2, this.MachineID, this.MechanicName, "ColumnState");
-            this.ReelMatrix3Table = BettrMathController.GetBaseGameMechanic(3, this.MachineID, this.MechanicName, "SymbolsState");
-            this.ReelMatrix4Table = BettrMathController.GetBaseGameMechanic(4, this.MachineID, this.MechanicName, "CellMask");
-            
-            this.BettrReelMatrixCells = new BettrReelMatrixCells(this);
             this.BettrReelMatrixReelSet = new BettrReelMatrixReelSet(this);
+            this.BettrReelMatrixSymbolGroupsData = new BettrReelMatrixSymbolGroupsData(this, BettrMathController);
+            this.BettrReelMatrixSpinState = new BettrReelMatrixSpinState(this, BettrMathController);
             
-            this.ReelMatrixDataSummaryTable["BettrReelMatrixCellController"] = this;
+            this.BettrReelMatrixStateSummary = new BettrReelMatrixStateSummary(this, BettrMathController);
+            this.BettrReelMatrixState = new BettrReelMatrixState(this, BettrMathController);
+            this.BettrReelMatrixOutcomes = new BettrReelMatrixOutcomes(this);
+            
+            this.TileTable["BettrReelMatrixCellController"] = this;
         }
         
         public IEnumerator StartEngines()
