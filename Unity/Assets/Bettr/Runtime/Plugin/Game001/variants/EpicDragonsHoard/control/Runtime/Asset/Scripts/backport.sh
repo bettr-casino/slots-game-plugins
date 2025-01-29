@@ -70,7 +70,7 @@ function process_mechanics_dir() {
             mechanic_lower=$(echo "$mechanic" | tr '[:upper:]' '[:lower:]')
     
             # Define the target path for the file
-            target_path="$templates_path/mechanics/$mechanic_lower/scripts/BaseGameMachine${mechanic}.cscript.txt.template"
+            target_path="$templates_path/mechanics/$mechanic_lower/scripts/GameBaseGameMachine${mechanic}.cscript.txt.template"
     
             # Ensure the target directory exists
             mkdir -p "$(dirname "$target_path")"
@@ -94,7 +94,7 @@ function process_mechanics_dir() {
             mechanic_lower=$(echo "$mechanic" | tr '[:upper:]' '[:lower:]')
     
             # Define the target path for the file
-            target_path="$templates_path/mechanics/$mechanic_lower/scripts/BaseGameBackground${mechanic}Mechanic.cscript.txt.template"
+            target_path="$templates_path/mechanics/$mechanic_lower/scripts/GameBaseGameBackground${mechanic}Mechanic.cscript.txt.template"
     
             # Ensure the target directory exists
             mkdir -p "$(dirname "$target_path")"
