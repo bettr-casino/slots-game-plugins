@@ -35,9 +35,9 @@ function process_mechanics_dir() {
               -e "s/${mechanic}/{{mechanicName}}/g" \
               "$file" > "$target_path"
   
-          echo "Processed $filename for GameBaseGameMachine pattern."
+          echo "Processed $filename for Game[0-9]+BaseGameMachine([a-zA-Z]+)Mechanic.cscript.txt pattern."
   
-      # Check for the second pattern: Game<NNN>BaseGameReel{mechanic}Mechanic.cscript.txt
+      # Check for the pattern: Game<NNN>BaseGameReel{mechanic}Mechanic.cscript.txt
       elif [[ "$filename" =~ Game([0-9]+)BaseGameReel([a-zA-Z]+)Mechanic.cscript.txt ]]; then
           game_number="${BASH_REMATCH[1]}"
           mechanic="${BASH_REMATCH[2]}"
@@ -59,7 +59,55 @@ function process_mechanics_dir() {
               -e "s/${mechanic}/{{mechanicName}}/g" \
               "$file" > "$target_path"
   
-          echo "Processed $filename for GameBaseGameReel pattern."
+          echo "Processed $filename for Game([0-9]+)BaseGameReel([a-zA-Z]+)Mechanic.cscript.txt pattern."
+          
+      # Check for the pattern: Game<NNN>BaseGameMachine{mechanic}.cscript.txt
+      elif [[ "$filename" =~ Game([0-9]+)BaseGameMachine([a-zA-Z]+).cscript.txt ]]; then
+            game_number="${BASH_REMATCH[1]}"
+            mechanic="${BASH_REMATCH[2]}"
+            
+            # Convert mechanic to lowercase for the directory path
+            mechanic_lower=$(echo "$mechanic" | tr '[:upper:]' '[:lower:]')
+    
+            # Define the target path for the file
+            target_path="$templates_path/mechanics/$mechanic_lower/scripts/BaseGameMachine${mechanic}.cscript.txt.template"
+    
+            # Ensure the target directory exists
+            mkdir -p "$(dirname "$target_path")"
+    
+            # Copy the file with replacement
+            # Copy the file with multiple replacements
+            sed -e "s/${game}/{{machineName}}/g" \
+                -e "s/${machine_variant}/{{machineVariant}}/g" \
+                -e "s/${experiment_variant}/{{experimentVariant}}/g" \
+                -e "s/${mechanic}/{{mechanicName}}/g" \
+                "$file" > "$target_path"
+    
+            echo "Processed $filename for Game<NNN>BaseGameMachine{mechanic}.cscript.txt pattern."
+            
+      # Check for the pattern: Game<NNN>BaseGameBackground{mechanic}Mechanic.cscript.txt
+      elif [[ "$filename" =~ Game([0-9]+)BaseGameBackground([a-zA-Z]+)Mechanic.cscript.txt ]]; then
+            game_number="${BASH_REMATCH[1]}"
+            mechanic="${BASH_REMATCH[2]}"
+            
+            # Convert mechanic to lowercase for the directory path
+            mechanic_lower=$(echo "$mechanic" | tr '[:upper:]' '[:lower:]')
+    
+            # Define the target path for the file
+            target_path="$templates_path/mechanics/$mechanic_lower/scripts/BaseGameBackground${mechanic}Mechanic.cscript.txt.template"
+    
+            # Ensure the target directory exists
+            mkdir -p "$(dirname "$target_path")"
+    
+            # Copy the file with replacement
+            # Copy the file with multiple replacements
+            sed -e "s/${game}/{{machineName}}/g" \
+                -e "s/${machine_variant}/{{machineVariant}}/g" \
+                -e "s/${experiment_variant}/{{experimentVariant}}/g" \
+                -e "s/${mechanic}/{{mechanicName}}/g" \
+                "$file" > "$target_path"
+    
+            echo "Processed $filename for Game<NNN>BaseGameBackground{mechanic}Mechanic.cscript.txt pattern."
       fi
   done    
 }
