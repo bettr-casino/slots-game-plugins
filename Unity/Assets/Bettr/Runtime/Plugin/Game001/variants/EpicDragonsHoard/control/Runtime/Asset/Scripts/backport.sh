@@ -61,8 +61,8 @@ function process_mechanics_dir() {
   
           echo "Processed $filename for Game([0-9]+)BaseGameReel([a-zA-Z]+)Mechanic.cscript.txt pattern."
           
-      # Check for the pattern: Game<NNN>BaseGameMachine{mechanic}.cscript.txt
-      elif [[ "$filename" =~ Game([0-9]+)BaseGameMachine([a-zA-Z]+).cscript.txt ]]; then
+      # Check for the pattern: Game<NNN>BaseGameMachine{mechanic}Controller.cscript.txt
+      elif [[ "$filename" =~ Game([0-9]+)BaseGameMachine([a-zA-Z]+)Controller.cscript.txt ]]; then
             game_number="${BASH_REMATCH[1]}"
             mechanic="${BASH_REMATCH[2]}"
             
@@ -70,7 +70,7 @@ function process_mechanics_dir() {
             mechanic_lower=$(echo "$mechanic" | tr '[:upper:]' '[:lower:]')
     
             # Define the target path for the file
-            target_path="$templates_path/mechanics/$mechanic_lower/scripts/GameBaseGameMachine${mechanic}.cscript.txt.template"
+            target_path="$templates_path/mechanics/$mechanic_lower/scripts/GameBaseGameMachine${mechanic}Controller.cscript.txt.template"
     
             # Ensure the target directory exists
             mkdir -p "$(dirname "$target_path")"
@@ -83,7 +83,7 @@ function process_mechanics_dir() {
                 -e "s/${mechanic}/{{mechanicName}}/g" \
                 "$file" > "$target_path"
     
-            echo "Processed $filename for Game<NNN>BaseGameMachine{mechanic}.cscript.txt pattern."
+            echo "Processed $filename for Game<NNN>BaseGameMachine{mechanic}Controller.cscript.txt pattern."
             
       # Check for the pattern: Game<NNN>BaseGameBackground{mechanic}Mechanic.cscript.txt
       elif [[ "$filename" =~ Game([0-9]+)BaseGameBackground([a-zA-Z]+)Mechanic.cscript.txt ]]; then
