@@ -1089,9 +1089,10 @@ namespace Bettr.Editor
     {
         private readonly Type _scriptType;
         
-        public MonoBehaviourComponent(string assemblyQualifiedName)
+        public MonoBehaviourComponent(string scriptName)
         {
-            _scriptType = Type.GetType(assemblyQualifiedName);
+            Assembly runtimeAssembly = Assembly.Load("casino.bettr.plugin.Core");
+            _scriptType = runtimeAssembly.GetType(scriptName);
         }
 
         public void AddComponent(GameObject gameObject)

@@ -29,9 +29,20 @@ function {{machineName}}BaseGame{{mechanicName}}Controller:Awake()
 	System.Print("{{machineName}}BaseGame{{mechanicName}}Controller Awake tile id={0}", self.id)
 end
 
-function {{machineName}}BaseGame{{mechanicName}}Controller:StartEngines(machine)
+function {{machineName}}BaseGame{{mechanicName}}Controller:Start()
     series
         do
+            System.Print("{{machineName}}BaseGame{{mechanicName}}Controller Start")
+            System.WaitForFrame(1)
+            self:StartEngines()
+        end
+    end
+end
+
+function {{machineName}}BaseGame{{mechanicName}}Controller:StartEngines()
+    series
+        do
+            System.Print("{{machineName}}BaseGame{{mechanicName}}Controller StartEngines")
             self.Bettr{{mechanicName}}CellController.StartEngines()
         end
     end

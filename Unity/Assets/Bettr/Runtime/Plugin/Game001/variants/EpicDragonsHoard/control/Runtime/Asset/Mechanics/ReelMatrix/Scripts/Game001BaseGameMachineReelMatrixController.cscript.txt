@@ -29,9 +29,20 @@ function Game001BaseGameReelMatrixController:Awake()
 	System.Print("Game001BaseGameReelMatrixController Awake tile id={0}", self.id)
 end
 
-function Game001BaseGameReelMatrixController:StartEngines(machine)
+function Game001BaseGameReelMatrixController:Start()
     series
         do
+            System.Print("Game001BaseGameReelMatrixController Start")
+            System.WaitForFrame(1)
+            self:StartEngines()
+        end
+    end
+end
+
+function Game001BaseGameReelMatrixController:StartEngines()
+    series
+        do
+            System.Print("Game001BaseGameReelMatrixController StartEngines")
             self.BettrReelMatrixCellController.StartEngines()
         end
     end

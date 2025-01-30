@@ -28,15 +28,13 @@ namespace Bettr.Core
             BettrMathController = BettrMathController.Instance;
         }
         
-        private IEnumerator Start()
+        private void Start()
         {
             this.MachineID = ReelMatrixTile.GetProperty<string>("MachineID");
             this.MachineVariantID = ReelMatrixTile.GetProperty<string>("MachineVariantID");
             this.MechanicName = ReelMatrixTile.GetProperty<string>("MechanicName");
             
             this.BettrReelMatrixCellController = new BettrReelMatrixCellController(ReelMatrixTile, BettrUserController, BettrMathController);
-            
-            yield break;
         }
         
     }
@@ -241,9 +239,10 @@ namespace Bettr.Core
         public BettrReelMatrixCellController(TileWithUpdate reelMatrixTile, BettrUserController userController, BettrMathController mathController)
         {
             this.Tile = reelMatrixTile;
-            this.TileTable = BettrMathController.GetGlobalTable(reelMatrixTile.globalTileId);
             BettrUserController = userController;
             BettrMathController = mathController;
+            
+            this.TileTable = BettrMathController.GetGlobalTable(reelMatrixTile.globalTileId);
             
             this.MachineID = reelMatrixTile.GetProperty<string>("MachineID");
             this.MachineVariantID = reelMatrixTile.GetProperty<string>("MachineVariantID");
