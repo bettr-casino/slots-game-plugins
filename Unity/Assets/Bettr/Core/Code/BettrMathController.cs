@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
 using UnityEngine;
@@ -257,6 +258,55 @@ namespace Bettr.Core
             }
             var reelStateTable = (Table) reelTable["Array"];
             return reelStateTable;
+        }
+        
+        public Table GetTableRow(Table table, params string[] kvPairs)
+        {
+            // get the table
+            // find the row where the kvPairs match
+            for (int i = 0; i < table.Length; i++)
+            {
+                var row = (Table) table[i + 1];
+                for (int j = 0; j < kvPairs.Length; j = j + 2)
+                {
+                    var key = kvPairs[j];
+                    var value = kvPairs[j + 1];
+                    if (row[key].ToString() != value)
+                    {
+                        break;
+                    }
+                    if (j == kvPairs.Length - 2)
+                    {
+                        return row;
+                    }
+                }
+            }
+            return null;
+        }
+        
+        public List<Table> GetTableArray(Table table, params string[] kvPairs)
+        {
+            var tableArray = new List<Table>();
+            // get the table
+            // find the row where the kvPairs match
+            for (int i = 0; i < table.Length; i++)
+            {
+                var row = (Table) table[i + 1];
+                for (int j = 0; j < kvPairs.Length; j = j + 2)
+                {
+                    var key = kvPairs[j];
+                    var value = kvPairs[j + 1];
+                    if (row[key].ToString() != value)
+                    {
+                        break;
+                    }
+                    if (j == kvPairs.Length - 2)
+                    {
+                        tableArray.Add(row);
+                    }
+                }
+            }
+            return tableArray;
         }
         
         public int GetTableCount(string tableName, string machineID, string reelID)
