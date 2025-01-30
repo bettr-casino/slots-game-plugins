@@ -1,0 +1,192 @@
+require "math"
+require "Core"
+require "Utils"
+
+Game001BaseGameReelMatrixController = {
+    Config = {
+        Machine = "Game001",
+        Variant = "EpicDragonsHoard",
+        Experiment = "variant1",
+    },
+}
+
+function Game001BaseGameReelMatrixController:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game001BaseGameReelMatrixController:destroy()
+	System.Print("Game001BaseGameReelMatrixController destroy tile id={0}", self.id)
+end
+
+function Game001BaseGameReelMatrixController:OnError(callStack)
+	System.Error("Game001BaseGameReelMatrixController Error CallStack: {0}", callStack)
+end
+
+function Game001BaseGameReelMatrixController:Awake()
+	System.Print("Game001BaseGameReelMatrixController Awake tile id={0}", self.id)
+end
+
+function Game001BaseGameReelMatrixController:Start()
+    series
+        do
+            System.Print("Game001BaseGameReelMatrixController Start")
+            System.WaitForFrame(1)
+            self:StartEngines()
+        end
+    end
+end
+
+function Game001BaseGameReelMatrixController:StartEngines()
+    series
+        do
+            System.Print("Game001BaseGameReelMatrixController StartEngines")
+            self.BettrReelMatrixCellController.StartEngines()
+        end
+    end
+end
+
+function Game001BaseGameReelMatrixController:SpinEngines()
+    self.BettrReelMatrixCellController.SpinEngines()
+end
+
+function Game001BaseGameReelMatrixController:Update()
+    local reelState = Game001BaseGameReelMatrix.ReelMatrix.First
+    local spinState = reelState.SpinState
+    self.ReelSpinStateDispatchTable[spinState](self)    
+end
+
+function Game001BaseGameReelMatrixController:SpinReelSpinStartedRollBack()
+    self.BettrReelMatrixCellController.SpinReelSpinStartedRollBack()
+end
+
+function Game001BaseGameReelMatrixController:SpinReelSpinStartedRollForward()
+    self.BettrReelMatrixCellController.SpinReelSpinStartedRollForward()
+end
+
+function Game001BaseGameReelMatrixController:SpinReelSpinEndingRollBack()    
+    self.BettrReelMatrixCellController.SpinReelSpinEndingRollBack()
+end
+
+function Game001BaseGameReelMatrixController:SpinReelSpinEndingRollForward()
+    self.BettrReelMatrixCellController.SpinReelSpinEndingRollForward()
+end
+
+function Game001BaseGameReelMatrixController:SpinReelReachedOutcomeStopIndex()
+    BettrAudioController.PlayAudioOnce("reelstop")
+    local reelSpinState = Game001BaseGameReelMatrixSpinState[self.ReelID].First
+    reelSpinState.ReelSpinState = "SpinEndingRollForward"
+end
+
+function Game001BaseGameReelMatrixController:SpinReelStopped()
+    local reelCount = Game001BaseGameLayout.ReelCount.First.Value
+    local lastReelID = "Reel" .. reelCount
+    if self.ReelID == lastReelID then
+        Game001BaseGameMachine:OnSpinReelsStopped()
+    end
+    local reelSpinState = Game001BaseGameReelMatrixSpinState[self.ReelID].First
+    reelSpinState.ReelSpinState = "StoppedWaiting"
+end
+
+function Game001BaseGameReelMatrixController:SpinReelStoppedWaiting()    
+end
+
+function Game001BaseGameReelMatrixController:SpinReelWaiting()    
+end
+
+function Game001BaseGameReelMatrixController:SpinReelSpinning()
+    return self.BettrReelMatrixCellController.SpinReelSpinning()    
+end
+
+function Game001BaseGameReelMatrixController:PlaySpinReelSpinEndingRollBackAnimation()
+    series
+        do        
+            local spinEndingRollbackAnimation = Game001BaseGameSpinEndingRollBackAnimation[self.ReelID]
+            
+            if spinEndingRollbackAnimation == nil then
+                return
+            end
+                      
+            if spinEndingRollbackAnimation.First.Counter > 0 then
+                return                
+            end               
+            
+            spinEndingRollbackAnimation.First.Counter = 1 
+                                                       
+            local reelState = Game001BaseGameReelMatrixState[self.ReelID].First
+            local reelSpinState = Game001BaseGameReelMatrixSpinState[self.ReelID].First
+            local reelSymbolsState = Game001BaseGameReelMatrixSymbolsState[self.ReelID].Array
+                        
+            local rollbackAnimationArray = spinEndingRollbackAnimation.Array            
+            
+            local animatorGroupPrefix = "SymbolLandWinAnimatorGroup"
+            
+            for i=1,#rollbackAnimationArray do
+                local rowIndex = rollbackAnimationArray[i].RowIndex
+                self:PlaySymbolAnimation(rowIndex, animatorGroupPrefix, false)
+            end
+        end
+    end
+end
+
+function Game001BaseGameReelMatrixController:PlaySymbolAnimation(rowIndex, animatorGroupPrefix, waitForAnimationComplete)
+    local animationDuration = 0.0
+    series
+        do                    
+            if rowIndex >= 0 then
+                local luaIndex = rowIndex + 1       
+                local animatorGroupProperty = self[animatorGroupPrefix .. luaIndex]
+                local symbolGroupProperty = self["SymbolGroup" .. luaIndex]
+                local currentKey = symbolGroupProperty.CurrentKey
+                local animatorProperty = animatorGroupProperty[currentKey]
+                animatorProperty.waitForAnimationComplete = waitForAnimationComplete
+                -- animationDuration = Core.Animator:PlayAnimatorProperty(currentKey, animatorProperty)
+                animationDuration = BettrVisualsController.PlayAnimatorProperty(animatorProperty)
+            end
+        end
+    end
+    return animationDuration
+end
+
+function Game001BaseGameReelMatrixController:CloneAndOverlayCurrentSymbol(rowIndex)
+    local overlaySymbol = nil
+    series
+        do                    
+            overlaySymbol = self:CloneCurrentSymbol(rowIndex)
+            if overlaySymbol ~= nil then
+                BettrVisualsController.SetLayerRecursively(overlaySymbol, Core.Layers.SLOT_REELS_OVERLAY)
+            end
+        end
+    end
+    return overlaySymbol
+end
+
+function Game001BaseGameReelMatrixController:CloneCurrentSymbol(rowIndex)
+    local clonedSymbol = nil
+    series
+        do                    
+            if rowIndex >= 0 then
+                local luaIndex = rowIndex + 1       
+                local symbolGroupProperty = self["SymbolGroup" .. luaIndex] 
+                clonedSymbol = symbolGroupProperty.CloneCurrent                               
+            end
+        end
+    end
+    return clonedSymbol
+end
+
+Game001BaseGameReelMatrixController.ReelSpinStateDispatchTable = {
+    Waiting = Game001BaseGameReelMatrixController.SpinReelWaiting,
+    Spinning = Game001BaseGameReelMatrixController.SpinReelSpinning,
+    Stopped = Game001BaseGameReelMatrixController.SpinReelStopped,
+    StoppedWaiting = Game001BaseGameReelMatrixController.SpinReelStoppedWaiting,
+    ReachedOutcomeStopIndex = Game001BaseGameReelMatrixController.SpinReelReachedOutcomeStopIndex,
+    SpinStartedRollBack = Game001BaseGameReelMatrixController.SpinReelSpinStartedRollBack,
+    SpinStartedRollForward = Game001BaseGameReelMatrixController.SpinReelSpinStartedRollForward,
+    SpinEndingRollForward = Game001BaseGameReelMatrixController.SpinReelSpinEndingRollForward,
+    SpinEndingRollBack = Game001BaseGameReelMatrixController.SpinReelSpinEndingRollBack
+}
+
+return Game001BaseGameReelMatrixController:new()

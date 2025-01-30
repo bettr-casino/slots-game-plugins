@@ -41,6 +41,7 @@ function Game001BaseGameMachineReelMatrixMechanic:OnBaseGameSpinCompleted(machin
         do
             System.Print("Game001BaseGameMachineReelMatrixMechanic:Game001BaseGameState.SpinState.First.State={0}", Game001BaseGameState.SpinState.First.State)
             Game001BaseGameState.SpinState.First.State = "Waiting"
+            System.WaitForSeconds(1)
             local machineParent = machine.MachineParent
             local mechanicsPrefab = self.State.MechanicsPrefab
             machineParent.SetActive(false)
