@@ -439,36 +439,24 @@ namespace Bettr.Core
     
     public class BettrReelMatrixReelSet
     {
-        public Dictionary<string, BettrReelMatrixReelStrip> BettrReelMatrixReelStrip { get; internal set; }
-        
-        private int RowIndex { get; set; }
-        private int ColumnIndex { get; set; }
-        
+        private BettrReelMatrixReelStrip ReelStrip { get; set; }
+        private string pk { get; set; }
         public BettrReelMatrixReelSet(BettrReelMatrixCellController cellController, BettrMathController mathController)
         {
-            this.BettrReelMatrixReelStrip = new Dictionary<string, BettrReelMatrixReelStrip>();
+            this.pk = $"ReelStrip";
             
-            var pk = $"Row{cellController.RowIndex}Cell{cellController.ColumnIndex}";
             var reelTable = mathController.GetBaseGameMechanicDataMatrix(cellController.MachineID, cellController.MechanicName, pk);
-            var reelStrip = new BettrReelMatrixReelStrip(reelTable, pk);
-            var key = reelStrip.CellId;
-            BettrReelMatrixReelStrip[key] = reelStrip;
-            
-            this.RowIndex = cellController.RowIndex;
-            this.ColumnIndex = cellController.ColumnIndex;
+            ReelStrip = new BettrReelMatrixReelStrip(reelTable, pk);            
         }
         
         public int GetReelSymbolCount()
         {
-            var key = $"Row{RowIndex}Cell{ColumnIndex}";
-            return (int) (double) BettrReelMatrixReelStrip[key].ReelSymbolCount;
+            return (int) (double) ReelStrip.ReelSymbolCount;
         }
         
         public string[] GetReelSymbols()
         {
-            var key = $"Row{RowIndex}Cell{ColumnIndex}";
-            var reelStrip = BettrReelMatrixReelStrip[key];
-            return reelStrip.ReelSymbols;
+            return ReelStrip.ReelSymbols;
         }
         
         public string GetReelSymbol(int symbolIndex)
@@ -480,7 +468,6 @@ namespace Bettr.Core
 
     public class BettrReelMatrixReelStrip
     {
-        public string CellId { get; internal set; }
         public Table ReelTable { get; internal set; }
         public int ReelSymbolCount { get; internal set; }
         public string[] ReelSymbols { get; internal set; }
@@ -488,7 +475,6 @@ namespace Bettr.Core
         public int[] ReelWeights { get; internal set; }
         public BettrReelMatrixReelStrip(Table reelTable, string cellId)
         {
-            CellId = cellId;
             ReelTable = reelTable;
             
             ReelSymbolCount = reelTable.Length;
