@@ -10,7 +10,7 @@ namespace Bettr.Core
     [Serializable]
     public class BettrReelMatrixController : MonoBehaviour 
     {
-        private TileWithUpdate Tile { get; set; }
+        private Tile Tile { get; set; }
         private Table TileTable { get; set; }
         
         private string MachineID { get; set; }
@@ -28,7 +28,7 @@ namespace Bettr.Core
 
         private void Awake()
         {
-            Tile = GetComponent<TileWithUpdate>();
+            Tile = GetComponent<Tile>();
             BettrUserController = BettrUserController.Instance;
             BettrMathController = BettrMathController.Instance;
         }
@@ -260,23 +260,16 @@ namespace Bettr.Core
     
     public class BettrReelStripSymbolsForSpins
     {
-        public Dictionary<string, BettrReelStripSymbolsForSpin> ReelStripSymbolsForThisSpin { get; internal set; }
-        private int RowIndex { get; set; }
-        private int ColumnIndex { get; set; }
+        public BettrReelStripSymbolsForSpin ReelStripSymbolsForThisSpin { get; internal set; }
         private BettrReelMatrixReelSet ReelMatrixReelSet { get; set; }
         public BettrReelStripSymbolsForSpins(BettrReelMatrixCellController cellController)
         {
-            var key = $"Row{RowIndex}Cell{ColumnIndex}";
-            ReelStripSymbolsForThisSpin[key] = new BettrReelStripSymbolsForSpin();
+            ReelStripSymbolsForThisSpin = new BettrReelStripSymbolsForSpin();
             ReelMatrixReelSet = cellController.BettrReelMatrixReelSet;
-            
-            this.RowIndex = cellController.RowIndex;
-            this.ColumnIndex = cellController.ColumnIndex;
         }
         public void Reset()
         {
-            var key = $"Row{RowIndex}Cell{ColumnIndex}";
-            ReelStripSymbolsForThisSpin[key].Reset(ReelMatrixReelSet.GetReelSymbols());
+            ReelStripSymbolsForThisSpin.Reset(ReelMatrixReelSet.GetReelSymbols());
         }
     }
 
@@ -410,7 +403,7 @@ namespace Bettr.Core
         {
             var key = $"Row{RowIndex}Col{ColumnIndex}";
             var row = MathController.GetTableRow(SpinStateTable, "Cell", key);
-            var oldPropValue = (bool) row[propKey];
+            var oldPropValue = row[propKey];
             row[propKey] = propValue;
         }
     }
@@ -514,7 +507,7 @@ namespace Bettr.Core
     [Serializable]
     public class BettrReelMatrixCellController : MonoBehaviour
     {
-        private TileWithUpdate Tile { get; set; }
+        private Tile Tile { get; set; }
         private Table TileTable { get; set; }
         public string MachineID { get; internal set; }
         public string MachineVariantID { get; internal set; }
@@ -543,7 +536,7 @@ namespace Bettr.Core
         
         private BettrMathController BettrMathController { get; set; }
         
-        public void Initialize(TileWithUpdate tile, Table tileTable, BettrUserController userController, BettrMathController mathController, string machineID, string machineVariantID, string mechanicName, int rowIndex, int columnIndex)
+        public void Initialize(Tile tile, Table tileTable, BettrUserController userController, BettrMathController mathController, string machineID, string machineVariantID, string mechanicName, int rowIndex, int columnIndex)
         {
             this.BettrUserController = userController;
             this.BettrMathController = mathController;
@@ -569,6 +562,8 @@ namespace Bettr.Core
             this.BettrReelMatrixStateSummary = new BettrReelMatrixStateSummary(this, BettrMathController);
             this.BettrReelMatrixState = new BettrReelMatrixState(this, BettrMathController);
             this.BettrReelMatrixOutcomes = new BettrReelMatrixOutcomes(this, BettrMathController);
+
+            this.BettrReelStripSymbolsForSpins = new BettrReelStripSymbolsForSpins(this);
         }
 
         private void OnDestroy()
@@ -651,10 +646,9 @@ namespace Bettr.Core
     
         public string ReplaceSymbolForSpin(int zeroIndex, string newSymbol)
         {
-            var key = $"Row{RowIndex}Cell{ColumnIndex}";
             int reelSymbolCount = this.BettrReelMatrixReelSet.GetReelSymbolCount();
             int oneIndexed = 1 +zeroIndex % reelSymbolCount;
-            var reelStripSymbols = BettrReelStripSymbolsForSpins.ReelStripSymbolsForThisSpin[key];
+            var reelStripSymbols = BettrReelStripSymbolsForSpins.ReelStripSymbolsForThisSpin;
             var oldSymbol = reelStripSymbols.ReelSymbolsForThisSpin[oneIndexed];
             reelStripSymbols.ReelSymbolsForThisSpin[oneIndexed] = newSymbol;
 
