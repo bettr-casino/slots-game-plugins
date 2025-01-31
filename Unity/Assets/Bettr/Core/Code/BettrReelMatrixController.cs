@@ -368,10 +368,10 @@ namespace Bettr.Core
             RowIndex = cellController.RowIndex;
         }
         
-        public T GetProperty<T>(string propKey)
+        public T GetProperty<T>(string propKey, int symbolIndex)
         {
             var key = $"Row{RowIndex}";
-            var row = MathController.GetTableRow(SymbolGroupsTable, "Row", key);
+            var row = MathController.GetTableRow(SymbolGroupsTable, "Row", key, "SymbolGroup", $"SymbolGroup{symbolIndex}");
             var propValue = row[propKey];
             if (propValue is T value) { return value; }
             // Handle special case: double to int conversion
@@ -646,7 +646,7 @@ namespace Bettr.Core
             for (int symbolIndex = 1; symbolIndex <= symbolCount; symbolIndex++)
             {
                 var symbolGroupsTable = this.BettrReelMatrixSymbolGroupsData;
-                var reelPosition = symbolGroupsTable.GetProperty<int>("ReelPosition");
+                var reelPosition = symbolGroupsTable.GetProperty<int>("ReelPosition", symbolIndex);
                 int symbolStopIndex = 1 + (reelSymbolCount + reelStopIndex + reelPosition) % reelSymbolCount;
                 var reelSymbol = reelSymbols[symbolIndex]; // 1 indexed
                 var symbolGroupKey = $"Row{RowIndex}Col{ColumnIndex}SymbolGroup{symbolIndex}";
@@ -883,7 +883,7 @@ namespace Bettr.Core
         // Dispatch Handler
         public void SpinReelSpinning()
         {
-            var speed = BettrUserController.UserInSlamStopMode ? 4 : 0.1f;
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 1;
             
             var spinState = this.BettrReelMatrixSpinState;
             var layoutProperties = this.BettrReelMatrixLayoutPropertiesData;
@@ -978,11 +978,11 @@ namespace Bettr.Core
                 return;
             }
             
-            var rowVisible = symbolGroupsTable.GetProperty<bool>("Visible");
+            var rowVisible = symbolGroupsTable.GetProperty<bool>("Visible", symbolIndex);
             var reelStopIndex = spinStateTable.GetProperty<int>("ReelStopIndex");
             var reelSymbolCount = reelSetTable.GetReelSymbolCount();
 
-            var reelPosition = symbolGroupsTable.GetProperty<int>("ReelPosition");
+            var reelPosition = symbolGroupsTable.GetProperty<int>("ReelPosition", symbolIndex);
 
             var symbolStopIndex = 1 + (reelSymbolCount + reelStopIndex + reelPosition) % reelSymbolCount;
             
@@ -1153,7 +1153,7 @@ namespace Bettr.Core
             Vector3 localPosition = symbolProperty.gameObject.transform.localPosition;
             
             // Get symbol's position and other relevant values from the reel state
-            float symbolPosition = (float) symbolGroupsDataTable.GetProperty<double>("SymbolPosition");
+            float symbolPosition = (float) symbolGroupsDataTable.GetProperty<double>("SymbolPosition", symbolIndex);
             float verticalSpacing = (float) layoutPropertiesDataTable.GetProperty<double>("SymbolVerticalSpacing");
             float symbolOffsetY = (float) layoutPropertiesDataTable.GetProperty<double>("SymbolOffsetY");
             
