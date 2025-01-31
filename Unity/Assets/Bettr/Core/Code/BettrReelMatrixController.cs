@@ -883,7 +883,7 @@ namespace Bettr.Core
         // Dispatch Handler
         public void SpinReelSpinning()
         {
-            var speed = BettrUserController.UserInSlamStopMode ? 4 : 1;
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 0.001f;
             
             var spinState = this.BettrReelMatrixSpinState;
             var layoutProperties = this.BettrReelMatrixLayoutPropertiesData;
@@ -986,7 +986,7 @@ namespace Bettr.Core
 
             var symbolStopIndex = 1 + (reelSymbolCount + reelStopIndex + reelPosition) % reelSymbolCount;
             
-            var reelSymbol = reelSetTable.GetReelSymbol(symbolIndex);
+            var reelSymbol = reelSetTable.GetReelSymbol(symbolStopIndex);
             
             var symbolGroupProperty = GetSymbolGroupProperty(symbolIndex);
 
