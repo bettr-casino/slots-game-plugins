@@ -284,29 +284,31 @@ namespace Bettr.Core
             return null;
         }
         
-        public List<Table> GetTableArray(Table table, params string[] kvPairs)
+        public void SetTableRow<T>(Table table, string key, T value, params string[] kvPairs)
         {
-            var tableArray = new List<Table>();
             // get the table
             // find the row where the kvPairs match
+            var found = false;
             for (int i = 0; i < table.Length; i++)
             {
+                if (found) break;
                 var row = (Table) table[i + 1];
                 for (int j = 0; j < kvPairs.Length; j = j + 2)
                 {
-                    var key = kvPairs[j];
-                    var value = kvPairs[j + 1];
-                    if (row[key].ToString() != value)
+                    var rowKey = kvPairs[j];
+                    var rowValue = kvPairs[j + 1];
+                    if (row[rowKey].ToString() != rowValue)
                     {
                         break;
                     }
                     if (j == kvPairs.Length - 2)
                     {
-                        tableArray.Add(row);
+                        row[key] = value;
+                        found = true;
+                        break;
                     }
                 }
             }
-            return tableArray;
         }
         
         public int GetTableCount(string tableName, string machineID, string reelID)

@@ -227,7 +227,7 @@ function {{machineName}}BaseGameMachineCascadingReelsMechanic:SymbolRemovalActio
     local reel = _G["{{machineName}}BaseGame" .. reelID]
     local luaRowIndex = rowIndex + 1
     local symbolGroupProperty = reel["SymbolGroup" .. luaRowIndex]
-    reel.BettrReelStripController.SymbolRemovalAction(symbolGroupProperty)
+    reel.BettrReelController.SymbolRemovalAction(symbolGroupProperty)
 end
 
 function {{machineName}}BaseGameMachineCascadingReelsMechanic:SymbolCascadeActions(cascadeMatrix, cascadeMatrixCount, cascadeAction)
@@ -248,7 +248,7 @@ function {{machineName}}BaseGameMachineCascadingReelsMechanic:SymbolCascadeActio
             local reel = _G["{{machineName}}BaseGame" .. reelID]
             local symbolGroupProperty = reel["SymbolGroup" .. luaRowIndex]
             symbolGroupProperty.Current.SetActive(true)
-            reel.BettrReelStripController.SymbolCascadeAction(luaRowIndex, cascadeDistance, cascadeSymbol)
+            reel.BettrReelController.SymbolCascadeAction(luaRowIndex, cascadeDistance, cascadeSymbol)
         end
     end
 end

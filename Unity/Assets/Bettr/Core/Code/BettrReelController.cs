@@ -78,7 +78,7 @@ namespace Bettr.Core
             this._undoCompleted = false;
         }
 
-        internal void Undo(BettrReelStripController reelController)
+        internal void Undo(BettrReelController reelController)
         {
             if (!_undoCompleted)
             {
@@ -99,7 +99,7 @@ namespace Bettr.Core
             this._undoCompleted = false;
         }
 
-        internal void Undo(BettrReelStripController reelController)
+        internal void Undo(BettrReelController reelController)
         {
             if (!_undoCompleted)
             {
@@ -123,8 +123,23 @@ namespace Bettr.Core
 
         [NonSerialized] private BettrUserController BettrUserController;
         [NonSerialized] private BettrMathController BettrMathController;
-
-        internal BettrReelStripController BettrReelStripController { get; private set; }
+        
+        [NonSerialized] private ReelStripSwapInSymbolsCommand _reelStripSwapInSymbolsCommand;
+        [NonSerialized] private ReelStripSwapInSpinOutcomeTableCommand _reelStripSwapInSpinOutcomeTableCommand;
+        
+        public Table ReelTable { get; internal set; }
+        public Table ReelStateTable { get; internal set; }
+        public Table ReelSpinStateTable { get; internal set; }
+        public Table SpinOutcomeTable { get; internal set; }
+        public Table ReelSymbolsStateTable { get; internal set; }
+        public Table ReelSymbolsTable { get; internal set; }
+        
+        // TODO: FIXME move this to ReelStateTable
+        [NonSerialized] private bool ShouldSpliceReel;
+        
+        public List<string> ReelStripSymbolsForThisSpin { get; set; }
+        
+        public static ReelStripOutcomeDelay[] ReelOutcomeDelays { get; private set; }
 
         private void Awake()
         {
@@ -142,50 +157,6 @@ namespace Bettr.Core
             this.MachineVariantID = ReelTile.GetProperty<string>("MachineVariantID");
             var reelTable = BettrMathController.GetGlobalTable(ReelTile.globalTileId);
             var reelStateTable = BettrMathController.GetTableFirst("BaseGameReelState", this.MachineID, this.ReelID);
-            
-            this.BettrReelStripController = new BettrReelStripController(ReelTile, BettrUserController, BettrMathController);
-            
-            yield break;
-        }
-        
-    }
-    
-    [Serializable]
-    public class BettrReelStripController
-    {
-        [NonSerialized] private TileWithUpdate ReelTile;
-        [NonSerialized] private GameObject ReelGo;
-
-        [NonSerialized] private string ReelID;
-        [NonSerialized] private int ReelIndex;
-        [NonSerialized] private string MachineID;
-        [NonSerialized] private string MachineVariantID;
-        
-        [NonSerialized] private ReelStripSwapInSymbolsCommand _reelStripSwapInSymbolsCommand;
-        [NonSerialized] private ReelStripSwapInSpinOutcomeTableCommand _reelStripSwapInSpinOutcomeTableCommand;
-        
-        public Table ReelTable { get; internal set; }
-        public Table ReelStateTable { get; internal set; }
-        public Table ReelSpinStateTable { get; internal set; }
-        public Table SpinOutcomeTable { get; internal set; }
-        public Table ReelSymbolsStateTable { get; internal set; }
-        public Table ReelSymbolsTable { get; internal set; }
-        
-        // TODO: FIXME move this to ReelStateTable
-        [NonSerialized] private bool ShouldSpliceReel;
-        
-        [NonSerialized] private BettrUserController BettrUserController;
-        [NonSerialized] private BettrMathController BettrMathController;
-        
-        public List<string> ReelStripSymbolsForThisSpin { get; set; }
-        
-        public static ReelStripOutcomeDelay[] ReelOutcomeDelays { get; private set; }
-        
-        public BettrReelStripController(TileWithUpdate reelTile, BettrUserController userController, BettrMathController mathController)
-        {
-            ReelTile = reelTile;
-            BettrUserController = userController;
-            BettrMathController = mathController;
             
             var totalSize = 32;
             ReelOutcomeDelays = new ReelStripOutcomeDelay[totalSize];
@@ -210,7 +181,9 @@ namespace Bettr.Core
             this.ReelSymbolsStateTable = BettrMathController.GetTableArray("BaseGameReelSymbolsState", this.MachineID, this.ReelID);
             this.ReelSymbolsTable = BettrMathController.GetTableArray("BaseGameReelSet", this.MachineID, this.ReelID);    
             
-            this.ReelTable["BettrReelStripController"] = this;
+            this.ReelTable["BettrReelController"] = this;
+            
+            yield break;
         }
         
         public IEnumerator StartEngines()

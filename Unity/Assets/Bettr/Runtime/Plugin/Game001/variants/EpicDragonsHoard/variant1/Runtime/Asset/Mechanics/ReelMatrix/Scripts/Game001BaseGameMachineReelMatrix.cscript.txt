@@ -33,7 +33,7 @@ end
 function Game001BaseGameReelMatrix:StartEngines(machine)
     series
         do
-            self.BettrReelMatrixCellController.StartEngines()
+            self.BettrReelMatrixController.StartEngines()
             machine.Mechanics:StartCellEngines(self, machine)                          
         end
     end
@@ -42,7 +42,7 @@ end
 function Game001BaseGameReelMatrix:OnOutcomeReceived()
     series
         do
-            self.BettrReelMatrixCellController.OnOutcomeReceived()
+            self.BettrReelMatrixController.OnOutcomeReceived()
             self.Mechanics:OnOutcomeReceived(self)
         end
     end
@@ -57,7 +57,7 @@ function Game001BaseGameReelMatrix:OnApplyOutcomeReceived()
 end
 
 function Game001BaseGameReelMatrix:SpinEngines()
-    self.BettrReelMatrixCellController.SpinEngines()
+    self.BettrReelMatrixController.SpinEngines()
     self.Mechanics.SpinEngines(self)
 end
 
@@ -73,22 +73,22 @@ function Game001BaseGameReelMatrix:Update()
 end
 
 function Game001BaseGameReelMatrix:SpinReelSpinStartedRollBack()
-    self.BettrReelMatrixCellController.SpinReelSpinStartedRollBack()
+    self.BettrReelMatrixController.SpinReelSpinStartedRollBack()
     self.Mechanics:SpinReelSpinStartedRollBack(self)    
 end
 
 function Game001BaseGameReelMatrix:SpinReelSpinStartedRollForward()
-    self.BettrReelMatrixCellController.SpinReelSpinStartedRollForward()
+    self.BettrReelMatrixController.SpinReelSpinStartedRollForward()
     self.Mechanics:SpinReelSpinStartedRollForward(self)    
 end
 
 function Game001BaseGameReelMatrix:SpinReelSpinEndingRollBack()    
-    self.BettrReelMatrixCellController.SpinReelSpinEndingRollBack()
+    self.BettrReelMatrixController.SpinReelSpinEndingRollBack()
     self.Mechanics:SpinReelSpinEndingRollBack(self)    
 end
 
 function Game001BaseGameReelMatrix:SpinReelSpinEndingRollForward()
-    self.BettrReelMatrixCellController.SpinReelSpinEndingRollForward()
+    self.BettrReelMatrixController.SpinReelSpinEndingRollForward()
     self.Mechanics:SpinReelSpinEndingRollForward(self)    
 end
 
@@ -117,7 +117,7 @@ function Game001BaseGameReelMatrix:SpinReelWaiting()
 end
 
 function Game001BaseGameReelMatrix:SpinReelSpinning()
-    return self.BettrReelMatrixCellController.SpinReelSpinning()    
+    return self.BettrReelMatrixController.SpinReelSpinning()    
 end
 
 function Game001BaseGameReelMatrix:PlaySpinReelSpinEndingRollBackAnimation()
