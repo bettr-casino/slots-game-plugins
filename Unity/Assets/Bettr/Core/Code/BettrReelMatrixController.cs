@@ -705,7 +705,7 @@ namespace Bettr.Core
             
             var slideDistanceThresholdInSymbolUnits = (float) layoutProperties.GetProperty<double>("SpinStartedRollBackDistanceInSymbolUnits");
             
-            spinState.SetProperty<double>("SpinSpeedInSymbolUnitsPerSecond", layoutProperties.GetProperty<double>("SpinStartedRollBackSpeedInSymbolUnitsPerSecond") * speed);
+            spinState.SetProperty<double>("SpeedInSymbolUnitsPerSecond", layoutProperties.GetProperty<double>("SpinStartedRollBackSpeedInSymbolUnitsPerSecond") * speed);
             var reelSpinDirection = spinState.GetProperty<string>("ReelSpinDirection");
             var spinDirectionIsDown = reelSpinDirection == "Down";
             float slideDistanceInSymbolUnits = CalculateSlideDistanceInSymbolUnits();
@@ -741,7 +741,7 @@ namespace Bettr.Core
             var spinState = this.BettrReelMatrixSpinState;
             var layoutProperties = this.BettrReelMatrixLayoutPropertiesData;
             
-            spinState.SetProperty<double>("SpinSpeedInSymbolUnitsPerSecond", layoutProperties.GetProperty<double>("SpinStartedRollForwardSpeedInSymbolUnitsPerSecond") * speed);
+            spinState.SetProperty<double>("SpeedInSymbolUnitsPerSecond", layoutProperties.GetProperty<double>("SpinStartedRollForwardSpeedInSymbolUnitsPerSecond") * speed);
                     
             var reelSpinDirection = spinState.GetProperty<string>("ReelSpinDirection");
             var spinDirectionIsDown = reelSpinDirection == "Down";
@@ -782,7 +782,7 @@ namespace Bettr.Core
             var layoutProperties = this.BettrReelMatrixLayoutPropertiesData;
             
             // loop over the RowCount and ColumnCount
-            spinState.SetProperty<double>("SpinSpeedInSymbolUnitsPerSecond", layoutProperties.GetProperty<double>("SpinEndingRollBackSpeedInSymbolUnitsPerSecond") * speed);
+            spinState.SetProperty<double>("SpeedInSymbolUnitsPerSecond", layoutProperties.GetProperty<double>("SpinEndingRollBackSpeedInSymbolUnitsPerSecond") * speed);
             
             var reelSpinDirection = spinState.GetProperty<string>("ReelSpinDirection");
             var spinDirectionIsDown = reelSpinDirection == "Down";
@@ -823,7 +823,7 @@ namespace Bettr.Core
             var slideDistanceThresholdInSymbolUnits = (float) layoutProperties.GetProperty<double>("SpinEndingRollForwardDistanceInSymbolUnits");
             
             // loop over the RowCount and ColumnCount
-            spinState.SetProperty<double>("SpinSpeedInSymbolUnitsPerSecond", layoutProperties.GetProperty<double>("SpinEndingRollForwardSpeedInSymbolUnitsPerSecond") * speed);
+            spinState.SetProperty<double>("SpeedInSymbolUnitsPerSecond", layoutProperties.GetProperty<double>("SpinEndingRollForwardSpeedInSymbolUnitsPerSecond") * speed);
             var reelSpinDirection = spinState.GetProperty<string>("ReelSpinDirection");
             var spinDirectionIsDown = reelSpinDirection == "Down";
                     
@@ -883,7 +883,7 @@ namespace Bettr.Core
         // Dispatch Handler
         public void SpinReelSpinning()
         {
-            var speed = BettrUserController.UserInSlamStopMode ? 4 : 4;
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 0.1f;
             
             var spinState = this.BettrReelMatrixSpinState;
             var layoutProperties = this.BettrReelMatrixLayoutPropertiesData;
@@ -891,7 +891,7 @@ namespace Bettr.Core
             var slideDistanceThresholdInSymbolUnits = (float) layoutProperties.GetProperty<double>("SpinEndingRollForwardDistanceInSymbolUnits");
             
             // loop over the RowCount and ColumnCount
-            spinState.SetProperty<double>("SpinSpeedInSymbolUnitsPerSecond", layoutProperties.GetProperty<double>("SpinSpeedInSymbolUnitsPerSecond") * speed);
+            spinState.SetProperty<double>("SpeedInSymbolUnitsPerSecond", layoutProperties.GetProperty<double>("SpinSpeedInSymbolUnitsPerSecond") * speed);
                     
             float slideDistanceInSymbolUnits = AdvanceReel();
             SlideReelSymbols(slideDistanceInSymbolUnits);
@@ -901,10 +901,10 @@ namespace Bettr.Core
         {
             // Unity's Time.deltaTime provides the duration of the last frame in seconds
             float frameDurationInSeconds = Time.deltaTime;
-            var layoutProperties = this.BettrReelMatrixLayoutPropertiesData;
+            var layoutPropertiesData = this.BettrReelMatrixLayoutPropertiesData;
             var spinState = this.BettrReelMatrixSpinState;
             // Get the speed in symbol units per second from reelSpinState
-            float speedInSymbolUnits = (float) layoutProperties.GetProperty<double>("SpinSpeedInSymbolUnitsPerSecond");
+            float speedInSymbolUnits = (float) spinState.GetProperty<double>("SpeedInSymbolUnitsPerSecond");
             // Calculate distance traveled in this frame
             float distanceInSymbolUnits = speedInSymbolUnits * frameDurationInSeconds;
             // Check spin direction
@@ -1005,12 +1005,13 @@ namespace Bettr.Core
         public void UpdateReelStopIndexes()
         {
             var spinState = this.BettrReelMatrixSpinState;
+            var layoutPropertiesData = this.BettrReelMatrixLayoutPropertiesData;
             var reelMatrix = this.BettrReelMatrixReelSet;
             // Get the symbol count from reelState
             var reelSymbolCount = reelMatrix.GetReelSymbolCount();
             // Get the current stop index and advance offset
-            var reelStopIndex = this.BettrReelMatrixSpinState.GetProperty<int>("ReelStopIndex");            
-            var reelStopIndexAdvanceOffset = spinState.GetProperty<int>("ReelStopIndexAdvanceOffset");
+            var reelStopIndex = spinState.GetProperty<int>("ReelStopIndex");            
+            var reelStopIndexAdvanceOffset = layoutPropertiesData.GetProperty<int>("ReelStopIndexAdvanceOffset");
             // Update the reel stop index
             reelStopIndex += reelStopIndexAdvanceOffset;
             // Wrap the stop index to keep it within bounds using modulus
@@ -1023,6 +1024,7 @@ namespace Bettr.Core
         {
             var spinState = this.BettrReelMatrixSpinState;
             var reelMatrix = this.BettrReelMatrixReelSet;
+            var layoutPropertiesData = this.BettrReelMatrixLayoutPropertiesData;
             
             // Check if the outcome has been received
             if (!spinState.GetProperty<bool>("OutcomeReceived"))
@@ -1037,8 +1039,8 @@ namespace Bettr.Core
             
             // // Get the current stop index and outcome-related values
             var reelSymbolCount = reelMatrix.GetReelSymbolCount();
-            var reelStopIndex = this.BettrReelMatrixSpinState.GetProperty<int>("ReelStopIndex");
-            var reelStopIndexAdvanceOffset = spinState.GetProperty<int>("ReelStopIndexAdvanceOffset");
+            var reelStopIndex = spinState.GetProperty<int>("ReelStopIndex");
+            var reelStopIndexAdvanceOffset = layoutPropertiesData.GetProperty<int>("ReelStopIndexAdvanceOffset");
             
             // Adjust the stop index
             reelStopIndex -= reelStopIndexAdvanceOffset;
