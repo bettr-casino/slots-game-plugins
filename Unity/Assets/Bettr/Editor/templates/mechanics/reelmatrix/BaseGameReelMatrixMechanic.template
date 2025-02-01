@@ -203,7 +203,34 @@
                                       "Child": {
                                         "Name": "Pivot",
                                         "Layer": "SLOT_REELS",
-                                        "Children": [
+                                        "Children": [                                        
+                                            {
+                                                "Name": "ValueText",
+                                                "Id": "ValueText",
+                                                "Layer": "SLOT_REELS",
+                                                "Active": false,
+                                                "Components": [
+                                                  {
+                                                      "ComponentType": "RectTransform",
+                                                      "Rect":
+                                                      {
+                                                          "X": 0,
+                                                          "Y": 0,
+                                                          "Width": 10,
+                                                          "Height": 1.5
+                                                      }
+                                                  },
+                                                  {
+                                                      "ComponentType": "TextMeshPro",
+                                                      "Text": "0",
+                                                      "Font": "Roboto-Bold SDF",
+                                                      "FontSize": 4,
+                                                      "HorizontalAlignment": "Center",
+                                                      "VerticalAlignment": "Middle",
+                                                      "Color": "#FFFF00"
+                                                  }
+                                                ]
+                                          },                                        
                                           {
                                             "Name": "Quad",
                                             "Layer": "SLOT_REELS",
@@ -214,7 +241,7 @@
                                             "PrimitiveTexture": "ReelMatrixSymbol-{{symbolKey}}",
                                             "PrimitiveTextureCreate": true,
                                             "PrimitiveTextureSource": "default.png",
-                                            "PrimitiveTextureForceReplace": false,
+                                            "PrimitiveTextureForceReplace": true,
                                             "PrimitiveAlpha": 0.7,
                                             "ShaderProperties": {
                                                 "_StencilRef": {{ (columnIndex - 1) * rowCount + (rowIndex - 1) + 1}}
@@ -237,4 +264,4 @@
 {{ if !for.last }},{{ end }}{{ end }}
        ]
   }
-}
+}               
