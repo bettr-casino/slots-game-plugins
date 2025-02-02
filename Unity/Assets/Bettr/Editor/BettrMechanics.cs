@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Bettr.Editor.generators;
+using CrayonScript.Interpreter;
 using Unity.Plastic.Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
@@ -244,36 +245,43 @@ namespace Bettr.Editor
             BettrMaterialGenerator.MachineVariant = machineVariant;
             
             var dataSummary = BettrMenu.GetTable($"{machineName}BaseGameReelMatrixDataSummary");
-            var rowCount = BettrMenu.GetTableValue<int>(dataSummary, "ReelMatrix", "RowCount", 0);
             var columnCount = BettrMenu.GetTableValue<int>(dataSummary, "ReelMatrix", "ColumnCount", 0);
             
             var data = BettrMenu.GetTable($"{machineName}BaseGameReelMatrixData");
-            var topSymbolCount = BettrMenu.GetTableValue<int>(data, "LayoutProperties", "TopSymbolCount", 0);
-            var bottomSymbolOffset = BettrMenu.GetTableValue<int>(data, "LayoutProperties", "BottomSymbolCount", 0);
-            var visibleSymbolOffset = BettrMenu.GetTableValue<int>(data, "LayoutProperties", "VisibleSymbolCount", 0);
+            var rowCounts = new int[columnCount];
+            for (int i = 0; i < columnCount; i++)
+            {
+                var rowCount = BettrMenu.GetTableValue<int, int>(data, $"ReelMatrix", "ColumnIndex", i, "RowCount", 0);
+                rowCounts[i] = (int) rowCount;
+            }
+            
+            var data2 = BettrMenu.GetTable($"{machineName}BaseGameReelMatrixData2");
+            var topSymbolCount = BettrMenu.GetTableValue<int>(data2, "LayoutProperties", "TopSymbolCount", 0);
+            var bottomSymbolOffset = BettrMenu.GetTableValue<int>(data2, "LayoutProperties", "BottomSymbolCount", 0);
+            var visibleSymbolOffset = BettrMenu.GetTableValue<int>(data2, "LayoutProperties", "VisibleSymbolCount", 0);
 
             var totalSymbolCount = topSymbolCount + bottomSymbolOffset + visibleSymbolOffset;
 
-            var symbolScaleX = BettrMenu.GetTableValue<int>(data, "LayoutProperties", "SymbolScaleX", 1);
-            var symbolScaleY = BettrMenu.GetTableValue<int>(data, "LayoutProperties", "SymbolScaleY", 1);
-            var symbolOffsetY = BettrMenu.GetTableValue<float>(data, "LayoutProperties", "SymbolOffsetY", 0.0f);
-            
-            var data3 = BettrMenu.GetTable($"{machineName}BaseGameReelMatrixData3");
-            var symbols = BettrMenu.GetTableArray<string>(data3, "Symbols", "Symbol");
+            var symbolScaleX = BettrMenu.GetTableValue<int>(data2, "LayoutProperties", "SymbolScaleX", 1);
+            var symbolScaleY = BettrMenu.GetTableValue<int>(data2, "LayoutProperties", "SymbolScaleY", 1);
+            var symbolOffsetY = BettrMenu.GetTableValue<float>(data2, "LayoutProperties", "SymbolOffsetY", 0.0f);
             
             var data4 = BettrMenu.GetTable($"{machineName}BaseGameReelMatrixData4");
+            var symbols = BettrMenu.GetTableArray<string>(data4, "Symbols", "Symbol");
+            
+            var data5 = BettrMenu.GetTable($"{machineName}BaseGameReelMatrixData5");
             var horizontalReelPositions = new float[columnCount];
             for (var i = 0; i < columnCount; i++)
             {
-                horizontalReelPositions[i] = BettrMenu.GetTableValue<float, string>(data4, "Columns", "Column", $"Col{i + 1}", "HorizontalPosition", 0.0f);
+                horizontalReelPositions[i] = BettrMenu.GetTableValue<float, string>(data5, "Columns", "Column", $"Col{i + 1}", "HorizontalPosition", 0.0f);
             }
             
-            var data5 = BettrMenu.GetTable($"{machineName}BaseGameReelMatrixData5");
-            var symbolPositions = BettrMenu.GetTableArray<double>(data5, $"SymbolGroups", "SymbolPosition");
+            var data6 = BettrMenu.GetTable($"{machineName}BaseGameReelMatrixData6");
+            var symbolPositions = BettrMenu.GetTableArray<double>(data6, $"SymbolGroups", "SymbolPosition");
             var symbolYPositions = symbolPositions.Select(d => (int)d).ToList();
             
-            var data6 = BettrMenu.GetTable($"{machineName}BaseGameReelMatrixData6");
-            var cellMaskPositions = BettrMenu.GetTableArray<double>(data6, $"CellMask", "CellMaskPosition");
+            var data7 = BettrMenu.GetTable($"{machineName}BaseGameReelMatrixData7");
+            var cellMaskPositions = BettrMenu.GetTableArray<double>(data7, $"CellMask", "CellMaskPosition");
             var cellMaskYPositions = cellMaskPositions.Select(d => (int)d).ToList();
             
             // get the model
@@ -282,7 +290,7 @@ namespace Bettr.Editor
                 { "machineName", machineName },
                 { "machineVariant", machineVariant },
                 { "mechanicName", mechanicName },
-                { "rowCount", rowCount },
+                { "rowCounts", rowCounts },
                 { "columnCount", columnCount },
                 { "totalSymbolCount", totalSymbolCount },
                 { "symbolKeys", symbols },

@@ -23,7 +23,7 @@ namespace Bettr.Core
         internal BettrReelMatrixCellController BettrReelMatrixCellController { get; private set; }
         internal Dictionary<string, BettrReelMatrixCellController> BettrReelMatrixCellControllers { get; private set; }
         
-        public int RowCount { get; private set; }
+        public int[] RowCounts { get; private set; }
         public int ColumnCount { get; private set;  }
 
         private void Awake()
@@ -42,14 +42,23 @@ namespace Bettr.Core
             this.BettrReelMatrixCellControllers = new Dictionary<string, BettrReelMatrixCellController>();
             
             var reelMatrixDataSummaryTable = BettrMathController.GetBaseGameMechanicDataSummary(this.MachineID, this.MechanicName, "ReelMatrix");
-            this.RowCount = (int) (double) reelMatrixDataSummaryTable["RowCount"];
             this.ColumnCount = (int) (double) reelMatrixDataSummaryTable["ColumnCount"];
-            
+            this.RowCounts = new int[this.ColumnCount];
+
+            var reelMatrixDataTable = BettrMathController.GetBaseGameMechanicData(this.MachineID, this.MechanicName, "ReelMatrix");
+            for (var i = 0; i < this.ColumnCount; i++)
+            {
+                var row = (Table) reelMatrixDataTable[i + 1];
+                var rowCount = (int) (double) row["RowCount"];
+                var columnIndex = (int) (double) row["ColumnIndex"];
+                this.RowCounts[columnIndex] = rowCount;
+            }
+
             this.TileTable = BettrMathController.GetGlobalTable(Tile.globalTileId);
             
-            for (var rowIndex = 1; rowIndex <= this.RowCount; rowIndex++)
+            for (var columnIndex = 1; columnIndex <= this.ColumnCount; columnIndex++)
             {
-                for (var columnIndex = 1; columnIndex <= this.ColumnCount; columnIndex++)
+                for (var rowIndex = 1; rowIndex <= this.RowCounts[columnIndex-1]; rowIndex++)
                 {
                     var bettrReelMatrixCellController = this.gameObject.AddComponent<BettrReelMatrixCellController>();
                     bettrReelMatrixCellController.Initialize(Tile, TileTable, BettrUserController, BettrMathController, MachineID, MachineVariantID, MechanicName, rowIndex, columnIndex);
@@ -64,8 +73,6 @@ namespace Bettr.Core
         
         private void OnDisable()
         {
-            this.RowCount = 0;
-            this.ColumnCount = 0;
             var components = this.gameObject.GetComponents<BettrReelMatrixCellController>();
             foreach (var component in components)
             {
@@ -84,9 +91,9 @@ namespace Bettr.Core
 
         public IEnumerator StartEngines()
         {
-            for (int rowIndex = 1; rowIndex <= RowCount; rowIndex++)
+            for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
             {
-                for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
+                for (int rowIndex = 1; rowIndex <= this.RowCounts[columnIndex-1]; rowIndex++)
                 {
                     var key = $"Row{rowIndex}Col{columnIndex}";
                     // add to the dictionary
@@ -99,9 +106,9 @@ namespace Bettr.Core
         
         public IEnumerator OnOutcomeReceived()
         {
-            for (int rowIndex = 1; rowIndex <= RowCount; rowIndex++)
+            for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
             {
-                for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
+                for (int rowIndex = 1; rowIndex <= this.RowCounts[columnIndex-1]; rowIndex++)
                 {
                     var key = $"Row{rowIndex}Col{columnIndex}";
                     // add to the dictionary
@@ -114,9 +121,9 @@ namespace Bettr.Core
         
         public IEnumerator OnApplyOutcomeReceived()
         {
-            for (int rowIndex = 1; rowIndex <= RowCount; rowIndex++)
+            for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
             {
-                for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
+                for (int rowIndex = 1; rowIndex <= this.RowCounts[columnIndex-1]; rowIndex++)
                 {
                     var key = $"Row{rowIndex}Col{columnIndex}";
                     // add to the dictionary
@@ -129,9 +136,9 @@ namespace Bettr.Core
 
         public void SpinEngines()
         {
-            for (int rowIndex = 1; rowIndex <= RowCount; rowIndex++)
+            for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
             {
-                for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
+                for (int rowIndex = 1; rowIndex <= this.RowCounts[columnIndex-1]; rowIndex++)
                 {
                     var key = $"Row{rowIndex}Col{columnIndex}";
                     // add to the dictionary
@@ -144,9 +151,9 @@ namespace Bettr.Core
         // Dispatch Handler
         public void SpinReelSpinStartedRollBack()
         {
-            for (int rowIndex = 1; rowIndex <= RowCount; rowIndex++)
+            for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
             {
-                for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
+                for (int rowIndex = 1; rowIndex <= this.RowCounts[columnIndex-1]; rowIndex++)
                 {
                     var key = $"Row{rowIndex}Col{columnIndex}";
                     // add to the dictionary
@@ -158,9 +165,9 @@ namespace Bettr.Core
 
         public void SpinReelSpinStartedRollForward()
         {
-            for (int rowIndex = 1; rowIndex <= RowCount; rowIndex++)
+            for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
             {
-                for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
+                for (int rowIndex = 1; rowIndex <= this.RowCounts[columnIndex-1]; rowIndex++)
                 {
                     var key = $"Row{rowIndex}Col{columnIndex}";
                     // add to the dictionary
@@ -172,9 +179,9 @@ namespace Bettr.Core
         
         public void SpinReelSpinEndingRollBack()
         {
-            for (int rowIndex = 1; rowIndex <= RowCount; rowIndex++)
+            for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
             {
-                for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
+                for (int rowIndex = 1; rowIndex <= this.RowCounts[columnIndex-1]; rowIndex++)
                 {
                     var key = $"Row{rowIndex}Col{columnIndex}";
                     // add to the dictionary
@@ -186,9 +193,9 @@ namespace Bettr.Core
         
         public void SpinReelSpinEndingRollForward()
         {
-            for (int rowIndex = 1; rowIndex <= RowCount; rowIndex++)
+            for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
             {
-                for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
+                for (int rowIndex = 1; rowIndex <= this.RowCounts[columnIndex-1]; rowIndex++)
                 {
                     var key = $"Row{rowIndex}Col{columnIndex}";
                     // add to the dictionary
@@ -200,9 +207,9 @@ namespace Bettr.Core
         
         public void SpinReelSpinning()
         {
-            for (int rowIndex = 1; rowIndex <= RowCount; rowIndex++)
+            for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
             {
-                for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
+                for (int rowIndex = 1; rowIndex <= this.RowCounts[columnIndex-1]; rowIndex++)
                 {
                     var key = $"Row{rowIndex}Col{columnIndex}";
                     // add to the dictionary
@@ -286,7 +293,7 @@ namespace Bettr.Core
         
         public BettrReelMatrixLayoutPropertiesData(BettrReelMatrixCellController cellController, BettrMathController mathController)
         {
-            LayoutPropertiesTable = mathController.GetBaseGameMechanicData(1, cellController.MachineID, cellController.MechanicName, "LayoutProperties");
+            LayoutPropertiesTable = mathController.GetBaseGameMechanicData(2, cellController.MachineID, cellController.MechanicName, "LayoutProperties");
             MathController = mathController;
             
             var row = (Table) LayoutPropertiesTable[1];
@@ -315,7 +322,7 @@ namespace Bettr.Core
         private BettrMathController MathController;
         public BettrReelMatrixSpinPropertiesData(BettrReelMatrixCellController cellController, BettrMathController mathController)
         {
-            SpinPropertiesTable = mathController.GetBaseGameMechanicData(2, cellController.MachineID, cellController.MechanicName, "SpinProperties");
+            SpinPropertiesTable = mathController.GetBaseGameMechanicData(3, cellController.MachineID, cellController.MechanicName, "SpinProperties");
             MathController = mathController;
         }
     }
@@ -327,7 +334,7 @@ namespace Bettr.Core
         private BettrMathController MathController;
         public BettrReelMatrixSymbolsData(BettrReelMatrixCellController cellController, BettrMathController mathController)
         {
-            SymbolsTable = mathController.GetBaseGameMechanicData(3, cellController.MachineID, cellController.MechanicName, "Symbols");
+            SymbolsTable = mathController.GetBaseGameMechanicData(4, cellController.MachineID, cellController.MechanicName, "Symbols");
             MathController = mathController;
         }
     }
@@ -339,7 +346,7 @@ namespace Bettr.Core
         private BettrMathController MathController;
         public BettrReelMatrixColumnsData(BettrReelMatrixCellController cellController, BettrMathController mathController)
         {
-            ColumnsTable = mathController.GetBaseGameMechanicData(4, cellController.MachineID, cellController.MechanicName, "Columns");
+            ColumnsTable = mathController.GetBaseGameMechanicData(5, cellController.MachineID, cellController.MechanicName, "Columns");
             MathController = mathController;
         }
     }
@@ -354,7 +361,7 @@ namespace Bettr.Core
         
         public BettrReelMatrixSymbolGroupsData(BettrReelMatrixCellController cellController, BettrMathController mathController)
         {
-            SymbolGroupsTable = mathController.GetBaseGameMechanicData(5, cellController.MachineID, cellController.MechanicName, "SymbolGroups");
+            SymbolGroupsTable = mathController.GetBaseGameMechanicData(6, cellController.MachineID, cellController.MechanicName, "SymbolGroups");
             MathController = mathController;
             
             RowIndex = cellController.RowIndex;

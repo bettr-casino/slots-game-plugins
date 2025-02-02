@@ -5480,7 +5480,7 @@ namespace Bettr.Editor
             return valueTable?.Pairs.Select(pair => pair.Value.Table[key]).ToList().Cast<T>().ToList();
         }
         
-        public static T GetTableValue<T, TU>(Table table, string pk, string referenceKey, TU referenceValue, string key, T d = default(T)) where TU : class
+        public static T GetTableValue<T, TU>(Table table, string pk, string referenceKey, TU referenceValue, string key, T d = default)
         {
             Table valueTable = table;
             if (!string.IsNullOrEmpty(pk) && table[pk] is Table pkTable)
@@ -5493,19 +5493,35 @@ namespace Bettr.Editor
             {
                 foreach (var pair in pairs)
                 {
-                    var value = pair.Value.Table[referenceKey] as TU;
-                    if (value == null && referenceValue == null)
+                    // Ensure proper conversion from Lua-style storage format (double) to expected type
+                    var referenceObj = pair.Value.Table[referenceKey];
+                    TU value;
+
+                    if (referenceObj is double doubleRef)
                     {
-                        return (T)Convert.ChangeType(pair.Value.Table[key], typeof(T));
+                        value = (TU)Convert.ChangeType(doubleRef, typeof(TU)); // Explicit conversion to TU
                     }
-                    else if (value != null && value.Equals(referenceValue))
+                    else
                     {
-                        return (T)Convert.ChangeType(pair.Value.Table[key], typeof(T));
+                        value = referenceObj is TU ? (TU)referenceObj : default;
                     }
-                }                
+
+                    // Ensure referenceValue comparison works correctly
+                    if (EqualityComparer<TU>.Default.Equals(value, referenceValue))
+                    {
+                        var keyObj = pair.Value.Table[key];
+
+                        if (keyObj is double doubleKey)
+                        {
+                            return (T)Convert.ChangeType(doubleKey, typeof(T)); // Convert double to expected type T (int)
+                        }
+
+                        return (T)Convert.ChangeType(keyObj, typeof(T)); // Convert other types if needed
+                    }
+                }
             }
 
-            return default(T);
+            return d; // Return default if no match is found
         }
         
         public static T GetTableValue<T>(Table table, string pk, string key, T d = default(T))

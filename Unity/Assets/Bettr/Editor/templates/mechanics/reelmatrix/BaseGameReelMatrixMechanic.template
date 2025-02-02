@@ -36,7 +36,7 @@
              "GroupKey": "Cells",
              "Group": [
                  {{- for columnIndex in 1..columnCount }}
-                 {{- for rowIndex in 1..rowCount }}      
+                 {{- for rowIndex in 1..rowCounts[columnIndex-1] }}      
                    {
                      "Key": "Row{{rowIndex}}Col{{columnIndex}}",
                      "Id": "Row{{rowIndex}}Col{{columnIndex}}"           
@@ -51,7 +51,7 @@
           "ComponentType": "TilePropertyGameObjects",
           "GameObjectsProperty": [                         
           {{- for columnIndex in 1..columnCount }}
-          {{- for rowIndex in 1..rowCount }}      
+          {{- for rowIndex in 1..rowCounts[columnIndex-1] }}      
           {{- for symbolIndex in 1..totalSymbolCount }}
               {
                 "Key": "Row{{rowIndex}}Col{{columnIndex}}Symbol{{symbolIndex}}",
@@ -66,7 +66,7 @@
           "ComponentType": "TilePropertyGameObjects",
           "GameObjectGroupsProperty": [             
           {{- for columnIndex in 1..columnCount }}
-          {{- for rowIndex in 1..rowCount }}      
+          {{- for rowIndex in 1..rowCounts[columnIndex-1] }}      
           {{- for symbolIndex in 1..totalSymbolCount }}
              {
                "GroupKey": "Row{{rowIndex}}Col{{columnIndex}}SymbolGroup{{symbolIndex}}",
@@ -101,7 +101,7 @@
       "Layer": "SLOT_REELS",
       "Children": [   
 {{- for columnIndex in 1..columnCount }}
-{{- for rowIndex in 1..rowCount }}
+{{- for rowIndex in 1..rowCounts[columnIndex-1] }}
         {
             "Name": "Row{{rowIndex}}Col{{columnIndex}}",
             "Id": "Row{{rowIndex}}Col{{columnIndex}}",
@@ -142,14 +142,14 @@
                             "Layer": "SLOT_REELS",
                             "IsPrimitive": true,
                             "Primitive": 5,
-                            "PrimitiveMaterial": "{{machineName}}SymbolStencilMask__StencilRef{{ (columnIndex - 1) * rowCount + (rowIndex - 1) + 1}}",
+                            "PrimitiveMaterial": "{{machineName}}SymbolStencilMask__StencilRef{{ (columnIndex - 1) * rowCounts[columnIndex-1] + (rowIndex - 1) + 1}}",
                             "PrimitiveShader": "Bettr/StencilMask",
                             "PrimitiveTexture": "{{machineName}}SymbolStencilMask",
                             "PrimitiveTextureCreate": true,
                             "PrimitiveTextureCreateSource": "default.png",
                             "PrimitiveAlpha": 1,
                             "ShaderProperties": {
-                                "_StencilRef": {{ (columnIndex - 1) * rowCount + (rowIndex - 1) + 1}}
+                                "_StencilRef": {{ (columnIndex - 1) * rowCounts[columnIndex-1] + (rowIndex - 1) + 1}}
                             },
                           }
                         ]
@@ -209,7 +209,7 @@
                                             "Layer": "SLOT_REELS",
                                             "IsPrimitive": true,
                                             "Primitive": 5,
-                                            "PrimitiveMaterial": "{{symbolKey}}__StencilRef{{ (columnIndex - 1) * rowCount + (rowIndex - 1) + 1}}",
+                                            "PrimitiveMaterial": "{{symbolKey}}__StencilRef{{ (columnIndex - 1) * rowCounts[columnIndex-1] + (rowIndex - 1) + 1}}",
                                             "PrimitiveShader": "Bettr/SymbolStencil",
                                             "PrimitiveTexture": "ReelMatrixSymbol-{{symbolKey}}",
                                             "PrimitiveTextureCreate": true,
@@ -217,7 +217,7 @@
                                             "PrimitiveTextureForceReplace": true,
                                             "PrimitiveAlpha": 0.7,
                                             "ShaderProperties": {
-                                                "_StencilRef": {{ (columnIndex - 1) * rowCount + (rowIndex - 1) + 1}}
+                                                "_StencilRef": {{ (columnIndex - 1) * rowCounts[columnIndex-1] + (rowIndex - 1) + 1}}
                                             },
                                           }
                                         ]
