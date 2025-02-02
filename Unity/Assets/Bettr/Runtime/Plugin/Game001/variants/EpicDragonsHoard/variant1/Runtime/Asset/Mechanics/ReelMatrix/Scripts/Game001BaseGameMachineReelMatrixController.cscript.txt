@@ -1,0 +1,55 @@
+require "math"
+require "Core"
+require "Utils"
+
+Game001BaseGameMachineReelMatrixController = {
+    Config = {
+        Machine = "Game001",
+        Variant = "EpicDragonsHoard",
+        Experiment = "variant1",
+    },
+}
+
+function Game001BaseGameMachineReelMatrixController:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game001BaseGameMachineReelMatrixController:destroy()
+	System.Print("Game001BaseGameMachineReelMatrixController destroy tile id={0}", self.id)
+end
+
+function Game001BaseGameMachineReelMatrixController:OnError(callStack)
+	System.Error("Game001BaseGameMachineReelMatrixController Error CallStack: {0}", callStack)
+end
+
+function Game001BaseGameMachineReelMatrixController:Awake()
+	System.Print("Game001BaseGameMachineReelMatrixController Awake tile id={0}", self.id)
+end
+
+function Game001BaseGameMachineReelMatrixController:Start()
+    series
+        do
+            System.Print("Game001BaseGameMachineReelMatrixController Start")
+            System.WaitForFrame(1)
+            self:StartEngines()
+        end
+    end
+end
+
+function Game001BaseGameMachineReelMatrixController:StartEngines()
+    series
+        do
+            System.Print("Game001BaseGameMachineReelMatrixController StartEngines")
+            self.BettrReelMatrixController.StartEngines()
+        end
+    end
+end
+
+function Game001BaseGameMachineReelMatrixController:SpinEngines()
+    self.BettrReelMatrixController.SpinEngines()
+end
+
+return Game001BaseGameMachineReelMatrixController:new()

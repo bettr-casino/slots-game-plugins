@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CrayonScript.Code;
 using CrayonScript.Interpreter;
 using UnityEngine;
@@ -37,12 +38,18 @@ namespace Bettr.Core
             return GetBaseGameMechanicData(machineID, mechanicName, null);
         }
         
-        public Table GetBaseGameMechanicData(string machineID, string mechanicName, string pk)
+        public Table GetBaseGameMechanicData(int index, string machineID, string mechanicName, string pk)
         {
-            var tableName = $"BaseGame{mechanicName}Data";
+            var indexString = index <= 1 ? "" : index.ToString();
+            var tableName = $"BaseGame{mechanicName}Data{indexString}";
             pk = pk ?? mechanicName;
             var table = GetTableArray(tableName, machineID, pk);
             return table;
+        }
+        
+        public Table GetBaseGameMechanicData(string machineID, string mechanicName, string pk)
+        {
+            return GetBaseGameMechanicData(1, machineID, mechanicName, pk);
         }
 
         public Table GetBaseGameMechanicDataRow(string machineID, string mechanicName, params string[] kvPairs)
@@ -81,13 +88,19 @@ namespace Bettr.Core
             // ReSharper disable once IntroduceOptionalParameters.Global
             return GetBaseGameMechanicDataMatrix(machineID, mechanicName, null);
         }
-        
-        public Table GetBaseGameMechanicDataMatrix(string machineID, string mechanicName, string pk)
+
+        public Table GetBaseGameMechanicDataMatrix(int index, string machineID, string mechanicName, string pk)
         {
-            var tableName = $"BaseGame{mechanicName}DataMatrix";
+            var indexString = index <= 1 ? "" : index.ToString();
+            var tableName = $"BaseGame{mechanicName}DataMatrix{indexString}";
             pk = pk ?? mechanicName;
             var table = GetTableArray(tableName, machineID, pk);
             return table;
+        }
+        
+        public Table GetBaseGameMechanicDataMatrix(string machineID, string mechanicName, string pk)
+        {
+            return GetBaseGameMechanicDataMatrix(1, machineID, mechanicName, pk);
         }
 
         public Table GetBaseGameMechanicSummary(string machineID, string mechanicName)
@@ -109,13 +122,19 @@ namespace Bettr.Core
             // ReSharper disable once IntroduceOptionalParameters.Global
             return GetBaseGameMechanic(machineID, mechanicName, null);
         }
-        
-        public Table GetBaseGameMechanic(string machineID, string mechanicName, string pk)
+
+        public Table GetBaseGameMechanic(int index, string machineID, string mechanicName, string pk)
         {
-            var tableName = $"BaseGame{mechanicName}";
+            var indexString = index <= 1 ? "" : index.ToString();
+            var tableName = $"BaseGame{mechanicName}{indexString}";
             pk = pk ?? mechanicName;
             var table = GetTableArray(tableName, machineID, pk);
             return table;
+        }
+        
+        public Table GetBaseGameMechanic(string machineID, string mechanicName, string pk)
+        {
+            return GetBaseGameMechanic(1, machineID, mechanicName, pk);
         }
 
         public Table GetBaseGameMechanicRow(string machineID, string mechanicName, params string[] kvPairs)
@@ -239,6 +258,57 @@ namespace Bettr.Core
             }
             var reelStateTable = (Table) reelTable["Array"];
             return reelStateTable;
+        }
+        
+        public Table GetTableRow(Table table, params string[] kvPairs)
+        {
+            // get the table
+            // find the row where the kvPairs match
+            for (int i = 0; i < table.Length; i++)
+            {
+                var row = (Table) table[i + 1];
+                for (int j = 0; j < kvPairs.Length; j = j + 2)
+                {
+                    var key = kvPairs[j];
+                    var value = kvPairs[j + 1];
+                    if (row[key].ToString() != value)
+                    {
+                        break;
+                    }
+                    if (j == kvPairs.Length - 2)
+                    {
+                        return row;
+                    }
+                }
+            }
+            return null;
+        }
+        
+        public void SetTableRow<T>(Table table, string key, T value, params string[] kvPairs)
+        {
+            // get the table
+            // find the row where the kvPairs match
+            var found = false;
+            for (int i = 0; i < table.Length; i++)
+            {
+                if (found) break;
+                var row = (Table) table[i + 1];
+                for (int j = 0; j < kvPairs.Length; j = j + 2)
+                {
+                    var rowKey = kvPairs[j];
+                    var rowValue = kvPairs[j + 1];
+                    if (row[rowKey].ToString() != rowValue)
+                    {
+                        break;
+                    }
+                    if (j == kvPairs.Length - 2)
+                    {
+                        row[key] = value;
+                        found = true;
+                        break;
+                    }
+                }
+            }
         }
         
         public int GetTableCount(string tableName, string machineID, string reelID)

@@ -14,8 +14,6 @@ namespace Bettr.Editor.generators.mechanics
     {
         private static void ProcessBaseGameScatterBonusFreeSpinsMechanic(string machineName, string machineVariant, string runtimeAssetPath)
         {
-            AssetDatabase.Refresh();
-            
             var reelCount = BettrMenu.GetReelCount(machineName);
             
             var scatterSymbolIndexesByReel = new Dictionary<string, List<int>>();
@@ -65,7 +63,7 @@ namespace Bettr.Editor.generators.mechanics
                 var prefabPath =
                     $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{tilePropertyAnimator.PrefabName}.prefab";
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                var prefabGameObject = new PrefabGameObject(prefab, tilePropertyAnimator.PrefabName);
+                var prefabGameObject = new PrefabGameObject(prefab, tilePropertyAnimator.PrefabName, false);
                 if (tilePropertyAnimator.PrefabIds != null)
                 {
                     foreach (var prefabId in tilePropertyAnimator.PrefabIds)
@@ -144,12 +142,10 @@ namespace Bettr.Editor.generators.mechanics
             // Modified Prefabs
             foreach (var modifiedPrefab in mechanic.Prefabs)
             {
-                AssetDatabase.Refresh();
-                
                 var prefabPath =
                     $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{modifiedPrefab.PrefabName}.prefab";
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                var prefabGameObject = new PrefabGameObject(prefab, modifiedPrefab.PrefabName);
+                var prefabGameObject = new PrefabGameObject(prefab, modifiedPrefab.PrefabName, false);
                 if (modifiedPrefab.PrefabIds != null)
                 {
                     foreach (var prefabId in modifiedPrefab.PrefabIds)
@@ -168,15 +164,13 @@ namespace Bettr.Editor.generators.mechanics
                 PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
             }
             
-            AssetDatabase.Refresh();
-
             // Anticipation animation
             foreach (var mechanicParticleSystem in mechanic.ParticleSystems)
             {
                 var prefabPath =
                     $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{mechanicParticleSystem.PrefabName}.prefab";
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                var prefabGameObject = new PrefabGameObject(prefab, mechanicParticleSystem.PrefabName);
+                var prefabGameObject = new PrefabGameObject(prefab, mechanicParticleSystem.PrefabName, false);
                 if (mechanicParticleSystem.PrefabIds != null)
                 {
                     foreach (var prefabId in mechanicParticleSystem.PrefabIds)
@@ -300,14 +294,12 @@ namespace Bettr.Editor.generators.mechanics
             // save the changes
             AssetDatabase.SaveAssets();
             
-            AssetDatabase.Refresh();
-            
             foreach (var tilePropertyParticleSystem in mechanic.TilePropertyParticleSystems)
             {
                 var prefabPath =
                     $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{tilePropertyParticleSystem.PrefabName}.prefab";
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                var prefabGameObject = new PrefabGameObject(prefab, tilePropertyParticleSystem.PrefabName);
+                var prefabGameObject = new PrefabGameObject(prefab, tilePropertyParticleSystem.PrefabName, false);
                 if (tilePropertyParticleSystem.PrefabIds != null)
                 {
                     foreach (var prefabId in tilePropertyParticleSystem.PrefabIds)
@@ -356,8 +348,6 @@ namespace Bettr.Editor.generators.mechanics
             
             // save the changes
             AssetDatabase.SaveAssets();
-            
-            AssetDatabase.Refresh();
         }
     }
 }

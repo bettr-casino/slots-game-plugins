@@ -108,7 +108,10 @@ function {{machineName}}BaseGameMachineMechanics:OnBaseGameSpinCompleted(machine
             elseif self.HorizontalReelsShiftMechanic ~= nil then
                 self.HorizontalReelsShiftMechanic:OnBaseGameSpinCompleted(machine)            
             elseif self.ScattersMechanic ~= nil then
-                self.ScattersMechanic:OnBaseGameSpinCompleted(machine)            
+                self.ScattersMechanic:OnBaseGameSpinCompleted(machine)
+                if self.ReelMatrixMechanic ~= nil then
+                    self.ReelMatrixMechanic:OnBaseGameSpinCompleted(machine)            
+                end
             else
                 machine:OnBaseGameSpinCompleted()
             end
@@ -130,4 +133,15 @@ function {{machineName}}BaseGameMachineMechanics:ApplyOutcomeReceived(machine)
             end
         end
     end
+end
+
+function {{machineName}}BaseGameMachineMechanics:SpinEngines(machine)
+end
+
+function {{machineName}}BaseGameMachineMechanics:StartReelMatrixEngines(reelMatrixMechanic, machine)
+    reelMatrixMechanic:StartEnginesDefault(machine)
+end
+
+function {{machineName}}BaseGameMachineMechanics:SpinReelMatrixEngines(reelMatrixMechanic, machine)
+    reelMatrixMechanic:SpinEnginesDefault(machine)
 end

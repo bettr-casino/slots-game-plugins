@@ -206,6 +206,7 @@ namespace Bettr.Editor
             var machineModelName =$"{machineName}Models";
             
             string modelDestinationPath = Path.Combine(runtimeAssetPath, "Models",  $"{machineModelName}.cscript.txt");
+            Debug.Log($"modelDestinationPath={modelDestinationPath}");
             
             // Load and run the Model file
             var modelTextAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(modelDestinationPath);
@@ -220,6 +221,7 @@ namespace Bettr.Editor
             foreach (var pk in pkArray)
             {
                 var activeMechanics = GetTableArray<string>(mechanicsTable, pk, "Mechanic");
+                Debug.Log($"activeMechanics={string.Join(",", activeMechanics)}");
                 var isMechanicActive = activeMechanics.Contains(mechanic);
                 if (!isMechanicActive)
                 {
@@ -246,14 +248,26 @@ namespace Bettr.Editor
             TileController.LuaScript.Call(dynValue);
         }
         
-        [MenuItem("Bettr/Tools/Apply Mechanics/ReelAnticipation/Game001EpicCosmicVoyage")]
+        [MenuItem("Bettr/Tools/Apply Mechanics/Game001EpicDragonsHoard")]
         static void ApplyMechanicMachine()
         {
-            var mechanic = "ReelAnticipation";
+            var map = new Dictionary<string, ProcessMechanic>()
+            {
+                {"Scatters", BettrMechanics.ProcessScattersMechanic},
+                {"ReelAnticipation", BettrMechanics.ProcessReelAnticipationMechanic},
+                {"ReelMatrix", BettrMechanics.ProcessReelMatrixMechanic},
+            };
+
             var machineName = "Game001";
-            var machineVariant = "EpicCosmicVoyage";
+            var machineVariant = "EpicDragonsHoard";
             var experimentVariant = "control";
-            ApplyMechanicDelegate(mechanic, BettrMechanics.ProcessReelAnticipationMechanic, machineName, machineVariant, experimentVariant);
+            
+            foreach (var kvPair in map)
+            {
+                var mechanic = kvPair.Key;
+                var processMechanic = kvPair.Value;
+                ApplyMechanicDelegate(mechanic, processMechanic, machineName, machineVariant, experimentVariant);
+            }
         }
         
         [MenuItem("Tools/Update Prefab References")]
@@ -3452,6 +3466,7 @@ namespace Bettr.Editor
                 { "horizontalreels", BettrMechanics.ProcessHorizontalReelsMechanic },
                 { "horizontalreelshift", BettrMechanics.ProcessHorizontalReelsShiftMechanic },
                 { "hotreels", BettrMechanics.ProcessHotReelsMechanic },
+                { "ReelMatrix", BettrMechanics.ProcessHotReelsMechanic },
                 { "infinityreels", BettrMechanics.ProcessInfinityReelsMechanic },
                 { "linkedreels", BettrMechanics.ProcessLinkedReelsMechanic },
                 { "lockedreels", BettrMechanics.ProcessLockedReelsMechanic },
@@ -5073,7 +5088,7 @@ namespace Bettr.Editor
             pivotInstance.SetParent(symbolInstance.GameObject);
             
             var symbolGroupPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{runtimeAssetPath}/Prefabs/{machineName}BaseGameSymbolGroup.prefab");
-            var prefabGameObject = new PrefabGameObject(symbolGroupPrefab, "SymbolGroup");
+            var prefabGameObject = new PrefabGameObject(symbolGroupPrefab, "SymbolGroup", false);
             prefabGameObject.SetParent(pivotInstance.GameObject);
 
             return symbolInstance;
@@ -5463,6 +5478,50 @@ namespace Bettr.Editor
             }
             
             return valueTable?.Pairs.Select(pair => pair.Value.Table[key]).ToList().Cast<T>().ToList();
+        }
+        
+        public static T GetTableValue<T, TU>(Table table, string pk, string referenceKey, TU referenceValue, string key, T d = default)
+        {
+            Table valueTable = table;
+            if (!string.IsNullOrEmpty(pk) && table[pk] is Table pkTable)
+            {
+                valueTable = pkTable["Array"] as Table;
+            }
+
+            var pairs = valueTable?.Pairs;
+            if (pairs != null)
+            {
+                foreach (var pair in pairs)
+                {
+                    // Ensure proper conversion from Lua-style storage format (double) to expected type
+                    var referenceObj = pair.Value.Table[referenceKey];
+                    TU value;
+
+                    if (referenceObj is double doubleRef)
+                    {
+                        value = (TU)Convert.ChangeType(doubleRef, typeof(TU)); // Explicit conversion to TU
+                    }
+                    else
+                    {
+                        value = referenceObj is TU ? (TU)referenceObj : default;
+                    }
+
+                    // Ensure referenceValue comparison works correctly
+                    if (EqualityComparer<TU>.Default.Equals(value, referenceValue))
+                    {
+                        var keyObj = pair.Value.Table[key];
+
+                        if (keyObj is double doubleKey)
+                        {
+                            return (T)Convert.ChangeType(doubleKey, typeof(T)); // Convert double to expected type T (int)
+                        }
+
+                        return (T)Convert.ChangeType(keyObj, typeof(T)); // Convert other types if needed
+                    }
+                }
+            }
+
+            return d; // Return default if no match is found
         }
         
         public static T GetTableValue<T>(Table table, string pk, string key, T d = default(T))

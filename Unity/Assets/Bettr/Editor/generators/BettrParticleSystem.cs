@@ -7,8 +7,6 @@ namespace Bettr.Editor.generators
     {
         public static ParticleSystem AddOrGetParticleSystem(GameObject go)
         {
-            AssetDatabase.Refresh();
-
             var particleSystem = go.GetComponent<ParticleSystem>();
             if (particleSystem == null)
             {

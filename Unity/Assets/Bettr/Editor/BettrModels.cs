@@ -17,6 +17,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
+using PrimitiveType = UnityEngine.PrimitiveType;
 
 namespace Bettr.Editor
 {
@@ -33,6 +34,9 @@ namespace Bettr.Editor
     {
         public static Dictionary<string, InstanceGameObject> IdGameObjects = new Dictionary<string, InstanceGameObject>();
         
+        // Cache to store processed materials
+        public static Dictionary<string, Material> SymbolMaterialCache = new Dictionary<string, Material>();
+        
         private GameObject _go;
         public string Name { get; set; }
         
@@ -41,6 +45,16 @@ namespace Bettr.Editor
         public List<PrefabId> PrefabIds { get; set; }
         
         public string PrefabName { get; set; }
+        
+        public bool PrefabUnpacked { get; set; }
+        
+        public string PrefabShaderOld { get; set; }
+        
+        public string PrefabShaderNew { get; set; }
+        
+        public string PrefabMaterialNewPrefix { get; set; }
+        
+        public string PrefabTextureNewPrefix { get; set; }
         
         public bool IsPrefab { get; set; }
         
@@ -60,6 +74,8 @@ namespace Bettr.Editor
         
         public string PrimitiveTextureCreateSource { get; set; }
         
+        public bool PrimitiveTextureForceReplace { get; set; }
+        
         public string PrimitiveColor { get; set; }
         
         public float PrimitiveAlpha { get; set; } = 1.0f;
@@ -67,6 +83,8 @@ namespace Bettr.Editor
         public int Primitive { get; set; }
         
         public bool IsPrimitive { get; set; }
+        
+        public Dictionary<string, float> ShaderProperties { get; set; }
         
         public bool Active { get; set; }
         
@@ -247,18 +265,111 @@ namespace Bettr.Editor
                 {
                     Debug.Log($"loading model from path: {InstanceComponent.RuntimeAssetPath}/Models/{ModelName}.fbx");
                     BettrModelController.ImportModelAsPrefab(ModelName, PrefabName, InstanceComponent.RuntimeAssetPath);
-                    AssetDatabase.Refresh();
                     string prefabPath = Path.Combine(InstanceComponent.RuntimeAssetPath, "Prefabs",  $"{PrefabName}.prefab");
                     GameObject modelAsPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                    var modelGameObject = new PrefabGameObject(modelAsPrefab, Name);
+                    var modelGameObject = new PrefabGameObject(modelAsPrefab, Name, false);
                     _go = modelGameObject.GameObject;
                 }
                 else if (IsPrefab)
                 {
                     Debug.Log($"loading prefab from path: {InstanceComponent.RuntimeAssetPath}/Prefabs/{PrefabName}.prefab");
-                    var prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{InstanceComponent.RuntimeAssetPath}/Prefabs/{PrefabName}.prefab");
-                    var prefabGameObject = new PrefabGameObject(prefab, Name);
+                    GameObject prefab = null;
+                    string prefabPath = $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{PrefabName}.prefab";
+                    prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                    if (prefab == null)
+                    {
+                        prefabPath = $"{InstanceComponent.DefaultRuntimeAssetPath}/Prefabs/{PrefabName}.prefab";
+                        prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                    }
+                    
+                    var prefabGameObject = new PrefabGameObject(prefab, Name, PrefabUnpacked);
                     _go = prefabGameObject.GameObject;
+                    
+                    // START - update Prefab Shaders
+                    
+                    // Replace the shader if required
+                    if (!string.IsNullOrEmpty(PrefabShaderOld) && !string.IsNullOrEmpty(PrefabShaderNew))
+                    {
+                        // Get all renderers in the GameObject and its children
+                        var renderers = _go.GetComponentsInChildren<Renderer>(true);
+                        Debug.Log($"Updating shaders for {renderers.Length} renderers in {Name}");
+                    
+                        foreach (var renderer in renderers)
+                        {
+                            Debug.Log($"Updating renderer for {renderer.name} renderers in {Name}");
+
+                            var materials = renderer.sharedMaterials.ToArray();
+                            bool materialsChanged = false;
+                    
+                            for (int i = 0; i < materials.Length; i++)
+                            {
+                                var material = materials[i];
+                    
+                                // Check if the material uses the old shader
+                                if (material != null && material.shader.name == PrefabShaderOld)
+                                {
+                                    // Check if the material is already in the cache
+                                    if (SymbolMaterialCache.TryGetValue(material.name, out Material cachedMaterial))
+                                    {
+                                        // Use the cached material
+                                        Debug.Log($"Using the cached material for {material.name}");
+                                        materials[i] = cachedMaterial;
+                                        materialsChanged = true;
+                                    }
+                                    else
+                                    {
+                                        // Convert color to hex string
+                                        string hexColor = $"#{ColorUtility.ToHtmlStringRGBA(material.color)}";
+
+                                        string materialName = $"{PrefabMaterialNewPrefix}{material.name}";
+                                        // Get the main texture name if it exists
+                                        string textureName = material.mainTexture != null ? material.mainTexture.name : "";
+                                        textureName = $"{PrefabTextureNewPrefix}{textureName}";
+
+                                        // Save the material using BettrMaterialGenerator
+                                        var savedMaterial = BettrMaterialGenerator.CreateOrLoadMaterial(
+                                            materialName,           // materialName
+                                            PrefabShaderNew,         // shaderName
+                                            textureName,             // textureName
+                                            hexColor,                // hexColor
+                                            material.color.a,        // alpha
+                                            InstanceComponent.RuntimeAssetPath,  // runtimeAssetPath
+                                            true,                   // createTextureIfNotExists
+                                            null                     // sourceTexture
+                                        );
+                                        
+                                        Debug.Log($"Creating a new saved material for {material.name}");
+                    
+                                        if (savedMaterial != null)
+                                        {
+                                            // Cache the created material
+                                            SymbolMaterialCache[material.name] = savedMaterial;
+                    
+                                            // Update the material in the materials array
+                                            materials[i] = savedMaterial;
+                                            materialsChanged = true;
+                                        }
+                                        else
+                                        {
+                                            Debug.LogWarning($"Failed to create/load material for: {material.name}");
+                                        }
+                                    }
+                                }
+                            }
+                    
+                            // If any materials were changed, update the renderer
+                            if (materialsChanged)
+                            {
+                                renderer.sharedMaterials = materials;
+                                EditorUtility.SetDirty(renderer);
+                                EditorUtility.SetDirty(_go);
+                            }
+                        }
+                    }
+                    
+                    
+                    // - END - Prefab Shader Update
+                    
                     if (PrefabIds != null)
                     {
                         foreach (var prefabId in PrefabIds)
@@ -272,7 +383,7 @@ namespace Bettr.Editor
                 {
                     Debug.Log($"loading prefab from path: {InstanceComponent.MainLobbyPath}/Prefabs/{PrefabName}.prefab");
                     var prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{InstanceComponent.MainLobbyPath}/Prefabs/{PrefabName}.prefab");
-                    var prefabGameObject = new PrefabGameObject(prefab, Name);
+                    var prefabGameObject = new PrefabGameObject(prefab, Name, false);
                     _go = prefabGameObject.GameObject;
                     if (PrefabIds != null)
                     {
@@ -286,7 +397,25 @@ namespace Bettr.Editor
                 else if (IsPrimitive)
                 {
                     var primitiveGameObject = GameObject.CreatePrimitive(Enum.GetValues(typeof(PrimitiveType)).GetValue(Primitive) as PrimitiveType? ?? PrimitiveType.Quad);
-                    var primitiveMaterial = BettrMaterialGenerator.CreateOrLoadMaterial(PrimitiveMaterial, PrimitiveShader, PrimitiveTexture, PrimitiveColor, PrimitiveAlpha, InstanceComponent.RuntimeAssetPath, PrimitiveTextureCreate, PrimitiveTextureCreateSource);
+                    var primitiveMaterial = BettrMaterialGenerator.CreateOrLoadMaterial(PrimitiveMaterial, PrimitiveShader, PrimitiveTexture, PrimitiveColor, PrimitiveAlpha, InstanceComponent.RuntimeAssetPath, PrimitiveTextureCreate, PrimitiveTextureCreateSource, PrimitiveTextureForceReplace);
+                    // update the shader properties
+                    if (ShaderProperties != null && ShaderProperties.Count > 0)
+                    {
+                        foreach (var shaderPropertyPair in ShaderProperties)
+                        {
+                            var shaderProperty = shaderPropertyPair.Key;
+                            var shaderValue = shaderPropertyPair.Value;
+                            var abs = Math.Abs(shaderValue - (int) shaderValue);
+                            if (abs < 0.000001)
+                            {
+                                primitiveMaterial.SetInt(shaderProperty, (int) shaderValue);
+                            }
+                            else
+                            {
+                                primitiveMaterial.SetFloat(shaderProperty, shaderValue);
+                            }
+                        }
+                    }
                     
                     var primitiveMeshRenderer = primitiveGameObject.GetComponent<MeshRenderer>();
                     primitiveMeshRenderer.material = primitiveMaterial;
@@ -358,12 +487,17 @@ namespace Bettr.Editor
         public GameObject GameObject => _go;
         public bool Active { get; set; } = true;
         
-        public PrefabGameObject(GameObject prefab, string name)
+        public PrefabGameObject(GameObject prefab, string name, bool unpack)
         {
             _prefab = prefab;
             _name = name;
             _go = (GameObject)PrefabUtility.InstantiatePrefab(_prefab);
             _go.name = _name;
+
+            if (unpack)
+            {
+                PrefabUtility.UnpackPrefabInstance(_go, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
+            }
         }
         
         public void SetParent(GameObject parentGo)
@@ -417,6 +551,7 @@ namespace Bettr.Editor
     [Serializable]
     public class InstanceComponent : IComponent
     {
+        public static string DefaultRuntimeAssetPath;
         public static string RuntimeAssetPath;
         public static string CorePath;
         public static string MainLobbyPath;
@@ -608,6 +743,10 @@ namespace Bettr.Editor
                 {
                     var globalTileId = string.IsNullOrEmpty(Name) ? Filename : Name;
                     var scriptAsset = BettrScriptGenerator.CreateOrLoadScript(Filename, RuntimeAssetPath);
+                    if (scriptAsset == null)
+                    {
+                        throw new Exception($"Failed to load script asset: Name={Name} Filename={Filename} RuntimeAssetPath={RuntimeAssetPath}");
+                    }
                     var tileComponent = new TileWithUpdateComponent(globalTileId, scriptAsset);
                     tileComponent.AddComponent(gameObject);
                     
@@ -950,9 +1089,10 @@ namespace Bettr.Editor
     {
         private readonly Type _scriptType;
         
-        public MonoBehaviourComponent(string assemblyQualifiedName)
+        public MonoBehaviourComponent(string scriptName)
         {
-            _scriptType = Type.GetType(assemblyQualifiedName);
+            Assembly runtimeAssembly = Assembly.Load("casino.bettr.plugin.Core");
+            _scriptType = runtimeAssembly.GetType(scriptName);
         }
 
         public void AddComponent(GameObject gameObject)
@@ -1678,8 +1818,6 @@ namespace Bettr.Editor
 
         private void BuildParticleSystem(GameObject gameObject)
         {
-            AssetDatabase.Refresh();
-
             var particleSystem = BettrParticleSystem.AddOrGetParticleSystem(gameObject);
             _particleSystem = particleSystem;
         }
@@ -1784,8 +1922,6 @@ namespace Bettr.Editor
 
         private void BuildAnimatorController(GameObject gameObject)
         {
-            AssetDatabase.Refresh();
-            
             var runtimeAnimatorController = BettrAnimatorController.CreateOrLoadAnimatorController(_fileName, _animationStates, _animationTransitions, _runtimeAssetPath);
             _animatorController = runtimeAnimatorController;
         }
@@ -2157,7 +2293,6 @@ namespace Bettr.Editor
                     destPath += extension;
                 }
                 BettrMaterialGenerator.ImportTexture2D(sourcePath, destPath);
-                AssetDatabase.Refresh();
                 var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(destPath);
                 image.sprite = sprite;
                 image.type = Image.Type.Simple;
@@ -2496,19 +2631,15 @@ namespace Bettr.Editor
 
         private void ProcessModifiedPrefabs()
         {
-            AssetDatabase.Refresh();
-            
             // Modified Prefabs
             if (this.Prefabs != null)
             {
                 foreach (var instanceGameObject in this.Prefabs)
                 {
-                    AssetDatabase.Refresh();
-
                     var prefabPath =
                         $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{instanceGameObject.PrefabName}.prefab";
                     var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                    var prefabGameObject = new PrefabGameObject(prefab, instanceGameObject.PrefabName);
+                    var prefabGameObject = new PrefabGameObject(prefab, instanceGameObject.PrefabName, false);
                     if (instanceGameObject.PrefabIds != null)
                     {
                         foreach (var prefabId in instanceGameObject.PrefabIds)
@@ -2556,14 +2687,10 @@ namespace Bettr.Editor
                     }
                 }
             }
-            
-            AssetDatabase.Refresh();
         }
 
         private void ProcessTextMeshPros()
         {
-            AssetDatabase.Refresh();
-            
             if (TilePropertyTextMeshPros != null)
             {
                 foreach (var tilePropertyTextMeshPro in this.TilePropertyTextMeshPros)
@@ -2571,7 +2698,7 @@ namespace Bettr.Editor
                     var prefabPath =
                         $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{tilePropertyTextMeshPro.PrefabName}.prefab";
                     var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                    var prefabGameObject = new PrefabGameObject(prefab, tilePropertyTextMeshPro.PrefabName);
+                    var prefabGameObject = new PrefabGameObject(prefab, tilePropertyTextMeshPro.PrefabName, false);
                     if (tilePropertyTextMeshPro.PrefabIds != null)
                     {
                         foreach (var prefabId in tilePropertyTextMeshPro.PrefabIds)
@@ -2638,8 +2765,6 @@ namespace Bettr.Editor
                     PrefabUtility.SaveAsPrefabAsset(prefabGameObject.GameObject, prefabPath);
                 }
             }
-            
-            AssetDatabase.Refresh();
         }
     }
 }

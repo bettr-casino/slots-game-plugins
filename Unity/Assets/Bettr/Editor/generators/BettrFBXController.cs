@@ -32,8 +32,6 @@ namespace Bettr.Editor.generators
 
             File.Copy(sourceFilePath, destinationFilePath, overwrite: true);
 
-            AssetDatabase.Refresh();
-
             var asset = AssetDatabase.LoadAssetAtPath<Object>(GetRelativePath(destinationFilePath));
             if (asset == null)
             {
@@ -132,7 +130,6 @@ namespace Bettr.Editor.generators
                         PrefabUtility.SaveAsPrefabAsset(instantiatedModel, GetRelativePath(prefabPath));
                         
                         AssetDatabase.SaveAssets();
-                        AssetDatabase.Refresh();
 
                         Debug.Log($"FBX imported successfully. Prefab saved at: {prefabPath}");
                         Debug.Log($"FBX textures extracted successfully. Textures saved at: {string.Join(",", texturesPath)}");

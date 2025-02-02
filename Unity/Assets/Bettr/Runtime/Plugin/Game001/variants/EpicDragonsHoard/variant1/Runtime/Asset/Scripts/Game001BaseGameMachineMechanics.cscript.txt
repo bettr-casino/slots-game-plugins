@@ -1,6 +1,9 @@
 require "math"
 require "Core"
 require "Game001BaseGameMachineWaysMechanic"
+require "Game001BaseGameMachineScattersMechanic"
+require "Game001BaseGameMachineReelAnticipationMechanic"
+require "Game001BaseGameMachineReelMatrixMechanic"
 
 Game001BaseGameMachineMechanics = {
     Config = {
@@ -9,6 +12,9 @@ Game001BaseGameMachineMechanics = {
         Experiment = "variant1",
     },
     WaysMechanic = nil,
+    ScattersMechanic = nil,
+    ReelAnticipationMechanic = nil,
+    ReelMatrixMechanic = nil,
 }
 
 function Game001BaseGameMachineMechanics:new(o)
@@ -25,6 +31,12 @@ end
 function Game001BaseGameMachineMechanics:Initialize(machine)
      self.WaysMechanic = Game001BaseGameMachineWaysMechanic:new()
      self.WaysMechanic:Initialize(machine)
+     self.ScattersMechanic = Game001BaseGameMachineScattersMechanic:new()
+     self.ScattersMechanic:Initialize(machine)
+     self.ReelAnticipationMechanic = Game001BaseGameMachineReelAnticipationMechanic:new()
+     self.ReelAnticipationMechanic:Initialize(machine)
+     self.ReelMatrixMechanic = Game001BaseGameMachineReelMatrixMechanic:new()
+     self.ReelMatrixMechanic:Initialize(machine)
 end
 
 function Game001BaseGameMachineMechanics:StartMachine(machine)
@@ -102,7 +114,10 @@ function Game001BaseGameMachineMechanics:OnBaseGameSpinCompleted(machine)
             elseif self.HorizontalReelsShiftMechanic ~= nil then
                 self.HorizontalReelsShiftMechanic:OnBaseGameSpinCompleted(machine)            
             elseif self.ScattersMechanic ~= nil then
-                self.ScattersMechanic:OnBaseGameSpinCompleted(machine)            
+                self.ScattersMechanic:OnBaseGameSpinCompleted(machine)
+                if self.ReelMatrixMechanic ~= nil then
+                    self.ReelMatrixMechanic:OnBaseGameSpinCompleted(machine)            
+                end
             else
                 machine:OnBaseGameSpinCompleted()
             end
@@ -124,4 +139,15 @@ function Game001BaseGameMachineMechanics:ApplyOutcomeReceived(machine)
             end
         end
     end
+end
+
+function Game001BaseGameMachineMechanics:SpinEngines(machine)
+end
+
+function Game001BaseGameMachineMechanics:StartReelMatrixEngines(reelMatrixMechanic, machine)
+    reelMatrixMechanic:StartEnginesDefault(machine)
+end
+
+function Game001BaseGameMachineMechanics:SpinReelMatrixEngines(reelMatrixMechanic, machine)
+    reelMatrixMechanic:SpinEnginesDefault(machine)
 end

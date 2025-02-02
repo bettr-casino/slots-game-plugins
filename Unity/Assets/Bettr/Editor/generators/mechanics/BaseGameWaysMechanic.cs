@@ -55,8 +55,6 @@ namespace Bettr.Editor.generators.mechanics
                 {
                     foreach (var instanceComponent in mechanic.AnimatorControllers)
                     {
-                        AssetDatabase.Refresh();
-
                         BettrAnimatorController.AddAnimationState(instanceComponent.Filename,
                             instanceComponent.AnimationStates, instanceComponent.AnimatorTransitions, runtimeAssetPath);
                     }
@@ -65,8 +63,6 @@ namespace Bettr.Editor.generators.mechanics
                 {
                     mechanic.Process();
                 }
-                
-                AssetDatabase.Refresh();
             }
         }
         
@@ -96,8 +92,6 @@ namespace Bettr.Editor.generators.mechanics
                 }
 
                 mechanic.Process();
-            
-                AssetDatabase.Refresh();
             }
         }
         
@@ -157,8 +151,6 @@ namespace Bettr.Editor.generators.mechanics
                 mechanic.Process();
 
             }
-            
-            AssetDatabase.Refresh();
         }
     }
 }

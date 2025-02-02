@@ -11,8 +11,6 @@ namespace Bettr.Editor.generators
     {
         public static AnimatorController CreateOrLoadAnimatorController(string fileName, List<AnimationState> animationStates, List<AnimatorTransition> animationTransitions, string runtimeAssetPath)
         {
-            AssetDatabase.Refresh();
-            
             var animatorControllerName = $"{fileName}_anims.controller";
             var animatorControllerPath = $"{runtimeAssetPath}/Animators/{animatorControllerName}";
             
@@ -26,7 +24,6 @@ namespace Bettr.Editor.generators
             
             var stateMachine = animatorController.layers[0].stateMachine;
             AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
 
             var frameRate = 60;
             
@@ -106,11 +103,9 @@ namespace Bettr.Editor.generators
                     AssetDatabase.CreateAsset(animationClip, animationClipPath);
                 }
                 AssetDatabase.SaveAssets();
-                AssetDatabase.Refresh();
             }
             
             AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
 
             foreach (var animationStateTransition in animationTransitions)
             {
@@ -125,7 +120,6 @@ namespace Bettr.Editor.generators
             }
             
             AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
 
             var runtimeAnimatorController = AssetDatabase.LoadAssetAtPath<AnimatorController>(animatorControllerPath);
 
@@ -134,8 +128,6 @@ namespace Bettr.Editor.generators
         
         public static AnimatorController AddAnimationState(string fileName, List<AnimationState> animationStates, List<AnimatorTransition> animationTransitions, string runtimeAssetPath)
         {
-            AssetDatabase.Refresh();
-            
             var animatorControllerName = $"{fileName}_anims.controller";
             var animatorControllerPath = $"{runtimeAssetPath}/Animators/{animatorControllerName}";
             
@@ -147,7 +139,6 @@ namespace Bettr.Editor.generators
             
             var stateMachine = animatorController.layers[0].stateMachine;
             AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
 
             var frameRate = 60;
             
@@ -227,11 +218,9 @@ namespace Bettr.Editor.generators
                     AssetDatabase.CreateAsset(animationClip, animationClipPath);
                 }
                 AssetDatabase.SaveAssets();
-                AssetDatabase.Refresh();
             }
             
             AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
 
             foreach (var animationStateTransition in animationTransitions)
             {
@@ -246,7 +235,6 @@ namespace Bettr.Editor.generators
             }
             
             AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
 
             var runtimeAnimatorController = AssetDatabase.LoadAssetAtPath<AnimatorController>(animatorControllerPath);
 

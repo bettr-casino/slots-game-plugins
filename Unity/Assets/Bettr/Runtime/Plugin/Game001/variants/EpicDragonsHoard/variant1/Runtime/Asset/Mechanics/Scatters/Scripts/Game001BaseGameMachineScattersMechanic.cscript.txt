@@ -1,0 +1,74 @@
+require "math"
+require "Core"
+
+Game001BaseGameMachineScattersMechanic = {
+    Config = {
+        Machine = "Game001",
+        Variant = "EpicDragonsHoard",
+        Experiment = "variant1",
+        Mechanic = "Scatters",
+    },
+    State = {
+        MechanicsPrefab = nil,
+        MainLobbyScene = nil,
+    }
+}
+
+function Game001BaseGameMachineScattersMechanic:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game001BaseGameMachineScattersMechanic:Initialize(machine)
+    series
+        do
+            local manifest = Game001.Manifest
+            local prefabName = "BaseGameMachineScatters"
+            local machineParent = machine.MachineParent
+            local mechanicsParent = machine.MechanicsParent
+            local mechanicsPrefab = BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, prefabName, mechanicsParent.GameObject)
+            self.State.MechanicsPrefab = mechanicsPrefab
+            System.Print("Game001BaseGameMachineScattersMechanic:Initialize mechanicsPrefab={0}", self.State.MechanicsPrefab.name)
+        end
+    end
+end
+
+function Game001BaseGameMachineScattersMechanic:OnBaseGameSpinCompleted(machine)
+    series
+        do
+            local scattersSummary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
+            local numScatters = scattersSummary.NumScatters
+            System.Print("Game001BaseGameMachineScattersMechanic:OnBaseGameSpinCompleted numScatters={0}", numScatters)
+            if numScatters == 0 then
+                machine:OnBaseGameSpinCompleted()
+                return
+            end
+            local payout = scattersSummary.Payout
+            if payout <= 0 then
+                machine:OnBaseGameSpinCompleted()
+                return
+            end
+            local reelCount = Game001BaseGameLayout.ReelCount.First.Value
+            local scatters = BettrMathController.GetBaseGameMechanic(self.Config.Machine, self.Config.Mechanic)
+            for i=1,#scatters do
+                local row = scatters[i]
+                local symbol = row.ScatterSymbol
+                local symbolGameObjects = BettrMechanicsController.GetSymbolMatrixGameObjects(self.Config.Machine, reelCount, symbol)
+                local symbolGameObjectsCount = #symbolGameObjects
+                System.Print("Game001BaseGameMachineScattersMechanic:OnBaseGameSpinCompleted symbol={0} symbolGameObjectsCount={1}", symbol, symbolGameObjectsCount)
+                for j=1,#symbolGameObjects parallel do
+                    local symbolGameObject = symbolGameObjects[j]
+                    BettrVisualsController.FireballMoveTo(nil, symbolGameObject, 0, 1, false)
+                    BettrVisualsController.FireballMoveTo(symbolGameObject, machine.WinText.GameObject, 0, 1, true)
+                end
+            end    
+            BettrUser.SpinCoins = BettrUser.SpinCoins + payout                            
+            machine:RollupCredits()
+            System.WaitForSeconds(1)
+            machine:OnBaseGameSpinCompleted()            
+        end
+    end
+end
+

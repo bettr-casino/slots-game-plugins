@@ -38,7 +38,6 @@ namespace Bettr.Editor.generators
 
             // Save and refresh the asset database
             AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
         }
     }
 }

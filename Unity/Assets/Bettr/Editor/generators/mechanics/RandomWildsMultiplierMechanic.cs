@@ -12,8 +12,6 @@ namespace Bettr.Editor.generators.mechanics
     {
         public static void ProcessBaseGameRandomMultiplierWildsMechanic(string machineName, string machineVariant, string runtimeAssetPath)
         {
-            AssetDatabase.Refresh();
-            
             var reelCount = BettrMenu.GetReelCount(machineName);
             
             var symbolIndexesByReel = new Dictionary<string, List<int>>();
@@ -63,7 +61,7 @@ namespace Bettr.Editor.generators.mechanics
                 var prefabPath =
                     $"{InstanceComponent.RuntimeAssetPath}/Prefabs/{tilePropertyAnimator.PrefabName}.prefab";
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                var prefabGameObject = new PrefabGameObject(prefab, tilePropertyAnimator.PrefabName);
+                var prefabGameObject = new PrefabGameObject(prefab, tilePropertyAnimator.PrefabName, false);
                 if (tilePropertyAnimator.PrefabIds != null)
                 {
                     foreach (var prefabId in tilePropertyAnimator.PrefabIds)

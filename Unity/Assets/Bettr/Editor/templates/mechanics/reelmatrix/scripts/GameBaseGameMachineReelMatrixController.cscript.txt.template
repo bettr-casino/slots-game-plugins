@@ -1,0 +1,55 @@
+require "math"
+require "Core"
+require "Utils"
+
+{{machineName}}BaseGameMachine{{mechanicName}}Controller = {
+    Config = {
+        Machine = "{{machineName}}",
+        Variant = "{{machineVariant}}",
+        Experiment = "{{experimentVariant}}",
+    },
+}
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Controller:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Controller:destroy()
+	System.Print("{{machineName}}BaseGameMachine{{mechanicName}}Controller destroy tile id={0}", self.id)
+end
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Controller:OnError(callStack)
+	System.Error("{{machineName}}BaseGameMachine{{mechanicName}}Controller Error CallStack: {0}", callStack)
+end
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Controller:Awake()
+	System.Print("{{machineName}}BaseGameMachine{{mechanicName}}Controller Awake tile id={0}", self.id)
+end
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Controller:Start()
+    series
+        do
+            System.Print("{{machineName}}BaseGameMachine{{mechanicName}}Controller Start")
+            System.WaitForFrame(1)
+            self:StartEngines()
+        end
+    end
+end
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Controller:StartEngines()
+    series
+        do
+            System.Print("{{machineName}}BaseGameMachine{{mechanicName}}Controller StartEngines")
+            self.Bettr{{mechanicName}}Controller.StartEngines()
+        end
+    end
+end
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Controller:SpinEngines()
+    self.Bettr{{mechanicName}}Controller.SpinEngines()
+end
+
+return {{machineName}}BaseGameMachine{{mechanicName}}Controller:new()

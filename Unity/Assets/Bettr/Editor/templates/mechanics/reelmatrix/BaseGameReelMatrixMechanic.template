@@ -1,0 +1,240 @@
+{
+  "Name": "BaseGameReelMatrixMechanic",
+  "Id": "BaseGameReelMatrixMechanic",
+  "Layer": "SLOT_REELS",
+  "Components": [
+      {
+        "ComponentType": "MonoBehaviour",
+        "Name": "Bettr.Core.BettrReelMatrixController"
+      },
+      {
+        "ComponentType": "Tile",
+        "FileName": "{{machineName}}BaseGameMachineReelMatrixController",
+        "Name": "{{machineName}}BaseGameMachineReelMatrixController"
+      },
+      {
+        "ComponentType": "TilePropertyStrings",
+        "StringsProperty": [
+          {
+            "Key": "MachineID",
+            "Value": "{{machineName}}"           
+          },
+          {
+            "Key": "MachineVariantID",
+            "Value": "{{machineVariant}}"           
+          },
+          {
+            "Key": "MechanicName",
+            "Value": "{{mechanicName}}"           
+          }
+        ]
+      },
+      {
+        "ComponentType": "TilePropertyGameObjects",
+        "GameObjectGroupsProperty": [           
+           {
+             "GroupKey": "Cells",
+             "Group": [
+                 {{- for columnIndex in 1..columnCount }}
+                 {{- for rowIndex in 1..rowCounts[columnIndex-1] }}      
+                   {
+                     "Key": "Row{{rowIndex}}Col{{columnIndex}}",
+                     "Id": "Row{{rowIndex}}Col{{columnIndex}}"           
+                   }
+                 {{ if !for.last }},{{ end }}{{ end }}
+                 {{ if !for.last }},{{ end }}{{ end }}
+             ]
+           }        
+        ]
+      },
+      {
+          "ComponentType": "TilePropertyGameObjects",
+          "GameObjectsProperty": [                         
+          {{- for columnIndex in 1..columnCount }}
+          {{- for rowIndex in 1..rowCounts[columnIndex-1] }}      
+          {{- for symbolIndex in 1..totalSymbolCount }}
+              {
+                "Key": "Row{{rowIndex}}Col{{columnIndex}}Symbol{{symbolIndex}}",
+                "Id": "Symbol{{symbolIndex}}__Row{{rowIndex}}Col{{columnIndex}}"         
+              }
+          {{ if !for.last }},{{ end }}{{ end }}
+          {{ if !for.last }},{{ end }}{{ end }}
+          {{ if !for.last }},{{ end }}{{ end }}
+          ]
+      },
+      {
+          "ComponentType": "TilePropertyGameObjects",
+          "GameObjectGroupsProperty": [             
+          {{- for columnIndex in 1..columnCount }}
+          {{- for rowIndex in 1..rowCounts[columnIndex-1] }}      
+          {{- for symbolIndex in 1..totalSymbolCount }}
+             {
+               "GroupKey": "Row{{rowIndex}}Col{{columnIndex}}SymbolGroup{{symbolIndex}}",
+               "Group": [
+               {{ for symbolKey in symbolKeys }}              
+                    {
+                      "Key": "{{symbolKey}}",
+                      "Id": "Symbol{{symbolKey}}__SymbolGroup{{symbolIndex}}__Row{{rowIndex}}Col{{columnIndex}}"         
+                    }
+               {{ if !for.last }},{{ end }}{{ end }}                  
+               ]
+            }           
+          {{ if !for.last }},{{ end }}{{ end }}
+          {{ if !for.last }},{{ end }}{{ end }}
+          {{ if !for.last }},{{ end }}{{ end }}
+          ]
+        },              
+  ],
+  "Child": {
+      "Name": "Pivot",
+      "Id": "Pivot",
+      "Position": {
+        "X": -0.15,
+        "Y": -0.1,
+        "Z": -10
+      },
+      "Scale": {
+        "X": 0.87,
+        "Y": 0.80,
+        "Z": 1
+      },
+      "Layer": "SLOT_REELS",
+      "Children": [   
+{{- for columnIndex in 1..columnCount }}
+{{- for rowIndex in 1..rowCounts[columnIndex-1] }}
+        {
+            "Name": "Row{{rowIndex}}Col{{columnIndex}}",
+            "Id": "Row{{rowIndex}}Col{{columnIndex}}",
+            "Layer": "SLOT_REELS",
+            "Position": {
+                "X": {{horizontalReelPositions[columnIndex-1]}},
+                "Y": 0,
+                "Z": 0
+            },
+            "Child": {
+                "Name": "Pivot",
+                "Layer": "SLOT_REELS",
+                "Position": {
+                    "X": {{ columnIndex*0.06 }},
+                    "Y": {{ -rowIndex*0.06 }},
+                    "Z": 0
+                },
+                "Children": [
+                    {
+                      "Name": "SymbolStencilMask",
+                      "Layer": "SLOT_REELS",
+                      "Position": {
+                        "X": 0,
+                        "Y": {{symbolScaleY * (cellMaskYPositions[rowIndex-1]) + symbolOffsetY}},
+                        "Z": 0
+                      },
+                      "Scale": {
+                        "X": {{symbolScaleX}},
+                        "Y": {{symbolScaleY}},
+                        "Z": 1
+                      },
+                      "Child": {
+                        "Name": "Pivot",
+                        "Layer": "SLOT_REELS",
+                        "Children": [
+                          {
+                            "Name": "Quad",
+                            "Layer": "SLOT_REELS",
+                            "IsPrimitive": true,
+                            "Primitive": 5,
+                            "PrimitiveMaterial": "{{machineName}}SymbolStencilMask__StencilRef{{ (columnIndex - 1) * rowCounts[columnIndex-1] + (rowIndex - 1) + 1}}",
+                            "PrimitiveShader": "Bettr/StencilMask",
+                            "PrimitiveTexture": "{{machineName}}SymbolStencilMask",
+                            "PrimitiveTextureCreate": true,
+                            "PrimitiveTextureCreateSource": "default.png",
+                            "PrimitiveAlpha": 1,
+                            "ShaderProperties": {
+                                "_StencilRef": {{ (columnIndex - 1) * rowCounts[columnIndex-1] + (rowIndex - 1) + 1}}
+                            },
+                          }
+                        ]
+                      }
+                    }, 
+{{- for symbolIndex in 1..totalSymbolCount }}                    
+                    {
+                        "Name": "Symbol{{symbolIndex}}",
+                        "Id": "Symbol{{symbolIndex}}__Row{{rowIndex}}Col{{columnIndex}}",
+                        "Layer": "SLOT_REELS",
+                        "Position": {
+                            "X": 0,
+                            "Y": {{symbolScaleY * (symbolYPositions[(rowIndex - 1) * totalSymbolCount + (symbolIndex - 1)]) + symbolOffsetY}},
+                            "Z": 0
+                        },
+                        "Scale": {
+                            "X": {{symbolScaleX}},
+                            "Y": {{symbolScaleY}},
+                            "Z": 1
+                        },
+                        "Child": {
+                            "Name": "Pivot",
+                            "Layer": "SLOT_REELS",
+                            "Child": {
+                                 "Name": "{{machineName}}SymbolGroup",
+                                 "Id": "{{machineName}}SymbolGroup{{symbolIndex}}__Row{{rowIndex}}Col{{columnIndex}}",
+                                 "Layer": "SLOT_REELS",
+                                 "Children": [
+                            {{ for symbolKey in symbolKeys }}                                    
+                                    {
+                                      "Name": "{{symbolKey}}",
+                                      "Id": "Symbol{{symbolKey}}__SymbolGroup{{symbolIndex}}__Row{{rowIndex}}Col{{columnIndex}}",
+                                      "Layer": "SLOT_REELS",
+                                      "Active": false,
+                                      "Components": [
+                                        {
+                                          "ComponentType": "AnimatorController",
+                                          "Filename": "{{symbolKey}}",
+                                          "AnimationStates": [
+                                            {
+                                              "Name": "noop",
+                                              "Speed": 1,
+                                              "IsLoop": false,
+                                              "IsDefault": true
+                                            }
+                                          ],
+                                          "AnimatorStateTransitions": [
+                                          ]
+                                        }
+                                      ],
+                                      "Child": {
+                                        "Name": "Pivot",
+                                        "Layer": "SLOT_REELS",
+                                        "Children": [                                        
+                                          {
+                                            "Name": "Quad",
+                                            "Layer": "SLOT_REELS",
+                                            "IsPrimitive": true,
+                                            "Primitive": 5,
+                                            "PrimitiveMaterial": "{{symbolKey}}__StencilRef{{ (columnIndex - 1) * rowCounts[columnIndex-1] + (rowIndex - 1) + 1}}",
+                                            "PrimitiveShader": "Bettr/SymbolStencil",
+                                            "PrimitiveTexture": "ReelMatrixSymbol-{{symbolKey}}",
+                                            "PrimitiveTextureCreate": true,
+                                            "PrimitiveTextureSource": "default.png",
+                                            "PrimitiveTextureForceReplace": true,
+                                            "PrimitiveAlpha": 0.7,
+                                            "ShaderProperties": {
+                                                "_StencilRef": {{ (columnIndex - 1) * rowCounts[columnIndex-1] + (rowIndex - 1) + 1}}
+                                            },
+                                          }
+                                        ]
+                                      }
+                                    }                                    
+                            {{ if !for.last }},{{ end }}{{ end }}
+                                 ]
+                            }
+                        }
+                    }                   
+                    
+{{ if !for.last }},{{ end }}{{ end }}                    
+                ]
+            }
+        }
+{{ if !for.last }},{{ end }}{{ end }}
+{{ if !for.last }},{{ end }}{{ end }}
+       ]
+  }
+}               

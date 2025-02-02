@@ -60,6 +60,8 @@ namespace Bettr.Core
                 "Bettr/LobbyMask",
                 "Bettr/ReelMask",
                 "Bettr/Symbol",
+                "Bettr/SymbolStencil",
+                "Bettr/StencilMask",
                 "Bettr/Shimmer",
                 "Bettr/UIImage",
                 "Unlit/Texture",
