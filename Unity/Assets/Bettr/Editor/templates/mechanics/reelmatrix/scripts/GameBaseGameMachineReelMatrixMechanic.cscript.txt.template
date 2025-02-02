@@ -50,13 +50,19 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             System.WaitForFrame(1)
             machineParent.SetActive(false)
             
-            self.State.{{mechanicName}}Controller:StartEngines(machine)
-            
-            System.WaitForSeconds(1)
-            
-            self.State.{{mechanicName}}Controller:SpinEngines()
+            machine.Mechanics:Start{{mechanicName}}Engines(self, machine)            
         end
     end
+end
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:StartEnginesDefault(machine)
+    self.State.{{mechanicName}}Controller:StartEngines(machine)            
+    machine.Mechanics:Spin{{mechanicName}}Engines(self, machine)
+end
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:SpinEnginesDefault(machine)
+    System.WaitForSeconds(1)            
+    self.State.{{mechanicName}}Controller:SpinEngines()
 end
 
 
