@@ -278,11 +278,11 @@ namespace Bettr.Editor
             
             var data6 = BettrMenu.GetTable($"{machineName}BaseGameReelMatrixData6");
             var symbolPositions = BettrMenu.GetTableArray<double>(data6, $"SymbolGroups", "SymbolPosition");
-            var symbolYPositions = symbolPositions.Select(d => (int)d).ToList();
+            var symbolYPositions = symbolPositions.Select(d => (int)d).Reverse().ToList();
             
             var data7 = BettrMenu.GetTable($"{machineName}BaseGameReelMatrixData7");
             var cellMaskPositions = BettrMenu.GetTableArray<double>(data7, $"CellMask", "CellMaskPosition");
-            var cellMaskYPositions = cellMaskPositions.Select(d => (int)d).ToList();
+            var cellMaskYPositions = cellMaskPositions.Select(d => (int)d).Reverse().ToList();
             
             // get the model
             var model = new Dictionary<string, object>
