@@ -2,7 +2,7 @@ require "math"
 require "Core"
 require "Utils"
 
-{{machineName}}BaseGame{{mechanicName}}Controller = {
+{{machineName}}BaseGameMachine{{mechanicName}}Controller = {
     Config = {
         Machine = "{{machineName}}",
         Variant = "{{machineVariant}}",
@@ -10,183 +10,46 @@ require "Utils"
     },
 }
 
-function {{machineName}}BaseGame{{mechanicName}}Controller:new(o)
+function {{machineName}}BaseGameMachine{{mechanicName}}Controller:new(o)
 	o = o or {}
 	setmetatable(o, self)
 	self.__index = self
 	return o
 end
 
-function {{machineName}}BaseGame{{mechanicName}}Controller:destroy()
-	System.Print("{{machineName}}BaseGame{{mechanicName}}Controller destroy tile id={0}", self.id)
+function {{machineName}}BaseGameMachine{{mechanicName}}Controller:destroy()
+	System.Print("{{machineName}}BaseGameMachine{{mechanicName}}Controller destroy tile id={0}", self.id)
 end
 
-function {{machineName}}BaseGame{{mechanicName}}Controller:OnError(callStack)
-	System.Error("{{machineName}}BaseGame{{mechanicName}}Controller Error CallStack: {0}", callStack)
+function {{machineName}}BaseGameMachine{{mechanicName}}Controller:OnError(callStack)
+	System.Error("{{machineName}}BaseGameMachine{{mechanicName}}Controller Error CallStack: {0}", callStack)
 end
 
-function {{machineName}}BaseGame{{mechanicName}}Controller:Awake()
-	System.Print("{{machineName}}BaseGame{{mechanicName}}Controller Awake tile id={0}", self.id)
+function {{machineName}}BaseGameMachine{{mechanicName}}Controller:Awake()
+	System.Print("{{machineName}}BaseGameMachine{{mechanicName}}Controller Awake tile id={0}", self.id)
 end
 
-function {{machineName}}BaseGame{{mechanicName}}Controller:Start()
+function {{machineName}}BaseGameMachine{{mechanicName}}Controller:Start()
     series
         do
-            System.Print("{{machineName}}BaseGame{{mechanicName}}Controller Start")
+            System.Print("{{machineName}}BaseGameMachine{{mechanicName}}Controller Start")
             System.WaitForFrame(1)
             self:StartEngines()
         end
     end
 end
 
-function {{machineName}}BaseGame{{mechanicName}}Controller:StartEngines()
+function {{machineName}}BaseGameMachine{{mechanicName}}Controller:StartEngines()
     series
         do
-            System.Print("{{machineName}}BaseGame{{mechanicName}}Controller StartEngines")
+            System.Print("{{machineName}}BaseGameMachine{{mechanicName}}Controller StartEngines")
             self.Bettr{{mechanicName}}Controller.StartEngines()
         end
     end
 end
 
-function {{machineName}}BaseGame{{mechanicName}}Controller:SpinEngines()
+function {{machineName}}BaseGameMachine{{mechanicName}}Controller:SpinEngines()
     self.Bettr{{mechanicName}}Controller.SpinEngines()
 end
 
-function {{machineName}}BaseGame{{mechanicName}}Controller:Update()
-    local reelState = {{machineName}}BaseGame{{mechanicName}}.{{mechanicName}}.First
-    local spinState = reelState.SpinState
-    self.ReelSpinStateDispatchTable[spinState](self)    
-end
-
-function {{machineName}}BaseGame{{mechanicName}}Controller:SpinReelSpinStartedRollBack()
-    self.Bettr{{mechanicName}}Controller.SpinReelSpinStartedRollBack()
-end
-
-function {{machineName}}BaseGame{{mechanicName}}Controller:SpinReelSpinStartedRollForward()
-    self.Bettr{{mechanicName}}Controller.SpinReelSpinStartedRollForward()
-end
-
-function {{machineName}}BaseGame{{mechanicName}}Controller:SpinReelSpinEndingRollBack()    
-    self.Bettr{{mechanicName}}Controller.SpinReelSpinEndingRollBack()
-end
-
-function {{machineName}}BaseGame{{mechanicName}}Controller:SpinReelSpinEndingRollForward()
-    self.Bettr{{mechanicName}}Controller.SpinReelSpinEndingRollForward()
-end
-
-function {{machineName}}BaseGame{{mechanicName}}Controller:SpinReelReachedOutcomeStopIndex()
-    BettrAudioController.PlayAudioOnce("reelstop")
-    local reelSpinState = {{machineName}}BaseGame{{mechanicName}}SpinState[self.ReelID].First
-    reelSpinState.ReelSpinState = "SpinEndingRollForward"
-end
-
-function {{machineName}}BaseGame{{mechanicName}}Controller:SpinReelStopped()
-    local reelCount = {{machineName}}BaseGameLayout.ReelCount.First.Value
-    local lastReelID = "Reel" .. reelCount
-    if self.ReelID == lastReelID then
-        {{machineName}}BaseGameMachine:OnSpinReelsStopped()
-    end
-    local reelSpinState = {{machineName}}BaseGame{{mechanicName}}SpinState[self.ReelID].First
-    reelSpinState.ReelSpinState = "StoppedWaiting"
-end
-
-function {{machineName}}BaseGame{{mechanicName}}Controller:SpinReelStoppedWaiting()    
-end
-
-function {{machineName}}BaseGame{{mechanicName}}Controller:SpinReelWaiting()    
-end
-
-function {{machineName}}BaseGame{{mechanicName}}Controller:SpinReelSpinning()
-    return self.Bettr{{mechanicName}}Controller.SpinReelSpinning()    
-end
-
-function {{machineName}}BaseGame{{mechanicName}}Controller:PlaySpinReelSpinEndingRollBackAnimation()
-    series
-        do        
-            local spinEndingRollbackAnimation = {{machineName}}BaseGameSpinEndingRollBackAnimation[self.ReelID]
-            
-            if spinEndingRollbackAnimation == nil then
-                return
-            end
-                      
-            if spinEndingRollbackAnimation.First.Counter > 0 then
-                return                
-            end               
-            
-            spinEndingRollbackAnimation.First.Counter = 1 
-                                                       
-            local reelState = {{machineName}}BaseGame{{mechanicName}}State[self.ReelID].First
-            local reelSpinState = {{machineName}}BaseGame{{mechanicName}}SpinState[self.ReelID].First
-            local reelSymbolsState = {{machineName}}BaseGame{{mechanicName}}SymbolsState[self.ReelID].Array
-                        
-            local rollbackAnimationArray = spinEndingRollbackAnimation.Array            
-            
-            local animatorGroupPrefix = "SymbolLandWinAnimatorGroup"
-            
-            for i=1,#rollbackAnimationArray do
-                local rowIndex = rollbackAnimationArray[i].RowIndex
-                self:PlaySymbolAnimation(rowIndex, animatorGroupPrefix, false)
-            end
-        end
-    end
-end
-
-function {{machineName}}BaseGame{{mechanicName}}Controller:PlaySymbolAnimation(rowIndex, animatorGroupPrefix, waitForAnimationComplete)
-    local animationDuration = 0.0
-    series
-        do                    
-            if rowIndex >= 0 then
-                local luaIndex = rowIndex + 1       
-                local animatorGroupProperty = self[animatorGroupPrefix .. luaIndex]
-                local symbolGroupProperty = self["SymbolGroup" .. luaIndex]
-                local currentKey = symbolGroupProperty.CurrentKey
-                local animatorProperty = animatorGroupProperty[currentKey]
-                animatorProperty.waitForAnimationComplete = waitForAnimationComplete
-                -- animationDuration = Core.Animator:PlayAnimatorProperty(currentKey, animatorProperty)
-                animationDuration = BettrVisualsController.PlayAnimatorProperty(animatorProperty)
-            end
-        end
-    end
-    return animationDuration
-end
-
-function {{machineName}}BaseGame{{mechanicName}}Controller:CloneAndOverlayCurrentSymbol(rowIndex)
-    local overlaySymbol = nil
-    series
-        do                    
-            overlaySymbol = self:CloneCurrentSymbol(rowIndex)
-            if overlaySymbol ~= nil then
-                BettrVisualsController.SetLayerRecursively(overlaySymbol, Core.Layers.SLOT_REELS_OVERLAY)
-            end
-        end
-    end
-    return overlaySymbol
-end
-
-function {{machineName}}BaseGame{{mechanicName}}Controller:CloneCurrentSymbol(rowIndex)
-    local clonedSymbol = nil
-    series
-        do                    
-            if rowIndex >= 0 then
-                local luaIndex = rowIndex + 1       
-                local symbolGroupProperty = self["SymbolGroup" .. luaIndex] 
-                clonedSymbol = symbolGroupProperty.CloneCurrent                               
-            end
-        end
-    end
-    return clonedSymbol
-end
-
-{{machineName}}BaseGame{{mechanicName}}Controller.ReelSpinStateDispatchTable = {
-    Waiting = {{machineName}}BaseGame{{mechanicName}}Controller.SpinReelWaiting,
-    Spinning = {{machineName}}BaseGame{{mechanicName}}Controller.SpinReelSpinning,
-    Stopped = {{machineName}}BaseGame{{mechanicName}}Controller.SpinReelStopped,
-    StoppedWaiting = {{machineName}}BaseGame{{mechanicName}}Controller.SpinReelStoppedWaiting,
-    ReachedOutcomeStopIndex = {{machineName}}BaseGame{{mechanicName}}Controller.SpinReelReachedOutcomeStopIndex,
-    SpinStartedRollBack = {{machineName}}BaseGame{{mechanicName}}Controller.SpinReelSpinStartedRollBack,
-    SpinStartedRollForward = {{machineName}}BaseGame{{mechanicName}}Controller.SpinReelSpinStartedRollForward,
-    SpinEndingRollForward = {{machineName}}BaseGame{{mechanicName}}Controller.SpinReelSpinEndingRollForward,
-    SpinEndingRollBack = {{machineName}}BaseGame{{mechanicName}}Controller.SpinReelSpinEndingRollBack
-}
-
-return {{machineName}}BaseGame{{mechanicName}}Controller:new()
+return {{machineName}}BaseGameMachine{{mechanicName}}Controller:new()

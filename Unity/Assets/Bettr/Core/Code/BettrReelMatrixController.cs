@@ -33,7 +33,7 @@ namespace Bettr.Core
             BettrMathController = BettrMathController.Instance;
         }
 
-        private IEnumerator Start()
+        private void Start()
         {
             this.MachineID = Tile.GetProperty<string>("MachineID");
             this.MachineVariantID = Tile.GetProperty<string>("MachineVariantID");
@@ -60,14 +60,6 @@ namespace Bettr.Core
             }
             
             this.TileTable["BettrReelMatrixController"] = this;
-
-            yield return null;
-
-            yield return StartEngines();
-
-            yield return null;
-
-            SpinEngines();
         }
         
         private void OnDisable()
