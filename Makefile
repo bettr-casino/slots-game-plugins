@@ -740,6 +740,8 @@ deploy-webgl:  deploy-assets-webgl deploy-audio-webgl deploy-video-webgl deploy-
 
 deploy-webgl-all: build-webgl deploy-webgl
 
+deploy-lobby-cards-webgl-all: build-lobbycard-assets-webgl build-lobby-cards-webgl deploy-lobby-cards-webgl
+
 start-local-server:
 	@echo "Starting local web server..."
 	@cd $(BUILD_WEBGL)/BettrSlots; $(CURDIR)/scripts/https-server.sh
