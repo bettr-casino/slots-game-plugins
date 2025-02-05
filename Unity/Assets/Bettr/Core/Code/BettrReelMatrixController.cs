@@ -439,13 +439,9 @@ namespace Bettr.Core
     public class BettrReelMatrixReelSet
     {
         private BettrReelMatrixReelStrip ReelStrip { get; set; }
-        private string pk { get; set; }
-        public BettrReelMatrixReelSet(BettrReelMatrixCellController cellController, BettrMathController mathController)
+        public BettrReelMatrixReelSet(BettrReelMatrixReelStrip reelStrip)
         {
-            this.pk = $"ReelStrip";
-            
-            var reelTable = mathController.GetBaseGameMechanicDataMatrix(cellController.MachineID, cellController.MechanicName, pk);
-            ReelStrip = new BettrReelMatrixReelStrip(reelTable, pk);            
+            ReelStrip = reelStrip;            
         }
         
         public int GetReelSymbolCount()
@@ -467,16 +463,14 @@ namespace Bettr.Core
 
     public class BettrReelMatrixReelStrip
     {
-        public Table ReelTable { get; internal set; }
         public int ReelSymbolCount { get; internal set; }
         public string[] ReelSymbols { get; internal set; }
         public int[] ReelIndexes { get; internal set; }
         public int[] ReelWeights { get; internal set; }
-        public BettrReelMatrixReelStrip(Table reelTable, string cellId)
+        public BettrReelMatrixReelStrip()
         {
-            ReelTable = reelTable;
-            
-            ReelSymbolCount = reelTable.Length;
+            // TODO: FIXME: update reel strip to read from the relevant mechanic
+            ReelSymbolCount = 20;
             
             ReelSymbols = new string[ReelSymbolCount + 1];  // 1 indexes
             ReelIndexes = new int[ReelSymbolCount + 1];     // 1 indexed
@@ -489,10 +483,9 @@ namespace Bettr.Core
             
             for (int i = 1; i <= ReelSymbolCount; i++) // 1 indexed
             {
-                var row = (Table) ReelTable[i];
-                ReelSymbols[i] = (string) row["ReelSymbol"];
-                ReelIndexes[i] = (int) (double) row["ReelIndex"];
-                ReelWeights[i] = (int) (double) row["ReelWeight"];
+                ReelSymbols[i] = "SC";
+                ReelIndexes[i] = i-1;
+                ReelWeights[i] = 1;
             }
         }
     }
@@ -574,7 +567,10 @@ namespace Bettr.Core
             this.BettrReelMatrixSymbolsData = new BettrReelMatrixSymbolsData(this, BettrMathController);
             this.BettrReelMatrixSymbolGroupsData = new BettrReelMatrixSymbolGroupsData(this, BettrMathController);
             
-            this.BettrReelMatrixReelSet = new BettrReelMatrixReelSet(this, BettrMathController);
+            // TODO: REPLACE WITH ACTUAL REEL STRIP from the relevant mechanic
+            // *ReelMatrix should not be providing the reel strip*
+            this.BettrReelMatrixReelSet = new BettrReelMatrixReelSet(new BettrReelMatrixReelStrip());
+            
             this.BettrReelMatrixSpinState = new BettrReelMatrixSpinState(this, BettrMathController);
             
             this.BettrReelMatrixStateSummary = new BettrReelMatrixStateSummary(this, BettrMathController);
@@ -669,17 +665,6 @@ namespace Bettr.Core
             this.BettrReelMatrixSpinState.SetProperty<bool>("OutcomeReceived", false);
 
             this.BettrReelStripSymbolsForSpins.Reset();
-        }
-    
-        public string ReplaceSymbolForSpin(int zeroIndex, string newSymbol)
-        {
-            int reelSymbolCount = this.BettrReelMatrixReelSet.GetReelSymbolCount();
-            int oneIndexed = 1 +zeroIndex % reelSymbolCount;
-            var reelStripSymbols = BettrReelStripSymbolsForSpins.ReelStripSymbolsForThisSpin;
-            var oldSymbol = reelStripSymbols.ReelSymbolsForThisSpin[oneIndexed];
-            reelStripSymbols.ReelSymbolsForThisSpin[oneIndexed] = newSymbol;
-
-            return oldSymbol;
         }
     
         public void SpinReelSpinStartedRollBack()
