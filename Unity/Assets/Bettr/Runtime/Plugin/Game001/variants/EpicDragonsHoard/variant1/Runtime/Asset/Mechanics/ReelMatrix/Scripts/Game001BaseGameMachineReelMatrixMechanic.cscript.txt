@@ -46,6 +46,10 @@ function Game001BaseGameMachineReelMatrixMechanic:OnBaseGameSpinCompleted(machin
             System.WaitForSeconds(1)
             local machineParent = machine.MachineParent
             local mechanicsPrefab = self.State.MechanicsPrefab
+            
+            local symbolMaterial = BettrAssetController.LoadMaterial(manifest.BundleName, manifest.BundleVersion, "SC", mechanicsParent.GameObject)
+            self.State.ReelMatrixController.BettrReelMatrixController.SetReelStripSymbolMaterial("SC", symbolMaterial)
+                        
             mechanicsPrefab.SetActive(true)
             System.WaitForFrame(1)
             machineParent.SetActive(false) 

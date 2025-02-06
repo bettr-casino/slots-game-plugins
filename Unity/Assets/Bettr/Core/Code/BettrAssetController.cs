@@ -563,6 +563,36 @@ namespace Bettr.Core
             _bettrAssetController = bettrAssetController;
             _bettrAssetPackageController = bettrAssetPackageController;
         }
+        
+        public IEnumerator LoadMaterial(CrayonScriptContext context, string bettrAssetBundleName, string bettrAssetBundleVersion, string materialName)
+        {
+            var assetBundle = _bettrAssetController.GetLoadedAssetBundle(bettrAssetBundleName, bettrAssetBundleVersion);
+
+            Material material = null;
+            
+#if UNITY_EDITOR            
+            
+            // find the prefabName from the assetBundle
+            string materialPath = assetBundle.GetAllAssetNames()
+                .FirstOrDefault(s => s.EndsWith($"{materialName}.mat", System.StringComparison.OrdinalIgnoreCase));
+            if (materialPath != null)
+            {
+                material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+            }
+#endif
+            if (material == null)
+            {
+                material = assetBundle.LoadAsset<Material>(materialName);
+            }
+            if (material == null)
+            {
+                Debug.LogError(
+                    $"Failed to load material={materialName} from asset bundle={bettrAssetBundleName} version={bettrAssetBundleVersion}");
+                yield break;
+            }
+            
+            context.MaterialResult = material;
+        }
 
         public IEnumerator LoadMaterial(string bettrAssetBundleName, string bettrAssetBundleVersion, string materialName,
             GameObject targetGameObject)
@@ -941,6 +971,11 @@ namespace Bettr.Core
             GameObject replaced)
         {
             yield return BettrAssetPrefabsController.ReplacePrefab(bettrAssetBundleName, bettrAssetBundleVersion, prefabName, replaced);
+        }
+        
+        public IEnumerator LoadMaterial(CrayonScriptContext context, string bettrAssetBundleName, string bettrAssetBundleVersion, string materialName)
+        {
+            yield return BettrAssetMaterialsController.LoadMaterial(context, bettrAssetBundleName, bettrAssetBundleVersion, materialName);
         }
 
         public IEnumerator LoadMaterial(string bettrAssetBundleName, string bettrAssetBundleVersion, string materialName,

@@ -17,8 +17,10 @@ namespace Bettr.Core
         
         private string MachineID { get; set; }
         private string MachineVariantID { get; set; }
+        
+        private string ExperimentVariantID { get; set; }
         private string MechanicName { get; set; }
-
+        
         private BettrUserController BettrUserController { get; set; }
         private BettrMathController BettrMathController { get; set; }
 
@@ -40,6 +42,7 @@ namespace Bettr.Core
         {
             this.MachineID = Tile.GetProperty<string>("MachineID");
             this.MachineVariantID = Tile.GetProperty<string>("MachineVariantID");
+            this.ExperimentVariantID = Tile.GetProperty<string>("ExperimentVariantID");
             this.MechanicName = Tile.GetProperty<string>("MechanicName");
             
             this.BettrReelMatrixCellControllers = new Dictionary<string, BettrReelMatrixCellController>();
@@ -56,7 +59,7 @@ namespace Bettr.Core
                 var columnIndex = (int) (double) row["ColumnIndex"];
                 this.RowCounts[columnIndex] = rowCount;
             }
-
+            
             this.TileTable = BettrMathController.GetGlobalTable(Tile.globalTileId);
             
             for (var columnIndex = 1; columnIndex <= this.ColumnCount; columnIndex++)
@@ -109,7 +112,7 @@ namespace Bettr.Core
             }
         }
 
-        public void SetReelStripSymbolMaterials(BettrReelStripSymbolMaterials symbolMaterials)
+        public void SetReelStripSymbolMaterial(string symbolName, Material material)
         {
             for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
             {
@@ -117,7 +120,7 @@ namespace Bettr.Core
                 {
                     var key = $"Row{rowIndex}Col{columnIndex}";
                     var bettrReelMatrixCellController = this.BettrReelMatrixCellControllers[key];
-                    bettrReelMatrixCellController.SetReelStripSymbolMaterials(symbolMaterials);
+                    bettrReelMatrixCellController.SetReelStripSymbolMaterial(symbolName, material);
                 }
             }
         }
@@ -301,16 +304,14 @@ namespace Bettr.Core
     {
         public List<BettrReelStripSymbolMaterial> SymbolMaterials { get; internal set; }
 
-        public BettrReelStripSymbolMaterials(List<GameObject> symbolGameObjects)
+        public BettrReelStripSymbolMaterials()
         {
             SymbolMaterials = new List<BettrReelStripSymbolMaterial>();
-            foreach (var symbolGameObject in symbolGameObjects)
-            {
-                var symbolName = symbolGameObject.name;
-                var symbolRenderer = symbolGameObject.GetComponent<MeshRenderer>();
-                var sharedMaterial = symbolRenderer.sharedMaterial;
-                SymbolMaterials.Add(new BettrReelStripSymbolMaterial(symbolName, sharedMaterial));
-            }
+        }
+        
+        public void AddSymbolMaterial(string symbolName, Material symbolMaterial)
+        {
+            SymbolMaterials.Add(new BettrReelStripSymbolMaterial(symbolName, symbolMaterial));
         }
 
         public Material UpdateReelSymbolMaterial(string symbolName, MeshRenderer meshRenderer)
@@ -662,11 +663,13 @@ namespace Bettr.Core
             this.BettrReelStripSymbolsForThisSpin = new BettrReelStripSymbolsForThisSpin(this);
 
             this.BettrReelMatrixCellDispatcher = new BettrReelMatrixCellDispatcher(this);
+            
+            this.BettrSymbolMaterials = new BettrReelStripSymbolMaterials();
         }
 
-        public void SetReelStripSymbolMaterials(BettrReelStripSymbolMaterials symbolMaterials)
+        public void SetReelStripSymbolMaterial(string symbolName, Material symbolMaterial)
         {
-            this.BettrSymbolMaterials = symbolMaterials;
+            this.BettrSymbolMaterials.AddSymbolMaterial(symbolName, symbolMaterial);
         }
 
         public void SetReelStrip(string[] reelSymbols)
@@ -1062,6 +1065,11 @@ namespace Bettr.Core
             currentValue.SetActive(true);
             symbolGroupProperty.Current = currentValue;
             symbolGroupProperty.CurrentKey = reelSymbol;
+            
+            var go = currentValue.GameObject;
+            var meshRenderer = go.GetComponent<MeshRenderer>();
+            
+            this.BettrSymbolMaterials.UpdateReelSymbolMaterial(reelSymbol, meshRenderer);
             
         }
         
