@@ -109,6 +109,19 @@ namespace Bettr.Core
             }
         }
 
+        public void SetReelStripSymbolMaterials(BettrReelStripSymbolMaterials symbolMaterials)
+        {
+            for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
+            {
+                for (int rowIndex = 1; rowIndex <= this.RowCounts[columnIndex - 1]; rowIndex++)
+                {
+                    var key = $"Row{rowIndex}Col{columnIndex}";
+                    var bettrReelMatrixCellController = this.BettrReelMatrixCellControllers[key];
+                    bettrReelMatrixCellController.SetReelStripSymbolMaterials(symbolMaterials);
+                }
+            }
+        }
+
         public IEnumerator StartEngines()
         {
             for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
@@ -269,6 +282,46 @@ namespace Bettr.Core
             // Handle special case: double to int conversion
             if (typeof(T) == typeof(int) && propValue is double d) { return (T)(object)Convert.ToInt32(d); }
             return (T)Convert.ChangeType(propValue, typeof(T));
+        }
+    }
+
+    public class BettrReelStripSymbolMaterial
+    {
+        public string symbolName { get; internal set; }
+        public Material symbolMaterial { get; internal set; }
+        
+        public BettrReelStripSymbolMaterial(string symbolName, Material symbolMaterial)
+        {
+            this.symbolName = symbolName;
+            this.symbolMaterial = symbolMaterial;
+        }
+    }
+    
+    public class BettrReelStripSymbolMaterials
+    {
+        public List<BettrReelStripSymbolMaterial> SymbolMaterials { get; internal set; }
+
+        public BettrReelStripSymbolMaterials(List<GameObject> symbolGameObjects)
+        {
+            SymbolMaterials = new List<BettrReelStripSymbolMaterial>();
+            foreach (var symbolGameObject in symbolGameObjects)
+            {
+                var symbolName = symbolGameObject.name;
+                var symbolRenderer = symbolGameObject.GetComponent<MeshRenderer>();
+                var sharedMaterial = symbolRenderer.sharedMaterial;
+                SymbolMaterials.Add(new BettrReelStripSymbolMaterial(symbolName, sharedMaterial));
+            }
+        }
+
+        public Material UpdateReelSymbolMaterial(string symbolName, MeshRenderer meshRenderer)
+        {
+            // get the shared material
+            var sharedMaterial = meshRenderer.sharedMaterial;
+            // find the symbol material
+            var symbolMaterial = SymbolMaterials.Find(material => material.symbolName == symbolName);
+            // replace the shared material
+            meshRenderer.sharedMaterial = symbolMaterial.symbolMaterial;
+            return sharedMaterial;
         }
     }
 
@@ -567,6 +620,8 @@ namespace Bettr.Core
         
         public BettrReelStripSymbolsForThisSpin BettrReelStripSymbolsForThisSpin { get; internal set; }
         
+        public BettrReelStripSymbolMaterials BettrSymbolMaterials { get; internal set; }
+        
         private bool ShouldSpliceReel { get; set; }
         
         private BettrUserController BettrUserController { get; set; }
@@ -607,6 +662,11 @@ namespace Bettr.Core
             this.BettrReelStripSymbolsForThisSpin = new BettrReelStripSymbolsForThisSpin(this);
 
             this.BettrReelMatrixCellDispatcher = new BettrReelMatrixCellDispatcher(this);
+        }
+
+        public void SetReelStripSymbolMaterials(BettrReelStripSymbolMaterials symbolMaterials)
+        {
+            this.BettrSymbolMaterials = symbolMaterials;
         }
 
         public void SetReelStrip(string[] reelSymbols)
@@ -1002,6 +1062,7 @@ namespace Bettr.Core
             currentValue.SetActive(true);
             symbolGroupProperty.Current = currentValue;
             symbolGroupProperty.CurrentKey = reelSymbol;
+            
         }
         
         public void UpdateReelStopIndexes()

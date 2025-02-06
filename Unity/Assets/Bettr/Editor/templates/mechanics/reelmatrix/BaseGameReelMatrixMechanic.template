@@ -183,7 +183,18 @@
                                       "Name": "{{symbolKey}}",
                                       "Id": "Symbol{{symbolKey}}__SymbolGroup{{symbolIndex}}__Row{{rowIndex}}Col{{columnIndex}}",
                                       "Layer": "SLOT_REELS",
-                                      "Active": false,
+                                      "IsPrimitive": true,
+                                      "Primitive": 5,
+                                      "PrimitiveMaterial": "{{symbolKey}}__StencilRef{{ (columnIndex - 1) * rowCounts[columnIndex-1] + (rowIndex - 1) + 1}}",
+                                      "PrimitiveShader": "Bettr/SymbolStencil",
+                                      "PrimitiveTexture": "ReelMatrixSymbol-{{symbolKey}}",
+                                      "PrimitiveTextureCreate": true,
+                                      "PrimitiveTextureSource": "default.png",
+                                      "PrimitiveTextureForceReplace": false,
+                                      "PrimitiveAlpha": 0.7,
+                                      "ShaderProperties": {
+                                        "_StencilRef": {{ (columnIndex - 1) * rowCounts[columnIndex-1] + (rowIndex - 1) + 1}}
+                                      },                                      
                                       "Components": [
                                         {
                                           "ComponentType": "AnimatorController",
@@ -199,29 +210,7 @@
                                           "AnimatorStateTransitions": [
                                           ]
                                         }
-                                      ],
-                                      "Child": {
-                                        "Name": "Pivot",
-                                        "Layer": "SLOT_REELS",
-                                        "Children": [                                        
-                                          {
-                                            "Name": "Quad",
-                                            "Layer": "SLOT_REELS",
-                                            "IsPrimitive": true,
-                                            "Primitive": 5,
-                                            "PrimitiveMaterial": "{{symbolKey}}__StencilRef{{ (columnIndex - 1) * rowCounts[columnIndex-1] + (rowIndex - 1) + 1}}",
-                                            "PrimitiveShader": "Bettr/SymbolStencil",
-                                            "PrimitiveTexture": "ReelMatrixSymbol-{{symbolKey}}",
-                                            "PrimitiveTextureCreate": true,
-                                            "PrimitiveTextureSource": "default.png",
-                                            "PrimitiveTextureForceReplace": true,
-                                            "PrimitiveAlpha": 0.7,
-                                            "ShaderProperties": {
-                                                "_StencilRef": {{ (columnIndex - 1) * rowCounts[columnIndex-1] + (rowIndex - 1) + 1}}
-                                            },
-                                          }
-                                        ]
-                                      }
+                                      ]
                                     }                                    
                             {{ if !for.last }},{{ end }}{{ end }}
                                  ]
