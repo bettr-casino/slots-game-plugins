@@ -112,7 +112,7 @@ namespace Bettr.Core
             }
         }
 
-        public void SetReelStripSymbolMaterial(string symbolName, Material material)
+        public void SetReelStripSymbolTexture(string symbolName, Texture texture)
         {
             for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
             {
@@ -120,7 +120,7 @@ namespace Bettr.Core
                 {
                     var key = $"Row{rowIndex}Col{columnIndex}";
                     var bettrReelMatrixCellController = this.BettrReelMatrixCellControllers[key];
-                    bettrReelMatrixCellController.SetReelStripSymbolMaterial(symbolName, material);
+                    bettrReelMatrixCellController.SetReelStripSymbolTexture(symbolName, texture);
                 }
             }
         }
@@ -288,41 +288,42 @@ namespace Bettr.Core
         }
     }
 
-    public class BettrReelStripSymbolMaterial
+    public class BettrReelStripSymbolTexture
     {
-        public string symbolName { get; internal set; }
-        public Material symbolMaterial { get; internal set; }
+        public string SymbolName { get; internal set; }
+        public Texture SymbolTexture { get; internal set; }
         
-        public BettrReelStripSymbolMaterial(string symbolName, Material symbolMaterial)
+        public BettrReelStripSymbolTexture(string symbolName, Texture symbolTexture)
         {
-            this.symbolName = symbolName;
-            this.symbolMaterial = symbolMaterial;
+            this.SymbolName = symbolName;
+            this.SymbolTexture = symbolTexture;
         }
     }
     
-    public class BettrReelStripSymbolMaterials
+    public class BettrReelStripSymbolTextures
     {
-        public List<BettrReelStripSymbolMaterial> SymbolMaterials { get; internal set; }
+        public List<BettrReelStripSymbolTexture> SymbolTextures { get; internal set; }
 
-        public BettrReelStripSymbolMaterials()
+        public BettrReelStripSymbolTextures()
         {
-            SymbolMaterials = new List<BettrReelStripSymbolMaterial>();
+            SymbolTextures = new List<BettrReelStripSymbolTexture>();
         }
         
-        public void AddSymbolMaterial(string symbolName, Material symbolMaterial)
+        public void AddSymbolTexture(string symbolName, Texture symbolTexture)
         {
-            SymbolMaterials.Add(new BettrReelStripSymbolMaterial(symbolName, symbolMaterial));
+            SymbolTextures.Add(new BettrReelStripSymbolTexture(symbolName, symbolTexture));
         }
 
-        public Material UpdateReelSymbolMaterial(string symbolName, MeshRenderer meshRenderer)
+        public void UpdateReelSymbolTexture(string symbolName, MeshRenderer meshRenderer)
         {
             // get the shared material
             var sharedMaterial = meshRenderer.sharedMaterial;
-            // find the symbol material
-            var symbolMaterial = SymbolMaterials.Find(material => material.symbolName == symbolName);
-            // replace the shared material
-            meshRenderer.sharedMaterial = symbolMaterial.symbolMaterial;
-            return sharedMaterial;
+            // find the symbol texture
+            var symbolTexture = SymbolTextures.Find(texture => texture.SymbolName == symbolName);
+            if (symbolTexture != null)
+            {
+                sharedMaterial.SetTexture("_MainTex", symbolTexture.SymbolTexture); 
+            }
         }
     }
 
@@ -621,7 +622,7 @@ namespace Bettr.Core
         
         public BettrReelStripSymbolsForThisSpin BettrReelStripSymbolsForThisSpin { get; internal set; }
         
-        public BettrReelStripSymbolMaterials BettrSymbolMaterials { get; internal set; }
+        public BettrReelStripSymbolTextures BettrSymbolTextures { get; internal set; }
         
         private bool ShouldSpliceReel { get; set; }
         
@@ -664,12 +665,12 @@ namespace Bettr.Core
 
             this.BettrReelMatrixCellDispatcher = new BettrReelMatrixCellDispatcher(this);
             
-            this.BettrSymbolMaterials = new BettrReelStripSymbolMaterials();
+            this.BettrSymbolTextures = new BettrReelStripSymbolTextures();
         }
 
-        public void SetReelStripSymbolMaterial(string symbolName, Material symbolMaterial)
+        public void SetReelStripSymbolTexture(string symbolName, Texture symbolTexture)
         {
-            this.BettrSymbolMaterials.AddSymbolMaterial(symbolName, symbolMaterial);
+            this.BettrSymbolTextures.AddSymbolTexture(symbolName, symbolTexture);
         }
 
         public void SetReelStrip(string[] reelSymbols)
@@ -1069,7 +1070,7 @@ namespace Bettr.Core
             var go = currentValue.GameObject;
             var meshRenderer = go.GetComponent<MeshRenderer>();
             
-            this.BettrSymbolMaterials.UpdateReelSymbolMaterial(reelSymbol, meshRenderer);
+            this.BettrSymbolTextures.UpdateReelSymbolTexture(reelSymbol, meshRenderer);
             
         }
         
