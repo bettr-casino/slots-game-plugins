@@ -104,6 +104,8 @@ SLEEP_DURATION := 10
 #
 # =============================================================================
 
+default: all
+
 .PHONY: all pull bump unity_patch_ios_build_version prepare preparedll clean_ios build_ios archive_ios build_webgl publish_webgl sync-machines
 
 
