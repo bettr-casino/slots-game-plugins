@@ -255,36 +255,33 @@ namespace Bettr.Core
             }
         }
     }
+
+    [Serializable]
+    public class BettrReelMatrixOutcome
+    {
+        public int OutcomeReelStopIndex { get; internal set; }
+        
+        public BettrReelMatrixOutcome(int outcomeReelStopIndex)
+        {
+            this.OutcomeReelStopIndex = outcomeReelStopIndex;
+        }
+    }
     
     [Serializable]
     public class BettrReelMatrixOutcomes
     {
-        private int RowIndex { get; set; }
-        private int ColumnIndex { get; set; }
+        public List<BettrReelMatrixOutcome> Outcomes { get; internal set; }
+
+        public int LastOutcomeReelStopIndex => Outcomes.Count > 0 ? Outcomes[Outcomes.Count - 1].OutcomeReelStopIndex : -1;
         
-        private string MachineID { get; set; }
-        private string MechanicName { get; set; }
-        private BettrMathController MathController { get; set; }
-        
-        public BettrReelMatrixOutcomes(BettrReelMatrixCellController cellController, BettrMathController mathController)
+        public BettrReelMatrixOutcomes()
         {
-            this.MachineID = cellController.MachineID;
-            this.MechanicName = cellController.MechanicName;
-            
-            this.RowIndex = cellController.RowIndex;
-            this.ColumnIndex = cellController.ColumnIndex;
+            Outcomes = new List<BettrReelMatrixOutcome>();
         }
         
-        public T GetProperty<T>(string propKey)
+        public void AddOutcome(int outcomeReelStopIndex)
         {
-            var key = $"Row{RowIndex}Col{ColumnIndex}";
-            var rows = MathController.GetBaseGameMechanicMatrix(this.MachineID, this.MechanicName, key);
-            var row = (Table) rows[1];
-            var propValue = row[propKey];
-            if (propValue is T value) { return value; }
-            // Handle special case: double to int conversion
-            if (typeof(T) == typeof(int) && propValue is double d) { return (T)(object)Convert.ToInt32(d); }
-            return (T)Convert.ChangeType(propValue, typeof(T));
+            Outcomes.Add(new BettrReelMatrixOutcome(outcomeReelStopIndex));
         }
     }
 
@@ -659,7 +656,7 @@ namespace Bettr.Core
             
             this.BettrReelMatrixStateSummary = new BettrReelMatrixStateSummary(this, BettrMathController);
             this.BettrReelMatrixState = new BettrReelMatrixState(this, BettrMathController);
-            this.BettrReelMatrixOutcomes = new BettrReelMatrixOutcomes(this, BettrMathController);
+            this.BettrReelMatrixOutcomes = new BettrReelMatrixOutcomes();
 
             this.BettrReelStripSymbolsForThisSpin = new BettrReelStripSymbolsForThisSpin(this);
 
@@ -676,6 +673,11 @@ namespace Bettr.Core
         public void SetReelStrip(string[] reelSymbols)
         {
             this.BettrReelMatrixReelStrip = new BettrReelMatrixReelStrip(reelSymbols);
+        }
+        
+        public void SetReelOutcome(int reelStopIndex)
+        {
+            this.BettrReelMatrixOutcomes.AddOutcome(reelStopIndex);
         }
 
         private void Update()
@@ -1119,7 +1121,7 @@ namespace Bettr.Core
             reelStopIndex = (reelSymbolCount + reelStopIndex) % reelSymbolCount;
             
             // Get the outcome's stop index
-            var outcomeReelStopIndex = this.BettrReelMatrixOutcomes.GetProperty<int>("OutcomeReelStopIndex");
+            var outcomeReelStopIndex = this.BettrReelMatrixOutcomes.LastOutcomeReelStopIndex;
             
             // Check if the reel stop index matches the outcome stop index
             if (outcomeReelStopIndex == reelStopIndex)
@@ -1245,7 +1247,7 @@ namespace Bettr.Core
             var outcomesTable = this.BettrReelMatrixOutcomes;
             var reelStrip = this.BettrReelMatrixReelStrip;
 
-            var outcomeReelStopIndex = outcomesTable.GetProperty<int>("OutcomeReelStopIndex");
+            var outcomeReelStopIndex = outcomesTable.LastOutcomeReelStopIndex;
             var spliceDistance = layoutPropertiesDataTable.GetProperty<int>("SpliceDistance");
             var reelSymbolCount = reelStrip.ReelSymbolCount;
 
