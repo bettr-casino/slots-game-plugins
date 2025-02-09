@@ -256,6 +256,7 @@ namespace Bettr.Editor
                 {"Scatters", BettrMechanics.ProcessScattersMechanic},
                 {"ReelAnticipation", BettrMechanics.ProcessReelAnticipationMechanic},
                 {"ReelMatrix", BettrMechanics.ProcessReelMatrixMechanic},
+                {"FreeSpins", BettrMechanics.ProcessFreeSpinsMechanic},
             };
 
             var machineName = "Game001";

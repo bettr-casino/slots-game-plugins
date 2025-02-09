@@ -1,0 +1,70 @@
+{
+    "Name": "BaseGame{{mechanicName}}Mechanic",
+    "Id": "BaseGame{{mechanicName}}Mechanic",
+    "Components": [
+      {
+          "ComponentType": "TilePropertyGameObjectsInjected",
+          "GameObjectGroupsProperty": [           
+             {
+               "GroupKey": "{{mechanicName}}SymbolGroup",
+               "Group": [
+             {{ for symbolName in symbolKeys }}
+                 {
+                   "Key": "{{symbolName}}",
+                   "Id": "{{symbolName}}"           
+                 }
+             {{ if !for.last }},{{ end }}{{ end }}
+               ]
+             }        
+          ]
+      }
+    ],    
+    "Children": [
+        {
+           "Name": "SymbolGroup",
+           "Layer": "SLOT_REELS",
+           "Active": false,
+           "Children": [
+             {{ for symbolName in symbolKeys }}
+             {
+               "Name": "{{symbolName}}",
+               "Layer": "SLOT_REELS",
+               "Components": [
+                 {
+                   "ComponentType": "AnimatorController",
+                   "Filename": "{{mechanicName}}__{{symbolName}}",
+                   "AnimationStates": [
+                     {
+                       "Name": "noop",
+                       "Speed": 1,
+                       "IsLoop": false,
+                       "IsDefault": true
+                     }
+                   ]
+                 }
+               ],
+               "Child": {
+                 "Name": "Pivot",
+                 "Layer": "SLOT_REELS",
+                 "Children": [
+                   {
+                     "Name": "{{symbolName}}",
+                     "Id": "{{symbolName}}",
+                     "Layer": "SLOT_REELS",
+                     "IsPrimitive": true,
+                     "Primitive": 5,
+                     "PrimitiveMaterial": "{{mechanicName}}__{{symbolName}}",
+                     "PrimitiveShader": "Bettr/Symbol",
+                     "PrimitiveTexture": "{{mechanicName}}__{{symbolName}}",
+                     "PrimitiveAlpha": 0.7,
+                     "PrimitiveTextureCreate": true,
+                     "PrimitiveTextureCreateSource": "default.png"
+                   }
+                 ]
+               }
+             }
+             {{ if !for.last }},{{ end }}{{ end }}
+           ]
+        }
+    ] 
+}

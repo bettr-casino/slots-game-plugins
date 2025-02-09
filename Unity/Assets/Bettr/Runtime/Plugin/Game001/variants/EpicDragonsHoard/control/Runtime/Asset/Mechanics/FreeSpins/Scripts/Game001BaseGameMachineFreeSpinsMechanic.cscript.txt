@@ -1,0 +1,74 @@
+require "math"
+require "Core"
+
+Game001BaseGameMachineFreeSpinsMechanic = {
+    Config = {
+        Machine = "Game001",
+        Variant = "EpicDragonsHoard",
+        Experiment = "control",
+        Mechanic = "FreeSpins",
+    },
+    State = {
+        MechanicsPrefab = nil,
+        FreeSpinsController = nil,
+    }
+}
+
+function Game001BaseGameMachineFreeSpinsMechanic:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game001BaseGameMachineFreeSpinsMechanic:Initialize(machine)
+    series
+        do
+            local manifest = Game001.Manifest
+            local prefabName = "BaseGameMachineFreeSpins"
+            local machineParent = machine.MachineParent
+            local mechanicsParent = machine.MechanicsParent
+            local mechanicsPrefab = BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, prefabName, mechanicsParent.GameObject)
+            mechanicsPrefab.SetActive(false)
+            mechanicsPrefab.name = self.Config.Mechanic
+            self.State.MechanicsPrefab = mechanicsPrefab
+            self.State.FreeSpinsController = _G["Game001BaseGameMachineFreeSpinsController"]        
+            System.Print("Game001BaseGameMachineFreeSpinsMechanic:Initialize mechanicsPrefab={0}", self.State.MechanicsPrefab.name)
+        end
+    end
+end
+
+function Game001BaseGameMachineFreeSpinsMechanic:OnBaseGameSpinCompleted(machine)
+    series
+        do
+            System.Print("Game001BaseGameMachineFreeSpinsMechanic:Game001BaseGameState.SpinState.First.State={0}", Game001BaseGameState.SpinState.First.State)
+            Game001BaseGameState.SpinState.First.State = "Waiting"
+            System.WaitForSeconds(1)
+            local machineParent = machine.MachineParent
+            local mechanicsPrefab = self.State.MechanicsPrefab
+            
+            local symbolTexture = BettrAssetController.LoadTexture(machine.Manifest.BundleName, machine.Manifest.BundleVersion, "FreeSpinsSymbol-SC")
+                        
+            mechanicsPrefab.SetActive(true)
+            System.WaitForFrame(1)
+            machineParent.SetActive(false)
+            
+            self.State.FreeSpinsController.BettrFreeSpinsController.SetReelStripSymbolTexture("SC", symbolTexture) 
+            
+            machine.Mechanics:StartFreeSpinsEngines(self, machine)           
+        end
+    end
+end
+
+function Game001BaseGameMachineFreeSpinsMechanic:StartEnginesDefault(machine)
+    self.State.FreeSpinsController:StartEngines(machine)            
+    machine.Mechanics:SpinFreeSpinsEngines(self, machine)
+end
+
+function Game001BaseGameMachineFreeSpinsMechanic:SpinEnginesDefault(machine)
+    System.WaitForSeconds(1)            
+    self.State.FreeSpinsController:SpinEngines()
+end
+
+
+
