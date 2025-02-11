@@ -44,29 +44,33 @@ function Game001BaseGameMachineReelMatrixMechanic:OnBaseGameSpinCompleted(machin
             System.Print("Game001BaseGameMachineReelMatrixMechanic:Game001BaseGameState.SpinState.First.State={0}", Game001BaseGameState.SpinState.First.State)
             Game001BaseGameState.SpinState.First.State = "Waiting"
             System.WaitForSeconds(1)
-            local machineParent = machine.MachineParent
-            local mechanicsPrefab = self.State.MechanicsPrefab
-            
-            local symbolTexture = BettrAssetController.LoadTexture(machine.Manifest.BundleName, machine.Manifest.BundleVersion, "ReelMatrixSymbol-SC")
-                        
+            local mechanicsPrefab = self.State.MechanicsPrefab            
             mechanicsPrefab.SetActive(true)
-            System.WaitForFrame(1)
-            machineParent.SetActive(false)
-            
-            self.State.ReelMatrixController.BettrReelMatrixController.SetReelStripSymbolTexture("SC", symbolTexture) 
-            
-            machine.Mechanics:StartReelMatrixEngines(self, machine)           
         end
     end
 end
 
-function Game001BaseGameMachineReelMatrixMechanic:StartEnginesDefault(machine)
-    self.State.ReelMatrixController:StartEngines(machine)            
-    machine.Mechanics:SpinReelMatrixEngines(self, machine)
+function Game001BaseGameMachineReelMatrixMechanic:SetReelStripData(reelStripData)
+    self.State.ReelMatrixController:SetReelStripData(reelStripData)
 end
 
-function Game001BaseGameMachineReelMatrixMechanic:SpinEnginesDefault(machine)
-    System.WaitForSeconds(1)            
+function Game001BaseGameMachineReelMatrixMechanic:SetReelStopIndexes(reelStopIndexes)
+    self.State.ReelMatrixController:SetReelStopIndexes(reelStopIndexes)
+end
+
+function Game001BaseGameMachineReelMatrixMechanic:SetReelStripSymbolTextures(prefab)
+    self.State.ReelMatrixController:SetReelStripSymbolTextures(prefab)
+end
+
+function Game001BaseGameMachineReelMatrixMechanic:ShowReelMatrix()
+    self.State.ReelMatrixController["Pivot"].SetActive(true)
+end
+
+function Game001BaseGameMachineReelMatrixMechanic:StartEngines()
+    self.State.ReelMatrixController:StartEngines()            
+end
+
+function Game001BaseGameMachineReelMatrixMechanic:SpinEngines(machine)
     self.State.ReelMatrixController:SpinEngines()
 end
 

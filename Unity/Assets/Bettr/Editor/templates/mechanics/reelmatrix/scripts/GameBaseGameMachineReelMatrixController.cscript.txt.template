@@ -39,10 +39,25 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Controller:Start()
     end
 end
 
+function {{machineName}}BaseGameMachine{{mechanicName}}Controller:SetReelStopIndexes(reelStopIndexes)
+    self.Bettr{{mechanicName}}Controller.SetReelStopIndexes(reelStopIndexes)
+end
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Controller:SetReelStripData(reelStripData)
+     self.Bettr{{mechanicName}}Controller.SetReelStripData(reelStripData)
+end
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Controller:SetReelStripSymbolTextures(prefab)
+     self.Bettr{{mechanicName}}Controller.SetReelStripSymbolTextures(prefab)
+end
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Controller:SetReelStripSymbolTextures(prefab)
+    self.Bettr{{mechanicName}}Controller.SetReelStripSymbolTextures(prefab)
+end
+
 function {{machineName}}BaseGameMachine{{mechanicName}}Controller:StartEngines()
     series
         do
-            System.Print("{{machineName}}BaseGameMachine{{mechanicName}}Controller StartEngines")
             self.Bettr{{mechanicName}}Controller.StartEngines()
         end
     end
@@ -50,6 +65,10 @@ end
 
 function {{machineName}}BaseGameMachine{{mechanicName}}Controller:SpinEngines()
     self.Bettr{{mechanicName}}Controller.SpinEngines()
+end
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Controller:Show{{mechanicName}}()
+    self.State.{{mechanicName}}Controller["Pivot"].SetActive(true)
 end
 
 return {{machineName}}BaseGameMachine{{mechanicName}}Controller:new()

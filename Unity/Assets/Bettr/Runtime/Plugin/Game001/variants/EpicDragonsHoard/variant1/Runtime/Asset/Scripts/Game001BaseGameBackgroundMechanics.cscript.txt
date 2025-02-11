@@ -11,6 +11,7 @@ Game001BaseGameBackgroundMechanics = {
     ScattersMechanic = nil,
     ReelAnticipationMechanic = nil,
     ReelMatrixMechanic = nil,
+    FreeSpinsMechanic = nil,
 }
 
 function Game001BaseGameBackgroundMechanics:new(o)
@@ -41,6 +42,8 @@ function Game001BaseGameBackgroundMechanics:Initialize(background)
      self.ReelAnticipationMechanic:Initialize(background)
      self.ReelMatrixMechanic = Game001BaseGameBackgroundReelMatrixMechanic:new()
      self.ReelMatrixMechanic:Initialize(background)
+     self.FreeSpinsMechanic = Game001BaseGameBackgroundFreeSpinsMechanic:new()
+     self.FreeSpinsMechanic:Initialize(background)
 end
 
 return Game001BaseGameBackgroundMechanics:new()

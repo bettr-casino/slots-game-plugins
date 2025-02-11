@@ -1,0 +1,46 @@
+{
+    "Name": "BaseGame{{mechanicName}}Mechanic",
+    "Id": "BaseGame{{mechanicName}}Mechanic",
+    "Components": [
+      {
+          "ComponentType": "TilePropertyMeshRenderersInjected",
+          "MeshRendererGroupsProperty": [           
+             {
+               "GroupKey": "{{mechanicName}}SymbolGroupMeshRenderers",
+               "Group": [
+             {{ for symbolName in symbolKeys }}
+                 {
+                   "Key": "{{symbolName}}",
+                   "Id": "{{symbolName}}"           
+                 }
+             {{ if !for.last }},{{ end }}{{ end }}
+               ]
+             }        
+          ]
+      }
+    ],    
+    "Children": [
+        {
+           "Name": "SymbolGroup",
+           "Layer": "SLOT_REELS",
+           "Active": false,
+           "Children": [
+             {{ for symbolName in symbolKeys }}
+             {
+                "Name": "{{symbolName}}",
+                "Id": "{{symbolName}}",
+                "Layer": "SLOT_REELS",
+                "IsPrimitive": true,
+                "Primitive": 5,
+                "PrimitiveMaterial": "{{mechanicName}}__{{symbolName}}",
+                "PrimitiveShader": "Bettr/Symbol",
+                "PrimitiveTexture": "{{mechanicName}}__{{symbolName}}",
+                "PrimitiveAlpha": 0.7,
+                "PrimitiveTextureCreate": true,
+                "PrimitiveTextureCreateSource": "default.png"
+             }
+             {{ if !for.last }},{{ end }}{{ end }}
+           ]
+        }
+    ] 
+}

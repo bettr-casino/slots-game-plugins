@@ -39,10 +39,25 @@ function Game001BaseGameMachineReelMatrixController:Start()
     end
 end
 
+function Game001BaseGameMachineReelMatrixController:SetReelStopIndexes(reelStopIndexes)
+    self.BettrReelMatrixController.SetReelStopIndexes(reelStopIndexes)
+end
+
+function Game001BaseGameMachineReelMatrixController:SetReelStripData(reelStripData)
+     self.BettrReelMatrixController.SetReelStripData(reelStripData)
+end
+
+function Game001BaseGameMachineReelMatrixController:SetReelStripSymbolTextures(prefab)
+     self.BettrReelMatrixController.SetReelStripSymbolTextures(prefab)
+end
+
+function Game001BaseGameMachineReelMatrixController:SetReelStripSymbolTextures(prefab)
+    self.BettrReelMatrixController.SetReelStripSymbolTextures(prefab)
+end
+
 function Game001BaseGameMachineReelMatrixController:StartEngines()
     series
         do
-            System.Print("Game001BaseGameMachineReelMatrixController StartEngines")
             self.BettrReelMatrixController.StartEngines()
         end
     end
@@ -50,6 +65,10 @@ end
 
 function Game001BaseGameMachineReelMatrixController:SpinEngines()
     self.BettrReelMatrixController.SpinEngines()
+end
+
+function Game001BaseGameMachineReelMatrixController:ShowReelMatrix()
+    self.State.ReelMatrixController["Pivot"].SetActive(true)
 end
 
 return Game001BaseGameMachineReelMatrixController:new()

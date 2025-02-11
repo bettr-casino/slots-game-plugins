@@ -106,13 +106,16 @@ function Game001BaseGameMachineMechanics:OnBaseGameSpinCompleted(machine)
     series
         do
             if self.ChooseASideMechanic ~= nil then
-                self.ChooseASideMechanic:OnBaseGameSpinCompleted(machine)            
+                self.ChooseASideMechanic:OnBaseGameSpinCompleted(machine)        
             elseif self.HorizontalReelsShiftMechanic ~= nil then
                 self.HorizontalReelsShiftMechanic:OnBaseGameSpinCompleted(machine)            
             elseif self.ScattersMechanic ~= nil then
                 self.ScattersMechanic:OnBaseGameSpinCompleted(machine)
                 if self.ReelMatrixMechanic ~= nil then
                     self.ReelMatrixMechanic:OnBaseGameSpinCompleted(machine)            
+                end
+                if self.FreeSpinsMechanic ~= nil then
+                    self.FreeSpinsMechanic:OnBaseGameSpinCompleted(machine)            
                 end
             else
                 machine:OnBaseGameSpinCompleted()
@@ -140,10 +143,3 @@ end
 function Game001BaseGameMachineMechanics:SpinEngines(machine)
 end
 
-function Game001BaseGameMachineMechanics:StartReelMatrixEngines(reelMatrixMechanic, machine)
-    reelMatrixMechanic:StartEnginesDefault(machine)
-end
-
-function Game001BaseGameMachineMechanics:SpinReelMatrixEngines(reelMatrixMechanic, machine)
-    reelMatrixMechanic:SpinEnginesDefault(machine)
-end

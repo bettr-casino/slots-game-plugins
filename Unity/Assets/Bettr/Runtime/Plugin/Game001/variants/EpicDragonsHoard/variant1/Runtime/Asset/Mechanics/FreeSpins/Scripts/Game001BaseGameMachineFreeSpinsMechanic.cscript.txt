@@ -1,0 +1,65 @@
+require "math"
+require "Core"
+
+Game001BaseGameMachineFreeSpinsMechanic = {
+    Config = {
+        Machine = "Game001",
+        Variant = "EpicDragonsHoard",
+        Experiment = "variant1",
+        Mechanic = "FreeSpins",
+    },
+    State = {
+        MechanicsPrefab = nil,
+        ReelMatrixMechanic = nil,
+    }
+}
+
+function Game001BaseGameMachineFreeSpinsMechanic:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game001BaseGameMachineFreeSpinsMechanic:Initialize(machine)
+    series
+        do
+            local manifest = Game001.Manifest
+            local prefabName = "BaseGameMachineFreeSpins"
+            local machineParent = machine.MachineParent
+            local mechanicsParent = machine.MechanicsParent
+            local mechanicsPrefab = BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, prefabName, mechanicsParent.GameObject)
+            mechanicsPrefab.SetActive(false)
+            mechanicsPrefab.name = self.Config.Mechanic
+            self.State.MechanicsPrefab = mechanicsPrefab
+            self.State.ReelMatrixMechanic = machine.Mechanics.ReelMatrixMechanic
+        end
+    end
+end
+
+function Game001BaseGameMachineFreeSpinsMechanic:OnBaseGameSpinCompleted(machine)
+    series
+        do
+            System.Print("Game001BaseGameMachineFreeSpinsMechanic:Game001BaseGameState.SpinState.First.State={0}", Game001BaseGameState.SpinState.First.State)
+            Game001BaseGameState.SpinState.First.State = "Waiting"
+            System.WaitForSeconds(1)
+            local machineParent = machine.MachineParent
+            local mechanicsPrefab = self.State.MechanicsPrefab
+            
+            local symbolTexture = BettrAssetController.LoadTexture(machine.Manifest.BundleName, machine.Manifest.BundleVersion, "ReelMatrixSymbol-SC")
+                        
+            mechanicsPrefab.SetActive(true)
+            System.WaitForFrame(1)
+            machineParent.SetActive(false)
+            
+            self.State.ReelMatrixController.BettrReelMatrixController.SetReelStripSymbolTextures(self.State.MechanicsPrefab) 
+            
+            self.State.ReelMatrixMechanic:StartEngines(self, machine) 
+            
+            System.WaitForSeconds(1)
+            
+            self.State.ReelMatrixMechanic:SpinEngines(self, machine)         
+        end
+    end
+end
+

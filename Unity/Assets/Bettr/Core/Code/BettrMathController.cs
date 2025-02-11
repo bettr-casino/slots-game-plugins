@@ -82,7 +82,7 @@ namespace Bettr.Core
             }
             return null;
         }
-
+        
         public Table GetBaseGameMechanicDataMatrix(string machineID, string mechanicName)
         {
             // ReSharper disable once IntroduceOptionalParameters.Global
@@ -170,12 +170,13 @@ namespace Bettr.Core
         public Table GetBaseGameMechanicMatrix(string machineID, string mechanicName)
         {
             // ReSharper disable once IntroduceOptionalParameters.Global
-            return GetBaseGameMechanicMatrix(machineID, mechanicName, null);
+            return GetBaseGameMechanicMatrix(1, machineID, mechanicName, null);
         }
         
-        public Table GetBaseGameMechanicMatrix(string machineID, string mechanicName, string pk)
+        public Table GetBaseGameMechanicMatrix(int index, string machineID, string mechanicName, string pk)
         {
-            var tableName = $"BaseGame{mechanicName}Matrix";
+            var indexString = index <= 1 ? "" : index.ToString();
+            var tableName = $"BaseGame{mechanicName}Matrix{indexString}";
             pk = pk ?? mechanicName;
             var table = GetTableArray(tableName, machineID, pk);
             return table;
@@ -189,7 +190,7 @@ namespace Bettr.Core
         public Table GetBaseGameMechanicMatrixRow(string machineID, string mechanicName, string pk, int placeholder, params string[] kvPairs)
         {
             // get the table
-            var table = GetBaseGameMechanicMatrix(machineID, mechanicName, pk);
+            var table = GetBaseGameMechanicMatrix(1, machineID, mechanicName, pk);
             // find the row where the kvPairs match
             for (int i = 0; i < table.Length; i++)
             {

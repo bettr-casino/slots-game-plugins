@@ -296,7 +296,7 @@ namespace Bettr.Core
         //
         // SymbolGroup APIs
         //
-        
+
         public List<TilePropertyGameObjectGroup> AddSymbolsToReelSymbolGroups(string mechanicName,
             BettrReelController reelController, TilePropertyGameObjectGroup symbolPropertiesGroup)
         {
