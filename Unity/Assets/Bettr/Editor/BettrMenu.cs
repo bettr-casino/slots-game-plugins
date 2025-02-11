@@ -620,7 +620,7 @@ namespace Bettr.Editor
 #endif            
         }
         
-        [MenuItem("Bettr/Build/Assets/SingleGame")]
+        // [MenuItem("Bettr/Build/Assets/SingleGame")]
         public static void BuildSingleGameAssetsAndAudio()
         {
             Debug.Log("Building asset bundles...");
@@ -630,7 +630,7 @@ namespace Bettr.Editor
             Debug.Log("...refreshing database before building asset bundles..");
             AssetDatabase.Refresh();
             
-            var buildAssetLabel = "game001epicancientadventures";
+            var buildAssetLabel = "game001dragonshoard";
             var assetLabels = GetAllAssetLabels();
 
             List<AssetBundleBuild> buildMapList = new List<AssetBundleBuild>();

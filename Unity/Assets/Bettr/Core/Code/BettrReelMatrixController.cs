@@ -94,13 +94,43 @@ namespace Bettr.Core
         //
         // APIs
         // 
+
+        public void SetReelStopIndexes(Table reelStopIndexesTable)
+        {
+            var reelStopIndexes = new int[reelStopIndexesTable.Length];
+            for (int i = 0; i < reelStopIndexesTable.Length; i++)
+            {
+                var reelStopIndexRow = (Table) reelStopIndexesTable[i + 1];
+                var reelStopIndex = (int) (double) reelStopIndexRow["ReelStopIndex"];
+                reelStopIndexes[i] = reelStopIndex;
+            }
+            // update the reel stop indexes on the ReelSpinState
+            for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
+            {
+                for (int rowIndex = 1; rowIndex <= this.RowCounts[columnIndex - 1]; rowIndex++)
+                {
+                    var key = $"Row{rowIndex}Col{columnIndex}";
+                    var bettrReelMatrixCellController = this.BettrReelMatrixCellControllers[key];
+                    bettrReelMatrixCellController.BettrReelMatrixSpinState.SetProperty<int>("ReelStopIndex", reelStopIndexes[rowIndex - 1]);
+                }
+            }
+        }
         
         /**
-         * This sets the reel strip on the ReelMatrix.
+         * This sets the reel strip data on the ReelMatrix.
          * ReelMatrix will use a default reel strip if not set.
          */
-        public void SetReelStrip(string[] reelSymbols)
+        public void SetReelStripData(Table reelStripData)
         {
+            // construct the reelStripData column from "ReelSymbol"
+            var reelSymbols = new string[reelStripData.Length];
+            for (var i = 0; i < reelStripData.Length; i++)
+            {
+                var row = (Table) reelStripData[i + 1];
+                var reelSymbol = (string) row["ReelSymbol"];
+                reelSymbols[i] = reelSymbol;
+            }
+            
             for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
             {
                 for (int rowIndex = 1; rowIndex <= this.RowCounts[columnIndex - 1]; rowIndex++)
@@ -109,6 +139,21 @@ namespace Bettr.Core
                     var bettrReelMatrixCellController = this.BettrReelMatrixCellControllers[key];
                     bettrReelMatrixCellController.SetReelStrip(reelSymbols);
                 }
+            }
+        }
+
+        public void SetReelStripSymbolTextures(GameObject go)
+        {
+            //return the "SymbolGroup" GameObject
+            var symbolGroupGo = go.transform.Find("SymbolGroup").gameObject;
+            
+            // Extract all the textures from the prefab
+            var symbolTextures = symbolGroupGo.GetComponentsInChildren<MeshRenderer>();
+            foreach (var symbolTexture in symbolTextures)
+            {
+                var symbolName = symbolTexture.name;
+                var texture = symbolTexture.sharedMaterial.GetTexture("_MainTex");
+                SetReelStripSymbolTexture(symbolName, texture);
             }
         }
 
@@ -313,13 +358,13 @@ namespace Bettr.Core
 
         public void UpdateReelSymbolTexture(string symbolName, MeshRenderer meshRenderer)
         {
-            // get the shared material
-            var sharedMaterial = meshRenderer.sharedMaterial;
+            // get the material
+            var material = meshRenderer.material;
             // find the symbol texture
             var symbolTexture = SymbolTextures.Find(texture => texture.SymbolName == symbolName);
             if (symbolTexture != null)
             {
-                sharedMaterial.SetTexture("_MainTex", symbolTexture.SymbolTexture); 
+                material.SetTexture("_MainTex", symbolTexture.SymbolTexture); 
             }
         }
     }
@@ -726,20 +771,15 @@ namespace Bettr.Core
             {
                 var symbolGroupsTable = this.BettrReelMatrixSymbolGroupsData;
                 var reelPosition = symbolGroupsTable.GetProperty<int>("ReelPosition", symbolIndex);
-                int symbolStopIndex = 1 + (reelSymbolCount + reelStopIndex + reelPosition) % reelSymbolCount;
-                var reelSymbol = reelSymbols[symbolIndex]; // 1 indexed
                 var symbolGroupKey = $"Row{RowIndex}Col{ColumnIndex}SymbolGroup{symbolIndex}";
                 var symbolGroupProperty = (TilePropertyGameObjectGroup) this.TileTable[symbolGroupKey];
-                if (symbolGroupProperty.Current != null)
-                {
-                    symbolGroupProperty.Current.SetActive(false);
-                    symbolGroupProperty.CurrentKey = null;
-                }
-                var currentValue = (PropertyGameObject) symbolGroupProperty[reelSymbol];
+                var currentValue = (PropertyGameObject) symbolGroupProperty[symbolGroupProperty.Keys[0]];
                 currentValue.SetActive(true);
                 symbolGroupProperty.Current = currentValue;
-                symbolGroupProperty.CurrentKey = reelSymbol;
+                symbolGroupProperty.CurrentIndex = 0;
+                symbolGroupProperty.CurrentKey = symbolGroupProperty.Keys[0];
             }
+            AdvanceSymbols();
             yield break;
         }
     
@@ -951,7 +991,7 @@ namespace Bettr.Core
         // Dispatch Handler
         public void SpinReelSpinning()
         {
-            var speed = BettrUserController.UserInSlamStopMode ? 4 : 1;
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 4;
             
             var spinState = this.BettrReelMatrixSpinState;
             var layoutProperties = this.BettrReelMatrixLayoutPropertiesData;
@@ -1058,18 +1098,9 @@ namespace Bettr.Core
             
             var symbolGroupProperty = GetSymbolGroupProperty(symbolIndex);
 
-            if (symbolGroupProperty.Current != null)
-            {
-                symbolGroupProperty.Current.SetActive(false);
-                symbolGroupProperty.CurrentKey = null;
-            }
+            var fixedSymbol = symbolGroupProperty.Current;
             
-            var currentValue = symbolGroupProperty[reelSymbol];
-            currentValue.SetActive(true);
-            symbolGroupProperty.Current = currentValue;
-            symbolGroupProperty.CurrentKey = reelSymbol;
-            
-            var go = currentValue.GameObject;
+            var go = fixedSymbol.GameObject;
             var meshRenderer = go.GetComponent<MeshRenderer>();
             
             this.BettrSymbolTextures.UpdateReelSymbolTexture(reelSymbol, meshRenderer);

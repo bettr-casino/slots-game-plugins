@@ -598,6 +598,10 @@ namespace Bettr.Editor
         
         public List<AnimatorGroupProperty> AnimatorsGroupProperty { get; set; }
         
+        public List<MeshRendererProperty> MeshRenderersProperty { get; set; }
+        
+        public List<MeshRendererGroupProperty> MeshRendererGroupsProperty { get; set; }
+        
         public List<TextMeshProProperty> TextMeshProsProperty { get; set; }
         
         public List<TextMeshProGroupProperty> TextMeshProGroupsProperty { get; set; }
@@ -625,6 +629,8 @@ namespace Bettr.Editor
             AnimatorTransitions = new List<AnimatorTransition>();
             TextMeshProsProperty = new List<TextMeshProProperty>();
             TextMeshProGroupsProperty = new List<TextMeshProGroupProperty>();
+            MeshRenderersProperty = new List<MeshRendererProperty>();
+            MeshRendererGroupsProperty = new List<MeshRendererGroupProperty>();
             EventTriggers = new List<EventTriggerData>();
         }
         
@@ -760,6 +766,59 @@ namespace Bettr.Editor
                     }
                 }
                     break;
+
+                case "TilePropertyMeshRenderers":
+                case "TilePropertyMeshRenderersInjected":
+                {
+                    var tileMeshRendererProperties = new List<TilePropertyMeshRenderer>();
+                    var tileMeshRendererGroupProperties = new List<TilePropertyMeshRendererGroup>();
+                    if (ComponentType == "TilePropertyMeshRenderersInjected")
+                    {
+                        var tilePropertyMeshRenderersComponent = new TilePropertyMeshRenderersInjectedComponent(tileMeshRendererProperties, tileMeshRendererGroupProperties);
+                        tilePropertyMeshRenderersComponent.AddComponent(gameObject);
+                    }
+                    else
+                    {
+                        var tilePropertyMeshRenderersComponent =
+                            new TilePropertyMeshRenderersComponent(tileMeshRendererProperties,
+                                tileMeshRendererGroupProperties);
+                        tilePropertyMeshRenderersComponent.AddComponent(gameObject);
+                    }
+
+                    foreach (var kvPair in MeshRenderersProperty)
+                    {
+                        InstanceGameObject.IdGameObjects.TryGetValue(kvPair.Id, out var referenceGameObject);
+                        var meshRenderer = referenceGameObject?.GameObject.GetComponent<MeshRenderer>();
+                        var tilePropertyMeshRenderer = new TilePropertyMeshRenderer()
+                        {
+                            key = kvPair.Key,
+                            value = new PropertyMeshRenderer() {meshRenderer = meshRenderer},
+                        };
+                        tileMeshRendererProperties.Add(tilePropertyMeshRenderer);
+                    }
+                    foreach (var kvPair in MeshRendererGroupsProperty)
+                    {
+                        List<TilePropertyMeshRenderer> meshRenderersProperties = new List<TilePropertyMeshRenderer>();
+                        foreach (var property in kvPair.Group)
+                        {
+                            InstanceGameObject.IdGameObjects.TryGetValue(property.Id, out var referenceGameObject);
+                            var meshRenderer = referenceGameObject?.GameObject.GetComponent<MeshRenderer>();
+                            var gameObjectProperty = new TilePropertyMeshRenderer()
+                            {
+                                key = property.Key,
+                                value = new PropertyMeshRenderer() { meshRenderer = meshRenderer },
+                            };
+                            meshRenderersProperties.Add(gameObjectProperty);
+                        }
+                        tileMeshRendererGroupProperties.Add(new TilePropertyMeshRendererGroup()
+                        {
+                            groupKey = kvPair.GroupKey,
+                            meshRendererProperties = meshRenderersProperties,
+                        });
+                    }
+                }
+                    break;                
+                
                 case "TilePropertyTextMeshPros":
                 case "TilePropertyTextMeshProsInjected":
                     var tileTextMeshProProperties = new List<TilePropertyTextMeshPro>();
@@ -1321,6 +1380,66 @@ namespace Bettr.Editor
             var component = gameObject.AddComponent<TilePropertyGameObjects>();
             component.tileGameObjectProperties = _tileGameObjectProperties;
             component.tileGameObjectGroupProperties = _tileGameObjectGroupProperties;
+        }
+    }
+    
+    [Serializable]
+    public class MeshRendererProperty
+    {
+        // ReSharper disable once InconsistentNaming
+        public string Key;
+
+        // ReSharper disable once InconsistentNaming
+        public string Id;
+    }
+    
+    [Serializable]
+    public class MeshRendererGroupProperty
+    {
+        // ReSharper disable once InconsistentNaming
+        public string GroupKey;
+
+        // ReSharper disable once InconsistentNaming
+        public List<MeshRendererProperty> Group;
+    }
+    
+    [Serializable]
+    public class TilePropertyMeshRenderersInjectedComponent : IComponent
+    {
+        private readonly List<TilePropertyMeshRenderer> _tileMeshRendererProperties;
+        private readonly List<TilePropertyMeshRendererGroup> _tileTextMeshProGroupProperties;
+        
+        public TilePropertyMeshRenderersInjectedComponent(List<TilePropertyMeshRenderer> properties, List<TilePropertyMeshRendererGroup> groupProperties)
+        {
+            this._tileMeshRendererProperties = properties;
+            this._tileTextMeshProGroupProperties = groupProperties;
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            var component = gameObject.AddComponent<TilePropertyMeshRenderersInjected>();
+            component.tileMeshRendererProperties = _tileMeshRendererProperties;
+            component.tileMeshRendererGroupProperties = _tileTextMeshProGroupProperties;
+        }
+    }
+    
+    [Serializable]
+    public class TilePropertyMeshRenderersComponent : IComponent
+    {
+        private readonly List<TilePropertyMeshRenderer> _tileTextMeshProProperties;
+        private readonly List<TilePropertyMeshRendererGroup> _tileTextMeshProGroupProperties;
+        
+        public TilePropertyMeshRenderersComponent(List<TilePropertyMeshRenderer> properties, List<TilePropertyMeshRendererGroup> groupProperties)
+        {
+            this._tileTextMeshProProperties = properties;
+            this._tileTextMeshProGroupProperties = groupProperties;
+        }
+
+        public void AddComponent(GameObject gameObject)
+        {
+            var component = gameObject.AddComponent<TilePropertyMeshRenderers>();
+            component.tileMeshRendererProperties = _tileTextMeshProProperties;
+            component.tileMeshRendererGroupProperties = _tileTextMeshProGroupProperties;
         }
     }
     

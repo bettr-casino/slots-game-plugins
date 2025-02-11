@@ -3,10 +3,10 @@
     "Id": "BaseGame{{mechanicName}}Mechanic",
     "Components": [
       {
-          "ComponentType": "TilePropertyGameObjectsInjected",
-          "GameObjectGroupsProperty": [           
+          "ComponentType": "TilePropertyMeshRenderersInjected",
+          "MeshRendererGroupsProperty": [           
              {
-               "GroupKey": "{{mechanicName}}SymbolGroup",
+               "GroupKey": "{{mechanicName}}SymbolGroupMeshRenderers",
                "Group": [
              {{ for symbolName in symbolKeys }}
                  {
@@ -27,41 +27,17 @@
            "Children": [
              {{ for symbolName in symbolKeys }}
              {
-               "Name": "{{symbolName}}",
-               "Layer": "SLOT_REELS",
-               "Components": [
-                 {
-                   "ComponentType": "AnimatorController",
-                   "Filename": "{{mechanicName}}__{{symbolName}}",
-                   "AnimationStates": [
-                     {
-                       "Name": "noop",
-                       "Speed": 1,
-                       "IsLoop": false,
-                       "IsDefault": true
-                     }
-                   ]
-                 }
-               ],
-               "Child": {
-                 "Name": "Pivot",
-                 "Layer": "SLOT_REELS",
-                 "Children": [
-                   {
-                     "Name": "{{symbolName}}",
-                     "Id": "{{symbolName}}",
-                     "Layer": "SLOT_REELS",
-                     "IsPrimitive": true,
-                     "Primitive": 5,
-                     "PrimitiveMaterial": "{{mechanicName}}__{{symbolName}}",
-                     "PrimitiveShader": "Bettr/Symbol",
-                     "PrimitiveTexture": "{{mechanicName}}__{{symbolName}}",
-                     "PrimitiveAlpha": 0.7,
-                     "PrimitiveTextureCreate": true,
-                     "PrimitiveTextureCreateSource": "default.png"
-                   }
-                 ]
-               }
+                "Name": "{{symbolName}}",
+                "Id": "{{symbolName}}",
+                "Layer": "SLOT_REELS",
+                "IsPrimitive": true,
+                "Primitive": 5,
+                "PrimitiveMaterial": "{{mechanicName}}__{{symbolName}}",
+                "PrimitiveShader": "Bettr/Symbol",
+                "PrimitiveTexture": "{{mechanicName}}__{{symbolName}}",
+                "PrimitiveAlpha": 0.7,
+                "PrimitiveTextureCreate": true,
+                "PrimitiveTextureCreateSource": "default.png"
              }
              {{ if !for.last }},{{ end }}{{ end }}
            ]

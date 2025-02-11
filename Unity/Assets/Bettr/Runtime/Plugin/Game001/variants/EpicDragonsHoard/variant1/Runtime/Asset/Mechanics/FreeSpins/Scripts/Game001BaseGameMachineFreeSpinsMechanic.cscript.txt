@@ -10,7 +10,7 @@ Game001BaseGameMachineFreeSpinsMechanic = {
     },
     State = {
         MechanicsPrefab = nil,
-        FreeSpinsController = nil,
+        ReelMatrixMechanic = nil,
     }
 }
 
@@ -32,8 +32,7 @@ function Game001BaseGameMachineFreeSpinsMechanic:Initialize(machine)
             mechanicsPrefab.SetActive(false)
             mechanicsPrefab.name = self.Config.Mechanic
             self.State.MechanicsPrefab = mechanicsPrefab
-            self.State.FreeSpinsController = _G["Game001BaseGameMachineFreeSpinsController"]        
-            System.Print("Game001BaseGameMachineFreeSpinsMechanic:Initialize mechanicsPrefab={0}", self.State.MechanicsPrefab.name)
+            self.State.ReelMatrixMechanic = machine.Mechanics.ReelMatrixMechanic
         end
     end
 end
@@ -47,28 +46,20 @@ function Game001BaseGameMachineFreeSpinsMechanic:OnBaseGameSpinCompleted(machine
             local machineParent = machine.MachineParent
             local mechanicsPrefab = self.State.MechanicsPrefab
             
-            local symbolTexture = BettrAssetController.LoadTexture(machine.Manifest.BundleName, machine.Manifest.BundleVersion, "FreeSpinsSymbol-SC")
+            local symbolTexture = BettrAssetController.LoadTexture(machine.Manifest.BundleName, machine.Manifest.BundleVersion, "ReelMatrixSymbol-SC")
                         
             mechanicsPrefab.SetActive(true)
             System.WaitForFrame(1)
             machineParent.SetActive(false)
             
-            self.State.FreeSpinsController.BettrFreeSpinsController.SetReelStripSymbolTexture("SC", symbolTexture) 
+            self.State.ReelMatrixController.BettrReelMatrixController.SetReelStripSymbolTextures(self.State.MechanicsPrefab) 
             
-            machine.Mechanics:StartFreeSpinsEngines(self, machine)           
+            self.State.ReelMatrixMechanic:StartEngines(self, machine) 
+            
+            System.WaitForSeconds(1)
+            
+            self.State.ReelMatrixMechanic:SpinEngines(self, machine)         
         end
     end
 end
-
-function Game001BaseGameMachineFreeSpinsMechanic:StartEnginesDefault(machine)
-    self.State.FreeSpinsController:StartEngines(machine)            
-    machine.Mechanics:SpinFreeSpinsEngines(self, machine)
-end
-
-function Game001BaseGameMachineFreeSpinsMechanic:SpinEnginesDefault(machine)
-    System.WaitForSeconds(1)            
-    self.State.FreeSpinsController:SpinEngines()
-end
-
-
 

@@ -694,8 +694,6 @@ namespace Bettr.Core
 
             Texture texture = null;
 
-#if UNITY_EDITOR
-
             // find the prefabName from the assetBundle
             string texturePath = assetBundle.GetAllAssetNames()
                 .FirstOrDefault(s =>
@@ -703,6 +701,8 @@ namespace Bettr.Core
                     (s.EndsWith(".png", System.StringComparison.OrdinalIgnoreCase) ||
                      s.EndsWith(".jpg", System.StringComparison.OrdinalIgnoreCase) ||
                      s.EndsWith(".jpeg", System.StringComparison.OrdinalIgnoreCase)));
+#if UNITY_EDITOR
+
             if (texturePath != null)
             {
                 texture = AssetDatabase.LoadAssetAtPath<Texture>(texturePath);

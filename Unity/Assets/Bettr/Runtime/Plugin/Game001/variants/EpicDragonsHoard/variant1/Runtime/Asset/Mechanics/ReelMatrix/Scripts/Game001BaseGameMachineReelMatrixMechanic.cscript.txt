@@ -47,26 +47,18 @@ function Game001BaseGameMachineReelMatrixMechanic:OnBaseGameSpinCompleted(machin
             local machineParent = machine.MachineParent
             local mechanicsPrefab = self.State.MechanicsPrefab
             
-            local symbolTexture = BettrAssetController.LoadTexture(machine.Manifest.BundleName, machine.Manifest.BundleVersion, "ReelMatrixSymbol-SC")
-                        
             mechanicsPrefab.SetActive(true)
             System.WaitForFrame(1)
-            machineParent.SetActive(false)
-            
-            self.State.ReelMatrixController.BettrReelMatrixController.SetReelStripSymbolTexture("SC", symbolTexture) 
-            
-            machine.Mechanics:StartReelMatrixEngines(self, machine)           
+            machineParent.SetActive(false)            
         end
     end
 end
 
-function Game001BaseGameMachineReelMatrixMechanic:StartEnginesDefault(machine)
+function Game001BaseGameMachineReelMatrixMechanic:StartEngines(machine)
     self.State.ReelMatrixController:StartEngines(machine)            
-    machine.Mechanics:SpinReelMatrixEngines(self, machine)
 end
 
-function Game001BaseGameMachineReelMatrixMechanic:SpinEnginesDefault(machine)
-    System.WaitForSeconds(1)            
+function Game001BaseGameMachineReelMatrixMechanic:SpinEngines(machine)
     self.State.ReelMatrixController:SpinEngines()
 end
 
