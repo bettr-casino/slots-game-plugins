@@ -300,6 +300,56 @@ namespace Bettr.Core
             }
         }
     }
+    
+    [Serializable]
+    public class BettrReelMatrixCellOutcomeDelay
+    {
+        public bool IsStoppedForSpin { get; private set; }
+        
+        public float ReelStopDelayInMsForSpin { get; private set; }
+        
+        public float TimerEndTimeForSpin { get; private set; }
+        
+        public bool IsTimerStartedForSpin { get; private set; }
+        
+        public bool IsApplySpiceReel => !this.IsStoppedForSpin && this.IsTimerStartedForSpin && Time.time >= this.TimerEndTimeForSpin;
+        
+        public BettrReelMatrixCellOutcomeDelay(float delayInMs)
+        {
+            this.IsStoppedForSpin = false;
+            this.ReelStopDelayInMsForSpin = 0;
+            this.TimerEndTimeForSpin = 0;
+            this.IsTimerStartedForSpin = false;
+            
+            // add a jitter in the range (0, delayInMs)
+            var jitteredDelayInMs = delayInMs + UnityEngine.Random.Range(0, delayInMs);
+            this.ReelStopDelayInMsForSpin = jitteredDelayInMs;
+        }
+        
+        public void SetStopped(bool isStopped)
+        {
+            this.IsStoppedForSpin = isStopped;
+        }
+
+        public void StartTimer()
+        {
+            this.IsTimerStartedForSpin = true;
+            this.TimerEndTimeForSpin += Time.time + this.ReelStopDelayInMsForSpin;
+        }
+        
+        public void ExtendTimer(float durationInSeconds)
+        {
+            this.TimerEndTimeForSpin += durationInSeconds;
+        }
+
+        public void Reset()
+        {
+            this.IsStoppedForSpin = false;
+            this.IsTimerStartedForSpin = false;
+            this.TimerEndTimeForSpin = 0;
+            this.ReelStopDelayInMsForSpin = 0;
+        }
+    }
 
     [Serializable]
     public class BettrReelMatrixOutcome
@@ -674,6 +724,8 @@ namespace Bettr.Core
         
         private BettrReelMatrixCellDispatcher BettrReelMatrixCellDispatcher { get; set; }
         
+        private  BettrReelMatrixCellOutcomeDelay BettrReelMatrixCellOutcomeDelay { get; set; }
+        
         public void Initialize(Tile tile, Table tileTable, BettrUserController userController, BettrMathController mathController, string machineID, string machineVariantID, string mechanicName, int rowIndex, int columnIndex)
         {
             this.BettrUserController = userController;
@@ -708,6 +760,9 @@ namespace Bettr.Core
             this.BettrReelMatrixCellDispatcher = new BettrReelMatrixCellDispatcher(this);
             
             this.BettrSymbolTextures = new BettrReelStripSymbolTextures();
+            
+            var applyOutcomeDelayInMs = this.BettrReelMatrixLayoutPropertiesData.GetProperty<int>("ApplyOutcomeDelay");
+            this.BettrReelMatrixCellOutcomeDelay = new BettrReelMatrixCellOutcomeDelay(applyOutcomeDelayInMs);
         }
 
         public void SetReelStripSymbolTexture(string symbolName, Texture symbolTexture)
@@ -758,6 +813,8 @@ namespace Bettr.Core
             this.BettrReelMatrixStateSummary = null;
             this.BettrReelMatrixState = null;
             this.BettrReelMatrixOutcomes = null;
+            
+            this.BettrReelMatrixCellOutcomeDelay = null;
         }
 
         public IEnumerator StartEngines()
@@ -803,6 +860,8 @@ namespace Bettr.Core
             this.BettrReelMatrixSpinState.SetProperty<bool>("OutcomeReceived", false);
 
             this.BettrReelStripSymbolsForThisSpin.Reset();
+            
+            this.BettrReelMatrixCellOutcomeDelay.Reset();
         }
     
         public void SpinReelSpinStartedRollBack()
@@ -1138,6 +1197,16 @@ namespace Bettr.Core
             }
             if (this.ShouldSpliceReel)
             {
+                var thisReelOutcomeDelay = BettrReelMatrixCellOutcomeDelay;
+                if (!thisReelOutcomeDelay.IsTimerStartedForSpin)
+                {
+                    thisReelOutcomeDelay.StartTimer();
+                }
+                if (!thisReelOutcomeDelay.IsApplySpiceReel)
+                {
+                    return;
+                }
+                
                 SpliceReel();
                 this.ShouldSpliceReel = false;
             }
@@ -1159,6 +1228,7 @@ namespace Bettr.Core
             {
                 spinState.SetProperty<string>("ReelSpinState", "ReachedOutcomeStopIndex");
                 spinState.SetProperty<bool>("ReachedOutcomeStopIndex", true);
+                BettrReelMatrixCellOutcomeDelay.SetStopped(true);
             }
         }
         
