@@ -290,7 +290,6 @@ namespace Bettr.Core
         public BettrReelMatrixCellOutcomeDelay(float delayInMs)
         {
             this.IsStoppedForSpin = false;
-            this.ReelStopDelayInMsForSpin = 0;
             this.TimerEndTimeForSpin = 0;
             this.IsTimerStartedForSpin = false;
             
@@ -320,7 +319,6 @@ namespace Bettr.Core
             this.IsStoppedForSpin = false;
             this.IsTimerStartedForSpin = false;
             this.TimerEndTimeForSpin = 0;
-            this.ReelStopDelayInMsForSpin = 0;
         }
     }
 
@@ -842,32 +840,25 @@ namespace Bettr.Core
         
         public IEnumerator SpinEngines()
         {
-            while (this.BettrReelMatrixOutcomes.HasNextOutcome())
+            ResetSpin();
+
+            var nextOutcome = this.BettrReelMatrixOutcomes.GetNextOutcome();
+                
+            this.BettrReelMatrixSpinState.SetProperty<int>("ReelStopIndex", nextOutcome);
+                
+            yield return this.OnApplyOutcomeReceived();
+                
+            this.BettrReelMatrixSpinState.SetProperty<string>("ReelSpinState", "SpinStartedRollBack");
+
+            while (true)
             {
-                ResetSpin();
-
-                var nextOutcome = this.BettrReelMatrixOutcomes.GetNextOutcome();
-                
-                this.BettrReelMatrixSpinState.SetProperty<int>("ReelStopIndex", nextOutcome);
-                
-                yield return this.OnApplyOutcomeReceived();
-                
-                this.BettrReelMatrixSpinState.SetProperty<string>("ReelSpinState", "SpinStartedRollBack");
-
-                while (true)
+                yield return null;
+                var state = this.BettrReelMatrixSpinState.GetProperty<string>("ReelSpinState");
+                if (state == "Stopped")
                 {
-                    yield return null;
-                    var state = this.BettrReelMatrixSpinState.GetProperty<string>("ReelSpinState");
-                    if (state == "Stopped")
-                    {
-                        break;
-                    }
+                    break;
                 }
-
-                yield return new WaitForSeconds(1.0f);
             }
-
-            yield break;
         }
 
         private void ResetSpin()
