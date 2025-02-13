@@ -56,11 +56,12 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             self.State.ReelMatrixMechanic:SetOutcomes(outcomesTable)
             self.State.ReelMatrixMechanic:ShowReelMatrix()            
             self.State.ReelMatrixMechanic:StartEngines()
-            
-            System.WaitForSeconds(1)            
-            self.State.ReelMatrixMechanic:SpinEngines(self, machine)
-            
         end
     end
 end
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:SpinEngines(machine)
+    self.State.ReelMatrixMechanic:SpinEngines(self, machine)
+end
+
 

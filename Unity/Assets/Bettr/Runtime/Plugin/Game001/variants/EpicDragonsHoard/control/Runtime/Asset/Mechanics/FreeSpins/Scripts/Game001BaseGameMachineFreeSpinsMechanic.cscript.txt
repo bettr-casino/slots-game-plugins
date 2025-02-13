@@ -56,11 +56,12 @@ function Game001BaseGameMachineFreeSpinsMechanic:OnBaseGameSpinCompleted(machine
             self.State.ReelMatrixMechanic:SetOutcomes(outcomesTable)
             self.State.ReelMatrixMechanic:ShowReelMatrix()            
             self.State.ReelMatrixMechanic:StartEngines()
-            
-            System.WaitForSeconds(1)            
-            self.State.ReelMatrixMechanic:SpinEngines(self, machine)
-            
         end
     end
 end
+
+function Game001BaseGameMachineFreeSpinsMechanic:SpinEngines(machine)
+    self.State.ReelMatrixMechanic:SpinEngines(self, machine)
+end
+
 
