@@ -188,18 +188,35 @@ namespace Bettr.Core
 
         public IEnumerator SpinEngines()
         {
+            Debug.Log("SpinEngines started");
+            
+            int totalTasks = 0;
+            int finishedTasks = 0;
+    
             for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
             {
-                for (int rowIndex = 1; rowIndex <= this.RowCounts[columnIndex-1]; rowIndex++)
+                for (int rowIndex = 1; rowIndex <= this.RowCounts[columnIndex - 1]; rowIndex++)
                 {
+                    totalTasks++;
                     var key = $"Row{rowIndex}Col{columnIndex}";
-                    // add to the dictionary
-                    var bettrReelMatrixCellController = this.BettrReelMatrixCellControllers[key];
-                    StartCoroutine(bettrReelMatrixCellController.SpinEngines());
+                    var cellController = this.BettrReelMatrixCellControllers[key];
+                    StartCoroutine(RunSpinEngine(cellController, () => finishedTasks++));
                 }
             }
+    
+            while (finishedTasks < totalTasks)
+            {
+                yield return null;
+            }
+    
+            // All coroutines finished
+            Debug.Log("SpinEngines finished");
+        }
 
-            yield break;
+        private IEnumerator RunSpinEngine(BettrReelMatrixCellController controller, Action onComplete)
+        {
+            yield return controller.SpinEngines();
+            onComplete?.Invoke();
         }
 
         // Dispatch Handler
