@@ -55,13 +55,18 @@ function Game001BaseGameMachineFreeSpinsMechanic:OnBaseGameSpinCompleted(machine
             self.State.ReelMatrixMechanic:SetReelStripSymbolTextures(self.State.MechanicsPrefab)
             self.State.ReelMatrixMechanic:SetOutcomes(outcomesTable)
             self.State.ReelMatrixMechanic:ShowReelMatrix()            
-            self.State.ReelMatrixMechanic:StartEngines()
+            self.State.ReelMatrixMechanic:StartEngines() 
             
-            self:SpinEngines(machine)
+            local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic, "FreeSpins")
+            summary.FreeSpins = 30
+            local freeSpins = summary.FreeSpins
             
-            System.WaitForSeconds(3)
-            
-            self:SpinEngines(machine)
+            while freeSpins > 0 do
+                freeSpins = freeSpins - 1
+                self:SpinEngines(machine)
+                System.WaitForSeconds(1)
+            end            
+                      
         end
     end
 end

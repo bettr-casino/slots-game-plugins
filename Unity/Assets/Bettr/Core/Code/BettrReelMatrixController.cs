@@ -190,8 +190,6 @@ namespace Bettr.Core
 
         public IEnumerator SpinEngines()
         {
-            Debug.Log("SpinEngines started");
-            
             int totalTasks = 0;
             int finishedTasks = 0;
     
@@ -212,7 +210,6 @@ namespace Bettr.Core
             }
     
             // All coroutines finished
-            Debug.Log("SpinEngines finished");
         }
 
         private IEnumerator RunSpinEngine(BettrReelMatrixCellController controller, Action onComplete)

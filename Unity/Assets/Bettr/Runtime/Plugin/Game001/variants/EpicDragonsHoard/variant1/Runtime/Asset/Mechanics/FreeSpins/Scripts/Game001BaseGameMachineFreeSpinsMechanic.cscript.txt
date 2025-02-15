@@ -45,21 +45,34 @@ function Game001BaseGameMachineFreeSpinsMechanic:OnBaseGameSpinCompleted(machine
             System.WaitForSeconds(1)
             local machineParent = machine.MachineParent
             local mechanicsPrefab = self.State.MechanicsPrefab
+            local reelStripData = BettrMathController.GetBaseGameMechanicDataMatrix(self.Config.Machine, self.Config.Mechanic, "ReelStrip")
             
-            local symbolTexture = BettrAssetController.LoadTexture(machine.Manifest.BundleName, machine.Manifest.BundleVersion, "ReelMatrixSymbol-SC")
-                        
-            mechanicsPrefab.SetActive(true)
-            System.WaitForFrame(1)
-            machineParent.SetActive(false)
+            machineParent.SetActive(false)            
             
-            self.State.ReelMatrixController.BettrReelMatrixController.SetReelStripSymbolTextures(self.State.MechanicsPrefab) 
+            local outcomesTable = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, self.Config.Mechanic, "Outcomes")
             
-            self.State.ReelMatrixMechanic:StartEngines(self, machine) 
+            self.State.ReelMatrixMechanic:SetReelStripData(reelStripData)
+            self.State.ReelMatrixMechanic:SetReelStripSymbolTextures(self.State.MechanicsPrefab)
+            self.State.ReelMatrixMechanic:SetOutcomes(outcomesTable)
+            self.State.ReelMatrixMechanic:ShowReelMatrix()            
+            self.State.ReelMatrixMechanic:StartEngines() 
             
-            System.WaitForSeconds(1)
+            local summary = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic, "FreeSpins")
+            summary.FreeSpins = 30
+            local freeSpins = summary.FreeSpins
             
-            self.State.ReelMatrixMechanic:SpinEngines(self, machine)         
+            while freeSpins > 0 do
+                freeSpins = freeSpins - 1
+                self:SpinEngines(machine)
+                System.WaitForSeconds(1)
+            end            
+                      
         end
     end
 end
+
+function Game001BaseGameMachineFreeSpinsMechanic:SpinEngines(machine)
+    self.State.ReelMatrixMechanic:SpinEngines(self, machine)
+end
+
 
