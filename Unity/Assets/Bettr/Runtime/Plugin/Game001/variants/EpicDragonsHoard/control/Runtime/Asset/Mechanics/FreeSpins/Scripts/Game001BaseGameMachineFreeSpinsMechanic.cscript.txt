@@ -58,6 +58,10 @@ function Game001BaseGameMachineFreeSpinsMechanic:OnBaseGameSpinCompleted(machine
             self.State.ReelMatrixMechanic:StartEngines()
             
             self:SpinEngines(machine)
+            
+            System.WaitForSeconds(3)
+            
+            self:SpinEngines(machine)
         end
     end
 end

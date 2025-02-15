@@ -30,6 +30,8 @@ namespace Bettr.Core
         
         public int[] RowCounts { get; private set; }
         public int ColumnCount { get; private set;  }
+        
+        const string ReelID = "ReelID";
 
         private void Awake()
         {
@@ -100,7 +102,7 @@ namespace Bettr.Core
             for (int i = 0; i < outcomesTable.Length; i++)
             {
                 var outcomeRow = (Table) outcomesTable[i + 1];
-                var cell = (string) outcomeRow["Cell"];
+                var cell = (string) outcomeRow[ReelID];
                 var bettrReelMatrixCellController = this.BettrReelMatrixCellControllers[cell];
                 var outcomeReelStopIndexesStr = (string) outcomeRow["OutcomeReelStopIndexes"];
                 // parse the comma separated string
@@ -563,6 +565,10 @@ namespace Bettr.Core
         private int RowIndex { get; set; }
         private int ColumnIndex { get; set; }
         
+        const string ReelID = "ReelID";
+        
+        const string Cell = "Cell";
+        
         public BettrReelMatrixSpinState(BettrReelMatrixCellController cellController, BettrMathController mathController)
         {
             SpinStateTable = mathController.GetBaseGameMechanic(2, cellController.MachineID, cellController.MechanicName, "SpinState");
@@ -575,7 +581,7 @@ namespace Bettr.Core
         public T GetProperty<T>(string propKey)
         {
             var key = $"Row{RowIndex}Col{ColumnIndex}";
-            var row = MathController.GetTableRow(SpinStateTable, "Cell", key);
+            var row = MathController.GetTableRow(SpinStateTable, Cell, key);
             var propValue = row[propKey];
             if (propValue is T value) { return value; }
             // Handle special case: double to int conversion
@@ -586,7 +592,7 @@ namespace Bettr.Core
         public void SetProperty<T>(string propKey, T propValue)
         {
             var key = $"Row{RowIndex}Col{ColumnIndex}";
-            var row = MathController.GetTableRow(SpinStateTable, "Cell", key);
+            var row = MathController.GetTableRow(SpinStateTable, Cell, key);
             var oldPropValue = row[propKey];
             row[propKey] = propValue;
         }
