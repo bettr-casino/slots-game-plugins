@@ -38,14 +38,65 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:Initialize(machi
     end
 end
 
-function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCompleted(machine, freeSpinsMechanic)
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCompleted(machine)
     series
         do
-            System.Print("{{machineName}}BaseGameMachine{{mechanicName}}Mechanic:{{machineName}}BaseGameState.SpinState.First.State={0}", {{machineName}}BaseGameState.SpinState.First.State)
-            {{machineName}}BaseGameState.SpinState.First.State = "Waiting"
-            System.WaitForSeconds(1)
+            local freeSpinsMechanic = machine.Mechanics.FreeSpinsMechanic
+            if freeSpinsMechanic == nil then
+                return
+            end       
+            
+            local summaryTable = BettrMathController.GetBaseGameMechanicSummary(freeSpinsMechanic.Config.Machine, freeSpinsMechanic.Config.Mechanic)            
+            local outcomeCount = summaryTable.OutcomeCount
+            if outcomeCount <= 0 then
+                return
+            end     
+            
+            if true then
+                return
+            end       
+            
+            {{machineName}}BaseGameState.SpinState.First.State = "Waiting"                
+
+            local reelStripData = BettrMathController.GetBaseGameMechanicDataMatrix(freeSpinsMechanic.Config.Machine, freeSpinsMechanic.Config.Mechanic, "ReelStrip")
+            local outcomesTable = BettrMathController.GetBaseGameMechanicMatrix(freeSpinsMechanic.Config.Machine, freeSpinsMechanic.Config.Mechanic, "Outcomes")
+            
             local mechanicsPrefab = self.State.MechanicsPrefab            
-            mechanicsPrefab.SetActive(true)
+            local machineParent = machine.MachineParent
+
+            machineParent.SetActive(false)
+            
+            System.WaitForSeconds(1)
+            
+            mechanicsPrefab.SetActive(true)            
+            System.WaitForFrame(2)                     
+            
+            self:SetReelStripData(reelStripData)
+            self:SetReelStripSymbolTextures(freeSpinsMechanic.State.MechanicsPrefab)
+            self:SetOutcomes(outcomesTable)
+            self:Show{{mechanicName}}()            
+            self:StartEngines() 
+            
+            System.WaitForFrame(2)
+            
+            local freeSpins = 3
+            
+            while freeSpins > 0 do
+                freeSpins = freeSpins - 1
+                self:SpinEngines(machine)
+                System.WaitForSeconds(1)
+            end     
+            
+            System.WaitForSeconds(1)
+            
+            mechanicsPrefab.SetActive(false)
+            
+            System.WaitForSeconds(1)
+                                    
+            machineParent.SetActive(true)   
+            
+            machine:OnBaseGameSpinCompleted()
+            
         end
     end
 end

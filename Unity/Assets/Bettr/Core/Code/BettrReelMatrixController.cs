@@ -79,20 +79,6 @@ namespace Bettr.Core
             this.TileTable["BettrReelMatrixController"] = this;
         }
         
-        private void OnDisable()
-        {
-            var components = this.gameObject.GetComponents<BettrReelMatrixCellController>();
-            foreach (var component in components)
-            {
-                Destroy(component);   
-            }
-
-            if (BettrReelMatrixCellControllers != null)
-            {
-                this.BettrReelMatrixCellControllers.Clear();
-            }
-        }
-        
         //
         // APIs
         // 
@@ -605,16 +591,6 @@ namespace Bettr.Core
         }
     }
     
-    public class BettrReelMatrixStateSummary
-    {
-        public Table StateSummaryTable { get; internal set; }
-        
-        public BettrReelMatrixStateSummary(BettrReelMatrixCellController cellController, BettrMathController mathController)
-        {
-            StateSummaryTable = mathController.GetBaseGameMechanicSummary(cellController.MachineID, cellController.MechanicName, "ReelMatrix");
-        }
-    }
-    
     public class BettrReelMatrixReelSet
     {
         private BettrReelMatrixReelStrip ReelStrip { get; set; }
@@ -720,7 +696,6 @@ namespace Bettr.Core
         public BettrReelMatrixSymbolGroupsData BettrReelMatrixSymbolGroupsData { get; internal set; }
         public BettrReelMatrixSpinState BettrReelMatrixSpinState { get; internal set; }
         public BettrReelMatrixState BettrReelMatrixState { get; internal set; }
-        public BettrReelMatrixStateSummary BettrReelMatrixStateSummary { get; internal set; }
         public BettrReelMatrixOutcomes BettrReelMatrixOutcomes { get; internal set; }
         
         public BettrReelStripSymbolsForThisSpin BettrReelStripSymbolsForThisSpin { get; internal set; }
@@ -762,7 +737,6 @@ namespace Bettr.Core
             
             this.BettrReelMatrixSpinState = new BettrReelMatrixSpinState(this, BettrMathController);
             
-            this.BettrReelMatrixStateSummary = new BettrReelMatrixStateSummary(this, BettrMathController);
             this.BettrReelMatrixState = new BettrReelMatrixState(this, BettrMathController);
             this.BettrReelMatrixOutcomes = new BettrReelMatrixOutcomes();
 
@@ -821,7 +795,6 @@ namespace Bettr.Core
             this.BettrReelMatrixReelStrip = null;
             this.BettrReelMatrixSpinState = null;
             
-            this.BettrReelMatrixStateSummary = null;
             this.BettrReelMatrixState = null;
             this.BettrReelMatrixOutcomes = null;
             

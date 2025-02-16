@@ -38,14 +38,41 @@ function Game001BaseGameMachineReelMatrixMechanic:Initialize(machine)
     end
 end
 
-function Game001BaseGameMachineReelMatrixMechanic:OnBaseGameSpinCompleted(machine, freeSpinsMechanic)
+function Game001BaseGameMachineReelMatrixMechanic:OnBaseGameSpinCompleted(machine)
     series
         do
-            System.Print("Game001BaseGameMachineReelMatrixMechanic:Game001BaseGameState.SpinState.First.State={0}", Game001BaseGameState.SpinState.First.State)
-            Game001BaseGameState.SpinState.First.State = "Waiting"
-            System.WaitForSeconds(1)
+            local freeSpinsMechanic = machine.Mechanics.FreeSpinsMechanic
+            if freeSpinsMechanic == nil then
+                return
+            end       
+            
+            local freeSpinsMechanic = freeSpinsMechanic.State.Mechanic
+            local freeSpinsMachine = freeSpinsMechanic.State.Machine     
+                        
+            Game001BaseGameState.SpinState.First.State = "Waiting"                
+
             local mechanicsPrefab = self.State.MechanicsPrefab            
-            mechanicsPrefab.SetActive(true)
+            local machineParent = machine.MachineParent
+            local reelStripData = BettrMathController.GetBaseGameMechanicDataMatrix(freeSpinsMachine, freeSpineMechanic, "ReelStrip")
+            local outcomesTable = BettrMathController.GetBaseGameMechanicMatrix(freeSpinsMachine, freeSpineMechanic, "Outcomes")
+
+            mechanicsPrefab.SetActive(true)                        
+            machineParent.SetActive(false)                        
+            
+            self.State.ReelMatrixMechanic:SetReelStripData(reelStripData)
+            self.State.ReelMatrixMechanic:SetReelStripSymbolTextures(self.State.MechanicsPrefab)
+            self.State.ReelMatrixMechanic:SetOutcomes(outcomesTable)
+            self.State.ReelMatrixMechanic:ShowReelMatrix()            
+            self.State.ReelMatrixMechanic:StartEngines() 
+            
+            local freeSpins = 30
+            
+            while freeSpins > 0 do
+                freeSpins = freeSpins - 1
+                freeSpinsMechanic:SpinEngines(machine)
+                System.WaitForSeconds(1)
+            end     
+            
         end
     end
 end
