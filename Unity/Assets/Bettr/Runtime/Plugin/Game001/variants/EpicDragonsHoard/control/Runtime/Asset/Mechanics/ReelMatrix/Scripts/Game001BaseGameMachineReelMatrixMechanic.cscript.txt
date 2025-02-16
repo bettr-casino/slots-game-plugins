@@ -41,11 +41,58 @@ end
 function Game001BaseGameMachineReelMatrixMechanic:OnBaseGameSpinCompleted(machine)
     series
         do
-            System.Print("Game001BaseGameMachineReelMatrixMechanic:Game001BaseGameState.SpinState.First.State={0}", Game001BaseGameState.SpinState.First.State)
-            Game001BaseGameState.SpinState.First.State = "Waiting"
-            System.WaitForSeconds(1)
+            local freeSpinsMechanic = machine.Mechanics.FreeSpinsMechanic
+            if freeSpinsMechanic == nil then
+                return
+            end       
+            
+            local summaryTable = BettrMathController.GetBaseGameMechanicSummary(freeSpinsMechanic.Config.Machine, freeSpinsMechanic.Config.Mechanic)            
+            local outcomeCount = summaryTable.OutcomeCount
+            if outcomeCount <= 0 then
+                return
+            end 
+            
+            Game001BaseGameState.SpinState.First.State = "Waiting"                
+
+            local reelStripData = BettrMathController.GetBaseGameMechanicDataMatrix(freeSpinsMechanic.Config.Machine, freeSpinsMechanic.Config.Mechanic, "ReelStrip")
+            local outcomesTable = BettrMathController.GetBaseGameMechanicMatrix(freeSpinsMechanic.Config.Machine, freeSpinsMechanic.Config.Mechanic, "Outcomes")
+            
             local mechanicsPrefab = self.State.MechanicsPrefab            
-            mechanicsPrefab.SetActive(true)
+            local machineParent = machine.MachineParent
+
+            machineParent.SetActive(false)
+            
+            System.WaitForSeconds(1)
+            
+            mechanicsPrefab.SetActive(true)            
+            System.WaitForFrame(2)                     
+            
+            self:SetReelStripData(reelStripData)
+            self:SetReelStripSymbolTextures(freeSpinsMechanic.State.MechanicsPrefab)
+            self:SetOutcomes(outcomesTable)
+            self:ShowReelMatrix()            
+            self:StartEngines() 
+            
+            System.WaitForFrame(2)
+            
+            local freeSpins = 3
+            
+            while freeSpins > 0 do
+                freeSpins = freeSpins - 1
+                self:SpinEngines(machine)
+                System.WaitForSeconds(1)
+            end     
+            
+            System.WaitForSeconds(1)
+            
+            mechanicsPrefab.SetActive(false)
+            
+            System.WaitForSeconds(1)
+                                    
+            machineParent.SetActive(true)   
+            
+            machine:OnBaseGameSpinCompleted()
+            
         end
     end
 end
@@ -54,12 +101,12 @@ function Game001BaseGameMachineReelMatrixMechanic:SetReelStripData(reelStripData
     self.State.ReelMatrixController:SetReelStripData(reelStripData)
 end
 
-function Game001BaseGameMachineReelMatrixMechanic:SetReelStopIndexes(reelStopIndexes)
-    self.State.ReelMatrixController:SetReelStopIndexes(reelStopIndexes)
-end
-
 function Game001BaseGameMachineReelMatrixMechanic:SetReelStripSymbolTextures(prefab)
     self.State.ReelMatrixController:SetReelStripSymbolTextures(prefab)
+end
+
+function Game001BaseGameMachineReelMatrixMechanic:SetOutcomes(outcomesTable)
+    self.State.ReelMatrixController:SetOutcomes(outcomesTable)
 end
 
 function Game001BaseGameMachineReelMatrixMechanic:ShowReelMatrix()

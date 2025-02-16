@@ -75,6 +75,8 @@ namespace Bettr.Core
         
         public BettrExperimentController BettrExperimentController { get; private set; }
         
+        public static BettrOutcomeController Instance { get; private set; }
+        
         public BettrOutcomeController(BettrAssetScriptsController bettrAssetScriptsController, BettrUserController bettrUserController, BettrExperimentController experimentController, string hashKey)
         {
             TileController.RegisterType<BettrOutcomeController>("BettrOutcomeController");
@@ -84,6 +86,8 @@ namespace Bettr.Core
             this.BettrUserController = bettrUserController;
             this.BettrExperimentController = experimentController;
             this.HashKey = hashKey;
+            
+            Instance = this;
         }
 
         public IEnumerator WaitForApplyOutcomeDelay(double outcomeDelayInMs)

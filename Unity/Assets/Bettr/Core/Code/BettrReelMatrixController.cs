@@ -23,13 +23,15 @@ namespace Bettr.Core
         
         private BettrUserController BettrUserController { get; set; }
         private BettrMathController BettrMathController { get; set; }
-
+        
         internal BettrReelMatrixCellController BettrReelMatrixCellController { get; private set; }
         
         internal Dictionary<string, BettrReelMatrixCellController> BettrReelMatrixCellControllers { get; private set; }
         
         public int[] RowCounts { get; private set; }
         public int ColumnCount { get; private set;  }
+        
+        const string ReelID = "ReelID";
 
         private void Awake()
         {
@@ -77,45 +79,32 @@ namespace Bettr.Core
             this.TileTable["BettrReelMatrixController"] = this;
         }
         
-        private void OnDisable()
-        {
-            var components = this.gameObject.GetComponents<BettrReelMatrixCellController>();
-            foreach (var component in components)
-            {
-                Destroy(component);   
-            }
-
-            if (BettrReelMatrixCellControllers != null)
-            {
-                this.BettrReelMatrixCellControllers.Clear();
-            }
-        }
-        
         //
         // APIs
         // 
-
-        public void SetReelStopIndexes(Table reelStopIndexesTable)
+        
+        public void SetOutcomes(Table outcomesTable)
         {
-            var reelStopIndexes = new int[reelStopIndexesTable.Length];
-            for (int i = 0; i < reelStopIndexesTable.Length; i++)
+            for (int i = 0; i < outcomesTable.Length; i++)
             {
-                var reelStopIndexRow = (Table) reelStopIndexesTable[i + 1];
-                var reelStopIndex = (int) (double) reelStopIndexRow["ReelStopIndex"];
-                reelStopIndexes[i] = reelStopIndex;
-            }
-            // update the reel stop indexes on the ReelSpinState
-            for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
-            {
-                for (int rowIndex = 1; rowIndex <= this.RowCounts[columnIndex - 1]; rowIndex++)
+                var outcomeRow = (Table) outcomesTable[i + 1];
+                var cell = (string) outcomeRow[ReelID];
+                var bettrReelMatrixCellController = this.BettrReelMatrixCellControllers[cell];
+                var outcomeReelStopIndexesStr = (string) outcomeRow["OutcomeReelStopIndexes"];
+                // parse the comma separated string
+                // first remove the trailing , if any
+                if (outcomeReelStopIndexesStr.EndsWith(","))
                 {
-                    var key = $"Row{rowIndex}Col{columnIndex}";
-                    var bettrReelMatrixCellController = this.BettrReelMatrixCellControllers[key];
-                    bettrReelMatrixCellController.BettrReelMatrixSpinState.SetProperty<int>("ReelStopIndex", reelStopIndexes[rowIndex - 1]);
+                    outcomeReelStopIndexesStr = outcomeReelStopIndexesStr.Remove(outcomeReelStopIndexesStr.Length - 1);
                 }
+                var outcomeReelStopIndexes = outcomeReelStopIndexesStr.Split(',').Select(int.Parse).ToArray();
+                // TODO: replace with initial reel stop index
+                var initialReelStopIndex = 0;
+                bettrReelMatrixCellController.SetReelOutcomes(outcomeReelStopIndexes);
+                bettrReelMatrixCellController.BettrReelMatrixSpinState.SetProperty<int>("ReelStopIndex", initialReelStopIndex);
             }
         }
-        
+
         /**
          * This sets the reel strip data on the ReelMatrix.
          * ReelMatrix will use a default reel strip if not set.
@@ -184,49 +173,35 @@ namespace Bettr.Core
             }
             yield break;
         }
-        
-        public IEnumerator OnOutcomeReceived()
+
+        public IEnumerator SpinEngines()
         {
+            int totalTasks = 0;
+            int finishedTasks = 0;
+    
             for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
             {
-                for (int rowIndex = 1; rowIndex <= this.RowCounts[columnIndex-1]; rowIndex++)
+                for (int rowIndex = 1; rowIndex <= this.RowCounts[columnIndex - 1]; rowIndex++)
                 {
+                    totalTasks++;
                     var key = $"Row{rowIndex}Col{columnIndex}";
-                    // add to the dictionary
-                    var bettrReelMatrixCellController = this.BettrReelMatrixCellControllers[key];
-                    StartCoroutine(bettrReelMatrixCellController.OnOutcomeReceived());
+                    var cellController = this.BettrReelMatrixCellControllers[key];
+                    StartCoroutine(RunSpinEngine(cellController, () => finishedTasks++));
                 }
             }
-            yield break;
-        }
-        
-        public IEnumerator OnApplyOutcomeReceived()
-        {
-            for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
+    
+            while (finishedTasks < totalTasks)
             {
-                for (int rowIndex = 1; rowIndex <= this.RowCounts[columnIndex-1]; rowIndex++)
-                {
-                    var key = $"Row{rowIndex}Col{columnIndex}";
-                    // add to the dictionary
-                    var bettrReelMatrixCellController = this.BettrReelMatrixCellControllers[key];
-                    StartCoroutine(bettrReelMatrixCellController.OnApplyOutcomeReceived());
-                }
+                yield return null;
             }
-            yield break;
+    
+            // All coroutines finished
         }
 
-        public void SpinEngines()
+        private IEnumerator RunSpinEngine(BettrReelMatrixCellController controller, Action onComplete)
         {
-            for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
-            {
-                for (int rowIndex = 1; rowIndex <= this.RowCounts[columnIndex-1]; rowIndex++)
-                {
-                    var key = $"Row{rowIndex}Col{columnIndex}";
-                    // add to the dictionary
-                    var bettrReelMatrixCellController = this.BettrReelMatrixCellControllers[key];
-                    bettrReelMatrixCellController.SpinEngines();
-                }
-            }
+            yield return controller.SpinEngines();
+            onComplete?.Invoke();
         }
 
         // Dispatch Handler
@@ -300,6 +275,54 @@ namespace Bettr.Core
             }
         }
     }
+    
+    [Serializable]
+    public class BettrReelMatrixCellOutcomeDelay
+    {
+        public bool IsStoppedForSpin { get; private set; }
+        
+        public float ReelStopDelayInMsForSpin { get; private set; }
+        
+        public float TimerEndTimeForSpin { get; private set; }
+        
+        public bool IsTimerStartedForSpin { get; private set; }
+        
+        public bool IsApplySpiceReel => !this.IsStoppedForSpin && this.IsTimerStartedForSpin && Time.time >= this.TimerEndTimeForSpin;
+        
+        public BettrReelMatrixCellOutcomeDelay(float delayInMs)
+        {
+            this.IsStoppedForSpin = false;
+            this.TimerEndTimeForSpin = 0;
+            this.IsTimerStartedForSpin = false;
+            
+            // add a jitter in the range (0, delayInMs)
+            var jitteredDelayInMs = delayInMs + UnityEngine.Random.Range(0, delayInMs);
+            this.ReelStopDelayInMsForSpin = jitteredDelayInMs;
+        }
+        
+        public void SetStopped(bool isStopped)
+        {
+            this.IsStoppedForSpin = isStopped;
+        }
+
+        public void StartTimer()
+        {
+            this.IsTimerStartedForSpin = true;
+            this.TimerEndTimeForSpin += Time.time + this.ReelStopDelayInMsForSpin / 1000;
+        }
+        
+        public void ExtendTimer(float durationInSeconds)
+        {
+            this.TimerEndTimeForSpin += durationInSeconds;
+        }
+
+        public void Reset()
+        {
+            this.IsStoppedForSpin = false;
+            this.IsTimerStartedForSpin = false;
+            this.TimerEndTimeForSpin = 0;
+        }
+    }
 
     [Serializable]
     public class BettrReelMatrixOutcome
@@ -316,17 +339,37 @@ namespace Bettr.Core
     public class BettrReelMatrixOutcomes
     {
         public List<BettrReelMatrixOutcome> Outcomes { get; internal set; }
+        
+        public int CurrentOutcomeIndex { get; private set; }
+        
+        public int OutcomeCount => Outcomes.Count;
 
         public int LastOutcomeReelStopIndex => Outcomes.Count > 0 ? Outcomes[Outcomes.Count - 1].OutcomeReelStopIndex : -1;
         
         public BettrReelMatrixOutcomes()
         {
             Outcomes = new List<BettrReelMatrixOutcome>();
+            CurrentOutcomeIndex = -1;
         }
         
-        public void AddOutcome(int outcomeReelStopIndex)
+        public void AddOutcomes(int[] outcomeReelStopIndexes)
         {
-            Outcomes.Add(new BettrReelMatrixOutcome(outcomeReelStopIndex));
+            for (int i = 0; i < outcomeReelStopIndexes.Length; i++)
+            {
+                Outcomes.Add(new BettrReelMatrixOutcome(outcomeReelStopIndexes[i]));
+            }
+        }
+
+        public int GetNextOutcome()
+        {
+            CurrentOutcomeIndex++;
+            return Outcomes[CurrentOutcomeIndex].OutcomeReelStopIndex;
+        }
+
+        public bool HasNextOutcome()
+        {
+            var nextOutcomeIndex = CurrentOutcomeIndex + 1;
+            return nextOutcomeIndex < Outcomes.Count;
         }
     }
 
@@ -505,6 +548,10 @@ namespace Bettr.Core
         private int RowIndex { get; set; }
         private int ColumnIndex { get; set; }
         
+        const string ReelID = "ReelID";
+        
+        const string Cell = "Cell";
+        
         public BettrReelMatrixSpinState(BettrReelMatrixCellController cellController, BettrMathController mathController)
         {
             SpinStateTable = mathController.GetBaseGameMechanic(2, cellController.MachineID, cellController.MechanicName, "SpinState");
@@ -517,7 +564,7 @@ namespace Bettr.Core
         public T GetProperty<T>(string propKey)
         {
             var key = $"Row{RowIndex}Col{ColumnIndex}";
-            var row = MathController.GetTableRow(SpinStateTable, "Cell", key);
+            var row = MathController.GetTableRow(SpinStateTable, Cell, key);
             var propValue = row[propKey];
             if (propValue is T value) { return value; }
             // Handle special case: double to int conversion
@@ -528,7 +575,7 @@ namespace Bettr.Core
         public void SetProperty<T>(string propKey, T propValue)
         {
             var key = $"Row{RowIndex}Col{ColumnIndex}";
-            var row = MathController.GetTableRow(SpinStateTable, "Cell", key);
+            var row = MathController.GetTableRow(SpinStateTable, Cell, key);
             var oldPropValue = row[propKey];
             row[propKey] = propValue;
         }
@@ -541,16 +588,6 @@ namespace Bettr.Core
         public BettrReelMatrixState(BettrReelMatrixCellController cellController, BettrMathController mathController)
         {
             StateTable = mathController.GetBaseGameMechanic(cellController.MachineID, cellController.MechanicName, "ReelMatrix");
-        }
-    }
-    
-    public class BettrReelMatrixStateSummary
-    {
-        public Table StateSummaryTable { get; internal set; }
-        
-        public BettrReelMatrixStateSummary(BettrReelMatrixCellController cellController, BettrMathController mathController)
-        {
-            StateSummaryTable = mathController.GetBaseGameMechanicSummary(cellController.MachineID, cellController.MechanicName, "ReelMatrix");
         }
     }
     
@@ -659,7 +696,6 @@ namespace Bettr.Core
         public BettrReelMatrixSymbolGroupsData BettrReelMatrixSymbolGroupsData { get; internal set; }
         public BettrReelMatrixSpinState BettrReelMatrixSpinState { get; internal set; }
         public BettrReelMatrixState BettrReelMatrixState { get; internal set; }
-        public BettrReelMatrixStateSummary BettrReelMatrixStateSummary { get; internal set; }
         public BettrReelMatrixOutcomes BettrReelMatrixOutcomes { get; internal set; }
         
         public BettrReelStripSymbolsForThisSpin BettrReelStripSymbolsForThisSpin { get; internal set; }
@@ -673,6 +709,8 @@ namespace Bettr.Core
         private BettrMathController BettrMathController { get; set; }
         
         private BettrReelMatrixCellDispatcher BettrReelMatrixCellDispatcher { get; set; }
+        
+        private  BettrReelMatrixCellOutcomeDelay BettrReelMatrixCellOutcomeDelay { get; set; }
         
         public void Initialize(Tile tile, Table tileTable, BettrUserController userController, BettrMathController mathController, string machineID, string machineVariantID, string mechanicName, int rowIndex, int columnIndex)
         {
@@ -699,7 +737,6 @@ namespace Bettr.Core
             
             this.BettrReelMatrixSpinState = new BettrReelMatrixSpinState(this, BettrMathController);
             
-            this.BettrReelMatrixStateSummary = new BettrReelMatrixStateSummary(this, BettrMathController);
             this.BettrReelMatrixState = new BettrReelMatrixState(this, BettrMathController);
             this.BettrReelMatrixOutcomes = new BettrReelMatrixOutcomes();
 
@@ -708,6 +745,9 @@ namespace Bettr.Core
             this.BettrReelMatrixCellDispatcher = new BettrReelMatrixCellDispatcher(this);
             
             this.BettrSymbolTextures = new BettrReelStripSymbolTextures();
+            
+            var applyOutcomeDelayInMs = this.BettrReelMatrixLayoutPropertiesData.GetProperty<int>("ApplyOutcomeDelay");
+            this.BettrReelMatrixCellOutcomeDelay = new BettrReelMatrixCellOutcomeDelay(applyOutcomeDelayInMs);
         }
 
         public void SetReelStripSymbolTexture(string symbolName, Texture symbolTexture)
@@ -720,11 +760,11 @@ namespace Bettr.Core
             this.BettrReelMatrixReelStrip = new BettrReelMatrixReelStrip(reelSymbols);
         }
         
-        public void SetReelOutcome(int reelStopIndex)
+        public void SetReelOutcomes(int[] outcomes)
         {
-            this.BettrReelMatrixOutcomes.AddOutcome(reelStopIndex);
+            this.BettrReelMatrixOutcomes.AddOutcomes(outcomes);
         }
-
+        
         private void Update()
         {
             var spinStateTable = this.BettrReelMatrixSpinState;
@@ -755,9 +795,10 @@ namespace Bettr.Core
             this.BettrReelMatrixReelStrip = null;
             this.BettrReelMatrixSpinState = null;
             
-            this.BettrReelMatrixStateSummary = null;
             this.BettrReelMatrixState = null;
             this.BettrReelMatrixOutcomes = null;
+            
+            this.BettrReelMatrixCellOutcomeDelay = null;
         }
 
         public IEnumerator StartEngines()
@@ -783,11 +824,6 @@ namespace Bettr.Core
             yield break;
         }
     
-        public IEnumerator OnOutcomeReceived()
-        {
-            yield break;
-        }
-    
         public IEnumerator OnApplyOutcomeReceived()
         {
             this.ShouldSpliceReel = true;
@@ -795,14 +831,38 @@ namespace Bettr.Core
             yield break;
         }
         
-        public void SpinEngines()
+        public IEnumerator SpinEngines()
+        {
+            ResetSpin();
+
+            var nextOutcome = this.BettrReelMatrixOutcomes.GetNextOutcome();
+                
+            this.BettrReelMatrixSpinState.SetProperty<int>("ReelStopIndex", nextOutcome);
+                
+            yield return this.OnApplyOutcomeReceived();
+                
+            this.BettrReelMatrixSpinState.SetProperty<string>("ReelSpinState", "SpinStartedRollBack");
+
+            while (true)
+            {
+                yield return null;
+                var state = this.BettrReelMatrixSpinState.GetProperty<string>("ReelSpinState");
+                if (state == "Stopped")
+                {
+                    break;
+                }
+            }
+        }
+
+        private void ResetSpin()
         {
             this.ShouldSpliceReel = false;
-            this.BettrReelMatrixSpinState.SetProperty<string>("ReelSpinState", "SpinStartedRollBack");
             this.BettrReelMatrixSpinState.SetProperty<bool>("ReachedOutcomeStopIndex", false);
             this.BettrReelMatrixSpinState.SetProperty<bool>("OutcomeReceived", false);
 
             this.BettrReelStripSymbolsForThisSpin.Reset();
+            
+            this.BettrReelMatrixCellOutcomeDelay.Reset();
         }
     
         public void SpinReelSpinStartedRollBack()
@@ -991,7 +1051,7 @@ namespace Bettr.Core
         // Dispatch Handler
         public void SpinReelSpinning()
         {
-            var speed = BettrUserController.UserInSlamStopMode ? 4 : 4;
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 1;
             
             var spinState = this.BettrReelMatrixSpinState;
             var layoutProperties = this.BettrReelMatrixLayoutPropertiesData;
@@ -1138,6 +1198,16 @@ namespace Bettr.Core
             }
             if (this.ShouldSpliceReel)
             {
+                var thisReelOutcomeDelay = BettrReelMatrixCellOutcomeDelay;
+                if (!thisReelOutcomeDelay.IsTimerStartedForSpin)
+                {
+                    thisReelOutcomeDelay.StartTimer();
+                }
+                if (!thisReelOutcomeDelay.IsApplySpiceReel)
+                {
+                    return;
+                }
+                
                 SpliceReel();
                 this.ShouldSpliceReel = false;
             }
@@ -1159,6 +1229,7 @@ namespace Bettr.Core
             {
                 spinState.SetProperty<string>("ReelSpinState", "ReachedOutcomeStopIndex");
                 spinState.SetProperty<bool>("ReachedOutcomeStopIndex", true);
+                BettrReelMatrixCellOutcomeDelay.SetStopped(true);
             }
         }
         

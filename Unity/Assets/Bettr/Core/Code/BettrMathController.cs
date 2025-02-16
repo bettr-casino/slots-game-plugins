@@ -170,7 +170,13 @@ namespace Bettr.Core
         public Table GetBaseGameMechanicMatrix(string machineID, string mechanicName)
         {
             // ReSharper disable once IntroduceOptionalParameters.Global
-            return GetBaseGameMechanicMatrix(1, machineID, mechanicName, null);
+            return GetBaseGameMechanicMatrix(machineID, mechanicName, null);
+        }
+
+        public Table GetBaseGameMechanicMatrix(string machineID, string mechanicName, string pk)
+        {
+            // ReSharper disable once IntroduceOptionalParameters.Global
+            return GetBaseGameMechanicMatrix(1, machineID, mechanicName, pk);
         }
         
         public Table GetBaseGameMechanicMatrix(int index, string machineID, string mechanicName, string pk)

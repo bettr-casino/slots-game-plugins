@@ -37,27 +37,4 @@ function Game001BaseGameMachineFreeSpinsMechanic:Initialize(machine)
     end
 end
 
-function Game001BaseGameMachineFreeSpinsMechanic:OnBaseGameSpinCompleted(machine)
-    series
-        do
-            System.Print("Game001BaseGameMachineFreeSpinsMechanic:Game001BaseGameState.SpinState.First.State={0}", Game001BaseGameState.SpinState.First.State)
-            Game001BaseGameState.SpinState.First.State = "Waiting"
-            System.WaitForSeconds(1)
-            local machineParent = machine.MachineParent
-            local mechanicsPrefab = self.State.MechanicsPrefab
-            local reelStopIndexes = BettrMathController.GetBaseGameMechanicMatrix(2, self.Config.Machine, self.Config.Mechanic, "Initial")
-            local reelStripData = BettrMathController.GetBaseGameMechanicDataMatrix(self.Config.Machine, self.Config.Mechanic, "ReelStrip")            
-            local machineParent = machine.MachineParent
-            machineParent.SetActive(false)            
-            
-            self.State.ReelMatrixMechanic:SetReelStopIndexes(reelStopIndexes)
-            self.State.ReelMatrixMechanic:SetReelStripData(reelStripData)
-            self.State.ReelMatrixMechanic:SetReelStripSymbolTextures(self.State.MechanicsPrefab)
-            self.State.ReelMatrixMechanic:ShowReelMatrix()            
-            self.State.ReelMatrixMechanic:StartEngines()
-            System.WaitForSeconds(1)            
-            self.State.ReelMatrixMechanic:SpinEngines(self, machine)         
-        end
-    end
-end
 
