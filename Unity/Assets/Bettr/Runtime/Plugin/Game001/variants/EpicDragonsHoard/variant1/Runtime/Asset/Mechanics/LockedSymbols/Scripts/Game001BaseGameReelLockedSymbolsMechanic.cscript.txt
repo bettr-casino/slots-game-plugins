@@ -1,0 +1,22 @@
+require "math"
+require "Core"
+
+Game001BaseGameReelLockedSymbolsMechanic = {
+    Config = {
+        Machine = "Game001",
+        Variant = "EpicDragonsHoard",
+        Experiment = "variant1",
+        Mechanic = "LockedSymbols",
+    },
+}
+
+function Game001BaseGameReelLockedSymbolsMechanic:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Game001BaseGameReelLockedSymbolsMechanic:Initialize(reel)
+end
+

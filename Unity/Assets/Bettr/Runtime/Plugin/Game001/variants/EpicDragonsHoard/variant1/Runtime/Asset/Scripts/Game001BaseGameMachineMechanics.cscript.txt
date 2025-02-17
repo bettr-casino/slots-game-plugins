@@ -5,6 +5,7 @@ require "Game001BaseGameMachineScattersMechanic"
 require "Game001BaseGameMachineReelAnticipationMechanic"
 require "Game001BaseGameMachineReelMatrixMechanic"
 require "Game001BaseGameMachineFreeSpinsMechanic"
+require "Game001BaseGameMachineLockedSymbolsMechanic"
 
 Game001BaseGameMachineMechanics = {
     Config = {
@@ -17,6 +18,7 @@ Game001BaseGameMachineMechanics = {
     ReelAnticipationMechanic = nil,
     ReelMatrixMechanic = nil,
     FreeSpinsMechanic = nil,
+    LockedSymbolsMechanic = nil,
 }
 
 function Game001BaseGameMachineMechanics:new(o)
@@ -41,6 +43,8 @@ function Game001BaseGameMachineMechanics:Initialize(machine)
      self.ReelMatrixMechanic:Initialize(machine)
      self.FreeSpinsMechanic = Game001BaseGameMachineFreeSpinsMechanic:new()
      self.FreeSpinsMechanic:Initialize(machine)
+     self.LockedSymbolsMechanic = Game001BaseGameMachineLockedSymbolsMechanic:new()
+     self.LockedSymbolsMechanic:Initialize(machine)
 end
 
 function Game001BaseGameMachineMechanics:StartMachine(machine)
@@ -119,8 +123,8 @@ function Game001BaseGameMachineMechanics:OnBaseGameSpinCompleted(machine)
                 self.HorizontalReelsShiftMechanic:OnBaseGameSpinCompleted(machine)            
             elseif self.ScattersMechanic ~= nil then
                 self.ScattersMechanic:OnBaseGameSpinCompleted(machine)
-                if self.ReelMatrixMechanic ~= nil then
-                    self.ReelMatrixMechanic:OnBaseGameSpinCompleted(machine)
+                if self.LockedSymbolsMechanic ~= nil then
+                    self.LockedSymbolsMechanic:OnBaseGameSpinCompleted(machine)
                 end
             else
                 machine:OnBaseGameSpinCompleted()
