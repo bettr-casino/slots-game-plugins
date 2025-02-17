@@ -158,7 +158,7 @@ namespace Bettr.Core
                 }
             }
         }
-
+        
         public IEnumerator StartEngines()
         {
             for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
@@ -202,6 +202,24 @@ namespace Bettr.Core
         {
             yield return controller.SpinEngines();
             onComplete?.Invoke();
+        }
+        
+        public void LockEngines(params string[] keys)
+        {
+            foreach (var key in keys)
+            {
+                var bettrReelMatrixCellController = this.BettrReelMatrixCellControllers[key];
+                bettrReelMatrixCellController.LockEngine();
+            }
+        }
+        
+        public void UnlockEngines(params string[] keys)
+        {
+            foreach (var key in keys)
+            {
+                var bettrReelMatrixCellController = this.BettrReelMatrixCellControllers[key];
+                bettrReelMatrixCellController.UnlockEngine();
+            }
         }
 
         // Dispatch Handler
@@ -273,6 +291,27 @@ namespace Bettr.Core
                     bettrReelMatrixCellController.SpinReelSpinning();
                 }
             }
+        }
+    }
+
+    [Serializable]
+    public class BettrReelMatrixCellEngineLock
+    {
+        public bool IsLocked { get; private set; }
+        
+        public BettrReelMatrixCellEngineLock()
+        {
+            IsLocked = false;
+        }
+        
+        public void Lock()
+        {
+            IsLocked = true;
+        }
+        
+        public void Unlock()
+        {
+            IsLocked = false;
         }
     }
     
@@ -712,6 +751,8 @@ namespace Bettr.Core
         
         private  BettrReelMatrixCellOutcomeDelay BettrReelMatrixCellOutcomeDelay { get; set; }
         
+        private BettrReelMatrixCellEngineLock BettrReelMatrixCellEngineLock { get; set; }
+        
         public void Initialize(Tile tile, Table tileTable, BettrUserController userController, BettrMathController mathController, string machineID, string machineVariantID, string mechanicName, int rowIndex, int columnIndex)
         {
             this.BettrUserController = userController;
@@ -748,6 +789,8 @@ namespace Bettr.Core
             
             var applyOutcomeDelayInMs = this.BettrReelMatrixLayoutPropertiesData.GetProperty<int>("ApplyOutcomeDelay");
             this.BettrReelMatrixCellOutcomeDelay = new BettrReelMatrixCellOutcomeDelay(applyOutcomeDelayInMs);
+            
+            this.BettrReelMatrixCellEngineLock = new BettrReelMatrixCellEngineLock();
         }
 
         public void SetReelStripSymbolTexture(string symbolName, Texture symbolTexture)
@@ -822,6 +865,16 @@ namespace Bettr.Core
             }
             AdvanceSymbols();
             yield break;
+        }
+
+        public void LockEngine()
+        {
+            this.BettrReelMatrixCellEngineLock.Lock();
+        }
+        
+        public void UnlockEngine()
+        {
+            this.BettrReelMatrixCellEngineLock.Unlock();
         }
     
         public IEnumerator OnApplyOutcomeReceived()
