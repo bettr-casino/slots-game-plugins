@@ -31,6 +31,8 @@ namespace Bettr.Core
         public int[] RowCounts { get; private set; }
         public int ColumnCount { get; private set;  }
         
+        public int OutcomeIndex { get; private set; }
+        
         const string ReelID = "ReelID";
 
         private void Awake()
@@ -158,7 +160,7 @@ namespace Bettr.Core
                 }
             }
         }
-
+        
         public IEnumerator StartEngines()
         {
             for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
@@ -171,6 +173,7 @@ namespace Bettr.Core
                     StartCoroutine(bettrReelMatrixCellController.StartEngines());
                 }
             }
+            OutcomeIndex = -1;
             yield break;
         }
 
@@ -178,6 +181,8 @@ namespace Bettr.Core
         {
             int totalTasks = 0;
             int finishedTasks = 0;
+
+            OutcomeIndex++;
     
             for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
             {
@@ -203,7 +208,19 @@ namespace Bettr.Core
             yield return controller.SpinEngines();
             onComplete?.Invoke();
         }
-
+        
+        public void LockEngines(Table table)
+        {
+            // Loop over table and lock the engines
+            for (int i = 0; i < table.Length; i++)
+            {
+                var row = (Table) table[i + 1];
+                var key = (string) row[ReelID];
+                var bettrReelMatrixCellController = this.BettrReelMatrixCellControllers[key];
+                bettrReelMatrixCellController.LockEngine();
+            }
+        }
+        
         // Dispatch Handler
         public void SpinReelSpinStartedRollBack()
         {
@@ -273,6 +290,22 @@ namespace Bettr.Core
                     bettrReelMatrixCellController.SpinReelSpinning();
                 }
             }
+        }
+    }
+
+    [Serializable]
+    public class BettrReelMatrixCellEngineLock
+    {
+        public bool IsLocked { get; private set; }
+        
+        public BettrReelMatrixCellEngineLock()
+        {
+            IsLocked = false;
+        }
+        
+        public void Lock()
+        {
+            IsLocked = true;
         }
     }
     
@@ -712,6 +745,8 @@ namespace Bettr.Core
         
         private  BettrReelMatrixCellOutcomeDelay BettrReelMatrixCellOutcomeDelay { get; set; }
         
+        private BettrReelMatrixCellEngineLock BettrReelMatrixCellEngineLock { get; set; }
+        
         public void Initialize(Tile tile, Table tileTable, BettrUserController userController, BettrMathController mathController, string machineID, string machineVariantID, string mechanicName, int rowIndex, int columnIndex)
         {
             this.BettrUserController = userController;
@@ -748,6 +783,8 @@ namespace Bettr.Core
             
             var applyOutcomeDelayInMs = this.BettrReelMatrixLayoutPropertiesData.GetProperty<int>("ApplyOutcomeDelay");
             this.BettrReelMatrixCellOutcomeDelay = new BettrReelMatrixCellOutcomeDelay(applyOutcomeDelayInMs);
+            
+            this.BettrReelMatrixCellEngineLock = new BettrReelMatrixCellEngineLock();
         }
 
         public void SetReelStripSymbolTexture(string symbolName, Texture symbolTexture)
@@ -823,7 +860,12 @@ namespace Bettr.Core
             AdvanceSymbols();
             yield break;
         }
-    
+
+        public void LockEngine()
+        {
+            this.BettrReelMatrixCellEngineLock.Lock();
+        }
+        
         public IEnumerator OnApplyOutcomeReceived()
         {
             this.ShouldSpliceReel = true;
@@ -833,6 +875,11 @@ namespace Bettr.Core
         
         public IEnumerator SpinEngines()
         {
+            if (this.BettrReelMatrixCellEngineLock.IsLocked)
+            {
+                yield break;
+            }
+            
             ResetSpin();
 
             var nextOutcome = this.BettrReelMatrixOutcomes.GetNextOutcome();

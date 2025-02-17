@@ -71,4 +71,12 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Controller:Show{{mechanic
     self.State.{{mechanicName}}Controller["Pivot"].SetActive(true)
 end
 
+function {{machineName}}BaseGameMachine{{mechanicName}}Controller:OutcomeIndex()
+    return self.Bettr{{mechanicName}}Controller.OutcomeIndex
+end
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Controller:LockEngines(lockedSymbols{{mechanicName}})
+    return self.Bettr{{mechanicName}}Controller.LockEngines(lockedSymbols{{mechanicName}})
+end
+
 return {{machineName}}BaseGameMachine{{mechanicName}}Controller:new()

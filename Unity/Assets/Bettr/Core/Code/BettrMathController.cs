@@ -267,6 +267,31 @@ namespace Bettr.Core
             return reelStateTable;
         }
         
+        public void FilterTable(Table table, Table filteredTable, params string[] kvPairs)
+        {
+            int tableIndex = 1;
+            for (int i = 0; i < table.Length; i++)
+            {
+                var row = (Table) table[i + 1];
+                var match = true;
+                for (int j = 0; j < kvPairs.Length; j = j + 2)
+                {
+                    var key = kvPairs[j];
+                    var value = kvPairs[j + 1];
+                    if (row[key].ToString() != value)
+                    {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match)
+                {
+                    filteredTable[tableIndex] = row;
+                    tableIndex++;
+                }
+            }
+        }
+        
         public Table GetTableRow(Table table, params string[] kvPairs)
         {
             // get the table
