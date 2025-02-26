@@ -347,6 +347,35 @@ namespace Bettr.Editor
                 templateName, prefabName, mechanicName);
         }
 
+        public static void ProcessLockedSymbolsMechanic(string machineName, string machineVariant,
+            string experimentVariant, string machineModelPath)
+        {
+            var mechanicName = "LockedSymbols";
+            
+            Debug.Log(
+                $"Processing {mechanicName} mechanic for {machineName} {machineVariant} {experimentVariant} {machineModelPath}");
+            
+            var templateName = $"BaseGame{mechanicName}Mechanic";
+            var prefabName = $"BaseGameMachine{mechanicName}";
+            var runtimeAssetPath = BettrMechanics.RuntimeAssetPath;
+            
+            BettrMaterialGenerator.MachineName = machineName;
+            BettrMaterialGenerator.MachineVariant = machineVariant;
+            
+            // get the model
+            var model = new Dictionary<string, object>
+            {
+                { "machineName", machineName },
+                { "machineVariant", machineVariant },
+                { "experimentVariant", experimentVariant },
+                { "mechanicName", mechanicName },
+            };
+            
+            BettrMechanicsHelpers.ProcessBaseGameMechanic(
+                runtimeAssetPath, model,
+                templateName, prefabName, mechanicName);
+        }
+
         public static void ProcessInfinityReelsMechanic(string machineName, string machineVariant,
             string experimentVariant, string machineModelPath)
         {
