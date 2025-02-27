@@ -8,6 +8,9 @@ Game001BaseGameMachineLockedSymbolsMechanic = {
         Experiment = "control",
         Mechanic = "LockedSymbols",
     },
+    State = {
+        MechanicsPrefab = nil,
+    }
 }
 
 function Game001BaseGameMachineLockedSymbolsMechanic:new(o)
@@ -18,5 +21,17 @@ function Game001BaseGameMachineLockedSymbolsMechanic:new(o)
 end
 
 function Game001BaseGameMachineLockedSymbolsMechanic:Initialize(machine)
+    series
+        do
+            local manifest = Game001.Manifest
+            local prefabName = "BaseGameMachineLockedSymbols"
+            local machineParent = machine.MachineParent
+            local mechanicsParent = machine.MechanicsParent
+            local mechanicsPrefab = BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, prefabName, mechanicsParent.GameObject)
+            mechanicsPrefab.SetActive(true)
+            mechanicsPrefab.name = self.Config.Mechanic
+            self.State.MechanicsPrefab = mechanicsPrefab
+        end
+    end
 end
 

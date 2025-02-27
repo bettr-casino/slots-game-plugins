@@ -8,6 +8,9 @@ require "Core"
         Experiment = "{{experimentVariant}}",
         Mechanic = "{{mechanicName}}",
     },
+    State = {
+        MechanicsPrefab = nil,
+    }
 }
 
 function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:new(o)
@@ -18,5 +21,17 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:new(o)
 end
 
 function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:Initialize(machine)
+    series
+        do
+            local manifest = {{machineName}}.Manifest
+            local prefabName = "BaseGameMachine{{mechanicName}}"
+            local machineParent = machine.MachineParent
+            local mechanicsParent = machine.MechanicsParent
+            local mechanicsPrefab = BettrAssetController.LoadPrefab(manifest.BundleName, manifest.BundleVersion, prefabName, mechanicsParent.GameObject)
+            mechanicsPrefab.SetActive(true)
+            mechanicsPrefab.name = self.Config.Mechanic
+            self.State.MechanicsPrefab = mechanicsPrefab
+        end
+    end
 end
 
