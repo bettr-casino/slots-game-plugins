@@ -102,6 +102,8 @@ namespace Bettr.Core
                 var outcomeReelStopIndexes = outcomeReelStopIndexesStr.Split(',').Select(int.Parse).ToArray();
                 // TODO: replace with initial reel stop index
                 var initialReelStopIndex = 0;
+                // remove the 1st entry in the outcomeReelStopIndexes
+                outcomeReelStopIndexes = outcomeReelStopIndexes.Skip(1).ToArray();
                 bettrReelMatrixCellController.SetReelOutcomes(outcomeReelStopIndexes);
                 bettrReelMatrixCellController.BettrReelMatrixSpinState.SetProperty<int>("ReelStopIndex", initialReelStopIndex);
             }
@@ -328,9 +330,7 @@ namespace Bettr.Core
             this.TimerEndTimeForSpin = 0;
             this.IsTimerStartedForSpin = false;
             
-            // add a jitter in the range (0, delayInMs)
-            var jitteredDelayInMs = delayInMs + UnityEngine.Random.Range(0, delayInMs);
-            this.ReelStopDelayInMsForSpin = jitteredDelayInMs;
+            this.ReelStopDelayInMsForSpin = delayInMs;
         }
         
         public void SetStopped(bool isStopped)
@@ -396,6 +396,11 @@ namespace Bettr.Core
         public int GetNextOutcome()
         {
             CurrentOutcomeIndex++;
+            return Outcomes[CurrentOutcomeIndex].OutcomeReelStopIndex;
+        }
+        
+        public int GetOutcome()
+        {
             return Outcomes[CurrentOutcomeIndex].OutcomeReelStopIndex;
         }
 
@@ -1269,7 +1274,9 @@ namespace Bettr.Core
             reelStopIndex = (reelSymbolCount + reelStopIndex) % reelSymbolCount;
             
             // Get the outcome's stop index
-            var outcomeReelStopIndex = this.BettrReelMatrixOutcomes.LastOutcomeReelStopIndex;
+            var outcomeReelStopIndex = this.BettrReelMatrixOutcomes.GetOutcome();
+            // Uncomment below to Debug
+            // outcomeReelStopIndex = this.BettrReelMatrixOutcomes.CurrentOutcomeIndex;
             
             // Check if the reel stop index matches the outcome stop index
             if (outcomeReelStopIndex == reelStopIndex)
