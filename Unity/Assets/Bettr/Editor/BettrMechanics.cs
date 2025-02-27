@@ -362,6 +362,10 @@ namespace Bettr.Editor
             BettrMaterialGenerator.MachineName = machineName;
             BettrMaterialGenerator.MachineVariant = machineVariant;
             
+            var dataMatrix = BettrMenu.GetTable($"{machineName}BaseGameLockedSymbolsDataMatrix");
+            var symbolKeys = BettrMenu.GetTableArray<string>(dataMatrix, "ValueSymbols", "Symbol");
+            var symbolTypes = BettrMenu.GetTableArray<string>(dataMatrix, "ValueSymbols", "SymbolType");
+            
             // get the model
             var model = new Dictionary<string, object>
             {
