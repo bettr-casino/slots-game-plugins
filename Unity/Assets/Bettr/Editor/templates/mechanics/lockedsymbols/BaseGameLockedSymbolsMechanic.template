@@ -4,26 +4,42 @@
   "Layer": "SLOT_REELS_OVERLAY",
   "Components": [
     {
-    "ComponentType": "TilePropertyGameObjectsInjected",
-    "GameObjectGroupsProperty": [           
-       {
-         "GroupKey": "HeapAccumulators",
-         "Group": [
+        "ComponentType": "TilePropertyGameObjectsInjected",
+        "GameObjectGroupsProperty": [           
             {
-                "Key": "Green",
-                "Id": "GreenHeapAccumulator"           
-            },
-            {
-                "Key": "Yellow",
-                "Id": "YellowHeapAccumulator"           
-            },
-            {
-                "Key": "Blue",
-                "Id": "BlueHeapAccumulator"           
-            }
-         ]
-       }        
-    ]
+                 "GroupKey": "HeapAccumulators",
+                 "Group": [
+                    {
+                        "Key": "Green",
+                        "Id": "GreenHeapAccumulator"           
+                    },
+                    {
+                        "Key": "Yellow",
+                        "Id": "YellowHeapAccumulator"           
+                    },
+                    {
+                        "Key": "Blue",
+                        "Id": "BlueHeapAccumulator"           
+                    }
+                 ]
+            }        
+        ]
+    },
+    {
+        "ComponentType": "TilePropertyMeshRenderersInjected",
+        "MeshRendererGroupsProperty": [           
+             {
+               "GroupKey": "{{mechanicName}}SymbolGroupMeshRenderers",
+               "Group": [
+             {{ for symbolName in symbolKeys }}
+                 {
+                   "Key": "{{symbolName}}",
+                   "Id": "{{symbolName}}"           
+                 }
+             {{ if !for.last }},{{ end }}{{ end }}
+               ]
+             }        
+        ]
     }
   ],
   "Child": {
@@ -31,46 +47,70 @@
     "Id": "Pivot",
     "Layer": "SLOT_REELS_OVERLAY",
     "Active": false,
-    "Child": {
-        "Name": "HeapAccumulators",
-        "Id": "Pivot",
-        "Layer": "SLOT_REELS_OVERLAY",
-        "Active": true,
-        "Position": {
-            "X": 4.42,
-            "Y": -8.56,
-            "Z": 0
+    "Children": [    
+        {
+            "Name": "HeapAccumulators",
+            "Id": "Pivot",
+            "Layer": "SLOT_REELS_OVERLAY",
+            "Active": true,
+            "Position": {
+                "X": 4.42,
+                "Y": -8.56,
+                "Z": 0
+            },
+            "Children": [
+                {
+                    "Name": "GreenHeapAccumulator",
+                    "Id": "GreenHeapAccumulator",
+                    "Layer": "SLOT_REELS_OVERLAY",
+                    "Active": true,
+                    "Position": {
+                      "X": -3,
+                      "Y": 0,
+                      "Z": 0
+                    }
+                },
+                {
+                    "Name": "YellowHeapAccumulator",
+                    "Id": "YellowHeapAccumulator",
+                    "Layer": "SLOT_REELS_OVERLAY",
+                    "Active": true
+                },
+                {
+                    "Name": "BlueHeapAccumulator",
+                    "Id": "BlueHeapAccumulator",
+                    "Layer": "SLOT_REELS_OVERLAY",
+                    "Active": true,
+                    "Position": {
+                        "X": 3,
+                        "Y": 0,
+                        "Z": 0
+                    }
+                }
+            ]
         },
-        "Children": [
-            {
-                "Name": "GreenHeapAccumulator",
-                "Id": "GreenHeapAccumulator",
-                "Layer": "SLOT_REELS_OVERLAY",
-                "Active": true,
-                "Position": {
-                  "X": -3,
-                  "Y": 0,
-                  "Z": 0
-                }
-            },
-            {
-                "Name": "YellowHeapAccumulator",
-                "Id": "YellowHeapAccumulator",
-                "Layer": "SLOT_REELS_OVERLAY",
-                "Active": true
-            },
-            {
-                "Name": "BlueHeapAccumulator",
-                "Id": "BlueHeapAccumulator",
-                "Layer": "SLOT_REELS_OVERLAY",
-                "Active": true,
-                "Position": {
-                    "X": 3,
-                    "Y": 0,
-                    "Z": 0
-                }
-            }
-        ]
-    }
+        {
+           "Name": "SymbolGroup",
+           "Layer": "SLOT_REELS",
+           "Active": false,
+           "Children": [
+             {{ for symbolName in symbolNames }}
+             {
+                "Name": "{{symbolName}}",
+                "Id": "{{symbolName}}",
+                "Layer": "SLOT_REELS",
+                "IsPrimitive": true,
+                "Primitive": 5,
+                "PrimitiveMaterial": "{{mechanicName}}__{{symbolName}}",
+                "PrimitiveShader": "Bettr/Symbol",
+                "PrimitiveTexture": "{{mechanicName}}__{{symbolName}}",
+                "PrimitiveAlpha": 0.7,
+                "PrimitiveTextureCreate": true,
+                "PrimitiveTextureCreateSource": "default.png"
+             }
+             {{ if !for.last }},{{ end }}{{ end }}
+           ]
+        }    
+    ]
   }
 }               

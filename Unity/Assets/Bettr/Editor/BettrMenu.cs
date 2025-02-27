@@ -5473,13 +5473,34 @@ namespace Bettr.Editor
         
         public static List<T> GetTableArray<T>(Table table, string pk, string key)
         {
+            if (table == null)
+            {
+                throw new ArgumentNullException(nameof(table));
+            }
+
             Table valueTable = table;
+        
+            // Navigate to the appropriate table if pk is provided
             if (!string.IsNullOrEmpty(pk) && table[pk] is Table pkTable)
             {
                 valueTable = pkTable["Array"] as Table;
             }
-            
-            return valueTable?.Pairs.Select(pair => pair.Value.Table[key]).ToList().Cast<T>().ToList();
+
+            var values = valueTable?.Pairs
+                .Select(pair => pair.Value.Table[key])
+                .Where(v => v != null)
+                .ToList();
+
+            // Special handling for int type
+            if (typeof(T) == typeof(int))
+            {
+                return values?
+                    .Select(v => Convert.ToInt32(Convert.ToDouble(v))) // Convert first to double, then to int
+                    .Cast<T>()
+                    .ToList();
+            }
+
+            return values?.Cast<T>().ToList();
         }
         
         public static T GetTableValue<T, TU>(Table table, string pk, string referenceKey, TU referenceValue, string key, T d = default)
