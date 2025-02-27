@@ -71,4 +71,12 @@ function Game001BaseGameMachineReelMatrixController:ShowReelMatrix()
     self.State.ReelMatrixController["Pivot"].SetActive(true)
 end
 
+function Game001BaseGameMachineReelMatrixController:OutcomeIndex()
+    return self.BettrReelMatrixController.OutcomeIndex
+end
+
+function Game001BaseGameMachineReelMatrixController:LockEngines(lockedSymbolsReelMatrix)
+    return self.BettrReelMatrixController.LockEngines(lockedSymbolsReelMatrix)
+end
+
 return Game001BaseGameMachineReelMatrixController:new()

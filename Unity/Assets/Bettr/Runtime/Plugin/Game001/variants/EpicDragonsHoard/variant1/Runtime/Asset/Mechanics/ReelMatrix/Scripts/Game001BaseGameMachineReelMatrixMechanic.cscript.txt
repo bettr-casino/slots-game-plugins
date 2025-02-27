@@ -73,13 +73,27 @@ function Game001BaseGameMachineReelMatrixMechanic:OnBaseGameSpinCompleted(machin
             self:ShowReelMatrix()            
             self:StartEngines() 
             
+            local lockedSymbols = nil
+            local lockedSymbolsMechanic = machine.Mechanics.LockedSymbolsMechanic
+            if lockedSymbolsMechanic ~= nil then
+                lockedSymbols = BettrMathController.GetBaseGameMechanicMatrix(lockedSymbolsMechanic.Config.Machine, lockedSymbolsMechanic.Config.Mechanic, "LockedSymbols")
+            end
+            
             System.WaitForFrame(2)
             
-            local freeSpins = 3
+            local freeSpins = 10
             
             while freeSpins > 0 do
                 freeSpins = freeSpins - 1
                 self:SpinEngines(machine)
+                
+                if lockedSymbols ~= nil then
+                    local outcomeIndex = self:OutcomeIndex()
+                    local filteredTable = {}
+                    BettrMathController.FilterTable(lockedSymbols, filteredTable, "LockOutcomeIndex", outcomeIndex)
+                    self:LockEngines(filteredTable)
+                end
+                
                 System.WaitForSeconds(1)
             end     
             
@@ -119,6 +133,14 @@ end
 
 function Game001BaseGameMachineReelMatrixMechanic:SpinEngines(machine)
     self.State.ReelMatrixController:SpinEngines()
+end
+
+function Game001BaseGameMachineReelMatrixMechanic:OutcomeIndex()
+    return self.State.ReelMatrixController:OutcomeIndex()
+end
+
+function Game001BaseGameMachineReelMatrixMechanic:LockEngines(lockedSymbolsReelMatrix)
+    return self.State.ReelMatrixController:LockEngines(lockedSymbolsReelMatrix)
 end
 
 
