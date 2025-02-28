@@ -134,7 +134,33 @@
                     "Y": {{ -rowIndex*0.06 }},
                     "Z": 0
                 },
-                "Children": [
+                "Children": [                
+                    {
+                       "Name": "SymbolBackground",
+                       "Layer": "SLOT_REELS",
+                       "IsPrimitive": true,
+                       "Primitive": 5,
+                       "PrimitiveMaterial": "{{machineName}}SymbolBackground",
+                       "PrimitiveShader": "Bettr/Symbol",
+                       "PrimitiveTexture": "SymbolBackground",
+                       "PrimitiveTextureCreate": true,
+                       "PrimitiveTextureCreateSource": "default.png",
+                       "PrimitiveTextureForceReplace": true,
+                       "PrimitiveAlpha": 1,                       
+                       "ShaderProperties": {
+                        "RenderQueue": 2000
+                       },                       
+                       "Position": {
+                        "X": 0,
+                        "Y": {{symbolScaleY * (cellMaskYPositions[rowIndex-1]) + symbolOffsetY}},
+                        "Z": 1
+                       },
+                       "Scale": {
+                        "X": {{symbolScaleX}},
+                        "Y": {{symbolScaleY}},
+                        "Z": 1
+                       },
+                    },                
                     {
                       "Name": "SymbolStencilMask",
                       "Layer": "SLOT_REELS",
@@ -159,7 +185,7 @@
                             "Primitive": 5,
                             "PrimitiveMaterial": "{{machineName}}SymbolStencilMask__StencilRef{{ (columnIndex - 1) * rowCounts[columnIndex-1] + (rowIndex - 1) + 1}}",
                             "PrimitiveShader": "Bettr/StencilMask",
-                            "PrimitiveTexture": "{{machineName}}SymbolStencilMask",
+                            "PrimitiveTexture": "SymbolStencilMask",
                             "PrimitiveTextureCreate": true,
                             "PrimitiveTextureCreateSource": "default.png",
                             "PrimitiveAlpha": 1,
