@@ -35,3 +35,79 @@ function Game001BaseGameMachineLockedSymbolsMechanic:Initialize(machine)
     end
 end
 
+function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(machine)
+    series
+        do
+            local reelMatrixMechanic = machine.Mechanics.ReelMatrixMechanic
+            local reelMatrixState = reelMatrixMechanic.State
+            
+            local freeSpinsMechanic = machine.Mechanics.FreeSpinsMechanic
+            if freeSpinsMechanic == nil then
+                return
+            end       
+            
+            local summaryTable = BettrMathController.GetBaseGameMechanicSummary(freeSpinsMechanic.Config.Machine, freeSpinsMechanic.Config.Mechanic)            
+            local outcomeCount = summaryTable.OutcomeCount
+            if outcomeCount <= 0 then
+                return
+            end 
+            
+            Game001BaseGameState.SpinState.First.State = "Waiting"                
+
+            local reelStripData = BettrMathController.GetBaseGameMechanicDataMatrix(freeSpinsMechanic.Config.Machine, freeSpinsMechanic.Config.Mechanic, "ReelStrip")
+            local outcomesTable = BettrMathController.GetBaseGameMechanicMatrix(freeSpinsMechanic.Config.Machine, freeSpinsMechanic.Config.Mechanic, "Outcomes")
+            
+            local mechanicsPrefab = reelMatrixState.MechanicsPrefab            
+            local machineParent = machine.MachineParent
+
+            machineParent.SetActive(false)
+            
+            System.WaitForSeconds(1)
+            
+            mechanicsPrefab.SetActive(true)            
+            System.WaitForFrame(2)                     
+            
+            reelMatrixMechanic:SetReelStripData(reelStripData)
+            reelMatrixMechanic:SetReelStripSymbolTextures(freeSpinsMechanic.State.MechanicsPrefab)
+            reelMatrixMechanic:SetOutcomes(outcomesTable)
+            reelMatrixMechanic:ShowReelMatrix()            
+            reelMatrixMechanic:StartEngines() 
+            
+            local lockedSymbols = nil
+            local lockedSymbolsMechanic = self
+            if lockedSymbolsMechanic ~= nil then
+                lockedSymbols = BettrMathController.GetBaseGameMechanic(lockedSymbolsMechanic.Config.Machine, lockedSymbolsMechanic.Config.Mechanic, "LockedSymbols")
+            end
+            
+            System.WaitForFrame(2)
+            
+            local freeSpins = 10
+            
+            while freeSpins > 0 do
+                freeSpins = freeSpins - 1
+                reelMatrixMechanic:SpinEngines(machine)
+                
+                if lockedSymbols ~= nil then
+                    local outcomeIndex = reelMatrixMechanic:OutcomeIndex()
+                    local filteredTable = {}
+                    BettrMathController.FilterTable(lockedSymbols, filteredTable, "LockOutcomeIndex", outcomeIndex)
+                    reelMatrixMechanic:LockEngines(filteredTable)
+                end
+                
+                System.WaitForSeconds(1)
+            end     
+            
+            System.WaitForSeconds(1)
+            
+            mechanicsPrefab.SetActive(false)
+            
+            System.WaitForSeconds(1)
+                                    
+            machineParent.SetActive(true)   
+            
+            machine:OnBaseGameSpinCompleted()
+            
+        end
+    end
+end
+
