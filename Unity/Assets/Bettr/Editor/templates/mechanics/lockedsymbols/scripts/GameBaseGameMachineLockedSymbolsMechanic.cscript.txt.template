@@ -68,7 +68,8 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             System.WaitForFrame(2)                     
             
             reelMatrixMechanic:SetReelStripData(reelStripData)
-            reelMatrixMechanic:SetReelStripSymbolTextures(freeSpinsMechanic.State.MechanicsPrefab)
+            local texturesGo = self.State.MechanicsPrefab.transform.GetChild(0).gameObject
+            reelMatrixMechanic:SetReelStripSymbolTextures(texturesGo)
             reelMatrixMechanic:SetOutcomes(outcomesTable)
             reelMatrixMechanic:ShowReelMatrix()            
             reelMatrixMechanic:StartEngines() 

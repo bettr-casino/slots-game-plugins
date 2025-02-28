@@ -145,7 +145,7 @@ namespace Bettr.Core
             foreach (var symbolTexture in symbolTextures)
             {
                 var symbolName = symbolTexture.name;
-                var texture = symbolTexture.sharedMaterial.GetTexture("_MainTex");
+                var texture = symbolTexture.material.GetTexture("_MainTex");
                 SetReelStripSymbolTexture(symbolName, texture);
             }
         }
@@ -1103,7 +1103,7 @@ namespace Bettr.Core
         // Dispatch Handler
         public void SpinReelSpinning()
         {
-            var speed = BettrUserController.UserInSlamStopMode ? 4 : 1;
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 4;
             
             var spinState = this.BettrReelMatrixSpinState;
             var layoutProperties = this.BettrReelMatrixLayoutPropertiesData;

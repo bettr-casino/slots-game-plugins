@@ -96,7 +96,7 @@
            "Children": [
              {{ for symbolName in symbolNames }}
              {
-                "Name": "{{symbolName}}",
+                "Name": "{{ replacementSymbols[for.index] }}",
                 "Id": "{{symbolName}}",
                 "Layer": "SLOT_REELS",
                 "IsPrimitive": true,
@@ -107,7 +107,7 @@
                 "PrimitiveAlpha": 0.7,
                 "PrimitiveTextureCreate": true,
                 "PrimitiveTextureCreateSource": "default.png",
-                "PrimitiveTextureForceReplace": false,
+                "PrimitiveTextureForceReplace": true,
              }
              {{ if !for.last }},{{ end }}{{ end }}
            ]

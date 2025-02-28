@@ -397,6 +397,7 @@ namespace Bettr.Editor
                 { "experimentVariant", experimentVariant },
                 { "mechanicName", mechanicName },
                 { "symbolNames", symbolNames },
+                { "replacementSymbols", replacementSymbols},
             };
             
             BettrMechanicsHelpers.ProcessBaseGameMechanic(
