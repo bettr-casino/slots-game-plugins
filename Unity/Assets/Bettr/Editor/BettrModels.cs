@@ -408,7 +408,15 @@ namespace Bettr.Editor
                             var abs = Math.Abs(shaderValue - (int) shaderValue);
                             if (abs < 0.000001)
                             {
-                                primitiveMaterial.SetInt(shaderProperty, (int) shaderValue);
+                                var shaderValueInt = (int) shaderValue;
+                                if (shaderProperty == "RenderQueue")
+                                {
+                                    primitiveMaterial.renderQueue = shaderValueInt;
+                                }
+                                else
+                                {
+                                    primitiveMaterial.SetInt(shaderProperty, shaderValueInt);
+                                }
                             }
                             else
                             {
