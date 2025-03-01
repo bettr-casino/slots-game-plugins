@@ -84,6 +84,25 @@ namespace Bettr.Core
         //
         // APIs
         // 
+
+        public void ShowReelMatrix(MeshRenderer[] meshRenderers)
+        {
+            for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
+            {
+                int rowCount = this.RowCounts[columnIndex - 1];
+                for (int rowIndex = 1; rowIndex <= this.RowCounts[columnIndex - 1]; rowIndex++)
+                {
+                    var key = $"Row{rowIndex}Col{columnIndex}";
+                    var bettrReelMatrixCellController = this.BettrReelMatrixCellControllers[key];
+                    int meshIndex = (columnIndex - 1) * rowCount + (rowCount - rowIndex);
+                    var meshRenderer = meshRenderers[meshIndex];
+                    var symbolTexture = meshRenderer.material.GetTexture("_MainTex");
+                    bettrReelMatrixCellController.OverrideVisibleSymbolTexture(symbolTexture);
+                }
+            }
+
+            ((PropertyGameObject) this.TileTable["Pivot"]).SetActive(true);
+        }
         
         public void SetOutcomes(Table outcomesTable)
         {
@@ -1179,6 +1198,16 @@ namespace Bettr.Core
             var layoutPropertiesTable = this.BettrReelMatrixLayoutPropertiesData;
             var visibleSymbolCount = (int) (double) layoutPropertiesTable.VisibleSymbolCount;
             return 0;
+        }
+
+        public void OverrideVisibleSymbolTexture(Texture symbolTexture)
+        {
+            var symbolGroupProperty = GetSymbolGroupProperty(2);
+            var fixedSymbol = symbolGroupProperty.Current;
+            var go = fixedSymbol.GameObject;
+            var meshRenderer = go.GetComponent<MeshRenderer>();
+            var material = meshRenderer.material;
+            material.SetTexture("_MainTex", symbolTexture); 
         }
         
         public void UpdateReelSymbolForSpin(int symbolIndex)
