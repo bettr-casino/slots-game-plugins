@@ -135,14 +135,9 @@ namespace Bettr.Core
             }
         }
 
-        public void SetReelStripSymbolTextures(GameObject go)
+        public void SetReelStripSymbolTextures(MeshRenderer[] meshRenderers)
         {
-            //return the "SymbolGroup" GameObject
-            var symbolGroupGo = go.transform.Find("SymbolGroup").gameObject;
-            
-            // Extract all the textures from the prefab
-            var symbolTextures = symbolGroupGo.GetComponentsInChildren<MeshRenderer>();
-            foreach (var symbolTexture in symbolTextures)
+            foreach (var symbolTexture in meshRenderers)
             {
                 var symbolName = symbolTexture.name;
                 var texture = symbolTexture.material.GetTexture("_MainTex");

@@ -2904,7 +2904,7 @@ namespace Bettr.Editor
                         pivot.transform.localScale = new Vector3(localScale.x, 0.8f, localScale.z);
                         
                         // update the local Y position of the Pivot to -0.1f
-                        var localY = -0.1f;
+                        var localY = -0.13f;
                         if (machineName == "Game003" || machineName == "Game004" || machineName == "Game005" || machineName == "Game007" || machineName == "Game009")
                         {
                             localY = 1.47f;

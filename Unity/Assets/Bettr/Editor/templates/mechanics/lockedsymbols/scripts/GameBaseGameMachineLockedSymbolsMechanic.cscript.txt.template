@@ -60,19 +60,21 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             local mechanicsPrefab = reelMatrixState.MechanicsPrefab            
             local machineParent = machine.MachineParent
 
-            machineParent.SetActive(false)
-            
             System.WaitForSeconds(1)
             
             mechanicsPrefab.SetActive(true)            
+            machineParent.SetActive(false)
             System.WaitForFrame(2)                     
             
             reelMatrixMechanic:SetReelStripData(reelStripData)
-            local texturesGo = self.State.MechanicsPrefab.transform.GetChild(0).gameObject
-            reelMatrixMechanic:SetReelStripSymbolTextures(texturesGo)
+            local texturesGo = self.State.MechanicsPrefab
+            local meshRenderers = BettrMechanicsController.GetSymbolGroupMeshRenderers(texturesGo)
+            reelMatrixMechanic:SetReelStripSymbolTextures(meshRenderers)
             reelMatrixMechanic:SetOutcomes(outcomesTable)
             reelMatrixMechanic:ShowReelMatrix()            
             reelMatrixMechanic:StartEngines() 
+            
+            BettrDialogController.WaitForDialogAction(machine.{{mechanicName}}Controls["StartButton"].GameObject)    
             
             local lockedSymbols = nil
             local lockedSymbolsMechanic = self
