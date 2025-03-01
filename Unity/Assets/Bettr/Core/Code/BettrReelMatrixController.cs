@@ -176,7 +176,21 @@ namespace Bettr.Core
                 }
             }
         }
-        
+
+        public void ResetEngines()
+        {
+            for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
+            {
+                for (int rowIndex = 1; rowIndex <= this.RowCounts[columnIndex - 1]; rowIndex++)
+                {
+                    var key = $"Row{rowIndex}Col{columnIndex}";
+                    // add to the dictionary
+                    var bettrReelMatrixCellController = this.BettrReelMatrixCellControllers[key];
+                    bettrReelMatrixCellController.ResetEngines();
+                }
+            }
+        }
+
         public IEnumerator StartEngines()
         {
             for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
@@ -323,6 +337,11 @@ namespace Bettr.Core
         {
             IsLocked = true;
         }
+        
+        public void Unlock()
+        {
+            IsLocked = false;
+        }
     }
     
     [Serializable]
@@ -398,6 +417,12 @@ namespace Bettr.Core
             Outcomes = new List<BettrReelMatrixOutcome>();
             CurrentOutcomeIndex = -1;
         }
+
+        public void Reset()
+        {
+            Outcomes = new List<BettrReelMatrixOutcome>();
+            CurrentOutcomeIndex = -1;
+        }
         
         public void AddOutcomes(int[] outcomeReelStopIndexes)
         {
@@ -444,6 +469,11 @@ namespace Bettr.Core
         public BettrReelStripSymbolTextures()
         {
             SymbolTextures = new List<BettrReelStripSymbolTexture>();
+        }
+
+        public void Reset()
+        {
+            SymbolTextures.Clear();
         }
         
         public void AddSymbolTexture(string symbolName, Texture symbolTexture)
@@ -857,6 +887,13 @@ namespace Bettr.Core
             this.BettrReelMatrixCellOutcomeDelay = null;
         }
 
+        public void ResetEngines()
+        {
+            BettrSymbolTextures.Reset();
+            BettrReelMatrixOutcomes.Reset();
+            UnlockEngine();
+        }
+
         public IEnumerator StartEngines()
         {
             // loop over all the cells and start the engines
@@ -876,13 +913,17 @@ namespace Bettr.Core
                 symbolGroupProperty.CurrentIndex = 0;
                 symbolGroupProperty.CurrentKey = symbolGroupProperty.Keys[0];
             }
-            AdvanceSymbols();
             yield break;
         }
 
         public void LockEngine()
         {
             this.BettrReelMatrixCellEngineLock.Lock();
+        }
+        
+        public void UnlockEngine()
+        {
+            this.BettrReelMatrixCellEngineLock.Unlock();
         }
         
         public IEnumerator OnApplyOutcomeReceived()
