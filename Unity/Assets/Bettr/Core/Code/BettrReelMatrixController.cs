@@ -919,7 +919,7 @@ namespace Bettr.Core
     
         public void SpinReelSpinStartedRollBack()
         {
-            var speed = BettrUserController.UserInSlamStopMode ? 4 : 1;
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 2;
             var layoutProperties = this.BettrReelMatrixLayoutPropertiesData;
             var spinState = this.BettrReelMatrixSpinState;
             
@@ -957,7 +957,7 @@ namespace Bettr.Core
         
         public void SpinReelSpinStartedRollForward()
         {
-            var speed = BettrUserController.UserInSlamStopMode ? 4 : 1;
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 2;
             var spinState = this.BettrReelMatrixSpinState;
             var layoutProperties = this.BettrReelMatrixLayoutPropertiesData;
             
@@ -997,7 +997,7 @@ namespace Bettr.Core
             // -- spin ending roll back animation
             Tile.StartCoroutine(this.Tile.CallAction("PlaySpinReelSpinEndingRollBackAnimation"));
             
-            var speed = BettrUserController.UserInSlamStopMode ? 4 : 1;
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 2;
             var spinState = this.BettrReelMatrixSpinState;
             var layoutProperties = this.BettrReelMatrixLayoutPropertiesData;
             
@@ -1036,7 +1036,7 @@ namespace Bettr.Core
         
         public void SpinReelSpinEndingRollForward()
         {
-            var speed = BettrUserController.UserInSlamStopMode ? 4 : 1;
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 2;
             var spinState = this.BettrReelMatrixSpinState;
             var layoutProperties = this.BettrReelMatrixLayoutPropertiesData;
             
@@ -1103,7 +1103,7 @@ namespace Bettr.Core
         // Dispatch Handler
         public void SpinReelSpinning()
         {
-            var speed = BettrUserController.UserInSlamStopMode ? 4 : 1;
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 2;
             
             var spinState = this.BettrReelMatrixSpinState;
             var layoutProperties = this.BettrReelMatrixLayoutPropertiesData;
