@@ -330,7 +330,7 @@ namespace Bettr.Core
             this.TimerEndTimeForSpin = 0;
             this.IsTimerStartedForSpin = false;
             
-            this.ReelStopDelayInMsForSpin = delayInMs;
+            this.ReelStopDelayInMsForSpin = delayInMs * 10;
         }
         
         public void SetStopped(bool isStopped)
@@ -919,7 +919,7 @@ namespace Bettr.Core
     
         public void SpinReelSpinStartedRollBack()
         {
-            var speed = BettrUserController.UserInSlamStopMode ? 4 : 4;
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 1;
             var layoutProperties = this.BettrReelMatrixLayoutPropertiesData;
             var spinState = this.BettrReelMatrixSpinState;
             
@@ -1103,7 +1103,7 @@ namespace Bettr.Core
         // Dispatch Handler
         public void SpinReelSpinning()
         {
-            var speed = BettrUserController.UserInSlamStopMode ? 4 : 4;
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 1;
             
             var spinState = this.BettrReelMatrixSpinState;
             var layoutProperties = this.BettrReelMatrixLayoutPropertiesData;
