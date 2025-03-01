@@ -63,11 +63,13 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
             System.WaitForSeconds(1)
             
             mechanicsPrefab.SetActive(true)            
+            machineParent.SetActive(false)
             System.WaitForFrame(2)                     
             
             reelMatrixMechanic:SetReelStripData(reelStripData)
-            local texturesGo = self.State.MechanicsPrefab.transform.GetChild(0).gameObject
-            reelMatrixMechanic:SetReelStripSymbolTextures(texturesGo)
+            local texturesGo = self.State.MechanicsPrefab
+            local meshRenderers = BettrMechanicsController.GetSymbolGroupMeshRenderers(texturesGo)
+            reelMatrixMechanic:SetReelStripSymbolTextures(meshRenderers)
             reelMatrixMechanic:SetOutcomes(outcomesTable)
             reelMatrixMechanic:ShowReelMatrix()            
             reelMatrixMechanic:StartEngines() 
