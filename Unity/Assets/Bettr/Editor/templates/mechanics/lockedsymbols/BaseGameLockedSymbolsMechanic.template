@@ -7,7 +7,7 @@
         "ComponentType": "TilePropertyGameObjectsInjected",
         "GameObjectGroupsProperty": [           
             {
-                 "GroupKey": "HeapAccumulators",
+                 "GroupKey": "{{mechanicName}}HeapAccumulators",
                  "Group": [
                     {
                         "Key": "Green",
@@ -20,6 +20,15 @@
                     {
                         "Key": "Blue",
                         "Id": "BlueHeapAccumulator"           
+                    }
+                 ]
+            },
+            {
+                "GroupKey": "{{mechanicName}}Controls",
+                 "Group": [
+                    {
+                        "Key": "StartButton",
+                        "Id": "StartFreeSpinsButton"           
                     }
                  ]
             }        
@@ -46,13 +55,61 @@
     "Name": "Pivot",
     "Id": "Pivot",
     "Layer": "SLOT_REELS_OVERLAY",
-    "Active": false,
-    "Children": [    
+    "Active": true,
+    "Children": [ 
         {
-            "Name": "HeapAccumulators",
-            "Id": "Pivot",
+            "Name": "Controls",
+            "Id": "Controls",
             "Layer": "SLOT_REELS_OVERLAY",
             "Active": true,
+            "Children": [
+                {
+                    "Name": "StartFreeSpinsButton",
+                    "Id": "StartFreeSpinsButton",
+                    "Layer": "SLOT_REELS_OVERLAY",
+                    "Active": false,
+                    "IsPrimitive": true,
+                    "Primitive": 5,
+                    "PrimitiveMaterial": "{{mechanicName}}StartFreeSpins",
+                    "PrimitiveShader": "Bettr/Symbol",
+                    "PrimitiveTexture": "{{mechanicName}}StartFreeSpins",
+                    "PrimitiveTextureCreate": true,
+                    "PrimitiveTextureCreateSource": "default.png",
+                    "Position": {
+                      "X": 0,
+                      "Y": -1,
+                      "Z": 0
+                    },
+                    "Scale":
+                    {
+                      "X": 2,
+                      "Y": 4,
+                      "Z": 1
+                    },
+                    "Components":
+                    [
+                      {
+                          "ComponentType": "BettrEventListener",
+                          "EventTriggers":
+                          [
+                              {
+                                  "ReferenceId": "BettrDialogController",
+                                  "Params":
+                                  [
+                                      "Start"
+                                  ]
+                              }
+                          ]
+                      }
+                    ]
+                }
+            ]
+        },   
+        {
+            "Name": "HeapAccumulators",
+            "Id": "HeapAccumulators",
+            "Layer": "SLOT_REELS_OVERLAY",
+            "Active": false,
             "Position": {
                 "X": 4.42,
                 "Y": -8.56,
@@ -91,6 +148,7 @@
         },
         {
            "Name": "SymbolGroup",
+           "Id": "SymbolGroup",
            "Layer": "SLOT_REELS",
            "Active": false,
            "Children": [

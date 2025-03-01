@@ -60,8 +60,6 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
             local mechanicsPrefab = reelMatrixState.MechanicsPrefab            
             local machineParent = machine.MachineParent
 
-            machineParent.SetActive(false)
-            
             System.WaitForSeconds(1)
             
             mechanicsPrefab.SetActive(true)            
@@ -73,6 +71,8 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
             reelMatrixMechanic:SetOutcomes(outcomesTable)
             reelMatrixMechanic:ShowReelMatrix()            
             reelMatrixMechanic:StartEngines() 
+            
+            BettrDialogController.WaitForDialogAction(machine.LockedSymbolsControls["StartButton"].GameObject)    
             
             local lockedSymbols = nil
             local lockedSymbolsMechanic = self
