@@ -18,6 +18,13 @@ namespace Bettr.Core
             Instance = this;
         }
 
+        public float GenerateJitter()
+        {
+            // generate a random number between -0.5 and 0.5
+            var jitter = Random.Range(-0.5f, 0.5f);
+            return jitter;
+        }
+
         public Table GetBaseGameMechanicDataSummary(string machineID, string mechanicName)
         {
             // ReSharper disable once IntroduceOptionalParameters.Global
