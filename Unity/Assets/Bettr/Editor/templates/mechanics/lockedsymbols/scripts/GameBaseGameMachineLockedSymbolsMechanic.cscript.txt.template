@@ -10,6 +10,7 @@ require "Core"
     },
     State = {
         MechanicsPrefab = nil,
+        ActiveAlgorithmsTable = nil,
     }
 }
 
@@ -57,6 +58,10 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             local reelStripData = BettrMathController.GetBaseGameMechanicDataMatrix(freeSpinsMechanic.Config.Machine, freeSpinsMechanic.Config.Mechanic, "ReelStrip")
             local outcomesTable = BettrMathController.GetBaseGameMechanicMatrix(freeSpinsMechanic.Config.Machine, freeSpinsMechanic.Config.Mechanic, "Outcomes")
             
+            local tableName = "BaseGame" .. self.Config.Mechanic .. "3"
+            local activeAlgorithmsTable = BettrMathController.GetTableArray(tableName, self.Config.Machine, "{{mechanicName}}")
+            self.State.ActiveAlgorithmsTable = activeAlgorithmsTable
+            
             local mechanicsPrefab = reelMatrixState.MechanicsPrefab            
             local machineParent = machine.MachineParent
 
@@ -84,7 +89,20 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             
             startButton.GameObject.SetActive(true)
             BettrDialogController.WaitForDialogAction(startButton.GameObject)
-            startButton.GameObject.SetActive(false)    
+            startButton.GameObject.SetActive(false)
+            
+            local groupKey = machine.{{mechanicName}}HeapAccumulators
+            
+            for i = 1, #activeAlgorithmsTable do
+                local row = activeAlgorithmsTable[i]
+                if row.Algorithm == "GreenMultiplierAccumulator" or row.Algorithm == "GreenCreditsAccumulator" then
+                    groupKey["Green"].SetActive(true)
+                elseif row.Algorithm == "YellowMultiplierAccumulator" or row.Algorithm == "YellowCreditsAccumulator" then
+                    groupKey["Yellow"].SetActive(true)
+                elseif row.Algorithm == "BlueMultiplierAccumulator" or row.Algorithm == "BlueCreditsAccumulator" then
+                    groupKey["Blue"].SetActive(true)
+                end
+            end                           
             
             local lockedSymbols = nil
             local lockedSymbolsMechanic = self
