@@ -365,10 +365,6 @@ namespace Bettr.Editor
             var dataMatrix = BettrMenu.GetTable($"{machineName}BaseGameLockedSymbolsDataMatrix");
             var replacementSymbols = BettrMenu.GetTableArray<string>(dataMatrix, "ValueSymbols", "Symbol");
             var symbolTypes = BettrMenu.GetTableArray<string>(dataMatrix, "ValueSymbols", "SymbolType");
-            var lockSymbolIDs = BettrMenu.GetTableArray<string>(dataMatrix, "ValueSymbols", "LockSymbolID");
-            var specialSymbolIDs = BettrMenu.GetTableArray<string>(dataMatrix, "ValueSymbols", "SpecialSymbolID");
-            var heapSymbolIDs = BettrMenu.GetTableArray<string>(dataMatrix, "ValueSymbols", "HeapSymbolID");
-            var freeSpinsSymbolIDs = BettrMenu.GetTableArray<string>(dataMatrix, "ValueSymbols", "FreeSpinsSymbolID");
             var values = BettrMenu.GetTableArray<int>(dataMatrix, "ValueSymbols", "Value");
             
             var symbolNames = new List<string>();
@@ -376,14 +372,6 @@ namespace Bettr.Editor
             {
                 var replacementSymbol = replacementSymbols[i];
                 var symbolType = symbolTypes[i];
-                var lockSymbolID = lockSymbolIDs[i];
-                lockSymbolID = lockSymbolID == "None" ? "" : lockSymbolID;
-                var specialSymbolID = specialSymbolIDs[i];
-                specialSymbolID = specialSymbolID == "None" ? "" : specialSymbolID;
-                var heapSymbolID = heapSymbolIDs[i];
-                heapSymbolID = heapSymbolID == "None" ? "" : heapSymbolID;
-                var freeSpinsSymbolID = freeSpinsSymbolIDs[i];
-                freeSpinsSymbolID = freeSpinsSymbolID == "None" ? "" : freeSpinsSymbolID;
                 var value = values[i];
                 var valueStr = value == 0 ? "" : $"_{value}";
                 symbolNames.Add($"{replacementSymbol}{symbolType}{valueStr}");
