@@ -93,6 +93,10 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
             
             local groupKey = machine.LockedSymbolsHeapAccumulators
             
+            groupKey["Green"].SetActive(false)
+            groupKey["Yellow"].SetActive(false)
+            groupKey["Blue"].SetActive(false)
+            
             for i = 1, #activeAlgorithmsTable do
                 local row = activeAlgorithmsTable[i]
                 if row.Algorithm == "GreenMultiplierAccumulator" or row.Algorithm == "GreenCreditsAccumulator" then
@@ -129,6 +133,10 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
             end     
             
             System.WaitForSeconds(1)
+            
+            groupKey["Green"].SetActive(false)
+            groupKey["Yellow"].SetActive(false)
+            groupKey["Blue"].SetActive(false)
             
             mechanicsPrefab.SetActive(false)
             
