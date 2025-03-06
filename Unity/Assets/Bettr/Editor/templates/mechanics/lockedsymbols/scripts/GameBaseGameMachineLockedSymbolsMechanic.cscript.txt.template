@@ -47,11 +47,17 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                 return
             end       
             
-            local summaryTable = BettrMathController.GetBaseGameMechanicSummary(freeSpinsMechanic.Config.Machine, freeSpinsMechanic.Config.Mechanic)            
+            local fsSummaryTable = BettrMathController.GetBaseGameMechanicSummary(freeSpinsMechanic.Config.Machine, freeSpinsMechanic.Config.Mechanic)            
+            local fsOutcomeCount = fsSummaryTable.OutcomeCount
+            if fsOutcomeCount <= 0 then
+                return
+            end 
+            
+            local summaryTable = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
             local outcomeCount = summaryTable.OutcomeCount
             if outcomeCount <= 0 then
                 return
-            end 
+            end
             
             {{machineName}}BaseGameState.SpinState.First.State = "Waiting"                
 
@@ -108,18 +114,12 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                 end
             end                           
             
-            local lockedSymbols = nil
-            local lockedSymbolsMechanic = self
-            if lockedSymbolsMechanic ~= nil then
-                lockedSymbols = BettrMathController.GetBaseGameMechanic(lockedSymbolsMechanic.Config.Machine, lockedSymbolsMechanic.Config.Mechanic, "{{mechanicName}}")
-            end
+            local lockedSymbols = BettrMathController.GetBaseGameMechanic(self.Config.Machine, self.Config.Mechanic, "{{mechanicName}}")
             
             System.WaitForSeconds(2)
             
-            local freeSpins = 10
-            
-            while freeSpins > 0 do
-                freeSpins = freeSpins - 1
+            while outcomeCount > 0 do
+                outcomeCount = outcomeCount - 1
                 reelMatrixMechanic:SpinEngines(machine)
                 
                 if lockedSymbols ~= nil then
