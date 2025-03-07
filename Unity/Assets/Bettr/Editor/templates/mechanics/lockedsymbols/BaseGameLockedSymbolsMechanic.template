@@ -49,6 +49,23 @@
                ]
              }        
         ]
+    },
+    {
+        "ComponentType": "TilePropertyTextMeshProsInjected",
+        "TextMeshProsProperty": [
+            {
+                "Key": "GreenHeapAccumulatorText",
+                "Id": "WonText"
+            },
+            {
+                "Key": "YellowHeapAccumulatorText",
+                "Id": "WonText"
+            },
+            {
+                "Key": "BlueHeapAccumulatorText",
+                "Id": "WonText"
+            } 
+        ]
     }
   ],
   "Child": {
@@ -122,154 +139,216 @@
                     "Id": "GreenHeapAccumulator",
                     "Layer": "SLOT_REELS_OVERLAY",
                     "Active": false,
-                    "Child": {
-                      "Name": "GreenHeapAccumulatorCollector",
-                      "Id": "GreenHeapAccumulatorCollector",
-                      "Layer": "SLOT_REELS_OVERLAY",
-                      "Active": true,
-                      "IsPrimitive": true,
-                      "Primitive": 5,
-                      "PrimitiveMaterial": "{{mechanicName}}GreenHeapAccumulatorCollector",
-                      "PrimitiveShader": "Bettr/Symbol",
-                      "PrimitiveTexture": "{{mechanicName}}GreenHeapAccumulatorCollector",
-                      "PrimitiveTextureCreate": true,
-                      "PrimitiveTextureCreateSource": "default.png",
-                      "PrimitiveTextureForceReplace": true,
-                      "Position": {
-                        "X": -3,
-                        "Y": -3,
-                        "Z": 0
-                      },
-                      "Scale":
-                      {
-                        "X": 1.5,
-                        "Y": 0.75,
-                        "Z": 1
-                      },
-                      "Components": [
+                    "Position": {
+                      "X": -3,
+                      "Y": -3,
+                      "Z": 0
+                    },
+                    "Scale":
+                    {
+                      "X": 1.5,
+                      "Y": 0.75,
+                      "Z": 1
+                    },
+                    "Children": [
                         {
-                            "ComponentType": "RectTransform",
-                            "Rect": {
-                              "X": 0,
-                              "Y": 0,
-                              "Width": 10,
-                              "Height": 1.5
+                            "Name": "GreenHeapAccumulatorImage",
+                            "Id": "GreenHeapAccumulatorImage",
+                            "Layer": "SLOT_REELS_OVERLAY",
+                            "Active": true,
+                            "Child": {
+                              "Name": "GreenHeapAccumulatorCollector",
+                              "Id": "GreenHeapAccumulatorCollector",
+                              "Layer": "SLOT_REELS_OVERLAY",
+                              "Active": true,
+                              "IsPrimitive": true,
+                              "Primitive": 5,
+                              "PrimitiveMaterial": "{{mechanicName}}GreenHeapAccumulatorCollector",
+                              "PrimitiveShader": "Bettr/Symbol",
+                              "PrimitiveTexture": "{{mechanicName}}GreenHeapAccumulatorCollector",
+                              "PrimitiveTextureCreate": true,
+                              "PrimitiveTextureCreateSource": "default.png",
+                              "PrimitiveTextureForceReplace": true
                             }
                         },
                         {
-                            "ComponentType": "TextMeshPro",
-                            "Text": "0",
-                            "Font": "Roboto-Bold SDF",
-                            "FontSize": 4,
-                            "HorizontalAlignment": "Center",
-                            "VerticalAlignment": "Middle",
-                            "Color": "#FFFFFF"
+                           "Name": "GreenHeapAccumulatorText",
+                           "Id": "GreenHeapAccumulatorText",
+                           "Layer": "SLOT_REELS_OVERLAY",
+                           "Active": true,
+                           "Scale":
+                           {
+                               "X": 4,
+                               "Y": 4,
+                               "Z": 1
+                           },
+                           "Components": [
+                               {
+                                   "ComponentType": "RectTransform",
+                                   "Rect":
+                                   {
+                                       "X": 0,
+                                       "Y": 0,
+                                       "Width": 10,
+                                       "Height": 1.5
+                                   }
+                               },
+                               {
+                                   "ComponentType": "TextMeshPro",
+                                   "Text": "0",
+                                   "Font": "Roboto-Bold SDF",
+                                   "FontSize": 1,
+                                   "HorizontalAlignment": "Center",
+                                   "VerticalAlignment": "Middle",
+                                   "Color": "#FFFFFF"
+                               }
+                           ]
                         }
-                      ]
-                    }
+                    ]
                 },
                 {
                     "Name": "YellowHeapAccumulator",
                     "Id": "YellowHeapAccumulator",
                     "Layer": "SLOT_REELS_OVERLAY",
                     "Active": false,
-                    "Child": {
-                        "Name": "YellowHeapAccumulatorCollector",
-                        "Id": "YellowHeapAccumulatorCollector",
-                        "Layer": "SLOT_REELS_OVERLAY",
-                        "Active": true,
-                        "IsPrimitive": true,
-                        "Primitive": 5,
-                        "PrimitiveMaterial": "{{mechanicName}}YellowHeapAccumulatorCollector",
-                        "PrimitiveShader": "Bettr/Symbol",
-                        "PrimitiveTexture": "{{mechanicName}}YellowHeapAccumulatorCollector",
-                        "PrimitiveTextureCreate": true,
-                        "PrimitiveTextureCreateSource": "default.png",
-                        "PrimitiveTextureForceReplace": true,
-                        "Position": {
-                          "X": 0,
-                          "Y": -3,
-                          "Z": 0
-                        },
-                        "Scale":
+                    "Position": {
+                        "X": 0,
+                        "Y": -3,
+                        "Z": 0
+                    },
+                    "Scale":
+                    {
+                        "X": 1.5,
+                        "Y": 0.75,
+                        "Z": 1
+                    },
+                    "Children": [
                         {
-                          "X": 1.5,
-                          "Y": 0.75,
-                          "Z": 1
+                            "Name": "YellowHeapAccumulatorImage",
+                            "Id": "YellowHeapAccumulatorImage",
+                            "Layer": "SLOT_REELS_OVERLAY",
+                            "Active": true,
+                            "Child": {
+                                "Name": "YellowHeapAccumulatorCollector",
+                                "Id": "YellowHeapAccumulatorCollector",
+                                "Layer": "SLOT_REELS_OVERLAY",
+                                "Active": true,
+                                "IsPrimitive": true,
+                                "Primitive": 5,
+                                "PrimitiveMaterial": "{{mechanicName}}YellowHeapAccumulatorCollector",
+                                "PrimitiveShader": "Bettr/Symbol",
+                                "PrimitiveTexture": "{{mechanicName}}YellowHeapAccumulatorCollector",
+                                "PrimitiveTextureCreate": true,
+                                "PrimitiveTextureCreateSource": "default.png",
+                                "PrimitiveTextureForceReplace": true
+                            }
                         },
-                        "Components": [
-                           {
-                               "ComponentType": "RectTransform",
-                               "Rect": {
-                                 "X": 0,
-                                 "Y": 0,
-                                 "Width": 10,
-                                 "Height": 1.5
-                               }
-                           },
-                           {
-                               "ComponentType": "TextMeshPro",
-                               "Text": "0",
-                               "Font": "Roboto-Bold SDF",
-                               "FontSize": 4,
-                               "HorizontalAlignment": "Center",
-                               "VerticalAlignment": "Middle",
-                               "Color": "#FFFFFF"
-                           }
-                        ]
-                    }
+                        {
+                            "Name": "YellowHeapAccumulatorText",
+                            "Id": "YellowHeapAccumulatorText",
+                            "Layer": "SLOT_REELS_OVERLAY",
+                            "Active": true,
+                            "Scale":
+                            {
+                                "X": 4,
+                                "Y": 4,
+                                "Z": 1
+                            },
+                            "Components": [
+                                {
+                                    "ComponentType": "RectTransform",
+                                    "Rect":
+                                    {
+                                        "X": 0,
+                                        "Y": 0,
+                                        "Width": 10,
+                                        "Height": 1.5
+                                    }
+                                },
+                                {
+                                    "ComponentType": "TextMeshPro",
+                                    "Text": "0",
+                                    "Font": "Roboto-Bold SDF",
+                                    "FontSize": 1,
+                                    "HorizontalAlignment": "Center",
+                                    "VerticalAlignment": "Middle",
+                                    "Color": "#FFFFFF"
+                                }
+                            ]
+                        }
+                    ]
                 },
                 {
                     "Name": "BlueHeapAccumulator",
                     "Id": "BlueHeapAccumulator",
                     "Layer": "SLOT_REELS_OVERLAY",
                     "Active": false,
-                    "Child": {
-                      "Name": "BlueHeapAccumulatorCollector",
-                      "Id": "BlueHeapAccumulatorCollector",
-                      "Layer": "SLOT_REELS_OVERLAY",
-                      "Active": true,
-                      "IsPrimitive": true,
-                      "Primitive": 5,
-                      "PrimitiveMaterial": "{{mechanicName}}BlueHeapAccumulatorCollector",
-                      "PrimitiveShader": "Bettr/Symbol",
-                      "PrimitiveTexture": "{{mechanicName}}BlueHeapAccumulatorCollector",
-                      "PrimitiveTextureCreate": true,
-                      "PrimitiveTextureCreateSource": "default.png",
-                      "PrimitiveTextureForceReplace": true,
-                      "Position": {
-                        "X": 3,
-                        "Y": -3,
-                        "Z": 0
-                      },
-                      "Scale":
-                      {
-                        "X": 1.5,
-                        "Y": 0.75,
-                        "Z": 1
-                      },
-                      "Components": [
-                         {
-                             "ComponentType": "RectTransform",
-                             "Rect": {
-                               "X": 0,
-                               "Y": 0,
-                               "Width": 10,
-                               "Height": 1.5
-                             }
-                         },
-                         {
-                             "ComponentType": "TextMeshPro",
-                             "Text": "0",
-                             "Font": "Roboto-Bold SDF",
-                             "FontSize": 4,
-                             "HorizontalAlignment": "Center",
-                             "VerticalAlignment": "Middle",
-                             "Color": "#FFFFFF"
-                         }
-                      ]
-                    }
-                }
+                    "Position": {
+                      "X": 3,
+                      "Y": -3,
+                      "Z": 0
+                    },
+                    "Scale":
+                    {
+                      "X": 1.5,
+                      "Y": 0.75,
+                      "Z": 1
+                    },
+                    "Children": [
+                        {
+                            "Name": "BlueHeapAccumulatorImage",
+                            "Id": "BlueHeapAccumulatorImage",
+                            "Layer": "SLOT_REELS_OVERLAY",
+                            "Active": true,
+                            "Child": {
+                              "Name": "BlueHeapAccumulatorCollector",
+                              "Layer": "SLOT_REELS_OVERLAY",
+                              "Active": true,
+                              "IsPrimitive": true,
+                              "Primitive": 5,
+                              "PrimitiveMaterial": "{{mechanicName}}BlueHeapAccumulatorCollector",
+                              "PrimitiveShader": "Bettr/Symbol",
+                              "PrimitiveTexture": "{{mechanicName}}BlueHeapAccumulatorCollector",
+                              "PrimitiveTextureCreate": true,
+                              "PrimitiveTextureCreateSource": "default.png",
+                              "PrimitiveTextureForceReplace": true
+                            }
+                        },
+                        {
+                            "Name": "YellowHeapAccumulatorText",
+                            "Id": "YellowHeapAccumulatorText",
+                            "Layer": "SLOT_REELS_OVERLAY",
+                            "Active": true,
+                            "Scale":
+                            {
+                                 "X": 4,
+                                 "Y": 4,
+                                 "Z": 1
+                            },
+                            "Components": [
+                                {
+                                    "ComponentType": "RectTransform",
+                                    "Rect":
+                                    {
+                                        "X": 0,
+                                        "Y": 0,
+                                        "Width": 10,
+                                        "Height": 1.5
+                                    }
+                                },
+                                {
+                                    "ComponentType": "TextMeshPro",
+                                    "Text": "0",
+                                    "Font": "Roboto-Bold SDF",
+                                    "FontSize": 1,
+                                    "HorizontalAlignment": "Center",
+                                    "VerticalAlignment": "Middle",
+                                    "Color": "#FFFFFF"
+                                }
+                            ]
+                        }
+                    ]
+                }                
             ]
         },
         {
