@@ -115,6 +115,12 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
             end                           
             
             local lockedSymbols = BettrMathController.GetBaseGameMechanic(self.Config.Machine, self.Config.Mechanic, "LockedSymbols")
+            local algorithms = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, self.Config.Mechanic, "Algorithms")
+            local locks = BettrMathController.GetBaseGameMechanicMatrix(2, self.Config.Machine, self.Config.Mechanic, "Locks")
+            local credits = BettrMathController.GetBaseGameMechanicMatrix(3, self.Config.Machine, self.Config.Mechanic, "Credits")
+            local multipliers = BettrMathController.GetBaseGameMechanicMatrix(4, self.Config.Machine, self.Config.Mechanic, "Multipliers")
+            local freeSpins = BettrMathController.GetBaseGameMechanicMatrix(5, self.Config.Machine, self.Config.Mechanic, "FreeSpins")
+            local accumulators = BettrMathController.GetBaseGameMechanicMatrix(6, self.Config.Machine, self.Config.Mechanic, "Accumulators")
             
             System.WaitForSeconds(2)
             
@@ -122,10 +128,10 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                 outcomeCount = outcomeCount - 1
                 reelMatrixMechanic:SpinEngines(machine)
                 
-                if lockedSymbols ~= nil then
+                if locks ~= nil then
                     local outcomeIndex = reelMatrixMechanic:OutcomeIndex()
                     local filteredTable = {}
-                    BettrMathController.FilterTable(lockedSymbols, filteredTable, "LockOutcomeIndex", outcomeIndex)
+                    BettrMathController.FilterTable(locks, filteredTable, "OutcomeIndex", outcomeIndex)
                     reelMatrixMechanic:LockEngines(filteredTable)
                 end
                 
