@@ -85,6 +85,32 @@ namespace Bettr.Core
         // APIs
         // 
 
+        public BettrReelMatrixCellController GetReelMatrixController(int rowIndex, int columnIndex)
+        {
+            var key = $"Row{rowIndex}Col{columnIndex}";
+            return GetReelMatrixController(key);
+        }
+
+        public BettrReelMatrixCellController GetReelMatrixController(string key)
+        {
+            var bettrReelMatrixCellController = this.BettrReelMatrixCellControllers[key];
+            return bettrReelMatrixCellController;
+        }
+        
+        public PropertyGameObject GetReelMatrixVisibleSymbol(int rowIndex, int columnIndex)
+        {
+            var key = $"Row{rowIndex}Col{columnIndex}";
+            var controller = GetReelMatrixController(key);
+            return controller.GetVisibleSymbol();
+        }
+        
+        public TilePropertyGameObjectGroup GetReelMatrixVisibleSymbolGroup(int rowIndex, int columnIndex)
+        {
+            var key = $"Row{rowIndex}Col{columnIndex}";
+            var controller = GetReelMatrixController(key);
+            return controller.GetVisibleSymbolGroup();
+        }
+
         public void ShowReelMatrix(MeshRenderer[] meshRenderers)
         {
             for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
@@ -1248,7 +1274,7 @@ namespace Bettr.Core
 
         public void OverrideVisibleSymbolTexture(Texture symbolTexture)
         {
-            var symbolGroupProperty = GetSymbolGroupProperty(2);
+            var symbolGroupProperty = GetSymbolGroup(2);
             var fixedSymbol = symbolGroupProperty.Current;
             var go = fixedSymbol.GameObject;
             var meshRenderer = go.GetComponent<MeshRenderer>();
@@ -1278,7 +1304,7 @@ namespace Bettr.Core
             
             var reelSymbol = reelStrip.GetReelSymbol(symbolStopIndex);
             
-            var symbolGroupProperty = GetSymbolGroupProperty(symbolIndex);
+            var symbolGroupProperty = GetSymbolGroup(symbolIndex);
 
             var fixedSymbol = symbolGroupProperty.Current;
             
@@ -1445,7 +1471,6 @@ namespace Bettr.Core
             {
                 return;
             }
-            // Access the symbol property (assuming you have a way to reference symbols like this)
             var key = $"Row{RowIndex}Col{ColumnIndex}Symbol{symbolIndex}";
             var symbolProperty = (PropertyGameObject) this.TileTable[key];
             
@@ -1501,8 +1526,27 @@ namespace Bettr.Core
                 }
             }
         }
+        
+        public PropertyGameObject GetVisibleSymbol()
+        {
+            var symbolIndex = 2;
+            return GetSymbol(symbolIndex);
+        }
+        
+        public TilePropertyGameObjectGroup GetVisibleSymbolGroup()
+        {
+            var symbolIndex = 2;
+            return GetSymbolGroup(symbolIndex);
+        }
+        
+        private PropertyGameObject GetSymbol(int symbolIndex)
+        {
+            var symbolKey = $"Row{RowIndex}Col{ColumnIndex}Symbol{symbolIndex}";
+            var symbolProperty = (PropertyGameObject) this.TileTable[symbolKey];
+            return symbolProperty;
+        }
 
-        private TilePropertyGameObjectGroup GetSymbolGroupProperty(int symbolIndex)
+        private TilePropertyGameObjectGroup GetSymbolGroup(int symbolIndex)
         {
             var symbolGroupKey = $"Row{RowIndex}Col{ColumnIndex}SymbolGroup{symbolIndex}";
             var symbolGroupProperty = (TilePropertyGameObjectGroup) this.TileTable[symbolGroupKey];
