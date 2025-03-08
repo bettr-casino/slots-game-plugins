@@ -365,16 +365,13 @@ namespace Bettr.Editor
             var dataMatrix = BettrMenu.GetTable($"{machineName}BaseGameLockedSymbolsDataMatrix");
             var replacementSymbols = BettrMenu.GetTableArray<string>(dataMatrix, "ValueSymbols", "Symbol");
             var symbolTypes = BettrMenu.GetTableArray<string>(dataMatrix, "ValueSymbols", "SymbolType");
-            var values = BettrMenu.GetTableArray<int>(dataMatrix, "ValueSymbols", "Value");
+            // var values = BettrMenu.GetTableArray<int>(dataMatrix, "ValueSymbols", "Value");
             
             var symbolNames = new List<string>();
-            for (int i = 0; i < replacementSymbols.Count; i++)
+            for (int i = 0; i < symbolTypes.Count; i++)
             {
-                var replacementSymbol = replacementSymbols[i];
                 var symbolType = symbolTypes[i];
-                var value = values[i];
-                var valueStr = value == 0 ? "" : $"_{value}";
-                symbolNames.Add($"{replacementSymbol}{symbolType}{valueStr}");
+                symbolNames.Add($"{symbolType}");
             }
             
             // get the model

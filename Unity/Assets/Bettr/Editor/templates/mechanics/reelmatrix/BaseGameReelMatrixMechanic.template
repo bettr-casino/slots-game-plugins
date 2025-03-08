@@ -3,16 +3,16 @@
   "Id": "BaseGameReelMatrixMechanic",
   "Layer": "SLOT_REELS",
   "Components": [
-      {
+    {
         "ComponentType": "MonoBehaviour",
         "Name": "Bettr.Core.BettrReelMatrixController"
-      },
-      {
+    },
+    {
         "ComponentType": "Tile",
         "FileName": "{{machineName}}BaseGameMachineReelMatrixController",
         "Name": "{{machineName}}BaseGameMachineReelMatrixController"
-      },
-      {
+    },
+    {
         "ComponentType": "TilePropertyStrings",
         "StringsProperty": [
           {
@@ -32,22 +32,22 @@
             "Value": "{{mechanicName}}"           
           }
         ]
-      },
-      {
+    },
+    {
         "ComponentType": "TilePropertyGameObjects",
         "GameObjectGroupsProperty": [           
-           {
-             "GroupKey": "Cells",
-             "Group": [
-                 {{- for columnIndex in 1..columnCount }}
-                 {{- for rowIndex in 1..rowCounts[columnIndex-1] }}      
-                   {
-                     "Key": "Row{{rowIndex}}Col{{columnIndex}}",
-                     "Id": "Row{{rowIndex}}Col{{columnIndex}}"           
-                   }
-                 {{ if !for.last }},{{ end }}{{ end }}
-                 {{ if !for.last }},{{ end }}{{ end }}
-             ]
+            {
+               "GroupKey": "Cells",
+               "Group": [
+                    {{- for columnIndex in 1..columnCount }}
+                    {{- for rowIndex in 1..rowCounts[columnIndex-1] }}      
+                    {
+                        "Key": "Row{{rowIndex}}Col{{columnIndex}}",
+                        "Id": "Row{{rowIndex}}Col{{columnIndex}}"           
+                    }
+                    {{ if !for.last }},{{ end }}{{ end }}
+                    {{ if !for.last }},{{ end }}{{ end }}
+               ]
            }        
         ]
       },
@@ -69,35 +69,93 @@
       {
           "ComponentType": "TilePropertyGameObjects",
           "GameObjectGroupsProperty": [             
-          {{- for columnIndex in 1..columnCount }}
-          {{- for rowIndex in 1..rowCounts[columnIndex-1] }}      
-          {{- for symbolIndex in 1..totalSymbolCount }}
-             {
-               "GroupKey": "Row{{rowIndex}}Col{{columnIndex}}SymbolGroup{{symbolIndex}}",
-               "Group": [
-               {{ for symbolKey in symbolKeys }}              
-                    {
-                      "Key": "{{symbolKey}}",
-                      "Id": "Symbol{{symbolKey}}__SymbolGroup{{symbolIndex}}__Row{{rowIndex}}Col{{columnIndex}}"         
-                    }
-               {{ if !for.last }},{{ end }}{{ end }}                  
-               ]
-            }           
-          {{ if !for.last }},{{ end }}{{ end }}
-          {{ if !for.last }},{{ end }}{{ end }}
-          {{ if !for.last }},{{ end }}{{ end }}
+              {{- for columnIndex in 1..columnCount }}
+              {{- for rowIndex in 1..rowCounts[columnIndex-1] }}      
+              {{- for symbolIndex in 1..totalSymbolCount }}
+                 {
+                   "GroupKey": "Row{{rowIndex}}Col{{columnIndex}}SymbolGroup{{symbolIndex}}",
+                   "Group": [
+                   {{ for symbolKey in symbolKeys }}              
+                        {
+                          "Key": "{{symbolKey}}",
+                          "Id": "Symbol{{symbolKey}}__SymbolGroup{{symbolIndex}}__Row{{rowIndex}}Col{{columnIndex}}"         
+                        }
+                   {{ if !for.last }},{{ end }}{{ end }}                  
+                   ]
+                }           
+              {{ if !for.last }},{{ end }}{{ end }}
+              {{ if !for.last }},{{ end }}{{ end }}
+              {{ if !for.last }},{{ end }}{{ end }}
           ]
-        },
-        {
-           "ComponentType": "TilePropertyGameObjects",
-           "GameObjectsProperty": [
-            {
-              "Key": "Pivot",
-              "Id": "Pivot"           
-            }
-           ]
-        }
-                      
+      },
+      {
+         "ComponentType": "TilePropertyAnimators",
+         "AnimatorsGroupProperty": [
+           {{- first = true }}
+           {{- for columnIndex in 1..columnCount }}
+             {{- for rowIndex in 1..rowCounts[columnIndex-1] }}
+               {{- for symbolIndex in 1..totalSymbolCount }}
+                 {{- if symbolIndex == 2 }}
+                   {{- if !first }},{{ end }}
+                   {
+                     "GroupKey": "Row{{rowIndex}}Col{{columnIndex}}SymbolAnimator{{symbolIndex}}",
+                     "Group": [
+                       {{ for symbolKey in symbolKeys }}
+                         {
+                           "Key": "{{symbolKey}}",
+                           "Id": "Symbol{{symbolKey}}__SymbolGroup{{symbolIndex}}__Row{{rowIndex}}Col{{columnIndex}}",
+                           "State": "lock",
+                           "DelayBeforeStart": 0.5,
+                           "WaitForComplete": true
+                         }
+                         {{ if !for.last }},{{ end }}
+                       {{ end }}
+                     ]
+                   }
+                   {{- first = false }}
+                 {{- end }}
+               {{- end }}
+             {{- end }}
+           {{- end }}
+         ]
+      },
+      {
+        "ComponentType": "TilePropertyTextMeshPros",
+        "TextMeshProGroupsProperty": [
+          {{- first = true }}
+          {{- for columnIndex in 1..columnCount }}
+            {{- for rowIndex in 1..rowCounts[columnIndex-1] }}
+              {{- for symbolIndex in 1..totalSymbolCount }}
+                {{- if symbolIndex == 2 }}
+                  {{- if !first }},{{ end }}
+                  {
+                    "GroupKey": "Row{{rowIndex}}Col{{columnIndex}}SymbolText{{symbolIndex}}",
+                    "Group": [
+                      {{ for symbolKey in symbolKeys }}
+                        {
+                          "Key": "{{symbolKey}}",
+                          "Id": "Symbol{{symbolKey}}Text__{{symbolIndex}}__Row{{rowIndex}}Col{{columnIndex}}"
+                        }
+                        {{ if !for.last }},{{ end }}
+                      {{ end }}
+                    ]
+                  }
+                  {{- first = false }}
+                {{- end }}
+              {{- end }}
+            {{- end }}
+          {{- end }}
+        ]
+      },      
+      {
+        "ComponentType": "TilePropertyGameObjects",
+        "GameObjectsProperty": [
+          {
+            "Key": "Pivot",
+            "Id": "Pivot"
+          }
+        ]           
+      }            
   ],
   "Child": {
       "Name": "Pivot",
@@ -235,22 +293,101 @@
                                       "PrimitiveAlpha": 0.7,
                                       "ShaderProperties": {
                                         "_StencilRef": {{ (columnIndex - 1) * rowCounts[columnIndex-1] + (rowIndex - 1) + 1}}
-                                      },                                      
+                                      },
+                                      "Children": [
+                                        {{- if symbolIndex == 2 }}
+                                        {
+                                          "Name": "{{symbolKey}}Lock",
+                                          Active: false,
+                                          "Layer": "SLOT_REELS",
+                                          "IsPrimitive": true,
+                                          "Primitive": 5,
+                                          "PrimitiveMaterial": "ReelMatrixSymbolLock-{{symbolKey}}",
+                                          "PrimitiveShader": "Bettr/Symbol",
+                                          "PrimitiveTexture": "ReelMatrixSymbolLock-{{symbolKey}}",
+                                          "PrimitiveTextureCreate": true,
+                                          "PrimitiveTextureSource": "default.png",
+                                          "PrimitiveTextureForceReplace": false,
+                                          "PrimitiveAlpha": 1.0,                                        
+                                        },                                        
+                                        {
+                                            "Name": "{{symbolKey}}Text",
+                                            "Id": "Symbol{{symbolKey}}Text__{{symbolIndex}}__Row{{rowIndex}}Col{{columnIndex}}",
+                                            "Layer": "SLOT_REELS",
+                                            "Active": false,
+                                            "Scale":
+                                            {
+                                                 "X": 1,
+                                                 "Y": 1,
+                                                 "Z": 1
+                                            },
+                                            "Components": [
+                                                {
+                                                    "ComponentType": "RectTransform",
+                                                    "Rect":
+                                                    {
+                                                        "X": 0,
+                                                        "Y": 0,
+                                                        "Width": 4,
+                                                        "Height": 1.5
+                                                    }
+                                                },
+                                                {
+                                                    "ComponentType": "TextMeshPro",
+                                                    "Text": "0",
+                                                    "Font": "Roboto-Bold SDF",
+                                                    "FontSize": 4,
+                                                    "HorizontalAlignment": "Center",
+                                                    "VerticalAlignment": "Middle",
+                                                    "Color": "#FFFFFF"
+                                                }
+                                            ]
+                                        }  
+                                        {{- end }}                                      
+                                      ],                                      
                                       "Components": [
+                                        {{- if symbolIndex == 2 }}
                                         {
                                           "ComponentType": "AnimatorController",
                                           "Filename": "{{symbolKey}}",
                                           "AnimationStates": [
                                             {
-                                              "Name": "noop",
-                                              "Speed": 1,
-                                              "IsLoop": false,
-                                              "IsDefault": true
+                                                "Name": "noop",
+                                                "Speed": 1,
+                                                "IsLoop": false,
+                                                "IsDefault": true
+                                            },
+                                            {
+                                                "Name": "lock",
+                                                "Speed": 1,
+                                                "IsLoop": false,
+                                                "IsDefault": false,
+                                                "Dopesheet": [
+                                                     {
+                                                         "Path": "{{symbolKey}}Lock",
+                                                         "Type": "GameObject",
+                                                         "Property": "m_IsActive",
+                                                         "Keyframes": {
+                                                             "Times":  [0],
+                                                             "Values": [1]
+                                                         }
+                                                     },
+                                                     {
+                                                        "Path": "{{symbolKey}}Text",
+                                                        "Type": "GameObject",
+                                                        "Property": "m_IsActive",
+                                                        "Keyframes": {
+                                                          "Times":  [0],
+                                                          "Values": [1]
+                                                        }
+                                                    }
+                                                ] 
                                             }
                                           ],
                                           "AnimatorStateTransitions": [
                                           ]
                                         }
+                                        {{- end }}
                                       ]
                                     }                                    
                             {{ if !for.last }},{{ end }}{{ end }}

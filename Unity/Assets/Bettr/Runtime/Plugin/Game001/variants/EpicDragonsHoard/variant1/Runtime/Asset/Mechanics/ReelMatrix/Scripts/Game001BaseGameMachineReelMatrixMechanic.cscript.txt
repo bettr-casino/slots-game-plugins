@@ -46,12 +46,16 @@ function Game001BaseGameMachineReelMatrixMechanic:SetReelStripSymbolTextures(pre
     self.State.ReelMatrixController:SetReelStripSymbolTextures(prefab)
 end
 
+function Game001BaseGameMachineReelMatrixMechanic:ResetEngines()
+    self.State.ReelMatrixController:ResetEngines()
+end
+
 function Game001BaseGameMachineReelMatrixMechanic:SetOutcomes(outcomesTable)
     self.State.ReelMatrixController:SetOutcomes(outcomesTable)
 end
 
-function Game001BaseGameMachineReelMatrixMechanic:ShowReelMatrix()
-    self.State.ReelMatrixController["Pivot"].SetActive(true)
+function Game001BaseGameMachineReelMatrixMechanic:ShowReelMatrix(initialMeshRenderers)
+    self.State.ReelMatrixController:ShowReelMatrix(initialMeshRenderers)
 end
 
 function Game001BaseGameMachineReelMatrixMechanic:StartEngines()
@@ -68,6 +72,10 @@ end
 
 function Game001BaseGameMachineReelMatrixMechanic:LockEngines(lockedSymbolsReelMatrix)
     return self.State.ReelMatrixController:LockEngines(lockedSymbolsReelMatrix)
+end
+
+function Game001BaseGameMachineReelMatrixMechanic:GetProperty(key)
+    return self.State.ReelMatrixController[key]
 end
 
 
