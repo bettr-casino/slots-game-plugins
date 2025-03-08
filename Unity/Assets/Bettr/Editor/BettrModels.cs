@@ -894,13 +894,21 @@ namespace Bettr.Editor
                     {
                         foreach (var kvPair in GameObjectsProperty)
                         {
-                            InstanceGameObject.IdGameObjects.TryGetValue(kvPair.Id, out var referenceGameObject);
-                            var tilePropertyGameObject = new TilePropertyGameObject()
+                            try
                             {
-                                key = kvPair.Key,
-                                value = new PropertyGameObject() {gameObject = referenceGameObject?.GameObject },
-                            };
-                            tileGameObjectProperties.Add(tilePropertyGameObject);
+                                InstanceGameObject.IdGameObjects.TryGetValue(kvPair.Id, out var referenceGameObject);
+                                var tilePropertyGameObject = new TilePropertyGameObject()
+                                {
+                                    key = kvPair.Key,
+                                    value = new PropertyGameObject() {gameObject = referenceGameObject?.GameObject },
+                                };
+                                tileGameObjectProperties.Add(tilePropertyGameObject);
+                            }
+                            catch (Exception e)
+                            {
+                                Debug.LogError($"Failed to find game object with id: {kvPair.Id}, error: {e.Message}");
+                                throw;
+                            }
                         }
                     }
                     if (GameObjectGroupsProperty != null)
