@@ -388,7 +388,7 @@ namespace Bettr.Core
 
             yield return LoadGamePrefabAsync(machineBundleName, machineBundleVariant, machineName, machineVariant, gamePanel);
 
-            var properties = new string[] { "CreditsText", "BetText", "WinText" };
+            var properties = new string[] { "CreditsText", "BetText", "WinText", "Settings", "Spin", "Bet", "FreeSpinsRemaining", "FreeSpinsRemainingText" };
             foreach (var p in properties)
             {
                 var propValue = self[p];
