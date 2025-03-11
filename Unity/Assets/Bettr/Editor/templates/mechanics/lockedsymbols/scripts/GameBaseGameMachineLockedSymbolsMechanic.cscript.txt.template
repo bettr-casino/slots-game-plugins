@@ -105,9 +105,21 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             
             machine.Spin.SetActive(false)
             machine.Bet.SetActive(false) 
+
+            machine.FreeSpinsInitialText.SetText(freeSpinsRemaining)
+            machine.FreeSpinsRemainingText.SetActive(false)
+            machine.FreeSpinsInitialText.SetActive(false)
+            machine.FreeSpinsAddedText.SetActive(false)
+            
+            machine.FreeSpinsRemaining.SetActive(true)
+                                   
+            machine.FreeSpinsInitialText.SetActive(true)
+            BettrVisualsController.PlayAnimatorProperty(machine.FreeSpinsInitialAnimation)
+            
+            machine.FreeSpinsInitialText.SetActive(false)            
             
             machine.FreeSpinsRemainingText.SetText(freeSpinsRemaining)
-            machine.FreeSpinsRemaining.SetActive(true)                       
+            machine.FreeSpinsRemainingText.SetActive(true)
             
             local groupKey = machine.{{mechanicName}}HeapAccumulators
             
@@ -160,13 +172,31 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                         local animatorProp = animatorGroupProp["SC"]
                         BettrVisualsController.PlayAnimatorProperty(animatorProp)
                     end
+                    local updatedFreeSpinsRemaining = freeSpinsRemaining
                     local filteredFreeSpinsTable = {}
                     BettrMathController.FilterTable(freeSpins, filteredFreeSpinsTable, "OutcomeIndex", outcomeIndex, "AppliedByOutcomeIndex", outcomeIndex)
                     for i = 1, #filteredFreeSpinsTable do
                         local row = filteredFreeSpinsTable[i]
                         local fsRemaining = row.FreeSpinsRemainingAfter
-                        freeSpinsRemaining = fsRemaining
+                        updatedFreeSpinsRemaining = fsRemaining
+                    end
+                    
+                    if updatedFreeSpinsRemaining > freeSpinsRemaining then
+                        local addedFreeSpins = updatedFreeSpinsRemaining - freeSpinsRemaining
+                        freeSpinsRemaining = updatedFreeSpinsRemaining
+                        
+                        machine.FreeSpinsRemainingText.SetActive(false)
+                        
+                        machine.FreeSpinsAddedText.SetActive(true)
+                        machine.FreeSpinsAddedText.Format(addedFreeSpins)
+                        
+                        BettrVisualsController.PlayAnimatorProperty(machine.FreeSpinsAddAnimation)
+                        
                         machine.FreeSpinsRemainingText.SetText(freeSpinsRemaining)
+                        machine.FreeSpinsRemainingText.SetActive(true)
+                        
+                        machine.FreeSpinsAddedText.SetActive(false)
+
                     end
                 end
                 
