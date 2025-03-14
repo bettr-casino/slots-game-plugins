@@ -152,59 +152,86 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                 outcomeCount = outcomeCount - 1
                 freeSpinsRemaining = freeSpinsRemaining - 1
                 machine.FreeSpinsRemainingText.SetText(freeSpinsRemaining)
-                reelMatrixMechanic:SpinEngines(machine)
-                
+                reelMatrixMechanic:SpinEngines(machine)                
+                local outcomeIndex = reelMatrixMechanic:OutcomeIndex()
+-------------------- ALGORITHMS
+                local filteredAlgorithmsTable = {}
+                BettrMathController.FilterTable(algorithms, filteredAlgorithmsTable, "OutcomeIndex", outcomeIndex)                
+-------------------- FREE SPINS
+                local filteredFreeSpinsTable = {}
+                BettrMathController.FilterTable(freeSpins, filteredFreeSpinsTable, "AppliedByOutcomeIndex", outcomeIndex)
+-------------------- LOCKS                
+                local filteredLocksTable = {}
+                BettrMathController.FilterTable(locks, filteredLocksTable, "OutcomeIndex", outcomeIndex)
+-------------------- CREDITS                
+                local filteredCreditsTable = {}
+                BettrMathController.FilterTable(credits, filteredCreditsTable, "AppliedByOutcomeIndex", outcomeIndex)
+-------------------- MULTIPLIERS                
+                local filteredMultipliersTable = {}
+                BettrMathController.FilterTable(multipliers, filteredMultipliersTable, "AppliedByOutcomeIndex", outcomeIndex)
+-------------------- ACCUMULATORS - GREEN                
+                local filteredGreenAccumulatorsTable = {}
+                BettrMathController.FilterTable(accumulators, filteredGreenAccumulatorsTable, "AppliedByOutcomeIndex", outcomeIndex, "AccumulatorAlgo", "GreenMultiplierAccumulator")
+-------------------- ACCUMULATORS - GREEN                
+                local filteredYellowAccumulatorsTable = {}
+                BettrMathController.FilterTable(accumulators, filteredYellowAccumulatorsTable, "AppliedByOutcomeIndex", outcomeIndex, "AccumulatorAlgo", "YellowMultiplierAccumulator")
+-------------------- ACCUMULATORS - GREEN                
+                local filteredBlueAccumulatorsTable = {}
+                BettrMathController.FilterTable(accumulators, filteredBlueAccumulatorsTable, "AppliedByOutcomeIndex", outcomeIndex, "AccumulatorAlgo", "BlueMultiplierAccumulator")
+-------------------- APPLY LOCK ANIMATION                   
                 if locks ~= nil then
-                    local outcomeIndex = reelMatrixMechanic:OutcomeIndex()
-                    local filteredLocksTable = {}
-                    BettrMathController.FilterTable(locks, filteredLocksTable, "OutcomeIndex", outcomeIndex)
                     reelMatrixMechanic:LockEngines(filteredLocksTable)
-                    local filteredCreditsTable = {}
-                    BettrMathController.FilterTable(credits, filteredCreditsTable, "OutcomeIndex", outcomeIndex, "AppliedByOutcomeIndex", outcomeIndex)
-                    for i = 1, #filteredCreditsTable parallel do
-                        local row = filteredCreditsTable[i]
+                    for i = 1, #filteredLocksTable parallel do
+                        local row = filteredLocksTable[i]
                         local reelID = row.ReelID
-                        local creditsAdded = row.CreditsAdded
+                        local lockCreditsRow = BettrMathController.GetTableRow(filteredCreditsTable, "ReelID", reelID, "AppliedByReelID", reelID, "OutcomeIndex", outcomeIndex)
+                        local lockCredits = lockCreditsRow.CreditsAdded
                         local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
-                        local textMeshProProp = textMeshProGroupProp["SC"]
-                        textMeshProProp.SetText(creditsAdded)
+                        local textMeshProProp = textMeshProGroupProp["SC"]                        
+                        textMeshProProp.SetText(lockCredits)
                         local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
-                        local animatorProp = animatorGroupProp["SC"]
+                        local animatorProp = animatorGroupProp["SC__LockAnimation"]
                         BettrVisualsController.PlayAnimatorProperty(animatorProp)
                     end
-                    local updatedFreeSpinsRemaining = freeSpinsRemaining
-                    local filteredFreeSpinsTable = {}
-                    BettrMathController.FilterTable(freeSpins, filteredFreeSpinsTable, "OutcomeIndex", outcomeIndex, "AppliedByOutcomeIndex", outcomeIndex)
-                    for i = 1, #filteredFreeSpinsTable do
-                        local row = filteredFreeSpinsTable[i]
-                        local fsRemaining = row.FreeSpinsRemainingAfter
-                        updatedFreeSpinsRemaining = fsRemaining
-                    end
-                    
-                    if updatedFreeSpinsRemaining > freeSpinsRemaining then
-                        local addedFreeSpins = updatedFreeSpinsRemaining - freeSpinsRemaining
-                        freeSpinsRemaining = updatedFreeSpinsRemaining
-                        
-                        machine.FreeSpinsRemainingText.SetActive(false)
-                        
-                        machine.FreeSpinsAddedText.SetActive(true)
-                        machine.FreeSpinsAddedText.Format(addedFreeSpins)
-                        
-                        BettrVisualsController.PlayAnimatorProperty(machine.FreeSpinsAddAnimation)
-                        
-                        machine.FreeSpinsRemainingText.SetText(freeSpinsRemaining)
-                        machine.FreeSpinsRemainingText.SetActive(true)
-                        
-                        machine.FreeSpinsAddedText.SetActive(false)
-
-                    end
                 end
-                
+-------------------- RESET THE FREE SPINS REMAINING
+                local updatedFreeSpinsRemaining = freeSpinsRemaining
+                for i = 1, #filteredFreeSpinsTable do
+                    local row = filteredFreeSpinsTable[i]
+                    local fsRemaining = row.FreeSpinsRemainingAfter
+                    updatedFreeSpinsRemaining = fsRemaining
+                end
+                if updatedFreeSpinsRemaining > freeSpinsRemaining then
+                    local addedFreeSpins = updatedFreeSpinsRemaining - freeSpinsRemaining
+                    freeSpinsRemaining = updatedFreeSpinsRemaining                    
+                    machine.FreeSpinsRemainingText.SetActive(false)                    
+                    machine.FreeSpinsAddedText.SetActive(true)
+                    machine.FreeSpinsAddedText.Format(addedFreeSpins)                    
+                    BettrVisualsController.PlayAnimatorProperty(machine.FreeSpinsAddAnimation)                    
+                    machine.FreeSpinsRemainingText.SetText(freeSpinsRemaining)
+                    machine.FreeSpinsRemainingText.SetActive(true)                    
+                    machine.FreeSpinsAddedText.SetActive(false)                
+                end                
+-------------------- APPLY ANY ADDED CREDITS 
+-------------------- FROM SPECIAL SYMBOLS
+                local specialSymbolCreditsAlgosTable = {}
+                BettrMathController.FilterTable(filteredAlgorithmsTable, specialSymbolCreditsAlgosTable, "Algo", "SpecialSymbolCredits")
+                for i = 1, #specialSymbolCreditsAlgosTable parallel do
+                    local row = specialSymbolCreditsAlgosTable[i]
+                    local reelID = row.ReelID
+                    local specialSymbolCreditsRow = BettrMathController.GetTableRow(filteredCreditsTable, "AppliedByReelID", reelID)
+                    local creditsAdded = specialSymbolCreditsRow.CreditsAdded
+                    local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
+                    local textMeshProProp = textMeshProGroupProp["SC"]
+                    BettrVisualsController.RollUpCounter(winTextProperty, 0, pays, 0.3)
+                end
+-------------------- FROM ACCUMULATORS                                  
+-------------------- APPLY ANY ADDED MULTIPLIERS 
+-------------------- FROM SPECIAL SYMBOLS
+-------------------- FROM ACCUMULATORS                                  
                 System.WaitForSeconds(1)
-            end     
-            
-            System.WaitForSeconds(1)
-            
+            end                 
+            System.WaitForSeconds(1)            
             groupKey["Green"].SetActive(false)
             groupKey["Yellow"].SetActive(false)
             groupKey["Blue"].SetActive(false)
