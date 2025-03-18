@@ -131,14 +131,14 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
             
             for i = 1, #activeAlgorithmsTable do
                 local row = activeAlgorithmsTable[i]
-                if row.Algorithm == "GreenMultiplierAccumulator" or row.Algorithm == "GreenCreditsAccumulator" then
+                if row.Algo == "GreenMultiplierAccumulator" or row.Algo == "GreenCreditsAccumulator" then
                     heapAccumulatorsGroupKey["Green"].SetActive(true)
-                elseif row.Algorithm == "YellowMultiplierAccumulator" or row.Algorithm == "YellowCreditsAccumulator" then
+                elseif row.Algo == "YellowMultiplierAccumulator" or row.Algo == "YellowCreditsAccumulator" then
                     heapAccumulatorsGroupKey["Yellow"].SetActive(true)
-                elseif row.Algorithm == "BlueMultiplierAccumulator" or row.Algorithm == "BlueCreditsAccumulator" then
+                elseif row.Algo == "BlueMultiplierAccumulator" or row.Algo == "BlueCreditsAccumulator" then
                     heapAccumulatorsGroupKey["Blue"].SetActive(true)
                 end
-                if row.Algorithm == "SpecialSymbolCredits" or row.Algorithm == "SpecialSymbolMultipliers" then
+                if row.Algo == "SpecialSymbolCredits" or row.Algo == "SpecialSymbolMultipliers" then
                     accumulatorsGroupKey["Accumulator"].SetActive(true)
                 end
             end                           
