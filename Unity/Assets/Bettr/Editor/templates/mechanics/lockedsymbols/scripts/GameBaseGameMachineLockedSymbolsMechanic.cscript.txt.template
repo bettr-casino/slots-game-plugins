@@ -70,8 +70,8 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             local reelStripData = BettrMathController.GetBaseGameMechanicDataMatrix(freeSpinsMechanic.Config.Machine, freeSpinsMechanic.Config.Mechanic, "ReelStrip")
             local outcomesTable = BettrMathController.GetBaseGameMechanicMatrix(freeSpinsMechanic.Config.Machine, freeSpinsMechanic.Config.Mechanic, "Outcomes")
             
-            local tableName = "BaseGame" .. self.Config.Mechanic .. "3"
-            local activeAlgorithmsTable = BettrMathController.GetTableArray(tableName, self.Config.Machine, "{{mechanicName}}")
+            local tableName = "BaseGame" .. self.Config.Mechanic .. "Summary2"
+            local activeAlgorithmsTable = BettrMathController.GetTableArray(tableName, self.Config.Machine, "Algorithms")
             self.State.ActiveAlgorithmsTable = activeAlgorithmsTable
             
             local mechanicsPrefab = reelMatrixState.MechanicsPrefab            
@@ -121,30 +121,52 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             machine.FreeSpinsRemainingText.SetText(freeSpinsRemaining)
             machine.FreeSpinsRemainingText.SetActive(true)
             
-            local groupKey = machine.{{mechanicName}}HeapAccumulators
+            local heapAccumulatorsGroupKey = machine.{{mechanicName}}HeapAccumulators            
+            heapAccumulatorsGroupKey["Green"].SetActive(false)
+            heapAccumulatorsGroupKey["Yellow"].SetActive(false)
+            heapAccumulatorsGroupKey["Blue"].SetActive(false)
             
-            groupKey["Green"].SetActive(false)
-            groupKey["Yellow"].SetActive(false)
-            groupKey["Blue"].SetActive(false)
+            local accumulatorsGroupKey = machine.{{mechanicName}}Accumulators
+            accumulatorsGroupKey["Accumulator"].SetActive(false)
             
             for i = 1, #activeAlgorithmsTable do
                 local row = activeAlgorithmsTable[i]
                 if row.Algorithm == "GreenMultiplierAccumulator" or row.Algorithm == "GreenCreditsAccumulator" then
-                    groupKey["Green"].SetActive(true)
+                    heapAccumulatorsGroupKey["Green"].SetActive(true)
                 elseif row.Algorithm == "YellowMultiplierAccumulator" or row.Algorithm == "YellowCreditsAccumulator" then
-                    groupKey["Yellow"].SetActive(true)
+                    heapAccumulatorsGroupKey["Yellow"].SetActive(true)
                 elseif row.Algorithm == "BlueMultiplierAccumulator" or row.Algorithm == "BlueCreditsAccumulator" then
-                    groupKey["Blue"].SetActive(true)
+                    heapAccumulatorsGroupKey["Blue"].SetActive(true)
+                end
+                if row.Algorithm == "SpecialSymbolCredits" or row.Algorithm == "SpecialSymbolMultipliers" then
+                    accumulatorsGroupKey["Accumulator"].SetActive(true)
                 end
             end                           
             
-            local lockedSymbols = BettrMathController.GetBaseGameMechanic(self.Config.Machine, self.Config.Mechanic, "{{mechanicName}}")
+            local lockedSymbolsTable = BettrMathController.GetBaseGameMechanic(self.Config.Machine, self.Config.Mechanic, "{{mechanicName}}")
+
+            local freeSpinsTable = BettrMathController.GetBaseGameMechanic(2, self.Config.Machine, self.Config.Mechanic, "FreeSpins")
+            local freeSpinsMatrix = BettrMathController.GetBaseGameMechanicMatrix(2, self.Config.Machine, self.Config.Mechanic, "FreeSpins")
+
+            local lockCreditsTable = BettrMathController.GetBaseGameMechanic(3, self.Config.Machine, self.Config.Mechanic, "LockCredits")
+            local lockCreditsMatrix = BettrMathController.GetBaseGameMechanicMatrix(3, self.Config.Machine, self.Config.Mechanic, "LockCredits")            
+            
+            local lockMultipliersTable = BettrMathController.GetBaseGameMechanic(4, self.Config.Machine, self.Config.Mechanic, "LockMultipliers")
+            local lockMultipliersMatrix = BettrMathController.GetBaseGameMechanicMatrix(4, self.Config.Machine, self.Config.Mechanic, "LockMultipliers")
+            
+            local accumulatorCreditsTable = BettrMathController.GetBaseGameMechanic(5, self.Config.Machine, self.Config.Mechanic, "AccumulatorCredits")
+            local accumulatorCreditsMatrix = BettrMathController.GetBaseGameMechanicMatrix(5, self.Config.Machine, self.Config.Mechanic, "AccumulatorCredits")
+            
+            local accumulatorMultipliersTable = BettrMathController.GetBaseGameMechanic(6, self.Config.Machine, self.Config.Mechanic, "AccumulatorMultipliers")
+            local accumulatorMultipliersMatrix = BettrMathController.GetBaseGameMechanicMatrix(6, self.Config.Machine, self.Config.Mechanic, "AccumulatorMultipliers")
+            
+            local heapAccumulatorCreditsTable = BettrMathController.GetBaseGameMechanic(7, self.Config.Machine, self.Config.Mechanic, "HeapAccumulatorCredits")
+            local heapAccumulatorCreditsMatrix = BettrMathController.GetBaseGameMechanicMatrix(7, self.Config.Machine, self.Config.Mechanic, "HeapAccumulatorCredits")
+            
+            local heapAccumulatorMultipliersTable = BettrMathController.GetBaseGameMechanic(8, self.Config.Machine, self.Config.Mechanic, "HeapAccumulatorMultipliers")
+            local heapAccumulatorMultipliersMatrix = BettrMathController.GetBaseGameMechanicMatrix(8, self.Config.Machine, self.Config.Mechanic, "HeapAccumulatorMultipliers")
+            
             local algorithms = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, self.Config.Mechanic, "Algorithms")
-            local locks = BettrMathController.GetBaseGameMechanicMatrix(2, self.Config.Machine, self.Config.Mechanic, "Locks")
-            local credits = BettrMathController.GetBaseGameMechanicMatrix(3, self.Config.Machine, self.Config.Mechanic, "Credits")
-            local multipliers = BettrMathController.GetBaseGameMechanicMatrix(4, self.Config.Machine, self.Config.Mechanic, "Multipliers")
-            local freeSpins = BettrMathController.GetBaseGameMechanicMatrix(5, self.Config.Machine, self.Config.Mechanic, "FreeSpins")
-            local accumulators = BettrMathController.GetBaseGameMechanicMatrix(6, self.Config.Machine, self.Config.Mechanic, "Accumulators")
             
             System.WaitForSeconds(2)
             
@@ -152,62 +174,83 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                 outcomeCount = outcomeCount - 1
                 freeSpinsRemaining = freeSpinsRemaining - 1
                 machine.FreeSpinsRemainingText.SetText(freeSpinsRemaining)
-                reelMatrixMechanic:SpinEngines(machine)
-                
-                if locks ~= nil then
-                    local outcomeIndex = reelMatrixMechanic:OutcomeIndex()
-                    local filteredLocksTable = {}
-                    BettrMathController.FilterTable(locks, filteredLocksTable, "OutcomeIndex", outcomeIndex)
-                    reelMatrixMechanic:LockEngines(filteredLocksTable)
-                    local filteredCreditsTable = {}
-                    BettrMathController.FilterTable(credits, filteredCreditsTable, "OutcomeIndex", outcomeIndex, "AppliedByOutcomeIndex", outcomeIndex)
-                    for i = 1, #filteredCreditsTable parallel do
-                        local row = filteredCreditsTable[i]
+                reelMatrixMechanic:SpinEngines(machine)                
+                local outcomeIndex = reelMatrixMechanic:OutcomeIndex()
+-------------------- ALGORITHMS
+                local filteredAlgorithmsTable = {}
+                BettrMathController.FilterTable(algorithms, filteredAlgorithmsTable, "OutcomeIndex", outcomeIndex)                
+-------------------- FREE SPINS
+                local filteredFreeSpinsTable = {}
+                BettrMathController.FilterTable(freeSpinsMatrix, filteredFreeSpinsTable, "OutcomeIndex", outcomeIndex)
+-------------------- LOCKS - CREDITS                
+                local filteredLockCreditsTable = {}
+                BettrMathController.FilterTable(lockCreditsMatrix, filteredLockCreditsTable, "OutcomeIndex", outcomeIndex)
+-------------------- LOCKS - MULTIPLIERS                
+                local filteredLockMultipliersTable = {}
+                BettrMathController.FilterTable(lockMultipliersMatrix, filteredLockMultipliersTable, "OutcomeIndex", outcomeIndex)
+-------------------- ACCUMULATORS - CREDITS                
+                local filteredAccumulatorCreditsTable = {}
+                BettrMathController.FilterTable(accumulatorCreditsMatrix, filteredAccumulatorCreditsTable, "OutcomeIndex", outcomeIndex)
+-------------------- ACCUMULATORS - MULTIPLIERS                
+                local filteredAccumulatorMultipliersTable = {}
+                BettrMathController.FilterTable(accumulatorMultipliersMatrix, filteredAccumulatorMultipliersTable, "OutcomeIndex", outcomeIndex)
+-------------------- HEAP ACCUMULATORS - CREDITS                
+                local filteredHeapAccumulatorCreditsTable = {}
+                BettrMathController.FilterTable(heapAccumulatorCreditsMatrix, filteredHeapAccumulatorCreditsTable, "OutcomeIndex", outcomeIndex)
+-------------------- HEAP ACCUMULATORS - MULTIPLIERS                
+                local filteredHeapAccumulatorMultipliersTable = {}
+                BettrMathController.FilterTable(heapAccumulatorMultipliersMatrix, filteredHeapAccumulatorMultipliersTable, "OutcomeIndex", outcomeIndex)
+-------------------- APPLY LOCK ANIMATION                   
+                if #filteredLockCreditsTable > 0 then
+                    reelMatrixMechanic:LockEngines(filteredLockCreditsTable)
+                    for i = 1, #filteredLockCreditsTable parallel do
+                        local row = filteredLockCreditsTable[i]
                         local reelID = row.ReelID
-                        local creditsAdded = row.CreditsAdded
-                        local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
-                        local textMeshProProp = textMeshProGroupProp["SC"]
-                        textMeshProProp.SetText(creditsAdded)
+                        local lockCreditsRow = BettrMathController.GetTableRow(filteredLockCreditsTable, "ReelID", reelID)
                         local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
-                        local animatorProp = animatorGroupProp["SC"]
+                        local animatorProp = animatorGroupProp["SC__LockAnimation"]
                         BettrVisualsController.PlayAnimatorProperty(animatorProp)
                     end
-                    local updatedFreeSpinsRemaining = freeSpinsRemaining
-                    local filteredFreeSpinsTable = {}
-                    BettrMathController.FilterTable(freeSpins, filteredFreeSpinsTable, "OutcomeIndex", outcomeIndex, "AppliedByOutcomeIndex", outcomeIndex)
-                    for i = 1, #filteredFreeSpinsTable do
-                        local row = filteredFreeSpinsTable[i]
-                        local fsRemaining = row.FreeSpinsRemainingAfter
-                        updatedFreeSpinsRemaining = fsRemaining
-                    end
-                    
-                    if updatedFreeSpinsRemaining > freeSpinsRemaining then
-                        local addedFreeSpins = updatedFreeSpinsRemaining - freeSpinsRemaining
-                        freeSpinsRemaining = updatedFreeSpinsRemaining
-                        
-                        machine.FreeSpinsRemainingText.SetActive(false)
-                        
-                        machine.FreeSpinsAddedText.SetActive(true)
-                        machine.FreeSpinsAddedText.Format(addedFreeSpins)
-                        
-                        BettrVisualsController.PlayAnimatorProperty(machine.FreeSpinsAddAnimation)
-                        
-                        machine.FreeSpinsRemainingText.SetText(freeSpinsRemaining)
-                        machine.FreeSpinsRemainingText.SetActive(true)
-                        
-                        machine.FreeSpinsAddedText.SetActive(false)
-
+                    for i = 1, #filteredLockCreditsTable parallel do
+                        local row = filteredLockCreditsTable[i]
+                        local reelID = row.ReelID
+                        local lockCreditsRow = BettrMathController.GetTableRow(filteredLockCreditsTable, "ReelID", reelID)
+                        local lockCredits = lockCreditsRow.CreditsAdded
+                        local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
+                        local textMeshProProp = textMeshProGroupProp["SC"]                        
+                        textMeshProProp.SetText(lockCredits)
+                        local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
+                        local animatorProp = animatorGroupProp["SC__CreditsAnimation"]
+                        BettrVisualsController.PlayAnimatorProperty(animatorProp)
                     end
                 end
-                
+-------------------- RESET THE FREE SPINS REMAINING
+                local updatedFreeSpinsRemaining = freeSpinsRemaining
+                for i = 1, #filteredFreeSpinsTable do
+                    local row = filteredFreeSpinsTable[i]
+                    local fsRemaining = row.FreeSpinsAfter
+                    updatedFreeSpinsRemaining = fsRemaining
+                end
+                if updatedFreeSpinsRemaining > freeSpinsRemaining then
+                    local addedFreeSpins = updatedFreeSpinsRemaining - freeSpinsRemaining
+                    freeSpinsRemaining = updatedFreeSpinsRemaining                    
+                    machine.FreeSpinsRemainingText.SetActive(false)                    
+                    machine.FreeSpinsAddedText.SetActive(true)
+                    machine.FreeSpinsAddedText.Format(addedFreeSpins)                    
+                    BettrVisualsController.PlayAnimatorProperty(machine.FreeSpinsAddAnimation)                    
+                    machine.FreeSpinsRemainingText.SetText(freeSpinsRemaining)
+                    machine.FreeSpinsRemainingText.SetActive(true)                    
+                    machine.FreeSpinsAddedText.SetActive(false)                
+                end                          
                 System.WaitForSeconds(1)
-            end     
+            end                 
+            System.WaitForSeconds(1)         
             
-            System.WaitForSeconds(1)
+            heapAccumulatorsGroupKey["Green"].SetActive(false)
+            heapAccumulatorsGroupKey["Yellow"].SetActive(false)
+            heapAccumulatorsGroupKey["Blue"].SetActive(false)
             
-            groupKey["Green"].SetActive(false)
-            groupKey["Yellow"].SetActive(false)
-            groupKey["Blue"].SetActive(false)
+            accumulatorsGroupKey["Accumulator"].SetActive(false)   
             
             mechanicsPrefab.SetActive(false)
             

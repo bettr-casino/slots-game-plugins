@@ -15,12 +15,19 @@ namespace Bettr.Editor.generators
             var animatorControllerPath = $"{runtimeAssetPath}/Animators/{animatorControllerName}";
             
             var animatorController = AssetDatabase.LoadAssetAtPath<AnimatorController>(animatorControllerPath);
-            if (animatorController != null)
+            if (animatorController == null)
             {
-                return animatorController;
+                animatorController = AnimatorController.CreateAnimatorControllerAtPath(animatorControllerPath);
             }
-            
-            animatorController = AnimatorController.CreateAnimatorControllerAtPath(animatorControllerPath);
+            else
+            {
+                // remove all animator states from the existing animatorController
+                var existingStateMachine = animatorController.layers[0].stateMachine;
+                foreach (var state in existingStateMachine.states)
+                {
+                    existingStateMachine.RemoveState(state.state);
+                }
+            }
             
             var stateMachine = animatorController.layers[0].stateMachine;
             AssetDatabase.SaveAssets();

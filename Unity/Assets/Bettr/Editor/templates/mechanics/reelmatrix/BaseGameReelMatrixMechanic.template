@@ -107,6 +107,13 @@
                            "State": "lock",
                            "DelayBeforeStart": 0.5,
                            "WaitForComplete": true
+                         },
+                         {
+                            "Key": "{{symbolKey}}__CreditsAnimation",
+                            "Id": "Symbol{{symbolKey}}__SymbolGroup{{symbolIndex}}__Row{{rowIndex}}Col{{columnIndex}}",
+                            "State": "credits",
+                            "DelayBeforeStart": 0.5,
+                            "WaitForComplete": true
                          }
                          {{ if !for.last }},{{ end }}
                        {{ end }}
@@ -371,16 +378,33 @@
                                                              "Times":  [0],
                                                              "Values": [1]
                                                          }
-                                                     },
-                                                     {
-                                                        "Path": "{{symbolKey}}Text",
-                                                        "Type": "GameObject",
-                                                        "Property": "m_IsActive",
-                                                        "Keyframes": {
-                                                          "Times":  [0],
-                                                          "Values": [1]
-                                                        }
+                                                     }
+                                                ] 
+                                            },
+                                            {
+                                                "Name": "credits",
+                                                "Speed": 1,
+                                                "IsLoop": false,
+                                                "IsDefault": false,
+                                                "Dopesheet": [
+                                                  {
+                                                    "Path": "{{symbolKey}}Lock",
+                                                    "Type": "GameObject",
+                                                    "Property": "m_IsActive",
+                                                    "Keyframes": {
+                                                       "Times":  [0],
+                                                       "Values": [1]
                                                     }
+                                                  },
+                                                  {
+                                                     "Path": "{{symbolKey}}Text",
+                                                     "Type": "GameObject",
+                                                     "Property": "m_IsActive",
+                                                     "Keyframes": {
+                                                       "Times":  [0],
+                                                       "Values": [1]
+                                                     }
+                                                 }
                                                 ] 
                                             }
                                           ],
