@@ -141,7 +141,8 @@
                       {{ for symbolKey in symbolKeys }}
                         {
                           "Key": "{{symbolKey}}",
-                          "Id": "Symbol{{symbolKey}}Text__{{symbolIndex}}__Row{{rowIndex}}Col{{columnIndex}}"
+                          "Id": "Symbol{{symbolKey}}Text__{{symbolIndex}}__Row{{rowIndex}}Col{{columnIndex}}",
+                          "IsFormatText": true
                         }
                         {{ if !for.last }},{{ end }}
                       {{ end }}
@@ -341,7 +342,7 @@
                                                 },
                                                 {
                                                     "ComponentType": "TextMeshPro",
-                                                    "Text": "0",
+                                                    "Text": "{0}{1}",
                                                     "Font": "Roboto-Bold SDF",
                                                     "FontSize": 4,
                                                     "HorizontalAlignment": "Center",

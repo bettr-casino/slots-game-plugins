@@ -206,7 +206,6 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                     for i = 1, #filteredLockCreditsTable parallel do
                         local row = filteredLockCreditsTable[i]
                         local reelID = row.ReelID
-                        local lockCreditsRow = BettrMathController.GetTableRow(filteredLockCreditsTable, "ReelID", reelID)
                         local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
                         local animatorProp = animatorGroupProp["SC__LockAnimation"]
                         BettrVisualsController.PlayAnimatorProperty(animatorProp)
@@ -218,7 +217,43 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                         local lockCredits = lockCreditsRow.CreditsAdded
                         local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
                         local textMeshProProp = textMeshProGroupProp["SC"]                        
-                        textMeshProProp.SetText(lockCredits)
+                        textMeshProProp.Format("",lockCredits)
+                        local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
+                        local animatorProp = animatorGroupProp["SC__CreditsAnimation"]
+                        BettrVisualsController.PlayAnimatorProperty(animatorProp)
+                    end
+                end
+                if #filteredLockMultipliersTable > 0 then
+                    reelMatrixMechanic:LockEngines(filteredLockMultipliersTable)
+                    for i = 1, #filteredLockMultipliersTable parallel do
+                        local row = filteredLockMultipliersTable[i]
+                        local reelID = row.ReelID
+                        local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
+                        local animatorProp = animatorGroupProp["SC__LockAnimation"]
+                        BettrVisualsController.PlayAnimatorProperty(animatorProp)
+                    end
+                    for i = 1, #filteredLockMultipliersTable parallel do
+                        local row = filteredLockMultipliersTable[i]
+                        local reelID = row.ReelID
+                        local lockMultipliersRow = BettrMathController.GetTableRow(filteredLockMultipliersTable, "ReelID", reelID)
+                        local lockMultipliers = lockMultipliersRow.MultipliersAdded
+                        local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
+                        local textMeshProProp = textMeshProGroupProp["SC"]                        
+                        textMeshProProp.Format("x",lockMultipliers + 1)
+                        local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
+                        local animatorProp = animatorGroupProp["SC__CreditsAnimation"]
+                        BettrVisualsController.PlayAnimatorProperty(animatorProp)
+                    end
+                end
+                if #filteredAccumulatorMultipliersTable > 0 then
+                    for i = 1, #filteredAccumulatorMultipliersTable parallel do
+                        local row = filteredAccumulatorMultipliersTable[i]
+                        local reelID = row.ReelID
+                        local lockAccumulatorMultipliersRow = BettrMathController.GetTableRow(filteredAccumulatorMultipliersTable, "ReelID", reelID)
+                        local lockAccumulatorMultipliers = lockAccumulatorMultipliersRow.MultipliersAdded
+                        local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
+                        local textMeshProProp = textMeshProGroupProp["SC"]                        
+                        textMeshProProp.Format("x",lockAccumulatorMultipliers + 1)
                         local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
                         local animatorProp = animatorGroupProp["SC__CreditsAnimation"]
                         BettrVisualsController.PlayAnimatorProperty(animatorProp)
