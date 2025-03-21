@@ -154,6 +154,7 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
             heapAccumulatorsGroupKey["Blue"].SetActive(false)
             
             local accumulatorsGroupKey = machine.LockedSymbolsAccumulators
+            machine.AccumulatorText.Format("x", 1)
             accumulatorsGroupKey["Accumulator"].SetActive(false)
             
             for i = 1, #activeAlgorithmsTable do
@@ -253,6 +254,7 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                         local reelID = row.ReelID
                         local lockAccumulatorMultipliersRow = BettrMathController.GetTableRow(filteredAccumulatorMultipliersTable, "ReelID", reelID)
                         local lockAccumulatorMultipliers = lockAccumulatorMultipliersRow.MultipliersAdded
+                        local lockAccumulatorMultipliersAfter = lockAccumulatorMultipliersRow.MultipliersAfter
                         local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
                         local textMeshProProp = textMeshProGroupProp["SC"]                        
                         textMeshProProp.Format("x",lockAccumulatorMultipliers + 1)
@@ -261,6 +263,9 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                         BettrVisualsController.PlayAnimatorProperty(animatorProp)
                         BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 1, false)
                         BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, machine.LockedSymbolsAccumulators["Accumulator"].GameObject, 0, 1, true)
+                        machine.AccumulatorText.Format("x", lockAccumulatorMultipliersAfter + 1)
+                        animatorProp = animatorGroupProp["SC__HideAnimation"]
+                        BettrVisualsController.PlayAnimatorProperty(animatorProp)
                     end
                 end
 -------------------- RESET THE FREE SPINS REMAINING
