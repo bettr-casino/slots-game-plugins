@@ -259,6 +259,8 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                         local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
                         local animatorProp = animatorGroupProp["SC__MultipliersAccumulatorAnimation"]
                         BettrVisualsController.PlayAnimatorProperty(animatorProp)
+                        BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 1, false)
+                        BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, machine.LockedSymbolsAccumulators["Accumulator"].GameObject, 0, 1, true)
                     end
                 end
 -------------------- RESET THE FREE SPINS REMAINING

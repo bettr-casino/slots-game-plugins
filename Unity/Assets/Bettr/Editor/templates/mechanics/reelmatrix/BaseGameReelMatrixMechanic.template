@@ -109,6 +109,13 @@
                            "WaitForComplete": true
                          },
                          {
+                           "Key": "{{symbolKey}}__HideAnimation",
+                           "Id": "Symbol{{symbolKey}}__SymbolGroup{{symbolIndex}}__Row{{rowIndex}}Col{{columnIndex}}",
+                           "State": "hide",
+                           "DelayBeforeStart": 0.5,
+                           "WaitForComplete": true
+                         },
+                         {
                             "Key": "{{symbolKey}}__CreditsAnimation",
                             "Id": "Symbol{{symbolKey}}__SymbolGroup{{symbolIndex}}__Row{{rowIndex}}Col{{columnIndex}}",
                             "State": "credits",
@@ -404,6 +411,23 @@
                                                 ] 
                                             },
                                             {
+                                                "Name": "hide",
+                                                "Speed": 1,
+                                                "IsLoop": false,
+                                                "IsDefault": false,
+                                                "Dopesheet": [
+                                                  {
+                                                     "Path": "{{symbolKey}}Text",
+                                                     "Type": "GameObject",
+                                                     "Property": "m_IsActive",
+                                                     "Keyframes": {
+                                                       "Times":  [0],
+                                                       "Values": [0]
+                                                     }
+                                                  }                                                
+                                                ] 
+                                            },
+                                            {
                                                 "Name": "credits",
                                                 "Speed": 1,
                                                 "IsLoop": false,
@@ -426,7 +450,7 @@
                                                        "Times":  [0],
                                                        "Values": [1]
                                                      }
-                                                 }
+                                                  }
                                                 ] 
                                             },                                            
                                             {
