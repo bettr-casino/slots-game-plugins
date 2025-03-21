@@ -180,13 +180,20 @@ namespace Bettr.Core
             }
         }
 
-        public void SetReelStripSymbolTextures(MeshRenderer[] meshRenderers)
+        public void SetReelStripSymbolTextures(Table meshRenderersMatrix, MeshRenderer[] meshRenderers)
         {
-            foreach (var symbolTexture in meshRenderers)
+            for (int i = 0; i < meshRenderersMatrix.Length; i++)
             {
-                var symbolName = symbolTexture.name;
-                var texture = symbolTexture.material.GetTexture("_MainTex");
-                SetReelStripSymbolTexture(symbolName, texture);
+                var row = (Table) meshRenderersMatrix[i + 1];
+                var replacementSymbol = (string) row["Symbol"];
+                var meshRendererName = (string) row["MeshRenderer"];
+                var meshRenderer = meshRenderers.First(renderer => renderer.name == meshRendererName);
+                if (meshRenderer != null)
+                {
+                    var material = meshRenderer.material;
+                    var texture = material.GetTexture("_MainTex");
+                    SetReelStripSymbolTexture(replacementSymbol, texture);
+                }
             }
         }
 

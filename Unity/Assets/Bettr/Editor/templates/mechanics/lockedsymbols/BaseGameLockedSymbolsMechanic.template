@@ -47,12 +47,12 @@
         "ComponentType": "TilePropertyMeshRenderersInjected",
         "MeshRendererGroupsProperty": [           
              {
-               "GroupKey": "{{mechanicName}}SymbolGroupMeshRenderers",
+               "GroupKey": "{{mechanicName}}MeshRenderers",
                "Group": [
-             {{ for symbolName in symbolKeys }}
+             {{ for symbolID in symbolIDs }}
                  {
-                   "Key": "{{symbolName}}",
-                   "Id": "{{symbolName}}"           
+                   "Key": "{{symbolID}}",
+                   "Id": "{{symbolID}}"           
                  }
              {{ if !for.last }},{{ end }}{{ end }}
                ]
@@ -460,16 +460,16 @@
            "Layer": "SLOT_REELS",
            "Active": false,
            "Children": [
-             {{ for symbolName in symbolNames }}
+             {{ for symbolID in symbolIDs }}
              {
-                "Name": "{{ replacementSymbols[for.index] }}",
-                "Id": "{{symbolName}}",
+                "Name": "{{symbolID}}",
+                "Id": "{{symbolID}}",
                 "Layer": "SLOT_REELS",
                 "IsPrimitive": true,
                 "Primitive": 5,
-                "PrimitiveMaterial": "{{mechanicName}}__{{symbolName}}",
+                "PrimitiveMaterial": "{{mechanicName}}__{{symbolID}}",
                 "PrimitiveShader": "Bettr/Symbol",
-                "PrimitiveTexture": "{{mechanicName}}__{{symbolName}}",
+                "PrimitiveTexture": "{{mechanicName}}__{{symbolID}}",
                 "PrimitiveAlpha": 0.7,
                 "PrimitiveTextureCreate": true,
                 "PrimitiveTextureCreateSource": "default.png",

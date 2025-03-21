@@ -365,6 +365,12 @@ namespace Bettr.Editor
             var dataMatrix = BettrMenu.GetTable($"{machineName}BaseGameLockedSymbolsDataMatrix");
             var replacementSymbols = BettrMenu.GetTableArray<string>(dataMatrix, "ValueSymbols", "Symbol");
             var symbolTypes = BettrMenu.GetTableArray<string>(dataMatrix, "ValueSymbols", "SymbolType");
+            var lockSymbolIDs = BettrMenu.GetTableArray<string>(dataMatrix, "ValueSymbols", "LockSymbolID");
+            var specialMultipliersSymbolIDs = BettrMenu.GetTableArray<string>(dataMatrix, "ValueSymbols", "SpecialMultipliersSymbolID");
+            var specialCreditsSymbolIDs = BettrMenu.GetTableArray<string>(dataMatrix, "ValueSymbols", "SpecialCreditsSymbolID");
+            var heapMultipliersSymbolIDs = BettrMenu.GetTableArray<string>(dataMatrix, "ValueSymbols", "HeapMultipliersSymbolID");
+            var heapCreditsSymbolIDs = BettrMenu.GetTableArray<string>(dataMatrix, "ValueSymbols", "HeapCreditsSymbolID");
+            var freeSpinsSymbolIDs = BettrMenu.GetTableArray<string>(dataMatrix, "ValueSymbols", "FreeSpinsSymbolID");
             // var values = BettrMenu.GetTableArray<int>(dataMatrix, "ValueSymbols", "Value");
             
             var symbolNames = new List<string>();
@@ -373,6 +379,28 @@ namespace Bettr.Editor
                 var symbolType = symbolTypes[i];
                 symbolNames.Add($"{symbolType}");
             }
+
+            var symbolIDs = new HashSet<string>();
+            for (int i = 0; i < symbolTypes.Count; i++)
+            {
+                var symbolType = symbolTypes[i];
+                var lockSymbolID = lockSymbolIDs[i];
+                var specialCreditsSymbolID = specialCreditsSymbolIDs[i];
+                var specialMultipliersSymbolID = specialMultipliersSymbolIDs[i];
+                var heapMultipliersSymbolID = heapMultipliersSymbolIDs[i];
+                var heapCreditsSymbolID = heapCreditsSymbolIDs[i];
+                var freeSpinsSymbolID = freeSpinsSymbolIDs[i];
+
+                symbolIDs.Add(symbolType);
+                symbolIDs.Add(lockSymbolID);
+                symbolIDs.Add(specialCreditsSymbolID);
+                symbolIDs.Add(specialMultipliersSymbolID);
+                symbolIDs.Add(heapMultipliersSymbolID);
+                symbolIDs.Add(heapCreditsSymbolID);
+                symbolIDs.Add(freeSpinsSymbolID);
+            }
+
+            var symbolIDsList = symbolIDs.ToList();
             
             // get the model
             var model = new Dictionary<string, object>
@@ -383,6 +411,7 @@ namespace Bettr.Editor
                 { "mechanicName", mechanicName },
                 { "symbolNames", symbolNames },
                 { "replacementSymbols", replacementSymbols},
+                { "symbolIDs", symbolIDsList }
             };
             
             BettrMechanicsHelpers.ProcessBaseGameMechanic(

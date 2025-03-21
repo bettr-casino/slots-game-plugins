@@ -65,7 +65,34 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                 return
             end
             
-            Game001BaseGameState.SpinState.First.State = "Waiting"                
+            Game001BaseGameState.SpinState.First.State = "Waiting"   
+            
+            local lockedSymbolsTable = BettrMathController.GetBaseGameMechanic(self.Config.Machine, self.Config.Mechanic, "LockedSymbols")
+
+            local freeSpinsTable = BettrMathController.GetBaseGameMechanic(2, self.Config.Machine, self.Config.Mechanic, "FreeSpins")
+            local freeSpinsMatrix = BettrMathController.GetBaseGameMechanicMatrix(2, self.Config.Machine, self.Config.Mechanic, "FreeSpins")
+
+            local lockCreditsTable = BettrMathController.GetBaseGameMechanic(3, self.Config.Machine, self.Config.Mechanic, "LockCredits")
+            local lockCreditsMatrix = BettrMathController.GetBaseGameMechanicMatrix(3, self.Config.Machine, self.Config.Mechanic, "LockCredits")            
+            
+            local lockMultipliersTable = BettrMathController.GetBaseGameMechanic(4, self.Config.Machine, self.Config.Mechanic, "LockMultipliers")
+            local lockMultipliersMatrix = BettrMathController.GetBaseGameMechanicMatrix(4, self.Config.Machine, self.Config.Mechanic, "LockMultipliers")
+            
+            local accumulatorCreditsTable = BettrMathController.GetBaseGameMechanic(5, self.Config.Machine, self.Config.Mechanic, "AccumulatorCredits")
+            local accumulatorCreditsMatrix = BettrMathController.GetBaseGameMechanicMatrix(5, self.Config.Machine, self.Config.Mechanic, "AccumulatorCredits")
+            
+            local accumulatorMultipliersTable = BettrMathController.GetBaseGameMechanic(6, self.Config.Machine, self.Config.Mechanic, "AccumulatorMultipliers")
+            local accumulatorMultipliersMatrix = BettrMathController.GetBaseGameMechanicMatrix(6, self.Config.Machine, self.Config.Mechanic, "AccumulatorMultipliers")
+            
+            local heapAccumulatorCreditsTable = BettrMathController.GetBaseGameMechanic(7, self.Config.Machine, self.Config.Mechanic, "HeapAccumulatorCredits")
+            local heapAccumulatorCreditsMatrix = BettrMathController.GetBaseGameMechanicMatrix(7, self.Config.Machine, self.Config.Mechanic, "HeapAccumulatorCredits")
+            
+            local heapAccumulatorMultipliersTable = BettrMathController.GetBaseGameMechanic(8, self.Config.Machine, self.Config.Mechanic, "HeapAccumulatorMultipliers")
+            local heapAccumulatorMultipliersMatrix = BettrMathController.GetBaseGameMechanicMatrix(8, self.Config.Machine, self.Config.Mechanic, "HeapAccumulatorMultipliers")
+            
+            local meshRenderersMatrix = BettrMathController.GetBaseGameMechanicMatrix(9, self.Config.Machine, self.Config.Mechanic, "MeshRenderers")
+            
+            local algorithms = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, self.Config.Mechanic, "Algorithms")                         
 
             local reelStripData = BettrMathController.GetBaseGameMechanicDataMatrix(freeSpinsMechanic.Config.Machine, freeSpinsMechanic.Config.Mechanic, "ReelStrip")
             local outcomesTable = BettrMathController.GetBaseGameMechanicMatrix(freeSpinsMechanic.Config.Machine, freeSpinsMechanic.Config.Mechanic, "Outcomes")
@@ -92,7 +119,7 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
             local texturesGo = self.State.MechanicsPrefab
             local meshRenderers = BettrMechanicsController.GetSymbolGroupMeshRenderers(texturesGo)
             reelMatrixMechanic:ResetEngines()
-            reelMatrixMechanic:SetReelStripSymbolTextures(meshRenderers)
+            reelMatrixMechanic:SetReelStripSymbolTextures(meshRenderersMatrix, meshRenderers)
             reelMatrixMechanic:SetOutcomes(outcomesTable)
             reelMatrixMechanic:StartEngines() 
             
@@ -131,42 +158,17 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
             
             for i = 1, #activeAlgorithmsTable do
                 local row = activeAlgorithmsTable[i]
-                if row.Algo == "GreenMultiplierAccumulator" or row.Algo == "GreenCreditsAccumulator" then
+                if row.Algo == "GreenMultipliersAccumulator" or row.Algo == "GreenCreditsAccumulator" then
                     heapAccumulatorsGroupKey["Green"].SetActive(true)
-                elseif row.Algo == "YellowMultiplierAccumulator" or row.Algo == "YellowCreditsAccumulator" then
+                elseif row.Algo == "YellowMultipliersAccumulator" or row.Algo == "YellowCreditsAccumulator" then
                     heapAccumulatorsGroupKey["Yellow"].SetActive(true)
-                elseif row.Algo == "BlueMultiplierAccumulator" or row.Algo == "BlueCreditsAccumulator" then
+                elseif row.Algo == "BlueMultipliersAccumulator" or row.Algo == "BlueCreditsAccumulator" then
                     heapAccumulatorsGroupKey["Blue"].SetActive(true)
                 end
                 if row.Algo == "SpecialSymbolCredits" or row.Algo == "SpecialSymbolMultipliers" then
                     accumulatorsGroupKey["Accumulator"].SetActive(true)
                 end
-            end                           
-            
-            local lockedSymbolsTable = BettrMathController.GetBaseGameMechanic(self.Config.Machine, self.Config.Mechanic, "LockedSymbols")
-
-            local freeSpinsTable = BettrMathController.GetBaseGameMechanic(2, self.Config.Machine, self.Config.Mechanic, "FreeSpins")
-            local freeSpinsMatrix = BettrMathController.GetBaseGameMechanicMatrix(2, self.Config.Machine, self.Config.Mechanic, "FreeSpins")
-
-            local lockCreditsTable = BettrMathController.GetBaseGameMechanic(3, self.Config.Machine, self.Config.Mechanic, "LockCredits")
-            local lockCreditsMatrix = BettrMathController.GetBaseGameMechanicMatrix(3, self.Config.Machine, self.Config.Mechanic, "LockCredits")            
-            
-            local lockMultipliersTable = BettrMathController.GetBaseGameMechanic(4, self.Config.Machine, self.Config.Mechanic, "LockMultipliers")
-            local lockMultipliersMatrix = BettrMathController.GetBaseGameMechanicMatrix(4, self.Config.Machine, self.Config.Mechanic, "LockMultipliers")
-            
-            local accumulatorCreditsTable = BettrMathController.GetBaseGameMechanic(5, self.Config.Machine, self.Config.Mechanic, "AccumulatorCredits")
-            local accumulatorCreditsMatrix = BettrMathController.GetBaseGameMechanicMatrix(5, self.Config.Machine, self.Config.Mechanic, "AccumulatorCredits")
-            
-            local accumulatorMultipliersTable = BettrMathController.GetBaseGameMechanic(6, self.Config.Machine, self.Config.Mechanic, "AccumulatorMultipliers")
-            local accumulatorMultipliersMatrix = BettrMathController.GetBaseGameMechanicMatrix(6, self.Config.Machine, self.Config.Mechanic, "AccumulatorMultipliers")
-            
-            local heapAccumulatorCreditsTable = BettrMathController.GetBaseGameMechanic(7, self.Config.Machine, self.Config.Mechanic, "HeapAccumulatorCredits")
-            local heapAccumulatorCreditsMatrix = BettrMathController.GetBaseGameMechanicMatrix(7, self.Config.Machine, self.Config.Mechanic, "HeapAccumulatorCredits")
-            
-            local heapAccumulatorMultipliersTable = BettrMathController.GetBaseGameMechanic(8, self.Config.Machine, self.Config.Mechanic, "HeapAccumulatorMultipliers")
-            local heapAccumulatorMultipliersMatrix = BettrMathController.GetBaseGameMechanicMatrix(8, self.Config.Machine, self.Config.Mechanic, "HeapAccumulatorMultipliers")
-            
-            local algorithms = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, self.Config.Mechanic, "Algorithms")
+            end                                      
             
             System.WaitForSeconds(2)
             
