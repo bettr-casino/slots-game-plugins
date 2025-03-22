@@ -27,9 +27,13 @@
                   "GroupKey": "{{mechanicName}}Accumulators",
                   "Group": [
                      {
-                         "Key": "Accumulator",
-                         "Id": "Accumulator"           
-                     }
+                         "Key": "Multipliers",
+                         "Id": "MultipliersAccumulator"           
+                     },
+                     {
+                         "Key": "Credits",
+                         "Id": "CreditsAccumulator"           
+                     }                     
                   ]
             },
             {
@@ -61,32 +65,47 @@
     },
     {
         "ComponentType": "TilePropertyTextMeshProsInjected",
-        "TextMeshProsProperty": [
+        "TextMeshProGroupsProperty": [
             {
-                "Key": "GreenHeapAccumulatorText",
-                "Id": "GreenHeapAccumulatorText",
-                "IsFormatText": true
-            },
-            {
-                "Key": "YellowHeapAccumulatorText",
-                "Id": "YellowHeapAccumulatorText",
-                "IsFormatText": true
-            },
-            {
-                "Key": "BlueHeapAccumulatorText",
-                "Id": "BlueHeapAccumulatorText",
-                "IsFormatText": true
-            } 
+                "GroupKey": "{{mechanicName}}HeapAccumulatorTexts",
+                "Group": [
+                    {
+                        "Key": "Green",
+                        "Id": "GreenHeapAccumulatorText",
+                        "IsFormatText": true
+                    },
+                    {
+                        "Key": "Yellow",
+                        "Id": "YellowHeapAccumulatorText",
+                        "IsFormatText": true
+                    },
+                    {
+                        "Key": "Blue",
+                        "Id": "BlueHeapAccumulatorText",
+                        "IsFormatText": true
+                    }                
+                ]
+            }
         ]
     },
     {
         "ComponentType": "TilePropertyTextMeshProsInjected",
-        "TextMeshProsProperty": [
+        "TextMeshProGroupsProperty": [        
             {
-                "Key": "AccumulatorText",
-                "Id": "AccumulatorText",
-                "IsFormatText": true
-            } 
+                "GroupKey": "{{mechanicName}}AccumulatorTexts",
+                "Group": [
+                    {
+                        "Key": "Multipliers",
+                        "Id": "MultipliersAccumulatorText",
+                        "IsFormatText": true
+                    },
+                    {
+                        "Key": "Credits",
+                        "Id": "CreditsAccumulatorText",
+                        "IsFormatText": true
+                    }              
+                ]
+            }        
         ]
     }
   ],
@@ -385,12 +404,12 @@
          },
          "Children": [
              {
-                 "Name": "Accumulator",
-                 "Id": "Accumulator",
+                 "Name": "MultipliersAccumulator",
+                 "Id": "MultipliersAccumulator",
                  "Layer": "SLOT_REELS_OVERLAY",
                  "Active": false,
                  "Position": {
-                     "X": 0,
+                     "X": 3,
                      "Y": -3,
                      "Z": 0
                  },
@@ -402,28 +421,28 @@
                  },
                  "Children": [
                      {
-                         "Name": "AccumulatorImage",
-                         "Id": "HeapAccumulatorImage",
+                         "Name": "MultipliersAccumulatorImage",
+                         "Id": "MultipliersAccumulatorImage",
                          "Layer": "SLOT_REELS_OVERLAY",
                          "Active": true,
                          "Child": {
-                             "Name": "AccumulatorCollector",
-                             "Id": "AccumulatorCollector",
+                             "Name": "MultipliersAccumulatorCollector",
+                             "Id": "MultipliersAccumulatorCollector",
                              "Layer": "SLOT_REELS_OVERLAY",
                              "Active": true,
                              "IsPrimitive": true,
                              "Primitive": 5,
-                             "PrimitiveMaterial": "{{mechanicName}}AccumulatorCollector",
+                             "PrimitiveMaterial": "{{mechanicName}}MultipliersAccumulatorCollector",
                              "PrimitiveShader": "Bettr/Symbol",
-                             "PrimitiveTexture": "{{mechanicName}}AccumulatorCollector",
+                             "PrimitiveTexture": "{{mechanicName}}MultipliersAccumulatorCollector",
                              "PrimitiveTextureCreate": true,
                              "PrimitiveTextureCreateSource": "default.png",
                              "PrimitiveTextureForceReplace": true
                          }
                      },
                      {
-                         "Name": "AccumulatorText",
-                         "Id": "AccumulatorText",
+                         "Name": "MultipliersAccumulatorText",
+                         "Id": "MultipliersAccumulatorText",
                          "Layer": "SLOT_REELS_OVERLAY",
                          "Active": true,
                          "Scale":
@@ -455,7 +474,79 @@
                          ]
                      }
                  ]
-             }                
+             },
+             {
+                 "Name": "CreditsAccumulator",
+                 "Id": "CreditsAccumulator",
+                 "Layer": "SLOT_REELS_OVERLAY",
+                 "Active": false,
+                 "Position": {
+                     "X": -3,
+                     "Y": -3,
+                     "Z": 0
+                 },
+                 "Scale":
+                 {
+                     "X": 1.5,
+                     "Y": 0.75,
+                     "Z": 1
+                 },
+                 "Children": [
+                     {
+                         "Name": "CreditsAccumulatorImage",
+                         "Id": "CreditsAccumulatorImage",
+                         "Layer": "SLOT_REELS_OVERLAY",
+                         "Active": true,
+                         "Child": {
+                             "Name": "CreditsAccumulatorCollector",
+                             "Id": "CreditsAccumulatorCollector",
+                             "Layer": "SLOT_REELS_OVERLAY",
+                             "Active": true,
+                             "IsPrimitive": true,
+                             "Primitive": 5,
+                             "PrimitiveMaterial": "{{mechanicName}}CreditsAccumulatorCollector",
+                             "PrimitiveShader": "Bettr/Symbol",
+                             "PrimitiveTexture": "{{mechanicName}}CreditsAccumulatorCollector",
+                             "PrimitiveTextureCreate": true,
+                             "PrimitiveTextureCreateSource": "default.png",
+                             "PrimitiveTextureForceReplace": true
+                         }
+                     },
+                     {
+                         "Name": "CreditsAccumulatorText",
+                         "Id": "CreditsAccumulatorText",
+                         "Layer": "SLOT_REELS_OVERLAY",
+                         "Active": true,
+                         "Scale":
+                         {
+                             "X": 4,
+                             "Y": 4,
+                             "Z": 1
+                         },
+                         "Components": [
+                             {
+                                 "ComponentType": "RectTransform",
+                                 "Rect":
+                                 {
+                                     "X": 0,
+                                     "Y": 0,
+                                     "Width": 10,
+                                     "Height": 1.5
+                                 }
+                             },
+                             {
+                                 "ComponentType": "TextMeshPro",
+                                 "Text": "{0}{1}",
+                                 "Font": "Roboto-Bold SDF",
+                                 "FontSize": 1,
+                                 "HorizontalAlignment": "Center",
+                                 "VerticalAlignment": "Middle",
+                                 "Color": "#FFFFFF"
+                             }
+                         ]
+                     }
+                 ]
+             }                             
          ]
         },
         {
