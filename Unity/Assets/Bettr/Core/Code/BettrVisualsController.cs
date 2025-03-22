@@ -801,7 +801,7 @@ namespace Bettr.Core
             }
             
             BettrRoutineRunner.Instance.StartCoroutine(RollUpCoroutine(
-                value => counterTextProperty.Format(value.ToString()), 
+                value => counterTextProperty.Format(value), 
                 (long) start, (long) end, duration));
         }
 
