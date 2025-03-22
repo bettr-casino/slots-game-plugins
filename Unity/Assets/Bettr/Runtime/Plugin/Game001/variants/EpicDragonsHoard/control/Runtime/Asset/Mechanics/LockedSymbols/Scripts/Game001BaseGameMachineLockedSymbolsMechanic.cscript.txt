@@ -159,17 +159,54 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
             machine.AccumulatorText.Format("x", 1)
             accumulatorsGroupKey["Accumulator"].SetActive(false)
             
+            local hasHeapAccumulators = false
+            local hasCreditsHeapAccumulators = false
+            local hasMultipliersHeapAccumulators = false
+            local hasAccumulators = false
+            local hasCreditsAccumulators = false
+            local hasMultipliersAccumulators = false
+            
             for i = 1, #activeAlgorithmsTable do
                 local row = activeAlgorithmsTable[i]
-                if row.Algo == "GreenMultipliersAccumulator" or row.Algo == "GreenCreditsAccumulator" then
+                if row.Algo == "GreenMultipliersAccumulator" then
                     heapAccumulatorsGroupKey["Green"].SetActive(true)
-                elseif row.Algo == "YellowMultipliersAccumulator" or row.Algo == "YellowCreditsAccumulator" then
-                    heapAccumulatorsGroupKey["Yellow"].SetActive(true)
-                elseif row.Algo == "BlueMultipliersAccumulator" or row.Algo == "BlueCreditsAccumulator" then
-                    heapAccumulatorsGroupKey["Blue"].SetActive(true)
+                    hasHeapAccumulators = true
+                    hasMultipliersHeapAccumulators = true
                 end
-                if row.Algo == "SpecialSymbolCredits" or row.Algo == "SpecialSymbolMultipliers" then
+                if row.Algo == "GreenCreditsAccumulator" then
+                    heapAccumulatorsGroupKey["Green"].SetActive(true)
+                    hasHeapAccumulators = true
+                    hasCreditsHeapAccumulators = true
+                end
+                if row.Algo == "YellowMultipliersAccumulator" then
+                    heapAccumulatorsGroupKey["Yellow"].SetActive(true)
+                    hasHeapAccumulators = true
+                    hasMultipliersHeapAccumulators = true
+                end
+                if row.Algo == "YellowCreditsAccumulator" then
+                    heapAccumulatorsGroupKey["Yellow"].SetActive(true)
+                    hasHeapAccumulators = true
+                    hasCreditsHeapAccumulators = true
+                end
+                if row.Algo == "BlueMultipliersAccumulator" then
+                    heapAccumulatorsGroupKey["Blue"].SetActive(true)
+                    hasHeapAccumulators = true
+                    hasMultipliersHeapAccumulators = true
+                end
+                if row.Algo == "BlueCreditsAccumulator" then
+                    heapAccumulatorsGroupKey["Blue"].SetActive(true)
+                    hasHeapAccumulators = true
+                    hasCreditsHeapAccumulators = true
+                end
+                if row.Algo == "SpecialSymbolCredits" then
                     accumulatorsGroupKey["Accumulator"].SetActive(true)
+                    hasAccumulators = true
+                    hasCreditsAccumulators = true
+                end
+                if row.Algo == "SpecialSymbolMultipliers" then
+                    accumulatorsGroupKey["Accumulator"].SetActive(true)
+                    hasAccumulators = true
+                    hasMultipliersAccumulators = true
                 end
             end             
             
@@ -298,7 +335,25 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                 end                          
                 System.WaitForSeconds(1)
             end                 
-            System.WaitForSeconds(1)         
+            System.WaitForSeconds(1)      
+            
+                        
+            if #lockCreditsMatrix > 0 then
+                if hasMultipliersAccumulators then
+                    BettrVisualsController.FireballMoveTo(nil, machine.LockedSymbolsAccumulators["Accumulator"].GameObject, 0, 1, false)
+                    for i = 1, #lockCreditsMatrix do                
+                        local row = lockCreditsMatrix[i]
+                        local reelID = row.ReelID
+                        local creditsAdded = row.CreditsAdded
+                        local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
+                        local textMeshProProp = textMeshProGroupProp["SC"]                               
+                        do
+                            BettrVisualsController.FireballMoveTo(machine.LockedSymbolsAccumulators["Accumulator"].GameObject, textMeshProProp.GameObject, 0, 1, true)
+                        end
+                    end
+                end
+            end
+               
             
             for i=1,#algorithms parallel do
                 local row = algorithms[i]
