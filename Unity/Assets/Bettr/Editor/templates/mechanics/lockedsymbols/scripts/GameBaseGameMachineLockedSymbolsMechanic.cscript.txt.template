@@ -11,6 +11,7 @@ require "Core"
     State = {
         MechanicsPrefab = nil,
         ActiveAlgorithmsTable = nil,
+        ReelMatrixControllerIsInitialized = false,
     }
 }
 
@@ -32,6 +33,7 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:Initialize(machi
             mechanicsPrefab.SetActive(true)
             mechanicsPrefab.name = self.Config.Mechanic
             self.State.MechanicsPrefab = mechanicsPrefab
+            self.State.ReelMatrixControllerIsInitialized = false
         end
     end
 end
@@ -107,14 +109,14 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             local reelCount = {{machineName}}BaseGameLayout.ReelCount.First.Value
             local initialMeshRenderers = BettrMechanicsController.GetSymbolMatrixMeshRenderers(self.Config.Machine, reelCount)            
             
-            mechanicsPrefab.SetActive(true)            
-            System.WaitForFrame(2)                     
+            mechanicsPrefab.SetActive(true)
+            if not self.State.ReelMatrixControllerIsInitialized then
+                self.State.ReelMatrixControllerIsInitialized = true
+                System.WaitForFrame(2)  
+            end            
             
             reelMatrixMechanic:ShowReelMatrix(initialMeshRenderers)
-            machineParent.SetActive(false)
                                     
-            System.WaitForSeconds(1)
-                                 
             reelMatrixMechanic:SetReelStripData(reelStripData)
             local texturesGo = self.State.MechanicsPrefab
             local meshRenderers = BettrMechanicsController.GetSymbolGroupMeshRenderers(texturesGo)
@@ -148,28 +150,81 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             machine.FreeSpinsRemainingText.SetText(freeSpinsRemaining)
             machine.FreeSpinsRemainingText.SetActive(true)
             
-            local heapAccumulatorsGroupKey = machine.{{mechanicName}}HeapAccumulators            
-            heapAccumulatorsGroupKey["Green"].SetActive(false)
-            heapAccumulatorsGroupKey["Yellow"].SetActive(false)
-            heapAccumulatorsGroupKey["Blue"].SetActive(false)
+            local heapAccumulatorsGroup = machine.{{mechanicName}}HeapAccumulators            
+            heapAccumulatorsGroup["Green"].SetActive(false)
+            heapAccumulatorsGroup["Yellow"].SetActive(false)
+            heapAccumulatorsGroup["Blue"].SetActive(false)
             
-            local accumulatorsGroupKey = machine.{{mechanicName}}Accumulators
-            machine.AccumulatorText.Format("x", 1)
-            accumulatorsGroupKey["Accumulator"].SetActive(false)
+            local accumulatorsGroup = machine.{{mechanicName}}Accumulators
+            accumulatorsGroup["Multipliers"].SetActive(true)
+            accumulatorsGroup["Credits"].SetActive(true)
+            
+            local addedCredits = 0
+            local addedMultipliers = 1
+            
+            local addedGreenHeapCredits = 0
+            local addedGreenHeapMultipliers = 1
+            
+            local addedYellowHeapCredits = 0
+            local addedYellowHeapMultipliers = 1
+            
+            local addedBlueHeapCredits = 0
+            local addedBlueHeapMultipliers = 1
+            
+            local accumulatorsTextsGroup = machine.{{mechanicName}}AccumulatorTexts
+            accumulatorsTextsGroup["Multipliers"].Format(addedMultipliers)
+            accumulatorsTextsGroup["Credits"].Format(addedCredits)
+            
+            local heapAccumulatorsTexts = machine.{{mechanicName}}HeapAccumulatorTexts
+            
+            local hasHeapAccumulators = false
+            local hasCreditsHeapAccumulators = false
+            local hasMultipliersHeapAccumulators = false
+            local hasAccumulators = false
+            local hasCreditsAccumulators = false
+            local hasMultipliersAccumulators = false
             
             for i = 1, #activeAlgorithmsTable do
                 local row = activeAlgorithmsTable[i]
-                if row.Algo == "GreenMultipliersAccumulator" or row.Algo == "GreenCreditsAccumulator" then
-                    heapAccumulatorsGroupKey["Green"].SetActive(true)
-                elseif row.Algo == "YellowMultipliersAccumulator" or row.Algo == "YellowCreditsAccumulator" then
-                    heapAccumulatorsGroupKey["Yellow"].SetActive(true)
-                elseif row.Algo == "BlueMultipliersAccumulator" or row.Algo == "BlueCreditsAccumulator" then
-                    heapAccumulatorsGroupKey["Blue"].SetActive(true)
+                if row.Algo == "GreenMultipliersAccumulator" then
+                    heapAccumulatorsGroup["Green"].Format(addedGreenHeapMultipliers)
+                    heapAccumulatorsGroup["Green"].SetActive(true)
+                    hasHeapAccumulators = true
+                    hasMultipliersHeapAccumulators = true
                 end
-                if row.Algo == "SpecialSymbolCredits" or row.Algo == "SpecialSymbolMultipliers" then
-                    accumulatorsGroupKey["Accumulator"].SetActive(true)
+                if row.Algo == "GreenCreditsAccumulator" then
+                    heapAccumulatorsGroup["Green"].Format(addedGreenHeapCredits)
+                    heapAccumulatorsGroup["Green"].SetActive(true)
+                    hasHeapAccumulators = true
+                    hasCreditsHeapAccumulators = true
                 end
-            end                                      
+                if row.Algo == "YellowMultipliersAccumulator" then
+                    heapAccumulatorsGroup["Yellow"].Format(addedYellowHeapMultipliers)
+                    heapAccumulatorsGroup["Yellow"].SetActive(true)
+                    hasHeapAccumulators = true
+                    hasMultipliersHeapAccumulators = true
+                end
+                if row.Algo == "YellowCreditsAccumulator" then
+                    heapAccumulatorsGroup["Yellow"].Format(addedYellowHeapCredits)
+                    heapAccumulatorsGroup["Yellow"].SetActive(true)
+                    hasHeapAccumulators = true
+                    hasCreditsHeapAccumulators = true
+                end
+                if row.Algo == "BlueMultipliersAccumulator" then
+                    heapAccumulatorsGroup["Blue"].Format(addedBlueHeapMultipliers)
+                    heapAccumulatorsGroup["Blue"].SetActive(true)
+                    hasHeapAccumulators = true
+                    hasMultipliersHeapAccumulators = true
+                end
+                if row.Algo == "BlueCreditsAccumulator" then
+                    heapAccumulatorsGroup["Blue"].Format(addedBlueHeapCredits)
+                    heapAccumulatorsGroup["Blue"].SetActive(true)
+                    hasHeapAccumulators = true
+                    hasCreditsHeapAccumulators = true
+                end
+            end             
+            
+            machineParent.SetActive(false)                                     
             
             System.WaitForSeconds(2)
             
@@ -220,7 +275,7 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                         local lockCredits = lockCreditsRow.CreditsAdded
                         local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
                         local textMeshProProp = textMeshProGroupProp["SC"]                        
-                        textMeshProProp.Format("",lockCredits)
+                        textMeshProProp.Format(lockCredits)
                         local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
                         local animatorProp = animatorGroupProp["SC__CreditsAnimation"]
                         BettrVisualsController.PlayAnimatorProperty(animatorProp)
@@ -242,12 +297,39 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                         local lockMultipliers = lockMultipliersRow.MultipliersAdded
                         local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
                         local textMeshProProp = textMeshProGroupProp["SC"]                        
-                        textMeshProProp.Format("x",lockMultipliers + 1)
+                        textMeshProProp.Format(lockMultipliers + 1)
                         local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
                         local animatorProp = animatorGroupProp["SC__MultipliersAnimation"]
                         BettrVisualsController.PlayAnimatorProperty(animatorProp)
                     end
-                end
+                end                
+                if #filteredAccumulatorCreditsTable > 0 then
+                    for i = 1, #filteredAccumulatorCreditsTable parallel do
+                        local row = filteredAccumulatorCreditsTable[i]
+                        local reelID = row.ReelID
+                        local lockAccumulatorCreditsRow = BettrMathController.GetTableRow(filteredAccumulatorCreditsTable, "ReelID", reelID)
+                        local lockAccumulatorCredits = lockAccumulatorCreditsRow.CreditsAdded
+                        local lockAccumulatorCreditsAfter = lockAccumulatorCreditsRow.CreditsAfter
+                        local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
+                        local textMeshProProp = textMeshProGroupProp["SC"]                        
+                        textMeshProProp.Format(lockAccumulatorCredits)
+                        local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
+                        local animatorProp = animatorGroupProp["SC__CreditsAccumulatorAnimation"]
+                        BettrVisualsController.PlayAnimatorProperty(animatorProp)
+                        BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 1, false)
+                        addedCredits = addedCredits + lockAccumulatorCredits
+                        parallel
+                            do
+                                BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, accumulatorsGroup["Credits"].GameObject, 0, 1, true)
+                                accumulatorsTextsGroup["Credits"].Format(addedCredits)
+                            end
+                            do
+                                animatorProp = animatorGroupProp["SC__HideAnimation"]
+                                BettrVisualsController.PlayAnimatorProperty(animatorProp)
+                            end
+                        end
+                    end
+                end                
                 if #filteredAccumulatorMultipliersTable > 0 then
                     for i = 1, #filteredAccumulatorMultipliersTable parallel do
                         local row = filteredAccumulatorMultipliersTable[i]
@@ -257,15 +339,22 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                         local lockAccumulatorMultipliersAfter = lockAccumulatorMultipliersRow.MultipliersAfter
                         local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
                         local textMeshProProp = textMeshProGroupProp["SC"]                        
-                        textMeshProProp.Format("x",lockAccumulatorMultipliers + 1)
+                        textMeshProProp.Format(lockAccumulatorMultipliers)
                         local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
                         local animatorProp = animatorGroupProp["SC__MultipliersAccumulatorAnimation"]
                         BettrVisualsController.PlayAnimatorProperty(animatorProp)
                         BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 1, false)
-                        BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, machine.{{mechanicName}}Accumulators["Accumulator"].GameObject, 0, 1, true)
-                        machine.AccumulatorText.Format("x", lockAccumulatorMultipliersAfter + 1)
-                        animatorProp = animatorGroupProp["SC__HideAnimation"]
-                        BettrVisualsController.PlayAnimatorProperty(animatorProp)
+                        addedMultipliers = addedMultipliers + lockAccumulatorMultipliers
+                        parallel
+                            do
+                                BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, accumulatorsGroup["Multipliers"].GameObject, 0, 1, true)
+                                accumulatorsTextsGroup["Multipliers"].Format(addedMultipliers)
+                            end
+                            do
+                                animatorProp = animatorGroupProp["SC__HideAnimation"]
+                                BettrVisualsController.PlayAnimatorProperty(animatorProp)
+                            end
+                        end
                     end
                 end
 -------------------- RESET THE FREE SPINS REMAINING
@@ -288,13 +377,41 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                 end                          
                 System.WaitForSeconds(1)
             end                 
-            System.WaitForSeconds(1)         
+            System.WaitForSeconds(1)      
             
-            heapAccumulatorsGroupKey["Green"].SetActive(false)
-            heapAccumulatorsGroupKey["Yellow"].SetActive(false)
-            heapAccumulatorsGroupKey["Blue"].SetActive(false)
+                        
+            if #lockCreditsMatrix > 0 then
+                for i = 1, #lockCreditsMatrix do                
+                    local row = lockCreditsMatrix[i]
+                    local reelID = row.ReelID
+                    local creditsAdded = row.CreditsAdded
+                    local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
+                    local textMeshProProp = textMeshProGroupProp["SC"]                               
+                    BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 1, false)
+                    do
+                        BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, accumulatorsGroup["Credits"].GameObject, 0, 1, true)
+                    end
+                end
+            end
+               
             
-            accumulatorsGroupKey["Accumulator"].SetActive(false)   
+            for i=1,#algorithms parallel do
+                local row = algorithms[i]
+                local reelID = row.ReelID
+                local algo = row.Algo
+                local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
+                local animatorProp = animatorGroupProp["SC__HideAnimation"]
+                BettrVisualsController.PlayAnimatorProperty(animatorProp)
+            end
+            
+            reelMatrixMechanic:ResetTextures()
+            
+            heapAccumulatorsGroup["Green"].SetActive(false)
+            heapAccumulatorsGroup["Yellow"].SetActive(false)
+            heapAccumulatorsGroup["Blue"].SetActive(false)
+            
+            accumulatorsGroup["Multipliers"].SetActive(false)
+            accumulatorsGroup["Credits"].SetActive(false)   
             
             mechanicsPrefab.SetActive(false)
             
