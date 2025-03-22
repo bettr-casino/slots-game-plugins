@@ -195,6 +195,27 @@ namespace Bettr.Core
                     SetReelStripSymbolTexture(replacementSymbol, texture);
                 }
             }
+            // find "Blank" mesh renderer
+            var blankMeshRenderer = meshRenderers.First(renderer => renderer.name == "Blank");
+            if (blankMeshRenderer != null)
+            {
+                var material = blankMeshRenderer.material;
+                var texture = material.GetTexture("_MainTex");
+                SetDefaultSymbolTexture(texture);
+            }
+        }
+        
+        public void SetDefaultSymbolTexture(Texture texture)
+        {
+            for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
+            {
+                for (int rowIndex = 1; rowIndex <= this.RowCounts[columnIndex - 1]; rowIndex++)
+                {
+                    var key = $"Row{rowIndex}Col{columnIndex}";
+                    var bettrReelMatrixCellController = this.BettrReelMatrixCellControllers[key];
+                    bettrReelMatrixCellController.SetDefaultTexture(texture);
+                }
+            }
         }
 
         public void SetReelStripSymbolTexture(string symbolName, Texture texture)
@@ -497,6 +518,8 @@ namespace Bettr.Core
     
     public class BettrReelStripSymbolTextures
     {
+        public Texture DefaultTexture { get; internal set; }
+        
         public List<BettrReelStripSymbolTexture> SymbolTextures { get; internal set; }
 
         public BettrReelStripSymbolTextures()
@@ -504,16 +527,27 @@ namespace Bettr.Core
             SymbolTextures = new List<BettrReelStripSymbolTexture>();
         }
 
-        public void Reset()
+        public void Reset(MeshRenderer meshRenderer)
         {
+            if (DefaultTexture != null)
+            {
+                var material = meshRenderer.material;
+                material.SetTexture("_MainTex", DefaultTexture); 
+            }
+            
             SymbolTextures.Clear();
+        }
+        
+        public void SetSymbolTexture(Texture symbolTexture)
+        {
+            DefaultTexture = symbolTexture;
         }
         
         public void AddSymbolTexture(string symbolName, Texture symbolTexture)
         {
             SymbolTextures.Add(new BettrReelStripSymbolTexture(symbolName, symbolTexture));
         }
-
+        
         public void UpdateReelSymbolTexture(string symbolName, MeshRenderer meshRenderer)
         {
             // get the material
@@ -868,6 +902,11 @@ namespace Bettr.Core
             
             this.BettrReelMatrixCellEngineLock = new BettrReelMatrixCellEngineLock();
         }
+        
+        public void SetDefaultTexture(Texture symbolTexture)
+        {
+            this.BettrSymbolTextures.SetSymbolTexture(symbolTexture);
+        }
 
         public void SetReelStripSymbolTexture(string symbolName, Texture symbolTexture)
         {
@@ -922,7 +961,8 @@ namespace Bettr.Core
 
         public void ResetEngines()
         {
-            BettrSymbolTextures.Reset();
+            var meshRenderer = GetVisibleMeshRenderer();
+            BettrSymbolTextures.Reset(meshRenderer);
             BettrReelMatrixOutcomes.Reset();
             UnlockEngine();
         }
@@ -1260,6 +1300,15 @@ namespace Bettr.Core
             }
             
             return slideDistanceInSymbolUnits;
+        }
+        
+        public MeshRenderer GetVisibleMeshRenderer()
+        {
+            var symbolGroupProperty = GetSymbolGroup(2);
+            var fixedSymbol = symbolGroupProperty.Current;
+            var go = fixedSymbol.GameObject;
+            var meshRenderer = go.GetComponent<MeshRenderer>();
+            return meshRenderer;
         }
     
         public void AdvanceSymbols()
