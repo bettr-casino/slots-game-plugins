@@ -244,6 +244,20 @@ namespace Bettr.Core
                 }
             }
         }
+        
+        public void ResetTextures()
+        {
+            for (int columnIndex = 1; columnIndex <= ColumnCount; columnIndex++)
+            {
+                for (int rowIndex = 1; rowIndex <= this.RowCounts[columnIndex - 1]; rowIndex++)
+                {
+                    var key = $"Row{rowIndex}Col{columnIndex}";
+                    // add to the dictionary
+                    var bettrReelMatrixCellController = this.BettrReelMatrixCellControllers[key];
+                    bettrReelMatrixCellController.ResetTextures();
+                }
+            }
+        }
 
         public IEnumerator StartEngines()
         {
@@ -961,10 +975,14 @@ namespace Bettr.Core
 
         public void ResetEngines()
         {
-            var meshRenderer = GetVisibleMeshRenderer();
-            BettrSymbolTextures.Reset(meshRenderer);
             BettrReelMatrixOutcomes.Reset();
             UnlockEngine();
+        }
+
+        public void ResetTextures()
+        {
+            var meshRenderer = GetVisibleMeshRenderer();
+            BettrSymbolTextures.Reset(meshRenderer);
         }
 
         public IEnumerator StartEngines()

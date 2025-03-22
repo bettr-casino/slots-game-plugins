@@ -11,6 +11,7 @@ Game001BaseGameMachineLockedSymbolsMechanic = {
     State = {
         MechanicsPrefab = nil,
         ActiveAlgorithmsTable = nil,
+        ReelMatrixControllerIsInitialized = false,
     }
 }
 
@@ -32,6 +33,7 @@ function Game001BaseGameMachineLockedSymbolsMechanic:Initialize(machine)
             mechanicsPrefab.SetActive(true)
             mechanicsPrefab.name = self.Config.Mechanic
             self.State.MechanicsPrefab = mechanicsPrefab
+            self.State.ReelMatrixControllerIsInitialized = false
         end
     end
 end
@@ -107,14 +109,14 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
             local reelCount = Game001BaseGameLayout.ReelCount.First.Value
             local initialMeshRenderers = BettrMechanicsController.GetSymbolMatrixMeshRenderers(self.Config.Machine, reelCount)            
             
-            mechanicsPrefab.SetActive(true)            
-            System.WaitForFrame(2)                     
+            mechanicsPrefab.SetActive(true)
+            if not self.State.ReelMatrixControllerIsInitialized then
+                self.State.ReelMatrixControllerIsInitialized = true
+                System.WaitForFrame(2)  
+            end            
             
             reelMatrixMechanic:ShowReelMatrix(initialMeshRenderers)
-            machineParent.SetActive(false)
                                     
-            System.WaitForSeconds(1)
-                                 
             reelMatrixMechanic:SetReelStripData(reelStripData)
             local texturesGo = self.State.MechanicsPrefab
             local meshRenderers = BettrMechanicsController.GetSymbolGroupMeshRenderers(texturesGo)
@@ -169,7 +171,9 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                 if row.Algo == "SpecialSymbolCredits" or row.Algo == "SpecialSymbolMultipliers" then
                     accumulatorsGroupKey["Accumulator"].SetActive(true)
                 end
-            end                                      
+            end             
+            
+            machineParent.SetActive(false)                                     
             
             System.WaitForSeconds(2)
             
@@ -304,6 +308,8 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                 local animatorProp = animatorGroupProp["SC__HideAnimation"]
                 BettrVisualsController.PlayAnimatorProperty(animatorProp)
             end
+            
+            reelMatrixMechanic:ResetTextures()
             
             heapAccumulatorsGroupKey["Green"].SetActive(false)
             heapAccumulatorsGroupKey["Yellow"].SetActive(false)
