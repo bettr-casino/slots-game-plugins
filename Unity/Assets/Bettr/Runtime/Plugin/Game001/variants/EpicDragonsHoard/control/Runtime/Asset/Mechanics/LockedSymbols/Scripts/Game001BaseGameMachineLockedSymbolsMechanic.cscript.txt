@@ -220,7 +220,7 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                         local lockCredits = lockCreditsRow.CreditsAdded
                         local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
                         local textMeshProProp = textMeshProGroupProp["SC"]                        
-                        textMeshProProp.Format("",lockCredits)
+                        textMeshProProp.Format("+",lockCredits)
                         local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
                         local animatorProp = animatorGroupProp["SC__CreditsAnimation"]
                         BettrVisualsController.PlayAnimatorProperty(animatorProp)
@@ -257,15 +257,21 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                         local lockAccumulatorMultipliersAfter = lockAccumulatorMultipliersRow.MultipliersAfter
                         local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
                         local textMeshProProp = textMeshProGroupProp["SC"]                        
-                        textMeshProProp.Format("x",lockAccumulatorMultipliers + 1)
+                        textMeshProProp.Format("x",lockAccumulatorMultipliers)
                         local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
                         local animatorProp = animatorGroupProp["SC__MultipliersAccumulatorAnimation"]
                         BettrVisualsController.PlayAnimatorProperty(animatorProp)
                         BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 1, false)
-                        BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, machine.LockedSymbolsAccumulators["Accumulator"].GameObject, 0, 1, true)
-                        machine.AccumulatorText.Format("x", lockAccumulatorMultipliersAfter + 1)
-                        animatorProp = animatorGroupProp["SC__HideAnimation"]
-                        BettrVisualsController.PlayAnimatorProperty(animatorProp)
+                        parallel
+                            do
+                                BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, machine.LockedSymbolsAccumulators["Accumulator"].GameObject, 0, 1, true)
+                                machine.AccumulatorText.Format("x", lockAccumulatorMultipliersAfter + 1)
+                            end
+                            do
+                                animatorProp = animatorGroupProp["SC__HideAnimation"]
+                                BettrVisualsController.PlayAnimatorProperty(animatorProp)
+                            end
+                        end
                     end
                 end
 -------------------- RESET THE FREE SPINS REMAINING
@@ -289,6 +295,15 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                 System.WaitForSeconds(1)
             end                 
             System.WaitForSeconds(1)         
+            
+            for i=1,#algorithms parallel do
+                local row = algorithms[i]
+                local reelID = row.ReelID
+                local algo = row.Algo
+                local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
+                local animatorProp = animatorGroupProp["SC__HideAnimation"]
+                BettrVisualsController.PlayAnimatorProperty(animatorProp)
+            end
             
             heapAccumulatorsGroupKey["Green"].SetActive(false)
             heapAccumulatorsGroupKey["Yellow"].SetActive(false)

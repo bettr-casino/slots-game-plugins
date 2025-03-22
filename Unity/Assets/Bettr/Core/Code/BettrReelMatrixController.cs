@@ -1196,7 +1196,7 @@ namespace Bettr.Core
         public void SpinReelSpinning()
         {
             var jitter = BettrMathController.GenerateJitter();
-            var speed = BettrUserController.UserInSlamStopMode ? 4 : 2f + jitter;
+            var speed = BettrUserController.UserInSlamStopMode ? 4 : 0.8f + jitter;
             
             var spinState = this.BettrReelMatrixSpinState;
             var layoutProperties = this.BettrReelMatrixLayoutPropertiesData;
