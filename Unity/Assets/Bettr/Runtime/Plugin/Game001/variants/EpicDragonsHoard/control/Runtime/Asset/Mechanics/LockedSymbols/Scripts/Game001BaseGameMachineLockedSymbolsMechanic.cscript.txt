@@ -129,6 +129,9 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
             local startButton = lockedSymbolsControls["StartButton"]
             local summaryButton = lockedSymbolsControls["SummaryButton"]
             
+            local lockedSymbolsControlsText = machine.LockedSymbolsControlsText
+            local summaryButton = lockedSymbolsControlsText["SummaryButton"]
+            
             startButton.GameObject.SetActive(true)
             BettrDialogController.WaitForDialogAction(startButton.GameObject)
             startButton.GameObject.SetActive(false)
