@@ -42,7 +42,11 @@
                     {
                         "Key": "StartButton",
                         "Id": "StartFreeSpinsButton"           
-                    }
+                    },
+                    {
+                        "Key": "SummaryButton",
+                        "Id": "FreeSpinsSummaryButton"           
+                    }                    
                  ]
             }        
         ]
@@ -107,6 +111,21 @@
                 ]
             }        
         ]
+    },
+    {
+        "ComponentType": "TilePropertyTextMeshProsInjected",
+        "TextMeshProGroupsProperty": [        
+            {
+                "GroupKey": "{{mechanicName}}ControlTexts",
+                "Group": [
+                    {
+                        "Key": "FreeSpinsSummaryText",
+                        "Id": "FreeSpinsSummaryText",
+                        "IsFormatText": true
+                    }              
+                ]
+            }        
+        ]
     }
   ],
   "Child": {
@@ -156,6 +175,82 @@
                                   "Params":
                                   [
                                       "Start"
+                                  ]
+                              }
+                          ]
+                      }
+                    ]
+                },
+                {
+                    "Name": "FreeSpinsSummaryButton",
+                    "Id": "FreeSpinsSummaryButton",
+                    "Layer": "SLOT_REELS_OVERLAY",
+                    "Active": false,
+                    "IsPrimitive": true,
+                    "Primitive": 5,
+                    "PrimitiveMaterial": "{{mechanicName}}FreeSpinsSummaryButton",
+                    "PrimitiveShader": "Bettr/Symbol",
+                    "PrimitiveTexture": "{{mechanicName}}FreeSpinsSummaryButton",
+                    "PrimitiveTextureCreate": true,
+                    "PrimitiveTextureCreateSource": "default.png",
+                    "PrimitiveTextureForceReplace": true,
+                    "Position": {
+                      "X": 0,
+                      "Y": 0,
+                      "Z": 0
+                    },
+                    "Scale":
+                    {
+                      "X": 4,
+                      "Y": 4,
+                      "Z": 1
+                    },
+                    "Children": [                        
+                         {
+                             "Name": "FreeSpinsSummaryText",
+                             "Id": "FreeSpinsSummaryText",
+                             "Layer": "SLOT_REELS_OVERLAY",
+                             "Active": true,
+                             "Scale":
+                             {
+                                 "X": 1,
+                                 "Y": 1,
+                                 "Z": 1
+                             },
+                             "Components": [
+                                 {
+                                     "ComponentType": "RectTransform",
+                                     "Rect":
+                                     {
+                                         "X": 0,
+                                         "Y": 0,
+                                         "Width": 30,
+                                         "Height": 4
+                                     }
+                                 },
+                                 {
+                                     "ComponentType": "TextMeshPro",
+                                     "Text": "+{0}",
+                                     "Font": "Roboto-Bold SDF",
+                                     "FontSize": 3,
+                                     "HorizontalAlignment": "Center",
+                                     "VerticalAlignment": "Middle",
+                                     "Color": "#FFFFFF"
+                                 }
+                             ]
+                         }                        
+                    ],
+                    "Components":
+                    [
+                      {
+                          "ComponentType": "BettrEventListener",
+                          "EventTriggers":
+                          [
+                              {
+                                  "ReferenceId": "BettrDialogController",
+                                  "Params":
+                                  [
+                                      "Summary"
                                   ]
                               }
                           ]

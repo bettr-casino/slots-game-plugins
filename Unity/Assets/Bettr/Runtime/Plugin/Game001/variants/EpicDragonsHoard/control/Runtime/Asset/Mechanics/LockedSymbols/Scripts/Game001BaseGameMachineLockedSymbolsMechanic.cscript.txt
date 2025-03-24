@@ -127,6 +127,7 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
             
             local lockedSymbolsControls = machine.LockedSymbolsControls
             local startButton = lockedSymbolsControls["StartButton"]
+            local summaryButton = lockedSymbolsControls["SummaryButton"]
             
             startButton.GameObject.SetActive(true)
             BettrDialogController.WaitForDialogAction(startButton.GameObject)
@@ -429,6 +430,10 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                     end
                 end
             end
+            
+            summaryButton.GameObject.SetActive(true)
+            BettrDialogController.WaitForDialogAction(summaryButton.GameObject)
+            summaryButton.GameObject.SetActive(false)
                            
             reelMatrixMechanic:ResetTextures()
             
