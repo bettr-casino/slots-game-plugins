@@ -392,14 +392,14 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                         accumulatorMultipliers = accumulatorMultipliersAfter
                         local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
                         local textMeshProProp = textMeshProGroupProp["SC"]                               
-                        BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 0.3, false)
-                        BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, accumulatorsTextsGroup["Multipliers"].GameObject, 0, 0.3, true)
+                        BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 0.7, false)
+                        BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, accumulatorsTextsGroup["Multipliers"].GameObject, 0, 0.7, true)
                         parallel
                             do
-                                BettrVisualsController.RollUpFormatCounter(textMeshProProp, multipliersAdded, 0, 0.3)
+                                BettrVisualsController.RollUpFormatCounter(textMeshProProp, multipliersAdded, 0, 0.7)
                             end
                             do
-                                BettrVisualsController.RollUpFormatCounter(accumulatorsTextsGroup["Multipliers"], accumulatorMultipliersBefore, accumulatorMultipliersAfter, 0.3)
+                                BettrVisualsController.RollUpFormatCounter(accumulatorsTextsGroup["Multipliers"], accumulatorMultipliersBefore, accumulatorMultipliersAfter, 0.7)
                             end
                         end
                     end
@@ -418,18 +418,12 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                         local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
                         local textMeshProProp = textMeshProGroupProp["SC"]               
                         local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")                
-                        local animatorProp = animatorGroupProp["SC__HideAnimation"]
-                        BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 0.3, false)
-                        BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, accumulatorsTextsGroup["Credits"].GameObject, 0, 0.3, true)
-                        parallel
-                            do
-                                BettrVisualsController.RollUpFormatCounter(textMeshProProp, creditsAdded, 0, 0.3)
-                                BettrVisualsController.PlayAnimatorProperty(animatorProp)
-                            end
-                            do
-                                BettrVisualsController.RollUpFormatCounter(accumulatorsTextsGroup["Credits"], accumulatorCreditsBefore, accumulatorCreditsAfter, 0.3)
-                            end
-                        end
+                        local hideAnimationProp = animatorGroupProp["SC__HideAnimation"]
+                        BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 0.7, false)
+                        BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, accumulatorsTextsGroup["Credits"].GameObject, 0, 0.7, true)
+                        BettrVisualsController.RollUpFormatCounter(accumulatorsTextsGroup["Credits"], accumulatorCreditsBefore, accumulatorCreditsAfter, 0.7)
+                        BettrVisualsController.RollUpFormatCounter(textMeshProProp, creditsAdded, 0, 0.7)
+                        BettrVisualsController.PlayAnimatorProperty(hideAnimationProp)
                     end
                 end
             end
