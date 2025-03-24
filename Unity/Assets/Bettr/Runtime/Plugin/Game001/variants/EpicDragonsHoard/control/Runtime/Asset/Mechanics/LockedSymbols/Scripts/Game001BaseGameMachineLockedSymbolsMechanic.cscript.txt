@@ -64,8 +64,12 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
             local summaryTable = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
             local outcomeCount = summaryTable.OutcomeCount
             if outcomeCount <= 0 then
+                machine:OnBaseGameSpinCompleted() 
                 return
             end
+            
+            local payout = summaryTable.Payout
+            BettrUser.SpinCoins = BettrUser.SpinCoins + payout                        
             
             Game001BaseGameState.SpinState.First.State = "Waiting"   
             
@@ -443,8 +447,6 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
             System.WaitForSeconds(0.5)
             accumulatorsGroup["Multipliers"].SetActive(false)
             
-            local payout = summaryTable.Payout
-            
             summaryText.Format(0)
             summaryText.SetActive(true)
             summaryButton.GameObject.SetActive(true)
@@ -458,9 +460,6 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
             accumulatorsGroup["Credits"].SetActive(false)
             
             BettrDialogController.WaitForDialogAction(summaryButton.GameObject)
-            BettrVisualsController.FireballMoveTo(nil, summaryText.GameObject, 0, 0.5, false)
-            BettrVisualsController.FireballMoveTo(summaryText.GameObject, machine.WinText.GameObject, 0, 0.5, true)            
-            summaryButton.GameObject.SetActive(false)
             
             reelMatrixMechanic:ResetTextures()
             
@@ -471,6 +470,13 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
             accumulatorsGroup["Multipliers"].SetActive(false)
             accumulatorsGroup["Credits"].SetActive(false)   
             
+            BettrVisualsController.FireballMoveTo(nil, summaryText.GameObject, 0, 0.5, false)
+            BettrVisualsController.FireballMoveTo(summaryText.GameObject, machine.WinText.GameObject, 0, 0.5, true)
+            
+            machine:RollupCredits()
+            System.WaitForSeconds(2)
+            
+            summaryButton.GameObject.SetActive(false)            
             mechanicsPrefab.SetActive(false)
             
             System.WaitForSeconds(1)
@@ -480,7 +486,7 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
             machine.Spin.SetActive(true)
             machine.Bet.SetActive(true)
             
-            machine:OnBaseGameSpinCompleted()
+            machine:OnBaseGameSpinCompleted()    
             
         end
     end
