@@ -64,8 +64,12 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             local summaryTable = BettrMathController.GetBaseGameMechanicSummary(self.Config.Machine, self.Config.Mechanic)
             local outcomeCount = summaryTable.OutcomeCount
             if outcomeCount <= 0 then
+                machine:OnBaseGameSpinCompleted() 
                 return
             end
+            
+            local payout = summaryTable.Payout
+            BettrUser.SpinCoins = BettrUser.SpinCoins + payout                        
             
             {{machineName}}BaseGameState.SpinState.First.State = "Waiting"   
             
@@ -127,6 +131,10 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             
             local lockedSymbolsControls = machine.{{mechanicName}}Controls
             local startButton = lockedSymbolsControls["StartButton"]
+            local summaryButton = lockedSymbolsControls["SummaryButton"]
+            
+            local lockedSymbolsControlsText = machine.{{mechanicName}}ControlsText
+            local summaryText = lockedSymbolsControlsText["SummaryText"]
             
             startButton.GameObject.SetActive(true)
             BettrDialogController.WaitForDialogAction(startButton.GameObject)
@@ -319,11 +327,11 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                         local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
                         local animatorProp = animatorGroupProp["SC__CreditsAccumulatorAnimation"]
                         BettrVisualsController.PlayAnimatorProperty(animatorProp)
-                        BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 1, false)
+                        BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 0.5, false)
                         accumulatorCredits = accumulatorCredits + lockAccumulatorCredits
                         parallel
                             do
-                                BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, accumulatorsGroup["Credits"].GameObject, 0, 1, true)
+                                BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, accumulatorsGroup["Credits"].GameObject, 0, 0.5, true)
                                 accumulatorsTextsGroup["Credits"].Format(accumulatorCredits)
                             end
                             do
@@ -347,11 +355,11 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                         local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
                         local animatorProp = animatorGroupProp["SC__MultipliersAccumulatorAnimation"]
                         BettrVisualsController.PlayAnimatorProperty(animatorProp)
-                        BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 1, false)
+                        BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 0.5, false)
                         accumulatorMultipliers = accumulatorMultipliers + lockAccumulatorMultipliers
                         parallel
                             do
-                                BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, accumulatorsTextsGroup["Multipliers"].GameObject, 0, 1, true)
+                                BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, accumulatorsTextsGroup["Multipliers"].GameObject, 0, 0.5, true)
                                 accumulatorsTextsGroup["Multipliers"].Format(accumulatorMultipliers)
                             end
                             do
@@ -379,9 +387,9 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                     machine.FreeSpinsRemainingText.SetActive(true)                    
                     machine.FreeSpinsAddedText.SetActive(false)                
                 end                          
-                System.WaitForSeconds(1)
+                System.WaitForSeconds(0.3)
             end                 
-            System.WaitForSeconds(1)      
+            System.WaitForSeconds(0.3)      
             
             if #lockMultipliersMatrix > 0 then
                 for i = 1, #lockMultipliersMatrix do                
@@ -394,14 +402,14 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                         accumulatorMultipliers = accumulatorMultipliersAfter
                         local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
                         local textMeshProProp = textMeshProGroupProp["SC"]                               
-                        BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 0.7, false)
-                        BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, accumulatorsTextsGroup["Multipliers"].GameObject, 0, 0.7, true)
+                        BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 0.5, false)
+                        BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, accumulatorsTextsGroup["Multipliers"].GameObject, 0, 0.5, true)
                         parallel
                             do
-                                BettrVisualsController.RollUpFormatCounter(textMeshProProp, multipliersAdded, 0, 0.7)
+                                BettrVisualsController.RollUpFormatCounter(textMeshProProp, multipliersAdded, 0, 0.5)
                             end
                             do
-                                BettrVisualsController.RollUpFormatCounter(accumulatorsTextsGroup["Multipliers"], accumulatorMultipliersBefore, accumulatorMultipliersAfter, 0.7)
+                                BettrVisualsController.RollUpFormatCounter(accumulatorsTextsGroup["Multipliers"], accumulatorMultipliersBefore, accumulatorMultipliersAfter, 0.5)
                             end
                         end
                     end
@@ -421,15 +429,38 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                         local textMeshProProp = textMeshProGroupProp["SC"]               
                         local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")                
                         local hideAnimationProp = animatorGroupProp["SC__HideAnimation"]
-                        BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 0.7, false)
-                        BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, accumulatorsTextsGroup["Credits"].GameObject, 0, 0.7, true)
-                        BettrVisualsController.RollUpFormatCounter(accumulatorsTextsGroup["Credits"], accumulatorCreditsBefore, accumulatorCreditsAfter, 0.7)
-                        BettrVisualsController.RollUpFormatCounter(textMeshProProp, creditsAdded, 0, 0.7)
+                        BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 0.5, false)
+                        BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, accumulatorsTextsGroup["Credits"].GameObject, 0, 0.5, true)
+                        BettrVisualsController.RollUpFormatCounter(accumulatorsTextsGroup["Credits"], accumulatorCreditsBefore, accumulatorCreditsAfter, 0.5)
+                        BettrVisualsController.RollUpFormatCounter(textMeshProProp, creditsAdded, 0, 0.5)
                         BettrVisualsController.PlayAnimatorProperty(hideAnimationProp)
                     end
                 end
             end
-                           
+            
+            BettrVisualsController.FireballMoveTo(nil, accumulatorsTextsGroup["Multipliers"].GameObject, 0, 0.5, false)
+            BettrVisualsController.FireballMoveTo(accumulatorsTextsGroup["Multipliers"].GameObject, accumulatorsTextsGroup["Credits"].GameObject, 0, 0.5, true)
+            local accumulatorCreditsBefore = accumulatorCredits
+            local accumulatorCreditsAfter = accumulatorCreditsBefore * (accumulatorMultipliers + 1)
+            BettrVisualsController.RollUpFormatCounter(accumulatorsTextsGroup["Credits"], accumulatorCreditsBefore, accumulatorCreditsAfter, 0.5)   
+            BettrVisualsController.RollUpFormatCounter(accumulatorsTextsGroup["Multipliers"], accumulatorMultipliers, 0, 0.5)         
+            System.WaitForSeconds(0.5)
+            accumulatorsGroup["Multipliers"].SetActive(false)
+            
+            summaryText.Format(0)
+            summaryText.SetActive(true)
+            summaryButton.GameObject.SetActive(true)
+            
+            BettrVisualsController.FireballMoveTo(nil, accumulatorsTextsGroup["Credits"].GameObject, 0, 0.5, false)
+            BettrVisualsController.FireballMoveTo(accumulatorsTextsGroup["Credits"].GameObject, summaryText.GameObject, 0, 0.5, true)            
+                        
+            BettrVisualsController.RollUpFormatCounter(summaryText, 0, payout, 0.5)
+            BettrVisualsController.RollUpFormatCounter(accumulatorsTextsGroup["Credits"], payout, 0, 0.5)
+            System.WaitForSeconds(0.5)
+            accumulatorsGroup["Credits"].SetActive(false)
+            
+            BettrDialogController.WaitForDialogAction(summaryButton.GameObject)
+            
             reelMatrixMechanic:ResetTextures()
             
             heapAccumulatorsGroup["Green"].SetActive(false)
@@ -439,7 +470,15 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             accumulatorsGroup["Multipliers"].SetActive(false)
             accumulatorsGroup["Credits"].SetActive(false)   
             
+            BettrVisualsController.FireballMoveTo(nil, summaryText.GameObject, 0, 0.5, false)
+            BettrVisualsController.FireballMoveTo(summaryText.GameObject, machine.WinText.GameObject, 0, 0.5, true)
+            
+            machine:RollupCredits()
+            System.WaitForSeconds(2)
+            
+            summaryButton.GameObject.SetActive(false)            
             mechanicsPrefab.SetActive(false)
+            machine.FreeSpinsRemaining.SetActive(false)
             
             System.WaitForSeconds(1)
                                     
@@ -448,7 +487,7 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             machine.Spin.SetActive(true)
             machine.Bet.SetActive(true)
             
-            machine:OnBaseGameSpinCompleted()
+            machine:OnBaseGameSpinCompleted()    
             
         end
     end
