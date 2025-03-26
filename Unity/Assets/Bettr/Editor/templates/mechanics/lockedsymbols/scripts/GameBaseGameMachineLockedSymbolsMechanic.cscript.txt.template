@@ -399,7 +399,7 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                         local multipliersAdded = row.MultipliersAdded
                         local accumulatorMultipliersBefore = accumulatorMultipliers
                         local accumulatorMultipliersAfter = accumulatorMultipliersBefore + multipliersAdded
-                        accumulatorMultipliers = accumulatorMultipliersAfter
+                        accumulatorMultipliers = accumulatorMultipliersAfter + 1
                         local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
                         local textMeshProProp = textMeshProGroupProp["SC"]                               
                         BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 0.5, false)
@@ -441,7 +441,7 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             BettrVisualsController.FireballMoveTo(nil, accumulatorsTextsGroup["Multipliers"].GameObject, 0, 0.5, false)
             BettrVisualsController.FireballMoveTo(accumulatorsTextsGroup["Multipliers"].GameObject, accumulatorsTextsGroup["Credits"].GameObject, 0, 0.5, true)
             local accumulatorCreditsBefore = accumulatorCredits
-            local accumulatorCreditsAfter = accumulatorCreditsBefore * (accumulatorMultipliers + 1)
+            local accumulatorCreditsAfter = accumulatorCreditsBefore * (accumulatorMultipliers)
             BettrVisualsController.RollUpFormatCounter(accumulatorsTextsGroup["Credits"], accumulatorCreditsBefore, accumulatorCreditsAfter, 0.5)   
             BettrVisualsController.RollUpFormatCounter(accumulatorsTextsGroup["Multipliers"], accumulatorMultipliers, 0, 0.5)         
             System.WaitForSeconds(0.5)
