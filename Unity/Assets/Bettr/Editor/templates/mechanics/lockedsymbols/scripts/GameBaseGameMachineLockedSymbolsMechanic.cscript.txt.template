@@ -388,6 +388,8 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                         local credits = row.CreditsAdded
                         local accumulatorCreditsBefore = accumulatorCredits
                         accumulatorCredits = accumulatorCredits + credits
+                        row.AccumulatorCreditsBefore = accumulatorCreditsBefore
+                        row.AccumulatorCreditsAfter = accumulatorCredits
                         local algo = row.Algo
                         local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
                         local textMeshProProp = textMeshProGroupProp["SC"] 
@@ -396,7 +398,14 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                         local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
                         local animatorProp = animatorGroupProp["SC__CreditsAccumulatorAnimation"]
                         BettrVisualsController.PlayAnimatorProperty(animatorProp)
+                    end                    
+                    for i = 1, #filteredHeapAccumulatorCreditsTable do
+                        local row = filteredHeapAccumulatorCreditsTable[i]
+                        local reelID = row.ReelID
+                        local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
+                        local textMeshProProp = textMeshProGroupProp["SC"] 
                         BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 0.5, false)
+                        local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
                         local textMeshProTarget = nil
                         if row.Algo == "GreenCreditsAccumulator" then
                             textMeshProTarget = heapAccumulatorsTexts["Green"]
@@ -408,14 +417,14 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                         parallel
                             do
                                 BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, textMeshProTarget.GameObject, 0, 0.5, true)
-                                BettrVisualsController.RollUpFormatCounter(textMeshProTarget, accumulatorCreditsBefore, accumulatorCredits, 0.5)
+                                BettrVisualsController.RollUpFormatCounter(textMeshProTarget, row.AccumulatorCreditsBefore, row.AccumulatorCreditsAfter, 0.5)
                             end
                             do
                                 animatorProp = animatorGroupProp["SC__HideAnimation"]
                                 BettrVisualsController.PlayAnimatorProperty(animatorProp)
                             end
                         end
-                    end
+                    end                    
                 end                
                 if #filteredHeapAccumulatorMultipliersTable > 0 then
                     for i = 1, #filteredHeapAccumulatorMultipliersTable parallel do
@@ -424,6 +433,8 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                         local multipliers = row.MultipliersAdded
                         local accumulatorMultipliersBefore = accumulatorMultipliers
                         accumulatorMultipliers = accumulatorMultipliers + multipliers
+                        row.AccumulatorMultipliersBefore = accumulatorMultipliersBefore
+                        row.AccumulatorMultipliersAfter = accumulatorMultipliers
                         local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
                         local textMeshProProp = textMeshProGroupProp["SC"]
                         textMeshProProp.FormattedText = "x{0}"
@@ -431,7 +442,14 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                         local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
                         local animatorProp = animatorGroupProp["SC__MultipliersAccumulatorAnimation"]
                         BettrVisualsController.PlayAnimatorProperty(animatorProp)
+                    end
+                    for i = 1, #filteredHeapAccumulatorMultipliersTable do
+                        local row = filteredHeapAccumulatorMultipliersTable[i]
+                        local reelID = row.ReelID
+                        local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
+                        local textMeshProProp = textMeshProGroupProp["SC"]
                         BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 0.5, false)
+                        local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
                         local textMeshProTarget = nil
                         if row.Algo == "GreenMultipliersAccumulator" then
                             textMeshProTarget = heapAccumulatorsTexts["Green"]
@@ -443,14 +461,14 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                         parallel
                             do
                                 BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, textMeshProTarget.GameObject, 0, 0.5, true)
-                                BettrVisualsController.RollUpFormatCounter(textMeshProTarget, accumulatorMultipliersBefore, accumulatorMultipliers, 0.5)
+                                BettrVisualsController.RollUpFormatCounter(textMeshProTarget, row.AccumulatorMultipliersBefore, row.AccumulatorMultipliersAfter, 0.5)
                             end
                             do
                                 animatorProp = animatorGroupProp["SC__HideAnimation"]
                                 BettrVisualsController.PlayAnimatorProperty(animatorProp)
                             end
                         end
-                    end
+                    end                    
                 end                
 -------------------- RESET THE FREE SPINS REMAINING
                 local updatedFreeSpinsRemaining = freeSpinsRemaining
