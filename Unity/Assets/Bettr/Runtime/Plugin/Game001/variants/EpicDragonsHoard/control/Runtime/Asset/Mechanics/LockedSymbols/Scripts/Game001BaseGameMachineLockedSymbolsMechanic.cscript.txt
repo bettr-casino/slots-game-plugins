@@ -448,17 +448,22 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                         BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 0.5, false)
                         local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
                         local textMeshProTarget = nil
+                        local textMeshProCountTarget = nil
                         if algo == "GreenCreditsAccumulator" then
                             textMeshProTarget = heapAccumulatorTexts["Green"]
+                            textMeshProCountTarget = heapAccumulatorCountTexts["Green"]
                         elseif algo == "YellowCreditsAccumulator" then
                             textMeshProTarget = heapAccumulatorTexts["Yellow"]
+                            textMeshProCountTarget = heapAccumulatorCountTexts["Yellow"]
                         elseif algo == "BlueCreditsAccumulator" then
                             textMeshProTarget = heapAccumulatorTexts["Blue"]
+                            textMeshProCountTarget = heapAccumulatorCountTexts["Blue"]
                         end
                         parallel
                             do
                                 BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, textMeshProTarget.GameObject, 0, 0.5, true)
                                 BettrVisualsController.RollUpFormatCounter(textMeshProTarget, row.AccumulatorCreditsBefore, row.AccumulatorCreditsAfter, 0.5)
+                                textMeshProCountTarget.Format(row.AccumulatorHitsAfter, row.AccumulatorThreshold)
                             end
                             do
                                 animatorProp = animatorGroupProp["SC__HideAnimation"]
@@ -473,11 +478,17 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                         local reelID = row.ReelID
                         local algo = row.Algo
                         local multipliers = row.MultipliersAccumulated
+                        local hits = row.AccumulatorAdded
                         local accumulatorMultipliers = accumulatedHeapMultipliers[algo]
+                        local accumulatorHits = accumulatedHeapMultipliersHits[algo]
                         row.AccumulatorMultipliersBefore = accumulatorMultipliers
+                        row.AccumulatorHitsBefore = accumulatorHits
                         accumulatorMultipliers = accumulatorMultipliers + multipliers
+                        accumulatorHits = accumulatorHits + hits
                         row.AccumulatorMultipliersAfter = accumulatorMultipliers
+                        row.AccumulatorHitsAfter = accumulatorHits
                         accumulatedHeapMultipliers[algo] = accumulatorMultipliers
+                        accumulatedHeapMultipliersHits[algo] = accumulatorHits
                         local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
                         local textMeshProProp = textMeshProGroupProp["SC"]
                         textMeshProProp.FormattedText = "x{0}"
@@ -495,17 +506,22 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                         BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 0.5, false)
                         local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
                         local textMeshProTarget = nil
+                        local textMeshProCountTarget = nil
                         if algo == "GreenMultipliersAccumulator" then
                             textMeshProTarget = heapAccumulatorTexts["Green"]
+                            textMeshProCountTarget = heapAccumulatorCountTexts["Green"]
                         elseif algo == "YellowMultipliersAccumulator" then
                             textMeshProTarget = heapAccumulatorTexts["Yellow"]
+                            textMeshProCountTarget = heapAccumulatorCountTexts["Yellow"]
                         elseif algo == "BlueMultipliersAccumulator" then
                             textMeshProTarget = heapAccumulatorTexts["Blue"]
+                            textMeshProCountTarget = heapAccumulatorCountTexts["Blue"]
                         end
                         parallel
                             do
                                 BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, textMeshProTarget.GameObject, 0, 0.5, true)
                                 BettrVisualsController.RollUpFormatCounter(textMeshProTarget, row.AccumulatorMultipliersBefore, row.AccumulatorMultipliersAfter, 0.5)
+                                textMeshProCountTarget.Format(row.AccumulatorHitsAfter, row.AccumulatorThreshold)
                             end
                             do
                                 animatorProp = animatorGroupProp["SC__HideAnimation"]
