@@ -385,7 +385,7 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                     for i = 1, #filteredHeapAccumulatorCreditsTable parallel do
                         local row = filteredHeapAccumulatorCreditsTable[i]
                         local reelID = row.ReelID
-                        local credits = row.CreditsAdded
+                        local credits = row.CreditsAccumulated
                         local accumulatorCreditsBefore = accumulatorCredits
                         accumulatorCredits = accumulatorCredits + credits
                         row.AccumulatorCreditsBefore = accumulatorCreditsBefore
@@ -430,7 +430,7 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                     for i = 1, #filteredHeapAccumulatorMultipliersTable parallel do
                         local row = filteredHeapAccumulatorMultipliersTable[i]
                         local reelID = row.ReelID
-                        local multipliers = row.MultipliersAdded
+                        local multipliers = row.MultipliersAccumulated
                         local accumulatorMultipliersBefore = accumulatorMultipliers
                         accumulatorMultipliers = accumulatorMultipliers + multipliers
                         row.AccumulatorMultipliersBefore = accumulatorMultipliersBefore
