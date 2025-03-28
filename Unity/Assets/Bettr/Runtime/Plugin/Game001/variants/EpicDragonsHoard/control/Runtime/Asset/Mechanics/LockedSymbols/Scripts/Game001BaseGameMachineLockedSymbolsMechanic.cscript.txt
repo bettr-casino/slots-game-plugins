@@ -242,7 +242,17 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                     hasHeapAccumulators = true
                     hasCreditsHeapAccumulators = true
                 end
-            end             
+            end       
+            
+            local accumulatedHeapCredits = {}
+            accumulatedHeapCredits["GreenCreditsAccumulator"] = 0
+            accumulatedHeapCredits["YellowCreditsAccumulator"] = 0
+            accumulatedHeapCredits["BlueCreditsAccumulator"] = 0            
+    
+            local accumulatedHeapMultipliers = {}
+            accumulatedHeapMultipliers["GreenMultipliersAccumulator"] = 0
+            accumulatedHeapMultipliers["YellowMultipliersAccumulator"] = 0
+            accumulatedHeapMultipliers["BlueMultipliersAccumulator"] = 0                  
             
             machineParent.SetActive(false)                                     
             
@@ -385,12 +395,13 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                     for i = 1, #filteredHeapAccumulatorCreditsTable parallel do
                         local row = filteredHeapAccumulatorCreditsTable[i]
                         local reelID = row.ReelID
-                        local credits = row.CreditsAccumulated
-                        local accumulatorCreditsBefore = accumulatorCredits
-                        accumulatorCredits = accumulatorCredits + credits
-                        row.AccumulatorCreditsBefore = accumulatorCreditsBefore
-                        row.AccumulatorCreditsAfter = accumulatorCredits
                         local algo = row.Algo
+                        local credits = row.CreditsAccumulated
+                        local accumulatorCredits = accumulatedHeapCredits[algo]
+                        row.AccumulatorCreditsBefore = accumulatorCredits
+                        accumulatorCredits = accumulatorCredits + credits
+                        row.AccumulatorCreditsAfter = accumulatorCredits
+                        accumulatedHeapCredits[algo] = accumulatorCredits
                         local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
                         local textMeshProProp = textMeshProGroupProp["SC"] 
                         textMeshProProp.FormattedText = "+{0}"                        
@@ -402,16 +413,17 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                     for i = 1, #filteredHeapAccumulatorCreditsTable do
                         local row = filteredHeapAccumulatorCreditsTable[i]
                         local reelID = row.ReelID
+                        local algo = row.Algo
                         local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
                         local textMeshProProp = textMeshProGroupProp["SC"] 
                         BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 0.5, false)
                         local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
                         local textMeshProTarget = nil
-                        if row.Algo == "GreenCreditsAccumulator" then
+                        if algo == "GreenCreditsAccumulator" then
                             textMeshProTarget = heapAccumulatorsTexts["Green"]
-                        elseif row.Algo == "YellowCreditsAccumulator" then
+                        elseif algo == "YellowCreditsAccumulator" then
                             textMeshProTarget = heapAccumulatorsTexts["Yellow"]
-                        elseif row.Algo == "BlueCreditsAccumulator" then
+                        elseif algo == "BlueCreditsAccumulator" then
                             textMeshProTarget = heapAccumulatorsTexts["Blue"]
                         end
                         parallel
@@ -430,11 +442,13 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                     for i = 1, #filteredHeapAccumulatorMultipliersTable parallel do
                         local row = filteredHeapAccumulatorMultipliersTable[i]
                         local reelID = row.ReelID
+                        local algo = row.Algo
                         local multipliers = row.MultipliersAccumulated
-                        local accumulatorMultipliersBefore = accumulatorMultipliers
+                        local accumulatorMultipliers = accumulatedHeapMultipliers[algo]
+                        row.AccumulatorMultipliersBefore = accumulatorMultipliers
                         accumulatorMultipliers = accumulatorMultipliers + multipliers
-                        row.AccumulatorMultipliersBefore = accumulatorMultipliersBefore
                         row.AccumulatorMultipliersAfter = accumulatorMultipliers
+                        accumulatedHeapMultipliers[algo] = accumulatorMultipliers
                         local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
                         local textMeshProProp = textMeshProGroupProp["SC"]
                         textMeshProProp.FormattedText = "x{0}"
@@ -446,16 +460,17 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                     for i = 1, #filteredHeapAccumulatorMultipliersTable do
                         local row = filteredHeapAccumulatorMultipliersTable[i]
                         local reelID = row.ReelID
+                        local algo = row.Algo
                         local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
                         local textMeshProProp = textMeshProGroupProp["SC"]
                         BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 0.5, false)
                         local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
                         local textMeshProTarget = nil
-                        if row.Algo == "GreenMultipliersAccumulator" then
+                        if algo == "GreenMultipliersAccumulator" then
                             textMeshProTarget = heapAccumulatorsTexts["Green"]
-                        elseif row.Algo == "YellowMultipliersAccumulator" then
+                        elseif algo == "YellowMultipliersAccumulator" then
                             textMeshProTarget = heapAccumulatorsTexts["Yellow"]
-                        elseif row.Algo == "BlueMultipliersAccumulator" then
+                        elseif algo == "BlueMultipliersAccumulator" then
                             textMeshProTarget = heapAccumulatorsTexts["Blue"]
                         end
                         parallel
