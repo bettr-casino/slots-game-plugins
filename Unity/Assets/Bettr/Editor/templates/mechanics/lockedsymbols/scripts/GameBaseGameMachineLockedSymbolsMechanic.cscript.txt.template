@@ -98,8 +98,8 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             
             local meshRenderersMatrix = BettrMathController.GetBaseGameMechanicMatrix(9, self.Config.Machine, self.Config.Mechanic, "MeshRenderers")
             
-            local algorithms = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, self.Config.Mechanic, "Algorithms")                         
-
+            local algorithms = BettrMathController.GetBaseGameMechanicMatrix(self.Config.Machine, self.Config.Mechanic, "Algorithms")
+            
             local reelStripData = BettrMathController.GetBaseGameMechanicDataMatrix(freeSpinsMechanic.Config.Machine, freeSpinsMechanic.Config.Mechanic, "ReelStrip")
             local outcomesTable = BettrMathController.GetBaseGameMechanicMatrix(freeSpinsMechanic.Config.Machine, freeSpinsMechanic.Config.Mechanic, "Outcomes")
             
@@ -183,7 +183,8 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             accumulatorsTextsGroup["Multipliers"].Format(accumulatorMultipliers)
             accumulatorsTextsGroup["Credits"].Format(accumulatorCredits)
             
-            local heapAccumulatorsTexts = machine.{{mechanicName}}HeapAccumulatorTexts
+            local heapAccumulatorTexts = machine.{{mechanicName}}HeapAccumulatorTexts
+            local heapAccumulatorCountTexts = machine.{{mechanicName}}HeapAccumulatorCountTexts
             
             local hasHeapAccumulators = false
             local hasCreditsHeapAccumulators = false
@@ -195,49 +196,61 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             for i = 1, #activeAlgorithmsTable do
                 local row = activeAlgorithmsTable[i]
                 if row.Algo == "GreenMultipliersAccumulator" then
-                    heapAccumulatorsTexts["Green"].FormattedText = "x{0}"
-                    heapAccumulatorsTexts["Green"].Format(accumulatorGreenHeapMultipliers)
-                    heapAccumulatorsTexts["Green"].SetActive(true)
+                    heapAccumulatorTexts["Green"].FormattedText = "x{0}"
+                    heapAccumulatorTexts["Green"].Format(accumulatorGreenHeapMultipliers)
+                    heapAccumulatorTexts["Green"].SetActive(true)
+                    heapAccumulatorCountTexts["Green"].Format(0, row.HitCountThreshold)
+                    heapAccumulatorCountTexts["Green"].SetActive(true)                    
                     heapAccumulatorsGroup["Green"].SetActive(true)
                     hasHeapAccumulators = true
                     hasMultipliersHeapAccumulators = true
                 end
                 if row.Algo == "GreenCreditsAccumulator" then
-                    heapAccumulatorsTexts["Green"].FormattedText = "+{0}"
-                    heapAccumulatorsTexts["Green"].Format(accumulatorGreenHeapCredits)
-                    heapAccumulatorsTexts["Green"].SetActive(true)
+                    heapAccumulatorTexts["Green"].FormattedText = "+{0}"
+                    heapAccumulatorTexts["Green"].Format(accumulatorGreenHeapCredits)
+                    heapAccumulatorTexts["Green"].SetActive(true)
+                    heapAccumulatorCountTexts["Green"].Format(0, row.HitCountThreshold)
+                    heapAccumulatorCountTexts["Green"].SetActive(true)                    
                     heapAccumulatorsGroup["Green"].SetActive(true)
                     hasHeapAccumulators = true
                     hasCreditsHeapAccumulators = true
                 end
                 if row.Algo == "YellowMultipliersAccumulator" then
-                    heapAccumulatorsTexts["Yellow"].FormattedText = "x{0}"
-                    heapAccumulatorsTexts["Yellow"].Format(accumulatorYellowHeapMultipliers)
-                    heapAccumulatorsTexts["Yellow"].SetActive(true)
+                    heapAccumulatorTexts["Yellow"].FormattedText = "x{0}"
+                    heapAccumulatorTexts["Yellow"].Format(accumulatorYellowHeapMultipliers)
+                    heapAccumulatorTexts["Yellow"].SetActive(true)
+                    heapAccumulatorCountTexts["Yellow"].Format(0, row.HitCountThreshold)
+                    heapAccumulatorCountTexts["Yellow"].SetActive(true)                    
                     heapAccumulatorsGroup["Yellow"].SetActive(true)
                     hasHeapAccumulators = true
                     hasMultipliersHeapAccumulators = true
                 end
                 if row.Algo == "YellowCreditsAccumulator" then
-                    heapAccumulatorsTexts["Yellow"].FormattedText = "+{0}"
-                    heapAccumulatorsTexts["Yellow"].Format(accumulatorYellowHeapCredits)
-                    heapAccumulatorsTexts["Yellow"].SetActive(true)
+                    heapAccumulatorTexts["Yellow"].FormattedText = "+{0}"
+                    heapAccumulatorTexts["Yellow"].Format(accumulatorYellowHeapCredits)
+                    heapAccumulatorTexts["Yellow"].SetActive(true)
+                    heapAccumulatorCountTexts["Yellow"].Format(0, row.HitCountThreshold)
+                    heapAccumulatorCountTexts["Yellow"].SetActive(true)                    
                     heapAccumulatorsGroup["Yellow"].SetActive(true)
                     hasHeapAccumulators = true
                     hasCreditsHeapAccumulators = true
                 end
                 if row.Algo == "BlueMultipliersAccumulator" then
-                    heapAccumulatorsTexts["Blue"].FormattedText = "x{0}"
-                    heapAccumulatorsTexts["Blue"].Format(accumulatorBlueHeapMultipliers)
-                    heapAccumulatorsTexts["Blue"].SetActive(true)
+                    heapAccumulatorTexts["Blue"].FormattedText = "x{0}"
+                    heapAccumulatorTexts["Blue"].Format(accumulatorBlueHeapMultipliers)
+                    heapAccumulatorTexts["Blue"].SetActive(true)
+                    heapAccumulatorCountTexts["Blue"].Format(0, row.HitCountThreshold)
+                    heapAccumulatorCountTexts["Blue"].SetActive(true)                    
                     heapAccumulatorsGroup["Blue"].SetActive(true)
                     hasHeapAccumulators = true
                     hasMultipliersHeapAccumulators = true
                 end
                 if row.Algo == "BlueCreditsAccumulator" then
-                    heapAccumulatorsTexts["Blue"].FormattedText = "+{0}"
-                    heapAccumulatorsTexts["Blue"].Format(accumulatorBlueHeapCredits)
-                    heapAccumulatorsTexts["Blue"].SetActive(true)
+                    heapAccumulatorTexts["Blue"].FormattedText = "+{0}"
+                    heapAccumulatorTexts["Blue"].Format(accumulatorBlueHeapCredits)
+                    heapAccumulatorTexts["Blue"].SetActive(true)
+                    heapAccumulatorCountTexts["Blue"].Format(0, row.HitCountThreshold)
+                    heapAccumulatorCountTexts["Blue"].SetActive(true)                    
                     heapAccumulatorsGroup["Blue"].SetActive(true)
                     hasHeapAccumulators = true
                     hasCreditsHeapAccumulators = true
@@ -253,6 +266,16 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
             accumulatedHeapMultipliers["GreenMultipliersAccumulator"] = 0
             accumulatedHeapMultipliers["YellowMultipliersAccumulator"] = 0
             accumulatedHeapMultipliers["BlueMultipliersAccumulator"] = 0                  
+            
+            local accumulatedHeapCreditsHits = {}
+            accumulatedHeapCreditsHits["GreenCreditsAccumulator"] = 0
+            accumulatedHeapCreditsHits["YellowCreditsAccumulator"] = 0
+            accumulatedHeapCreditsHits["BlueCreditsAccumulator"] = 0                  
+            
+            local accumulatedHeapMultipliersHits = {}
+            accumulatedHeapMultipliersHits["GreenMultipliersAccumulator"] = 0
+            accumulatedHeapMultipliersHits["YellowMultipliersAccumulator"] = 0
+            accumulatedHeapMultipliersHits["BlueMultipliersAccumulator"] = 0                  
             
             machineParent.SetActive(false)                                     
             
@@ -397,11 +420,17 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                         local reelID = row.ReelID
                         local algo = row.Algo
                         local credits = row.CreditsAccumulated
+                        local hits = row.AccumulatorAdded
                         local accumulatorCredits = accumulatedHeapCredits[algo]
+                        local accumulatorHits = accumulatedHeapCreditsHits[algo]
                         row.AccumulatorCreditsBefore = accumulatorCredits
+                        row.AccumulatorHitsBefore = accumulatorHits
                         accumulatorCredits = accumulatorCredits + credits
+                        accumulatorHits = accumulatorHits + hits
                         row.AccumulatorCreditsAfter = accumulatorCredits
+                        row.AccumulatorHitsAfter = accumulatorHits
                         accumulatedHeapCredits[algo] = accumulatorCredits
+                        accumulatedHeapCreditsHits[algo] = accumulatorHits
                         local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
                         local textMeshProProp = textMeshProGroupProp["SC"] 
                         textMeshProProp.FormattedText = "+{0}"                        
@@ -419,17 +448,22 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                         BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 0.5, false)
                         local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
                         local textMeshProTarget = nil
+                        local textMeshProCountTarget = nil
                         if algo == "GreenCreditsAccumulator" then
-                            textMeshProTarget = heapAccumulatorsTexts["Green"]
+                            textMeshProTarget = heapAccumulatorTexts["Green"]
+                            textMeshProCountTarget = heapAccumulatorCountTexts["Green"]
                         elseif algo == "YellowCreditsAccumulator" then
-                            textMeshProTarget = heapAccumulatorsTexts["Yellow"]
+                            textMeshProTarget = heapAccumulatorTexts["Yellow"]
+                            textMeshProCountTarget = heapAccumulatorCountTexts["Yellow"]
                         elseif algo == "BlueCreditsAccumulator" then
-                            textMeshProTarget = heapAccumulatorsTexts["Blue"]
+                            textMeshProTarget = heapAccumulatorTexts["Blue"]
+                            textMeshProCountTarget = heapAccumulatorCountTexts["Blue"]
                         end
                         parallel
                             do
                                 BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, textMeshProTarget.GameObject, 0, 0.5, true)
                                 BettrVisualsController.RollUpFormatCounter(textMeshProTarget, row.AccumulatorCreditsBefore, row.AccumulatorCreditsAfter, 0.5)
+                                textMeshProCountTarget.Format(row.AccumulatorHitsAfter, row.AccumulatorThreshold)
                             end
                             do
                                 animatorProp = animatorGroupProp["SC__HideAnimation"]
@@ -444,11 +478,17 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                         local reelID = row.ReelID
                         local algo = row.Algo
                         local multipliers = row.MultipliersAccumulated
+                        local hits = row.AccumulatorAdded
                         local accumulatorMultipliers = accumulatedHeapMultipliers[algo]
+                        local accumulatorHits = accumulatedHeapMultipliersHits[algo]
                         row.AccumulatorMultipliersBefore = accumulatorMultipliers
+                        row.AccumulatorHitsBefore = accumulatorHits
                         accumulatorMultipliers = accumulatorMultipliers + multipliers
+                        accumulatorHits = accumulatorHits + hits
                         row.AccumulatorMultipliersAfter = accumulatorMultipliers
+                        row.AccumulatorHitsAfter = accumulatorHits
                         accumulatedHeapMultipliers[algo] = accumulatorMultipliers
+                        accumulatedHeapMultipliersHits[algo] = accumulatorHits
                         local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
                         local textMeshProProp = textMeshProGroupProp["SC"]
                         textMeshProProp.FormattedText = "x{0}"
@@ -466,17 +506,22 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                         BettrVisualsController.FireballMoveTo(nil, textMeshProProp.GameObject, 0, 0.5, false)
                         local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
                         local textMeshProTarget = nil
+                        local textMeshProCountTarget = nil
                         if algo == "GreenMultipliersAccumulator" then
-                            textMeshProTarget = heapAccumulatorsTexts["Green"]
+                            textMeshProTarget = heapAccumulatorTexts["Green"]
+                            textMeshProCountTarget = heapAccumulatorCountTexts["Green"]
                         elseif algo == "YellowMultipliersAccumulator" then
-                            textMeshProTarget = heapAccumulatorsTexts["Yellow"]
+                            textMeshProTarget = heapAccumulatorTexts["Yellow"]
+                            textMeshProCountTarget = heapAccumulatorCountTexts["Yellow"]
                         elseif algo == "BlueMultipliersAccumulator" then
-                            textMeshProTarget = heapAccumulatorsTexts["Blue"]
+                            textMeshProTarget = heapAccumulatorTexts["Blue"]
+                            textMeshProCountTarget = heapAccumulatorCountTexts["Blue"]
                         end
                         parallel
                             do
                                 BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, textMeshProTarget.GameObject, 0, 0.5, true)
                                 BettrVisualsController.RollUpFormatCounter(textMeshProTarget, row.AccumulatorMultipliersBefore, row.AccumulatorMultipliersAfter, 0.5)
+                                textMeshProCountTarget.Format(row.AccumulatorHitsAfter, row.AccumulatorThreshold)
                             end
                             do
                                 animatorProp = animatorGroupProp["SC__HideAnimation"]
