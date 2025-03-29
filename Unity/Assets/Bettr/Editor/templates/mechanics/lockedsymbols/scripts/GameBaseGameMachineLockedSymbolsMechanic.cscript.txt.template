@@ -419,22 +419,32 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                         local row = filteredHeapAccumulatorCreditsTable[i]
                         local reelID = row.ReelID
                         local algo = row.Algo
-                        local credits = row.CreditsAccumulated
+                        local heapCredits = row.CreditsAccumulated
+                        local heapAccumulatorCredits = accumulatedHeapCredits[algo]
+                        row.HeapAccumulatorCreditsBefore = heapAccumulatorCredits
+                        heapAccumulatorCredits = heapAccumulatorCredits + heapCredits
+                        row.HeapAccumulatorCreditsAfter = heapAccumulatorCredits
+                        accumulatedHeapCredits[algo] = heapAccumulatorCredits
+                        local creditsAdded = row.CreditsAdded
+                        row.CreditsAdded = creditsAdded
                         local hits = row.AccumulatorAdded
-                        local accumulatorCredits = accumulatedHeapCredits[algo]
-                        local accumulatorHits = accumulatedHeapCreditsHits[algo]
-                        row.AccumulatorCreditsBefore = accumulatorCredits
-                        row.AccumulatorHitsBefore = accumulatorHits
-                        accumulatorCredits = accumulatorCredits + credits
-                        accumulatorHits = accumulatorHits + hits
-                        row.AccumulatorCreditsAfter = accumulatorCredits
-                        row.AccumulatorHitsAfter = accumulatorHits
-                        accumulatedHeapCredits[algo] = accumulatorCredits
+                        local isHit = row.IsAccumulatorHit
+                        local heapAccumulatorHits = accumulatedHeapCreditsHits[algo]
+                        row.HeapAccumulatorHitsBefore = heapAccumulatorHits
+                        heapAccumulatorHits = heapAccumulatorHits + hits
+                        row.HeapAccumulatorHitsAfter = accumulatorHits
                         accumulatedHeapCreditsHits[algo] = accumulatorHits
+                        row.IsHeapHit = isHit
+                        if isHit then
+                            row.AccumulatorCreditsBefore = accumulatorCredits
+                            accumulatorCredits = accumulatorCredits + creditsAdded
+                            row.AccumulatorCreditsAfter = accumulatorCredits
+                            accumulatedHeapCredits[algo] = 0
+                        end
                         local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
                         local textMeshProProp = textMeshProGroupProp["SC"] 
                         textMeshProProp.FormattedText = "+{0}"                        
-                        textMeshProProp.Format(credits)
+                        textMeshProProp.Format(heapCredits)
                         local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
                         local animatorProp = animatorGroupProp["SC__CreditsAccumulatorAnimation"]
                         BettrVisualsController.PlayAnimatorProperty(animatorProp)
@@ -459,15 +469,35 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                             textMeshProTarget = heapAccumulatorTexts["Blue"]
                             textMeshProCountTarget = heapAccumulatorCountTexts["Blue"]
                         end
-                        parallel
-                            do
-                                BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, textMeshProTarget.GameObject, 0, 0.5, true)
-                                BettrVisualsController.RollUpFormatCounter(textMeshProTarget, row.AccumulatorCreditsBefore, row.AccumulatorCreditsAfter, 0.5)
-                                textMeshProCountTarget.Format(row.AccumulatorHitsAfter, row.AccumulatorThreshold)
+                        local textMeshProAccumulatorsCreditsTarget = accumulatorsTextsGroup["Credits"]
+                        if row.IsHeapHit then
+                            parallel
+                                do
+                                    BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, textMeshProTarget.GameObject, 0, 0.5, true)
+                                    BettrVisualsController.RollUpFormatCounter(textMeshProTarget, row.HeapAccumulatorCreditsBefore, row.HeapAccumulatorCreditsAfter, 0.5)
+                                    textMeshProCountTarget.Format(row.HeapAccumulatorHitsAfter, row.AccumulatorThreshold)
+                                    BettrVisualsController.FireballMoveTo(nil, textMeshProTarget.GameObject, 0, 0.5, false)
+                                    BettrVisualsController.FireballMoveTo(textMeshProTarget.GameObject, textMeshProAccumulatorsCreditsTarget.GameObject, 0, 0.5, true)
+                                    BettrVisualsController.RollUpFormatCounter(textMeshProAccumulatorsCreditsTarget, row.AccumulatorCreditsBefore, row.AccumulatorCreditsAfter, 0.5)
+                                    BettrVisualsController.RollUpFormatCounter(textMeshProTarget, row.HeapAccumulatorCreditsAfter, 0, 0.5)
+                                    System.WaitForSeconds(0.5)
+                                end
+                                do
+                                    animatorProp = animatorGroupProp["SC__HideAnimation"]
+                                    BettrVisualsController.PlayAnimatorProperty(animatorProp)
+                                end
                             end
-                            do
-                                animatorProp = animatorGroupProp["SC__HideAnimation"]
-                                BettrVisualsController.PlayAnimatorProperty(animatorProp)
+                        else
+                            parallel
+                                do
+                                    BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, textMeshProTarget.GameObject, 0, 0.5, true)
+                                    BettrVisualsController.RollUpFormatCounter(textMeshProTarget, row.HeapAccumulatorCreditsBefore, row.HeapAccumulatorCreditsAfter, 0.5)
+                                    textMeshProCountTarget.Format(row.HeapAccumulatorHitsAfter, row.AccumulatorThreshold)
+                                end
+                                do
+                                    animatorProp = animatorGroupProp["SC__HideAnimation"]
+                                    BettrVisualsController.PlayAnimatorProperty(animatorProp)
+                                end
                             end
                         end
                     end                    
@@ -477,22 +507,32 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                         local row = filteredHeapAccumulatorMultipliersTable[i]
                         local reelID = row.ReelID
                         local algo = row.Algo
-                        local multipliers = row.MultipliersAccumulated
+                        local heapMultipliers = row.MultipliersAccumulated
+                        local heapAccumulatorMultipliers = accumulatedHeapMultipliers[algo]
+                        row.HeapAccumulatorMultipliersBefore = heapAccumulatorMultipliers
+                        heapAccumulatorMultipliers = heapAccumulatorMultipliers + heapMultipliers
+                        row.HeapAccumulatorMultipliersAfter = heapAccumulatorMultipliers
+                        accumulatedHeapMultipliers[algo] = heapAccumulatorMultipliers
                         local hits = row.AccumulatorAdded
-                        local accumulatorMultipliers = accumulatedHeapMultipliers[algo]
-                        local accumulatorHits = accumulatedHeapMultipliersHits[algo]
-                        row.AccumulatorMultipliersBefore = accumulatorMultipliers
-                        row.AccumulatorHitsBefore = accumulatorHits
-                        accumulatorMultipliers = accumulatorMultipliers + multipliers
-                        accumulatorHits = accumulatorHits + hits
-                        row.AccumulatorMultipliersAfter = accumulatorMultipliers
-                        row.AccumulatorHitsAfter = accumulatorHits
-                        accumulatedHeapMultipliers[algo] = accumulatorMultipliers
-                        accumulatedHeapMultipliersHits[algo] = accumulatorHits
+                        local heapAccumulatorHits = accumulatedHeapMultipliersHits[algo]
+                        row.HeapAccumulatorHitsBefore = heapAccumulatorHits
+                        heapAccumulatorHits = heapAccumulatorHits + hits
+                        row.HeapAccumulatorHitsAfter = heapAccumulatorHits
+                        accumulatedHeapMultipliersHits[algo] = heapAccumulatorHits
+                        local multipliersAdded = row.MultipliersAdded
+                        row.MultipliersAdded = multipliersAdded
+                        local isHit = row.IsAccumulatorHit
+                        row.IsHeapHit = isHit
+                        if isHit then
+                            row.AccumulatorMultipliersBefore = accumulatorMultipliers
+                            accumulatorMultipliers = accumulatorMultipliers + multipliersAdded
+                            row.AccumulatorMultipliersAfter = accumulatorMultipliers
+                            accumulatedHeapMultipliers[algo] = 0
+                        end
                         local textMeshProGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolText2")
                         local textMeshProProp = textMeshProGroupProp["SC"]
                         textMeshProProp.FormattedText = "x{0}"
-                        textMeshProProp.Format(multipliers)
+                        textMeshProProp.Format(heapMultipliers)
                         local animatorGroupProp = reelMatrixMechanic:GetProperty(reelID .. "SymbolAnimator2")
                         local animatorProp = animatorGroupProp["SC__MultipliersAccumulatorAnimation"]
                         BettrVisualsController.PlayAnimatorProperty(animatorProp)
@@ -517,15 +557,35 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCo
                             textMeshProTarget = heapAccumulatorTexts["Blue"]
                             textMeshProCountTarget = heapAccumulatorCountTexts["Blue"]
                         end
-                        parallel
-                            do
-                                BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, textMeshProTarget.GameObject, 0, 0.5, true)
-                                BettrVisualsController.RollUpFormatCounter(textMeshProTarget, row.AccumulatorMultipliersBefore, row.AccumulatorMultipliersAfter, 0.5)
-                                textMeshProCountTarget.Format(row.AccumulatorHitsAfter, row.AccumulatorThreshold)
+                        local textMeshProAccumulatorsMultipliersTarget = accumulatorsTextsGroup["Multipliers"]
+                        if row.IsHeapHit then
+                            parallel
+                                do
+                                    BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, textMeshProTarget.GameObject, 0, 0.5, true)
+                                    BettrVisualsController.RollUpFormatCounter(textMeshProTarget, row.HeapAccumulatorMultipliersBefore, row.HeapAccumulatorMultipliersAfter, 0.5)
+                                    textMeshProCountTarget.Format(row.HeapAccumulatorHitsAfter, row.AccumulatorThreshold)
+                                    BettrVisualsController.FireballMoveTo(nil, textMeshProTarget.GameObject, 0, 0.5, false)
+                                    BettrVisualsController.FireballMoveTo(textMeshProTarget.GameObject, textMeshProAccumulatorsMultipliersTarget.GameObject, 0, 0.5, true)
+                                    BettrVisualsController.RollUpFormatCounter(textMeshProAccumulatorsMultipliersTarget, row.AccumulatorMultipliersBefore, row.AccumulatorMultipliersAfter, 0.5)
+                                    BettrVisualsController.RollUpFormatCounter(textMeshProTarget, row.HeapAccumulatorMultipliersAfter, 0, 0.5)
+                                    System.WaitForSeconds(0.5)
+                                end
+                                do
+                                    animatorProp = animatorGroupProp["SC__HideAnimation"]
+                                    BettrVisualsController.PlayAnimatorProperty(animatorProp)
+                                end
                             end
-                            do
-                                animatorProp = animatorGroupProp["SC__HideAnimation"]
-                                BettrVisualsController.PlayAnimatorProperty(animatorProp)
+                        else
+                            parallel
+                                do
+                                    BettrVisualsController.FireballMoveTo(textMeshProProp.GameObject, textMeshProTarget.GameObject, 0, 0.5, true)
+                                    BettrVisualsController.RollUpFormatCounter(textMeshProTarget, row.HeapAccumulatorMultipliersBefore, row.HeapAccumulatorMultipliersAfter, 0.5)
+                                    textMeshProCountTarget.Format(row.HeapAccumulatorHitsAfter, row.AccumulatorThreshold)
+                                end
+                                do
+                                    animatorProp = animatorGroupProp["SC__HideAnimation"]
+                                    BettrVisualsController.PlayAnimatorProperty(animatorProp)
+                                end
                             end
                         end
                     end                    
