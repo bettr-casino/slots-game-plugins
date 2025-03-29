@@ -660,12 +660,16 @@ function Game001BaseGameMachineLockedSymbolsMechanic:OnBaseGameSpinCompleted(mac
                 end
             end
             
-            BettrVisualsController.FireballMoveTo(nil, accumulatorsTextsGroup["Multipliers"].GameObject, 0, 0.5, false)
-            BettrVisualsController.FireballMoveTo(accumulatorsTextsGroup["Multipliers"].GameObject, accumulatorsTextsGroup["Credits"].GameObject, 0, 0.5, true)
             local accumulatorCreditsBefore = accumulatorCredits
             local accumulatorCreditsAfter = accumulatorCreditsBefore * (accumulatorMultipliers)
+            if accumulatorMultipliers > 1 then
+                BettrVisualsController.FireballMoveTo(nil, accumulatorsTextsGroup["Multipliers"].GameObject, 0, 0.5, false)
+                BettrVisualsController.FireballMoveTo(accumulatorsTextsGroup["Multipliers"].GameObject, accumulatorsTextsGroup["Credits"].GameObject, 0, 0.5, true)
+            end
             BettrVisualsController.RollUpFormatCounter(accumulatorsTextsGroup["Credits"], accumulatorCreditsBefore, accumulatorCreditsAfter, 0.5)   
-            BettrVisualsController.RollUpFormatCounter(accumulatorsTextsGroup["Multipliers"], accumulatorMultipliers, 0, 0.5)         
+            if accumulatorMultipliers > 1 then
+                BettrVisualsController.RollUpFormatCounter(accumulatorsTextsGroup["Multipliers"], accumulatorMultipliers, 1, 0.5)
+            end         
             System.WaitForSeconds(0.5)
             accumulatorsGroup["Multipliers"].SetActive(false)
             
