@@ -38,93 +38,28 @@ function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:Initialize(machi
     end
 end
 
-function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:OnBaseGameSpinCompleted(machine)
-    series
-        do
-            local freeSpinsMechanic = machine.Mechanics.FreeSpinsMechanic
-            if freeSpinsMechanic == nil then
-                return
-            end       
-            
-            local summaryTable = BettrMathController.GetBaseGameMechanicSummary(freeSpinsMechanic.Config.Machine, freeSpinsMechanic.Config.Mechanic)            
-            local outcomeCount = summaryTable.OutcomeCount
-            if outcomeCount <= 0 then
-                return
-            end 
-            
-            {{machineName}}BaseGameState.SpinState.First.State = "Waiting"                
-
-            local reelStripData = BettrMathController.GetBaseGameMechanicDataMatrix(freeSpinsMechanic.Config.Machine, freeSpinsMechanic.Config.Mechanic, "ReelStrip")
-            local outcomesTable = BettrMathController.GetBaseGameMechanicMatrix(freeSpinsMechanic.Config.Machine, freeSpinsMechanic.Config.Mechanic, "Outcomes")
-            
-            local mechanicsPrefab = self.State.MechanicsPrefab            
-            local machineParent = machine.MachineParent
-
-            machineParent.SetActive(false)
-            
-            System.WaitForSeconds(1)
-            
-            mechanicsPrefab.SetActive(true)            
-            System.WaitForFrame(2)                     
-            
-            self:SetReelStripData(reelStripData)
-            self:SetReelStripSymbolTextures(freeSpinsMechanic.State.MechanicsPrefab)
-            self:SetOutcomes(outcomesTable)
-            self:Show{{mechanicName}}()            
-            self:StartEngines() 
-            
-            local lockedSymbols = nil
-            local lockedSymbolsMechanic = machine.Mechanics.LockedSymbolsMechanic
-            if lockedSymbolsMechanic ~= nil then
-                lockedSymbols = BettrMathController.GetBaseGameMechanicMatrix(lockedSymbolsMechanic.Config.Machine, lockedSymbolsMechanic.Config.Mechanic, "LockedSymbols")
-            end
-            
-            System.WaitForFrame(2)
-            
-            local freeSpins = 10
-            
-            while freeSpins > 0 do
-                freeSpins = freeSpins - 1
-                self:SpinEngines(machine)
-                
-                if lockedSymbols ~= nil then
-                    local outcomeIndex = self:OutcomeIndex()
-                    local filteredTable = {}
-                    BettrMathController.FilterTable(lockedSymbols, filteredTable, "LockOutcomeIndex", outcomeIndex)
-                    self:LockEngines(filteredTable)
-                end
-                
-                System.WaitForSeconds(1)
-            end     
-            
-            System.WaitForSeconds(1)
-            
-            mechanicsPrefab.SetActive(false)
-            
-            System.WaitForSeconds(1)
-                                    
-            machineParent.SetActive(true)   
-            
-            machine:OnBaseGameSpinCompleted()
-            
-        end
-    end
-end
-
 function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:SetReelStripData(reelStripData)
     self.State.{{mechanicName}}Controller:SetReelStripData(reelStripData)
 end
 
-function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:SetReelStripSymbolTextures(prefab)
-    self.State.{{mechanicName}}Controller:SetReelStripSymbolTextures(prefab)
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:SetReelStripSymbolTextures(meshRenderersMatrix, meshRenderers)
+    self.State.{{mechanicName}}Controller:SetReelStripSymbolTextures(meshRenderersMatrix, meshRenderers)
+end
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:ResetEngines()
+    self.State.{{mechanicName}}Controller:ResetEngines()
+end
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:ResetTextures()
+    self.State.{{mechanicName}}Controller:ResetTextures()
 end
 
 function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:SetOutcomes(outcomesTable)
     self.State.{{mechanicName}}Controller:SetOutcomes(outcomesTable)
 end
 
-function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:Show{{mechanicName}}()
-    self.State.{{mechanicName}}Controller["Pivot"].SetActive(true)
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:Show{{mechanicName}}(initialMeshRenderers)
+    self.State.{{mechanicName}}Controller:Show{{mechanicName}}(initialMeshRenderers)
 end
 
 function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:StartEngines()
@@ -141,6 +76,10 @@ end
 
 function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:LockEngines(lockedSymbols{{mechanicName}})
     return self.State.{{mechanicName}}Controller:LockEngines(lockedSymbols{{mechanicName}})
+end
+
+function {{machineName}}BaseGameMachine{{mechanicName}}Mechanic:GetProperty(key)
+    return self.State.{{mechanicName}}Controller[key]
 end
 
 

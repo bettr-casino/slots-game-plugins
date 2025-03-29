@@ -38,79 +38,28 @@ function Game001BaseGameMachineReelMatrixMechanic:Initialize(machine)
     end
 end
 
-function Game001BaseGameMachineReelMatrixMechanic:OnBaseGameSpinCompleted(machine)
-    series
-        do
-            local freeSpinsMechanic = machine.Mechanics.FreeSpinsMechanic
-            if freeSpinsMechanic == nil then
-                return
-            end       
-            
-            local summaryTable = BettrMathController.GetBaseGameMechanicSummary(freeSpinsMechanic.Config.Machine, freeSpinsMechanic.Config.Mechanic)            
-            local outcomeCount = summaryTable.OutcomeCount
-            if outcomeCount <= 0 then
-                return
-            end 
-            
-            Game001BaseGameState.SpinState.First.State = "Waiting"                
-
-            local reelStripData = BettrMathController.GetBaseGameMechanicDataMatrix(freeSpinsMechanic.Config.Machine, freeSpinsMechanic.Config.Mechanic, "ReelStrip")
-            local outcomesTable = BettrMathController.GetBaseGameMechanicMatrix(freeSpinsMechanic.Config.Machine, freeSpinsMechanic.Config.Mechanic, "Outcomes")
-            
-            local mechanicsPrefab = self.State.MechanicsPrefab            
-            local machineParent = machine.MachineParent
-
-            machineParent.SetActive(false)
-            
-            System.WaitForSeconds(1)
-            
-            mechanicsPrefab.SetActive(true)            
-            System.WaitForFrame(2)                     
-            
-            self:SetReelStripData(reelStripData)
-            self:SetReelStripSymbolTextures(freeSpinsMechanic.State.MechanicsPrefab)
-            self:SetOutcomes(outcomesTable)
-            self:ShowReelMatrix()            
-            self:StartEngines() 
-            
-            System.WaitForFrame(2)
-            
-            local freeSpins = 3
-            
-            while freeSpins > 0 do
-                freeSpins = freeSpins - 1
-                self:SpinEngines(machine)
-                System.WaitForSeconds(1)
-            end     
-            
-            System.WaitForSeconds(1)
-            
-            mechanicsPrefab.SetActive(false)
-            
-            System.WaitForSeconds(1)
-                                    
-            machineParent.SetActive(true)   
-            
-            machine:OnBaseGameSpinCompleted()
-            
-        end
-    end
-end
-
 function Game001BaseGameMachineReelMatrixMechanic:SetReelStripData(reelStripData)
     self.State.ReelMatrixController:SetReelStripData(reelStripData)
 end
 
-function Game001BaseGameMachineReelMatrixMechanic:SetReelStripSymbolTextures(prefab)
-    self.State.ReelMatrixController:SetReelStripSymbolTextures(prefab)
+function Game001BaseGameMachineReelMatrixMechanic:SetReelStripSymbolTextures(meshRenderersMatrix, meshRenderers)
+    self.State.ReelMatrixController:SetReelStripSymbolTextures(meshRenderersMatrix, meshRenderers)
+end
+
+function Game001BaseGameMachineReelMatrixMechanic:ResetEngines()
+    self.State.ReelMatrixController:ResetEngines()
+end
+
+function Game001BaseGameMachineReelMatrixMechanic:ResetTextures()
+    self.State.ReelMatrixController:ResetTextures()
 end
 
 function Game001BaseGameMachineReelMatrixMechanic:SetOutcomes(outcomesTable)
     self.State.ReelMatrixController:SetOutcomes(outcomesTable)
 end
 
-function Game001BaseGameMachineReelMatrixMechanic:ShowReelMatrix()
-    self.State.ReelMatrixController["Pivot"].SetActive(true)
+function Game001BaseGameMachineReelMatrixMechanic:ShowReelMatrix(initialMeshRenderers)
+    self.State.ReelMatrixController:ShowReelMatrix(initialMeshRenderers)
 end
 
 function Game001BaseGameMachineReelMatrixMechanic:StartEngines()
@@ -119,6 +68,18 @@ end
 
 function Game001BaseGameMachineReelMatrixMechanic:SpinEngines(machine)
     self.State.ReelMatrixController:SpinEngines()
+end
+
+function Game001BaseGameMachineReelMatrixMechanic:OutcomeIndex()
+    return self.State.ReelMatrixController:OutcomeIndex()
+end
+
+function Game001BaseGameMachineReelMatrixMechanic:LockEngines(lockedSymbolsReelMatrix)
+    return self.State.ReelMatrixController:LockEngines(lockedSymbolsReelMatrix)
+end
+
+function Game001BaseGameMachineReelMatrixMechanic:GetProperty(key)
+    return self.State.ReelMatrixController[key]
 end
 
 

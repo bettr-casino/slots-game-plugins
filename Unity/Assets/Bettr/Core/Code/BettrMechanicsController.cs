@@ -213,6 +213,13 @@ namespace Bettr.Core
         // SymbolMatrix APIs
         //
         
+        public MeshRenderer[] GetSymbolMatrixMeshRenderers(string machineName, int reelCount)
+        {
+            var gameObjects = GetSymbolMatrixGameObjects(machineName, reelCount, new string[0]);
+            var meshRenderers = gameObjects.Select(go => go.GetComponent<MeshRenderer>()).ToArray();
+            return meshRenderers;
+        }
+        
         public List<GameObject> GetSymbolMatrixGameObjects(string machineName, int reelCount, params string[] symbols)
         {
             var symbolMatrixGameObjects = new List<GameObject>();
@@ -271,7 +278,7 @@ namespace Bettr.Core
             var globalKey = $"{machineName}BaseGame{reelID}";
             var reelTable = (Table) globals[globalKey];
             var reelController = (BettrReelController) reelTable["BettrReelController"];
-            var reelMatrixSymbols = reelController.GetReelMatrixVisibleSymbolsGroups(symbols);
+            var reelMatrixSymbols = reelController.GetReelMatrixVisibleSymbolsGroups();
             return reelMatrixSymbols;
         }
         
@@ -296,6 +303,13 @@ namespace Bettr.Core
         //
         // SymbolGroup APIs
         //
+        
+        public MeshRenderer[] GetSymbolGroupMeshRenderers(GameObject go)
+        {
+            var symbolGroupGo = FindGameObjectInHierarchy(go, "SymbolGroup");
+            var meshRenderers = symbolGroupGo.GetComponentsInChildren<MeshRenderer>();
+            return meshRenderers;
+        }
 
         public List<TilePropertyGameObjectGroup> AddSymbolsToReelSymbolGroups(string mechanicName,
             BettrReelController reelController, TilePropertyGameObjectGroup symbolPropertiesGroup)
@@ -380,6 +394,24 @@ namespace Bettr.Core
         //
         // Helper Methods
         //
+
+        public GameObject FindGameObjectInHierarchy(GameObject go, string gameObjectName, string parentGameObjectName = null)
+        {
+            Transform[] allTransforms = go.GetComponentsInChildren<Transform>(true);
+            foreach (Transform transform in allTransforms)
+            {
+                if (transform.gameObject.name == gameObjectName)
+                {
+                    if (parentGameObjectName != null && transform.parent.name != parentGameObjectName)
+                    {
+                        continue;
+                    }
+                    return transform.gameObject;
+                }
+            }
+
+            return null;
+        }
         
         // Function to print the table with recursion for nested tables using StringBuilder
         public void PrintTable(Table table, int indent = 2)

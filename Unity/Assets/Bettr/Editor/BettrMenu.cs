@@ -257,6 +257,7 @@ namespace Bettr.Editor
                 {"ReelAnticipation", BettrMechanics.ProcessReelAnticipationMechanic},
                 {"ReelMatrix", BettrMechanics.ProcessReelMatrixMechanic},
                 {"FreeSpins", BettrMechanics.ProcessFreeSpinsMechanic},
+                {"LockedSymbols", BettrMechanics.ProcessLockedSymbolsMechanic},
             };
 
             var machineName = "Game001";
@@ -2903,7 +2904,7 @@ namespace Bettr.Editor
                         pivot.transform.localScale = new Vector3(localScale.x, 0.8f, localScale.z);
                         
                         // update the local Y position of the Pivot to -0.1f
-                        var localY = -0.1f;
+                        var localY = -0.13f;
                         if (machineName == "Game003" || machineName == "Game004" || machineName == "Game005" || machineName == "Game007" || machineName == "Game009")
                         {
                             localY = 1.47f;
@@ -5472,13 +5473,34 @@ namespace Bettr.Editor
         
         public static List<T> GetTableArray<T>(Table table, string pk, string key)
         {
+            if (table == null)
+            {
+                throw new ArgumentNullException(nameof(table));
+            }
+
             Table valueTable = table;
+        
+            // Navigate to the appropriate table if pk is provided
             if (!string.IsNullOrEmpty(pk) && table[pk] is Table pkTable)
             {
                 valueTable = pkTable["Array"] as Table;
             }
-            
-            return valueTable?.Pairs.Select(pair => pair.Value.Table[key]).ToList().Cast<T>().ToList();
+
+            var values = valueTable?.Pairs
+                .Select(pair => pair.Value.Table[key])
+                .Where(v => v != null)
+                .ToList();
+
+            // Special handling for int type
+            if (typeof(T) == typeof(int))
+            {
+                return values?
+                    .Select(v => Convert.ToInt32(Convert.ToDouble(v))) // Convert first to double, then to int
+                    .Cast<T>()
+                    .ToList();
+            }
+
+            return values?.Cast<T>().ToList();
         }
         
         public static T GetTableValue<T, TU>(Table table, string pk, string referenceKey, TU referenceValue, string key, T d = default)

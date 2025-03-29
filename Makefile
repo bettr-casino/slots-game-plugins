@@ -110,7 +110,7 @@ default: all
 
 
 # Default target
-all: prepare-project
+all: prepare
 
 
 
@@ -126,6 +126,8 @@ preparedll:
 	@cp $(CRAYONSCRIPT_DLL_HOME)/Debug/CrayonScript.dll Unity/Assets/Bettr/Plugins/
 
 prepare-project: preparedll
+
+prepare: prepare-project
 
 
 

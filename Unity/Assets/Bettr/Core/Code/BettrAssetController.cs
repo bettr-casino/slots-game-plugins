@@ -489,7 +489,10 @@ namespace Bettr.Core
                     if (mat == null) continue;
                     if (ShaderCaches.ShaderCache.TryGetValue(mat.shader.name, out Shader bettrShader))
                     {
+                        // set renderQueue to material renderQueue
+                        var matRenderQueue = mat.renderQueue;
                         mat.shader = bettrShader;
+                        mat.renderQueue = matRenderQueue;
                     }
                 }
             }
@@ -657,7 +660,10 @@ namespace Bettr.Core
                         if (mat == null) continue;
                         if (ShaderCaches.ShaderCache.TryGetValue(mat.shader.name, out Shader bettrShader))
                         {
+                            // set renderQueue to material renderQueue
+                            var matRenderQueue = mat.renderQueue;
                             mat.shader = bettrShader;
+                            mat.renderQueue = matRenderQueue;
                         }
                     }
                 }
@@ -769,7 +775,10 @@ namespace Bettr.Core
                         if (mat == null) continue;
                         if (ShaderCaches.ShaderCache.TryGetValue(mat.shader.name, out Shader bettrShader))
                         {
+                            // set renderQueue to material renderQueue
+                            var matRenderQueue = mat.renderQueue;
                             mat.shader = bettrShader;
+                            mat.renderQueue = matRenderQueue;
                         }
                     }
                 }
@@ -835,7 +844,10 @@ namespace Bettr.Core
                 {
                     if (ShaderCaches.ShaderCache.TryGetValue(mat.shader.name, out Shader bettrShader))
                     {
+                        // set renderQueue to material renderQueue
+                        var matRenderQueue = mat.renderQueue;
                         mat.shader = bettrShader;
+                        mat.renderQueue = matRenderQueue;
                     }
                 }
             }

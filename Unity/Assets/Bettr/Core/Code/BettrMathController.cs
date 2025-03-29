@@ -18,6 +18,13 @@ namespace Bettr.Core
             Instance = this;
         }
 
+        public float GenerateJitter()
+        {
+            // generate a random number between -0.5 and 0.5
+            var jitter = Random.Range(-0.5f, 0.5f);
+            return jitter;
+        }
+
         public Table GetBaseGameMechanicDataSummary(string machineID, string mechanicName)
         {
             // ReSharper disable once IntroduceOptionalParameters.Global
@@ -139,13 +146,13 @@ namespace Bettr.Core
 
         public Table GetBaseGameMechanicRow(string machineID, string mechanicName, params string[] kvPairs)
         {
-            return GetBaseGameMechanicRow(machineID, mechanicName, null, 0, kvPairs);
+            return GetBaseGameMechanicRow(0, machineID, mechanicName, null, kvPairs);
         }
         
-        public Table GetBaseGameMechanicRow(string machineID, string mechanicName, string pk, int placeholder, params string[] kvPairs)
+        public Table GetBaseGameMechanicRow(int index, string machineID, string mechanicName, string pk,params string[] kvPairs)
         {
             // get the table
-            var table = GetBaseGameMechanic(machineID, mechanicName, pk);
+            var table = GetBaseGameMechanic(index, machineID, mechanicName, pk);
             // find the row where the kvPairs match
             for (int i = 0; i < table.Length; i++)
             {
