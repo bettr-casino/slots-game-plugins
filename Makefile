@@ -678,6 +678,14 @@ build-dev-target-webgl: prepare-project
 build-lobby-cards-webgl:
 	@./scripts/build-lobby-cards.sh
 
+init-target-fb:
+	@echo "Initializing target FB..."
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.InitFbTarget -buildTarget WebGL;
+
+build-target-fb: prepare-project init-target-fb
+	@echo "Set the platform settings."
+	@echo "Build completed."
+
 build-target-webgl: prepare-project
 	@echo "Cleaning up BuildCache..."
 	if [ -d "$(UNITY_PROJECT_PATH)/Library/BuildCache" ]; then $(RM) -r $(UNITY_PROJECT_PATH)/Library/BuildCache; fi

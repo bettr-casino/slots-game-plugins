@@ -91,6 +91,17 @@ namespace Bettr.Editor
         
         private static HashSet<string> AssetLabelsCache = new HashSet<string>();
         private static HashSet<string> AssetVariantsCache = new HashSet<string>();
+
+
+        public static void InitFbTarget()
+        {
+            Debug.Log("Initializing FB target...");
+            
+            PlayerSettings.WebGL.template = "PROJECT:FB";
+            
+            AssetDatabase.SaveAssets();
+        }
+        
         
         // Command line function
         public static void ExportPackage()
