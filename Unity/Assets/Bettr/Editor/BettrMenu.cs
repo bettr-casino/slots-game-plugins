@@ -15,6 +15,7 @@ using Scriban;
 using Scriban.Runtime;
 using TMPro;
 using UnityEditor;
+using UnityEditor.Build;
 using UnityEditor.Events;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -95,10 +96,49 @@ namespace Bettr.Editor
 
         public static void InitFbTarget()
         {
-            Debug.Log("Initializing FB target...");
-            
+            Debug.Log("Initializing FB Instant Game WebGL target...");
+
+            // Build settings
+            EditorUserBuildSettings.development = false;
+            EditorUserBuildSettings.allowDebugging = false;
+
+            // WebGL player template
             PlayerSettings.WebGL.template = "PROJECT:FB";
+
+            // Exception support (None = smaller, no try/catch overhead)
+            PlayerSettings.WebGL.exceptionSupport = WebGLExceptionSupport.None;
+
+            // Use IL2CPP backend and Master config for smallest binary
+            PlayerSettings.SetScriptingBackend(BuildTargetGroup.WebGL, ScriptingImplementation.IL2CPP);
+            PlayerSettings.SetIl2CppCompilerConfiguration(BuildTargetGroup.WebGL, Il2CppCompilerConfiguration.Master);
+            Debug.Log("Set scripting backend to IL2CPP and compiler configuration to Master.");
+
+            // Set Emscripten args for size optimization and socket support
+            PlayerSettings.WebGL.emscriptenArgs =
+                "-Oz " +
+                "-flto " +
+                "-s ASSERTIONS=0 " +
+                "-s DEMANGLE_SUPPORT=0 " +
+                "-s PROXY_POSIX_SOCKETS=1 " +
+                "-s ERROR_ON_UNDEFINED_SYMBOLS=0";
+            Debug.Log("Set Emscripten arguments: " + PlayerSettings.WebGL.emscriptenArgs);
+
+            // Disable debug symbols
+            PlayerSettings.WebGL.debugSymbolMode = WebGLDebugSymbolMode.Off;
+
+            // Define symbols to disable Debug.Log and other dev-only code
+            PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.WebGL, "UNITY_WEBGL;DISABLE_LOG");
+            Debug.Log("Set scripting define symbols for WebGL: UNITY_WEBGL;DISABLE_LOG");
             
+            PlayerSettings.SplashScreen.show = false;
+
+            // Log final settings
+            Debug.Log($"Exception Support: {PlayerSettings.WebGL.exceptionSupport}");
+            Debug.Log($"IL2CPP Configuration: {PlayerSettings.GetIl2CppCompilerConfiguration(BuildTargetGroup.WebGL)}");
+            Debug.Log($"Debug Symbols: {PlayerSettings.WebGL.debugSymbolMode}");
+            Debug.Log($"Emscripten Args: {PlayerSettings.WebGL.emscriptenArgs}");
+
+            // Save settings
             AssetDatabase.SaveAssets();
         }
         
