@@ -126,6 +126,9 @@ namespace Bettr.Editor
             // Disable debug symbols
             PlayerSettings.WebGL.debugSymbolMode = WebGLDebugSymbolMode.Off;
 
+            PlayerSettings.stripEngineCode = true;
+            PlayerSettings.SetManagedStrippingLevel(BuildTargetGroup.WebGL, ManagedStrippingLevel.High);
+
             // Define symbols to disable Debug.Log and other dev-only code
             PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.WebGL, "UNITY_WEBGL;DISABLE_LOG");
             Debug.Log("Set scripting define symbols for WebGL: UNITY_WEBGL;DISABLE_LOG");
