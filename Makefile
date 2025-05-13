@@ -779,4 +779,45 @@ pull:
 	git pull origin main
 
 
+# =============================================================================
+#
+# HOTFIX
+#
+# =============================================================================
 
+# Fixes the script for a specific machine variant
+
+# add a variable
+HOTFIX_MACHINE_NAME := game001
+HOTFIX_MACHINE_VARIANT := epicancientadventures
+
+
+build-hotfix-assets-webgl: prepare-project
+	@echo "Building hot fix..."
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "$(HOTFIX_MACHINE_NAME)$(HOTFIX_MACHINE_VARIANT)" -assetSubLabel "control" -buildTarget WebGL; \
+	${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "$(HOTFIX_MACHINE_NAME)$(HOTFIX_MACHINE_VARIANT)_scenes" -assetSubLabel "control" -buildTarget WebGL; \
+	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "$(HOTFIX_MACHINE_NAME)$(HOTFIX_MACHINE_VARIANT)" -assetSubLabel "variant1" -buildTarget WebGL; \
+	# ${UNITY_APP} -batchmode -logFile $(ASSET_BUNDLES_LOG_FILE_PATH) -quit -projectPath $(UNITY_PROJECT_PATH) -executeMethod Bettr.Editor.BettrMenu.BuildAssetsCommandLine -assetLabel "$(HOTFIX_MACHINE_NAME)$(HOTFIX_MACHINE_VARIANT)_scenes" -assetSubLabel "variant1" -buildTarget WebGL;
+
+publish-hotfix-assets-webgl: build-hotfix-assets-webgl
+	@echo "Publishing hot fix..."
+	@num_files=$$(find $(ASSET_BUNDLES_BASE_DIRECTORY)/WebGL -type f | wc -l); \
+	echo "Number of files to publish: $$num_files"; \
+	if [ $$num_files -lt 1792 ]; then \
+		echo "Error: Unexpected number of files found in $(ASSET_BUNDLES_BASE_DIRECTORY)/WebGL. Aborting sync."; \
+		exit 1; \
+	fi
+	aws s3 cp $(ASSET_BUNDLES_BASE_DIRECTORY)/WebGL/"$(HOTFIX_MACHINE_NAME)$(HOTFIX_MACHINE_VARIANT).control" s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY)/WebGL --exclude "*.meta" --profile $(AWS_DEFAULT_PROFILE)
+	aws s3 cp $(ASSET_BUNDLES_BASE_DIRECTORY)/WebGL/"$(HOTFIX_MACHINE_NAME)$(HOTFIX_MACHINE_VARIANT).control.manifest" s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY)/WebGL --exclude "*.meta" --profile $(AWS_DEFAULT_PROFILE)
+	aws s3 cp $(ASSET_BUNDLES_BASE_DIRECTORY)/WebGL/"$(HOTFIX_MACHINE_NAME)$(HOTFIX_MACHINE_VARIANT)_scenes.control" s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY)/WebGL --exclude "*.meta" --profile $(AWS_DEFAULT_PROFILE)
+	aws s3 cp $(ASSET_BUNDLES_BASE_DIRECTORY)/WebGL/"$(HOTFIX_MACHINE_NAME)$(HOTFIX_MACHINE_VARIANT)_scenes.control.manifest" s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY)/WebGL --exclude "*.meta" --profile $(AWS_DEFAULT_PROFILE)
+	aws s3 cp $(ASSET_BUNDLES_BASE_DIRECTORY)/WebGL/"$(HOTFIX_MACHINE_NAME)$(HOTFIX_MACHINE_VARIANT).variant1" s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY)/WebGL --exclude "*.meta" --profile $(AWS_DEFAULT_PROFILE)
+	aws s3 cp $(ASSET_BUNDLES_BASE_DIRECTORY)/WebGL/"$(HOTFIX_MACHINE_NAME)$(HOTFIX_MACHINE_VARIANT).variant1.manifest" s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY)/WebGL --exclude "*.meta" --profile $(AWS_DEFAULT_PROFILE)
+	aws s3 cp $(ASSET_BUNDLES_BASE_DIRECTORY)/WebGL/"$(HOTFIX_MACHINE_NAME)$(HOTFIX_MACHINE_VARIANT)_scenes.variant1" s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY)/WebGL --exclude "*.meta" --profile $(AWS_DEFAULT_PROFILE)
+	aws s3 cp $(ASSET_BUNDLES_BASE_DIRECTORY)/WebGL/"$(HOTFIX_MACHINE_NAME)$(HOTFIX_MACHINE_VARIANT)_scenes.variant1.manifest" s3://$(S3_BUCKET)/$(S3_ASSETS_LATEST_OBJECT_KEY)/WebGL --exclude "*.meta" --profile $(AWS_DEFAULT_PROFILE)
+
+publish-hotfix: build-hotfix-assets-webgl publish-hotfix-assets-webgl
+	@echo "Publishing hot fix completed."
+
+
+# =============================================================================
